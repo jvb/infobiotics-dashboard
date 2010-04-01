@@ -10,11 +10,7 @@ class McssParamsHandler(ParamsHandler):
     id='McssParamsHandler' # for saving window position and size
     title='mcss parameters' # does this do anything?
         
-#    def object_params_file_changed(self, info):
-#        if info.initialized:
-#            info.ui.title = os.path.basename(info.object.params_file)
-    
-    def object_model_file_changed(self, info):
+    def parameters_model_file_changed(self, info):
         import os.path
         if os.path.splitext(info.object.model_file)[1].lower() == '.sbml':
             self.model_format_ = 'sbml'

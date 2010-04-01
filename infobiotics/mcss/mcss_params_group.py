@@ -18,12 +18,12 @@ mcss_params_group = Group(
 #                id='model_file',
             ),
             HGroup(
-                Item('controller.model_format', 
+                Item('handler.model_format', 
                     label='XML type',
                     visible_when='object.model_file.endswith(".xml")',
                 ),
-                Item('just_psystem', visible_when='controller.model_format_ != "sbml"', label='Just initialise P system'),
-                Item('duplicate_initial_amounts', visible_when='controller.model_format_ == "sbml"'),
+                Item('just_psystem', visible_when='handler.model_format_ != "sbml"', label='Just initialise P system'),
+                Item('duplicate_initial_amounts', visible_when='handler.model_format_ == "sbml"'),
             ),
             label='Model',
         ),
@@ -36,7 +36,7 @@ mcss_params_group = Group(
             Item('compress', label='Compress output'),
             Item('compression_level', enabled_when='object.compress==True'),
     #        Item('simulation_algorithm'),
-            Item('controller.simulation_algorithm'), #TODO
+            Item('handler.simulation_algorithm'), #TODO
             Item('seed', label='Random seed'),
             label='Simulation',
         ),
@@ -74,4 +74,4 @@ mcss_params_group = Group(
 )
 
 #if __name__ == '__main__':
-#    execfile('mcss_params_controller.py')
+#    execfile('mcss_params_handler.py')

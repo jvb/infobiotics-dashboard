@@ -3,9 +3,8 @@ Deprecated: moved to params.py to avoid circular import.
 '''
 
 from infobiotics.shared.api import \
-    Handler, Instance, \
+    Handler, Instance, Property, property_depends_on, Str, \
     ParamsView, Item
-
 from params import Params
 
 class ParamsHandler(Handler):
@@ -22,6 +21,24 @@ class ParamsHandler(Handler):
     def _parameters_default(self):
         raise NotImplemetedError('Subclasses should override this method or'\
                                  "declare 'parameters = McssParams()'")
+    title = Property(Str)
+
+    @property_depends_on('parameters._params_file')
+    def _get_title(self):
+        path = self.parameters._params_file
+        if len(path) > 0:
+            dirname, basename = os.path.split(path)
+            if dirname == '':
+                return basename
+            else:
+                return '%s (%s)' % (basename, dirname)
+        else:
+            return self.parameters._parameters_name
+
+    def _title_changed(self, title):
+        print title
+        info.ui.title = self.title
+
 
     # Handler-specific ---
     
@@ -48,11 +65,6 @@ class ParamsHandler(Handler):
         pass
         info.parameters.save(file)
 
-
-    # parameters traits methods ---
-
-    def parameters_title_changed(self, info):
-        info.ui.title = info.parameters.title
 
         
 #    # Class attributes --- 

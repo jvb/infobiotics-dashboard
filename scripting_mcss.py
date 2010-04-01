@@ -1,7 +1,8 @@
 from infobiotics.mcss.api import McssParams, McssExperiment
 
-#McssParams.configure_traits()
-McssParams.configure()
+parameters = McssParams()
+#parameters.configure_traits()
+parameters.configure()
 
 
 
