@@ -50,7 +50,7 @@ params_actions = [load_action, save_action]
 
 perform_action = Action(name='Perform', action='perform', 
     tooltip='Perform the experiment with the current parameters',
-#    enabled_when='object.has_valid_parameters()', #XXX calls has_valid_parameters which each UI change
+    enabled_when='object.has_valid_parameters()',
 )
 
 experiment_actions = [load_action, save_action, perform_action] 

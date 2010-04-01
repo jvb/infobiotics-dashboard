@@ -1,31 +1,14 @@
-'''
-Deprecated: moved to params.py to avoid circular import.
-'''
-
 from infobiotics.shared.api import \
-    Handler, Instance, Property, property_depends_on, Str, \
-    ParamsView, Item, UIInfo
+    Controller, Property, Str, property_depends_on 
 from params import Params
 
-class ParamsHandler(Handler):
-    '''
-    
-    Extends Handler by adding 'parameters' to default UI context.
-    
-    '''
-        
-    # Traits ---
-    
-    parameters = Instance(Params) # enables ParamsHandler(parameters=McssParams(file='...'))
+class ParamsHandler(Controller):
 
-    def _parameters_default(self):
-        raise NotImplementedError('Subclasses should override this method or'\
-                                 "declare 'parameters = McssParams()'")
     title = Property(Str)
 
-    @property_depends_on('parameters._params_file')
+    @property_depends_on('model._params_file')
     def _get_title(self):
-        path = self.parameters._params_file
+        path = self.model._params_file
         if len(path) > 0:
             dirname, basename = os.path.split(path)
             if dirname == '':
@@ -33,46 +16,20 @@ class ParamsHandler(Handler):
             else:
                 return '%s (%s)' % (basename, dirname)
         else:
-            return self.parameters._parameters_name
+            return self.model._parameters_name
             
     def init(self, info):
         info.ui.title = self.title 
     
-    # Handler-specific ---
-    
-    def trait_context(self):
-        '''
-        
-        Adapted from Controller: https://svn.enthought.com/enthought/browser/Traits/trunk/enthought/traits/ui/handler.py
-        
-        '''
-        context = super(ParamsHandler, self).trait_context()
-        context.update(
-            {
-                'parameters': self.parameters,
-                'handler': self,
-                'object': self.parameters,
-            }
-        )
-        return context
-        
-    
-    # Action methods ---
+    def traits_view(self):
+        raise NotImplementedError
     
     def load(self, info): 
         file=None
         pass
-        info.parameters.load(file)
+        info.object.load(file)
     
     def save(self, info):
         file=None
         pass
-        info.parameters.save(file)
-
-
-        
-#    # Class attributes --- 
-#    
-#    traits_view = ParamsView(
-#        Item('_cwd', label='Working directory', tooltip='Relative paths will be relative to this directory.'),
-#    )
+        info.object.save(file)

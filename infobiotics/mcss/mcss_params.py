@@ -1,5 +1,5 @@
 from infobiotics.shared.api import Params, Str, Enum, Bool, File, Range, \
-    Long, FloatGreaterThanZero, LongGreaterThanZero, Instance
+    Long, FloatGreaterThanZero, LongGreaterThanZero
 
 class McssParams(Params):
     
@@ -52,15 +52,5 @@ class McssParams(Params):
         
     def _handler_default(self):
         from mcss_params_handler import McssParamsHandler
-        return McssParamsHandler()
-        
-#    def configure(self, **args):
-#        from mcss_params_handler import McssParamsHandler
-#        handler = McssParamsHandler(parameters=self)
-#        return handler.configure_traits(kind='modal', **args)
-
-    def edit(self, **traits):
-        from mcss_params_handler import McssParamsHandler
-        handler = McssParamsController(parameters=self)
-        return handler.edit_traits(kind='live', *args, **kwargs)
+        return McssParamsHandler(model=self)
         

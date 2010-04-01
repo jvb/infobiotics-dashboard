@@ -1,19 +1,8 @@
 from infobiotics.shared.api import \
     HasTraits, Params, File, ListStr, Str, Event, expect, Thread, Instance, \
-    Handler
+    Controller
 
-class Experiment(HasTraits):
-    
-    handler = Instance(Handler)
-    
-    def _handler_default(self):
-        raise NotImplementedError
-    
-    def configure(self, **args):
-        self.handler.experiment = self
-        return self.handler.configure_traits(kind='modal', **args)
-    
-    parameters = Instance(Params)
+class Experiment(Params):
     
     _params_program = File(exists=True)
     _params_program_kwargs = ListStr
@@ -26,6 +15,7 @@ class Experiment(HasTraits):
         '^I/O warning : failed to load external entity ".+"', # libxml++
     ])
     _error_string = Str
+
     starting = Event
     started = Event
     timed_out = Event
@@ -41,10 +31,16 @@ class Experiment(HasTraits):
 #        raise NotImplementedError
 ##        self.error = '' #TODO see Invalid...demo
 
-    def perform(self, thread=False): 
+    def has_valid_parameters(self):
+        import os.path
+        if not os.path.exists(self._params_file):
+            return False
+        return True
+
+    def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
-#        if not self.has_valid_parameters():
-#            return False
+        if not self.has_valid_parameters():
+            return False
 
         def _spawn():
             ''' Start the program and try to match output.
@@ -97,6 +93,7 @@ class Experiment(HasTraits):
         else:
             _spawn()
             #TODO call serial progress function from here
+        return True
 
     def _output_pattern_matched(self, pattern_index, match):
         ''' Update traits in response to matching error patterns.
@@ -117,4 +114,4 @@ class Experiment(HasTraits):
         self._error_string = match.split('rror')[1].strip(':') if 'rror' in match else match
 
     def __error_string_changed(self, _error_string):
-        print _error_string
+        print _error_string, '(from Experiment.__error_string_changed)'

@@ -1,19 +1,11 @@
-from infobiotics.shared.api import ParamsHandler, Instance, Trait, ParamsView, Item
-from mcss_params import McssParams 
-from mcss_params_group import mcss_params_group
+from infobiotics.shared.api import ParamsHandler, Trait
+from infobiotics.mcss.api import mcss_params_view
 
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
 
-    parameters = Instance(McssParams)
-
+    traits_view = mcss_params_view
     id='McssParamsHandler' # for saving window position and size
-#    title='mcss parameters' # does this do anything?
-        
-    def parameters_model_file_changed(self, info):
-        import os.path
-        if os.path.splitext(info.object.model_file)[1].lower() == '.sbml':
-            self.model_format_ = 'sbml'
     
     model_format = Trait(
         'P system XML',
@@ -27,6 +19,13 @@ class McssParamsHandler(ParamsHandler):
 
     def _model_format_changed(self, model_format):
         self.sync_trait('model_format_', self.model, alias='model_format')
+
+    def object_model_file_changed(self, info):
+        import os.path
+        ext = os.path.splitext(info.object.model_file)[1].lower() 
+#        print ext
+        if ext == '.sbml':
+            info.object.model_format_ = 'sbml'
 
     simulation_algorithm = Trait(
         'Direct Method with queue',
@@ -42,9 +41,3 @@ class McssParamsHandler(ParamsHandler):
 
     def _simulation_algorithm_changed(self, simulation_algorithm):
         self.sync_trait('simulation_algorithm_', self.model, alias='simulation_algorithm')    
-    
-    traits_view = ParamsView(
-        Item('_cwd', label='Working directory', tooltip='Relative paths will be relative to this directory.'),
-        '_',
-        mcss_params_group,
-    )
