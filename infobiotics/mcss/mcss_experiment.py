@@ -24,4 +24,7 @@ class McssExperiment(Experiment):
             self.time_in_run = float(time_in_run)
         else:
             super(McssExperimentProgressHandler, self).pattern_matched(pattern_index, match)
-            
+    
+    def _handler_default(self):
+        from mcss_experiment_handler import McssExperimentHandler
+        return McssExperimentHandler()

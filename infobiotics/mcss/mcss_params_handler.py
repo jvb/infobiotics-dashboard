@@ -5,10 +5,10 @@ from mcss_params_group import mcss_params_group
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
 
-    _parameters = Instance(McssParams)
+    parameters = Instance(McssParams)
 
     id='McssParamsHandler' # for saving window position and size
-    title='mcss parameters' # does this do anything?
+#    title='mcss parameters' # does this do anything?
         
     def parameters_model_file_changed(self, info):
         import os.path

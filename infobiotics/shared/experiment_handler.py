@@ -1,7 +1,8 @@
 from infobiotics.shared.api import \
     Handler, Instance, \
     Experiment, ExperimentProgressHandler, \
-    ExperimentView, Item
+    ExperimentView, Item, \
+    Property, Str, property_depends_on
 
 class ExperimentHandler(Handler):
 #class ExperimentHandler(ParamsHandler):
@@ -16,21 +17,27 @@ class ExperimentHandler(Handler):
         raise NotImplemetedError('Subclasses should override this method or'\
                                  "declare 'experiment = McssExperiment()'")
 
-    def _experiment_changed(self, experiment):
-        self.parameters = experiment.parameters
+#    def _experiment_changed(self, experiment):
+#        self.parameters = experiment.parameters
     
     
     # Handler-specific ---
     
-    def traits_context(self):
+    def trait_context(self):
         '''
         
         Adapted from Controller: https://svn.enthought.com/enthought/browser/Traits/trunk/enthought/traits/ui/handler.py
         
         '''
-        context = super(ExperimentHandler, self).traits_context()
-        context.update({'experiment':self.experiment, 'parameters': self.experiment.parameters})
-#        context.update({'experiment':self._experiment}) # if ExperimentHandler(ParamsHandler)
+        context = super(ExperimentHandler, self).trait_context()
+        context.update(
+            {
+                'experiment':self.experiment,
+                'parameters': self.experiment.parameters,
+                'handler': self,
+                'object': self.experiment.parameters,
+            }
+        )
         return context
 
 
@@ -59,10 +66,22 @@ class ExperimentHandler(Handler):
         progress_handler.edit_traits(kind='live') # must be live to receive progress updates
 
 
-    # parameters traits methods ---
+    title = Property(Str)
 
-    def parameters_title_changed(self, info):
-        info.ui.title = info.parameters.title
+    @property_depends_on('experiment.parameters._params_file')
+    def _get_title(self):
+        path = self.experiment.parameters._params_file
+        if len(path) > 0:
+            dirname, basename = os.path.split(path)
+            if dirname == '':
+                return basename
+            else:
+                return '%s (%s)' % (basename, dirname)
+        else:
+            return self.experiment.parameters._parameters_name
+            
+    def init(self, info):
+        info.ui.title = self.title 
 
 
 #    # Class attributes --- 

@@ -50,10 +50,14 @@ class McssParams(Params):
             'division_direction', 'keep_divisions', 'growth_type' 
         ]
         
-    def configure(self, **args):
+    def _handler_default(self):
         from mcss_params_handler import McssParamsHandler
-        handler = McssParamsHandler(parameters=self)
-        return handler.configure_traits(kind='modal', **args)
+        return McssParamsHandler()
+        
+#    def configure(self, **args):
+#        from mcss_params_handler import McssParamsHandler
+#        handler = McssParamsHandler(parameters=self)
+#        return handler.configure_traits(kind='modal', **args)
 
     def edit(self, **traits):
         from mcss_params_handler import McssParamsHandler

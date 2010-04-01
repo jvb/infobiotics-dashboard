@@ -4,7 +4,7 @@ Deprecated: moved to params.py to avoid circular import.
 
 from infobiotics.shared.api import \
     Handler, Instance, Property, property_depends_on, Str, \
-    ParamsView, Item
+    ParamsView, Item, UIInfo
 from params import Params
 
 class ParamsHandler(Handler):
@@ -19,7 +19,7 @@ class ParamsHandler(Handler):
     parameters = Instance(Params) # enables ParamsHandler(parameters=McssParams(file='...'))
 
     def _parameters_default(self):
-        raise NotImplemetedError('Subclasses should override this method or'\
+        raise NotImplementedError('Subclasses should override this method or'\
                                  "declare 'parameters = McssParams()'")
     title = Property(Str)
 
@@ -34,22 +34,26 @@ class ParamsHandler(Handler):
                 return '%s (%s)' % (basename, dirname)
         else:
             return self.parameters._parameters_name
-
-    def _title_changed(self, title):
-        print title
-        info.ui.title = self.title
-
-
+            
+    def init(self, info):
+        info.ui.title = self.title 
+    
     # Handler-specific ---
     
-    def traits_context(self):
+    def trait_context(self):
         '''
         
         Adapted from Controller: https://svn.enthought.com/enthought/browser/Traits/trunk/enthought/traits/ui/handler.py
         
         '''
-        context = super(ExperimentHandler, self).traits_context()
-        context.update({'parameters': self._parameters})
+        context = super(ParamsHandler, self).trait_context()
+        context.update(
+            {
+                'parameters': self.parameters,
+                'handler': self,
+                'object': self.parameters,
+            }
+        )
         return context
         
     

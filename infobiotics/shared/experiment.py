@@ -1,7 +1,17 @@
 from infobiotics.shared.api import \
-    HasTraits, Params, File, ListStr, Str, Event, expect, Thread, Instance 
+    HasTraits, Params, File, ListStr, Str, Event, expect, Thread, Instance, \
+    Handler
 
 class Experiment(HasTraits):
+    
+    handler = Instance(Handler)
+    
+    def _handler_default(self):
+        raise NotImplementedError
+    
+    def configure(self, **args):
+        self.handler.experiment = self
+        return self.handler.configure_traits(kind='modal', **args)
     
     parameters = Instance(Params)
     

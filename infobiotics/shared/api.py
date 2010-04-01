@@ -24,7 +24,7 @@ from enthought.traits.api import \
     
 from enthought.traits.ui.api import \
     Handler, Controller, ModelView, View, Item, Action, DefaultOverride, \
-    Group, VGroup, Item, FileEditor, HGroup
+    Group, VGroup, Item, FileEditor, HGroup, UIInfo
 
 from float_greater_than_zero import FloatGreaterThanZero
 from long_greater_than_zero import LongGreaterThanZero

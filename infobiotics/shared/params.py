@@ -1,6 +1,6 @@
 from infobiotics.shared.api import \
     HasTraits, Instance, Str, Undefined, File, Directory, Bool, Property, \
-    os, property_depends_on
+    os, property_depends_on, Handler
 
 class Params(HasTraits): 
     
@@ -32,15 +32,15 @@ class Params(HasTraits):
     #TODO change to more descriptive name, something to do with the fact that not all parameters will be returned
     def parameter_names(self):  
         raise NotImplementedError
+
+    handler = Instance(Handler)
+    
+    def _handler_default(self):
+        raise NotImplementedError
     
     def configure(self, **args):
-        raise NotImplementedError('''
-        #Subclasses of ParamsHandler should implement something like:
-    def configure(self, **args):
-        from infobiotics.<program>.api import <program>[Params/Experiment]Handler
-        handler = <program>Handler(model=self)
-        return handler.configure_traits(kind='modal', **args)''')
-    
+        self.handler.parameters = self
+        return self.handler.configure_traits(kind='modal', **args)
 
     def edit(self, **args):
         raise NotImplementedError('''
