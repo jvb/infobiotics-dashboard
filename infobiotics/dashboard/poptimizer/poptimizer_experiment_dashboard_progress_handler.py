@@ -1,0 +1,2 @@
+class POptimizerExperimentDashboardProgressHandler(POptimizerExperimentProgressHandler, CancelExperimentMixin):
+    pass
