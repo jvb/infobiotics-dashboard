@@ -2,9 +2,9 @@
 Adapted from TraitsBackendWX/enthought/traits/ui/wx/progress_editor.py and uses
 a TraitsBackendQt ProgressDialog as its control.
 
-Can't use can_cancel=True because ProgressDialog sets up a cancel signal via the
-QDialogButtonBox that is not present for the widget. Maybe this can be wrapped 
-in a traits Event instead...  
+Can't use can_cancel=True because ProgressDialog sets up a cancel signal via 
+the QDialogButtonBox that is not present for the widget. Maybe this can be 
+wrapped in a traits Event instead...  
 
 '''
 
@@ -36,13 +36,13 @@ class SimpleEditor(Editor):
         Finishes initializing the editor by creating the underlying widget.
         """
 
-        self.progress = ProgressDialog( title=self.factory.title,
-                                        message=self.factory.message,
-                                        min=self.factory.min,
-                                        max=self.factory.max,
-                                        can_cancel=self.factory.can_cancel,
-                                        show_time=self.factory.show_time,
-                                        show_percent=self.factory.show_percent)
+        self.progress = ProgressDialog(title=self.factory.title,
+                                       message=self.factory.message,
+                                       min=self.factory.min,
+                                       max=self.factory.max,
+                                       can_cancel=self.factory.can_cancel,
+                                       show_time=self.factory.show_time,
+                                       show_percent=self.factory.show_percent)
         import time
         self.progress._start_time = time.time()
 
@@ -74,7 +74,7 @@ class SimpleEditor(Editor):
         return self.control
 
 
-    def update_editor ( self ):
+    def update_editor(self):
         """
         Updates the editor when the object trait changes externally to the
         editor.
