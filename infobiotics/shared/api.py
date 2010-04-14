@@ -153,10 +153,20 @@ def can_access(path, mode=os.F_OK):
     '''
     return os.access(path, mode)
 
+def can_execute(path):
+    return can_access(path, os.X_OK)
 
 def can_read(path):
     return can_access(path, os.R_OK)
 
+def read(file, mode='r'):
+    if not can_read(file):
+        raise IOError("Cannot read '%s'." % file)
+    else:
+        return open(file, mode)
+
+def read_binary(file):
+    return read(file, mode='rb')        
 
 def can_write(path):
     ''' When testing whether a file can be written to the statement:
@@ -169,6 +179,35 @@ def can_write(path):
         # if we got then the file might not exist but we can still test if the 
         # directory is should be in is writable.
         return can_write(os.path.dirname(os.path.abspath(path)))
+        
+def write(file, mode='w'):
+    if not can_write(file):
+        raise IOError("Cannot write '%s'." % file)
+    else:
+        return open(file, mode)
+
+def append(file):
+    return write(file, mode='a')
+
+def update(file):
+    return write(file, mode='r+')
+
+#def test_with():
+#    with write('test') as test:
+##        test.writelines(['1','2'])
+#        print test
+##    with read('test') as test:
+###        for line in test:
+###            print line
+##        print test
+#    print test
+#
+##test_with()
+##with open('test', 'r') as test:
+##    print test
+##print test
+#with open('test', 'r') as test:
+#    print test
 
 
 # Params specific definitions and imports ---
