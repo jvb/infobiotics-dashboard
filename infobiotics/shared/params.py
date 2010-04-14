@@ -221,7 +221,7 @@ class Params(HasTraits):
             if trait_type_class_name == 'TraitMap': # a mapped trait
 #                repr += "%s='%s'" % (parameter_name, eval('self.%s' % parameter_name)) # displayed value
                 repr += "%s_='%s'" % (parameter_name, eval('self.%s_' % parameter_name)) # shadow name/value
-            elif trait_type_class_name in ('String', 'Enum', 'File', 'Directory'):
+            elif trait_type_class_name in ('Unicode','Str', 'Enum', 'File', 'Directory'):
                 repr += "%s='%s'" % (parameter_name, eval('self.%s' % parameter_name))
             elif trait_type_class_name == 'Instance': # see ExampleInstanceWithRepr below
                 repr += "%s=%s" % (parameter_name, eval('self.%s.__repr__()' % parameter_name))
@@ -262,4 +262,5 @@ if __name__ == '__main__':
     from infobiotics.mcss.api import McssParams
     parameters = McssParams()
 #    parameters.configure_traits()
-    parameters.configure()
+#    parameters.configure()
+    print parameters
