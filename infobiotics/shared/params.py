@@ -1,6 +1,9 @@
 from infobiotics.shared.api import \
     HasTraits, Instance, Str, Undefined, File, Directory, Bool, \
-    os, Controller, List, can_read
+    os, Controller, List, can_read, logging, can_access
+
+logger = logging.get_logger('params')
+
 
 class Params(HasTraits): 
     
@@ -41,7 +44,8 @@ class Params(HasTraits):
 
         if not os.path.isabs(file): file = os.path.abspath(file) 
 
-        if not os.path.exists(file): raise IOError("'%s' does not exist." % file)
+#        if not os.path.exists(file): raise IOError("'%s' does not exist." % file)
+        assert can_access(file)
         
         if not can_read(file): raise IOError("'%s' cannot be read." % file)    
             
@@ -70,7 +74,7 @@ class Params(HasTraits):
             if error is not None:
                 # report error
                 logger.error(error)
-                auto_close_message(message=error) #TODO is this desirable when scripting?...might not happen, as with ProgressDialog
+#                auto_close_message(message=error) #TODO is this desirable when scripting?...might not happen, as with ProgressDialog
                 return False
 
         # read parameters ok
@@ -119,6 +123,8 @@ class Params(HasTraits):
     def save(self, file=''):
         #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
         with open(file, 'w') as fh:
+            print fh
+            logger.debug(fh)
             try:
                 fh.write(self.params_file_string()) # important bit, see method below
             except IOError, e:
@@ -247,6 +253,13 @@ class Params(HasTraits):
     
     def configure(self, **args):
         self.handler.configure_traits(kind='livemodal', **args)
-
+        
     def edit(self, **args):
         self.handler.edit_traits(kind='live', **args)
+
+
+if __name__ == '__main__':
+    from infobiotics.mcss.api import McssParams
+    parameters = McssParams()
+#    parameters.configure_traits()
+    parameters.configure()

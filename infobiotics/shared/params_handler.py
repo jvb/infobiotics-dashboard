@@ -21,9 +21,6 @@ class ParamsHandler(Controller):
     def init(self, info):
         info.ui.title = self.title 
     
-    def traits_view(self):
-        raise NotImplementedError
-    
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
         fd = FileDialog(
