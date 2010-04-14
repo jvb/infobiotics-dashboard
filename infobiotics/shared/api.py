@@ -168,7 +168,7 @@ def can_write(path):
     else:
         # if we got then the file might not exist but we can still test if the 
         # directory is should be in is writable.
-        return can_write(os.path.dirname(path))
+        return can_write(os.path.dirname(os.path.abspath(path)))
 
 
 # Params specific definitions and imports ---
