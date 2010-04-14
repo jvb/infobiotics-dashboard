@@ -192,23 +192,6 @@ def append(file):
 def update(file):
     return write(file, mode='r+')
 
-#def test_with():
-#    with write('test') as test:
-##        test.writelines(['1','2'])
-#        print test
-##    with read('test') as test:
-###        for line in test:
-###            print line
-##        print test
-#    print test
-#
-##test_with()
-##with open('test', 'r') as test:
-##    print test
-##print test
-#with open('test', 'r') as test:
-#    print test
-
 
 # Params specific definitions and imports ---
 
