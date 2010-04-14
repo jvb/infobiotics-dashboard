@@ -24,7 +24,7 @@ else:
 # my non-ETS module imports
 
 import unified_logging as logging  
-
+logger = logging.get_logger('shared.api')
 
 # Enthought imports ---
 
@@ -242,19 +242,28 @@ class ParamsXMLReader(ContentHandler):
             self.parameters_dictionary[name] = value
 
 
-#TODO def trait_value_from_param_value(params, name, value):
-def trait_value_from_parameter_value(params, name, value):
+def set_trait_value_from_parameter_value(self, name, value):
+    setattr(self, name, trait_value_from_parameter_value(self, name, value))
+#        # or set trait by assignment (requires less type-checking in trait_value_from_parameter_value)
+#        try:
+##            exec('self.experiment.%s=%s' % (name, value))
+#            exec('self.experiment.trait_set(%s=%s)' % (name, value))
+#            # Either method works but exec is necessary because we are 
+#            # using value of 'name' to assign value to it in each case.
+#            # The second form is consistent with __repr__ and reset in 
+#            # ParamsExperiment.
+#        except TraitError, e:
+#            logger.debug('%s.%s=%s; %s' % (self.experiment, name, value, e))
+
+def trait_value_from_parameter_value(self, name, value): # change name to 'trait_value_from_param_value'?
     ''' Return parameter trait value from a parameter value string. '''
-    try:
-        assert name in params.parameter_names()
-    except AssertionError, e:
-        print name, e
-    trait = params.trait(name)
+    assert name in self.parameter_names()
+    trait = self.trait(name)
     type = trait.trait_type.__class__.__name__
 #    from infobiotics.dashboard.shared.dicts import key_from_value # in this file
     if type == 'DelegatesTo':
         _delegate = trait._delegate
-        setattr(eval('params.%s' % (_delegate)), name, value)
+        setattr(eval('self.%s' % (_delegate)), name, value)
         #FIXME should go in 'set_trait_value_from_parameter_value'
         return value
     elif type == 'Bool': # convert from lowercase truth values
@@ -295,19 +304,19 @@ def trait_value_from_parameter_value(params, name, value):
         return value
 
 #TODO could replace name with trait.metadata.parameter_name and return (new_name, value)
-def parameter_value_from_trait_value(params, name):
+def parameter_value_from_trait_value(self, name):
     ''' Return parameter value string from a ParamsExperiment parameter trait. ''' 
-    assert name in params.parameter_names()
-    trait = params.trait(name)
-    value = params.trait_get(name)[name] # trait_get returns dict
+    assert name in self.parameter_names()
+    trait = self.trait(name)
+    value = self.trait_get(name)[name] # trait_get returns dict
     type = trait.trait_type.__class__.__name__
     if type == 'Bool': # convert to lowercase truth values
         value = 'true' if value is True else 'false'
     elif type == 'TraitMap': # use shadow_value
         shadow_name = '%s_' % name
-        shadow_value = params.trait_get(shadow_name)[shadow_name]
+        shadow_value = self.trait_get(shadow_name)[shadow_name]
         # look for a trait with the name in shadow_value and if found return its value
-        possible_shadow_trait_dictionary = params.trait_get(shadow_value)
+        possible_shadow_trait_dictionary = self.trait_get(shadow_value)
         if len(possible_shadow_trait_dictionary) > 0:
             shadow_value = possible_shadow_trait_dictionary[shadow_value]
         else:
@@ -316,6 +325,48 @@ def parameter_value_from_trait_value(params, name):
 #    print name, value
     return str(value)
     
+def traits_repr(self, *names):
+    ''' Returns the "official" string representation of an object.
+     
+     From http://docs.python.org/reference/datamodel.html:
+         'Called by the repr() built-in function and by string conversions 
+         (reverse quotes) to compute the "official" string representation 
+         of an object. If at all possible, this should look like a valid 
+         Python expression that could be used to recreate an object with the
+         same value[s] (given an appropriate environment).'
+     
+     In other words a string that can be eval'd to completely recreate the 
+     experiment object (i.e. what the user would have to script). Instances 
+     that match the pattern below will be correctly represented.  
+     
+     class ExampleInstanceWithRepr(HasTraits):
+         name = Str('Jon')
+         age = Int(28)
+         def __repr__(self):
+             from infobiotics.shared.api import traits_repr
+             return traits_repr(self, [name, age])
+    
+    '''
+    names = flatten(names)
+    repr = self.__class__.__name__ + '('
+    for i, name in enumerate(names):
+        if len(names) > 0:
+            if i != 0:
+                repr += ', '
+        # switch on trait type 
+        type = self.trait(name).trait_type.__class__.__name__
+        if type == 'Instance':
+            repr += "%s=%s" % (name, getattr(self, '%s' % name).__repr__())
+        elif type == 'TraitMap': # Trait({'2+2':5})
+            repr += "%s_='%s'" % (name, getattr(self, '%s_' % name)) # use shadow name/value
+        elif type in ('Unicode','Str', 'Enum', 'File', 'Directory'):
+            repr += "%s='%s'" % (name, getattr(self, '%s' % name))
+        else: # Bool, Int, Float, Long, ...
+            repr += "%s=%s" % (name, getattr(self, '%s' % name))
+    repr += ')'
+    return repr      
+
+
 
 from params import Params
 from params_handler import ParamsHandler
@@ -324,6 +375,37 @@ from experiment_progress_handler import ExperimentProgressHandler
 from experiment_handler import ExperimentHandler
 
 
+# methods to flatten nested lists, taken from http://www.archivum.info/tutor@python.org/2005-01/00506/Re:-[Tutor]-flattening-a-list.html
 
+def flatten(a):
+    """Flatten a list."""
+    return bounce(flatten_k(a, lambda x: x))
+
+def bounce(thing):
+    """Bounce the 'thing' until it stops being a callable."""
+    while callable(thing):
+        thing = thing()
+    return thing
+
+def flatten_k(a, k):
+    """CPS/trampolined version of the flatten function.  The original
+    function, before the CPS transform, looked like this:
+
+    def flatten(a):
+        if not isinstance(a,(tuple,list)): return [a]
+        if len(a)==0: return []
+        return flatten(a[0])+flatten(a[1:])
+
+    The following code is not meant for human consumption.
+    """
+    if not isinstance(a,(tuple,list)):
+        return lambda: k([a])
+    if len(a)==0:
+        return lambda: k([])
+    def k1(v1):
+        def k2(v2):
+            return lambda: k(v1 + v2)
+        return lambda: flatten_k(a[1:], k2)
+    return lambda: flatten_k(a[0], k1)
     
     

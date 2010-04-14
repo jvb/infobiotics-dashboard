@@ -1,6 +1,7 @@
 from infobiotics.shared.api import \
     HasTraits, Instance, Str, Undefined, File, Directory, Bool, \
-    os, Controller, List, can_read, logging, can_access
+    os, Controller, List, can_read, logging, can_access, \
+    set_trait_value_from_parameter_value
 
 logger = logging.get_logger('params')
 
@@ -42,7 +43,7 @@ class Params(HasTraits):
             #TODO prompt to save, with timeout
             pass
 
-        if not os.path.isabs(file): file = os.path.abspath(file) 
+#        if not os.path.isabs(file): file = os.path.abspath(file) 
 
 #        if not os.path.exists(file): raise IOError("'%s' does not exist." % file)
         assert can_access(file)
@@ -87,39 +88,20 @@ class Params(HasTraits):
         if not os.path.isabs(file):
             file = os.path.abspath(file)
         dir = os.path.dirname(file)
-        old_cwd = os.getcwd()
-        os.chdir(dir) # change current directory to directory of params file
-#        self._cwd = dir # used by expect.spawn(cwd=self._cwd)
+        old_cwd = os.getcwd() # remember where we are now
+        os.chdir(dir)
         
         # set parameters from dictionary
-#        print parameters_dictionary
         for k, v in parameters_dictionary.iteritems():
-            self.set_trait_value_from_parameter_value(k, v)
+            set_trait_value_from_parameter_value(self, k, v)
 
-#        print self.params_file_string()
-                
         # success!
-        self._params_file = file # keep file in trait
-#        self._cwd = os.getcwd() # keep cwd in trait
-        os.chdir(old_cwd) # now change back to previous cwd
+        self._params_file = file # update _params_file
+        self._cwd = os.getcwd() # update _cwd
+        os.chdir(old_cwd) # go back to where we were (for scripts using relative paths)
         return True
 
 
-    def set_trait_value_from_parameter_value(self, name, value):
-        from api import trait_value_from_parameter_value
-        setattr(self, name, trait_value_from_parameter_value(self, name, value))
-#        # or set trait by assignment (requires less type-checking in trait_value_from_parameter_value)
-#        try:
-##            exec('self.experiment.%s=%s' % (name, value))
-#            exec('self.experiment.trait_set(%s=%s)' % (name, value))
-#            # Either method works but exec is necessary because we are 
-#            # using value of 'name' to assign value to it in each case.
-#            # The second form is consistent with __repr__ and reset in 
-#            # ParamsExperiment.
-#        except TraitError, e:
-#            logger.debug('%s.%s=%s; %s' % (self.experiment, name, value, e))
-
-    
     def save(self, file=''):
         #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
         with open(file, 'w') as fh:
@@ -188,52 +170,14 @@ class Params(HasTraits):
 #        return self.params_file_string()
         return super(HasTraits, self).__str__()
 
-    def __repr__(self): #TODO change eval's to 'getattr(self, trait_name)'
-        ''' Returns the "official" string representation of an object.
-        
-        From http://docs.python.org/reference/datamodel.html:
-            'Called by the repr() built-in function and by string conversions 
-            (reverse quotes) to compute the "official" string representation 
-            of an object. If at all possible, this should look like a valid 
-            Python expression that could be used to recreate an object with the
-            same value[s] (given an appropriate environment).'
-        
-        In other words a string that can be eval'd to completely recreate the 
-        experiment object (i.e. what the user would have to script). Instances 
-        that match the pattern below will be correctly represented.  
-        
-        class ExampleInstanceWithRepr(HasTraits):
-            name = Str('Jon')
-            def __repr__(self):
-                return 'Test("name=%s")' % self.name
- 
-        '''
-        repr = ''
-        repr += self.__class__.__name__
-        repr += '('
-        parameter_names = self.parameter_names()
-        for i, parameter_name in enumerate(parameter_names):
-            if len(parameter_names) > 0:
-                if i != 0:
-                    repr += ', '
-            # switch on trait type (uses __repr__() of value for Instance traits)
-            trait_type_class_name = eval('self.trait("%s").trait_type.__class__.__name__' % parameter_name)
-            if trait_type_class_name == 'TraitMap': # a mapped trait
-#                repr += "%s='%s'" % (parameter_name, eval('self.%s' % parameter_name)) # displayed value
-                repr += "%s_='%s'" % (parameter_name, eval('self.%s_' % parameter_name)) # shadow name/value
-            elif trait_type_class_name in ('Unicode','Str', 'Enum', 'File', 'Directory'):
-                repr += "%s='%s'" % (parameter_name, eval('self.%s' % parameter_name))
-            elif trait_type_class_name == 'Instance': # see ExampleInstanceWithRepr below
-                repr += "%s=%s" % (parameter_name, eval('self.%s.__repr__()' % parameter_name))
-            else: # Bool, Int, Float, Long, ...
-                repr += "%s=%s" % (parameter_name, eval('self.%s' % parameter_name))
-        repr += ')'
-        return repr        
-
     repr = Str # The "offical" string representation (scripting interface) of this params experiment, updated when any trait changes.
 
     def _repr_default(self):
         return self.__repr__()
+
+    def __repr__(self):
+        from infobiotics.shared.api import traits_repr
+        return traits_repr(self, self.parameter_names())
 
     def _anytrait_changed(self, name, old, new): # move to handler
         ''' Updates 'repr' trait with value of '__repr__()', for display.
@@ -263,4 +207,7 @@ if __name__ == '__main__':
     parameters = McssParams()
 #    parameters.configure_traits()
 #    parameters.configure()
+    os.chdir('../../tests/mcss/models')
+    print parameters.load('module1.params')
+    print parameters.load('reactions1.params')
     print parameters
