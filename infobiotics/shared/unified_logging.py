@@ -15,10 +15,13 @@ default_level to WARNING.
 
 '''
 
-import logging
-from logging import DEBUG, INFO, WARN, ERROR, CRITICAL 
+from logging import \
+    DEBUG, INFO, WARN, ERROR, CRITICAL, \
+    getLogger, disable, \
+    StreamHandler, Formatter, \
+    shutdown
 
-default_handler = logging.StreamHandler
+default_handler = StreamHandler()
 default_level = DEBUG
 default_date_format = '%Y%m%d;%H:%M:%S'
 # see 15.6.15. Formatter Objects at http://docs.python.org/library/logging.html
@@ -26,7 +29,8 @@ default_date_format = '%Y%m%d;%H:%M:%S'
 #default_format = '"%(message)s\" on %(asctime)s,%(msecs).3f from %(name)s (level=%(levelno)s) at line %(lineno)s of %(funcName)s in %(module)s (%(pathname)s) pid=%(process)d' 
 default_header = 'message \
 logger(level) module:line(function) time [thread:pid] \'path/to/module.py\''
-default_format = '%(message)-80s%(name)s(%(levelno)s) %(module)s:%(lineno)s(%(funcName)s) \
+default_format = '"%(message)s" %(module)s:%(lineno)s(%(funcName)s) \
+%(name)s(%(levelno)s) \
 %(asctime)s,%(msecs).3f [%(thread)d:%(process)d] \'%(pathname)s\''  
 
 def get_logger(name='', level=None, handler=None, format=None, date_format=None):
@@ -39,22 +43,18 @@ def get_logger(name='', level=None, handler=None, format=None, date_format=None)
     if level is None:
         level = default_level
     if handler is None:
-        handler = default_handler()
+        handler = default_handler
     if format is None:
         format = default_format
     if date_format is None:
         date_format = default_date_format
         
-    logger = logging.getLogger(name)
+    logger = getLogger(name)
     logger.setLevel(level)
-    handler.setFormatter(logging.Formatter(format, date_format))
+    handler.setFormatter(Formatter(format, date_format))
     logger.addHandler(handler)
     
     return logger
-
-#def disable(defcon_level):
-#    logging.disable(from_defcon(level))
-from logging import disable 
 
 
 #def from_defcon(defcon_level):
