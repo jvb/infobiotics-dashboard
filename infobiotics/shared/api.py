@@ -25,7 +25,22 @@ else:
 
 import unified_logging as logging  
 logger = logging.get_logger('shared.api')
+logger.setLevel(logging.WARN)
 
+def chdir(path):
+    path = os.path.abspath(path)
+    logger.debug("Changing directory to '%s'" % path)
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(path)
+        if old_cwd != path:
+            logger.warn("Changed directory from '%s' to '%s'" % (old_cwd, path))
+    except OSError, e:
+        logger.exception(e)
+        logger.debug("Changing directory back to '%s'" % old_cwd)
+        os.chdir(old_cwd)
+
+        
 # Enthought imports ---
 
 os.environ['ETS_TOOLKIT']='qt4' # must be before Enthought import statements
@@ -375,37 +390,36 @@ from experiment_progress_handler import ExperimentProgressHandler
 from experiment_handler import ExperimentHandler
 
 
-# methods to flatten nested lists, taken from http://www.archivum.info/tutor@python.org/2005-01/00506/Re:-[Tutor]-flattening-a-list.html
+# flatten nested list(s) method taken from http://www.archivum.info/tutor@python.org/2005-01/00506/Re:-[Tutor]-flattening-a-list.html ---
 
 def flatten(a):
     """Flatten a list."""
-    return bounce(flatten_k(a, lambda x: x))
-
-def bounce(thing):
-    """Bounce the 'thing' until it stops being a callable."""
-    while callable(thing):
-        thing = thing()
-    return thing
-
-def flatten_k(a, k):
-    """CPS/trampolined version of the flatten function.  The original
-    function, before the CPS transform, looked like this:
-
-    def flatten(a):
-        if not isinstance(a,(tuple,list)): return [a]
-        if len(a)==0: return []
-        return flatten(a[0])+flatten(a[1:])
-
-    The following code is not meant for human consumption.
-    """
-    if not isinstance(a,(tuple,list)):
-        return lambda: k([a])
-    if len(a)==0:
-        return lambda: k([])
-    def k1(v1):
-        def k2(v2):
-            return lambda: k(v1 + v2)
-        return lambda: flatten_k(a[1:], k2)
-    return lambda: flatten_k(a[0], k1)
+    def bounce(thing):
+        """Bounce the 'thing' until it stops being a callable."""
+        while callable(thing):
+            thing = thing()
+        return thing
     
+    def flatten_k(a, k):
+        """CPS/trampolined version of the flatten function.  The original
+        function, before the CPS transform, looked like this:
+    
+        def flatten(a):
+            if not isinstance(a,(tuple,list)): return [a]
+            if len(a)==0: return []
+            return flatten(a[0])+flatten(a[1:])
+    
+        The following code is not meant for human consumption.
+        """
+        if not isinstance(a,(tuple,list)):
+            return lambda: k([a])
+        if len(a)==0:
+            return lambda: k([])
+        def k1(v1):
+            def k2(v2):
+                return lambda: k(v1 + v2)
+            return lambda: flatten_k(a[1:], k2)
+        return lambda: flatten_k(a[0], k1)
+    
+    return bounce(flatten_k(a, lambda x: x))
     

@@ -1,7 +1,7 @@
 from infobiotics.shared.api import \
     HasTraits, Instance, Str, Undefined, File, Directory, Bool, \
     os, Controller, List, can_read, logging, can_access, \
-    set_trait_value_from_parameter_value
+    set_trait_value_from_parameter_value, chdir
 
 logger = logging.get_logger('params')
 
@@ -89,7 +89,7 @@ class Params(HasTraits):
             file = os.path.abspath(file)
         dir = os.path.dirname(file)
         old_cwd = os.getcwd() # remember where we are now
-        os.chdir(dir)
+        chdir(dir)
         
         # set parameters from dictionary
         for k, v in parameters_dictionary.iteritems():
@@ -98,7 +98,8 @@ class Params(HasTraits):
         # success!
         self._params_file = file # update _params_file
         self._cwd = os.getcwd() # update _cwd
-        os.chdir(old_cwd) # go back to where we were (for scripts using relative paths)
+        chdir(old_cwd) # go back to where we were (for scripts using relative paths)
+        logger.debug("Loaded '%s'." % file)
         return True
 
 
@@ -114,7 +115,7 @@ class Params(HasTraits):
                 return False
         # success!
 #        if os.path.isabs(file): #FIXME
-#            os.chdir(os.path.dirname(file)) # change current directory to directory of params file
+#            chdir(os.path.dirname(file)) # change current directory to directory of params file
 #        self._cwd = os.getcwd()
         self._params_file = file
         self._dirty = False
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     parameters = McssParams()
 #    parameters.configure_traits()
 #    parameters.configure()
-    os.chdir('../../tests/mcss/models')
-    print parameters.load('module1.params')
-    print parameters.load('reactions1.params')
+    chdir('../../tests/mcss/models')
+    parameters.load('module1.params')
+    parameters.load('reactions1.params')
     print parameters
