@@ -21,6 +21,10 @@ else:
     import pexpect as expect
 
 
+# my non-ETS module imports
+
+import unified_logging as logging  
+
 
 # Enthought imports ---
 
