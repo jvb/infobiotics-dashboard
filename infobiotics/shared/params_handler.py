@@ -33,7 +33,6 @@ class ParamsHandler(Controller):
             default_directory = os.path.dirname(self.model._params_file),
         )
         if fd.open() == OK:
-#            self.model.load(fd.path)
             info.object.load(fd.path)
 
     def save(self, info):
@@ -45,8 +44,7 @@ class ParamsHandler(Controller):
             default_directory = os.path.dirname(self.model._params_file),
         )
         if fd.open() == OK:
-#            self.model.save(fd.path)
-            info.object.save(fd.path)
+            info.object.save(fd.path, force=True) # user will have been prompted to overwrite by the GUI
             
     wildcard = Str(desc='an appropriate wildcard string for a WX or Qt open and save dialog looking for params files.')
         

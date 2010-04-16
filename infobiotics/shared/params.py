@@ -1,13 +1,13 @@
 from infobiotics.shared.api import \
     HasTraits, Instance, Str, Undefined, List, File, Directory, Bool, \
-    Property, Controller, chdir, can_access, read, isrel, os, \
+    Property, Controller, chdir, can_access, isrel, read, write, os, \
     ParamsXMLReader, set_trait_value_from_parameter_value, \
     parameter_value_from_trait_value, traits_repr, \
     logging
 
 from xml import sax
 
-logger = logging.getLogger()#level=logging.DEBUG)
+logger = logging.getLogger(level=logging.DEBUG)
 
 class Params(HasTraits): 
 
@@ -20,8 +20,9 @@ class Params(HasTraits):
     _params_file = File(exists=True)
 
     def __params_file_changed(self, _params_file):
+        self._dirty = False
         self._cwd = os.path.dirname(_params_file)
-    
+        
     _cwd = Directory # not Directory(exists=True) because that breaks the editor!
     
     def __cwd_default(self):
@@ -33,17 +34,20 @@ class Params(HasTraits):
 
     def __cwd_changed(self, old, new):
         # try and change directory ---
-        old_new_tuple_or_false = chdir(new) 
+        old_new_tuple_or_false = chdir(new)
+        # update all file and directory parameters with relative paths ---
         if old_new_tuple_or_false:
-            # update all file and directory parameters with relative paths ---
             old, new = old_new_tuple_or_false
-            for name in self.parameter_names():
-                type = self.trait(name).trait_type.__class__.__name__
-                if type in ('File', 'Directory'):
-                    path = getattr(self, name)
-                    if isrel(path):
-                        path = os.path.join(old, path)
-                    setattr(self, name, os.path.relpath(path, new))
+            self._update_relative_paths(old, new) 
+
+    def _update_relative_paths(self, old, new):
+        for name in self.parameter_names():
+            type = self.trait(name).trait_type.__class__.__name__
+            if type in ('File', 'Directory'):
+                path = getattr(self, name)
+                if isrel(path):
+                    path = os.path.join(old, path)
+                setattr(self, name, os.path.relpath(path, new))
 
     # external validation of '_cwd'
     _cwd_invalid = Property(Bool, depends_on='_cwd') # relates to Item('_cwd', invalid='_cwd_invalid', ...) in working_directory_group of infobiotics.shared.api
@@ -109,8 +113,9 @@ class Params(HasTraits):
         # change directory so that setting of File traits with relative paths works
         if isrel(file):
             file = os.path.abspath(file)
-        old_cwd = os.getcwd() # remember where we are now
-        chdir(os.path.dirname(file))
+        old = os.getcwd() # remember where we are now
+        new = os.path.dirname(file)
+        chdir(old)
         
         # set parameters from dictionary
         for k, v in parameters_dictionary.iteritems():
@@ -121,24 +126,50 @@ class Params(HasTraits):
         # remember params file
         self._params_file = file # update _params_file (and _cwd via __params_file_changed)
         
+#        self._update_relative_paths(old, new) #TODO FileDialog.extras -> 'Move input files to new directory?' checkbox
+        
         # go back to where we were (for scripts using relative paths)
-        chdir(old_cwd)
+        chdir(old)
         
         logger.debug("Loaded '%s'." % file)
         return True
 
 
-    def save(self, file=''):
-        
-        #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
-        with open(file, 'w') as fh:
-            logger.debug(fh)
-            try:
-                fh.write(self.params_file_string()) # important bit, see method below
-            except IOError, e:
-                logger.error('save(), %s' % e) #TODO message box
-                return False
-        # success!
+    def save(self, file='', force=False):
+        # handle whether or not to overwrite an existing file ---
+        if can_access(file):
+            if not force:
+                if self._interactive is True:
+                    #TODO prompt not to overwrite with a message box
+                    pass
+                else:
+                    #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
+                    pass
+#                    print "Are you sure you want to overwrite '%s' (Y/n)?" % file
+##                    start_time = time()
+##                    while(whatever):
+##                        do_something
+##                        if time() - smart_time > 5:
+##                            return
+#                    answer = sys.stdin.readline()
+#                    if answer.lower().startswith('y'):
+#                        pass
+
+        # actually write the file ---
+        try:
+            with write(file) as fh:
+                fh.write(self.params_file_string()) # important bit
+        except IOError, e:
+            # handle IOError ---
+            logger.exception(e)
+            if self._interactive:
+                from infobiotics.shared.api import message
+                message(e, title='Error')
+            else:
+                print e
+            return False
+            
+        # success! ---
 #        if os.path.isabs(file): #FIXME
 #            chdir(os.path.dirname(file)) # change current directory to directory of params file
 #        self._cwd = os.getcwd()
@@ -210,6 +241,8 @@ class Params(HasTraits):
     
     # interactive methods ---
         
+    _interactive = False
+
     handler = Instance(Controller)
     
     def _handler_default(self):
@@ -221,9 +254,11 @@ class Params(HasTraits):
         raise NotImplementedError
     
     def configure(self, **args):
+        self._interactive = True
         self.handler.configure_traits(**args)
         
     def edit(self, **args):
+        self._interactive = True
         self.handler.edit_traits(kind='live', **args)
 
 

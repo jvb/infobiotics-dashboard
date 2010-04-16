@@ -58,6 +58,9 @@ from enthought.traits.ui.api import \
 
 from enthought.pyface.api import FileDialog, OK
 
+from enthought.traits.ui.message import auto_close_message, error, message 
+
+
 # custom traits ---
 
 #TODO move this to enthought branch?
