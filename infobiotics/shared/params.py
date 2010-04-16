@@ -32,10 +32,11 @@ class Params(HasTraits):
         return _cwd
 
     def __cwd_changed(self, old, new):
+        # try and change directory ---
         old_new_tuple_or_false = chdir(new) 
         if old_new_tuple_or_false:
+            # update all file and directory parameters with relative paths ---
             old, new = old_new_tuple_or_false
-            # update all relative file traits
             for name in self.parameter_names():
                 type = self.trait(name).trait_type.__class__.__name__
                 if type in ('File', 'Directory'):
@@ -82,7 +83,7 @@ class Params(HasTraits):
             try:
                 # read parameters from file into dictionary
                 parser.parse(fh)
-            except sax._exceptions.SAXParseException, e: 
+            except sax._exceptions.SAXParseException: 
                 error = "'%s' is not a well-formed XML file." % file
             # check for other errors
             if not hasattr(handler, 'parameter_set_name'):
@@ -120,7 +121,7 @@ class Params(HasTraits):
         # remember params file
         self._params_file = file # update _params_file (and _cwd via __params_file_changed)
         
-         # go back to where we were (for scripts using relative paths)
+        # go back to where we were (for scripts using relative paths)
         chdir(old_cwd)
         
         logger.debug("Loaded '%s'." % file)
@@ -227,7 +228,5 @@ class Params(HasTraits):
 
 
 if __name__ == '__main__':
-    path = '/home/jvb/phd/eclipse/infobiotics/dashboard/test/mcss/models/module1.sbml'
-    _cwd = '/home/jvb/phd/eclipse/infobiotics/dashboard/test/mcss'
-    print path, os.path.relpath(path, _cwd)
     execfile('../mcss/mcss_params.py')
+    
