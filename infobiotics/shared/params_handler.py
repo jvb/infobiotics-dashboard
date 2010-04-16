@@ -1,6 +1,5 @@
 from infobiotics.shared.api import \
-    Controller, Property, Str, property_depends_on, FileDialog, OK, os, \
-    Bool, Property, property_depends_on, can_access, DelegatesTo
+    Controller, Property, Str, FileDialog, OK, os    
 
 class ParamsHandler(Controller):
 
@@ -11,10 +10,11 @@ class ParamsHandler(Controller):
         if len(path) > 0:
             dirname, basename = os.path.split(path)
             dirname = os.path.relpath(dirname, self.model._cwd)
-            if dirname == '':
-                return basename
+            if dirname == '.':
+                return '%s %s' % (self.model._parameters_name, basename)
             else:
-                return '%s (%s)' % (basename, dirname)
+                return '%s %s (%s)' % (self.model._parameters_name, basename, dirname)
+            return 
         else:
             return self.model._parameters_name
 

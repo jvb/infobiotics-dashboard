@@ -1,10 +1,13 @@
 from infobiotics.shared.api import \
-    HasTraits, Instance, Str, Undefined, File, Directory, Bool, \
-    os, Controller, List, can_read, logging, can_access, \
-    set_trait_value_from_parameter_value, chdir, \
-    Property
+    HasTraits, Instance, Str, Undefined, List, File, Directory, Bool, \
+    Property, Controller, chdir, can_access, read, isrel, os, \
+    ParamsXMLReader, set_trait_value_from_parameter_value, \
+    parameter_value_from_trait_value, traits_repr, \
+    logging
 
-logger = logging.getLogger()
+from xml import sax
+
+logger = logging.getLogger()#level=logging.DEBUG)
 
 class Params(HasTraits): 
 
@@ -22,21 +25,24 @@ class Params(HasTraits):
     _cwd = Directory # not Directory(exists=True) because that breaks the editor!
     
     def __cwd_default(self):
-#        logger = logging.getLogger(level=logging.DEBUG)
         #TODO try and load _cwd from preferences?
         _cwd = os.getcwd()
+#        logger = logging.getLogger(level=logging.DEBUG)
         logger.debug('__cwd_default(%s) returning %s', self, _cwd)
         return _cwd
 
-    def __cwd_changed(self, name, old, new):
-        chdir(new)
-#        # update all relative file traits
-#        for name in self.parameter_names():
-#            type = self.trait(name).trait_type.__class__.__name__
-#            if type in ('File', 'Directory'):
-#                path = getattr(self, name)
-#                if not os.path.isabs(path):
-#                    setattr(self, name, os.path.relpath(path, new))
+    def __cwd_changed(self, old, new):
+        old_new_tuple_or_false = chdir(new) 
+        if old_new_tuple_or_false:
+            old, new = old_new_tuple_or_false
+            # update all relative file traits
+            for name in self.parameter_names():
+                type = self.trait(name).trait_type.__class__.__name__
+                if type in ('File', 'Directory'):
+                    path = getattr(self, name)
+                    if isrel(path):
+                        path = os.path.join(old, path)
+                    setattr(self, name, os.path.relpath(path, new))
 
     # external validation of '_cwd'
     _cwd_invalid = Property(Bool, depends_on='_cwd') # relates to Item('_cwd', invalid='_cwd_invalid', ...) in working_directory_group of infobiotics.shared.api
@@ -52,29 +58,22 @@ class Params(HasTraits):
     def load(self, file=''):
         '''  
         
-        Tries to load file, if successful resets traits and *then* parses file. 
+        Reads parameters file, 
+        resets traits,
+        sets traits to new parameters,
         
         Returns True if a params file was successfully loaded. 
         
         '''
 
-        if self._dirty: 
-            print 'loading %s when current parameters are dirty' % file
-            #TODO prompt to save, with timeout
+        if self._dirty:
+            logger.warn('loading %s when current parameters are dirty', file)
+            #TODO prompt to save, with timeout/override for non-interactive_mode
             pass
 
-#        if not os.path.isabs(file): file = os.path.abspath(file) 
-
-#        if not os.path.exists(file): raise IOError("'%s' does not exist." % file)
-        assert can_access(file)
-        
-        if not can_read(file): raise IOError("'%s' cannot be read." % file)    
-            
         # open and parse params file with ParamsXMLReader
         # reporting errors or responding to success 
-        with open(file, 'rb') as fh:
-            from xml import sax
-            from api import ParamsXMLReader
+        with read(file, 'rb') as fh:
             parser = sax.make_parser()
             parameters_dictionary = {}
             handler = ParamsXMLReader(parameters_dictionary, self._parameter_set_name)
@@ -84,52 +83,54 @@ class Params(HasTraits):
                 # read parameters from file into dictionary
                 parser.parse(fh)
             except sax._exceptions.SAXParseException, e: 
-                error = 'Not a well-formed XML file.' # can fail *after* some parameters have been changed!
+                error = "'%s' is not a well-formed XML file." % file
             # check for other errors
-            if not hasattr(handler, 'parameter_set_name'): # will fail without changing anything, good.
-                error = 'Not a parameters file.'
+            if not hasattr(handler, 'parameter_set_name'):
+                error = "'%s' is not a parameters file." % file
 #            elif not handler.has_expected_parameter_set_name: # will also fail without changing anything, also good.
-#                error = 'Incorrect parameter set: %s when %s expected' % (handler.parameter_set_name, handler.expected_parameter_set_name)
+#                error = "Incorrect parameter set: '%s' when '%s' expected." % (handler.parameter_set_name, handler.expected_parameter_set_name)
             elif len(parameters_dictionary) == 0:
-                error = 'No parameters in file'
+                error = "No parameters in file '%s'." % file
             if error is not None:
-                # report error
                 logger.error(error)
 #                auto_close_message(message=error) #TODO is this desirable when scripting?...might not happen, as with ProgressDialog
                 return False
 
         # read parameters ok
-        self._unresetable = self.reset(self.parameter_names())
+        
+        
         # reset traits so we don't carry over parameters that are missing from 
         # the file we are loading
-        #TODO reset traits after file successfully parsed, *then* apply traits?
+        self._unresetable = self.reset(self.parameter_names())
+        if len(self._unresetable) > 0:
+            logger.warn("Some parameters were not reset: %s", self._unresetable)
 
         # change directory so that setting of File traits with relative paths works
-        if not os.path.isabs(file):
+        if isrel(file):
             file = os.path.abspath(file)
-        dir = os.path.dirname(file)
         old_cwd = os.getcwd() # remember where we are now
-        chdir(dir)
+        chdir(os.path.dirname(file))
         
         # set parameters from dictionary
         for k, v in parameters_dictionary.iteritems():
             set_trait_value_from_parameter_value(self, k, v)
 
         # success!
-        self._params_file = file # update _params_file
-        self._cwd = os.getcwd() # update _cwd
-        chdir(old_cwd) # go back to where we were (for scripts using relative paths)
+        
+        # remember params file
+        self._params_file = file # update _params_file (and _cwd via __params_file_changed)
+        
+         # go back to where we were (for scripts using relative paths)
+        chdir(old_cwd)
+        
         logger.debug("Loaded '%s'." % file)
         return True
 
 
     def save(self, file=''):
-
-        # when saving update all relative to save location a la __cwd_changed
         
         #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
         with open(file, 'w') as fh:
-            print fh
             logger.debug(fh)
             try:
                 fh.write(self.params_file_string()) # important bit, see method below
@@ -180,7 +181,6 @@ class Params(HasTraits):
     <!-- parameter definitions -->
     <parameterSet name="%s">
 ''' % (self._parameters_name, self._parameter_set_name)
-        from api import parameter_value_from_trait_value
         for name in self.parameter_names():
             value = parameter_value_from_trait_value(self, name)
             parameter = '        <parameter name="%s" value="%s"/>\n' % (name, value)
@@ -195,7 +195,6 @@ class Params(HasTraits):
         return '%s(_params_file=%s)' % (self.__class__.__name__, os.path.basename(self._params_file))
         
     def __repr__(self):
-        from infobiotics.shared.api import traits_repr
         return traits_repr(self, self.parameter_names())
 
     repr = Str # The "offical" string representation (scripting interface) of this params experiment, updated when any trait changes.
@@ -228,4 +227,7 @@ class Params(HasTraits):
 
 
 if __name__ == '__main__':
+    path = '/home/jvb/phd/eclipse/infobiotics/dashboard/test/mcss/models/module1.sbml'
+    _cwd = '/home/jvb/phd/eclipse/infobiotics/dashboard/test/mcss'
+    print path, os.path.relpath(path, _cwd)
     execfile('../mcss/mcss_params.py')
