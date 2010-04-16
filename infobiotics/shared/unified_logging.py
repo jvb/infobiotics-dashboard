@@ -15,29 +15,24 @@ default_level to WARNING.
 
 '''
 
-from logging import \
-    DEBUG, INFO, WARN, ERROR, CRITICAL, \
-    getLogger, disable, \
-    StreamHandler, Formatter, \
-    shutdown
+import logging # namespace
+from logging import DEBUG, INFO, WARN, ERROR, CRITICAL # constants
+from logging import disable, shutdown # functions
 
-default_handler = StreamHandler()
-default_level = DEBUG
-default_date_format = '%Y%m%d;%H:%M:%S'
+default_level = logging.ERROR
+
+default_handler = logging.StreamHandler()
+
 # see 15.6.15. Formatter Objects at http://docs.python.org/library/logging.html
-#default_header = '"<message>" on <time> from <logger> (level=<level>) at line of <function> in <module> (<path>) <pid>'
-#default_format = '"%(message)s\" on %(asctime)s,%(msecs).3f from %(name)s (level=%(levelno)s) at line %(lineno)s of %(funcName)s in %(module)s (%(pathname)s) pid=%(process)d' 
-default_header = 'message \
-logger(level) module:line(function) time [thread:pid] \'path/to/module.py\''
-default_format = '"%(message)s" %(module)s:%(lineno)s(%(funcName)s) \
+custom_format = '"%(message)s" %(module)s:%(lineno)s(%(funcName)s) \
 %(name)s(%(levelno)s) \
 %(asctime)s,%(msecs).3f [%(thread)d:%(process)d] \'%(pathname)s\''  
+simple_format = '"%(message)s" %(module)s:%(lineno)s(%(funcName)s) [%(name)s(%(levelno)s)]'
+default_format = simple_format
+default_date_format = '%Y%m%d;%H:%M:%S'
 
-def get_logger(name='', level=None, handler=None, format=None, date_format=None):
-    ''' Returns a named logger.
-
-    e.g. unified_logging.get_logger
-    '''
+def getLogger(name='', level=None, handler=None, format=None, date_format=None):
+    ''' More flexible getLogger method than in standard logging module. '''
         
     # use, possibly changed, defaults 
     if level is None:
@@ -49,9 +44,9 @@ def get_logger(name='', level=None, handler=None, format=None, date_format=None)
     if date_format is None:
         date_format = default_date_format
         
-    logger = getLogger(name)
+    logger = logging.getLogger(name)
     logger.setLevel(level)
-    handler.setFormatter(Formatter(format, date_format))
+    handler.setFormatter(logging.Formatter(format, date_format))
     logger.addHandler(handler)
     
     return logger
@@ -108,13 +103,3 @@ def get_logger(name='', level=None, handler=None, format=None, date_format=None)
 #        return logging.ERROR
 #    elif logging.CRITICAL <= level:
 #        return logging.CRITICAL
-
-if __name__ == '__main__':
-    pass
-
-    logger1 = get_logger()
-    disable(0)
-    logger1.log(9, 'custom')
-    logger1.log(19, 'testing')
-    logger1.warn('warning')
-    

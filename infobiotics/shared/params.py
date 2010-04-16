@@ -1,33 +1,53 @@
 from infobiotics.shared.api import \
     HasTraits, Instance, Str, Undefined, File, Directory, Bool, \
     os, Controller, List, can_read, logging, can_access, \
-    set_trait_value_from_parameter_value, chdir
+    set_trait_value_from_parameter_value, chdir, \
+    Property
 
-logger = logging.get_logger('params')
-
+logger = logging.getLogger()
 
 class Params(HasTraits): 
-    
+
     _parameters_name = Str(Undefined, desc='the name attribute of the parameter tag in the params XML file')
     _parameter_set_name = Str(Undefined, desc='the name attribute of the parameterSet tag in the params XML file')
+    
+    _dirty = Bool(False)
+    _unresetable = List(Str)
+
     _params_file = File(exists=True)
-    _cwd = Directory(os.getcwd(), exists=True)
-    _dirty = Bool
 
     def __params_file_changed(self, _params_file):
         self._cwd = os.path.dirname(_params_file)
     
+    _cwd = Directory # not Directory(exists=True) because that breaks the editor!
+    
+    def __cwd_default(self):
+#        logger = logging.getLogger(level=logging.DEBUG)
+        #TODO try and load _cwd from preferences?
+        _cwd = os.getcwd()
+        logger.debug('__cwd_default(%s) returning %s', self, _cwd)
+        return _cwd
+
+    def __cwd_changed(self, name, old, new):
+        chdir(new)
+#        # update all relative file traits
+#        for name in self.parameter_names():
+#            type = self.trait(name).trait_type.__class__.__name__
+#            if type in ('File', 'Directory'):
+#                path = getattr(self, name)
+#                if not os.path.isabs(path):
+#                    setattr(self, name, os.path.relpath(path, new))
+
+    # external validation of '_cwd'
+    _cwd_invalid = Property(Bool, depends_on='_cwd') # relates to Item('_cwd', invalid='_cwd_invalid', ...) in working_directory_group of infobiotics.shared.api
+    def _get__cwd_invalid(self):
+        return True if not can_access(self._cwd) else False
+
     def __init__(self, file=None, **traits):
         super(Params, self).__init__(**traits)
+        self.on_trait_change(self.update_repr, self.parameter_names())
         if file is not None:
             self.load(file)
-
-#    def load(self, file=None): 
-#        if file is None:
-#            raise ValueError
-#        pass
-
-    _unresetable = List(Str)
 
     def load(self, file=''):
         '''  
@@ -79,7 +99,7 @@ class Params(HasTraits):
                 return False
 
         # read parameters ok
-        self._unresetable = self.reset()
+        self._unresetable = self.reset(self.parameter_names())
         # reset traits so we don't carry over parameters that are missing from 
         # the file we are loading
         #TODO reset traits after file successfully parsed, *then* apply traits?
@@ -104,6 +124,9 @@ class Params(HasTraits):
 
 
     def save(self, file=''):
+
+        # when saving update all relative to save location a la __cwd_changed
+        
         #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
         with open(file, 'w') as fh:
             print fh
@@ -169,46 +192,40 @@ class Params(HasTraits):
 
     def __str__(self):
 #        return self.params_file_string()
-        return super(HasTraits, self).__str__()
+        return '%s(_params_file=%s)' % (self.__class__.__name__, os.path.basename(self._params_file))
+        
+    def __repr__(self):
+        from infobiotics.shared.api import traits_repr
+        return traits_repr(self, self.parameter_names())
 
     repr = Str # The "offical" string representation (scripting interface) of this params experiment, updated when any trait changes.
 
     def _repr_default(self):
         return self.__repr__()
 
-    def __repr__(self):
-        from infobiotics.shared.api import traits_repr
-        return traits_repr(self, self.parameter_names())
-
-    def _anytrait_changed(self, name, old, new): # move to handler
-        ''' Updates 'repr' trait with value of '__repr__()', for display.
-        
-        This method is called when *any* trait's value changes.
-        
-        What about '_changed()', or @on_trait_change('*')?
-        
-        '''
+    # on_trait_change set in __init__
+    def update_repr(self):
         self.repr = self.__repr__()
 
-
+    
+    # interactive methods ---
+        
     handler = Instance(Controller)
     
     def _handler_default(self):
+        '''
+        e.g.
+            from infobiotics.mcss.api import McssParamsHandler
+            return McssParamsHandler(model=self)
+        '''
         raise NotImplementedError
     
     def configure(self, **args):
-        self.handler.configure_traits(kind='livemodal', **args)
+        self.handler.configure_traits(**args)
         
     def edit(self, **args):
         self.handler.edit_traits(kind='live', **args)
 
 
 if __name__ == '__main__':
-    from infobiotics.mcss.api import McssParams
-    parameters = McssParams()
-#    parameters.configure_traits()
-#    parameters.configure()
-    chdir('../../tests/mcss/models')
-    parameters.load('module1.params')
-    parameters.load('reactions1.params')
-    print parameters
+    execfile('../mcss/mcss_params.py')

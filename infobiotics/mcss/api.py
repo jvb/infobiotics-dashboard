@@ -1,12 +1,13 @@
 from infobiotics.shared.api import \
-    Group, VGroup, Item, FileEditor, HGroup, ParamsView, ExperimentView
+    Group, VGroup, Item, FileEditor, HGroup, ParamsView, ExperimentView, \
+    TextEditor, DirectoryEditor, working_directory_group
 
 mcss_params_group = Group(
     VGroup(
-#        Item('_cwd', label='Working directory'),
         VGroup(
             Item('model_file', 
                 editor=FileEditor(
+                    auto_set=True,
                     filter=[
                         'All model files (*.lpp *.sbml)', 
                         'Lattice population P system files (*.lpp)', 
@@ -65,17 +66,17 @@ mcss_params_group = Group(
         label='Spatial'
     ),
     
-#    VGroup(
-#        Item(label='Copy and paste the script below to reproduce this experiment.'),
-#        Item('repr', show_label=False, style='custom', editor=TextEditor()), #TODO
-#        label='script',
-#    ),
+    VGroup(
+        Item(label='Copy and paste the script below to reproduce this experiment.'),
+        Item('repr', show_label=False, style='custom', editor=TextEditor()), #TODO
+        label='script',
+    ),
     
     layout='tabbed',
 )
 
 contents = (
-    Item('_cwd', label='Working directory', tooltip='Relative paths will be resolved to this directory.'),
+    working_directory_group,
     mcss_params_group,
 )
 

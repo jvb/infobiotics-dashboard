@@ -1,22 +1,26 @@
 from infobiotics.shared.api import \
-    Controller, Property, Str, property_depends_on, FileDialog, OK, os
-from params import Params
+    Controller, Property, Str, property_depends_on, FileDialog, OK, os, \
+    Bool, Property, property_depends_on, can_access, DelegatesTo
 
 class ParamsHandler(Controller):
 
-    title = Property(Str)
+    title = Property(Str, depends_on='model._params_file, model._cwd')
 
-    @property_depends_on('model._params_file')
     def _get_title(self):
         path = self.model._params_file
         if len(path) > 0:
             dirname, basename = os.path.split(path)
+            dirname = os.path.relpath(dirname, self.model._cwd)
             if dirname == '':
                 return basename
             else:
                 return '%s (%s)' % (basename, dirname)
         else:
             return self.model._parameters_name
+
+    def _title_changed(self, title):
+        if self.info is not None and self.info.initialized:
+            self.info.ui.title = title
             
     def init(self, info):
         info.ui.title = self.title 
@@ -71,3 +75,8 @@ class ParamsHandler(Controller):
                 if i < len(wildcards) - 1:
                     wildcard += '|'#\n'
         return wildcard
+    
+    
+if __name__ == '__main__':
+    execfile('params.py')
+    

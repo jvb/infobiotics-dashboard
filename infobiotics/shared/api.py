@@ -24,39 +24,37 @@ else:
 # my non-ETS module imports
 
 import unified_logging as logging  
-logger = logging.get_logger('shared.api')
-logger.setLevel(logging.WARN)
+
+logger = logging.getLogger()
 
 def chdir(path):
+    ''' Tries to change directory, rolling back if failed. '''
+#    logger.setLevel(logging.DEBUG)
     path = os.path.abspath(path)
-    logger.debug("Changing directory to '%s'" % path)
     old_cwd = os.getcwd()
     try:
         os.chdir(path)
         if old_cwd != path:
-            logger.warn("Changed directory from '%s' to '%s'" % (old_cwd, path))
+            logger.debug("Changed directory from '%s' to '%s'" % (old_cwd, path))
     except OSError, e:
-        logger.exception(e)
-        logger.debug("Changing directory back to '%s'" % old_cwd)
-        os.chdir(old_cwd)
-
+        logger.warn(e)
         
 # Enthought imports ---
 
-os.environ['ETS_TOOLKIT']='qt4' # must be before Enthought import statements
+#os.environ['ETS_TOOLKIT']='qt4' # must be before Enthought import statements
 
 from enthought.traits.api import \
     HasTraits, Interface, implements, File, Directory, Bool, Str, List, \
     Callable, Property, property_depends_on, Range, Button, on_trait_change, \
     Instance, ListStr, Event, Int, Float, Undefined, Enum, Long, Trait, \
-    DelegatesTo
+    DelegatesTo, \
+    BaseDirectory, BaseFile
     
 from enthought.traits.ui.api import \
     Handler, Controller, ModelView, View, Item, Action, DefaultOverride, \
-    Group, VGroup, Item, FileEditor, HGroup, UIInfo
+    Group, VGroup, Item, FileEditor, HGroup, UIInfo, TextEditor, DirectoryEditor
 
 from enthought.pyface.api import FileDialog, OK
-
 
 # custom traits ---
 
@@ -65,6 +63,40 @@ from float_greater_than_zero import FloatGreaterThanZero
 from long_greater_than_zero import LongGreaterThanZero
 from float_with_minimum import FloatWithMinimum
 from int_greater_than_zero import IntGreaterThanZero
+
+
+#class ExistingFile(BaseFile):
+#    info_text = 'a file that exists'
+#
+#    default_value = ''
+#
+#    def init(self):
+#        self.exists = True
+#
+#    def validate(self, object, name, value):
+#        from os.path import isfile
+#        if isfile(value):
+#            return value
+#        self.error(object, name, value)
+#
+#
+#class ExistingDirectory(BaseDirectory):
+#    info_text = 'a directory that exists'
+#    
+#    default_value = ''
+#    
+#    def get_default_value(self):
+#        # to explain the tuple with a 0 see http://code.enthought.com/projects/files/ETS31_API/enthought.traits.trait_handlers.TraitType.html#get_default_value
+#        return (0, os.getcwd())
+#
+#    def init(self):
+#        self.exists = True
+#        
+#    def validate(self, object, name, value):
+#        from os.path import isdir
+#        if isdir(value):
+#            return value
+#        self.error( object, name, value )
 
 
 # reusable trait definitions ---
@@ -92,6 +124,22 @@ perform_action = Action(name='Perform', action='perform',
 )
 
 experiment_actions = [load_action, save_action, perform_action] 
+
+
+# reused Groups ---
+
+working_directory_group = Group(
+    Item('_cwd', 
+        label='Working directory', 
+        editor=DirectoryEditor(
+            auto_set=True, 
+            entries=10,
+            invalid='_cwd_invalid',
+        ),
+#        invalid='_cwd_invalid',
+        tooltip='Relative paths will be resolved to this directory.',
+    ),
+)
 
 
 # subclasses of View ---
@@ -423,3 +471,6 @@ def flatten(a):
     
     return bounce(flatten_k(a, lambda x: x))
     
+    
+if __name__ == '__main__':
+    execfile('params.py')
