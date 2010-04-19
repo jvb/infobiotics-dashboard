@@ -1,4 +1,5 @@
-from infobiotics.shared.api import ParamsHandler, Trait
+from infobiotics.shared.api import ParamsHandler, Trait, \
+    Bool, Property, can_access, os
 from infobiotics.mcss.api import mcss_params_view
 
 class McssParamsHandler(ParamsHandler):
@@ -7,6 +8,18 @@ class McssParamsHandler(ParamsHandler):
     traits_view = mcss_params_view
     id='McssParamsHandler' # for saving window position and size
     
+    # external validation of 'model_file' ---
+    
+    _model_file_invalid = Property(Bool, depends_on='model.model_file, model._cwd_invalid', sync_to_view='model_file.invalid')
+
+    def _get__model_file_invalid(self):
+        return True if not can_access(os.path.join(self.model._cwd, self.model.model_file)) else False
+
+    def object_model_file_changed(self, info):
+        ext = os.path.splitext(info.object.model_file)[1].lower() 
+        if ext == '.sbml':
+            info.object.model_format_ = 'sbml'
+
     model_format = Trait(
         'P system XML',
         {
@@ -19,13 +32,6 @@ class McssParamsHandler(ParamsHandler):
 
     def _model_format_changed(self, model_format):
         self.sync_trait('model_format_', self.model, alias='model_format')
-
-    def object_model_file_changed(self, info):
-        import os.path
-        ext = os.path.splitext(info.object.model_file)[1].lower() 
-#        print ext
-        if ext == '.sbml':
-            info.object.model_format_ = 'sbml'
 
     simulation_algorithm = Trait(
         'Direct Method with queue',

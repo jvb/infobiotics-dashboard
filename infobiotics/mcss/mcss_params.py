@@ -1,14 +1,13 @@
-from infobiotics.shared.api import Params, Str, Enum, Bool, File, Range, \
-    Long, FloatGreaterThanZero, LongGreaterThanZero
+from infobiotics.shared.api import \
+    Params, File, Enum, Bool, Range, Long, \
+    FloatGreaterThanZero, LongGreaterThanZero
 
 class McssParams(Params):
     
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
     
-#    model_file = File('model.lpp', exists=True, desc='the model file to simulate')
-#    model_file = File('model.lpp', desc='the model file to simulate')
-    model_file = Str('model.lpp', desc='the model file to simulate')
+    model_file = File('model.lpp', desc='the model file to simulate')
     model_format = Enum(['xml','sbml','lpp'], desc='the model specification format')
     duplicate_initial_amounts = Bool(desc='whether to duplicate initial amounts for all templates in the SBML model')
     just_psystem = Bool(desc='whether to just initialise the P system and not perform the simulation')
@@ -51,6 +50,15 @@ class McssParams(Params):
         ]
         
     def _handler_default(self):
-        from mcss_params_handler import McssParamsHandler
+        from infobiotics.mcss.api import McssParamsHandler
         return McssParamsHandler(model=self)
-        
+
+
+if __name__ == '__main__':
+    from infobiotics.shared.api import chdir
+    chdir('../../tests/mcss/models')
+    parameters = McssParams('module1.params')
+#    parameters.load('reactions1.params')
+#    print parameters # test __repr__
+    parameters.configure()
+            
