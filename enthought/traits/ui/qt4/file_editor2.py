@@ -47,6 +47,8 @@ class _FileEditor(SimpleTextEditor):
                                self.show_file_dialog)
 
         self.set_tooltip(control)
+        
+        self.set_value(self.value)
 
 
     def update_object(self):
