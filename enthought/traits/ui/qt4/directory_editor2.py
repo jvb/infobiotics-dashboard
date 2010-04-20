@@ -1,3 +1,4 @@
+import os
 from PyQt4 import QtGui
 from ...api import Str
 from enthought.traits.directory import Directory 
@@ -19,7 +20,14 @@ class _DirectoryEditor(_FileEditor):
         dlg = super(_DirectoryEditor, self)._create_file_dialog()
         dlg.setFileMode(QtGui.QFileDialog.Directory)
         return dlg
-        
+
+    def resolve_value(self, value):
+#        if not os.path.isabs(value):
+#            if not os.path.isabs(self.directory):
+#                value = os.path.join(os.getcwd(), self.directory, value)
+#            else:
+#                value = os.path.join(self.directory, value)
+        return value        
 
 class DirectoryEditor(FileEditor): # EditorFactory
     

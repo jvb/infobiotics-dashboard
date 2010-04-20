@@ -20,7 +20,7 @@ class Test(HasTraits):
     directory = Directory('tests/mcss/models')
     
     file = File(
-        exists=True,
+#        exists=True,
         auto_set=True,
         directory='/home/jvb/phd',
         directory_name='directory',

@@ -2,7 +2,7 @@
 Adapted from qt4/extras/bounds_editor.py and qt4/file_editor.py 
 '''
 
-import os.path
+import os
 from PyQt4 import QtCore, QtGui
 from ...api import (TraitError, Str, Directory)
 from ..api import FileEditor
@@ -13,10 +13,13 @@ class _FileEditor(SimpleTextEditor):
     directory = Directory(exists=True)
     directory_name = Str
 
-#    def _directory_changed(self):
-#        print '_FileEditor._directory_changed(self):', self.directory
-#    def _directory_name_changed(self):
-#        print '_FileEditor._directory_name_changed(self):', self.directory_name
+    def _directory_default(self):
+        return os.getcwd()
+
+    def _directory_changed(self):
+        print '_FileEditor._directory_changed(self):', self.directory
+    def _directory_name_changed(self):
+        print '_FileEditor._directory_name_changed(self):', self.directory_name
 
     def init(self, parent):
         
@@ -24,6 +27,8 @@ class _FileEditor(SimpleTextEditor):
         if not factory.directory_name:
             self.directory = factory.directory
         else:
+            self.directory_name = factory.directory_name
+#            self.sync_trait('directory_name',factory)
             self.sync_value(factory.directory_name, 'directory', 'both')#TODO just 'from'?
 
         self.control = QtGui.QWidget()
@@ -117,15 +122,20 @@ class _FileEditor(SimpleTextEditor):
         except TraitError, excp:
             pass
 
+    def resolve_value(self, value):
+#        if not os.path.isabs(value):
+#            if not os.path.isabs(self.directory):
+#                abspath = os.path.join(os.getcwd(), self.directory, value)
+#            else:
+#                abspath = os.path.join(self.directory, value)
+#            return os.path.relpath(value, abspath)
+        return value
+
     # Fixes non-removal of error state
     def set_value(self, value):
         try:
             
-            if not os.path.isabs(value):
-                if not os.path.isabs(self.directory):
-                    value = os.path.join(os.path.getcwd(), self.directory, value)
-                else:
-                    value = os.path.join(self.directory, value)
+            value = self.resolve_value(value)
 
             self.value = value
 
@@ -135,23 +145,30 @@ class _FileEditor(SimpleTextEditor):
 
             self.set_error_state(False)
                 
+            self.set_tooltip(self.control)
+                
         except TraitError, excp:
+#            print excp
+            self.control.setToolTip(unicode(excp))
             pass
+
+
+
 
 
 class FileEditor(FileEditor): # EditorFactory
     
-    directory = Directory(exists=True)
+#    directory = Directory(exists=True)
+    directory = Str
     directory_name = Str
 
-    def _directory_default(self):
-        import os
-        return os.getcwd()
+#    def _directory_default(self):
+#        return os.getcwd()
 
-#    def _directory_changed(self):
-#        print 'FileEditor._directory_changed(self):', self.directory
-#    def _directory_name_changed(self):
-#        print 'FileEditor._directory_name_changed(self):', self.directory_name
+    def _directory_changed(self):
+        print 'FileEditor._directory_changed(self):', self.directory
+    def _directory_name_changed(self):
+        print 'FileEditor._directory_name_changed(self):', self.directory_name
     
     def _get_simple_editor_class(self):
         return _FileEditor
