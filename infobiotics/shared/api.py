@@ -30,16 +30,18 @@ import unified_logging as logging
 logger = logging.getLogger()
 
 def chdir(path):
-    ''' Tries to change directory, rolling back if failed. '''
+    ''' Returns (old, path) or False if failed.'''
 #    logger.setLevel(logging.DEBUG)
     path = os.path.abspath(path)
-    old_cwd = os.getcwd()
+    old = os.getcwd()
     try:
         os.chdir(path)
-        if old_cwd != path:
-            logger.debug("Changed directory from '%s' to '%s'" % (old_cwd, path))
+        if old != path:
+            logger.debug("Changed directory from '%s' to '%s'" % (old, path))
     except OSError, e:
         logger.warn(e)
+        return False
+    return old, path
         
 # Enthought imports ---
 
@@ -57,6 +59,9 @@ from enthought.traits.ui.api import \
     Group, VGroup, Item, FileEditor, HGroup, UIInfo, TextEditor, DirectoryEditor
 
 from enthought.pyface.api import FileDialog, OK
+
+from enthought.traits.ui.message import auto_close_message, error, message 
+
 
 # custom traits ---
 
