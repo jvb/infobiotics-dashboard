@@ -1,3 +1,7 @@
+if __name__ == '__main__': #TODO
+    execfile('../../file2.py')
+    exit()
+
 '''
 Adapted from qt4/extras/bounds_editor.py and qt4/file_editor.py 
 '''
@@ -8,29 +12,36 @@ from ...api import (TraitError, Str, Directory)
 from ..api import FileEditor
 from .text_editor import SimpleEditor as SimpleTextEditor
 
-class _FileEditor(SimpleTextEditor):
+class SimpleEditor(SimpleTextEditor):
 
     directory = Directory(exists=True)
     directory_name = Str
-
-    def _directory_default(self):
-        return os.getcwd()
-
     def _directory_changed(self):
-        print '_FileEditor._directory_changed(self):', self.directory
-    def _directory_name_changed(self):
-        print '_FileEditor._directory_name_changed(self):', self.directory_name
-
-    def init(self, parent):
+        print 'SimpleEditor._directory_changed(self):', self.directory
+    def _directory_name_changed(self, old, new):
+        print "SimpleEditor._directory_name_changed(self, old='%s', new='%s')" % (old, new)
+        self.sync_value(old, 'directory', None)
+        self.sync_value(new, 'directory', 'from')
         
+    def init(self, parent):
+        # initialise traits from factory
         factory = self.factory # FileEditor (below)
-        if not factory.directory_name:
-            self.directory = factory.directory
+#        self.directory = factory.directory
+        if factory.directory_name:
+            print '1'
+#            self.sync_value(factory.directory_name, 'directory', 'from')
+            factory.sync_trait('directory_name', self)
         else:
-            self.directory_name = factory.directory_name
-#            self.sync_trait('directory_name',factory)
-            self.sync_value(factory.directory_name, 'directory', 'both')#TODO just 'from'?
-
+            print '2'
+#            self.sync_value('directory', 'directory', 'from')
+#            self.directory = factory.directory # must set before syncing
+#            self.sync_trait('directory', factory, mutual=False)
+#            factory.sync_trait('directory', self, mutual=False)
+#            self.sync_trait('directory', factory)
+            factory.sync_trait('directory', self)
+        print self._get_sync_trait_info()
+            
+        # file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
         layout = QtGui.QHBoxLayout(self.control)
         layout.setMargin(0)
@@ -51,9 +62,14 @@ class _FileEditor(SimpleTextEditor):
         QtCore.QObject.connect(button, QtCore.SIGNAL('clicked()'), 
                                self.show_file_dialog)
 
-        self.set_tooltip(control)
+        self.set_tooltip(control) # != self.control
+        # end of file_editor.SimpleEditor ---
         
-        self.set_value(self.value)
+        # ensure invalid is set appropriately for hard-coded/default value ---
+        if self.value is not None:
+            self.set_value(self.value)
+        else:
+            self.set_value('hello')
 
 
     def update_object(self):
@@ -62,7 +78,7 @@ class _FileEditor(SimpleTextEditor):
         self._update(unicode(self._file_name.text()))
 
 
-    def update_editor ( self, value=None):
+    def update_editor (self, value=None):
         """ Updates the editor when the object trait changes externally to the 
             editor.
         """
@@ -102,8 +118,9 @@ class _FileEditor(SimpleTextEditor):
     def _create_file_dialog ( self ):
         """ Creates the correct type of file dialog.
         """
-        dlg = QtGui.QFileDialog(self.control.parentWidget())
-        dlg.setDirectory(self.directory)
+        dlg = QtGui.QFileDialog(self.control.parentWidget(), self.name, self.directory)
+        if self.object.base_trait(self.name).handler.exists: 
+            dlg.setFileMode(QtGui.QFileDialog.ExistingFile)
         dlg.selectFile(self._file_name.text())
 
         if len(self.factory.filter) > 0:
@@ -122,56 +139,50 @@ class _FileEditor(SimpleTextEditor):
         except TraitError, excp:
             pass
 
-    def resolve_value(self, value):
-#        if not os.path.isabs(value):
-#            if not os.path.isabs(self.directory):
-#                abspath = os.path.join(os.getcwd(), self.directory, value)
-#            else:
-#                abspath = os.path.join(self.directory, value)
-#            return os.path.relpath(value, abspath)
-        return value
-
-    # Fixes non-removal of error state
+#    def resolve_value(self, value): #TODO see todo below
+##        if not os.path.isabs(value):
+##            if not os.path.isabs(self.directory):
+##                abspath = os.path.join(os.getcwd(), self.directory, value)
+##            else:
+##                abspath = os.path.join(self.directory, value)
+##            return os.path.relpath(value, abspath)
+#        return value
+    
     def set_value(self, value):
+        ''' Fixes non-removal of invalid state. '''
         try:
-            
-            value = self.resolve_value(value)
-
+#            value = self.resolve_value(value) # is done at the trait-level #TODO might need to do it here too if directory/directory_name attribute of trait is not set but they are set in the editor...   
             self.value = value
 
+            # added
             if self._error is not None:
                 self._error = None
                 self.ui.errors -= 1
 
             self.set_error_state(False)
                 
-            self.set_tooltip(self.control)
+            self.set_tooltip(self._file_name) # restore desc over excp
                 
         except TraitError, excp:
-#            print excp
-            self.control.setToolTip(unicode(excp))
-            pass
-
-
-
+            self._file_name.setToolTip(unicode(excp)) # #TODO plus desc?
 
 
 class FileEditor(FileEditor): # EditorFactory
     
-#    directory = Directory(exists=True)
-    directory = Str
-    directory_name = Str
+    directory = Directory(exists=True) #TODO copy changes in file2.py to directory2.py and use its Directory here
+    def _directory_default(self):
+        # handles editor=FileEditor()
+        return os.getcwd()
 
-#    def _directory_default(self):
-#        return os.getcwd()
-
+    directory_name = Str(desc='...overrides directory trait')
+    
     def _directory_changed(self):
         print 'FileEditor._directory_changed(self):', self.directory
     def _directory_name_changed(self):
         print 'FileEditor._directory_name_changed(self):', self.directory_name
     
     def _get_simple_editor_class(self):
-        return _FileEditor
+        return SimpleEditor
     def _get_custom_editor_class(self):
-        return _FileEditor
+        return SimpleEditor
     
