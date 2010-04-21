@@ -1,6 +1,5 @@
 from infobiotics.shared.api import \
-    Controller, Property, Str, property_depends_on, FileDialog, OK, os, \
-    Bool, Property, property_depends_on, can_access, DelegatesTo
+    Controller, Property, Str, FileDialog, OK, os    
 
 class ParamsHandler(Controller):
 
@@ -11,10 +10,11 @@ class ParamsHandler(Controller):
         if len(path) > 0:
             dirname, basename = os.path.split(path)
             dirname = os.path.relpath(dirname, self.model._cwd)
-            if dirname == '':
-                return basename
+            if dirname == '.':
+                return '%s %s' % (self.model._parameters_name, basename)
             else:
-                return '%s (%s)' % (basename, dirname)
+                return '%s %s (%s)' % (self.model._parameters_name, basename, dirname)
+            return 
         else:
             return self.model._parameters_name
 
@@ -33,7 +33,6 @@ class ParamsHandler(Controller):
             default_directory = os.path.dirname(self.model._params_file),
         )
         if fd.open() == OK:
-#            self.model.load(fd.path)
             info.object.load(fd.path)
 
     def save(self, info):
@@ -45,8 +44,7 @@ class ParamsHandler(Controller):
             default_directory = os.path.dirname(self.model._params_file),
         )
         if fd.open() == OK:
-#            self.model.save(fd.path)
-            info.object.save(fd.path)
+            info.object.save(fd.path, force=True) # user will have been prompted to overwrite by the GUI
             
     wildcard = Str(desc='an appropriate wildcard string for a WX or Qt open and save dialog looking for params files.')
         

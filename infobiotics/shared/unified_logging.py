@@ -21,7 +21,10 @@ from logging import disable, shutdown # functions
 
 default_level = logging.ERROR
 
-default_handler = logging.StreamHandler()
+stream_handler = logging.StreamHandler()
+#file_handler = logging.FileHandler('log')
+default_handler = stream_handler
+#default_handler = file_handler
 
 # see 15.6.15. Formatter Objects at http://docs.python.org/library/logging.html
 custom_format = '"%(message)s" %(module)s:%(lineno)s(%(funcName)s) \
