@@ -157,13 +157,15 @@ def test_trait():
 def test_implicit_editor():
     from enthought.traits.api import HasTraits, Str
     
-#    os.chdir('/tmp/permissions_test') # works when directory is not set or directory is relative
+#    os.chdir('/tmp') # works when directory is not set or directory is relative
     
     class Test(HasTraits):
-        directory = Directory(
+        other_directory = '/tmp'
+        directory = Directory('readonly',
             auto_set = True,
             exists = True,
-            directory = 'readonly',
+#            directory = 'permissions_test',
+            directory_name = 'other_directory',
         )
         
     Test().configure_traits()
