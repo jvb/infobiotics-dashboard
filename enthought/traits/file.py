@@ -252,7 +252,7 @@ class File(BaseFile):
             self.abspath = os.path.join(directory, value)
         else:
             self.abspath = value
-        print 'self.abspath =', self.abspath
+#        print 'self.abspath =', self.abspath
     
     def create_editor(self):
         from enthought.traits.ui.qt4.file_editor2 import FileEditor
@@ -326,17 +326,20 @@ def test_trait():
 
 def test_implicit_editor():
     from enthought.traits.api import HasTraits
+    from enthought.traits.directory import Directory
     
-    os.chdir('/tmp/permissions_test') # works when directory is not set or directory is relative
+    os.chdir('/tmp') # works when directory is not set or directory is relative
     
     class Test(HasTraits):
-        file = File(
+        file = File('module1.sbml',
             desc='tooltip',
-            entries = 10,
             auto_set = True,
             exists = True,
-            directory = 'readonly',
             directory_name = 'other_directory',
+        )
+        other_directory = Directory('/home/jvb/phd/eclipse/infobiotics/dashboard/tests/mcss/models', 
+            auto_set=True,
+            exists=True,
         )
         
     Test().configure_traits()
@@ -370,7 +373,7 @@ def test_explicit_editor():
     from enthought.traits.api import HasTraits, Str
     from enthought.traits.ui.api import View, Item
     from enthought.traits.ui.qt4.file_editor2 import FileEditor
-    from enthought.traits.directory2 import Directory
+    from enthought.traits.directory import Directory
     
     os.chdir('/tmp/permissions_test') # works when directory is not set or directory is relative
     
@@ -462,6 +465,6 @@ def test_explicit_editor2():
 
 if __name__ == '__main__':
 #    test_trait()
-#    test_implicit_editor()
-    test_explicit_editor()
+    test_implicit_editor()
+#    test_explicit_editor()
     

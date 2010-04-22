@@ -74,18 +74,6 @@ def append(file):
 def update(file):
     return write(file, mode='r+')
 
-def write(file, mode='w'):
-    if not can_write(file):
-        raise IOError("Cannot write '%s'." % file)
-    else:
-        return open(file, mode)
-
-def append(file):
-    return write(file, mode='a')
-
-def update(file):
-    return write(file, mode='r+')
-
 def whereis(program): #TODO rename to 'which'?
     '''
     from: http://jimmyg.org/blog/2009/working-with-python-subprocess.html

@@ -1,5 +1,5 @@
 import os
-from file2 import File
+from file import File
 from common.api import can_read, can_write, can_execute#, path_join_overlapping, split_directories
 
 class Directory(File):
@@ -84,10 +84,8 @@ class Directory(File):
         return self._validate(object, name, value, os.path.isdir)
    
     def create_editor(self):
-#        from enthought.traits.ui.qt4.directory_editor2 import DirectoryEditor
-        from enthought.traits.ui.qt4.file_editor2 import FileEditor
-        editor = FileEditor(
-#        editor = DirectoryEditor(
+        from enthought.traits.ui.qt4.directory_editor2 import DirectoryEditor
+        editor = DirectoryEditor(
             filter=self.filter or [],
             auto_set=self.auto_set,
             entries=self.entries,

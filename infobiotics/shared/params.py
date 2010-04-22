@@ -1,9 +1,11 @@
-from infobiotics.shared.api import \
-    HasTraits, Instance, Str, Undefined, List, File, Directory, Bool, \
-    Property, Controller, chdir, can_access, isrel, read, write, os, \
-    ParamsXMLReader, set_trait_value_from_parameter_value, \
-    parameter_value_from_trait_value, traits_repr, \
-    logging
+from infobiotics.shared.api import (
+    HasTraits, Instance, Str, Undefined, List, File, Directory, Bool, 
+    Property, Controller, can_access, read, write, os, 
+    ParamsXMLReader, set_trait_value_from_parameter_value, 
+    parameter_value_from_trait_value, traits_repr, 
+    logging, 
+    chdir,
+)
 
 from xml import sax
 
@@ -23,7 +25,12 @@ class Params(HasTraits):
         self._dirty = False
         self._cwd = os.path.dirname(_params_file)
         
-    _cwd = Directory # not Directory(exists=True) because that breaks the editor!
+#    # external validation of '_cwd'
+#    _cwd_invalid = Property(Bool, depends_on='_cwd') # relates to Item('_cwd', invalid='_cwd_invalid', ...) in working_directory_group of infobiotics.shared.api
+#    def _get__cwd_invalid(self):
+#        return True if not can_access(self._cwd) else False
+
+    _cwd = Directory(exists=True)#, auto_set=True)
     
     def __cwd_default(self):
         #TODO try and load _cwd from preferences?
@@ -31,28 +38,24 @@ class Params(HasTraits):
 #        logger = logging.getLogger(level=logging.DEBUG)
         logger.debug('__cwd_default(%s) returning %s', self, _cwd)
         return _cwd
+#
+#    def __cwd_changed(self, old, new):
+#        # try and change directory ---
+#        old_new_tuple_or_false = chdir(new)
+#        # update all file and directory parameters with relative paths ---
+#        if old_new_tuple_or_false:
+#            old, new = old_new_tuple_or_false
+#            self._update_relative_paths(old, new) 
+#
+#    def _update_relative_paths(self, old, new):
+#        for name in self.parameter_names():
+#            type = self.trait(name).trait_type.__class__.__name__
+#            if type in ('File', 'Directory'):
+#                path = getattr(self, name)
+#                if isrel(path):
+#                    path = os.path.join(old, path)
+#                setattr(self, name, os.path.relpath(path, new))
 
-    def __cwd_changed(self, old, new):
-        # try and change directory ---
-        old_new_tuple_or_false = chdir(new)
-        # update all file and directory parameters with relative paths ---
-        if old_new_tuple_or_false:
-            old, new = old_new_tuple_or_false
-            self._update_relative_paths(old, new) 
-
-    def _update_relative_paths(self, old, new):
-        for name in self.parameter_names():
-            type = self.trait(name).trait_type.__class__.__name__
-            if type in ('File', 'Directory'):
-                path = getattr(self, name)
-                if isrel(path):
-                    path = os.path.join(old, path)
-                setattr(self, name, os.path.relpath(path, new))
-
-    # external validation of '_cwd'
-    _cwd_invalid = Property(Bool, depends_on='_cwd') # relates to Item('_cwd', invalid='_cwd_invalid', ...) in working_directory_group of infobiotics.shared.api
-    def _get__cwd_invalid(self):
-        return True if not can_access(self._cwd) else False
 
     def __init__(self, file=None, **traits):
         super(Params, self).__init__(**traits)
@@ -111,15 +114,16 @@ class Params(HasTraits):
             logger.warn("Some parameters were not reset: %s", self._unresetable)
 
         # change directory so that setting of File traits with relative paths works
-        if isrel(file):
+        if not os.path.isabs(file):
             file = os.path.abspath(file)
         old = os.getcwd() # remember where we are now
         new = os.path.dirname(file)
-        chdir(old)
-        
+        chdir(new)
+
         # set parameters from dictionary
         for k, v in parameters_dictionary.iteritems():
             set_trait_value_from_parameter_value(self, k, v)
+            # must specify directory/directory_name in model_file = File() else: enthought.traits.trait_errors.TraitError: The 'model_file' trait of a McssParams instance must be an existing file name in '/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/shared', but a value of 'module1.sbml' <type 'str'> was specified.
 
         # success!
         

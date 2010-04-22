@@ -16,29 +16,23 @@ from enthought.traits.directory import Directory
 
 class SimpleEditor(SimpleTextEditor):
 
-    directory = Directory(exists=True)
-    def _directory_changed(self):
-        print 'SimpleEditor._directory_changed(self):', self.directory
+    directory = Directory(exists=True)# is exists necessary here?
+    def _directory_changed(self, directory):
+        if self.control is not None:
+            self.set_value(self.value) # necessary to trigger validation of trait
+#            print self.value_trait.handler.abspath
 
     directory_name = Str
-#    directory_name = Property(desc='...overrides directory trait', handler='_directory_name_changed')
-#    def _get_directory_name(self):
-#        return self._directory_name
-#    def _set_directory_name(self, directory_name):
-#        self._directory_name = self.factory.named_value(directory_name, self.ui)
-    def _directory_name_changed(self, old, new):
-        print "SimpleEditor._directory_name_changed(self, old='%s', new='%s')" % (old, new)
-##        self.sync_value(new, 'directory', 'from')
 
     def init(self, parent):
         # initialise traits from factory
         factory = self.factory # FileEditor (below)
         if factory.directory_name:
-            factory.sync_trait('directory_name', self)
             self.sync_value(factory.directory_name, 'directory', 'from')
+            factory.sync_trait('directory_name', self) # most important
+            pass
         else:
             factory.sync_trait('directory', self)
-#            self.sync_value(factory.directory, 'directory', 'from')
             
         # file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
@@ -101,6 +95,8 @@ class SimpleEditor(SimpleTextEditor):
                 if self.factory.truncate_ext:
                     file_name = os.path.splitext(file_name)[0]
 
+                file_name = os.path.relpath(file_name, self.directory) 
+
                 self.set_value(file_name)#self.value = file_name
                 self.update_editor(file_name)
 
@@ -113,7 +109,7 @@ class SimpleEditor(SimpleTextEditor):
         """ Creates the correct type of file dialog.
         """
         dlg = QtGui.QFileDialog(self.control.parentWidget(), self.name, self.directory)
-        if self.object.base_trait(self.name).handler.exists: 
+        if self.object.base_trait(self.name).handler.exists: #TODO self.value_trait? 
             dlg.setFileMode(QtGui.QFileDialog.ExistingFile)
         dlg.selectFile(self._file_name.text())
 
@@ -159,12 +155,12 @@ class FileEditor(FileEditor): # EditorFactory
     directory = Directory(exists=True, desc='overrides File(directory=...)')
     def _directory_default(self):
         return os.getcwd()
-    def _directory_changed(self, old, new):
-        print 'FileEditor._directory_changed(self, old, new):', old, new
+#    def _directory_changed(self):
+#        print '%s._directory_changed(self):' % self.__class__.__name__, self.directory, self, 'can safely ignore if _directory_name_changed also'
 
     directory_name = Str(desc='...overrides directory trait')
     def _directory_name_changed(self):
-        print 'FileEditor._directory_name_changed(self):', self.directory_name
+        print '%s._directory_name_changed(self):' % self.__class__.__name__, self.directory_name, self
     
     def _get_simple_editor_class(self):
         return SimpleEditor

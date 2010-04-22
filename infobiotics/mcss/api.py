@@ -6,17 +6,18 @@ mcss_params_group = Group(
     VGroup(
         VGroup(
             Item('model_file', 
-                editor=FileEditor(
-                    auto_set=True,
-                    filter=[
-                        'All model files (*.lpp *.sbml)', 
-                        'Lattice population P system files (*.lpp)', 
-                        'P system XML files (*.xml)', 
-                        'Systems Biology Markup Language files (*.sbml)', 
-                        'All files (*)'
-                    ],
-                    entries=10,
-                ),
+#                editor=FileEditor(
+#                    directory_name='_cwd',
+#                    auto_set=True,
+#                    filter=[
+#                        'All model files (*.lpp *.sbml)', 
+#                        'Lattice population P system files (*.lpp)', 
+#                        'P system XML files (*.xml)', 
+#                        'Systems Biology Markup Language files (*.sbml)', 
+#                        'All files (*)'
+#                    ],
+#                    entries=10,
+#                ),
 #                id='model_file',
             ),
             HGroup(

@@ -4,17 +4,36 @@ from infobiotics.shared.api import \
 
 class McssParams(Params):
     
+#    def __cwd_changed(self):
+#        print 'got here'
+#        model_file = self.model_file
+##        self.model_file = ''
+#        self.model_file = model_file
+    
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
     
-    model_file = File('model.lpp', desc='the model file to simulate')
+    model_file = File('model.lpp', 
+        exists=True, 
+        desc='the model file to simulate', 
+        directory_name='_cwd', 
+        auto_set=True,
+        filter=[
+            'All model files (*.lpp *.sbml)', 
+            'Lattice population P system files (*.lpp)', 
+            'P system XML files (*.xml)', 
+            'Systems Biology Markup Language files (*.sbml)', 
+            'All files (*)'
+        ],
+        entries=10,
+    )
     model_format = Enum(['xml','sbml','lpp'], desc='the model specification format')
     duplicate_initial_amounts = Bool(desc='whether to duplicate initial amounts for all templates in the SBML model')
     just_psystem = Bool(desc='whether to just initialise the P system and not perform the simulation')
     max_time = FloatGreaterThanZero(desc='the maximum time to run simulation')
     log_interval = FloatGreaterThanZero(desc='the time interval between which to log data') 
     runs = LongGreaterThanZero(1, desc='the number of simulation runs to perform')
-    data_file = File('simulation.h5', desc='the file to save simulation data to')
+    data_file = File('simulation.h5', writable=True, desc='the file to save simulation data to')
     seed = Long(0, desc='the random number seed (0=randomly generated)')
     compress = Bool(True, desc='whether to compress HDF5 output')
     compression_level = Range(low=0, high=9, value=9, desc='the HDF5 compression level (0-9; 9=best)')
@@ -56,8 +75,9 @@ class McssParams(Params):
 
 if __name__ == '__main__':
     from infobiotics.shared.api import chdir
-    chdir('../../tests/mcss/models')
-    parameters = McssParams('module1.params')
+#    chdir('../../tests/mcss/models')
+#    parameters = McssParams('module1.params')
+    parameters = McssParams('../../tests/mcss/models/module1.params')
 #    parameters.load('reactions1.params')
 #    print parameters # test __repr__
     parameters.configure()

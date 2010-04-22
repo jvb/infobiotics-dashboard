@@ -42,21 +42,27 @@ def chdir(path):
         logger.warn(e)
         return False
     return old, path
-        
+
+       
 # Enthought imports ---
 
 #os.environ['ETS_TOOLKIT']='qt4' # must be before Enthought import statements
 
+# my ETS classes
+from enthought.traits.file import File
+from enthought.traits.directory import Directory
+from enthought.traits.ui.qt4.file_editor2 import FileEditor
+from enthought.traits.ui.qt4.directory_editor2 import DirectoryEditor 
+
 from enthought.traits.api import \
-    HasTraits, Interface, implements, File, Directory, Bool, Str, List, \
+    HasTraits, Interface, implements, Bool, Str, List, \
     Callable, Property, property_depends_on, Range, Button, on_trait_change, \
     Instance, ListStr, Event, Int, Float, Undefined, Enum, Long, Trait, \
-    DelegatesTo, \
-    BaseDirectory, BaseFile
+    DelegatesTo
     
 from enthought.traits.ui.api import \
     Handler, Controller, ModelView, View, Item, Action, DefaultOverride, \
-    Group, VGroup, Item, FileEditor, HGroup, UIInfo, TextEditor, DirectoryEditor
+    Group, VGroup, Item, HGroup, UIInfo, TextEditor
 
 from enthought.pyface.api import FileDialog, OK
 
@@ -70,40 +76,6 @@ from float_greater_than_zero import FloatGreaterThanZero
 from long_greater_than_zero import LongGreaterThanZero
 from float_with_minimum import FloatWithMinimum
 from int_greater_than_zero import IntGreaterThanZero
-
-
-#class ExistingFile(BaseFile):
-#    info_text = 'a file that exists'
-#
-#    default_value = ''
-#
-#    def init(self):
-#        self.exists = True
-#
-#    def validate(self, object, name, value):
-#        from os.path import isfile
-#        if isfile(value):
-#            return value
-#        self.error(object, name, value)
-#
-#
-#class ExistingDirectory(BaseDirectory):
-#    info_text = 'a directory that exists'
-#    
-#    default_value = ''
-#    
-#    def get_default_value(self):
-#        # to explain the tuple with a 0 see http://code.enthought.com/projects/files/ETS31_API/enthought.traits.trait_handlers.TraitType.html#get_default_value
-#        return (0, os.getcwd())
-#
-#    def init(self):
-#        self.exists = True
-#        
-#    def validate(self, object, name, value):
-#        from os.path import isdir
-#        if isdir(value):
-#            return value
-#        self.error( object, name, value )
 
 
 # reusable trait definitions ---
@@ -141,7 +113,7 @@ working_directory_group = Group(
         editor=DirectoryEditor(
             auto_set=True, 
             entries=10,
-            invalid='_cwd_invalid',
+#            invalid='_cwd_invalid',
         ),
 #        invalid='_cwd_invalid',
         tooltip='Relative paths will be resolved to this directory.',
