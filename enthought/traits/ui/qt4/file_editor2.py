@@ -30,9 +30,9 @@ class SimpleEditor(SimpleTextEditor):
         if factory.directory_name:
             self.sync_value(factory.directory_name, 'directory', 'from')
             factory.sync_trait('directory_name', self) # most important
-            pass
-        else:
-            factory.sync_trait('directory', self)
+#            pass
+#        else:
+        factory.sync_trait('directory', self)
             
         # file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
@@ -159,8 +159,8 @@ class FileEditor(FileEditor): # EditorFactory
 #        print '%s._directory_changed(self):' % self.__class__.__name__, self.directory, self, 'can safely ignore if _directory_name_changed also'
 
     directory_name = Str(desc='...overrides directory trait')
-    def _directory_name_changed(self):
-        print '%s._directory_name_changed(self):' % self.__class__.__name__, self.directory_name, self
+#    def _directory_name_changed(self):
+#        print '%s._directory_name_changed(self):' % self.__class__.__name__, self.directory_name, self
     
     def _get_simple_editor_class(self):
         return SimpleEditor

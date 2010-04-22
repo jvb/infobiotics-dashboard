@@ -30,7 +30,7 @@ class Params(HasTraits):
 #    def _get__cwd_invalid(self):
 #        return True if not can_access(self._cwd) else False
 
-    _cwd = Directory(exists=True)#, auto_set=True)
+    _cwd = Directory(exists=True, auto_set=True)
     
     def __cwd_default(self):
         #TODO try and load _cwd from preferences?

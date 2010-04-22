@@ -1,6 +1,7 @@
-from infobiotics.shared.api import \
-    Group, VGroup, Item, FileEditor, HGroup, ParamsView, ExperimentView, \
-    TextEditor, DirectoryEditor, working_directory_group
+from infobiotics.shared.api import (
+    Group, VGroup, Item, HGroup, ParamsView, ExperimentView, TextEditor,
+#    FileEditor, DirectoryEditor, working_directory_group,
+)
 
 mcss_params_group = Group(
     VGroup(
@@ -77,7 +78,7 @@ mcss_params_group = Group(
 )
 
 contents = (
-    working_directory_group,
+#    working_directory_group,
     mcss_params_group,
 )
 

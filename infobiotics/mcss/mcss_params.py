@@ -33,7 +33,7 @@ class McssParams(Params):
     max_time = FloatGreaterThanZero(desc='the maximum time to run simulation')
     log_interval = FloatGreaterThanZero(desc='the time interval between which to log data') 
     runs = LongGreaterThanZero(1, desc='the number of simulation runs to perform')
-    data_file = File('simulation.h5', writable=True, desc='the file to save simulation data to')
+    data_file = File('simulation.h5', writable=True, auto_set=True, directory_name='_cwd', desc='the file to save simulation data to')
     seed = Long(0, desc='the random number seed (0=randomly generated)')
     compress = Bool(True, desc='whether to compress HDF5 output')
     compression_level = Range(low=0, high=9, value=9, desc='the HDF5 compression level (0-9; 9=best)')

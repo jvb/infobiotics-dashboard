@@ -107,28 +107,31 @@ experiment_actions = [load_action, save_action, perform_action]
 
 # reused Groups ---
 
-working_directory_group = Group(
-    Item('_cwd', 
-        label='Working directory', 
-        editor=DirectoryEditor(
-            auto_set=True, 
-            entries=10,
-#            invalid='_cwd_invalid',
-        ),
-#        invalid='_cwd_invalid',
-        tooltip='Relative paths will be resolved to this directory.',
-    ),
-)
+# see StatusItem in ParamsView below
+#working_directory_group = Group(
+#    Item('_cwd', 
+#        label='Working directory', 
+##        editor=DirectoryEditor(
+##            auto_set=True, 
+##            entries=10,
+###            invalid='_cwd_invalid',
+##        ),
+###        invalid='_cwd_invalid',
+#        tooltip='Relative paths will be resolved to this directory.',
+#    ),
+#)
 
 
 # subclasses of View ---
+
+from enthought.traits.ui.api import StatusItem
 
 class ParamsView(View): # can be used to edit parameters without performing the experiment (why would you want to do that?)
     
     buttons = shared_actions + params_actions
     resizable = True
     id = 'ParamsView'
-    
+    statusbar = [StatusItem(name='_cwd', width=1.0)]
 
 class ExperimentView(ParamsView):
 

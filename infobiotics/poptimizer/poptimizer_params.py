@@ -9,8 +9,8 @@ class POptimizerParams(Params):
     target_obj_num = Int(1, desc='the number of objects in the input time series data')
     initial_file = Str(desc='a filename for non-zero initial values settings of some objects')
     num_initials = Int(desc='the number of files for initial values')
-    nonfix_module_lib_file = File(exists=True, desc='a filename for the non-fixed module library to evolve models')
-    fix_module_lib_file = File(desc='a filename for the fixed module library')
+    nonfix_module_lib_file = File(exists=True, directory_name='_cwd', auto_set=True, desc='a filename for the non-fixed module library to evolve models')
+    fix_module_lib_file = File(directory_name='_cwd', auto_set=True, desc='a filename for the fixed module library')
     molecules = Str(desc='the possible values for all variables when instantiating a module in the library (colon-separated list of strings)')
     seednum = Long(desc='the seed number to initialize the random generator')
     
