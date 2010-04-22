@@ -9,7 +9,7 @@ from infobiotics.shared.api import (
 
 from xml import sax
 
-logger = logging.getLogger(level=logging.DEBUG)
+logger = logging.getLogger(level=logging.ERROR)
 
 class Params(HasTraits): 
 

@@ -136,19 +136,41 @@ experiment_actions = [load_action, save_action, perform_action]
 #)
 
 
+# key bindings
+from enthought.traits.ui.key_bindings import *
+
+params_key_bindings = KeyBindings(
+    KeyBinding(binding1   ='Ctrl-l',
+               description='Load',
+               method_name='load'),
+    KeyBinding(binding1   ='Ctrl-s',
+               description='Save',
+               method_name='save'),
+    KeyBinding(binding1   ='Ctrl-p',
+               description='Perform',
+               method_name='perform'),
+    KeyBinding(binding1   ='Ctrl-k',
+               description='Edit key bindings',
+               method_name='edit_key_bindings'),
+    
+)
+
+def edit_key_bindings(self):
+    params_key_bindings.edit_traits()
+
 # subclasses of View ---
 
 from enthought.traits.ui.api import StatusItem
 
 class ParamsView(View): # can be used to edit parameters without performing the experiment (why would you want to do that?)
-    
     buttons = shared_actions + params_actions
     resizable = True
     id = 'ParamsView'
     statusbar = [StatusItem(name='_cwd', width=1.0)]
+    key_bindings = params_key_bindings
+    
 
 class ExperimentView(ParamsView):
-
     buttons = shared_actions + experiment_actions
     id = 'ExperimentView'
 
