@@ -11,6 +11,7 @@ from PyQt4 import QtCore, QtGui
 from ...api import (TraitError, Str, Directory)
 from ..api import FileEditor
 from .text_editor import SimpleEditor as SimpleTextEditor
+from common.strings import wrap
 
 class SimpleEditor(SimpleTextEditor):
 
@@ -26,17 +27,19 @@ class SimpleEditor(SimpleTextEditor):
         # initialise traits from factory
         factory = self.factory # FileEditor (below)
         if factory.directory_name:
-            print '1'
+            pass
+#            print '1'
 #            factory.sync_trait('directory_name', self)
 #            self.sync_value(factory.directory_name, 'directory', 'from')
-            self.sync_value(factory.directory_name, 'directory_name', 'from')
+#            self.sync_value(factory.directory_name, 'directory_name', 'from')
         else:
-            print '2'
+            pass
+#            print '2'
 #            factory.sync_trait('directory', self)
 #            factory.sync_trait('directory_name', self, remove=True)
-            self.sync_value(factory.directory, 'directory', 'from')
-        print self._get_sync_trait_info()
-        print factory._get_sync_trait_info()
+#            self.sync_value(factory.directory, 'directory', 'from')
+#        print self._get_sync_trait_info()
+#        print factory._get_sync_trait_info()
             
         # file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
@@ -157,130 +160,133 @@ class SimpleEditor(SimpleTextEditor):
                 self.ui.errors -= 1
 
             self.set_error_state(False)
-                
-            self.set_tooltip(self._file_name) # restore desc over excp
+
+            if self.description == '' and self.object.base_trait( self.name ).desc is None:
+                self._file_name.setToolTip('') # restore '' over excp
+            else:
+                self.set_tooltip(self._file_name) # restore desc over excp
                 
         except TraitError, excp:
-            self._file_name.setToolTip(unicode(excp)) # #TODO plus desc?
+            self._file_name.setToolTip(wrap(unicode(excp),80)) #TODO plus desc?
 
 
-    def sync_value ( self, user_name, editor_name, mode = 'both',
-                           is_list = False, remove=False ):
-        """ Sets or unsets synchronization between an editor trait and a user
-            object trait.
-        """
-        if user_name != '':
-            key = '%s:%s' % ( user_name, editor_name )
-
-            if self._no_trait_update is None:
-                self._no_trait_update = {}
-
-            user_ref = 'user_object'
-            col      = user_name.find( '.' )
-            if col < 0:
-                user_object = self.context_object
-                xuser_name  = user_name
-            else:
-                user_object = self.ui.context[ user_name[ : col ] ]
-                user_name   = xuser_name = user_name[ col + 1: ]
-                col         = user_name.rfind( '.' )
-                if col >= 0:
-                    user_ref += ('.' + user_name[ : col ])
-                    user_name = user_name[ col + 1: ]
-
-            user_value = compile( '%s.%s' % ( user_ref, user_name ),
-                                  '<string>', 'eval' )
-            user_ref   = compile( user_ref, '<string>', 'eval' )
-
-            if mode in ( 'from', 'both' ):
-
-                def user_trait_modified ( new ):
-                    # Need this to include 'user_object' in closure:
-                    user_object
-                    if key not in self._no_trait_update:
-                        self._no_trait_update[ key ] = None
-                        try:
-                            setattr( self, editor_name, new )
-                        except:
-                            pass
-                        del self._no_trait_update[ key ]
-
-                user_object.on_trait_change( user_trait_modified, xuser_name, remove=remove )
-
-                if self._user_to is None:
-                    self._user_to = []
-                self._user_to.append( ( user_object, xuser_name,
-                                        user_trait_modified ) )
-
-                if is_list:
-
-                    def user_list_modified ( event ):
-                        if isinstance( event, TraitListEvent ):
-                            if key not in self._no_trait_update:
-                                self._no_trait_update[ key ] = None
-                                n = event.index
-                                try:
-                                    getattr( self, editor_name )[
-                                        n: n + len(event.removed)] = event.added
-                                except:
-                                    pass
-                                del self._no_trait_update[ key ]
-
-                    user_object.on_trait_change( user_list_modified,
-                                    xuser_name + '_items', remove=remove )
-                    self._user_to.append( ( user_object, xuser_name + '_items',
-                                            user_list_modified ) )
-
-                try:
-                    setattr( self, editor_name, eval( user_value ) )
-                except:
-                    pass
-
-            if mode in ( 'to', 'both' ):
-
-                def editor_trait_modified ( new ):
-                    # Need this to include 'user_object' in closure:
-                    user_object
-                    if key not in self._no_trait_update:
-                        self._no_trait_update[ key ] = None
-                        try:
-                            setattr( eval( user_ref ), user_name, new )
-                        except:
-                            pass
-                        del self._no_trait_update[ key ]
-
-                self.on_trait_change( editor_trait_modified, editor_name )
-
-                if self._user_from is None:
-                    self._user_from = []
-                self._user_from.append( ( editor_name, editor_trait_modified ) )
-
-                if is_list:
-
-                    def editor_list_modified ( event ):
-                        # Need this to include 'user_object' in closure:
-                        user_object
-                        if key not in self._no_trait_update:
-                            self._no_trait_update[ key ] = None
-                            n = event.index
-                            try:
-                                eval( user_value )[ n:
-                                    n + len( event.removed ) ] = event.added
-                            except:
-                                pass
-                            del self._no_trait_update[ key ]
-
-                    self.on_trait_change( editor_list_modified,
-                             editor_name + '_items' )
-                    self._user_from.append( ( editor_name + '_items',
-                                              editor_list_modified ) )
-
-                if mode == 'to':
-                    try:
-                        setattr( eval( user_ref ), user_name,
-                                 getattr( self, editor_name ) )
-                    except:
-                        pass
+#    def sync_value ( self, user_name, editor_name, mode = 'both',
+#                           is_list = False, remove=False ):
+#        """ Sets or unsets synchronization between an editor trait and a user
+#            object trait.
+#        """
+#        if user_name != '':
+#            key = '%s:%s' % ( user_name, editor_name )
+#
+#            if self._no_trait_update is None:
+#                self._no_trait_update = {}
+#
+#            user_ref = 'user_object'
+#            col      = user_name.find( '.' )
+#            if col < 0:
+#                user_object = self.context_object
+#                xuser_name  = user_name
+#            else:
+#                user_object = self.ui.context[ user_name[ : col ] ]
+#                user_name   = xuser_name = user_name[ col + 1: ]
+#                col         = user_name.rfind( '.' )
+#                if col >= 0:
+#                    user_ref += ('.' + user_name[ : col ])
+#                    user_name = user_name[ col + 1: ]
+#
+#            user_value = compile( '%s.%s' % ( user_ref, user_name ),
+#                                  '<string>', 'eval' )
+#            user_ref   = compile( user_ref, '<string>', 'eval' )
+#
+#            if mode in ( 'from', 'both' ):
+#
+#                def user_trait_modified ( new ):
+#                    # Need this to include 'user_object' in closure:
+#                    user_object
+#                    if key not in self._no_trait_update:
+#                        self._no_trait_update[ key ] = None
+#                        try:
+#                            setattr( self, editor_name, new )
+#                        except:
+#                            pass
+#                        del self._no_trait_update[ key ]
+#
+#                user_object.on_trait_change( user_trait_modified, xuser_name, remove=remove )
+#
+#                if self._user_to is None:
+#                    self._user_to = []
+#                self._user_to.append( ( user_object, xuser_name,
+#                                        user_trait_modified ) )
+#
+#                if is_list:
+#
+#                    def user_list_modified ( event ):
+#                        if isinstance( event, TraitListEvent ):
+#                            if key not in self._no_trait_update:
+#                                self._no_trait_update[ key ] = None
+#                                n = event.index
+#                                try:
+#                                    getattr( self, editor_name )[
+#                                        n: n + len(event.removed)] = event.added
+#                                except:
+#                                    pass
+#                                del self._no_trait_update[ key ]
+#
+#                    user_object.on_trait_change( user_list_modified,
+#                                    xuser_name + '_items', remove=remove )
+#                    self._user_to.append( ( user_object, xuser_name + '_items',
+#                                            user_list_modified ) )
+#
+#                try:
+#                    setattr( self, editor_name, eval( user_value ) )
+#                except:
+#                    pass
+#
+#            if mode in ( 'to', 'both' ):
+#
+#                def editor_trait_modified ( new ):
+#                    # Need this to include 'user_object' in closure:
+#                    user_object
+#                    if key not in self._no_trait_update:
+#                        self._no_trait_update[ key ] = None
+#                        try:
+#                            setattr( eval( user_ref ), user_name, new )
+#                        except:
+#                            pass
+#                        del self._no_trait_update[ key ]
+#
+#                self.on_trait_change( editor_trait_modified, editor_name )
+#
+#                if self._user_from is None:
+#                    self._user_from = []
+#                self._user_from.append( ( editor_name, editor_trait_modified ) )
+#
+#                if is_list:
+#
+#                    def editor_list_modified ( event ):
+#                        # Need this to include 'user_object' in closure:
+#                        user_object
+#                        if key not in self._no_trait_update:
+#                            self._no_trait_update[ key ] = None
+#                            n = event.index
+#                            try:
+#                                eval( user_value )[ n:
+#                                    n + len( event.removed ) ] = event.added
+#                            except:
+#                                pass
+#                            del self._no_trait_update[ key ]
+#
+#                    self.on_trait_change( editor_list_modified,
+#                             editor_name + '_items' )
+#                    self._user_from.append( ( editor_name + '_items',
+#                                              editor_list_modified ) )
+#
+#                if mode == 'to':
+#                    try:
+#                        setattr( eval( user_ref ), user_name,
+#                                 getattr( self, editor_name ) )
+#                    except:
+#                        pass
 
 
 class FileEditor(FileEditor): # EditorFactory

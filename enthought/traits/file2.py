@@ -1,12 +1,12 @@
 import os
-from common.api import can_read, can_write, can_execute, path_join_overlapping, split_directories
-from enthought.traits.api import BaseFile, TraitError, Directory
+from enthought.traits.api import BaseFile
+from common.api import can_read, can_write, can_execute#, path_join_overlapping, split_directories
 
 class File(BaseFile):
-    """ Defines a trait whose value must be the name of a file using a C-level
-        fast validator.
+    """ Defines a trait whose value must be the name of a file (which can be 
+    relative to a directory other than the current working directory.)
+    
     """
-
     def __init__(self, value='', filter=[], auto_set=False, entries=0, 
                  exists=False,  
                  directory='', directory_name='',
@@ -37,12 +37,12 @@ class File(BaseFile):
             Specifies an optional extended trait name to sync with directory. 
         absolute : boolean
             Indicates whether the trait value must be an absolute path or not.
+            The file will if necessary be resolved to an absolute path using the
+            value of directory and/or os.getcwd().
             if absolute is True: 
-                the file will if necessary be resolved to an absolute path
-                using the value of directory and/or os.getcwd().
+                value will be an absolute path.
             else: 
-                the file will be assumed to be relative to directory and/or 
-                os.getcwd() for the purposes of exists validation.
+                value will be a relative path. 
         readable : either True, False or None
             Implies file exists.
             if readable is True: 
@@ -50,7 +50,7 @@ class File(BaseFile):
             elif readable is False: 
                 validate will return an error if the file can be read.
         writable : either True, False or None
-            Implies directory exists.
+            Implies directory exists (see can_write in common).
             if writable is True:
                 validate will return an error if the file cannot be written.
             elif writable is False: 
@@ -67,17 +67,11 @@ class File(BaseFile):
         *value* or ''
         
         """
-        # disable fast validator
-#        if not exists and writable is None:
-#            # Define the C-level fast validator to use:
-#            fast_validate = ( 11, basestring )
-
         self.directory = directory if directory != '' else os.getcwd() # can't set this in class definition: it will always be the location of the module  
-
         self.directory_name = directory_name
 
         self.absolute = absolute
-        
+
         # make exists True if readable or executable are not None
         if (readable is not None or executable is not None) and not exists:
             exists = True
@@ -102,14 +96,19 @@ class File(BaseFile):
         ''' Constructs an error string to be incorporated into a TraitError.
         
         '''
+        return self._full_info(object, name, value)
+        
+    def _full_info(self, object, name, value, kind='file name '):
+        ''' Constructs an error string to be incorporated into a TraitError.
+        
+        '''
         permissions = []
         if self.readable is not None:
-            permissions.append('readable ') if self.readable else permissions.append('unreadable ')
+            permissions.append('readable ') if self.readable else permissions.append('non-readable ')
         if self.writable is not None:
-            permissions.append('writable ') if self.writable else permissions.append('unwritable ')
+            permissions.append('writable ') if self.writable else permissions.append('non-writable ')
         if self.executable is not None:
-            permissions.append('executable ') if self.executable else permissions.append('unexecutable ')
-
+            permissions.append('executable ') if self.executable else permissions.append('non-executable ')
         
         info = 'a '
         if self.exists:
@@ -118,25 +117,28 @@ class File(BaseFile):
             info += ', '.join(permissions)
             
         if self.absolute:
-            if info not in ('a ', 'an existing '):
+            if len(permissions) > 0:
                 info += 'and '
             info += 'absolute '
         
-#        if info == 'an existing ':
-#            info = 'a '
-        info += 'file name'
+        info += kind
         
         if self.directory != '':
-            info += '\n'
+#            info += '\n' # make tooltips easier to read # now done using wrap
             info += 'in %s' % self.directory
 #            info += '\n'  
         
-#        print self.info() #TODO
-#        return self.info()
         return info
            
 
     def validate(self, object, name, value):
+        ''' Calls _validate so that we can reuse _validate for Directory 
+        traits. 
+        
+        '''
+        return self._validate(object, name, value)
+
+    def _validate(self, object, name, value, function=os.path.isfile):
         """ Validates that a specified value is valid for this trait.
 
         Note: The there is *not* a 'fast validator' version that performs 
@@ -192,7 +194,7 @@ class File(BaseFile):
             else: # we don't care whether it can be written
                 return value
         
-        elif os.path.isfile(abspath): # we care whether it exists
+        elif function(abspath): # we care whether it exists
             if self.readable is not None: # we care whether it can be read
 #                print 'self.readable =', self.readable 
                 # validate whether it is readable failing fast 
@@ -224,6 +226,20 @@ class File(BaseFile):
         # it doesn't exist
         self.error(object, name, value)
 
+    def post_setattr(self, object, name, value):
+        ''' Sets self.abspath. '''
+#        if value == '':
+#            self.abspath = value
+#        elif not os.path.isabs(value):
+        if not os.path.isabs(value):
+            if not os.path.isabs(self.directory):
+                directory = os.path.join(os.getcwd(), self.directory)
+            else:
+                directory = self.directory
+            self.abspath = os.path.join(directory, value)
+        else:
+            self.abspath = value
+        print 'self.abspath =', self.abspath
     
     def create_editor(self):
         from enthought.traits.ui.qt4.file_editor2 import FileEditor
@@ -237,18 +253,16 @@ class File(BaseFile):
         return editor
 
 
-from enthought.traits.api import HasTraits, Property, Str, Button, Instance
-from enthought.traits.ui.api import View, Item
-from enthought.traits.ui.qt4.file_editor2 import FileEditor
 
 def test_trait():
+    from enthought.traits.api import HasTraits, Str
     
 #    os.chdir('/tmp/permissions_test')
     
     class Test(HasTraits):
         
         different_directory = Str('/tmp/permissions_test/writable')
-#        different_directory = Str('writable') # failed?: uses os.path.join(os.getcwd(), self.different_directory)
+#        different_directory = Str('writable') #TODO failed?: uses os.path.join(os.getcwd(), self.different_directory) even if directory is set
         
         file = File('default',
 #            directory = '', # passed: uses os.getcwd()
@@ -297,7 +311,28 @@ def test_trait():
 #    t.configure_traits()
         
 
-def test_editor():
+def test_implicit_editor():
+    from enthought.traits.api import HasTraits, Str, Directory
+    
+#    os.chdir('/tmp/permissions_test') # works when directory is not set or directory is relative
+    
+    class Test(HasTraits):
+        file = File(
+            desc='tooltip',
+            entries = 10,
+            auto_set = True,
+            exists = True,
+#            directory = 'readonly',
+        )
+        
+    Test().configure_traits()
+
+
+def test_explicit_editor(): 
+    from enthought.traits.api import HasTraits, Property, Str, Button, Instance, Directory
+    from enthought.traits.ui.api import View, Item
+    from enthought.traits.ui.qt4.file_editor2 import FileEditor
+    
     file_editor2 = FileEditor(
 #        directory='/tmp',
         directory_name='directory',
@@ -360,5 +395,6 @@ def test_editor():
 
 if __name__ == '__main__':
 #    test_trait()
-    test_editor()
+    test_implicit_editor()
+#    test_explicit_editor()
     
