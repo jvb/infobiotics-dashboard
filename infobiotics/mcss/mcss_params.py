@@ -4,12 +4,6 @@ from infobiotics.shared.api import \
 
 class McssParams(Params):
     
-#    def __cwd_changed(self):
-#        print 'got here'
-#        model_file = self.model_file
-##        self.model_file = ''
-#        self.model_file = model_file
-    
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
     
@@ -75,10 +69,10 @@ class McssParams(Params):
 
 if __name__ == '__main__':
     from infobiotics.shared.api import chdir
-#    chdir('../../tests/mcss/models')
-#    parameters = McssParams('module1.params')
-    parameters = McssParams('../../tests/mcss/models/module1.params')
-#    parameters.load('reactions1.params')
+    chdir('../../tests/mcss/models')
+    parameters = McssParams('module1.params')
+#    parameters = McssParams('../../tests/mcss/models/module1.params')
+    parameters.load('reactions1.params')
 #    print parameters # test __repr__
     parameters.configure()
             

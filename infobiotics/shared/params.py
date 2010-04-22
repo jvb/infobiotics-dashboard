@@ -19,7 +19,7 @@ class Params(HasTraits):
     _dirty = Bool(False)
     _unresetable = List(Str)
 
-    _params_file = File(exists=True)
+    _params_file = File(exists=True, absolute=True, readable=True, writable=True)
 
     def __params_file_changed(self, _params_file):
         self._dirty = False

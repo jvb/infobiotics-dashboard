@@ -50,6 +50,20 @@ def chdir(path):
 
 # my ETS classes
 from enthought.traits.file import File
+# seems to work but hardcoding '_cwd' into File traits is potentially problematic  
+#class File(File):
+#    def __init__(self, value='', filter=[], auto_set=False, entries=0, 
+#                 exists=False,  
+#                 directory='', directory_name='',
+#                 absolute=False,
+#                 readable=None, writable=None, executable=None,
+#                 **metadata ):
+#        super(File, self).__init__(value, filter, auto_set=True, entries=3,
+#                exists=exists,
+#                directory=directory, directory_name='_cwd',
+#                absolute=absolute,
+#                readable=readable, writable=writable, executable=executable,
+#                **metadata)
 from enthought.traits.directory import Directory
 from enthought.traits.ui.qt4.file_editor2 import FileEditor
 from enthought.traits.ui.qt4.directory_editor2 import DirectoryEditor 

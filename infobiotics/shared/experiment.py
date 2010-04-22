@@ -1,10 +1,9 @@
 from infobiotics.shared.api import \
-    HasTraits, Params, File, ListStr, Str, Event, expect, Thread, Instance, \
-    Controller
+    Params, File, ListStr, Str, Event, expect, Thread
 
 class Experiment(Params):
     
-    _params_program = File(exists=True)
+    _params_program = File(exists=True, executable=True)
     _params_program_kwargs = ListStr
     _output_pattern_list = ListStr
     _error_pattern_list = ListStr([
@@ -115,3 +114,8 @@ class Experiment(Params):
 
     def __error_string_changed(self, _error_string):
         print _error_string, '(from Experiment.__error_string_changed)'
+
+
+if __name__ == '__main__':
+    execfile('../mcss/mcss_experiment.py')
+    

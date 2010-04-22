@@ -8,7 +8,7 @@ class McssExperiment(McssParams, Experiment):
         return McssExperimentHandler(model=self)
     
     _params_program = 'mcss'
-    _params_program_kwargs = ['show_progress=true', 'max_time=333', 'runs=66']
+    _params_program_kwargs = ['show_progress=true']#, 'max_time=333', 'runs=66']
     _output_pattern_list = [
         '[0-9]+ [0-9]+', # 'time_in_run, run'
     ] 
@@ -24,4 +24,8 @@ class McssExperiment(McssParams, Experiment):
             self.time_in_run = float(time_in_run)
         else:
             super(McssExperimentProgressHandler, self).pattern_matched(pattern_index, match)
-    
+
+if __name__ == '__main__':
+    from infobiotics.shared.api import chdir
+    chdir('../../tests/mcss/models')
+    McssExperiment('module1.params').configure()
