@@ -9,7 +9,7 @@ class File(BaseFile):
 
     def __init__(self, value='', filter=[], auto_set=False, entries=0, 
                  exists=False,  
-                 directory=os.getcwd(), directory_name='', #TODO
+                 directory='', directory_name='',
                  absolute=False,
                  readable=None, writable=None, executable=None,
                  **metadata ):
@@ -68,33 +68,23 @@ class File(BaseFile):
         
         """
         # disable fast validator
-#        if not exists:
+#        if not exists and writable is None:
 #            # Define the C-level fast validator to use:
 #            fast_validate = ( 11, basestring )
 
-        # coerce directory
-#        if directory == '':
-#            directory = os.getcwd()
-        self.directory = directory
-        
-        # coerce directory_name
-#        if not directory_name == '':
-#            if not directory_name.startswith(('object.','controller.','model.')):
-#                directory_name = 'object.' + directory_name
+        self.directory = directory if directory != '' else os.getcwd() # can't set this in class definition: it will always be the location of the module  
+
         self.directory_name = directory_name
 
         self.absolute = absolute
         
+        # make exists True if readable or executable are not None
+        if (readable is not None or executable is not None) and not exists:
+            exists = True
+
         self.readable = readable
         self.writable = writable
         self.executable = executable
-
-#        self.abspath = '' #TODO
-#        self.relpath = ''
-#        self.abspath_name = ''
-#        self.relpath_name = '' # name of trait to sync with relpath
-    
-#        self._value = value
 
         super(File, self).__init__(value, filter, auto_set, entries, exists, **metadata)
 
@@ -103,34 +93,37 @@ class File(BaseFile):
 #    def get_default_value(self):
 #        return default_value
 
-#    info_text = 'a file name'
+#    info_text = 'a file name' # used if info() and full_info() are not defined
 #
-#    def info(self):
+#    def info(self): # used if full_info() is not defined
 #        return self.info_text
 
     def full_info(self, object, name, value):
+        ''' Constructs an error string to be incorporated into a TraitError.
         
+        '''
         permissions = []
         if self.readable is not None:
-            permissions.append('readable') if self.readable else permissions.append('unreadable')
+            permissions.append('readable ') if self.readable else permissions.append('unreadable ')
         if self.writable is not None:
-            permissions.append('writable') if self.writable else permissions.append('unwritable')
+            permissions.append('writable ') if self.writable else permissions.append('unwritable ')
         if self.executable is not None:
-            permissions.append('executable') if self.executable else permissions.append('unexecutable')
+            permissions.append('executable ') if self.executable else permissions.append('unexecutable ')
 
-        info = 'an '
+        
+        info = 'a '
         if self.exists:
-            info += 'existing '
+            info = 'an existing '
         if len(permissions) > 0:
             info += ', '.join(permissions)
-        
-        if info != 'an ' and info != 'an existing ':
-            info += 'and '
+            
         if self.absolute:
+            if info not in ('a ', 'an existing '):
+                info += 'and '
             info += 'absolute '
         
-        if info == 'an ':
-            info = 'a '
+#        if info == 'an existing ':
+#            info = 'a '
         info += 'file name'
         
         if self.directory != '':
@@ -138,6 +131,7 @@ class File(BaseFile):
             info += 'in %s' % self.directory
 #            info += '\n'  
         
+#        print self.info() #TODO
 #        return self.info()
         return info
            
@@ -148,144 +142,89 @@ class File(BaseFile):
         Note: The there is *not* a 'fast validator' version that performs 
         this check in C.
         
+        if directory = '/tmp'
+        and abspath = '/tmp/file'
+        return 'file'
         """
-        validated_value = super(BaseFile, self).validate(object, name, value)
-
-        # if directory = '/tmp/'
-        # and file = '/tmp/file'
-        # return 'file'
-
-        if os.path.isabs(self.directory):
-            directory = self.directory
+        value = super(BaseFile, self).validate(object, name, value) # validate value using BaseStr's validator 
+#        print 'value =', value
+        
+        if self.directory_name != '':
+#            #TODO will this be different for the editor? if directory_name = 'controller.directory' for instance.
+#            # coerce directory_name
+#            if not directory_name == '':
+#                if not directory_name.startswith(('object.','controller.','model.')):
+#                    directory_name = 'object.' + directory_name
+            directory = getattr(object, self.directory_name) #FIXME won't work for extended trait names (Range doesn't seem to do this either, maybe sync_value or _sync_values does?)
+#            print 'object.%s =' % self.directory_name, directory
+            
+            # update self.directory here because we didn't know object in __init__
+            if directory != '':
+                self.directory = directory
+#                print 'self.directory =', self.directory
+        directory = self.directory
+        if not os.path.isabs(directory):
+            directory = os.path.join(os.getcwd(), directory)
+#        print 'directory =', directory
+        
+        if not os.path.isabs(value):
+            abspath = os.path.join(directory, value)
         else:
-            directory = os.path.join(os.getcwd(), self.directory)
-        #TODO
+            abspath = value # needed by isfile below
+#        print 'abspath =', abspath
+        
+#        print 'self.absolute =', self.absolute
         if self.absolute:
-            # coerce to absolute with directory and/or os.getcwd()
-            if not os.path.isabs(validated_value):
-                validated_value = os.path.join(directory, validated_value)
-        else:
-            if validated_value != '':
-                # coerce to relative with directory and/or os.getcwd()
-                validated_value = os.path.normpath(os.path.relpath(validated_value, directory))
-
-#        error = None
-#
-#        if self.readable is not None:
-#            if self.readable:
-#                if not can_read(validated_value):
-#                    error = 'readable'
-#            else:
-#                if can_read(validated_value):
-#                    error = 'unreadable'
-#        
-#        if self.writable is not None:
-#            if self.writable:
-#                if not can_write(validated_value):
-#                    error = 'writable'
-#            else:
-#                if can_write(validated_value):
-#                    error = 'unwritable'
-#
-#        if self.executable is not None:
-#            if self.executable:
-#                if not can_execute(validated_value):
-#                    error = 'executable'
-#            else:
-#                if can_execute(validated_value):
-#                    error = 'unexecutable'
-#        
-#        if error:
-#            raise TraitError(error)
-##                raise TraitError(object, name, error, validated_value)
+            value = abspath
         
-        if not self.exists:
-            return validated_value
-        elif os.path.isfile(validated_value):
-            return validated_value
-
-        self.error(object, name, validated_value)
+#        print 'self.exists =', self.exists
+        if not self.exists: # we don't care whether it exists 
+            if self.writable is not None: # we care whether it can be written (created)
+                # validate whether it is writable failing last
+                if self.writable: # we care that it can be written
+                    if can_write(abspath): # we can write it
+                        return value
+                    # we can't write it so drop through to self.error()
+                else: # we care that it can't be written
+                    if not can_write(abspath): # we can't write it
+                        return value
+                    # we can write it so drop through to self.error()
+            else: # we don't care whether it can be written
+                return value
+        
+        elif os.path.isfile(abspath): # we care whether it exists
+            if self.readable is not None: # we care whether it can be read
+#                print 'self.readable =', self.readable 
+                # validate whether it is readable failing fast 
+                if self.readable: # we care that it can be read
+                    if not can_read(abspath): # we can read it
+                        self.error(object, name, value)
+                else: # we care that it can't be read
+                    if can_read(abspath): # we can read it
+                        self.error(object, name, value)
+            if self.writable is not None: # we care whether it can be written
+#                print 'self.writable =', self.writable
+                # validate whether it is writable failing fast
+                if self.writable: # we care that it can be written
+                    if not can_write(abspath): # we can't write it
+                        self.error(object, name, value)
+                else: # we care that it can't be written
+                    if can_write(abspath): # we can write it
+                        self.error(object, name, value)
+            if self.executable is not None: # we care whether it can be executed
+#                print 'self.executable =', self.executable
+                # validate whether it is executable failing fast
+                if self.executable: # we care that it can be executed
+                    if not can_execute(abspath): # we can't execute it
+                        self.error(object, name, value)
+                else: # we care that it can't be executed
+                    if can_execute(abspath): # we can execute it
+                        self.error(object, name, value)
+            return value # it does exist and we can/can't read/write/execute it appropriately
+        # it doesn't exist
+        self.error(object, name, value)
 
     
-#    def set(self, object, name, value):
-#        """ Validates that a specified value is valid for this trait.
-#
-#        Note: The there is *not* a 'fast validator' version that performs 
-#        this check in C.
-#        
-#        """
-#        validated_value = super(BaseFile, self).validate(object, name, value)
-#
-#        if os.path.isabs(self.directory):
-#            directory = self.directory
-#        else:
-#            directory = os.path.join(os.getcwd(), self.directory)
-#        #TODO
-#        if self.absolute:
-#            # coerce to absolute with directory and/or os.getcwd()
-#            if not os.path.isabs(validated_value):
-#                validated_value = os.path.join(directory, validated_value)
-#        else:
-#            if validated_value != '':
-#                # coerce to relative with directory and/or os.getcwd()
-#                validated_value = os.path.normpath(os.path.relpath(validated_value, directory))
-#
-##        error = None
-##
-##        if self.readable is not None:
-##            if self.readable:
-##                if not can_read(validated_value):
-##                    error = 'readable'
-##            else:
-##                if can_read(validated_value):
-##                    error = 'unreadable'
-##        
-##        if self.writable is not None:
-##            if self.writable:
-##                if not can_write(validated_value):
-##                    error = 'writable'
-##            else:
-##                if can_write(validated_value):
-##                    error = 'unwritable'
-##
-##        if self.executable is not None:
-##            if self.executable:
-##                if not can_execute(validated_value):
-##                    error = 'executable'
-##            else:
-##                if can_execute(validated_value):
-##                    error = 'unexecutable'
-##        
-##        if error:
-##            raise TraitError(error)
-###                raise TraitError(object, name, error, validated_value)
-#        
-#        if not self.exists:
-#            self._value = validated_value
-#            return
-#        elif os.path.isfile(validated_value):
-#            self._value = validated_value
-#            return
-#            
-#
-#        self.error(object, name, validated_value)
-#           
-#    def get(self, object, name):
-#        if self.directory_name != '':
-#            pass
-#        
-##            print getattr(self, self.directory_name)
-#
-##            print getattr(object, self.directory_name)
-##            return object.directory
-#
-#        # if directory = '/tmp/'
-#        # and file = '/tmp/file'
-#        # return 'file'
-#
-#        return self._value
-    
-        
     def create_editor(self):
         from enthought.traits.ui.qt4.file_editor2 import FileEditor
         editor = FileEditor(
@@ -298,11 +237,67 @@ class File(BaseFile):
         return editor
 
 
-if __name__ == '__main__':
-    from enthought.traits.api import HasTraits, Property, Str, Button, Instance
-    from enthought.traits.ui.api import View, Item
-    from enthought.traits.ui.qt4.file_editor2 import FileEditor
+from enthought.traits.api import HasTraits, Property, Str, Button, Instance
+from enthought.traits.ui.api import View, Item
+from enthought.traits.ui.qt4.file_editor2 import FileEditor
+
+def test_trait():
     
+#    os.chdir('/tmp/permissions_test')
+    
+    class Test(HasTraits):
+        
+        different_directory = Str('/tmp/permissions_test/writable')
+#        different_directory = Str('writable') # failed?: uses os.path.join(os.getcwd(), self.different_directory)
+        
+        file = File('default',
+#            directory = '', # passed: uses os.getcwd()
+            directory = '/tmp/permissions_test', # passed: uses'/tmp/permissions_test' 
+            
+#            directory_name = '', # passed: uses directory
+            directory_name = 'different_directory', # passed: uses different_directory over directory, raise AttributeError when object has no attribute named by directory_name 
+
+#            exists = False, # passed: uses nonexistent file as value #TODO should this fail if an existing file is set? (regular File traits don't fail) [could do exists=None like readable, etc.]
+#            exists = True, # passed: raises error if value doesn't exist otherwise returns value 
+
+#            absolute = False, # passed: returns value
+#            absolute = True, # passed: returns abspath instead of value
+
+#            readable = None, # passed: doesn't make exists = True 
+#            readable = True, # passed: raises error if value is not readable and makes exists = True
+#            readable = False, # passed: raises error if value is executable and makes exists = True
+
+#            writable = None, # passed: doesn't check if value is writable regardless of exists
+#            writable = True, # passed: raises error if value is not writable (and exists = False)
+#            writable = False, # passed: raises error is value is writable (and exists = False)
+
+#            executable = None, # passed: doesn't make exists = True
+#            executable = True, # passed: raises error if value is not executable and makes exists = True
+#            executable = False, # passed: raises error if value is executable and makes exists = True
+
+            auto_set = True,
+        )
+        
+    t = Test()
+    
+    print 't.file =', t.file
+    print
+    
+    def test_t(file_name):
+#        print 'test_t(%s)' % file_name
+        t.file = file_name
+        print 't.file =', t.file
+        print 
+    
+    test_t('readonly')
+#    test_t('writable')
+#    test_t('executable')
+#    test_t('unreadable')
+
+#    t.configure_traits()
+        
+
+def test_editor():
     file_editor2 = FileEditor(
 #        directory='/tmp',
         directory_name='directory',
@@ -361,4 +356,9 @@ if __name__ == '__main__':
 #    file_editor2.directory = '/usr'
     
     t.configure_traits(context={'object':t, 'editor':file_editor2})
+
+
+if __name__ == '__main__':
+#    test_trait()
+    test_editor()
     
