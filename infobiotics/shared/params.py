@@ -1,6 +1,6 @@
 from infobiotics.shared.api import (
     HasTraits, Instance, Str, Undefined, List, File, Directory, Bool, 
-    Property, Controller, can_access, read, write, os, 
+    Controller, can_access, read, write, os, 
     ParamsXMLReader, set_trait_value_from_parameter_value, 
     parameter_value_from_trait_value, traits_repr, 
     logging, 
@@ -25,11 +25,6 @@ class Params(HasTraits):
         self._dirty = False
         self._cwd = os.path.dirname(_params_file)
         
-#    # external validation of '_cwd'
-#    _cwd_invalid = Property(Bool, depends_on='_cwd') # relates to Item('_cwd', invalid='_cwd_invalid', ...) in working_directory_group of infobiotics.shared.api
-#    def _get__cwd_invalid(self):
-#        return True if not can_access(self._cwd) else False
-
     _cwd = Directory(exists=True, auto_set=True)
     
     def __cwd_default(self):
@@ -38,23 +33,6 @@ class Params(HasTraits):
 #        logger = logging.getLogger(level=logging.DEBUG)
         logger.debug('__cwd_default(%s) returning %s', self, _cwd)
         return _cwd
-#
-#    def __cwd_changed(self, old, new):
-#        # try and change directory ---
-#        old_new_tuple_or_false = chdir(new)
-#        # update all file and directory parameters with relative paths ---
-#        if old_new_tuple_or_false:
-#            old, new = old_new_tuple_or_false
-#            self._update_relative_paths(old, new) 
-#
-#    def _update_relative_paths(self, old, new):
-#        for name in self.parameter_names():
-#            type = self.trait(name).trait_type.__class__.__name__
-#            if type in ('File', 'Directory'):
-#                path = getattr(self, name)
-#                if isrel(path):
-#                    path = os.path.join(old, path)
-#                setattr(self, name, os.path.relpath(path, new))
 
 
     def __init__(self, file=None, **traits):
@@ -73,7 +51,6 @@ class Params(HasTraits):
         Returns True if a params file was successfully loaded. 
         
         '''
-
         if self._dirty:
             logger.warn('loading %s when current parameters are dirty', file)
             #TODO prompt to save, with timeout/override for non-interactive_mode
