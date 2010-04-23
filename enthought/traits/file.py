@@ -262,6 +262,7 @@ class File(BaseFile):
             entries=self.entries,
             directory=self.directory,
             directory_name=self.directory_name,
+            absolute=self.absolute,
         )
         return editor
 
@@ -336,6 +337,7 @@ def test_implicit_editor():
             auto_set = True,
             exists = True,
             directory_name = 'other_directory',
+            absolute = True,
         )
         other_directory = Directory('/home/jvb/phd/eclipse/infobiotics/dashboard/tests/mcss/models', 
             auto_set=True,

@@ -67,6 +67,7 @@ from enthought.traits.file import File
 from enthought.traits.directory import Directory
 from enthought.traits.ui.qt4.file_editor2 import FileEditor
 from enthought.traits.ui.qt4.directory_editor2 import DirectoryEditor 
+from enthought.traits.ui.api import ProgressEditor#from enthought.traits.ui.qt4.progress_editor import ProgressEditor # these both import the same thing when ETS_TOOLKIT=qt4
 
 from enthought.traits.api import \
     HasTraits, Interface, implements, Bool, Str, List, \
@@ -99,7 +100,7 @@ percentage = Range(0.0, 100.0, 0.0)
 
 # actions ---
 
-shared_actions = ['Undo','Revert','OK', 'Cancel']
+shared_actions = ['Undo', 'Cancel', 'OK']#'Revert','OK', 
 
 load_action = Action(name='Load', action='load', 
     tooltip='Load parameters from a file'
@@ -113,10 +114,10 @@ params_actions = [load_action, save_action]
 
 perform_action = Action(name='Perform', action='perform', 
     tooltip='Perform the experiment with the current parameters',
-    enabled_when='object.has_valid_parameters()',
+    enabled_when='controller.has_valid_parameters',
 )
 
-experiment_actions = [load_action, save_action, perform_action] 
+experiment_actions = params_actions + [perform_action] 
 
 
 # reused Groups ---

@@ -29,7 +29,7 @@ mcss_params_group = Group(
                 Item('just_psystem', visible_when='handler.model_format_ != "sbml"', label='Just initialise P system'),
                 Item('duplicate_initial_amounts', visible_when='handler.model_format_ == "sbml"'),
             ),
-            label='Model',
+            label='P system model',
         ),
         VGroup( 
             Item('max_time'),

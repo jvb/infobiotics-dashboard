@@ -8,7 +8,7 @@ Adapted from qt4/extras/bounds_editor.py and qt4/file_editor.py
 
 import os
 from PyQt4 import QtCore, QtGui
-from ...api import TraitError, Str, Property
+from ...api import Str, Bool, TraitError
 from ..api import FileEditor
 from .text_editor import SimpleEditor as SimpleTextEditor
 from common.strings import wrap
@@ -22,17 +22,17 @@ class SimpleEditor(SimpleTextEditor):
             self.set_value(self.value) # necessary to trigger validation of trait
 #            print self.value_trait.handler.abspath
 
-    directory_name = Str
-
     def init(self, parent):
         # initialise traits from factory
         factory = self.factory # FileEditor (below)
-        if factory.directory_name:
-            self.sync_value(factory.directory_name, 'directory', 'from')
-            factory.sync_trait('directory_name', self) # most important
-#            pass
-#        else:
-        factory.sync_trait('directory', self)
+#        if factory.directory_name:
+#            self.sync_value(factory.directory_name, 'directory', 'from')
+#            factory.sync_trait('directory_name', self) # most important
+##            pass
+##        else:
+#        factory.sync_trait('directory', self)
+        self.directory = factory.directory
+        self.sync_value(factory.directory_name, 'directory', 'from')
             
         # file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
@@ -77,6 +77,7 @@ class SimpleEditor(SimpleTextEditor):
             self._file_name.setText(value)
         else: 
             self._file_name.setText(self.str_value)
+        # triggers update_object
 
     def show_file_dialog(self):
         """ Displays the pop-up file dialog.
@@ -95,9 +96,10 @@ class SimpleEditor(SimpleTextEditor):
                 if self.factory.truncate_ext:
                     file_name = os.path.splitext(file_name)[0]
 
-                file_name = os.path.relpath(file_name, self.directory) 
+                if not self.factory.absolute:
+                    file_name = os.path.relpath(file_name, self.directory) 
 
-                self.set_value(file_name)#self.value = file_name
+#                self.set_value(file_name)#self.value = file_name
                 self.update_editor(file_name)
 
     def get_error_control ( self ):
@@ -148,9 +150,11 @@ class SimpleEditor(SimpleTextEditor):
                 
         except TraitError, excp:
             self._file_name.setToolTip(wrap(unicode(excp),80)) #TODO plus desc?
-
+            self.error(excp)
 
 class FileEditor(FileEditor): # EditorFactory
+    
+    absolute = Bool(False)
     
     directory = Directory(exists=True, desc='overrides File(directory=...)')
     def _directory_default(self):

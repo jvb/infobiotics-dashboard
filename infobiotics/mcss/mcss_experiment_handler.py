@@ -6,6 +6,6 @@ from infobiotics.mcss.api import \
 class McssExperimentHandler(ExperimentHandler, McssParamsHandler):
 
     def __progress_handler_default(self):
-        return McssProgressHandler(self.model)
+        return McssProgressHandler(self.model)#TODO (model=self)?
 
     traits_view = mcss_experient_view

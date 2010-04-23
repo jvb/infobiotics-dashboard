@@ -79,8 +79,9 @@ class SimpleEditor(Editor):
         Updates the editor when the object trait changes externally to the
         editor.
         """
-        if self.value:
-            self.progress.update(self.value)
+        if not str(self.value) == '<undefined>':
+            if self.value:
+                self.progress.update(self.value)
         return
     
     

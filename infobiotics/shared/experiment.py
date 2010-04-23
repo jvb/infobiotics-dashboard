@@ -1,5 +1,5 @@
 from infobiotics.shared.api import \
-    Params, File, ListStr, Str, Event, expect, Thread
+    Params, File, ListStr, Str, Event, expect, Thread, Property, Bool
 
 class Experiment(Params):
     
@@ -25,16 +25,6 @@ class Experiment(Params):
 ##    def _started_fired(self):
 #        ''' An example of responding to an Event. '''
 #        self.child.logfile_read = sys.stdout
-
-#    def has_valid_parameters(self): 
-#        raise NotImplementedError
-##        self.error = '' #TODO see Invalid...demo
-
-    def has_valid_parameters(self):
-        import os.path
-        if not os.path.exists(self._params_file):
-            return False
-        return True
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''

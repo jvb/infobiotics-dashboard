@@ -4,16 +4,16 @@ from infobiotics.mcss.api import McssParams
 class McssExperiment(McssParams, Experiment):
     
     def _handler_default(self):
-        from mcss_experiment_handler import McssExperimentHandler
+        from infobiotics.mcss.api import McssExperimentHandler
         return McssExperimentHandler(model=self)
     
     _params_program = 'mcss'
-    _params_program_kwargs = ['show_progress=true']#, 'max_time=333', 'runs=66']
+    _params_program_kwargs = ['show_progress=true']#, 'max_time=333', 'runs=66'] # testing
     _output_pattern_list = [
         '[0-9]+ [0-9]+', # 'time_in_run, run'
     ] 
 
-    # output patterns
+    # output pattern traits
     run = Int(1)
     time_in_run = Float
 
