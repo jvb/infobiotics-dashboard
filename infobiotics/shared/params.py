@@ -95,7 +95,7 @@ class Params(HasTraits):
             file = os.path.abspath(file)
         old = os.getcwd() # remember where we are now
         new = os.path.dirname(file)
-        chdir(new)
+        chdir(new) #TODO just set _cwd here and restore if it fails would be much better than changing the current directory
 
         # set parameters from dictionary
         for k, v in parameters_dictionary.iteritems():

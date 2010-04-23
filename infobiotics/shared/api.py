@@ -73,7 +73,7 @@ from enthought.traits.api import \
     HasTraits, Interface, implements, Bool, Str, List, \
     Callable, Property, property_depends_on, Range, Button, on_trait_change, \
     Instance, ListStr, Event, Int, Float, Undefined, Enum, Long, Trait, \
-    DelegatesTo
+    DelegatesTo, Unicode
     
 from enthought.traits.ui.api import \
     Handler, Controller, ModelView, View, Item, Action, DefaultOverride, \
