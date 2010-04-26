@@ -4,7 +4,7 @@ from infobiotics.shared.api import (
     ParamsXMLReader, set_trait_value_from_parameter_value, 
     parameter_value_from_trait_value, traits_repr, 
     logging, 
-    chdir,
+    chdir, TraitError
 )
 
 from xml import sax

@@ -28,9 +28,6 @@ class Experiment(Params):
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
-        if not self.has_valid_parameters():
-            return False
-
         def _spawn():
             ''' Start the program and try to match output.
             

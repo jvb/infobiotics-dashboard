@@ -25,6 +25,7 @@ class McssExperiment(McssParams, Experiment):
         else:
             super(McssExperimentProgressHandler, self).pattern_matched(pattern_index, match)
 
+
 if __name__ == '__main__':
     from infobiotics.shared.api import chdir
     chdir('../../tests/mcss/models')

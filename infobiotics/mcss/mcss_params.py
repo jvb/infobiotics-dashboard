@@ -55,7 +55,7 @@ class McssParams(Params):
         return [
             'model_file', 'model_format', 'duplicate_initial_amounts', 
             'just_psystem', 'max_time', 'log_interval', 'runs', 'data_file', 
-            'seed', 'compress', 'compression_level', 'show_progress', 
+            'seed', 'compress', 'compression_level', #'show_progress', 
             'simulation_algorithm', 'log_type', 'log_memory', 
             'log_propensities', 'log_volumes', 'log_steady_state', 
             'log_degraded', 'dump', 'periodic_x', 'periodic_y', 'periodic_z',
@@ -70,9 +70,10 @@ class McssParams(Params):
 if __name__ == '__main__':
     from infobiotics.shared.api import chdir
     chdir('../../tests/mcss/models')
-    parameters = McssParams('module1.params')
-#    parameters = McssParams('../../tests/mcss/models/module1.params')
-    parameters.load('reactions1.params')
+#    parameters = McssParams('module1.params')
+##    parameters = McssParams('../../tests/mcss/models/module1.params')
+#    parameters.load('reactions1.params')
 #    print parameters # test __repr__
+    parameters = McssParams()
     parameters.configure()
             

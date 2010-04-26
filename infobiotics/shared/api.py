@@ -73,7 +73,7 @@ from enthought.traits.api import (
     HasTraits, Interface, implements, Bool, Str, List,
     Callable, Property, property_depends_on, Range, Button, on_trait_change, 
     Instance, ListStr, Event, Int, Float, Undefined, Enum, Long, Trait, 
-    DelegatesTo, Unicode,
+    DelegatesTo, Unicode, TraitError
 )
     
 from enthought.traits.ui.api import (
@@ -284,7 +284,7 @@ def set_trait_value_from_parameter_value(self, name, value):
 
 def trait_value_from_parameter_value(self, name, value): # change name to 'trait_value_from_param_value'?
     ''' Return parameter trait value from a parameter value string. '''
-    assert name in self.parameter_names()
+#    assert name in self.parameter_names()
     trait = self.trait(name)
     type = trait.trait_type.__class__.__name__
 #    from infobiotics.dashboard.shared.dicts import key_from_value # in this file
