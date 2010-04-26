@@ -1,9 +1,9 @@
-from infobiotics.shared.api import Params
+from infobiotics.shared.api import Params, File, Enum, Long, Bool
 
 class PModelCheckerParams(Params):
 
     # PRISMExperiment and MC2Experiment
-    model_specification = File(directory_name='_cwd', auto_set=True, filter=['*.xml','*.lpp'], desc='the filename(.lpp) of the model to check') #TODO have multiple wildcards in one filter?
+    model_specification = File(filter=['*.xml','*.lpp'], desc='the filename(.lpp) of the model to check') #TODO have multiple wildcards in one filter?
     model_checker = Enum(['PRISM','MC2'], desc='the name of model checker to use')
     number_samples = Long(desc='the number of simulations to used when approximation is applied')
 #
@@ -22,10 +22,10 @@ class PModelCheckerParams(Params):
 
     # MC2Experiment
     simulations_generatedHDF5 = Bool(False, desc='whether the simulations have already been run')
-    simulations_file_hdf5 = File(directory_name='_cwd', auto_set=True, filter=['*.h5','*'], desc='the filename(.h5) of the simulation')
+    simulations_file_hdf5 = File(filter=['*.h5','*'], desc='the filename(.h5) of the simulation')
     simulations_generatedMC2 = Bool(False, desc='whether the TODO have already been run')
-    simulations_file_MC2 = File(directory_name='_cwd', auto_set=True, filter=['*.mc2','*'], desc='the filename(.mc2) of the simulation converted to MC2 format')
-    mcss_params_file = File(directory_name='_cwd', auto_set=True, filters=['*.params'], desc='TODO')
+    simulations_file_MC2 = File(filter=['*.mc2','*'], desc='the filename(.mc2) of the simulation converted to MC2 format')
+    mcss_params_file = File(filters=['*.params'], desc='TODO')
 
 #    def parameters_names(self):
 #        return [
@@ -50,3 +50,6 @@ class PModelCheckerParams(Params):
 #        ]
 
 
+if __name__ == '__main__':
+    execfile('prism_params.py')
+    

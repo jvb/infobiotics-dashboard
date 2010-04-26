@@ -1,5 +1,4 @@
 from __future__ import with_statement
-import os; os.environ['ETS_TOOLKIT']='qt4'
 from enthought.traits.api import HasTraits, Str, Float, Enum, Property
 from enthought.traits.ui.api import View, Item#, HGroup
     
@@ -132,12 +131,11 @@ class ModelParametersXMLReader(ContentHandler):
 
 from enthought.traits.api import File, List, Tuple, Instance, DelegatesTo
 from enthought.traits.ui.table_column import ObjectColumn, ExpressionColumn
-from infobiotics.dashboard.plugins.experiments.params_experiment import ParamsExperiment
 import os
 
 class ModelParameters(HasTraits):
     file = DelegatesTo('prism_experiment')
-    prism_experiment = Instance(ParamsExperiment)
+    prism_experiment = Instance('PRISMParams')
     _modelVariables = List(ModelParameter) 
     _ruleConstants = List(ModelParameter) 
     _moleculeConstants = List(MoleculeConstant) 

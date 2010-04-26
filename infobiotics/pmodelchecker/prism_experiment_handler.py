@@ -1,12 +1,9 @@
+from infobiotics.shared.api import (
+    VGroup, Item, HGroup, TextEditor, InstanceEditor, View
+)
+from infobiotics.pmodelchecker.model_parameters import editable_modal_parameters_group
+from infobiotics.pmodelchecker.temporal_formulas import temporal_formulas_group
 
-class PRISMExperimentHandler(PModelCheckerExperimentHandler):
-    
-    _progress_handler = PRISMExperimentProgressHandler
-
-    traits_view = ExperimentView(
-        Item('_cwd', label='Working directory', tooltip='Relative paths will be relative to this directory.'),
-    )
-    
 prism_group = VGroup(
     Item('model_specification'),
     HGroup(
@@ -56,3 +53,21 @@ prism_group = VGroup(
         label='PRISM parameters'
     ),
 )
+
+
+from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
+from infobiotics.pmodelchecker.prism_experiment_progress_handler import PRISMExperimentProgressHandler
+from infobiotics.shared.api import ExperimentView
+
+class PRISMExperimentHandler(PModelCheckerExperimentHandler):
+    
+    _progress_handler = PRISMExperimentProgressHandler
+
+    traits_view = ExperimentView(
+        prism_group,
+    )
+    
+
+if __name__ == '__main__':
+    execfile('prism_experiment.py')
+    

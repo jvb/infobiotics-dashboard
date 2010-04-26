@@ -1,4 +1,8 @@
-from infobiotics.shared.traits_imports import *
+from infobiotics.shared.api import (
+    HasTraits, Str, Float, List, Button, Any, 
+    View, Item, HGroup, VGroup, ListEditor,  
+    TableEditor, ObjectColumn, 
+)
     
 temporal_formula_view = View(
     Item('formula'),
@@ -105,7 +109,7 @@ temporal_formulas_group = VGroup(
     HGroup(   
         Item('temporal_formulas', label='File'),
     ),
-    Item('_temporal_formulas_list', 
+    Item('handler._temporal_formulas_list', 
         label='Temporal formulas', 
         show_label=False,
         editor=TableEditor(
@@ -135,9 +139,9 @@ temporal_formulas_group = VGroup(
         ),
     ),
     HGroup(
-        Item('_add_temporal_formula', show_label=False),
-        Item('_edit_temporal_formula', show_label=False, enabled_when='object.selected_temporal_formula is not None'),
-        Item('_remove_temporal_formula', show_label=False, enabled_when='len(object._temporal_formulas_list) > 0 and object._selected_temporal_formula is not None'),
+        Item('handler._add_temporal_formula', show_label=False),
+        Item('handler._edit_temporal_formula', show_label=False, enabled_when='object.selected_temporal_formula is not None'),
+        Item('handler._remove_temporal_formula', show_label=False, enabled_when='len(object._temporal_formulas_list) > 0 and object._selected_temporal_formula is not None'),
     ),
     label='Temporal formulas',
 )

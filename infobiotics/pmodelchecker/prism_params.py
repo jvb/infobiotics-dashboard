@@ -1,15 +1,24 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams  
+from infobiotics.shared.api import (File, Instance, DelegatesTo, Range, Float, 
+                                    Long, Str, Enum, Trait, Bool, Button) 
+from infobiotics.pmodelchecker.model_parameters import ModelParameters
 
 class PRISMParams(PModelCheckerParams):
 
     _parameter_set_name = 'prism'
 
+    def _handler_default(self):
+#        from infobiotics.pmodelchecker.prism_params_handler import PRISMParamsHandler
+#        return PRISMParamsHandler(model=self)
+        from infobiotics.pmodelchecker.prism_experiment_handler import PRISMExperimentHandler
+        return PRISMExperimentHandler(model=self)
+
     model_checker = 'PRISM'
-    model_specification = File(directory_name='_cwd', auto_set=True, filter=['*.xml','*.lpp'], desc='the filename(.lpp) of the model to check') #TODO have multiple wildcards in one filter?
-    PRISM_model = File(directory_name='_cwd', auto_set=True, 'PRISM_model.sm', filter=['*.sm','*'],desc='the filename(.sm) of the intermediate PRISM model')
-    _model_parameters = Instance(ModelParameters)
-    def __model_parameters_default(self):
-        return ModelParameters(prism_experiment=self)
+    model_specification = File(filter=['*.xml','*.lpp'], desc='the filename(.lpp) of the model to check') #TODO have multiple wildcards in one filter?
+    PRISM_model = File('PRISM_model.sm', filter=['*.sm','*'],desc='the filename(.sm) of the intermediate PRISM model')
+    _model_parameters = Instance('ModelParameters')
+#    def __model_parameters_default(self):
+#        return ModelParameters(prism_experiment=self)
     model_parameters = DelegatesTo('_model_parameters')
     temporal_formulas = File(directory_name='_cwd', auto_set=True, desc='') #TODO desc
     formula_parameters = Str(desc='') #TODO PRISM-specific? desc
@@ -27,9 +36,9 @@ class PRISMParams(PModelCheckerParams):
     )
     _custom_confidence = Range(0.0, 1.0, 0.1, mode='text')
     precision = Float(1.0, desc='the precision used when approximating the answer to a formula')
-    results_file = File(directory_name='_cwd', auto_set=True, 'results.txt', desc='') #TODO desc
-    states_file = File(directory_name='_cwd', auto_set=True, 'states.psm', desc='')  #TODO desc
-    transitions_file = File(directory_name='_cwd', auto_set=True, desc='')  #TODO desc
+    results_file = File('results.txt', desc='') #TODO desc
+    states_file = File('states.psm', desc='')  #TODO desc
+    transitions_file = File(desc='')  #TODO desc
     number_samples = Long(desc='the number of simulations to used when approximation is applied')
     
     def parameter_names(self):
@@ -41,7 +50,7 @@ class PRISMParams(PModelCheckerParams):
 #            'model_checker',
             'model_specification',
             'PRISM_model',
-            'model_parameters',
+#            'model_parameters',
             'temporal_formulas',
 #            'formula_parameters', # done by model checker
             'task',
@@ -195,4 +204,8 @@ class PRISMParams(PModelCheckerParams):
         
         
         super(PRISMExperiment, self).perform()
-                    
+
+
+if __name__ == '__main__':
+    PRISMParams().configure()
+                        
