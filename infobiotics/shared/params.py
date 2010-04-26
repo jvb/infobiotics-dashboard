@@ -22,8 +22,8 @@ class Params(HasTraits):
     _params_file = File(exists=True, absolute=True, readable=True, writable=True)
 
     def __params_file_changed(self, _params_file):
+        self._cwd = os.path.dirname(_params_file)
         self._dirty = False
-#        self._cwd = os.path.dirname(_params_file)
         
     _cwd = Directory(exists=True, auto_set=True)
     
@@ -80,9 +80,7 @@ class Params(HasTraits):
                 logger.error(error)
 #                auto_close_message(message=error) #TODO is this desirable when scripting?...might not happen, as with ProgressDialog
                 return False
-
         # read parameters ok
-        
         
         # reset traits so we don't carry over parameters that are missing from 
         # the file we are loading
@@ -108,32 +106,22 @@ class Params(HasTraits):
                 # must specify directory/directory_name in model_file = File() else: enthought.traits.trait_errors.TraitError: The 'model_file' trait of a McssParams instance must be an existing file name in '/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/shared', but a value of 'module1.sbml' <type 'str'> was specified.
         except TraitError, e:
             raise e
-            self._cwd = old
+            self._cwd = old #TODO does this ever get reached?
 
         # success!
-        
-        # remember params file
-        self._params_file = file # update _params_file (and _cwd via __params_file_changed)
-        
-#        self._update_relative_paths(old, new) #TODO FileDialog.extras -> 'Move input files to new directory?' checkbox
-        
-        # go back to where we were (for scripts using relative paths)
-#        chdir(old)
-
         logger.debug("Loaded '%s'." % file)
+        self._params_file = file # update self._params_file, and self._cwd via self.__params_file_changed()
         return True
 
-
-    def save(self, file='', force=False):
+    def save(self, file='', force=False, copy=False):
         # handle whether or not to overwrite an existing file ---
-        if can_access(file):
-            if not force:
-                if self._interactive is True:
-                    #TODO prompt not to overwrite with a message box
-                    pass
-                else:
-                    #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
-                    pass
+        if can_access(file) and not force:
+            if self._interactive is True:
+                #TODO prompt not to overwrite with a message box
+                pass
+            else:
+                #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
+                pass
 #                    print "Are you sure you want to overwrite '%s' (Y/n)?" % file
 ##                    start_time = time()
 ##                    while(whatever):
@@ -143,6 +131,39 @@ class Params(HasTraits):
 #                    answer = sys.stdin.readline()
 #                    if answer.lower().startswith('y'):
 #                        pass
+
+        # handle problem of invalidating relative paths when saving to a new directory
+        old_params_file_dir = os.path.dirname(self._params_file)
+        new_params_file_dir = os.path.dirname(file) 
+        if old_params_file_dir != new_params_file_dir:
+            for name in self.parameter_names():
+                trait = self.base_trait(name)
+                if not trait.trait_type.__class__.__name__ == 'File':
+                    continue
+                handler = trait.handler
+                if handler.exists:
+                    value = getattr(self, name)
+                    if not os.path.isabs(value): 
+                        if handler.directory != old_params_file_dir:
+                            print handler.directory, '!=', old_params_file_dir
+                            continue
+                        if copy: # copy input files whose parameter values are paths relative to _params_file to new _params_file directory
+                            src = os.path.normpath(os.path.join(old_params_file_dir, value))
+                            dst = os.path.normpath(os.path.join(new_params_file_dir, value))
+                            print src
+                            print dst
+                            if not force:
+                                pass
+                                #TODO prompt to overwrite existing file
+                                result = True #FIXME
+                                if not result:
+                                    continue
+                            import shutil
+                            shutil.copy2(src, dst) 
+                            print 'copied', src, 'to', dst
+                        else: # change relative paths to point to old locations
+                            self._cwd = new_params_file_dir
+                            setattr(self, name, os.path.relpath(os.path.normpath(os.path.join(old_params_file_dir, value)), new_params_file_dir))
 
         # actually write the file ---
         try:
@@ -158,12 +179,9 @@ class Params(HasTraits):
                 print e
             return False
             
-        # success! ---
-#        if os.path.isabs(file): #FIXME
-#            chdir(os.path.dirname(file)) # change current directory to directory of params file
-#        self._cwd = os.getcwd()
+        # success!
+        logger.debug("Saved '%s'." % file)
         self._params_file = file
-        self._dirty = False
         return True
 
     def reset(self, traits=None):

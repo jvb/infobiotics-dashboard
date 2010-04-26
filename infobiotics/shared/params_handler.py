@@ -1,30 +1,30 @@
+from common.api import can_read, mkdir_p
 from infobiotics.shared.api import \
     Controller, Property, Str, FileDialog, OK, os, List, Unicode, Bool #, Property, cached_property    
 from enthought.traits.ui.api import Controller, View, Item
-from enthought.traits.ui.file_dialog2 import (
-    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
-)
-
-class CopyInputFilesWithRelativePathsExtension(MFileDialogModel):
-#    is_fixed = True # only if inheriting from MFileDialogView or MFileDialogExtension, which is probably wrong 
-    copy = Bool(True, desc='whether to copy input files with relative paths to new directory')
-    copy_enabled = Bool(False, desc='whether copy is enabled')
-#    copy_enabled = Property(Bool, depends_on='file_name') # encouraged to use Property but can't get old file_name that way
-#    @cached_property
-#    def _get_copy_enabled(self):
-#        print os.path.dirname(self.file_name)
-#        return False
-    def _file_name_changed(self, old, new):
-        if old != '':
-            if os.path.dirname(new) != os.path.dirname(old):
-                self.copy_enabled = True 
-            else:
-                self.copy_enabled = False
-    
-    view = View(
-        Item('copy', label='Copy required files with relative paths to new directory?', enabled_when='object.copy_enabled'),
-    )
-
+#from enthought.traits.ui.file_dialog2 import (
+#    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
+#)
+#
+#class CopyInputFilesWithRelativePathsExtension(MFileDialogModel):
+##    is_fixed = True # only if inheriting from MFileDialogView or MFileDialogExtension, which is probably wrong 
+#    copy = Bool(True, desc='whether to copy input files with relative paths to new directory')
+#    copy_enabled = Bool(False, desc='whether copy is enabled (if old directory != new directory)')
+##    copy_enabled = Property(Bool, depends_on='file_name') # encouraged to use Property but can't get old file_name that way
+##    @cached_property
+##    def _get_copy_enabled(self):
+##        print os.path.dirname(self.file_name)
+##        return False
+#    def _file_name_changed(self, old, new):
+#        if old != '':
+#            if os.path.dirname(new) != os.path.dirname(old):
+#                self.copy_enabled = True 
+#            else:
+#                self.copy_enabled = False
+#    
+#    view = View(
+#        Item('copy', label='Copy required files with relative paths to new directory?', enabled_when='object.copy_enabled'),
+#    )
 
 class ParamsHandler(Controller):
 
@@ -52,11 +52,12 @@ class ParamsHandler(Controller):
     
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
-        title = 'Load %s parameters' % self.model._parameters_name
-#        file_name = self.get_load_file_name_using_PyFace_FileDialog(title)
-        file_name = self.get_load_file_name_using_Traits_FileDialog(title)
+        params = info.object
+        title = 'Load %s parameters' % params._parameters_name
+        file_name = self.get_load_file_name_using_PyFace_FileDialog(title)
+#        file_name = self.get_load_file_name_using_Traits_FileDialog(title)
         if file_name is not None:
-            info.object.load(file_name)
+            params.load(file_name)
         
     def get_load_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
@@ -79,33 +80,20 @@ class ParamsHandler(Controller):
             return fd.file_name
         return None
 
+    copy = Bool(False, desc='whether to copy required files with relatives paths to new save directory (set by eponymous FileDialog extension)')
+#    copy = Bool(True) #TODO remove after adding file_dialog2.py
+
     def save(self, info):
         ''' Saves the traits of experiment to a .params XML file. '''
-        title='Save %s parameters' % self.model._parameters_name
-#        file_name = self.get_save_file_name_using_PyFace_FileDialog(title)
-        file_name = self.get_save_file_name_using_Traits_FileDialog(title)
+        params = info.object
+        title='Save %s parameters' % params._parameters_name
+        file_name = self.get_save_file_name_using_PyFace_FileDialog(title)
+#        file_name = self.get_save_file_name_using_Traits_FileDialog(title)
         if file_name is not None:
-            result = info.object.save(file_name, force=True) # user will have been prompted to overwrite by the GUI
-            if result and self.copy: #TODO
-                # for each file in parameter_names with exists=True created directories in os.path.dirname(file_name) and copy abspath to there
-                for name in self.model.parameter_names():
-                    trait = self.model.base_trait(name)
-                    type = trait.trait_type.__class__.__name__
-                    if type == 'File':
-                        handler = trait.handler
-                        exists = handler.exists
-                        if exists:
-                            print 'new params file', file_name
-                            print os.path.dirname(file_name)
-                            print getattr(self.model, name)
-                            print handler.directory
-                            print handler.abspath
-                            print os.path.relpath(handler.abspath, handler.directory) 
-                    
-                    
-                    
-                 
-            
+            if self.copy: #TODO prompt to overwrite existing files in new directory
+                pass
+            params.save(file_name, force=True, copy=self.copy) # user will have been prompted to overwrite by the GUI
+                                   
     def get_save_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
             action='save as', 
@@ -130,19 +118,13 @@ class ParamsHandler(Controller):
             title = title,
             id = 'infobiotics.shared.params_handler:ParamsHandler.get_save_file_name_using_Traits_FileDialog',
         )
-            
         if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
-            
             # get whether to copy input files with relative paths or not
             for extension in fd.extensions:
                 if isinstance(extension, CopyInputFilesWithRelativePathsExtension):
-                    self.copy = extension.copy
-
+                    self.copy = extension.copy if extension.copy_enabled else False
             return fd.file_name
         return None
-        
-    copy = Bool(False)
-        
             
     filters = [ # used to create wildcard and filter traits for FileDialog and OpenFileDialog respectively
         ('Experiment parameters', ['*.params']), 
