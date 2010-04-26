@@ -100,7 +100,7 @@ percentage = Range(0.0, 100.0, 0.0)
 
 # actions ---
 
-shared_actions = ['Undo', 'Cancel', 'OK']#'Revert','OK', 
+shared_actions = ['Undo', 'Cancel'] 
 
 load_action = Action(name='Load', action='load', 
     tooltip='Load parameters from a file'
