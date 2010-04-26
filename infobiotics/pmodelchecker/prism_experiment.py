@@ -1,3 +1,6 @@
+from pmodelchecker_experiment import PModelCheckerExperiment
+from infobiotics.shared.api import Enum, Property, Str, Int, Range 
+
 class PRISMExperiment(PModelCheckerExperiment):
     
     pattern_list = [
@@ -60,3 +63,7 @@ class PRISMExperiment(PModelCheckerExperiment):
 #        id='PRISMExpect.view',
 #    )
 
+
+if __name__ == '__main__':
+    PRISMExperiment().configure()
+    
