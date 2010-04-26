@@ -1,5 +1,6 @@
 from infobiotics.shared.api import \
-    ExperimentHandler, TemporalFormula, List, Button, Instance
+    ExperimentHandler, List, Button, Instance
+from infobiotics.pmodelchecker.temporal_formulas import TemporalFormula
 
 class PModelCheckerExperimentHandler(ExperimentHandler):
 

@@ -1,19 +1,12 @@
-from infobiotics.shared.api import ParamsHandler, Instance, Trait, ParamsView, Item
-from mcss_params import McssParams 
-from mcss_params_group import mcss_params_group
+from infobiotics.shared.api import ParamsHandler, Trait, \
+    Bool, Property, can_access, os
+from infobiotics.mcss.api import mcss_params_view
 
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
 
-    _parameters = Instance(McssParams)
-
+    traits_view = mcss_params_view
     id='McssParamsHandler' # for saving window position and size
-    title='mcss parameters' # does this do anything?
-        
-    def parameters_model_file_changed(self, info):
-        import os.path
-        if os.path.splitext(info.object.model_file)[1].lower() == '.sbml':
-            self.model_format_ = 'sbml'
     
     model_format = Trait(
         'P system XML',
@@ -24,11 +17,13 @@ class McssParamsHandler(ParamsHandler):
         },
         desc='the model specification format',
     )
+    
+    model_format_reversed = {
+        'xml'  : 'P system XML',
+        'sbml' : 'SBML',
+    }
 
-    def _model_format_changed(self, model_format):
-        self.sync_trait('model_format_', self.model, alias='model_format')
-
-    simulation_algorithm = Trait(
+    simulation_algorithm = Trait( #FIXME loading of simulation_algorithm_ doesn't work
         'Direct Method with queue',
         {
             'Direct Method with queue'               : 'dmq',
@@ -37,14 +32,35 @@ class McssParamsHandler(ParamsHandler):
             'Direct Method with growth and division' : 'dmgd',
             'Direct Method (Cellular Potts)'         : 'dmcp',
         },
-        desc='the stochastic simulation algorithm to use'
+        desc='the stochastic simulation algorithm to use',
     )
 
-    def _simulation_algorithm_changed(self, simulation_algorithm):
-        self.sync_trait('simulation_algorithm_', self.model, alias='simulation_algorithm')    
+    simulation_algorithm_reversed = { # needed because we can't assign to simulation_algorithm_
+        'dmq'  : 'Direct Method with queue', 
+        'dm'   : 'Direct Method (Gillespie68)',
+        'ldm'  : 'Logarithmic Direct Method (Cao2007)',
+        'dmgd' : 'Direct Method with growth and division',
+        'dmcp' : 'Direct Method (Cellular Potts)',
+    }
+
+    def init(self, info):
+        self.sync_trait('model_format_', info.object, alias='model_format', mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
+        self.sync_trait('simulation_algorithm_', info.object, alias='simulation_algorithm', mutual=False) # ditto
+
+    def object_model_file_changed(self, info):
+        ext = os.path.splitext(info.object.model_file)[1].lower() 
+        if ext == '.sbml':
+            self.model_format = 'SBML'
+        else:
+            self.model_format = 'P system XML'
+
+    def object_model_format_changed(self, info):
+        self.model_format = self.model_format_reversed[info.object.model_format]
+
+    def object_simulation_algorithm_changed(self, info):
+        self.simulation_algorithm = self.simulation_algorithm_reversed[info.object.simulation_algorithm]
+
+
+if __name__ == '__main__':
+    execfile('mcss_params.py')
     
-    traits_view = ParamsView(
-        Item('_cwd', label='Working directory', tooltip='Relative paths will be relative to this directory.'),
-        '_',
-        mcss_params_group,
-    )

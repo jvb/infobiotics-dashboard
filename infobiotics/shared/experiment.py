@@ -1,11 +1,30 @@
 from infobiotics.shared.api import \
-    HasTraits, Params, File, ListStr, Str, Event, expect, Thread, Instance 
+    Params, File, ListStr, Str, Event, expect, Thread, Property, Bool
 
-class Experiment(HasTraits):
-    
-    parameters = Instance(Params)
-    
-    _params_program = File(exists=True)
+class Experiment(Params):
+#    ''' Abstract base class of all Infobiotics Dashboard experiments.
+#    
+#    ParamsExperiments are performed by external programs with parameters from
+#    files with the extension '.params' (hence forth called 'params files'). 
+#    Params files are XML in nature with 'parameters', 'parameterSet' 
+#    and 'parameter' elements. Only one 'parameters' element is present and 
+#    its name attribute is supposed to correlate to the program that parsers the
+#    file. Generally only one 'parameterSet' element is present in each params 
+#    file and its name attribute is supposed to correlate to a type of 
+#    experiment that the program performs. For example in a PModelChecker 
+#    experiment <parameters name="pmodelchecker"> and 
+#    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
+#    element has 'name' and 'value' attributes that are used by the experiment
+#    performing program to parameterise and perform an experiment.    
+#
+#    ParamsExperiment implements usable load(), save() and reset() methods from 
+#    the IParamsExperiment interface. has_valid_parameters() and 
+#    parameter_names() are left to subclasses to implement: in ParamsExperiment 
+#    they each raise a NotImplementedError when called, as does perform() from 
+#    the Experiment superclass.    
+#    
+#    '''
+    _params_program = File(exists=True, executable=True)
     _params_program_kwargs = ListStr
     _output_pattern_list = ListStr
     _error_pattern_list = ListStr([
@@ -16,6 +35,7 @@ class Experiment(HasTraits):
         '^I/O warning : failed to load external entity ".+"', # libxml++
     ])
     _error_string = Str
+
     starting = Event
     started = Event
     timed_out = Event
@@ -27,15 +47,8 @@ class Experiment(HasTraits):
 #        ''' An example of responding to an Event. '''
 #        self.child.logfile_read = sys.stdout
 
-#    def has_valid_parameters(self): 
-#        raise NotImplementedError
-##        self.error = '' #TODO see Invalid...demo
-
-    def perform(self, thread=False): 
+    def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
-#        if not self.has_valid_parameters():
-#            return False
-
         def _spawn():
             ''' Start the program and try to match output.
             
@@ -87,6 +100,7 @@ class Experiment(HasTraits):
         else:
             _spawn()
             #TODO call serial progress function from here
+        return True
 
     def _output_pattern_matched(self, pattern_index, match):
         ''' Update traits in response to matching error patterns.
@@ -107,4 +121,23 @@ class Experiment(HasTraits):
         self._error_string = match.split('rror')[1].strip(':') if 'rror' in match else match
 
     def __error_string_changed(self, _error_string):
-        print _error_string
+        print _error_string, '(from Experiment.__error_string_changed)'
+
+
+#from enthought.traits.ui.api import Group, Item
+#
+#error_string_group = Group(
+#    Item('error_string',
+#        show_label=False,
+#        style='readonly',
+#        emphasized=True,
+#    ),
+##    visible_when='len(object.error_string) > 0',
+#    enabled_when='len(object.error_string) > 0',
+#    label='Error(s)',
+#)
+
+
+if __name__ == '__main__':
+    execfile('../mcss/mcss_experiment.py')
+    

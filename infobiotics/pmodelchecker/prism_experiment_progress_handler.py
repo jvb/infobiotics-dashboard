@@ -1,3 +1,4 @@
+from infobiotics.shared.api import ExperimentProgressHandler, property_depends_on
 
 class PRISMExperimentProgressHandler(ExperimentProgressHandler):
 

@@ -1,73 +1,23 @@
-from infobiotics.shared.api import \
-    Handler, Instance, \
-    Experiment, ExperimentProgressHandler, \
-    ExperimentView, Item
+from infobiotics.shared.api import Instance, Property, Bool
+from params_handler import ParamsHandler
+from experiment_progress_handler import ExperimentProgressHandler
 
-class ExperimentHandler(Handler):
-#class ExperimentHandler(ParamsHandler):
+class ExperimentHandler(ParamsHandler):
     
-    # Traits ---
-
     _progress_handler = Instance(ExperimentProgressHandler)
 
-    experiment = Instance(Experiment)
+    def __progress_handler_default(self):
+        raise NotImplementedError
 
-    def _experiment_default(self):
-        raise NotImplemetedError('Subclasses should override this method or'\
-                                 "declare 'experiment = McssExperiment()'")
-
-    def _experiment_changed(self, experiment):
-        self.parameters = experiment.parameters
-    
-    
-    # Handler-specific ---
-    
-    def traits_context(self):
-        '''
-        
-        Adapted from Controller: https://svn.enthought.com/enthought/browser/Traits/trunk/enthought/traits/ui/handler.py
-        
-        '''
-        context = super(ExperimentHandler, self).traits_context()
-        context.update({'experiment':self.experiment, 'parameters': self.experiment.parameters})
-#        context.update({'experiment':self._experiment}) # if ExperimentHandler(ParamsHandler)
-        return context
-
-
-    # Action methods ---
-    
-    def load(self, info): 
-        file=None
-        pass
-        info.parameters.load(file)
-    
-    def save(self, info):
-        file=None
-        pass
-        info.parameters.save(file)
-    
-    def perform(self, info):
-        ''' Perform the experiment. '''
-        info.experiment.perform(thread=True)
-        self._show_progress()
-
-
-    # self traits methods ---
-    
     def _show_progress(self):
-        progress_handler = self._progress_handler(model=self.model) # remove model in favour of context?
-        progress_handler.edit_traits(kind='live') # must be live to receive progress updates
+        self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates
 
+    def perform(self, info):
+        if info.object.perform(thread=True):
+            self._show_progress()
 
-    # parameters traits methods ---
-
-    def parameters_title_changed(self, info):
-        info.ui.title = info.parameters.title
-
-
-#    # Class attributes --- 
-#
-#    traits_view = ExperimentView(
-#        Item('_cwd', label='Working directory', tooltip='Relative paths will be relative to this directory.'),
-#    )
+    has_valid_parameters = Property(Bool, depends_on='info.ui.errors')
+    def _get_has_valid_parameters(self):
+        # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
+        return False if self.info.ui.errors > 0 else True
     

@@ -1,4 +1,4 @@
-from infobiotics.shared.api import Params
+from infobiotics.shared.api import Params, File, Enum, Long, Bool
 
 class PModelCheckerParams(Params):
 
@@ -50,3 +50,6 @@ class PModelCheckerParams(Params):
 #        ]
 
 
+if __name__ == '__main__':
+    execfile('prism_params.py')
+    

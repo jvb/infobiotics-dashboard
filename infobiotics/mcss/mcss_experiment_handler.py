@@ -1,20 +1,11 @@
 from infobiotics.shared.api import \
-    ExperimentHandler, ExperimentView, Item, Instance, HasTraits, Property
-from infobiotics.mcss.api import McssExperiment, McssProgressHandler
+    ExperimentHandler
+from infobiotics.mcss.api import \
+    McssParamsHandler, McssProgressHandler, mcss_experient_view
 
-class McssExperimentHandler(ExperimentHandler):
+class McssExperimentHandler(ExperimentHandler, McssParamsHandler):
 
-    _progress_handler = McssProgressHandler()
+    def __progress_handler_default(self):
+        return McssProgressHandler(self.model)#TODO (model=self)?
 
-    experiment = McssExperiment()
-
-    traits_view = ExperimentView(
-        Item('_cwd', label='Working directory', tooltip='Relative paths will be relative to this directory.'),
-    )
-    
-    
-if __name__ == '__main__':
-    handler = McssExperimentHandler()
-    print handler._progress_handler
-    print handler.experiment
-    print handler.experiment.parameters
+    traits_view = mcss_experient_view
