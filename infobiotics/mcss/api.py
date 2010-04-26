@@ -39,8 +39,7 @@ mcss_params_group = Group(
     #        Item('show_progress'), #TODO popup showing stdout and stderr for each params program
             Item('compress', label='Compress output'),
             Item('compression_level', enabled_when='object.compress==True'),
-    #        Item('simulation_algorithm'),
-            Item('handler.simulation_algorithm'), #TODO
+            Item('handler.simulation_algorithm'),
             Item('seed', label='Random seed'),
             label='Simulation',
         ),
