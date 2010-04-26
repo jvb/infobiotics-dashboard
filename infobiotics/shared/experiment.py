@@ -2,7 +2,28 @@ from infobiotics.shared.api import \
     Params, File, ListStr, Str, Event, expect, Thread, Property, Bool
 
 class Experiment(Params):
-    
+#    ''' Abstract base class of all Infobiotics Dashboard experiments.
+#    
+#    ParamsExperiments are performed by external programs with parameters from
+#    files with the extension '.params' (hence forth called 'params files'). 
+#    Params files are XML in nature with 'parameters', 'parameterSet' 
+#    and 'parameter' elements. Only one 'parameters' element is present and 
+#    its name attribute is supposed to correlate to the program that parsers the
+#    file. Generally only one 'parameterSet' element is present in each params 
+#    file and its name attribute is supposed to correlate to a type of 
+#    experiment that the program performs. For example in a PModelChecker 
+#    experiment <parameters name="pmodelchecker"> and 
+#    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
+#    element has 'name' and 'value' attributes that are used by the experiment
+#    performing program to parameterise and perform an experiment.    
+#
+#    ParamsExperiment implements usable load(), save() and reset() methods from 
+#    the IParamsExperiment interface. has_valid_parameters() and 
+#    parameter_names() are left to subclasses to implement: in ParamsExperiment 
+#    they each raise a NotImplementedError when called, as does perform() from 
+#    the Experiment superclass.    
+#    
+#    '''
     _params_program = File(exists=True, executable=True)
     _params_program_kwargs = ListStr
     _output_pattern_list = ListStr
@@ -101,6 +122,20 @@ class Experiment(Params):
 
     def __error_string_changed(self, _error_string):
         print _error_string, '(from Experiment.__error_string_changed)'
+
+
+#from enthought.traits.ui.api import Group, Item
+#
+#error_string_group = Group(
+#    Item('error_string',
+#        show_label=False,
+#        style='readonly',
+#        emphasized=True,
+#    ),
+##    visible_when='len(object.error_string) > 0',
+#    enabled_when='len(object.error_string) > 0',
+#    label='Error(s)',
+#)
 
 
 if __name__ == '__main__':

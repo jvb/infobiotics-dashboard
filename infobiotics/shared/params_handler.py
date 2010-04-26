@@ -164,6 +164,22 @@ class ParamsHandler(Controller):
                     wildcard += '|'
         return wildcard
     
+#    # set _dirty on model and * on title ---  
+#    # self.model._dirty == info.object._dirty == Params()._dirty
+#    # http://code.enthought.com/projects/traits/docs/html/TUIUG/handler.html
+#
+#    def setattr(self, info, object, name, value):
+#        super(ParamsController, self).setattr(info, object, name, value)
+#        self.model._dirty = True
+##        if name in self.model.parameter_names():
+##            self.model._dirty = True
+#        
+#    def object__dirty_changed(self, info):
+#        if info.initialized:
+#            info.ui.title += '*'
+#        else:
+#            self.model._dirty = False
+
 
 if __name__ == '__main__':
     execfile('params.py')
