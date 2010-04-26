@@ -1,10 +1,8 @@
 from infobiotics.shared.api import \
-    Controller, Property, Str, FileDialog, OK, os, List, Unicode    
-from enthought.traits.api import Bool, Button, Str#, Property, cached_property
+    Controller, Property, Str, FileDialog, OK, os, List, Unicode, Bool #, Property, cached_property    
 from enthought.traits.ui.api import Controller, View, Item
-from enthought.traits.file import File
 from enthought.traits.ui.file_dialog2 import (
-    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog #, open_file
+    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
 )
 
 class CopyInputFilesWithRelativePathsExtension(MFileDialogModel):
@@ -77,7 +75,7 @@ class ParamsHandler(Controller):
             title = title,
             id = 'infobiotics.shared.params_handler:ParamsHandler.get_load_file_name_using_Traits_FileDialog',
         )
-        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # kind must never be 'modal'
+        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
             return fd.file_name
         return None
 
@@ -87,9 +85,26 @@ class ParamsHandler(Controller):
 #        file_name = self.get_save_file_name_using_PyFace_FileDialog(title)
         file_name = self.get_save_file_name_using_Traits_FileDialog(title)
         if file_name is not None:
-            if self.copy: #TODO
-                pass 
-            info.object.save(file_name, force=True) # user will have been prompted to overwrite by the GUI
+            result = info.object.save(file_name, force=True) # user will have been prompted to overwrite by the GUI
+            if result and self.copy: #TODO
+                # for each file in parameter_names with exists=True created directories in os.path.dirname(file_name) and copy abspath to there
+                for name in self.model.parameter_names():
+                    trait = self.model.base_trait(name)
+                    type = trait.trait_type.__class__.__name__
+                    if type == 'File':
+                        handler = trait.handler
+                        exists = handler.exists
+                        if exists:
+                            print 'new params file', file_name
+                            print os.path.dirname(file_name)
+                            print getattr(self.model, name)
+                            print handler.directory
+                            print handler.abspath
+                            print os.path.relpath(handler.abspath, handler.directory) 
+                    
+                    
+                    
+                 
             
     def get_save_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
@@ -116,7 +131,7 @@ class ParamsHandler(Controller):
             id = 'infobiotics.shared.params_handler:ParamsHandler.get_save_file_name_using_Traits_FileDialog',
         )
             
-        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # kind must never be 'modal'
+        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
             
             # get whether to copy input files with relative paths or not
             for extension in fd.extensions:

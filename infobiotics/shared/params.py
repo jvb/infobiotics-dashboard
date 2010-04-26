@@ -23,12 +23,12 @@ class Params(HasTraits):
 
     def __params_file_changed(self, _params_file):
         self._dirty = False
-        self._cwd = os.path.dirname(_params_file)
+#        self._cwd = os.path.dirname(_params_file)
         
     _cwd = Directory(exists=True, auto_set=True)
     
     def __cwd_default(self):
-        #TODO try and load _cwd from preferences?
+        #TODO try and load _cwd from preferences? and use in load dialogs
         _cwd = os.getcwd()
 #        logger = logging.getLogger(level=logging.DEBUG)
         logger.debug('__cwd_default(%s) returning %s', self, _cwd)
@@ -93,14 +93,22 @@ class Params(HasTraits):
         # change directory so that setting of File traits with relative paths works
         if not os.path.isabs(file):
             file = os.path.abspath(file)
-        old = os.getcwd() # remember where we are now
-        new = os.path.dirname(file)
-        chdir(new) #TODO just set _cwd here and restore if it fails would be much better than changing the current directory
 
-        # set parameters from dictionary
-        for k, v in parameters_dictionary.iteritems():
-            set_trait_value_from_parameter_value(self, k, v)
-            # must specify directory/directory_name in model_file = File() else: enthought.traits.trait_errors.TraitError: The 'model_file' trait of a McssParams instance must be an existing file name in '/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/shared', but a value of 'module1.sbml' <type 'str'> was specified.
+#        old = os.getcwd() # remember where we are now
+#        new = os.path.dirname(file)
+#        chdir(new) #TODO just set _cwd here and restore if it fails would be much better than changing the current directory
+    
+        old = self._cwd
+        self._cwd = os.path.dirname(file)
+
+        try:
+            # set parameters from dictionary
+            for k, v in parameters_dictionary.iteritems():
+                set_trait_value_from_parameter_value(self, k, v)
+                # must specify directory/directory_name in model_file = File() else: enthought.traits.trait_errors.TraitError: The 'model_file' trait of a McssParams instance must be an existing file name in '/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/shared', but a value of 'module1.sbml' <type 'str'> was specified.
+        except TraitError, e:
+            raise e
+            self._cwd = old
 
         # success!
         
@@ -110,8 +118,8 @@ class Params(HasTraits):
 #        self._update_relative_paths(old, new) #TODO FileDialog.extras -> 'Move input files to new directory?' checkbox
         
         # go back to where we were (for scripts using relative paths)
-        chdir(old)
-        
+#        chdir(old)
+
         logger.debug("Loaded '%s'." % file)
         return True
 
