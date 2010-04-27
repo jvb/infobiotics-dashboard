@@ -1,0 +1,3 @@
+Formulas:
+"P=?[ (Time=1000)U([protein1_(0,0)] >= B ^ [protein1_(0,0)] < B + 5){Time=1000}]"				{B =0:10:300}
+"P=?[ (Time=R*10)U([protein1_(0,0)] >= 50){Time=R*10}]"													{R = 0:20:200}

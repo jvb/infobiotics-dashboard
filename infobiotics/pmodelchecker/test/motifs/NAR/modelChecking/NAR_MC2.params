@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<parameters name="pmodelchecker">
+
+  <!-- parameter definitions -->
+  <parameterSet name="MC2">
+    <parameter name="model_specification" value="negativeAutoregulationModel.lpp"/>
+    <parameter name="model_checker" value="MC2" />
+    <parameter name="simulations_generatedHDF5" value="false" />
+    <parameter name="simulations_generatedMC2" value="false" />
+    <parameter name="mcss_params_file" value="negativeAutoregulation.params" />
+    <parameter name="simulations_file_hdf5" value="NAR_output.h5" />
+    <parameter name="simulations_file_MC2" value="NAR_simulations.mc2" />
+    <parameter name="temporal_formulas" value="formulas.pltl"/>
+    <parameter name="number_samples" value="5000" />
+    <parameter name="results_file" value="NAR_results.mc2" />
+  </parameterSet>
+  
+</parameters>
