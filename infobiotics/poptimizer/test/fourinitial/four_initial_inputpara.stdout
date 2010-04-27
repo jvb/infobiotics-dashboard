@@ -1,0 +1,12 @@
+initialization
+0 1946.00 PluxPR(X=LuxR) PluxPR(X=TetR) Plux(X=GFP) Pconst(X=LacI) 
+1 1946.00 Pconst(X=CI) Plux(X=LuxR) Pconst(X=LacI) 
+2 1946.00 Plux(X=LacI) 
+3 1946.00 Pconst(X=CI) PluxPR(X=TetR) 
+4 1946.00 Pconst(X=LacI) PluxPR(X=TetR) 
+5 1946.00 Pconst(X=CI) PluxPR(X=LuxR) 
+6 1946.00 Pconst(X=CI) Plux(X=LacI) 
+7 1946.00 Plux(X=LacI) 
+8 1946.00 Pconst(X=CI) PluxPR(X=GFP) 
+9 1946.00 Pconst(X=CI) PluxPR(X=GFP) 
+simulatefinalmodel

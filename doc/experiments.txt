@@ -1,0 +1,31 @@
+Infobiotics 'experiments', specifically classes derived from ParamsExperiment, 
+can be interacted with in different 3 ways:
+
+1. Through the Infobiotics Dashboad Envisage application, by clicking on menu 
+   or toolbar actions such as 'simulation (mcss)', 'model checking (PRISM)' and 
+   'optimisation (POptimizer)'. This opens a dialog where the user can edit the 
+   experiments parameters, 'save' and 'load' those parameters, and 'perform'
+   the experiment. Performing an experiment through the dashboard adds an
+   item to the 'Experiment queue' *view* of the 'Experiments' *perspective* 
+   than contains a progress bar and some action buttons that can used to 
+   control experiment such as 'pause', 'view output' or 'view parameters'. When
+   the experiment is complete the appropriate results *editor* is opened. 
+   
+2. Through a script or in the interactive Python interpreter, by:
+   >>> experiment = MC2Experiment(**kwargs)
+   >>> experiment.configure()
+   which will open a dialog as above, except that when the perform button is 
+   clicked the dialog is closed and a progress bar is displayed, which runs 
+   in a separate thread to allow the user to continue their work while the
+   experiment is being performed. When the experiment is complete an 
+   appropriate 'results' *dialog* is opened.
+   
+3. Through a script or in the interactive interpreter by:
+   >>> experiment = PRISMExperiment(**kwargs)
+   >>> experiment.perform()
+   i.e. the experiment is performed outside of an graphical user interface. In 
+   this case the progress of the experiment is output to a stream, 'stdout' by 
+   default. The stdout and stderr streams of the experiment are send to 
+   experiment.stdout and experiment.stderr respectively. These can be merged to
+   stdout with experiment.perform(merge_channels=True).
+    

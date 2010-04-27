@@ -1,0 +1,110 @@
+<PSystem name="lastmodulefile1.txt">
+
+	<alphabetOfObjects>
+		<object name="signal3OC12"/>
+		<object name="source"/>
+		<object name="proteinCI"/>
+		<object name="CI2"/>
+		<object name="proteinLuxR"/>
+		<object name="proteinLuxR_3OC12"/>
+		<object name="LuxR2"/>
+		<object name="rnaCI_RNAP"/>
+		<object name="rnaCI"/>
+		<object name="proteinCI_Rib"/>
+		<object name="rnaGFP_RNAP"/>
+		<object name="rnaGFP"/>
+		<object name="proteinGFP_Rib"/>
+		<object name="proteinGFP"/>
+		<object name="rnaLacI_RNAP"/>
+		<object name="rnaLacI"/>
+		<object name="proteinLacI_Rib"/>
+		<object name="proteinLacI"/>
+		<object name="rnaLuxR_RNAP"/>
+		<object name="rnaLuxR"/>
+		<object name="proteinLuxR_Rib"/>
+		<object name="rnaTetR_RNAP"/>
+		<object name="rnaTetR"/>
+		<object name="proteinTetR_Rib"/>
+		<object name="proteinTetR"/>
+		<object name="Pconst_geneCI"/>
+		<object name="PluxPR_geneGFP"/>
+		<object name="PluxPR_LuxR2_geneGFP"/>
+		<object name="PluxPR_CI2_geneGFP"/>
+		<object name="PluxPR_LuxR2_CI2_geneGFP"/>
+	</alphabetOfObjects>
+
+	<compartmentLabels>
+		<compartmentLabel label="bact"/>
+	</compartmentLabels>
+
+	<membraneStructure>
+		<compartment name="bact" label="bact"/>
+	</membraneStructure>
+
+	<initialMultisets>
+		<initialMultiset label="bact">
+			<object name="Pconst_geneCI" multiplicity="1"/>
+			<object name="PluxPR_geneGFP" multiplicity="1"/>
+		</initialMultiset>
+	</initialMultisets>
+
+	<ruleSets>
+
+		<ruleSet label="bact">
+
+			<module name="Pconst" 
+					 objects="CI"
+					 constants="9.8999996185"
+					 labels="bact"
+					file="library1-lin.xml" />
+			<module name="PluxPR" 
+					 objects="GFP"
+					 constants="8.5000000000,0.2000000030,9.5000000000,1.8000000715,1.0000000000,4.3000001907,9.6999998093,1.6000000238,1.6000000238"
+					 labels="bact"
+					file="library1-lin.xml" />
+			<module name="Deg" 
+					 objects=""
+					 constants="0.1000000015,0.0625000000"
+					 labels="bact"
+					file="library2.xml" />
+			<module name="Dim" 
+					 objects=""
+					 constants="1.0000000000,0.0055399998"
+					 labels="bact"
+					file="library2.xml" />
+			<module name="DimSig" 
+					 objects=""
+					 constants="1.0000000000,0.0153999999,1.0000000000,0.0153999999"
+					 labels="bact"
+					file="library2.xml" />
+			<module name="PostTranscCI" 
+					 objects=""
+					 constants="3.2000000477,0.0199999996,0.0399999991,3.5999999046,0.1000000015"
+					 labels="bact"
+					file="library2.xml" />
+			<module name="PostTranscGFP" 
+					 objects=""
+					 constants="3.3599998951,0.6669999957,0.0399999991,3.7799999714,0.0666999966"
+					 labels="bact"
+					file="library2.xml" />
+			<module name="PostTranscLacI" 
+					 objects=""
+					 constants="2.2200000286,0.0099999998,0.0399999991,2.5000000000,0.0689999983"
+					 labels="bact"
+					file="library2.xml" />
+			<module name="PostTranscLuxR" 
+					 objects=""
+					 constants="3.2000000477,0.3000000119,0.0399999991,3.5999999046,0.0750000030"
+					 labels="bact"
+					file="library2.xml" />
+			<module name="PostTranscTetR" 
+					 objects=""
+					 constants="3.6500000954,0.0099999998,0.0399999991,4.1100001335,0.0689999983"
+					 labels="bact"
+					file="library2.xml" />
+		</ruleSet>
+
+	</ruleSets>
+
+</PSystem>
+
