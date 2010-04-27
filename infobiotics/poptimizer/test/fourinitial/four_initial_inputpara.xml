@@ -6,20 +6,20 @@
 
 <!-- parameter definitions -->
 <parameterSet name="POptimizerParameters">
-	<parameter name="num_initials" value="1"/>
-	<parameter name="target_file" value="target_data_threegene.txt"/>
-	<parameter name="initial_file" value="initial_values_threegene.txt"/>
-	<parameter name="nonfix_module_lib_file" value="threegene_module_library.xml"/>
-	<parameter name="fix_module_lib_file" value="Null"/>
-	<parameter name="molecules" value="1:2:3"/>
+	<parameter name="num_initials" value="4"/>
+	<parameter name="target_file" value="target"/>
+	<parameter name="initial_file" value="initials"/>
+	<parameter name="nonfix_module_lib_file" value="library1-lin.xml"/>
+	<parameter name="fix_module_lib_file" value="library2.xml"/>
+	<parameter name="molecules" value="GFP:LuxR:LacI:TetR:CI"/>
 	<parameter name="para_opti_algo" value="DE"/>
 	<parameter name="fitness_func_type" value="RandomWeightedSum"/>  
-	<parameter name="target_obj_num" value="6"/>
-	<parameter name="maxtime" value="118"/>
-	<parameter name="interval" value="1"/>
-	<parameter name="maxmodulesno" value="4"/>
+	<parameter name="target_obj_num" value="1"/>
+	<parameter name="maxtime" value="170"/>
+	<parameter name="interval" value="10"/>
+	<parameter name="maxmodulesno" value="5"/>
 	<parameter name="simu_runs" value="20"/>
-	<parameter name="seednum" value="4123"/>	
+	<parameter name="seednum" value="1234"/>	
 	<parameter name="show_progress" value="true"/>
         <parameter name="debug_mode" value="false"/>
 	<parameter name="popsize" value="20"/>
@@ -27,11 +27,11 @@
 	<parameter name="percent_paraopti" value="0.1"/>
 	<parameter name="DE_psize" value="20"/>
 	<parameter name="DE_maxgeno" value="10"/>
-	<parameter name="GA_psize" value="30"/>
-	<parameter name="GA_maxxo" value="10"/>
+	<parameter name="GA_psize" value="10"/>
+	<parameter name="GA_maxxo" value="100"/>
 	<parameter name="EDA_psize" value="30"/>
 	<parameter name="EDA_maxgeno" value="2"/>
-	<parameter name="CMAES_maxgeno" value="20"/>
+	<parameter name="CMAES_maxgeno" value="2"/>
 
 </parameterSet>
 

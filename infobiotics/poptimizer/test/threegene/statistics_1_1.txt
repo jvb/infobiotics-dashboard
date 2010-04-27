@@ -1,1 +1,0 @@
-Run0:  7236   242.686295   3.596133   3248    4   PosReg(X=3,Y=1)  NegReg(X=1,Y=3)  UnReg(X=3)  UnReg(X=2)  
