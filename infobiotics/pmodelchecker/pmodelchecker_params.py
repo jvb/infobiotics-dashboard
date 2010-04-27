@@ -1,6 +1,8 @@
 from infobiotics.shared.api import Params, File, Enum, Long, Bool
 
 class PModelCheckerParams(Params):
+    
+    _parameters_name = 'pmodelchecker'
 
     # PRISMExperiment and MC2Experiment
     model_specification = File(filter=['*.xml','*.lpp'], desc='the filename(.lpp) of the model to check') #TODO have multiple wildcards in one filter?
