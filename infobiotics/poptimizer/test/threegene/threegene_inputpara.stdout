@@ -1,0 +1,651 @@
+start Model Optimizer!
+initialization
+
+run0 start
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=0
+i=1
+i=1
+i=2
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=3
+i=4
+i=4
+i=4
+i=4
+i=4
+i=5
+i=5
+i=5
+i=5
+i=5
+i=5
+i=5
+i=5
+i=5
+i=5
+i=6
+i=6
+i=6
+i=6
+i=6
+i=6
+i=6
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=7
+i=8
+i=8
+i=8
+i=8
+i=8
+i=8
+i=8
+i=8
+i=8
+i=8
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=9
+i=10
+i=10
+i=10
+i=11
+i=11
+i=11
+i=11
+i=11
+i=11
+i=11
+i=11
+i=11
+i=11
+i=12
+i=12
+i=12
+i=12
+i=12
+i=12
+i=12
+i=12
+i=12
+i=12
+i=12
+i=13
+i=13
+i=13
+i=13
+i=13
+i=13
+i=13
+i=13
+i=13
+i=13
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=14
+i=15
+i=15
+i=15
+i=15
+i=15
+i=15
+i=15
+i=15
+i=15
+i=15
+i=15
+i=16
+i=16
+i=16
+i=16
+i=16
+i=16
+i=16
+i=16
+i=16
+i=16
+i=16
+i=16
+i=17
+i=17
+i=17
+i=17
+i=17
+i=17
+i=17
+i=17
+i=17
+i=17
+i=17
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=18
+i=19
+init end
+Generation: 0   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 980.192322 
+para gen:1  best fitness: 777.240784 
+para gen:2  best fitness: 777.240784 
+para gen:3  best fitness: 777.240784 
+para gen:4  best fitness: 777.240784 
+para gen:5  best fitness: 706.453369 
+para gen:6  best fitness: 706.453369 
+para gen:7  best fitness: 706.453369 
+para gen:8  best fitness: 706.453369 
+para gen:9  best fitness: 706.453369 
+Generation: 0   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 1192.158569 
+para gen:1  best fitness: 1007.178772 
+para gen:2  best fitness: 655.463257 
+para gen:3  best fitness: 655.463257 
+para gen:4  best fitness: 598.156067 
+para gen:5  best fitness: 598.156067 
+para gen:6  best fitness: 598.156067 
+para gen:7  best fitness: 598.156067 
+para gen:8  best fitness: 598.156067 
+para gen:9  best fitness: 494.358582 
+
+
+Current Gen:0  different models:16 
+
+fitness=388.509888 
+
+0 388.51 PosReg(X=3,Y=1) NegReg(X=1,Y=3) UnReg(X=3) UnReg(X=2) 
+Generation: 1   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 629.384949 
+para gen:1  best fitness: 629.384949 
+para gen:2  best fitness: 629.384949 
+para gen:3  best fitness: 629.384949 
+para gen:4  best fitness: 600.505920 
+para gen:5  best fitness: 600.505920 
+para gen:6  best fitness: 600.505920 
+para gen:7  best fitness: 600.505920 
+para gen:8  best fitness: 600.505920 
+para gen:9  best fitness: 573.429993 
+Generation: 1   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 367.148254 
+para gen:1  best fitness: 367.148254 
+para gen:2  best fitness: 367.148254 
+para gen:3  best fitness: 367.148254 
+para gen:4  best fitness: 367.148254 
+para gen:5  best fitness: 367.148254 
+para gen:6  best fitness: 367.148254 
+para gen:7  best fitness: 365.762970 
+para gen:8  best fitness: 365.762970 
+para gen:9  best fitness: 365.762970 
+
+
+Current Gen:1  different models:14 
+
+fitness=351.542694 
+
+1 351.54 PosReg(X=3,Y=1) NegReg(X=1,Y=3) UnReg(X=3) UnReg(X=2) 
+Generation: 2   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 351.849762 
+para gen:1  best fitness: 351.849762 
+para gen:2  best fitness: 351.849762 
+para gen:3  best fitness: 351.849762 
+para gen:4  best fitness: 351.849762 
+para gen:5  best fitness: 351.849762 
+para gen:6  best fitness: 351.849762 
+para gen:7  best fitness: 351.849762 
+para gen:8  best fitness: 351.849762 
+para gen:9  best fitness: 351.849762 
+
+
+Current Gen:2  different models:17 
+
+fitness=340.189270 
+
+2 340.19 PosReg(X=3,Y=1) NegReg(X=1,Y=3) UnReg(X=3) UnReg(X=2) 
+Generation: 3   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 402.151062 
+para gen:1  best fitness: 402.151062 
+para gen:2  best fitness: 402.151062 
+para gen:3  best fitness: 361.611511 
+para gen:4  best fitness: 361.611511 
+para gen:5  best fitness: 361.611511 
+para gen:6  best fitness: 361.611511 
+para gen:7  best fitness: 361.611511 
+para gen:8  best fitness: 338.461487 
+para gen:9  best fitness: 338.461487 
+Generation: 3   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 347.799652 
+para gen:1  best fitness: 347.799652 
+para gen:2  best fitness: 347.799652 
+para gen:3  best fitness: 347.799652 
+para gen:4  best fitness: 347.799652 
+para gen:5  best fitness: 347.799652 
+para gen:6  best fitness: 347.799652 
+para gen:7  best fitness: 347.799652 
+para gen:8  best fitness: 332.756256 
+para gen:9  best fitness: 332.756256 
+
+
+Current Gen:3  different models:11 
+
+fitness=310.611908 
+
+3 310.61 UnReg(X=2) PosReg(X=2,Y=3) UnReg(X=1) 
+Generation: 4   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 320.027863 
+para gen:1  best fitness: 320.027863 
+para gen:2  best fitness: 320.027863 
+para gen:3  best fitness: 320.027863 
+para gen:4  best fitness: 320.027863 
+para gen:5  best fitness: 320.027863 
+para gen:6  best fitness: 320.027863 
+para gen:7  best fitness: 320.027863 
+para gen:8  best fitness: 320.027863 
+para gen:9  best fitness: 320.027863 
+Generation: 4   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 346.524719 
+para gen:1  best fitness: 346.524719 
+para gen:2  best fitness: 346.524719 
+para gen:3  best fitness: 346.524719 
+para gen:4  best fitness: 346.524719 
+para gen:5  best fitness: 346.524719 
+para gen:6  best fitness: 336.148407 
+para gen:7  best fitness: 324.626343 
+para gen:8  best fitness: 311.279480 
+para gen:9  best fitness: 311.279480 
+
+
+Current Gen:4  different models:9 
+
+fitness=310.611908 
+
+4 310.61 UnReg(X=2) PosReg(X=2,Y=3) UnReg(X=1) 
+Generation: 5   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 344.523560 
+para gen:1  best fitness: 344.523560 
+para gen:2  best fitness: 344.523560 
+para gen:3  best fitness: 344.523560 
+para gen:4  best fitness: 344.523560 
+para gen:5  best fitness: 344.523560 
+para gen:6  best fitness: 344.523560 
+para gen:7  best fitness: 344.523560 
+para gen:8  best fitness: 344.523560 
+para gen:9  best fitness: 343.862762 
+Generation: 5   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 355.958313 
+para gen:1  best fitness: 355.958313 
+para gen:2  best fitness: 355.958313 
+para gen:3  best fitness: 355.958313 
+para gen:4  best fitness: 341.534088 
+para gen:5  best fitness: 341.534088 
+para gen:6  best fitness: 341.534088 
+para gen:7  best fitness: 341.534088 
+para gen:8  best fitness: 336.930359 
+para gen:9  best fitness: 336.930359 
+
+
+Current Gen:5  different models:8 
+
+fitness=290.879761 
+
+5 290.88 UnReg(X=2) PosReg(X=2,Y=3) UnReg(X=1) 
+Generation: 6   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 348.356079 
+para gen:1  best fitness: 348.356079 
+para gen:2  best fitness: 348.356079 
+para gen:3  best fitness: 348.356079 
+para gen:4  best fitness: 348.356079 
+para gen:5  best fitness: 348.356079 
+para gen:6  best fitness: 348.356079 
+para gen:7  best fitness: 348.356079 
+para gen:8  best fitness: 348.356079 
+para gen:9  best fitness: 348.356079 
+Generation: 6   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 313.500336 
+para gen:1  best fitness: 313.500336 
+para gen:2  best fitness: 313.500336 
+para gen:3  best fitness: 313.500336 
+para gen:4  best fitness: 313.500336 
+para gen:5  best fitness: 313.500336 
+para gen:6  best fitness: 313.500336 
+para gen:7  best fitness: 313.500336 
+para gen:8  best fitness: 313.500336 
+para gen:9  best fitness: 313.500336 
+
+
+Current Gen:6  different models:10 
+
+fitness=278.428040 
+
+6 278.43 PosReg(X=3,Y=1) NegReg(X=1,Y=3) UnReg(X=3) UnReg(X=2) 
+Generation: 7   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 286.012360 
+para gen:1  best fitness: 286.012360 
+para gen:2  best fitness: 286.012360 
+para gen:3  best fitness: 286.012360 
+para gen:4  best fitness: 286.012360 
+para gen:5  best fitness: 286.012360 
+para gen:6  best fitness: 286.012360 
+para gen:7  best fitness: 286.012360 
+para gen:8  best fitness: 286.012360 
+para gen:9  best fitness: 286.012360 
+Generation: 7   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 298.755707 
+para gen:1  best fitness: 298.755707 
+para gen:2  best fitness: 298.755707 
+para gen:3  best fitness: 298.755707 
+para gen:4  best fitness: 298.755707 
+para gen:5  best fitness: 298.755707 
+para gen:6  best fitness: 298.755707 
+para gen:7  best fitness: 298.755707 
+para gen:8  best fitness: 298.755707 
+para gen:9  best fitness: 298.755707 
+
+
+Current Gen:7  different models:8 
+
+fitness=278.189850 
+
+7 278.19 PosReg(X=3,Y=1) NegReg(X=1,Y=3) UnReg(X=3) UnReg(X=2) 
+Generation: 8   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 293.920776 
+para gen:1  best fitness: 293.920776 
+para gen:2  best fitness: 293.920776 
+para gen:3  best fitness: 293.920776 
+para gen:4  best fitness: 293.920776 
+para gen:5  best fitness: 293.920776 
+para gen:6  best fitness: 293.920776 
+para gen:7  best fitness: 293.920776 
+para gen:8  best fitness: 293.920776 
+para gen:9  best fitness: 293.920776 
+Generation: 8   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 299.670166 
+para gen:1  best fitness: 299.670166 
+para gen:2  best fitness: 299.670166 
+para gen:3  best fitness: 299.670166 
+para gen:4  best fitness: 299.670166 
+para gen:5  best fitness: 299.670166 
+para gen:6  best fitness: 299.670166 
+para gen:7  best fitness: 299.670166 
+para gen:8  best fitness: 299.670166 
+para gen:9  best fitness: 297.123596 
+
+
+Current Gen:8  different models:8 
+
+fitness=278.189850 
+
+8 278.19 PosReg(X=3,Y=1) NegReg(X=1,Y=3) UnReg(X=3) UnReg(X=2) 
+Generation: 9   do para-optimization for Indivi No:18  
+DE optimization!
+para gen:0  best fitness: 309.927979 
+para gen:1  best fitness: 309.927979 
+para gen:2  best fitness: 309.927979 
+para gen:3  best fitness: 309.927979 
+para gen:4  best fitness: 309.927979 
+para gen:5  best fitness: 303.331024 
+para gen:6  best fitness: 303.331024 
+para gen:7  best fitness: 303.331024 
+para gen:8  best fitness: 303.331024 
+para gen:9  best fitness: 303.331024 
+Generation: 9   do para-optimization for Indivi No:19  
+DE optimization!
+para gen:0  best fitness: 311.128021 
+para gen:1  best fitness: 311.128021 
+para gen:2  best fitness: 311.128021 
+para gen:3  best fitness: 311.128021 
+para gen:4  best fitness: 311.128021 
+para gen:5  best fitness: 311.128021 
+para gen:6  best fitness: 311.128021 
+para gen:7  best fitness: 311.128021 
+para gen:8  best fitness: 311.128021 
+para gen:9  best fitness: 311.128021 
+
+
+Current Gen:9  different models:7 
+
+fitness=278.189850 
+
+9 278.19 PosReg(X=3,Y=1) NegReg(X=1,Y=3) UnReg(X=3) UnReg(X=2) 
+simulatefinalmodel
+get results!
+write best p system begin
+fitness=242.686295
+write best p system end
+write statistics start
+write statistics end
+
+run0 end
