@@ -68,12 +68,8 @@ class McssParams(Params):
 
 
 if __name__ == '__main__':
-    from infobiotics.shared.api import chdir
-    chdir('../../tests/mcss/models')
-#    parameters = McssParams('module1.params')
-##    parameters = McssParams('../../tests/mcss/models/module1.params')
+    parameters = McssParams()
 #    parameters.load('reactions1.params')
 #    print parameters # test __repr__
-    parameters = McssParams()
     parameters.configure()
             

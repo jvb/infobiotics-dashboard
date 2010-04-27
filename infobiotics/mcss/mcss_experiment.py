@@ -27,6 +27,4 @@ class McssExperiment(McssParams, Experiment):
 
 
 if __name__ == '__main__':
-    from infobiotics.shared.api import chdir
-    chdir('../../tests/mcss/models')
-    McssExperiment('module1.params').configure()
+    McssExperiment('test/models/module1.params').configure()

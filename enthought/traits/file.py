@@ -339,7 +339,7 @@ def test_implicit_editor():
             directory_name = 'other_directory',
             absolute = True,
         )
-        other_directory = Directory('/home/jvb/phd/eclipse/infobiotics/dashboard/tests/mcss/models', 
+        other_directory = Directory('/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/mcss/test/models', 
             auto_set=True,
             exists=True,
         )
@@ -411,7 +411,7 @@ def test_explicit_editor2():
     )
     
     class Test(HasTraits):
-        directory = Directory('/home/jvb/phd/eclipse/infobiotics/dashboard/tests/mcss/models', auto_set=True, exists=True)
+        directory = Directory('/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/mcss/test/models', auto_set=True, exists=True)
         
         def _directory_changed(self):
             print 'Test._directory_changed(self):', self.directory
@@ -427,7 +427,7 @@ def test_explicit_editor2():
     #        writable=True,
     #        executable=False,
     #        absolute=True,
-    #        directory='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/mcss/models',
+    #        directory='/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/mcss/test/models',
 #            directory_name='directory',
     #        directory_name='object.directory',
         )
