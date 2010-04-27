@@ -1,3 +1,8 @@
 .pyc
 .svn
 doc/epydoc/
+
+syntax: regexp
+^infobiotics/mcss/results/test/aba_signalling_01\.1\.0\.h5$
+syntax: regexp
+^infobiotics/poptimizer/test/run0\.zip$
