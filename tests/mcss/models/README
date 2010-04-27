@@ -1,7 +1,0 @@
-This directory contains some example models. For each model there are three files: an xml file which can be loaded into CellDesigner; an sbml file which has been exported from CellDesigner and is used by mcss; and an mcss parameter file, which specifies simulation parameters. To execute each model, run mcss with the parameter file. For example, to run the module1 model:
-
-$ mcss module1.params
-
-After mcss has finished running the model you will find a HDF5 in the current directory which contains the results of the simulation e.g. module1.h5. Use mcss-postprocess to view the results.
-
-See the documentation in the doc/ directory for more information.
