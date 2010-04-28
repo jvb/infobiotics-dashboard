@@ -1,9 +1,9 @@
 from __future__ import with_statement
 import os.path
 from common.files import read, write
-from infobiotics.shared.api import ParamsView, Trait, Range, Button, Str, Bool, Property
+from infobiotics.shared.api import ParamsView, Trait, Range, Button, Str, Bool, Instance, DelegatesTo
 from infobiotics.pmodelchecker.api import (
-    prism_params_group, PModelCheckerParamsHandler
+    prism_params_group, PModelCheckerParamsHandler, ModelParameters
 )
 
 prism_params_view = ParamsView(
@@ -14,12 +14,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     traits_view = prism_params_view
     id = 'PRISMParamsHandler'
-
-
-#    _model_parameters = Instance('ModelParameters')
-##    def __model_parameters_default(self):
-##        return ModelParameters(prism_experiment=self)
-#    model_parameters = DelegatesTo('_model_parameters')
 
 
     _prism_model_str = Str
@@ -73,12 +67,37 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                 
     _prism_model_str_changed = Bool(False)
         
-    retranslate_prism_model = Button
+    retranslate_prism_model = Button(desc='whether to translate the PRISM model from the P system model again.\nThis will overwrite any changes that have been made to the PRISM model file.')
     
     def _retranslate_prism_model_fired(self):
         self.model.translate_model_specification_to_PRISM_model()
         self._prism_model_str_changed = False
 
+
+    model_parameters = DelegatesTo('_model_parameters')
+    
+    _model_parameters = Instance('ModelParameters')
+
+#    def __model_parameters_default(self):
+#        return ModelParameters(_cwd=self.model._cwd)
+    def init(self, info):
+        self._model_parameters = ModelParameters(_cwd=self.model._cwd)
+        super(PRISMParamsHandler, self).init(info)
+
+    def save(self, info):
+        info.object.model_parameters = self.model_parameters
+        super(PRISMParamsHandler, self).save(info)
+        
+
+#    def _temporal_formulas_changed(self):
+#        print 'got here'
+#        try:
+#            with open(self.temporal_formulas, 'r') as f: 
+#                _temporal_formulas_str = f.read()
+#                #TODO create TemporalFormula objects by parsing temporal_formulas
+#                
+#        except IOError:
+#            logger.error(e)
 
 
     confidence = Trait(
@@ -103,32 +122,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
             self.sync_trait('confidence_', self.model, alias='confidence', mutual=False)
 
 
-
-#    def object_model_specification_changed(self, info):
-#        trait = info.object.base_trait('PRISM_model')
-#        if info.object.model_specification != '':
-#            trait.handler.writable = True
-#            trait.handler.readable = None
-#            trait.handler.exists = None
-#        else:
-#            trait.handler.writable = None
-#            trait.handler.readable = True
-#            trait.handler.exists = True
-            
-
-
-
-#    _open_in_new_window = Button('TODO') # open in new text editor syncing? #TODO add to view
-    
-#    def _temporal_formulas_changed(self):
-#        print 'got here'
-#        try:
-#            with open(self.temporal_formulas, 'r') as f: 
-#                _temporal_formulas_str = f.read()
-#                #TODO create TemporalFormula objects by parsing temporal_formulas
-#                
-#        except IOError:
-#            logger.error(e)
 
 
 if __name__ == '__main__':

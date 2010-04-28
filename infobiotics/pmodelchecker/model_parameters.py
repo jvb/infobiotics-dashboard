@@ -1,23 +1,25 @@
 from __future__ import with_statement
 from enthought.traits.api import HasTraits, Str, Float, Enum, Property
-from enthought.traits.ui.api import View, Item#, HGroup
+from enthought.traits.ui.api import View, Item, HGroup, VGroup
     
 model_parameter_view = View(
-#    Item('id', style='readonly', label='ID'),
-#    Item('name', style='readonly'),
-    Item('description', style='readonly'),
-    Item('range_or_value', style='custom'),
-#    HGroup(
-#        Item('lower'),
-#        Item('step'),
-#        Item('upper'),
-#        visible_when='object.range_or_value == "range"',
-#    ),
-    Item('lower', visible_when='object.range_or_value == "range"'),
-    Item('step', visible_when='object.range_or_value == "range"'),
-    Item('upper', visible_when='object.range_or_value == "range"'),
-    Item('value', visible_when='object.range_or_value == "value"'),
-    
+    VGroup(
+#        HGroup(Item('id', style='readonly', label='ID'),),
+#        Item('name', style='readonly'),
+        HGroup(Item('description', style='readonly'),),
+        HGroup(Item('range_or_value', style='custom'),),
+        HGroup(
+            Item('lower'),
+            Item('step'),
+            Item('upper'),
+            enabled_when='object.range_or_value == "range"',
+        ),
+#        Item('lower', visible_when='object.range_or_value == "range"'),
+#        Item('step', visible_when='object.range_or_value == "range"'),
+#        Item('upper', visible_when='object.range_or_value == "range"'),
+        HGroup(Item('value', enabled_when='object.range_or_value == "value"'),),
+        show_border=True,
+    ),
     title='Edit model parameter',
     width=400, #height=200,
     resizable=True,
@@ -79,8 +81,7 @@ class MoleculeConstant(ModelParameter):
 from xml.sax import ContentHandler
 
 class ModelParametersXMLReader(ContentHandler):
-    ''' Parses modelParameters.xml created by pmodelchecker --task=Translate
-    and inserts parameters into dictionary passed to __init__.
+    ''' Parses modelParameters.xml created by pmodelchecker --task=Translate.
 
     Adapted from ParamsXMLReader.   
     
@@ -91,26 +92,26 @@ class ModelParametersXMLReader(ContentHandler):
         self.modelVariables = []
         self.ruleConstants = []
         self.moleculeConstants = []
+        self.rewardConstants = []
         self.switch1 = ''
         self.switch2 = ''
         ContentHandler.__init__(self)
 
+    elements1 = ('modelVariables', 'ruleConstants', 'moleculeConstants', 'rewardConstants')
+    elements2 = ('variable', 'constant')
+    
     def startElement(self, name, attrs):
-        if name == 'modelVariables':
+        if name in self.elements1:
             self.switch1 = name
-        elif name == 'ruleConstants':
-            self.switch1 = name
-        elif name == 'moleculeConstants':
-            self.switch1 = name
-        elif name in ('variable', 'constant'):
+        elif name in self.elements2 and self.switch1 in self.elements1:
             if self.switch1 == 'moleculeConstants':
                 self.model_parameter = MoleculeConstant()
-            else:
+            elif self.switch1 == 'ruleConstants': return # TODO
+            elif self.switch1 == 'modelVariables':
                 self.model_parameter = ModelParameter()
+            elif self.switch1 == 'rewardConstants': return #TODO
             self.model_parameter.id=attrs['id']
-        elif name == 'name':
-            self.switch2 = name
-        elif name == 'description':
+        elif name in ('name', 'description', 'value'):
             self.switch2 = name
 
     def characters(self, content):
@@ -121,85 +122,83 @@ class ModelParametersXMLReader(ContentHandler):
                 self.model_parameter.name = content
             elif self.switch2 == 'description':
                 self.model_parameter.description = content
+            elif self.switch2 == 'value' and self.switch1 == 'rewardConstants':
+                pass#self.model_parameter.value = content #TODO
      
     def endElement(self, name):
-        if name in ('variable', 'constant'):
+        if name in self.elements2:
             getattr(self, self.switch1).append(self.model_parameter)
-#            self.model_parameter = None
-#            self.switch2 = ''
 
 
 from enthought.traits.api import File, List, Tuple, Instance, DelegatesTo
 from enthought.traits.ui.table_column import ObjectColumn, ExpressionColumn
 import os
+from enthought.traits.directory import Directory
+from common.files import read
 
 class ModelParameters(HasTraits):
-    file = DelegatesTo('prism_experiment')
-    prism_experiment = Instance('PRISMParams')
-    _modelVariables = List(ModelParameter) 
-    _ruleConstants = List(ModelParameter) 
-    _moleculeConstants = List(MoleculeConstant) 
+    _cwd = Directory
+    modelVariables = List(ModelParameter) 
+    ruleConstants = List(ModelParameter) 
+    moleculeConstants = List(MoleculeConstant) 
     
-    def _file_changed(self):
-        model_parameters_file = os.path.join(os.path.dirname(self.file), 'modelParameters.xml')
+    def __cwd_changed(self):
+        model_parameters_file = os.path.join(self._cwd, 'modelParameters.xml')
         try:
-            with open(model_parameters_file, 'rb') as fh:
+            with read(model_parameters_file) as f:
                 from xml import sax
                 parser = sax.make_parser()
                 handler = ModelParametersXMLReader()
                 parser.setContentHandler(handler)
-                error = None
                 try:
-                    parser.parse(fh) # read parameters from file into dictionary
+                    parser.parse(f) # read parameters from file into dictionary
                 except sax._exceptions.SAXParseException, e: 
                     print e
-                self._modelVariables = handler.modelVariables
-                self._ruleConstants = handler.ruleConstants
-                self._moleculeConstants = handler.moleculeConstants
+                self.modelVariables = handler.modelVariables
+                self.ruleConstants = handler.ruleConstants
+                self.moleculeConstants = handler.moleculeConstants
         except IOError, e:
-            print e, 'model_parameters.ModelParameters._file_changed()'
+            print e, 'ModelParameters.__cwd_changed()'
     
-    _all_model_parameters = Property(depends_on='_modelVariables, _ruleConstants, _moleculeConstants')
+    _all_model_parameters = Property(depends_on='modelVariables, ruleConstants, moleculeConstants')
     def _get__all_model_parameters(self):
-        return self._modelVariables + self._ruleConstants + self._moleculeConstants
+        return self.modelVariables + self.ruleConstants + self.moleculeConstants
     
     model_parameters = Property(depends_on='_all_model_parameters', desc='example_parameter_name=10, another_parameter=low:high:step')
+
     def _get_model_parameters(self):
         return ','.join([model_parameter.value_string for model_parameter in self._all_model_parameters])
+    
     def _set_model_parameters(self):
         ''' loading from a string '''
-        pass
+        pass #TODO
 
     def __len__(self):
-        return len(self._modelVariables) + len(self._ruleConstants) + len(self._moleculeConstants)
+        return len(self.modelVariables) + len(self.ruleConstants) + len(self.moleculeConstants)
 
     def traits_view(self):
         return View(
-            editable_modal_parameters_group,
+            model_parameters_group,
             buttons=['OK','Cancel'],
             title='Edit model parameters',
             resizable=True,
         )
     
     dclick = Tuple(Instance(ModelParameter), Instance(ObjectColumn))
+    
     def _dclick_changed(self, info):
-#        ModelParameterHandler().edit_traits(context={'object':self.dclick[0]})
-        self.dclick[0].edit_traits(kind='modal')
+        self.dclick[0].edit_traits(kind='livemodal')
 
-    selected_model_parameter = Instance(ModelParameter)
-    def _selected_model_parameter_changed(self):
-        print self.selected_model_parameter
     
 from enthought.traits.ui.api import Group, TableEditor
 
 model_parameters_group = Group(
-    Item('_all_model_parameters', #FIXME change to _moleculeConstants if necessary
+    Item('_all_model_parameters', #FIXME change to moleculeConstants if necessary
         show_label=False, 
         editor=TableEditor(
             columns=[
                 ObjectColumn(name='name',
                     width=0.25,
-                    editable=False,
                 ),
                 ExpressionColumn(name='value',
                     expression='object.value_string.split("=")[1]',
@@ -208,30 +207,16 @@ model_parameters_group = Group(
                 ),
                 ObjectColumn(name='description',
                     width=0.5,
-                    editable=False,
                 ),
             ],
             sortable=True,
             dclick='dclick',
-            selected='selected_model_parameter',
-#            edit_view=model_parameter_view,
+            editable=False,
         ),
     ),
-    label='Model parameters',
-)
-
-
-from enthought.traits.ui.api import VSplit 
-
-editable_modal_parameters_group = VSplit(
-    model_parameters_group,
-    Item('selected_model_parameter', style='custom', show_label=False),
+#    label='Model parameters',
 )
 
 
 if __name__ == '__main__':
     execfile('prism_experiment.py')
-
-#if __name__ == '__main__':
-#    object = ModelParameters(file='/home/jvb/phd/eclipse/infobiotics/dashboard/examples/pmodelchecker/Const/modelCheckingPRISM/Const_PRISM.params')
-#    PRISMExperimentHandler().configure_traits(context={'object':object})

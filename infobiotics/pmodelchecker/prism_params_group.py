@@ -1,7 +1,7 @@
 from infobiotics.shared.api import (
     VGroup, Item, HGroup, TextEditor, InstanceEditor, View
 )
-from infobiotics.pmodelchecker.model_parameters import editable_modal_parameters_group
+from infobiotics.pmodelchecker.model_parameters import model_parameters_group
 from infobiotics.pmodelchecker.temporal_formulas import temporal_formulas_group
 
 prism_params_group = VGroup(
@@ -17,22 +17,23 @@ prism_params_group = VGroup(
         ),
         label='PRISM model',
     ),
-#    model_parameters_group,
-    Item('model_parameters', style='custom'),
-#    Item('handler._model_parameters', #TODO 
-#        style='simple', 
-#        show_label=False, 
-#        editor=InstanceEditor(
-#            label='Edit model parameters',
-#            kind='live',
-#            view = View(
-#                editable_modal_parameters_group,
-#                buttons=['OK','Cancel'],
-##                resizable=True, # uncommenting this will stop button doing anything!
-#            ),
-#        ),
-#        visible_when='len(object._model_parameters) > 0',
-#    ),
+    
+#    Item('model_parameters', style='custom'),
+    VGroup(
+        Item(label='Model parameters: (double-click to edit)'),
+        Item('handler._model_parameters', 
+            style='custom',
+            show_label=False, 
+            editor=InstanceEditor(
+                label='Edit model parameters',
+                kind='live',
+                view = View(
+                    model_parameters_group,
+                ),
+            ),
+        ),
+    ),
+    
     temporal_formulas_group,
     VGroup(
         HGroup(
