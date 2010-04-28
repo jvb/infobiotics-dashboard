@@ -4,6 +4,9 @@ class PModelCheckerParams(Params):
     
     _parameters_name = 'pmodelchecker'
 
+#    --positions=<string> A string stating the positions of the P systems under study. The format of the string is the following "x_1,y_1:x_2,y_2: ... :x_n,y_n" #TODO  
+#    --molecular_species=<string> A string stating the name of the molecular species under study. The format of the string is the following "moleculeName_1,moleculeName_2, ...,moleculeName_n" #TODO
+
     # PRISMExperiment and MC2Experiment
     model_specification = File(filter=['*.xml','*.lpp'], desc='the filename(.lpp) of the model to check') #TODO have multiple wildcards in one filter?
     model_checker = Enum(['PRISM','MC2'], desc='the name of model checker to use')
