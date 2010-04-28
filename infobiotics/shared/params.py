@@ -145,8 +145,7 @@ class Params(HasTraits):
                     value = getattr(self, name)
                     if not os.path.isabs(value): 
                         if handler.directory != old_params_file_dir:
-                            print handler.directory, '!=', old_params_file_dir
-                            continue
+                            continue #FIXME what if old_params_file_dir == '' because the params/experiment hasn't been saved yet?
                         if copy: # copy input files whose parameter values are paths relative to _params_file to new _params_file directory
                             src = os.path.normpath(os.path.join(old_params_file_dir, value))
                             dst = os.path.normpath(os.path.join(new_params_file_dir, value))
