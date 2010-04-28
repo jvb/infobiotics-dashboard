@@ -49,17 +49,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     
     _custom_confidence = Range(0.0, 0.5, 0.1, mode='text')
 
-#    def _confidence_changed(self):
-#        if self.confidence == 'custom':
-#            self.model.confidence = self._custom_confidence
-#        else:
-#            self.model.confidence = self.confidence_  
-#
-#    def __custom_confidence_changed(self):
-#        if self.confidence == 'custom':
-#            self.model.confidence = self._custom_confidence
-#        else:
-#            self.model.confidence = self.confidence_  
     def _confidence_changed(self):
         if self.confidence == 'custom':
             self.sync_trait('confidence_', self.model, alias='confidence', mutual=False, remove=True)
