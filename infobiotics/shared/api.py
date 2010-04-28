@@ -105,7 +105,7 @@ percentage = Range(0.0, 100.0, 0.0)
 
 # actions ---
 
-shared_actions = ['Undo', 'Cancel'] 
+shared_actions = ['Undo'] 
 
 load_action = Action(name='Load', action='load', 
     tooltip='Load parameters from a file'
@@ -115,14 +115,14 @@ save_action = Action(name='Save', action='save',
     tooltip='Save the current parameters to a file'
 )
 
-params_actions = [load_action, save_action]
+params_actions = [load_action, save_action, 'OK']
 
 perform_action = Action(name='Perform', action='perform', 
     tooltip='Perform the experiment with the current parameters',
     enabled_when='controller.has_valid_parameters',
 )
 
-experiment_actions = params_actions + [perform_action] 
+experiment_actions = [load_action, save_action, perform_action, 'Cancel'] 
 
 
 # reused Groups ---
