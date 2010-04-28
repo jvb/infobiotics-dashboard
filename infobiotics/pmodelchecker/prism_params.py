@@ -1,7 +1,7 @@
 from infobiotics.pmodelchecker.api import PModelCheckerParams, ModelParameters
 from infobiotics.shared.api import (
     File, Instance, DelegatesTo, Range, Float, Long, Str, Enum, Trait, Bool, 
-    Button, Property
+    Button, Property, can_read
 )
 
 class PRISMParams(PModelCheckerParams):
@@ -58,6 +58,12 @@ class PRISMParams(PModelCheckerParams):
                 'transitions_file',
                 'number_samples',
             ]    
+
+    def load(self, file=''):
+        super(PRISMParams, self).load(file)
+        if not can_read(self.PRISM_model):
+            if self.model_specification != '':
+                self.translate_model_specification_to_PRISM_model()
 
     def translate_model_specification_to_PRISM_model(self):
         from infobiotics.pmodelchecker.api import PRISMExperiment

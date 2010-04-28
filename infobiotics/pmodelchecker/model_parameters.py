@@ -169,9 +169,26 @@ class ModelParameters(HasTraits):
     def _get_model_parameters(self):
         return ','.join([model_parameter.value_string for model_parameter in self._all_model_parameters])
     
-    def _set_model_parameters(self):
-        ''' loading from a string '''
-        pass #TODO
+    def _set_model_parameters(self, model_parameters):
+        model_parameters = model_parameters.split(',')
+        for model_parameter in model_parameters: 
+            name, value = model_parameter.split('=')
+            if ':' in value:
+                range_or_value = 'range'
+                lower, step, upper = value.split(':')
+            else:
+                range_or_value = 'value'
+                value = value
+            for model_parameter in self._all_model_parameters:
+                if model_parameter.name == name:
+                    if range_or_value == 'value':
+                        model_parameter.value = int(value) if isinstance(model_parameter, MoleculeConstant) else float(value)
+                    else:
+                        model_parameter.lower = int(lower) if isinstance(model_parameter, MoleculeConstant) else float(lower)
+                        model_parameter.step = int(step) if isinstance(model_parameter, MoleculeConstant) else float(step)
+                        model_parameter.upper = int(upper) if isinstance(model_parameter, MoleculeConstant) else float(upper)
+                    model_parameter.range_or_value = range_or_value
+                    break
 
     def __len__(self):
         return len(self.modelVariables) + len(self.ruleConstants) + len(self.moleculeConstants)

@@ -78,16 +78,17 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     
     _model_parameters = Instance('ModelParameters')
 
-#    def __model_parameters_default(self):
-#        return ModelParameters(_cwd=self.model._cwd)
     def init(self, info):
+        # must create _model_parameters here rather than __model_parmeters_default() because DelegatesTo('_model_parameters') causes it to be created before _cwd.
         self._model_parameters = ModelParameters(_cwd=self.model._cwd)
+        if info.object.model_parameters != '':
+            self._model_parameters.model_parameters = info.object.model_parameters
         super(PRISMParamsHandler, self).init(info)
 
     def save(self, info):
         info.object.model_parameters = self.model_parameters
         super(PRISMParamsHandler, self).save(info)
-        
+
 
 #    def _temporal_formulas_changed(self):
 #        print 'got here'
