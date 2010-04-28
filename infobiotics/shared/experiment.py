@@ -88,16 +88,20 @@ class Experiment(Params):
             timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
             
             # expect loop
+            patterns_matched = 0
             while True:
                 pattern_index = self.child.expect_list(compiled_pattern_list)
                 if pattern_index == eof_index:
-                    print self.child.before
+                    if patterns_matched == 0:
+                        if self.child.before != '':
+                            print self.child.before
                     # process has finished, perhaps prematurely
                     break
                 elif pattern_index == timeout_index:
                     self.timed_out = True
                 else:
                     self._output_pattern_matched(pattern_index, self.child.match.group())
+                    patterns_matched += 1
     
             self.finished = True
 
