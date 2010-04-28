@@ -1,7 +1,7 @@
 from infobiotics.shared.api import (
     HasTraits, Str, Float, List, Button, Any, 
     View, Item, HGroup, VGroup, ListEditor,  
-    TableEditor, ObjectColumn, 
+    TableEditor, ObjectColumn, Group, Spring,
 )
 
 temporal_formulas_group = VGroup(
@@ -23,10 +23,8 @@ temporal_formulas_group = VGroup(
                     editable=False,
                 ),
             ],
-            selection_mode='row', selected='object.selected_temporal_formula',
-            dclick='_edit_temporal_formula', # fires PModelCheckerHandler.object__edit_temporal_formula_changed()!
-#            dclick='object._edit_temporal_formula', # so does this
-#            dclick='handler.dclick', #TEST event trait on handler, works
+            selection_mode='row', selected='handler.selected_temporal_formula',
+            dclick='handler.edit_temporal_formula', # fires PModelCheckerHandler.object__edit_temporal_formula_changed()!
             rows=2,
 #            menu=Menu(), #TODO
             # not in traitsbackendqt-3.2.0 (@24005)
@@ -38,15 +36,17 @@ temporal_formulas_group = VGroup(
         ),
     ),
     HGroup(
+        Spring(),
         Item('handler.add_temporal_formula', show_label=False),
         Item('handler.edit_temporal_formula', show_label=False, enabled_when='handler.selected_temporal_formula is not None'),
         Item('handler.remove_temporal_formula', show_label=False, enabled_when='len(handler.temporal_formulas) > 0 and handler.selected_temporal_formula is not None'),
+        Spring(),
     ),
 #    label='Temporal formulas',
 )
     
 temporal_formula_view = View(
-    Item('formula'),
+    Item('formula', style='custom', tooltip='Multiple lines will be reduced to a single line with spaces between lines.'), #FIXME use CodeEditor and ability to insert model_parameters 
     Item('parameters', 
         style='custom', 
         editor=ListEditor(
@@ -54,18 +54,25 @@ temporal_formula_view = View(
             use_notebook=True,
             page_name='.name',
             view = View(
-                Item('name'),
-                Item('lower'),
-                Item('step'),
-                Item('upper'),
-                title='Edit Temporal Formula Parameter',
+                Group(    
+                    Item('name'),
+                    HGroup(
+                        Item('lower'),
+                        Item('step'),
+                        Item('upper'),
+                    ),
+                    show_border=True,
+                ),
+#                title='Edit Temporal Formula Parameter',
             ),
             selected='selected',
         ),
     ),
     HGroup(
+        Spring(),
         Item('add_new_parameter', show_label=False), 
         Item('remove_current_parameter', show_label=False),
+        Spring(),
     ),
     buttons = [
         'OK', 
@@ -79,8 +86,8 @@ temporal_formula_view = View(
 class TemporalFormulaParameter(HasTraits):
     name = Str
     lower = Float(0)
+    step = Float(0.5)
     upper = Float(1)
-    step=Float(0.5)
 
 class TemporalFormula(HasTraits):
     '''
@@ -132,6 +139,9 @@ class TemporalFormula(HasTraits):
                 parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
         self.parameters_string = parameters_string
 
+    def _formula_changed(self):
+        self.formula = ' '.join(self.formula.split('\n')).replace('  ', ' ')
+
 #    def __eq__(self, other):
 #        if self.formula == other.formula:
 #            matching_parameters = []
@@ -148,5 +158,7 @@ class TemporalFormula(HasTraits):
 
 
 if __name__ == '__main__':
-    execfile('mc2_experiment.py')
+#    execfile('mc2_experiment.py')
+    execfile('prism_params.py')
+    
     

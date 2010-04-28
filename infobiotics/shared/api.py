@@ -79,7 +79,7 @@ from enthought.traits.api import (
 from enthought.traits.ui.api import (
     Handler, Controller, ModelView, View, Item, Action, DefaultOverride, 
     Group, VGroup, Item, HGroup, UIInfo, TextEditor, TableEditor, 
-    InstanceEditor, VSplit
+    InstanceEditor, VSplit, Spring, 
 )
     
 from enthought.traits.ui.table_column import ObjectColumn

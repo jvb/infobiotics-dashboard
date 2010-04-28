@@ -18,9 +18,9 @@ class PRISMParams(PModelCheckerParams):
 
     model_parameters = Str(desc="a string stating the values of the parameters in the model as follows: 'param=lb:ub:s,param=lb:ub:s,...' where lb is the lower bound, up is the upper bound and s is the step")
 
-    temporal_formulas = File(readable=True) #TODO desc
-    
-    formula_parameters = Str #TODO desc #FIXME PRISM-specific?
+    #TODO move to PModelCheckerParams?
+    temporal_formulas = File(writable=True) #TODO desc
+    formula_parameters = Str #TODO desc
     
     task = Enum(['Approximate','Translate','Build','Verify'])  #TODO desc
     confidence = Float(0.1, desc='the confidence level used when approximating the answer to a formula')
@@ -31,7 +31,7 @@ class PRISMParams(PModelCheckerParams):
     number_samples = Long(desc='the number of simulations to used when approximation is applied')
     
     def parameter_names(self):
-        ''' Returns the subset of PModelChecker parameter names required for a 
+        ''' Returns the subset of parameter names required for a particular 
         PRISMExperiment.
         
         '''
@@ -49,7 +49,7 @@ class PRISMParams(PModelCheckerParams):
                 'PRISM_model',
                 'model_parameters',
                 'temporal_formulas',
-    #            'formula_parameters', # done by model checker
+                'formula_parameters',
                 'task',
                 'confidence',
                 'precision',

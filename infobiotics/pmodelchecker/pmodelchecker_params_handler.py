@@ -1,3 +1,4 @@
+from common.files import read, write
 from infobiotics.shared.api import ParamsHandler, List, Button, Instance
 from infobiotics.pmodelchecker.api import TemporalFormula, TemporalFormulaParameter
 
@@ -5,48 +6,12 @@ class PModelCheckerParamsHandler(ParamsHandler):
     ''' Contains traits common to PRISMParamsHandler and MC2ParamsHandler. '''
     
     temporal_formulas = List(TemporalFormula)
-    add_temporal_formula = Button
-    edit_temporal_formula = Button
-    remove_temporal_formula = Button
-    selected_temporal_formula = Instance(TemporalFormula)
     
-    def _add_temporal_formula_changed(self): # changed works, even for a button
-        formula = TemporalFormula()
-        formula.edit_traits(kind='modal')
-#        # only add formulas with new parameters 
-#        for temporal_formula in self.temporal_formulas:
-#            if temporal_formula == formula:
-#                return
-        self.temporal_formulas.append(formula)
-        
-    def _edit_temporal_formula_changed(self):
-        formula = self.selected_temporal_formula
-        if formula is not None:
-            formula.edit_traits(kind='modal')
-        
-    def _remove_temporal_formula_changed(self):
-        formula = self.selected_temporal_formula
-        if formula is not None:
-            self.temporal_formulas.remove(formula)
-            self.selected_temporal_formula = None
-    
-    #    def _temporal_formulas_changed(self):
-#        print 'got here'
-#        try:
-#            with open(self.temporal_formulas, 'r') as f: 
-#                _temporal_formulas_str = f.read()
-#                #TODO create TemporalFormula objects by parsing temporal_formulas
-#                
-#        except IOError:
-#            logger.error(e)
-
     def object_temporal_formulas_changed(self, info):
-        from common.files import read
         try:
-            print info.object.temporal_formulas_
             with read(info.object.temporal_formulas_) as f: 
                 lines = f.readlines()
-                if lines[0].strip() != 'Formulas:':
+                if len(lines) == 0 or lines[0].strip() != 'Formulas:':
                     return
                 del self.temporal_formulas[:] # clear list
                 for line in lines[1:]:
@@ -85,16 +50,43 @@ class PModelCheckerParamsHandler(ParamsHandler):
             print e
 
     def _temporal_formulas_items_changed(self):
-        ''' Refreshes temporal_formulas.
-        
-        '''
+        ''' Refreshes temporal_formulas. '''
         temporal_formulas = self.temporal_formulas
         self.temporal_formulas = []
         self.temporal_formulas = temporal_formulas
+    
+    selected_temporal_formula = Instance(TemporalFormula)
+
+    add_temporal_formula = Button
+    edit_temporal_formula = Button
+    remove_temporal_formula = Button
+    
+    def _add_temporal_formula_changed(self): # changed works, even for a button
+        formula = TemporalFormula()
+        if formula.edit_traits(kind='modal').result:
+#        # only add formulas with new parameters 
+#        for temporal_formula in self.temporal_formulas:
+#            if temporal_formula == formula:
+#                return
+            self.temporal_formulas.append(formula)
+        
+    def _edit_temporal_formula_changed(self):
+        formula = self.selected_temporal_formula
+        if formula is not None:
+            formula.edit_traits(kind='modal')
+        
+    def _remove_temporal_formula_changed(self):
+        formula = self.selected_temporal_formula
+        if formula is not None:
+            self.temporal_formulas.remove(formula)
+            self.selected_temporal_formula = None
+
+    def save(self, info):
+        super(PModelCheckerParamsHandler, self).save(info)
+        self.write_temporal_formulas_file()
 
     def write_temporal_formulas_file(self):
-        # write temporal formulas to file #TODO repeat for PRISMExperiment
-        with open(self.temporal_formulas, 'w') as temporal_formulas_file:
+        with write(self.model.temporal_formulas_) as f:
             '''
             Formulas:
             "P=?[ (Time=1000)U([protein1_(0,0)] >= B ^ [protein1_(0,0)] < B + 5){Time=1000}]" {B =0:10:300}
@@ -107,13 +99,10 @@ class PModelCheckerParamsHandler(ParamsHandler):
                 for i, parameter in enumerate(temporal_formula.parameters):
                     if i != 0:
                         line += ', ' 
-                    line += '%s=%s:%s:%s' % (parameter.name, parameter.lower_bound, parameter.step, parameter.upper_bound)
-                line += '}'
-#                line += ' ' 
-                line += '\n'             
-                lines += line                        
-            temporal_formulas_file.writelines(lines)
-            # with auto-closes file here at end of it's suite
+                    line += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
+                line += '}\n'
+                lines.append(line)
+            f.writelines(lines)
 
 
 if __name__ == '__main__':
