@@ -62,6 +62,11 @@ class Experiment(Params):
             '''
             starting = True
     
+            if self._params_program == '':
+                print "warning self._params_program == ''"
+            if self._params_file == '':
+                print "warning self._params_file == ''"
+    
             # spawn process
             self.child = expect.spawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
             # note that the expect module doesn't like list traits so we copy them using [:] 
@@ -86,6 +91,7 @@ class Experiment(Params):
             while True:
                 pattern_index = self.child.expect_list(compiled_pattern_list)
                 if pattern_index == eof_index:
+                    print self.child.before
                     # process has finished, perhaps prematurely
                     break
                 elif pattern_index == timeout_index:
@@ -136,8 +142,3 @@ class Experiment(Params):
 #    enabled_when='len(object.error_string) > 0',
 #    label='Error(s)',
 #)
-
-
-if __name__ == '__main__':
-    execfile('../mcss/mcss_experiment.py')
-    
