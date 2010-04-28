@@ -172,7 +172,7 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     buttons = shared_actions + params_actions
     resizable = True
     id = 'ParamsView'
-    statusbar = [StatusItem(name='_cwd', width=1.0)]
+#    statusbar = [StatusItem(name='_cwd', width=1.0)]
     key_bindings = params_key_bindings
     
 
