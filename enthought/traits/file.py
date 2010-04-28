@@ -253,6 +253,7 @@ class File(BaseFile):
         else:
             self.abspath = value
 #        print 'self.abspath =', self.abspath
+        object.__dict__[ name + '_' ] = self.abspath
     
     def create_editor(self):
         from enthought.traits.ui.qt4.file_editor2 import FileEditor
