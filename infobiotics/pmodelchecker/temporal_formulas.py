@@ -3,6 +3,47 @@ from infobiotics.shared.api import (
     View, Item, HGroup, VGroup, ListEditor,  
     TableEditor, ObjectColumn, 
 )
+
+temporal_formulas_group = VGroup(
+    HGroup(   
+        Item('temporal_formulas'),#, label='File'),
+    ),
+    Item('handler.temporal_formulas', 
+        label='Temporal formulas', 
+        show_label=False,
+        editor=TableEditor(
+            columns=[
+                ObjectColumn(name='formula',
+                    width=0.5,
+                    editable=False,
+                ),
+                ObjectColumn(name='parameters_string', 
+                    label='Parameters (name=lower:step:upper)', 
+                    width=0.5,
+                    editable=False,
+                ),
+            ],
+            selection_mode='row', selected='object.selected_temporal_formula',
+            dclick='_edit_temporal_formula', # fires PModelCheckerHandler.object__edit_temporal_formula_changed()!
+#            dclick='object._edit_temporal_formula', # so does this
+#            dclick='handler.dclick', #TEST event trait on handler, works
+            rows=2,
+#            menu=Menu(), #TODO
+            # not in traitsbackendqt-3.2.0 (@24005)
+#            on_dclick=on_dclick, 
+#            reorderable=True,
+#            deletable=True,
+#            editable=True, row_factory=TemporalFormula, auto_add=True,
+#            editable=True, edit_view=temporal_formula_view,
+        ),
+    ),
+    HGroup(
+        Item('handler.add_temporal_formula', show_label=False),
+        Item('handler.edit_temporal_formula', show_label=False, enabled_when='handler.selected_temporal_formula is not None'),
+        Item('handler.remove_temporal_formula', show_label=False, enabled_when='len(handler.temporal_formulas) > 0 and handler.selected_temporal_formula is not None'),
+    ),
+#    label='Temporal formulas',
+)
     
 temporal_formula_view = View(
     Item('formula'),
@@ -14,9 +55,9 @@ temporal_formula_view = View(
             page_name='.name',
             view = View(
                 Item('name'),
-                Item('lower_bound'),
+                Item('lower'),
                 Item('step'),
-                Item('upper_bound'),
+                Item('upper'),
                 title='Edit Temporal Formula Parameter',
             ),
             selected='selected',
@@ -37,8 +78,8 @@ temporal_formula_view = View(
 
 class TemporalFormulaParameter(HasTraits):
     name = Str
-    lower_bound = Float(0)
-    upper_bound = Float(1)
+    lower = Float(0)
+    upper = Float(1)
     step=Float(0.5)
 
 class TemporalFormula(HasTraits):
@@ -88,7 +129,7 @@ class TemporalFormula(HasTraits):
             if len(parameter.name) > 0:
                 if i != 0:
                     parameters_string += ', ' 
-                parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower_bound, parameter.step, parameter.upper_bound)
+                parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
         self.parameters_string = parameters_string
 
 #    def __eq__(self, other):
@@ -104,47 +145,6 @@ class TemporalFormula(HasTraits):
 #        return False
         
     traits_view = temporal_formula_view
-
-temporal_formulas_group = VGroup(
-    HGroup(   
-        Item('temporal_formulas', label='File'),
-    ),
-    Item('handler._temporal_formulas_list', 
-        label='Temporal formulas', 
-        show_label=False,
-        editor=TableEditor(
-            columns=[
-                ObjectColumn(name='formula',
-                    width=0.5,
-                    editable=False,
-                ),
-                ObjectColumn(name='parameters_string', 
-                    label='Parameters (name=lower:step:upper)', 
-                    width=0.5,
-                    editable=False,
-                ),
-            ],
-            selection_mode='row', selected='object.selected_temporal_formula',
-            dclick='_edit_temporal_formula', # fires PModelCheckerHandler.object__edit_temporal_formula_changed()!
-#            dclick='object._edit_temporal_formula', # so does this
-#            dclick='handler.dclick', #TEST event trait on handler, works
-            rows=2,
-#            menu=Menu(), #TODO
-            # not in traitsbackendqt-3.2.0 (@24005)
-#            on_dclick=on_dclick, 
-#            reorderable=True,
-#            deletable=True,
-#            editable=True, row_factory=TemporalFormula, auto_add=True,
-#            editable=True, edit_view=temporal_formula_view,
-        ),
-    ),
-    HGroup(
-        Item('handler._add_temporal_formula', show_label=False),
-        Item('handler._edit_temporal_formula', show_label=False, enabled_when='object.selected_temporal_formula is not None'),
-        Item('handler._remove_temporal_formula', show_label=False, enabled_when='len(object._temporal_formulas_list) > 0 and object._selected_temporal_formula is not None'),
-    ),
-    label='Temporal formulas',
-)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 from infobiotics.shared.api import (
-    VGroup, Item, HGroup, TextEditor, InstanceEditor, View
+    VGroup, Item, HGroup, InstanceEditor, View, VSplit
 )
 from infobiotics.pmodelchecker.model_parameters import model_parameters_group
 from infobiotics.pmodelchecker.temporal_formulas import temporal_formulas_group
@@ -15,29 +15,31 @@ prism_params_group = VGroup(
             Item('PRISM_model', label='PRISM model'),
             Item('handler.edit_prism_model', label='Edit', show_label=False, enabled_when='object.PRISM_model != ""'),
         ),
-        label='PRISM model',
+#        label='PRISM model',
     ),
     
-#    Item('model_parameters', style='custom'),
-    VGroup(
-        Item(label='Model parameters: (double-click to edit)'),
-        Item('handler._model_parameters', 
-            style='custom',
-            show_label=False, 
-            editor=InstanceEditor(
-                label='Edit model parameters',
-                kind='live',
-                view = View(
-                    model_parameters_group,
+#    VSplit(
+        VGroup(
+            Item(label='Model parameters: (double-click to edit)'),
+            Item('handler._model_parameters', 
+                style='custom',
+                show_label=False, 
+                editor=InstanceEditor(
+                    label='Edit model parameters',
+                    kind='live',
+                    view = View(
+                        model_parameters_group,
+                    ),
                 ),
             ),
         ),
-    ),
-    
-    temporal_formulas_group,
+        
+        temporal_formulas_group,
+#    ),
+
     VGroup(
         HGroup(
-            Item('task', emphasized=True),
+            Item('task'),#, emphasized=True),
         ),
 #        VGroup(
 #            Item('model_parameters', enabled_when='object.task == "Approximate" or object.task == "Verify"'),
@@ -55,7 +57,7 @@ prism_params_group = VGroup(
             Item('states_file', enabled_when='object.task=="Build"'),
             Item('transitions_file', enabled_when='object.task=="Build"'),
         ),
-        label='PRISM parameters'
+#        label='PRISM parameters'
     ),
     show_border=True,
 )

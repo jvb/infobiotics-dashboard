@@ -1,5 +1,5 @@
 from model_parameters import ModelParameters
-from temporal_formulas import TemporalFormula
+from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 from prism_params_group import prism_params_group
 from pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
 from pmodelchecker_experiment import PModelCheckerExperiment

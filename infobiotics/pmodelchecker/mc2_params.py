@@ -109,27 +109,27 @@ class MC2Params(PModelCheckerParams):
             # save _mcss_experiment.file with absolute path
             pass 
             
-        # write temporal formulas to file #TODO repeat for PRISMExperiment
-        with open(self.temporal_formulas, 'w') as temporal_formulas_file:
-            '''
-            Formulas:
-            "P=?[ (Time=1000)U([protein1_(0,0)] >= B ^ [protein1_(0,0)] < B + 5){Time=1000}]" {B =0:10:300}
-            "P=?[ (Time=R*10)U([protein1_(0,0)] >= 50){Time=R*10}]" {R = 0:20:200}
-            '''
-            lines = ['Formulas:\n']
-            for temporal_formula in self._temporal_formulas_list:
-                line = '"%s"' % temporal_formula.formula
-                line += ' {'
-                for i, parameter in enumerate(temporal_formula.parameters):
-                    if i != 0:
-                        line += ', ' 
-                    line += '%s=%s:%s:%s' % (parameter.name, parameter.lower_bound, parameter.step, parameter.upper_bound)
-                line += '}'
-#                line += ' ' 
-                line += '\n'             
-                lines += line                        
-            temporal_formulas_file.writelines(lines)
-            # with auto-closes file here at end of it's suite
+#        # write temporal formulas to file #TODO repeat for PRISMExperiment
+#        with open(self.temporal_formulas, 'w') as temporal_formulas_file:
+#            '''
+#            Formulas:
+#            "P=?[ (Time=1000)U([protein1_(0,0)] >= B ^ [protein1_(0,0)] < B + 5){Time=1000}]" {B =0:10:300}
+#            "P=?[ (Time=R*10)U([protein1_(0,0)] >= 50){Time=R*10}]" {R = 0:20:200}
+#            '''
+#            lines = ['Formulas:\n']
+#            for temporal_formula in self._temporal_formulas_list:
+#                line = '"%s"' % temporal_formula.formula
+#                line += ' {'
+#                for i, parameter in enumerate(temporal_formula.parameters):
+#                    if i != 0:
+#                        line += ', ' 
+#                    line += '%s=%s:%s:%s' % (parameter.name, parameter.lower_bound, parameter.step, parameter.upper_bound)
+#                line += '}'
+##                line += ' ' 
+#                line += '\n'             
+#                lines += line                        
+#            temporal_formulas_file.writelines(lines)
+#            # with auto-closes file here at end of it's suite
         
         super(MC2Experiment, self).perform()
 
@@ -169,52 +169,52 @@ class MC2Params(PModelCheckerParams):
     def _get__max_number_samples(self):
         return self._number_of_runs
 
-    def _temporal_formulas_changed(self):
-        from infobiotics.dashboard.shared.files import can_read
-        if not can_read(self.temporal_formulas):
-            return
-        try:
-            with open(self.temporal_formulas, 'r') as f: 
-                lines = f.readlines()
-                if lines[0].strip() != 'Formulas:':
-                    return
-                else:
-                    del self._temporal_formulas_list[:] # clear list
-                    for line in lines[1:]:
-                        line = line.strip()
-                        if len(line) != 0:
-                            first = line.find('"')
-                            second = line.find('"', first+1)
-                            formula = line[first+1:second]
-                            parameters_start = line.find('{', second+1)
-                            parameters_end = line.find('}', parameters_start+1)
-                            #{B=0:10:300,R=1:1:10}
-                            parameters = line[parameters_start+1:parameters_end]
-                            parameters_list = []
-                            for parameter in parameters.split(','):
-#                                print parameter
-                                name_and_values = parameter.split('=')
-                                name = name_and_values[0]
-                                values = name_and_values[1].split(':')
-                                lower = values[0]
-                                step = values[1]
-                                upper = values[2]
-#                                print '{%s=%s:%s:%s}' % (name, lower, step, upper)
-                                parameters_list.append(TemporalFormulaParameter(name=name, lower_bound=float(lower), step=float(step), upper_bound=float(upper)))
-
-                            temporal_formula = TemporalFormula(formula=formula, parameters=parameters_list)
-                            self._temporal_formulas_list.append(temporal_formula)
-                                
-        except IOError, e:
-            logger.error('%s, _temporal_formulas_changed()' % e)
-
-    def __temporal_formulas_list_items_changed(self):
-        ''' Refreshes _temporal_formulas_list.
-        
-        '''
-        _temporal_formulas_list = self._temporal_formulas_list
-        self._temporal_formulas_list = []
-        self._temporal_formulas_list = _temporal_formulas_list
+#    def _temporal_formulas_changed(self):
+#        from infobiotics.dashboard.shared.files import can_read
+#        if not can_read(self.temporal_formulas):
+#            return
+#        try:
+#            with open(self.temporal_formulas, 'r') as f: 
+#                lines = f.readlines()
+#                if lines[0].strip() != 'Formulas:':
+#                    return
+#                else:
+#                    del self._temporal_formulas_list[:] # clear list
+#                    for line in lines[1:]:
+#                        line = line.strip()
+#                        if len(line) != 0:
+#                            first = line.find('"')
+#                            second = line.find('"', first+1)
+#                            formula = line[first+1:second]
+#                            parameters_start = line.find('{', second+1)
+#                            parameters_end = line.find('}', parameters_start+1)
+#                            #{B=0:10:300,R=1:1:10}
+#                            parameters = line[parameters_start+1:parameters_end]
+#                            parameters_list = []
+#                            for parameter in parameters.split(','):
+##                                print parameter
+#                                name_and_values = parameter.split('=')
+#                                name = name_and_values[0]
+#                                values = name_and_values[1].split(':')
+#                                lower = values[0]
+#                                step = values[1]
+#                                upper = values[2]
+##                                print '{%s=%s:%s:%s}' % (name, lower, step, upper)
+#                                parameters_list.append(TemporalFormulaParameter(name=name, lower_bound=float(lower), step=float(step), upper_bound=float(upper)))
+#
+#                            temporal_formula = TemporalFormula(formula=formula, parameters=parameters_list)
+#                            self._temporal_formulas_list.append(temporal_formula)
+#                                
+#        except IOError, e:
+#            logger.error('%s, _temporal_formulas_changed()' % e)
+#
+#    def __temporal_formulas_list_items_changed(self):
+#        ''' Refreshes _temporal_formulas_list.
+#        
+#        '''
+#        _temporal_formulas_list = self._temporal_formulas_list
+#        self._temporal_formulas_list = []
+#        self._temporal_formulas_list = _temporal_formulas_list
         
     _mcss_experiment = Instance(McssExperiment, McssExperiment())
     

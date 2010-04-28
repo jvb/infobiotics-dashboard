@@ -18,7 +18,7 @@ class PRISMParams(PModelCheckerParams):
 
     model_parameters = Str(desc="a string stating the values of the parameters in the model as follows: 'param=lb:ub:s,param=lb:ub:s,...' where lb is the lower bound, up is the upper bound and s is the step")
 
-    temporal_formulas = File #TODO desc
+    temporal_formulas = File(readable=True) #TODO desc
     
     formula_parameters = Str #TODO desc #FIXME PRISM-specific?
     

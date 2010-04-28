@@ -90,17 +90,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         super(PRISMParamsHandler, self).save(info)
 
 
-#    def _temporal_formulas_changed(self):
-#        print 'got here'
-#        try:
-#            with open(self.temporal_formulas, 'r') as f: 
-#                _temporal_formulas_str = f.read()
-#                #TODO create TemporalFormula objects by parsing temporal_formulas
-#                
-#        except IOError:
-#            logger.error(e)
-
-
     confidence = Trait(
         '90% (0.1)',
         {
@@ -121,8 +110,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         else:
             self.sync_trait('_custom_confidence', self.model, alias='confidence', mutual=False, remove=True)
             self.sync_trait('confidence_', self.model, alias='confidence', mutual=False)
-
-
 
 
 if __name__ == '__main__':
