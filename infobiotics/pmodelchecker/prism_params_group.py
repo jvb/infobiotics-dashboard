@@ -8,15 +8,13 @@ prism_params_group = VGroup(
     VGroup(
         Item('_cwd', label='Working directory'),     
     ),
+    Item('model_specification', label='P system model'),
     VGroup(
-        Item('model_specification', label='P system model'),
         HGroup(
+            Item('handler.retranslate_prism_model', label='Retranslate', show_label=False, visible_when='handler._prism_model_str_changed'),
             Item('PRISM_model', label='PRISM model'),
-            Item('handler.generate_prism_model', label='Generate from P system', show_label=False, enabled_when='object.model_specification != ""'),
-#            Item('_show_prism_model', label='Show'),
-#            Item('edit_prism_model', label='Edit', show_label=False),
+            Item('handler.edit_prism_model', label='Edit', show_label=False, enabled_when='object.PRISM_model != ""'),
         ),
-        Item('handler._prism_model_str', show_label=False, style='custom', editor=TextEditor(), visible_when='len(handler._prism_model_str) > 0'),#enabled_when='handler._show_prism_model'),
         label='PRISM model',
     ),
 #    model_parameters_group,
@@ -49,6 +47,7 @@ prism_params_group = VGroup(
             Item('handler._custom_confidence', show_label=False, enabled_when='handler.confidence=="custom"'),
             Item('precision', enabled_when='object.task=="Approximate"'),
             Item('number_samples', label='Number of samples', enabled_when='object.task=="Approximate"'),
+            enabled_when='task != "Translate"',
         ),
         VGroup(
             Item('results_file', enabled_when='object.task == "Approximate" or object.task == "Verify"'),

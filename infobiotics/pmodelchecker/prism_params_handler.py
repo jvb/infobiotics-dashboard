@@ -1,11 +1,10 @@
 from __future__ import with_statement
 import os.path
-from common.files import read
-from infobiotics.shared.api import ParamsView, Trait, Range, Button, Str, Bool
+from common.files import read, write
+from infobiotics.shared.api import ParamsView, Trait, Range, Button, Str, Bool, Property
 from infobiotics.pmodelchecker.api import (
-    prism_params_group, PModelCheckerParamsHandler,
+    prism_params_group, PModelCheckerParamsHandler
 )
-
 
 prism_params_view = ParamsView(
     prism_params_group,
@@ -23,17 +22,63 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 #    model_parameters = DelegatesTo('_model_parameters')
 
 
-    generate_prism_model = Button
-    
-    def _generate_prism_model_fired(self):
-        #TODO do some validation
-#            path = self.path
-        from tempfile import NamedTemporaryFile
-        tmp = NamedTemporaryFile().name
+    _prism_model_str = Str
 
-        generate_experiment = PRISMExperiment(model_specification=self.model_specification, PRISM_model=self.PRISM_model, task='Translate')
-        generate_experiment.save(tmp)
-        generate_experiment.perform()
+    def object_PRISM_model_changed(self, info):
+        file = os.path.abspath(os.path.join(info.object._cwd, info.object.PRISM_model)) #TODO use shadow trait for abspath
+        if os.path.exists(file) and not os.path.isdir(file): 
+            try:
+                with read(file) as f:
+                    self._prism_model_str = f.read()
+            except IOError, e:
+                print e
+        else:
+            self._prism_model_str = ''
+
+    edit_prism_model = Button
+
+    def _edit_prism_model_fired(self):
+        _prism_model_str = self._prism_model_str
+        if self._prism_model_str == '':
+            self.model.translate_model_specification_to_PRISM_model()
+        from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor
+        edit_prism_model_view = View(
+                Group(
+                    HGroup(
+                        Item(label='Editing PRISM model:'),
+                        Item('PRISM_model', show_label=False, style='readonly'),
+                    ),
+                    Item('handler._prism_model_str',
+                        show_label = False, 
+                        style = 'custom',
+                        editor = CodeEditor(lexer='null'),
+                    ),
+                    Item(label='Ctrl-F toggles Find, Ctrl-D duplicates line.'),
+                    show_border = True,
+                ),
+                buttons = ['OK','Revert','Undo','Redo'],
+                width=640, height=480,
+                resizable = True,
+                id = 'edit_prism_model_view',
+            )
+        if self.edit_traits(view = edit_prism_model_view, kind='livemodal').result: # if kind is not live no traits are updated! (translate has model_specification='')
+            if self._prism_model_str != _prism_model_str:
+                file = os.path.abspath(os.path.join(self.model._cwd, self.model.PRISM_model)) #TODO use shadow trait for abspath
+                try:
+                    with write(file) as f:
+                        f.write(self._prism_model_str)
+                except IOError, e:
+                    print e
+                self._prism_model_str_changed = True
+                
+    _prism_model_str_changed = Bool(False)
+        
+    retranslate_prism_model = Button
+    
+    def _retranslate_prism_model_fired(self):
+        self.model.translate_model_specification_to_PRISM_model()
+        self._prism_model_str_changed = False
+
 
 
     confidence = Trait(
@@ -70,41 +115,8 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 #            trait.handler.readable = True
 #            trait.handler.exists = True
             
-    _prism_model_str = Str
-    _prism_model_dirty = Bool(False)
 
-    def _prism_model_str_changed(self, value):
-        self._prism_model_dirty = True
-    
-    def object_PRISM_model_changed(self, info):
-        file = os.path.abspath(os.path.join(info.object._cwd, info.object.PRISM_model)) 
-        if os.path.exists(file) and not os.path.isdir(file): 
-            try:
-                with read(file) as f:
-                    self._prism_model_str = f.read()
-                    self._prism_model_dirty = False
-            except IOError, e:
-                print e
-        else:
-            self._prism_model_str = ''
-            self._prism_model_dirty = False
 
-    _show_prism_model = Bool(False)
-    
-    edit_prism_model = Button
-
-    def _edit_prism_model_fired(self):
-        from enthought.traits.ui.api import View, Item, CodeEditor, TextEditor
-        self.edit_traits(
-            kind='nonmodal', 
-            view=View(
-                Item('_prism_model_str', 
-                     style='custom',
-                     editor=TextEditor()), 
-                buttons=['OK','Revert','Undo','Redo'],
-                resizable=True,
-            ),
-        )
 
 #    _open_in_new_window = Button('TODO') # open in new text editor syncing? #TODO add to view
     

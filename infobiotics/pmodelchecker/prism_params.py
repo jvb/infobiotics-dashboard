@@ -1,8 +1,8 @@
-from infobiotics.pmodelchecker.api import PModelCheckerParams, ModelParameters  
+from infobiotics.pmodelchecker.api import PModelCheckerParams, ModelParameters
 from infobiotics.shared.api import (
     File, Instance, DelegatesTo, Range, Float, Long, Str, Enum, Trait, Bool, 
     Button, Property
-) 
+)
 
 class PRISMParams(PModelCheckerParams):
 
@@ -13,15 +13,19 @@ class PRISMParams(PModelCheckerParams):
         return PRISMParamsHandler(model=self)
 
     model_checker = 'PRISM'
-    model_specification = File(exists=True, filter=['*.lpp *.xml'], desc='the filename of the model to check') #TODO have multiple wildcards in one filter?
-    PRISM_model = File('PRISM_model.sm', filter=['*.sm','*'], desc='the filename of the intermediate PRISM model')
+    model_specification = File(readable=True, filter=['Lattice Population P systems (*.lpp)','P system XML files (*.xml)','All files (*)'], desc='the filename of the model to check') #TODO have multiple wildcards in one filter?
+    PRISM_model = File('PRISM_model.sm', writable=True, auto_set=False, filter=['PRISM models (*.sm)','All files (*)'], desc='the filename of the intermediate PRISM model')
+
 #    _model_parameters = Instance('ModelParameters')
 ##    def __model_parameters_default(self):
 ##        return ModelParameters(prism_experiment=self)
 #    model_parameters = DelegatesTo('_model_parameters')
     model_parameters = Str(desc="a string stating the values of the parameters in the model as follows: 'param=lb:ub:s,param=lb:ub:s,...' where lb is the lower bound, up is the upper bound and s is the step")
+
     temporal_formulas = File(desc='') #TODO desc
+    
     formula_parameters = Str(desc='') #TODO PRISM-specific? desc
+    
     task = Enum(['Approximate','Translate','Build','Verify'], desc='')  #TODO desc
     confidence = Float(0.1, desc='the confidence level used when approximating the answer to a formula')
     precision = Float(1.0, desc='the precision used when approximating the answer to a formula')
@@ -35,22 +39,48 @@ class PRISMParams(PModelCheckerParams):
         PRISMExperiment.
         
         '''
-        return [
-            'model_checker',
-            'model_specification',
-            'PRISM_model',
-#            'model_parameters',
-            'temporal_formulas',
-#            'formula_parameters', # done by model checker
-            'task',
-            'confidence',
-            'precision',
-            'results_file',
-            'states_file',
-            'transitions_file',
-            'number_samples',
-        ]    
-            
+        if self.task == 'Translate':
+            return [
+                'model_checker',
+                'model_specification',
+                'PRISM_model',
+                'task',
+            ]
+        else:
+            return [
+                'model_checker',
+                'model_specification',
+                'PRISM_model',
+    #            'model_parameters',
+                'temporal_formulas',
+    #            'formula_parameters', # done by model checker
+                'task',
+                'confidence',
+                'precision',
+                'results_file',
+                'states_file',
+                'transitions_file',
+                'number_samples',
+            ]    
+
+    def translate_model_specification_to_PRISM_model(self):
+        from infobiotics.pmodelchecker.api import PRISMExperiment
+        translate_experiment = PRISMExperiment(_cwd=self._cwd) #TODO why is task already Translate?
+#        translate_experiment.trait('PRISM_model').handler.exists=False
+        translate_experiment.trait_set(model_specification=self.model_specification, PRISM_model=self.PRISM_model, task='Translate')
+        #TODO parameter_names = ['model_specification','PRISM_model','task']
+        import tempfile
+        temp_file = tempfile.NamedTemporaryFile(dir=translate_experiment._cwd) 
+        temp_file_name = temp_file.name
+        translate_experiment.save(temp_file_name)
+        translate_experiment.perform()
+        import os.path
+        if not os.path.exists(os.path.abspath(os.path.join(translate_experiment._cwd, translate_experiment.PRISM_model))):
+            del temp_file
+            raise Exception('%s was not created.' % self.PRISM_model)
+        self.PRISM_model = ''
+        self.PRISM_model = translate_experiment.PRISM_model
+
 
 if __name__ == '__main__':
     parameters = PRISMParams()

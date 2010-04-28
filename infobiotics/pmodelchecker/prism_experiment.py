@@ -1,7 +1,8 @@
+import os.path
 from infobiotics.pmodelchecker.api import PModelCheckerExperiment, PRISMParams
 from infobiotics.shared.api import Enum, Property, Str, Int, Range, Bool
 
-class PRISMExperiment(PModelCheckerExperiment, PRISMParams):
+class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
     def _handler_default(self):
         from infobiotics.pmodelchecker.prism_experiment_handler import PRISMExperimentHandler
@@ -136,22 +137,16 @@ class PRISMExperiment(PModelCheckerExperiment, PRISMParams):
 #            return super(PRISMExperiment, self).has_valid_parameters()
             return True
 
-    def perform(self):#*args, **kwargs):#TODO override traits here self.trait_setq(**kwargs)
-        
+    def perform(self):
         # if prism model doesn't exist quickly do a Translate to create it
-        if not os.path.exists(os.path.abspath(self.prism_model)):
-            task = self.task
-            self.task = 'Translate' # always generates modelParamaters.xml
-            #TODO parameter_names = ['model_specification','PRISM_model','task']
-            super(PRISMExperiment, self).perform()
-            self.task = task
-            if not os.path.exists(self.prism_model):
-                raise Exception('%s could not be created.' % self.prism_model)
-        
+        if not os.path.exists(os.path.abspath(self.PRISM_model)) and not self.task == 'Translate':
+            self.translate_model_specification_to_PRISM_model()
+        # perform the experiment
         super(PRISMExperiment, self).perform()
 
 
-
 if __name__ == '__main__':
-    PRISMExperiment().configure()
+    experiment = PRISMExperiment()
+    experiment.load('test/Const/modelCheckingPRISM/Const_PRISM.params')
+    experiment.configure()
     
