@@ -1,6 +1,11 @@
-from infobiotics.shared.api import ParamsHandler, Trait, \
-    Bool, Property, can_access, os
-from infobiotics.mcss.api import mcss_params_view
+from infobiotics.shared.api import (
+    ParamsHandler, ParamsView, Trait, Bool, Property, can_access, os
+)
+from infobiotics.mcss.api import mcss_params_group
+
+mcss_params_view = ParamsView(
+    mcss_params_group,
+)
 
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
