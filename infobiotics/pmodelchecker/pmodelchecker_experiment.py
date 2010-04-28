@@ -4,4 +4,3 @@ class PModelCheckerExperiment(Experiment):
 
     _params_program = 'pmodelchecker'
     _parameters_name = 'pmodelchecker'
-
