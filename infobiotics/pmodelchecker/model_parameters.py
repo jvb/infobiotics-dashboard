@@ -163,9 +163,10 @@ class ModelParameters(HasTraits):
         except IOError, e:
             print e, 'ModelParameters.__cwd_changed()'
     
-    _all_model_parameters = Property(depends_on='modelVariables, ruleConstants, moleculeConstants')
+    _all_model_parameters = Property(depends_on='ruleConstants, moleculeConstants')#modelVariables, 
     def _get__all_model_parameters(self):
-        return self.modelVariables + self.ruleConstants + self.moleculeConstants
+#        return self.modelVariables + self.ruleConstants + self.moleculeConstants
+        return self.ruleConstants + self.moleculeConstants
     
     model_parameters = Property(depends_on='_all_model_parameters', desc='example_parameter_name=10, another_parameter=low:high:step')
 

@@ -8,7 +8,7 @@ class Directory(File):
     
     """
     def __init__(self, value='', filter=[], auto_set=False, entries=0, 
-                 exists=False,
+                 exists=False, exists_name='',
                  directory='', directory_name='',
                  absolute=False,
                  readable=None, writable=None, executable=None,
@@ -69,7 +69,8 @@ class Directory(File):
         *value* or ''
         
         """
-        super(Directory, self).__init__(value, filter, auto_set, entries, exists, 
+        super(Directory, self).__init__(value, filter, auto_set, entries, 
+                                        exists, exists_name, 
                                         directory, directory_name,
                                         absolute,
                                         readable, writable, executable,
@@ -93,84 +94,4 @@ class Directory(File):
             directory_name=self.directory_name,
         )
         return editor
-
-
-def test_trait():
-    from enthought.traits.api import HasTraits, Str
-    
-#    os.chdir('/tmp/permissions_test')
-    
-    class Test(HasTraits):
-        
-        different_directory = Str('/tmp/permissions_test')
-#        different_directory = Str('writable') #TODO failed?: uses os.path.join(os.getcwd(), self.different_directory) even if directory is set
-        
-        directory = Directory('default',
-#            directory = '', # passed: uses os.getcwd()
-            directory = '/tmp/permissions_test', # passed: uses'/tmp/permissions_test' 
-            
-#            directory_name = '', # passed: uses directory
-            directory_name = 'different_directory', # passed: uses different_directory over directory, raise AttributeError when object has no attribute named by directory_name 
-
-#            exists = False, # passed: uses nonexistent file as value #TODO should this fail if an existing file is set? (regular File traits don't fail) [could do exists=None like readable, etc.]
-#            exists = True, # passed: raises error if value doesn't exist otherwise returns value 
-
-#            absolute = False, # passed: returns value
-#            absolute = True, # passed: returns abspath instead of value
-
-#            readable = None, # passed: doesn't make exists = True 
-#            readable = True, # passed: raises error if value is not readable and makes exists = True
-#            readable = False, # passed: raises error if value is executable and makes exists = True
-
-#            writable = None, # passed: doesn't check if value is writable regardless of exists
-#            writable = True, # passed: raises error if value is not writable (and exists = False)
-#            writable = False, # passed: raises error is value is writable (and exists = False)
-
-#            executable = None, # passed: doesn't make exists = True
-#            executable = True, # passed: raises error if value is not executable and makes exists = True
-#            executable = False, # passed: raises error if value is executable and makes exists = True
-
-            auto_set = True,
-        )
-        
-    t = Test()
-    
-    print 't.file =', t.file
-    print
-    
-    def test_t(file_name):
-#        print 'test_t(%s)' % file_name
-        t.file = file_name
-        print 't.file =', t.file
-        print 
-    
-    test_t('readonly')
-#    test_t('writable')
-#    test_t('executable')
-#    test_t('unreadable')
-
-#    t.configure_traits()
-        
-
-def test_implicit_editor():
-    from enthought.traits.api import HasTraits, Str
-    
-#    os.chdir('/tmp') # works when directory is not set or directory is relative
-    
-    class Test(HasTraits):
-        other_directory = '/tmp'
-        directory = Directory('readonly',
-            auto_set = True,
-            exists = True,
-#            directory = 'permissions_test',
-            directory_name = 'other_directory',
-        )
-        
-    Test().configure_traits()
-
-
-if __name__ == '__main__':
-#    test_trait()
-    test_implicit_editor()
-#    test_explicit_editor()
     

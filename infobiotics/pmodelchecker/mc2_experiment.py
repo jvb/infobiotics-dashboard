@@ -38,3 +38,9 @@ class MC2Experiment(PModelCheckerExperiment):
 #        Item('simulation'),
 #        error_string_group,
 #    )
+
+
+if __name__ == '__main__':
+    experiment = MC2Experiemnt()
+    experiment.load('test/Const/modelCheckingMC2/Const_MC2.params')
+    experiment.configure()
