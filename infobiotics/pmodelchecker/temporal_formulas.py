@@ -88,6 +88,7 @@ class TemporalFormulaParameter(HasTraits):
     lower = Float(0)
     step = Float(0.5)
     upper = Float(1)
+    #FIXME replicate range_or_value from model_parameters
 
 class TemporalFormula(HasTraits):
     '''
