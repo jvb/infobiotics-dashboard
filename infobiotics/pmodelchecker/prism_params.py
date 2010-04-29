@@ -1,8 +1,5 @@
-from infobiotics.pmodelchecker.api import PModelCheckerParams, ModelParameters
-from infobiotics.shared.api import (
-    File, Instance, DelegatesTo, Range, Float, Long, Str, Enum, Trait, Bool, 
-    Button, Property, can_read
-)
+from infobiotics.pmodelchecker.api import PModelCheckerParams
+from infobiotics.shared.api import File, Str, Enum, can_read
 
 class PRISMParams(PModelCheckerParams):
 
@@ -13,28 +10,16 @@ class PRISMParams(PModelCheckerParams):
         return PRISMParamsHandler(model=self)
 
     model_checker = 'PRISM'
-    model_specification = File(readable=True, filter=['Lattice Population P systems (*.lpp)','P system XML files (*.xml)','All files (*)'], desc='the filename of the model to check') #TODO have multiple wildcards in one filter?
-    PRISM_model = File('PRISM_model.sm', writable=True, auto_set=False, filter=['PRISM models (*.sm)','All files (*)'], desc='the filename of the intermediate PRISM model')
-
+    PRISM_model = File('PRISM_model.sm', writable=True, auto_set=False, filter=['PRISM models (*.sm)','All files (*)'], desc='the name of the file to output the translation of the input LPP model into the PRISM language')
     model_parameters = Str(desc="a string stating the values of the parameters in the model as follows: 'param=lb:ub:s,param=lb:ub:s,...' where lb is the lower bound, up is the upper bound and s is the step")
-
-    #TODO move to PModelCheckerParams?
-    temporal_formulas = File(writable=True) #TODO desc
-    formula_parameters = Str #TODO desc
-    
-    task = Enum(['Approximate','Translate','Build','Verify'])  #TODO desc
-    confidence = Float(0.1, desc='the confidence level used when approximating the answer to a formula')
-    precision = Float(1.0, desc='the precision used when approximating the answer to a formula')
-    results_file = File('results.txt') #TODO desc
-    states_file = File('states.psm')  #TODO desc
-    transitions_file = File  #TODO desc
-    number_samples = Long(desc='the number of simulations to used when approximation is applied')
+    task = Enum(['Approximate','Translate','Build','Verify'], desc='the task to perform: Translate LPP-system into the PRISM language; Build corresponding Markov chain; Verify or Approximate the input properties')
+    states_file = File('states.sm', desc='the name of the file to output the states of the Markov chain generated from the LPP-system when using PRISM with the tasks Build or Verify')
+    transitions_file = File('transitions.sm', desc='the name of the file to output the transitions of the Markov chain generated from the LPP-system when using PRISM with the tasks Build or Verify')
+    results_file = 'results.psm'
     
     def parameter_names(self):
         ''' Returns the subset of parameter names required for a particular 
-        PRISMExperiment.
-        
-        '''
+        PRISMExperiment. '''
         if self.task == 'Translate':
             return [
                 'model_checker',
@@ -61,25 +46,30 @@ class PRISMParams(PModelCheckerParams):
 
     def load(self, file=''):
         super(PRISMParams, self).load(file)
-        if not can_read(self.PRISM_model):
+        if not can_read(self.PRISM_model): #TODO do it anyway?
             if self.model_specification != '':
                 self.translate_model_specification_to_PRISM_model()
 
     def translate_model_specification_to_PRISM_model(self):
+        ''' Performs an experiment with task='Translate' to generate the 
+        PRISM model for LPP model specification. '''
+        # specify the experiments parameters
         from infobiotics.pmodelchecker.api import PRISMExperiment
-        translate_experiment = PRISMExperiment(_cwd=self._cwd) #TODO why is task already Translate?
+        translate_experiment = PRISMExperiment(_cwd=self._cwd) #FIXME why is task already Translate?
 #        translate_experiment.trait('PRISM_model').handler.exists=False
         translate_experiment.trait_set(model_specification=self.model_specification, PRISM_model=self.PRISM_model, task='Translate')
-        #TODO parameter_names = ['model_specification','PRISM_model','task']
+        # create a temporary file in `_cwd`, save to it and perform the experiment
         import tempfile
         temp_file = tempfile.NamedTemporaryFile(dir=translate_experiment._cwd) 
         temp_file_name = temp_file.name
         translate_experiment.save(temp_file_name)
         translate_experiment.perform()
+        # check for errors
         import os.path
         if not os.path.exists(os.path.abspath(os.path.join(translate_experiment._cwd, translate_experiment.PRISM_model))):
             del temp_file
             raise Exception('%s was not created.' % self.PRISM_model)
+        # refresh PRISM_model
         self.PRISM_model = ''
         self.PRISM_model = translate_experiment.PRISM_model
 

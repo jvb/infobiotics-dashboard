@@ -3,7 +3,7 @@ from infobiotics.shared.api import ParamsHandler, List, Button, Instance
 from infobiotics.pmodelchecker.api import TemporalFormula, TemporalFormulaParameter
 
 class PModelCheckerParamsHandler(ParamsHandler):
-    ''' Contains traits common to PRISMParamsHandler and MC2ParamsHandler. '''
+    ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
     
     temporal_formulas = List(TemporalFormula)
     

@@ -5,14 +5,32 @@ class MC2Params(PModelCheckerParams):
     _parameter_set_name = 'mc2'
     
     model_checker = 'MC2'
+
+    #TODO commented traits are defined in PModelCheckerParams
+
+#    model_specification = File(readable=True, filter=['Lattice Population P systems (*.lpp)','All files (*)'])
+    
+    simulations_generatedHDF5 = Bool(False, desc='whether the simulations have already been run')
+    simulations_file_hdf5 = File(filter=['*.h5','*'], desc='the filename(.h5) of the simulation')
+    
+    simulations_generatedMC2 = Bool(False, desc='whether the TODO have already been run')
+    simulations_file_MC2 = File(filter=['*.mc2','*'], desc='the filename(.mc2) of the simulation converted to MC2 format')
+    
+    mcss_params_file = File(filters=['*.params'], desc='TODO')
+    
+#    temporal_formulas = File(writable=True)
+#    formula_parameters = Str
+
+#    number_samples = Long
+#    precision = Float(1.0)
+#    confidence = Float(0.1)
+
+#    results_file = File('results.txt') #TODO desc
     
     def parameter_names(self):
         ''' Returns the subset of PModelChecker parameter names required for a 
-        PModelChecker experiment with MC2.
-        
-        '''
-        if self.simulations_generatedHDF5:
-            return [
+        PModelChecker experiment with MC2. '''
+        parameter_names = [
                 'model_specification',
                 'model_checker',
                 'temporal_formulas',
@@ -23,17 +41,10 @@ class MC2Params(PModelCheckerParams):
                 'simulations_generatedMC2',
                 'simulations_file_MC2',
             ]
+        if self.simulations_generatedHDF5:
+            return parameter_names
         else:
-            return [
-                'model_specification',
-                'model_checker',
-                'temporal_formulas',
-                'number_samples',
-                'results_file',
-                'simulations_generatedHDF5',
-                'simulations_file_hdf5',
-                'simulations_generatedMC2',
-                'simulations_file_MC2',
+            return parameter_names + [
                 'mcss_params_file',
             ]
 
