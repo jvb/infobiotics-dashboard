@@ -145,11 +145,10 @@ class TemporalFormula(HasTraits):
     def _insert_fired(self):
         lines = self.formula.split('\n')
         line = lines[self.line]
-        line = line[:self.column] + self.model_parameter_name_to_insert + line[self.column:]
+        line = line[:self.column] + self.model_parameter_name_to_insert + ' ' + line[self.column:]
         lines[self.line] = line
         self.formula = '\n'.join(lines)
-        
-        # set focus back to CodeEditor
+        # focus given back to CodeEditor in TemporalFormulaHandler.object_insert_changed()
         
 
     formula = Str('P = ? [ true U[A,A] (  >= X ) ]') #TODO better example? #TODO help?

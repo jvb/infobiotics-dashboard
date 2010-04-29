@@ -213,29 +213,57 @@ class ModelParameters(HasTraits):
     
 from enthought.traits.ui.api import Group, TableEditor
 
-model_parameters_group = Group(
-    Item('_all_model_parameters', #FIXME change to moleculeConstants if necessary
-        show_label=False, 
-        editor=TableEditor(
-            columns=[
-                ObjectColumn(name='name',
-                    width=0.25,
-                ),
-                ExpressionColumn(name='value',
-                    expression='object.value_string.split("=")[1]',
-                    width=0.25,
-                    tooltip='Double-click to edit model parameter',
-                ),
-                ObjectColumn(name='description',
-                    width=0.5,
-                ),
-            ],
-            sortable=True,
-            dclick='dclick',
+model_parameters_table_editor = TableEditor(
+    columns=[
+        ObjectColumn(name='name',
+            width=0.4,
             editable=False,
         ),
+#                ExpressionColumn(name='value',
+#                    expression='object.value_string.split("=")[1]',
+#                    width=0.25,
+#                    tooltip='Double-click to edit model parameter',
+#                ),
+        ObjectColumn(name='value',
+            width=0.1,
+        ),
+        ObjectColumn(name='description',
+            width=0.5,
+            editable=False,
+        ),
+    ],
+    sortable=True,
+    dclick='dclick',
+#            editable=False,
+) 
+
+moleculeConstants_table_editor = TableEditor(
+    columns=[
+        ObjectColumn(name='name',
+            width=0.4,
+            editable=False,
+        ),
+        ObjectColumn(name='value',
+            width=0.1,
+        ),
+        ObjectColumn(name='description',
+            width=0.5,
+            editable=False,
+        ),
+    ],
+    sortable=True,
+) 
+
+model_parameters_group = Group(
+#    Item('_all_model_parameters',
+#        show_label=False, 
+#        editor=model_parameters_table_editor,
+#    ),
+    Item('moleculeConstants',
+        show_label=False, 
+        editor=moleculeConstants_table_editor,
     ),
-#    label='Model parameters',
+    
 )
 
 

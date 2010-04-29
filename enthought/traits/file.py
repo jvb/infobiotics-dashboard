@@ -141,7 +141,7 @@ class File(BaseFile):
         ''' Factored out of _validate because it also used in post_setattr. '''
         if self.directory_name == '':
             return
-        print object, self.directory_name
+#        print object, self.directory_name
         directory = getattr(object, self.directory_name) #FIXME won't work for extended trait names (Range doesn't seem to do this either, maybe sync_value or _sync_values does?)
         if directory != '':
             self.directory = directory

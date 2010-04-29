@@ -15,27 +15,24 @@ prism_params_group = VGroup(
             Item('PRISM_model', label='PRISM model'),
             Item('handler.edit_prism_model', label='Edit', show_label=False, enabled_when='object.PRISM_model != ""'),
         ),
-#        label='PRISM model',
     ),
     
-#    VSplit(
-        VGroup(
-            Item(label='Model parameters: (double-click to edit)'),
-            Item('handler._model_parameters', 
-                style='custom',
-                show_label=False, 
-                editor=InstanceEditor(
-                    label='Edit model parameters',
-                    kind='live',
-                    view = View(
-                        model_parameters_group,
-                    ),
+    VGroup(
+        Item(label='Molecule constants:'),#'Model parameters: (double-click to edit)'),
+        Item('handler._model_parameters', 
+            style='custom',
+            show_label=False, 
+            editor=InstanceEditor(
+                label='Edit model parameters',
+                kind='live',
+                view = View(
+                    model_parameters_group,
                 ),
             ),
         ),
-        
-        temporal_formulas_group,
-#    ),
+    ),
+    
+    temporal_formulas_group,
 
     VGroup(
         HGroup(
