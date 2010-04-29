@@ -1,32 +1,40 @@
 from __future__ import with_statement
 from enthought.traits.api import HasTraits, Str, Float, Enum, Property
 from enthought.traits.ui.api import View, Item, HGroup, VGroup
+
+range_or_value_group = VGroup(
+    Item('range_or_value', style='custom'),
+    HGroup(
+        Item('lower'),
+        Item('step'),
+        Item('upper'),
+        enabled_when='object.range_or_value == "range"',
+    ),
+    Item('value', enabled_when='object.range_or_value == "value"'),
+)
     
 model_parameter_view = View(
     VGroup(
-#        HGroup(Item('id', style='readonly', label='ID'),),
+#        Item('id', style='readonly', label='ID'),
 #        Item('name', style='readonly'),
-        HGroup(Item('description', style='readonly'),),
-        HGroup(Item('range_or_value', style='custom'),),
-        HGroup(
-            Item('lower'),
-            Item('step'),
-            Item('upper'),
-            enabled_when='object.range_or_value == "range"',
-        ),
-#        Item('lower', visible_when='object.range_or_value == "range"'),
-#        Item('step', visible_when='object.range_or_value == "range"'),
-#        Item('upper', visible_when='object.range_or_value == "range"'),
-        HGroup(Item('value', enabled_when='object.range_or_value == "value"'),),
+        Item('description', style='readonly'),
+        range_or_value_group,
         show_border=True,
     ),
     title='Edit model parameter',
-    width=400, #height=200,
+    width=400,
     resizable=True,
     buttons = ['OK', 'Cancel'] 
 )    
+
+class PModelCheckerParameter(HasTraits):
+    range_or_value = Enum(['range','value'])
+    lower = Float(0)
+    step = Float(1.0) # Range('lower','upper', 'value')
+    upper = Float(2.0) #FIXME these aren't good defaults
+    value = Float(1.0)
     
-class ModelParameter(HasTraits):
+class ModelParameter(PModelCheckerParameter):
     ''' modelVariable or ruleConstant. '''
     def traits_view(self):
         model_parameter_view.title=self.name
@@ -34,11 +42,6 @@ class ModelParameter(HasTraits):
     id = Str
     name = Str
     description = Str
-    range_or_value = Enum(['range','value'])
-    lower = Float(0)
-    step = Float(1.0)
-    upper = Float(2.0)
-    value = Float(1.0)
     value_string = Property(depends_on='range_or_value, value, lower, step, upper')
     def _get_value_string(self):
         if self.range_or_value == 'value':

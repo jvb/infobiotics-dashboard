@@ -1,53 +1,64 @@
 from common.files import read, write
-from infobiotics.shared.api import ParamsHandler, List, Button, Instance
-from infobiotics.pmodelchecker.api import TemporalFormula, TemporalFormulaParameter
+from infobiotics.shared.api import ParamsHandler, List, Unicode, Button, Instance, Int
+from infobiotics.pmodelchecker.api import TemporalFormula, TemporalFormulaParameter, ModelParameters
 
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
     
+    _model_parameters = Instance(ModelParameters)
+    
+    def init(self, info): #TODO object_model_specification_changed(self, info):
+        self._model_parameters = ModelParameters(_cwd=self.model._cwd)
+        # must create _model_parameters here rather than __model_parmeters_default() 
+        # because DelegatesTo('_model_parameters') causes it to be created before _cwd.
+
+    model_parameter_names = List(Unicode)
+    
+    def __model_parameters_changed(self):
+        self.model_parameter_names = [modelVariable.name for modelVariable in self._model_parameters.modelVariables]
+    
     temporal_formulas = List(TemporalFormula)
     
     def object_temporal_formulas_changed(self, info):
-        try:
-            with read(info.object.temporal_formulas_) as f: 
-                lines = f.readlines()
-                if len(lines) == 0 or lines[0].strip() != 'Formulas:':
-                    return
-                del self.temporal_formulas[:] # clear list
-                for line in lines[1:]:
-                    line = line.strip()
-                    
-                    # skip empty lines
-                    if len(line) == 0:
-                        continue
-                    
-                    # extract formula
-                    first = line.find('"')
-                    second = line.find('"', first+1)
-                    formula = line[first+1:second]
-                    
-                    # extract parameters
-                    parameters_start = line.find('{', second+1)
-                    parameters_end = line.find('}', parameters_start+1)
-                    parameters = []
-                    for parameter in line[parameters_start+1:parameters_end].split(','):
-                        name_and_values = parameter.split('=')
-                        name = name_and_values[0].strip()
-                        values = name_and_values[1].split(':')
-                        lower = values[0]
-                        step = values[1]
-                        upper = values[2]
-                        
-                        # create parameter objects
-                        parameters.append(TemporalFormulaParameter(name=name, lower=float(lower), step=float(step), upper=float(upper)))
+        with read(info.object.temporal_formulas_) as f: 
+            lines = f.readlines()
+        if len(lines) == 0 or lines[0].strip() != 'Formulas:':
+            return
+        del self.temporal_formulas[:] # clear list
+        for line in lines[1:]:
+            line = line.strip()
+            
+            # skip empty lines
+            if len(line) == 0:
+                continue
+            
+            # extract formula
+            first = line.find('"')
+            second = line.find('"', first+1)
+            formula = line[first+1:second]
+            
+            # extract parameters
+            parameters_start = line.find('{', second+1)
+            parameters_end = line.find('}', parameters_start+1)
+            parameters = []
+            for parameter in line[parameters_start+1:parameters_end].split(','):
+                name_and_values = parameter.split('=')
+                name = name_and_values[0].strip()
+                values = name_and_values[1].split(':')
+                lower = values[0]
+                step = values[1]
+                upper = values[2]
+                
+                # create parameter objects
+                parameters.append(TemporalFormulaParameter(name=name, lower=float(lower), step=float(step), upper=float(upper)))
 
-                    # create formula object and add to list
-                    temporal_formula = TemporalFormula(formula=formula, parameters=parameters)
-                    self.temporal_formulas.append(temporal_formula)
-                                
-        except IOError, e:
-#            logger.error('%s, _temporal_formulas_changed()' % e)
-            print e
+            # create formula object and add to list
+            temporal_formula = TemporalFormula(
+                formula=formula, 
+                parameters=parameters, 
+                model_parameter_names=self.model_parameter_names
+            )
+            self.temporal_formulas.append(temporal_formula)
 
     def _temporal_formulas_items_changed(self):
         ''' Refreshes temporal_formulas. '''
@@ -61,24 +72,27 @@ class PModelCheckerParamsHandler(ParamsHandler):
     edit_temporal_formula = Button
     remove_temporal_formula = Button
     
-    def _add_temporal_formula_changed(self): # changed works, even for a button
-        formula = TemporalFormula()
-        if formula.edit_traits(kind='modal').result:
-#        # only add formulas with new parameters 
-#        for temporal_formula in self.temporal_formulas:
-#            if temporal_formula == formula:
-#                return
-            self.temporal_formulas.append(formula)
+    def __edit_temporal_formula(self, temporal_formula):
+        result = temporal_formula.edit_traits(kind='livemodal').result 
+        if result:
+            temporal_formula.formula = temporal_formula.formula.replace('\n', '')
+        return result 
+    
+    def _add_temporal_formula_fired(self):
+        temporal_formula = TemporalFormula(model_parameter_names=self.model_parameter_names, column=23)
+        if self.__edit_temporal_formula(temporal_formula):
+            self.temporal_formulas.append(temporal_formula)
+            self.selected_temporal_formula = temporal_formula
         
-    def _edit_temporal_formula_changed(self):
-        formula = self.selected_temporal_formula
-        if formula is not None:
-            formula.edit_traits(kind='modal')
-        
-    def _remove_temporal_formula_changed(self):
-        formula = self.selected_temporal_formula
-        if formula is not None:
-            self.temporal_formulas.remove(formula)
+    def _edit_temporal_formula_fired(self):
+        temporal_formula = self.selected_temporal_formula
+        if temporal_formula is not None:
+            self.__edit_temporal_formula(temporal_formula)
+            
+    def _remove_temporal_formula_fired(self):
+        temporal_formula = self.selected_temporal_formula
+        if temporal_formula is not None:
+            self.temporal_formulas.remove(temporal_formula)
             self.selected_temporal_formula = None
 
     def save(self, info):

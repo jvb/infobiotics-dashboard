@@ -8,13 +8,12 @@ from infobiotics.pmodelchecker.api import (
 
 prism_params_view = ParamsView(
     prism_params_group,
+    id = 'prism_params_view'
 )
 
 class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     traits_view = prism_params_view
-    id = 'PRISMParamsHandler'
-
 
     _prism_model_str = Str
 
@@ -31,10 +30,10 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     edit_prism_model = Button
 
-    def _edit_prism_model_fired(self):
+    def _edit_prism_model_fired(self): #TODO only view prism model?
         _prism_model_str = self._prism_model_str
         if self._prism_model_str == '':
-            self.model.translate_model_specification_to_PRISM_model()
+            self.model.translate_model_specification()
         from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor
         edit_prism_model_view = View(
                 Group(
@@ -70,20 +69,17 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     retranslate_prism_model = Button(desc='whether to translate the PRISM model from the P system model again.\nThis will overwrite any changes that have been made to the PRISM model file.')
     
     def _retranslate_prism_model_fired(self):
-        self.model.translate_model_specification_to_PRISM_model()
+        self.model.translate_model_specification()
         self._prism_model_str_changed = False
 
 
     model_parameters = DelegatesTo('_model_parameters')
-    
-    _model_parameters = Instance('ModelParameters')
 
     def init(self, info):
-        # must create _model_parameters here rather than __model_parmeters_default() because DelegatesTo('_model_parameters') causes it to be created before _cwd.
-        self._model_parameters = ModelParameters(_cwd=self.model._cwd)
-        if info.object.model_parameters != '':
-            self._model_parameters.model_parameters = info.object.model_parameters
         super(PRISMParamsHandler, self).init(info)
+        if info.object.model_parameters != '':
+#            self._model_parameters.model_parameters = info.object.model_parameters
+            self.model_parameters = info.object.model_parameters
 
     def save(self, info):
         info.object.model_parameters = self.model_parameters

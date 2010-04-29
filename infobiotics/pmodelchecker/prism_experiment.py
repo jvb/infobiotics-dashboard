@@ -139,8 +139,8 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
     def perform(self):
         # if prism model doesn't exist quickly do a Translate to create it
-        if not os.path.exists(os.path.abspath(self.PRISM_model)) and not self.task == 'Translate':
-            self.translate_model_specification_to_PRISM_model()
+        if not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
+            self.translate_model_specification()
         # perform the experiment
         super(PRISMExperiment, self).perform()
 

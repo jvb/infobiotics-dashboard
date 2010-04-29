@@ -27,6 +27,9 @@ class MC2Params(PModelCheckerParams):
 
 #    results_file = File('results.txt') #TODO desc
     
+    def translate_model_specification(self):
+        super(MC2Params, self).translate_model_specification(self._cwd, self.model_specification)
+    
     def parameter_names(self):
         ''' Returns the subset of PModelChecker parameter names required for a 
         PModelChecker experiment with MC2. '''

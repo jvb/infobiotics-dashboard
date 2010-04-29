@@ -44,83 +44,122 @@ temporal_formulas_group = VGroup(
     ),
 #    label='Temporal formulas',
 )
-    
-temporal_formula_view = View(
-    Item('formula', style='custom', tooltip='Multiple lines will be reduced to a single line with spaces between lines.'), #FIXME use CodeEditor and ability to insert model_parameters 
-    Item('parameters', 
-        style='custom', 
-        editor=ListEditor(
-            style='custom',
-            use_notebook=True,
-            page_name='.name',
-            view = View(
-                Group(    
-                    Item('name'),
-                    HGroup(
-                        Item('lower'),
-                        Item('step'),
-                        Item('upper'),
-                    ),
-                    show_border=True,
-                ),
-#                title='Edit Temporal Formula Parameter',
-            ),
-            selected='selected',
-        ),
-    ),
-    HGroup(
-        Spring(),
-        Item('add_new_parameter', show_label=False), 
-        Item('remove_current_parameter', show_label=False),
-        Spring(),
-    ),
-    buttons = [
-        'OK', 
-        'Cancel',
-    ],
-    width=600,
-    resizable=True,
-    title='Edit temporal formula properties',
-)
+
 
 class TemporalFormulaParameter(HasTraits):
     name = Str
     lower = Float(0)
     step = Float(0.5)
     upper = Float(1)
-    #FIXME replicate range_or_value from model_parameters
+    #FIXME replicate range_or_value from model_parameter_names
+
+
+from enthought.traits.ui.api import Handler
+
+class TemporalFormulaHandler(Handler):
+    
+    def object_insert_changed(self, info):
+        ''' Set focus back to CodeEditor. Works despite raising AttributeError! '''
+        for editor in info.ui._editors:
+            if hasattr(editor, '_scintilla'):
+                try:
+                    editor._scintilla.setFocus(True)
+                except AttributeError:
+                    pass
+
+
+from enthought.traits.ui.api import VGroup, CodeEditor, Spring 
+    
+temporal_formula_view = View(
+    VGroup(
+        Item(label='Formula:'),
+        Item('formula', 
+            show_label=False,
+            style='custom', 
+            editor=CodeEditor(
+                lexer='null', 
+                show_line_numbers=False, 
+                auto_set=True, 
+                line='line', 
+                column='column',
+            ), 
+            tooltip='Multiple lines will be concatenated.'), 
+        HGroup(
+            Spring(),
+            Item('model_parameter_name_to_insert', label='Model parameters:'),
+            Item('insert', show_label=False),
+            Spring(),
+        ),
+        Item(label='Formula parameters:'),
+        Item('parameters',
+            show_label=False,
+            style='custom', 
+            editor=ListEditor(
+                style='custom',
+                use_notebook=True,
+                page_name='.name',
+                view = View(
+                    Group(    
+                        Item('name'),
+                        HGroup(
+                            Item('lower'),
+                            Item('step'),
+                            Item('upper'),
+                        ),
+                        show_border=True,
+                    ),
+    #                title='Edit Temporal Formula Parameter',
+                ),
+                selected='selected',
+            ),
+        ),
+        HGroup(
+            Spring(),
+            Item('add_new_parameter', show_label=False), 
+            Item('remove_current_parameter', show_label=False, enabled_when='len(object.parameters) > 1'),
+            Spring(),
+        ),
+        show_border = True,
+    ),
+    buttons = ['Undo', 'Cancel', 'OK'],#, 'Revert'],
+    resizable = True,
+    title = 'Edit temporal formula',
+    handler = TemporalFormulaHandler(),
+    height=100,
+    id = 'temporal_formula_view',
+)
+
+
+from enthought.traits.api import Int, Str, Button, List, Enum, Unicode
 
 class TemporalFormula(HasTraits):
-    '''
-    MC2 formula_parameters string:
-    """
-    Formulas
-    "<formula>" {<paramName> = <lower>:<step>:<upper>, ..., <paramName> = <lower>:<step>:<upper>}
-    "<another_formula>" {...}
-    """
+
+    traits_view = temporal_formula_view
     
-    PRISM formulas file format:
-    """
-    <formula1>
-    <formula2>
-    """
+    line = Int
+    column = Int
+    model_parameter_names = List(Unicode)
+    model_parameter_name_to_insert = Enum(values='model_parameter_names')
+    insert = Button
     
-    PRISM formula_parameters string:
-    """
-    parameter_name=low:upper:step, parameter_name_2=low:up:step
-    """
-    '''
+    def _insert_fired(self):
+        lines = self.formula.split('\n')
+        line = lines[self.line]
+        line = line[:self.column] + self.model_parameter_name_to_insert + line[self.column:]
+        lines[self.line] = line
+        self.formula = '\n'.join(lines)
+        
+        # set focus back to CodeEditor
+        
+
+    formula = Str('P = ? [ true U[A,A] (  >= X ) ]') #TODO better example? #TODO help?
+    parameters = List(TemporalFormulaParameter, [TemporalFormulaParameter(name='A'), TemporalFormulaParameter(name='X')])
     
-    formula = Str('P=a') #TODO better example? #TODO help?
-    parameters = List(TemporalFormulaParameter, [TemporalFormulaParameter(name='a')])
-    
-    parameters_string = Str #TODO rename
+    parameters_string = Str
     add_new_parameter = Button
     remove_current_parameter = Button
     
     selected = Any
-#    def _selected_changed(self, selected):
-#        print selected
 
     def _add_new_parameter_fired(self):
         self.parameters.append(TemporalFormulaParameter())
@@ -139,23 +178,6 @@ class TemporalFormula(HasTraits):
                     parameters_string += ', ' 
                 parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
         self.parameters_string = parameters_string
-
-    def _formula_changed(self):
-        self.formula = ' '.join(self.formula.split('\n')).replace('  ', ' ')
-
-#    def __eq__(self, other):
-#        if self.formula == other.formula:
-#            matching_parameters = []
-#            for parameter in self.parameters:
-#                for other_parameter in other.parameters:
-#                    print parameter, other_parameter
-#                    if parameter == other_parameter:
-#                        matching_parameters.append(other_parameter)
-#            if len(matching_parameters) == len(self.parameters):
-#                return True
-#        return False
-        
-    traits_view = temporal_formula_view
 
 
 if __name__ == '__main__':
