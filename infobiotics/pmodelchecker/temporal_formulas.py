@@ -108,7 +108,6 @@ temporal_formula_view = View(
                         ),
                         show_border=True,
                     ),
-    #                title='Edit Temporal Formula Parameter',
                 ),
                 selected='selected',
             ),

@@ -44,6 +44,7 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                     HGroup(
                         Item(label='Editing PRISM model:'),
                         Item('PRISM_model', show_label=False, style='readonly'),
+                        Item(label='(Ctrl-F to find)'),#, Ctrl-D duplicates line)'), # not when "style = 'readonly'"
                     ),
                     Item('handler._prism_model_str',
                         show_label = False, 
@@ -51,7 +52,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                         style = 'readonly',
                         editor = CodeEditor(lexer='null'),
                     ),
-                    Item(label='Ctrl-F toggles Find'),#, Ctrl-D duplicates line.'), # not when "style = 'readonly'"
                     show_border = True,
                 ),
                 buttons = ['OK'],#,'Revert','Undo'], # not when "style = 'readonly'"

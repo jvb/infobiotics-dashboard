@@ -14,7 +14,7 @@ prism_params_group = VGroup(
             Item('handler.edit_prism_model', label='Edit', show_label=False, enabled_when='object.PRISM_model != ""'),
         ),
     ),
-    
+    Item('task'),#, emphasized=True),
     Group(
         VGroup(
             Item(label='Molecule constants:'),#'Model parameters: (double-click to edit)'),
@@ -31,32 +31,21 @@ prism_params_group = VGroup(
             ),
             label='Model parameters',
         ),
-        
         temporal_formulas_group,
+        enabled_when='object.task != "Translate"',
         layout='tabbed',
     ),
-
+    HGroup(
+        Item('handler.confidence'),
+        Item('handler._custom_confidence', show_label=False, enabled_when='handler.confidence=="custom"'),
+        Item('precision'),
+        Item('number_samples', label='Number of samples'),
+        enabled_when='object.task == "Approximate"',
+    ),
     VGroup(
-        HGroup(
-            Item('task'),#, emphasized=True),
-        ),
-#        VGroup(
-#            Item('model_parameters', enabled_when='object.task == "Approximate" or object.task == "Verify"'),
-#        #    Item('parameters_file', label='PRISM parameters file'),
-#        ),
-        HGroup(
-            Item('handler.confidence'),
-            Item('handler._custom_confidence', show_label=False, enabled_when='handler.confidence=="custom"'),
-            Item('precision'),
-            Item('number_samples', label='Number of samples'),
-            enabled_when='object.task == "Approximate"',
-        ),
-        VGroup(
-            Item('results_file', enabled_when='object.task in ("Approximate", "Verify")'),
-            Item('states_file', enabled_when='object.task=="Build"'),
-            Item('transitions_file', enabled_when='object.task=="Build"'),
-        ),
-#        label='PRISM parameters'
+        Item('results_file', enabled_when='object.task in ("Approximate", "Verify")'),
+        Item('states_file', enabled_when='object.task=="Build"'),
+        Item('transitions_file', enabled_when='object.task=="Build"'),
     ),
 )
 
