@@ -1,7 +1,7 @@
 import os
 #os.environ['ETS_TOOLKIT']='qt4' # must be before Enthought import statements
 from enthought.traits.api import (
-    HasTraits, Str, Undefined, Bool, List, TraitError, Instance
+    HasTraits, Str, Undefined, Bool, List, TraitError, Instance,
 )
 from enthought.traits.ui.api import Controller
 from infobiotics.common.api import (
@@ -9,6 +9,7 @@ from infobiotics.common.api import (
 )
 from xml import sax
 from commons.api import key_from_value, can_access, read, write, logging
+from commons.traits.api import RelativeDirectory
 
 logger = logging.getLogger(level=logging.ERROR)
 
@@ -26,7 +27,7 @@ class Params(HasTraits):
         self._cwd = os.path.dirname(_params_file)
         self._dirty = False
         
-    _cwd = ParamsRelativeDirectory(exists=True, auto_set=True)
+    _cwd = RelativeDirectory(exists=True, auto_set=True) # infinite recursion if ParamsRelativeDirectory because _cwd='_cwd'
     
     def __cwd_default(self):
         #TODO try and load _cwd from preferences? and use in load dialogs

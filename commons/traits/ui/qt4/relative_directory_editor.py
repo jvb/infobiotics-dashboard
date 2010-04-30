@@ -1,7 +1,7 @@
 from relative_file_editor import SimpleEditor as SimpleRelativeFileEditor, RelativeFileEditor
 from PyQt4 import QtGui
 
-class SimpleEditor(SimpleFileEditor):
+class SimpleEditor(SimpleRelativeFileEditor):
     
     def _create_file_dialog(self):
         ''' Creates the correct type of file dialog. '''

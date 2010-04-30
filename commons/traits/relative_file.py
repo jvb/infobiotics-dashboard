@@ -1,6 +1,6 @@
 import os
 from enthought.traits.api import BaseFile
-from common.api import can_read, can_write, can_execute
+from commons.api import can_read, can_write, can_execute
 
 class RelativeFile(BaseFile):
     """ Defines a trait whose value must be the name of a file (which can be 
@@ -148,7 +148,6 @@ class RelativeFile(BaseFile):
         ''' Factored out of _validate because it also used in post_setattr. '''
         if self.directory_name == '':
             return
-#        print object, self.directory_name
         directory = getattr(object, self.directory_name) #FIXME won't work for extended trait names (Range doesn't seem to do this either, maybe sync_value or _sync_values does?)
         if directory != '':
             self.directory = directory
@@ -260,7 +259,7 @@ class RelativeFile(BaseFile):
         object.__dict__[ name + '_' ] = value
     
     def create_editor(self):
-        from infobiotics.traits.ui.qt4.relative_file_editor import RelativeFileEditor
+        from commons.traits.ui.qt4.relative_file_editor import RelativeFileEditor
         editor = RelativeFileEditor(
             absolute=self.absolute,
             auto_set=self.auto_set,

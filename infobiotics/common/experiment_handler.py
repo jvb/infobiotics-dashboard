@@ -1,4 +1,4 @@
-from infobiotics.shared.api import Instance, Property, Bool
+from enthought.traits.api import Instance, Property, Bool
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
 

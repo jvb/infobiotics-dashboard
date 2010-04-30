@@ -1,8 +1,6 @@
-from common.files import read, write
-from infobiotics.shared.api import ParamsHandler, List, Unicode, Button, Instance, Int
-#from infobiotics.pmodelchecker.api import (
-#    TemporalFormula, TemporalFormulaParameter, ModelParameters,
-#)
+from commons.api import read, write
+from infobiotics.common.api import ParamsHandler
+from enthought.traits.api import List, Unicode, Button, Instance, Int
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 

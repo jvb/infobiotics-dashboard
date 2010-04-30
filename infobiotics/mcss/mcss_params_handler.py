@@ -1,24 +1,30 @@
-from infobiotics.shared.api import (
-    ParamsHandler, ParamsView, Trait, Bool, Property, can_access, os
+from enthought.traits.api import (
+    Trait, Bool, Property, 
 )
-from infobiotics.mcss.api import mcss_params_group
+from enthought.traits.ui.api import VGroup 
+import os.path
+from commons.api import can_access
+from infobiotics.common.api import ParamsHandler, ParamsView, _cwd_group
+from mcss_params_group import mcss_params_group
 
-mcss_params_view = ParamsView(
-    mcss_params_group,
-)
+#mcss_params_view = ParamsView(
+#    mcss_params_group,
+#    id='mcss_params_view' # for saving window position and size
+#)
 
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
 
-    traits_view = mcss_params_view
-    id='McssParamsHandler' # for saving window position and size
+    traits_view = ParamsView(
+        mcss_params_group,
+        id='McssParamsHandler' # for saving window position and size
+    )
     
     model_format = Trait(
         'P system XML',
         {
             'P system XML'                 : 'xml',
             'SBML'                         : 'sbml',
-#            'Lattice population P system'  : 'lpp',
         },
         desc='the model specification format',
     )
@@ -28,7 +34,7 @@ class McssParamsHandler(ParamsHandler):
         'sbml' : 'SBML',
     }
 
-    simulation_algorithm = Trait( #FIXME loading of simulation_algorithm_ doesn't work
+    simulation_algorithm = Trait(
         'Direct Method with queue',
         {
             'Direct Method with queue'               : 'dmq',
@@ -40,7 +46,7 @@ class McssParamsHandler(ParamsHandler):
         desc='the stochastic simulation algorithm to use',
     )
 
-    simulation_algorithm_reversed = { # needed because we can't assign to simulation_algorithm_
+    simulation_algorithm_reversed = { # needed because we can't assign to simulation_algorithm_ #TODO this means traits_repr is probably wrong for Traits - but we use Enum in Params subclass so it doesn't matter
         'dmq'  : 'Direct Method with queue', 
         'dm'   : 'Direct Method (Gillespie68)',
         'ldm'  : 'Logarithmic Direct Method (Cao2007)',

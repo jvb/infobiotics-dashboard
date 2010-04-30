@@ -1,6 +1,9 @@
-from common.api import can_read, mkdir_p
-from infobiotics.shared.api import \
-    Controller, Property, Str, FileDialog, OK, os, List, Unicode, Bool #, Property, cached_property    
+from commons.api import can_read, mkdir_p
+import os
+os.environ['ETS_TOOLKIT']='qt4'
+from enthought.traits.api import Property, Str, List, Unicode, Bool
+from enthought.pyface.api import FileDialog, OK
+
 from enthought.traits.ui.api import Controller, View, Item
 #from enthought.traits.ui.file_dialog2 import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog

@@ -133,14 +133,14 @@ class ModelParametersXMLReader(ContentHandler):
             getattr(self, self.switch1).append(self.model_parameter)
 
 
-from enthought.traits.api import File, List, Tuple, Instance, DelegatesTo
+from enthought.traits.api import List, Tuple, Instance
 from enthought.traits.ui.table_column import ObjectColumn, ExpressionColumn
 import os
-from enthought.traits.directory import Directory
-from common.files import read
+from commons.traits.api import RelativeDirectory
+from commons.api import read
 
 class ModelParameters(HasTraits):
-    _cwd = Directory
+    _cwd = RelativeDirectory
     modelVariables = List(ModelParameter) 
     ruleConstants = List(ModelParameter) 
     moleculeConstants = List(MoleculeConstant) 

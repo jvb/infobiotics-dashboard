@@ -1,7 +1,6 @@
-from infobiotics.shared.api import (
-    ExperimentProgressHandler, Property, percentage, property_depends_on,
-    ProgressEditor, View, Item
-)
+from infobiotics.common.api import ExperimentProgressHandler, percentage
+from enthought.traits.api import Property, property_depends_on
+from enthought.traits.ui.api import ProgressEditor, View, Item
 
 class McssProgressHandler(ExperimentProgressHandler):
     

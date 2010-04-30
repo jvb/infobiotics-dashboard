@@ -3,8 +3,9 @@ if platform.system() == 'Windows':
     import wexpect as expect #TODO test with and include wexpect in sys.path
 else:
     import pexpect as expect
-from infobiotics.shared.api import \
-    Params, File, ListStr, Str, Event, expect, Thread, Property, Bool
+from enthought.traits.api import ListStr, Str, Event, Property, Bool
+from threading import Thread
+from infobiotics.common.api import Params, ParamsRelativeFile
 
 class Experiment(Params):
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.
@@ -29,7 +30,7 @@ class Experiment(Params):
 #    the Experiment superclass.    
 #    
 #    '''
-    _params_program = File(exists=True, executable=True)
+    _params_program = ParamsRelativeFile(exists=True, executable=True)
     _params_program_kwargs = ListStr
     _output_pattern_list = ListStr
     _error_pattern_list = ListStr([

@@ -1,4 +1,4 @@
-from infobiotics.shared.api import ExperimentHandler
+from infobiotics.common.api import ExperimentHandler
 
 class PModelCheckerExperimentHandler(ExperimentHandler):
     pass

@@ -1,13 +1,11 @@
-from infobiotics.shared.api import (
-    VGroup, Item, HGroup, InstanceEditor, View, VSplit
+from enthought.traits.ui.api import (
+    VGroup, Item, HGroup, InstanceEditor, View, VSplit, Group,
 )
-from infobiotics.pmodelchecker.api import model_parameters_group
-from infobiotics.pmodelchecker.api import temporal_formulas_group
+from infobiotics.pmodelchecker.api import (
+    model_parameters_group, temporal_formulas_group,
+)
 
 prism_params_group = VGroup(
-    VGroup(
-        Item('_cwd', label='Working directory'),     
-    ),
     Item('model_specification', label='P system model'),
     VGroup(
         HGroup(
@@ -17,22 +15,26 @@ prism_params_group = VGroup(
         ),
     ),
     
-    VGroup(
-        Item(label='Molecule constants:'),#'Model parameters: (double-click to edit)'),
-        Item('handler._model_parameters', 
-            style='custom',
-            show_label=False, 
-            editor=InstanceEditor(
-                label='Edit model parameters',
-                kind='live',
-                view = View(
-                    model_parameters_group,
+    Group(
+        VGroup(
+            Item(label='Molecule constants:'),#'Model parameters: (double-click to edit)'),
+            Item('handler._model_parameters', 
+                style='custom',
+                show_label=False, 
+                editor=InstanceEditor(
+                    label='Edit model parameters',
+                    kind='live',
+                    view = View(
+                        model_parameters_group,
+                    ),
                 ),
             ),
+            label='Model parameters',
         ),
+        
+        temporal_formulas_group,
+        layout='tabbed',
     ),
-    
-    temporal_formulas_group,
 
     VGroup(
         HGroup(
@@ -56,7 +58,6 @@ prism_params_group = VGroup(
         ),
 #        label='PRISM parameters'
     ),
-    show_border=True,
 )
 
 

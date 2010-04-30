@@ -1,3 +1,6 @@
+import os
+os.environ['ETS_TOOLKIT']='qt4'
+
 from mcss.api import McssExperiment
 
 from pmodelchecker.pmodelchecker.api import PModelCheckerExperiment

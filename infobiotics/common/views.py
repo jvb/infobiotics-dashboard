@@ -84,11 +84,21 @@ class ParamsView(View): # can be used to edit parameters without performing the 
 ##        ),
 #    ]
 
-    # better to allow instances to choose where to put '_cwd_group'
-    # can't add top-level group with show_border=True to values either (really?)
-#    def set_content(self, *values): #TODO check this
-#        values = [_cwd_group] + list(values)
-#        super(ParamsView, self).set_content(*values) 
+#    # better to allow instances to choose where to put '_cwd_group'
+#    # can't add top-level group with show_border=True to values either (really?)
+##    def set_content(self, *values): #TODO check this
+##        values = [_cwd_group] + list(values)
+##        super(ParamsView, self).set_content(*values) 
+    def set_content(self, *values):
+        values = [
+            VGroup(
+                _cwd_group,
+                values,
+                show_border=True,
+            ),
+        ]
+        super(ParamsView, self).set_content(*values)
+        
     
 class ExperimentView(ParamsView):
     buttons = experiment_actions + shared_actions

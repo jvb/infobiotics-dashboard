@@ -1,5 +1,5 @@
 from infobiotics.pmodelchecker.api import PModelCheckerParams
-from infobiotics.shared.api import File, Str, Enum
+from enthought.traits.api import Str, Enum
 
 class PRISMParams(PModelCheckerParams):
 

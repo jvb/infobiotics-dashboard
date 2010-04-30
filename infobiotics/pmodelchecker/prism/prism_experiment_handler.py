@@ -1,8 +1,5 @@
-from infobiotics.shared.api import ExperimentView
-from infobiotics.pmodelchecker.api import (
-    PModelCheckerExperimentHandler, 
-#    prism_params_group, PRISMParamsHandler, PRISMExperimentProgressHandler,
-)
+from infobiotics.common.api import ExperimentView
+from infobiotics.pmodelchecker.api import PModelCheckerExperimentHandler
 from prism_params_group import prism_params_group
 from prism_params_handler import PRISMParamsHandler
 from prism_experiment_progress_handler import PRISMExperimentProgressHandler 

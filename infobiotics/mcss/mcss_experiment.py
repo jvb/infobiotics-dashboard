@@ -1,5 +1,6 @@
-from infobiotics.shared.api import Experiment, Float, Int
-from infobiotics.mcss.api import McssParams
+from mcss_params import McssParams
+from infobiotics.common.api import Experiment
+from enthought.traits.api import Float, Int
 
 class McssExperiment(McssParams, Experiment):
     

@@ -1,8 +1,8 @@
-from infobiotics.shared.api import (
-    HasTraits, Str, Float, List, Button, Any, 
-    View, Item, HGroup, VGroup, ListEditor,  
-    TableEditor, ObjectColumn, Group, Spring,
+from enthought.traits.api import HasTraits, Str, Float, Int, List, Button, Any
+from enthought.traits.ui.api import (
+    View, Item, HGroup, VGroup, Group, Spring, ListEditor, TableEditor,
 )
+from enthought.traits.ui.table_column import ObjectColumn
 
 temporal_formulas_group = VGroup(
     HGroup(   
@@ -42,7 +42,7 @@ temporal_formulas_group = VGroup(
         Item('handler.remove_temporal_formula', show_label=False, enabled_when='len(handler.temporal_formulas) > 0 and handler.selected_temporal_formula is not None'),
         Spring(),
     ),
-#    label='Temporal formulas',
+    label='Temporal formulas',
 )
 
 

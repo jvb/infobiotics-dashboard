@@ -1,10 +1,10 @@
 from __future__ import with_statement
 import os.path
-from common.files import read, write
-from infobiotics.shared.api import ParamsView, Trait, Range, Button, Str, Bool, Instance, DelegatesTo
+from commons.api import read, write
+from infobiotics.common.api import ParamsView
+from enthought.traits.api import Trait, Range, Button, Str, Bool, Instance, DelegatesTo
 from infobiotics.pmodelchecker.api import (
     PModelCheckerParamsHandler, ModelParameters,
-#    prism_params_group, 
 )
 from prism_params_group import prism_params_group
 
