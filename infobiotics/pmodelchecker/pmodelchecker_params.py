@@ -1,4 +1,4 @@
-from infobiotics.shared.api import Params, Enum, Str, File, Long, Float
+from infobiotics.shared.api import Params, Enum, Str, File, LongGreaterThanZero, Float
 
 class PModelCheckerParams(Params):
     ''' Traits common to PRISMParams and MC2Params. '''
@@ -14,7 +14,7 @@ class PModelCheckerParams(Params):
     temporal_formulas = File(writable=True, desc='the name of the file containing the temporal logic formulas formalising the properties to check')
     formula_parameters = Str(desc="a string stating the values of the parameters in the formulas as follows:\n'param=lb:ub:s,param=lb:ub:s, ...' where lb is the lower bound, up is the upper bound and s is the step.\nParameters with a single value can also be specified as follows:\n'param=value,param=value, ...'")
 
-    number_samples = Long(desc='the number of simulations to generate')
+    number_samples = LongGreaterThanZero(desc='the number of simulations to generate')
     precision = Float(1.0, desc='the precision to achieve with respect to a real value')
     confidence = Float(0.1, desc='the confidence to achieve with respect to a real value')
 

@@ -1,11 +1,13 @@
-from enthought.traits.api import BaseLong 
+from enthought.traits.api import BaseLong
 
-# used by McssParams.runs
+
 class LongGreaterThanZero(BaseLong):
+    ''' Used by McssParams.runs and MC2Params.number_samples (which are effectively the same thing). '''
+    
     info_text = 'a Long greater than zero'
 
-    default_value = 1
-
+    default_value = 1L
+    
     def validate(self, object, name, value):
         value = super(LongGreaterThanZero, self).validate(object, name, value)
         if value > 0:
