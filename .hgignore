@@ -10,3 +10,7 @@ syntax: regexp
 ^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
 syntax: regexp
 ^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$

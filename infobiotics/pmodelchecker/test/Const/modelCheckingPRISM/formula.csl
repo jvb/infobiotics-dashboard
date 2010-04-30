@@ -1,3 +1,0 @@
-Formulas:
-"P = ? [ true U[1000,1000] (protein1_0_0_Constbacterium >= B ^ protein1_0_0_Constbacterium < B + 5) ]"			{B =0:10:300}
-"P = ? [ true U[D,D] (protein1_0_0_Constbacterium >= 50)]"																		{D=0:50:1000}

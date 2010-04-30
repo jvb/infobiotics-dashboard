@@ -1,0 +1,59 @@
+stochastic
+
+const double c_r_bacterium_1_0_0_Constbacterium = 0.025;
+const double c_r_bacterium_2_0_0_Constbacterium = 0.07;
+const double c_r_bacterium_3_0_0_Constbacterium = 3;
+const double c_r_bacterium_4_0_0_Constbacterium = 0.01;
+const int lb_gene1_0_0_Constbacterium;			//Lower bound for molecule gene1_0_0_Constbacterium
+const int ub_gene1_0_0_Constbacterium;			// Upper bound for molecule gene1_0_0_Constbacterium
+const int lb_protein1_0_0_Constbacterium;			//Lower bound for molecule protein1_0_0_Constbacterium
+const int ub_protein1_0_0_Constbacterium;			// Upper bound for molecule protein1_0_0_Constbacterium
+const int lb_rna1_0_0_Constbacterium;			//Lower bound for molecule rna1_0_0_Constbacterium
+const int ub_rna1_0_0_Constbacterium;			// Upper bound for molecule rna1_0_0_Constbacterium
+
+
+module m_0_0_Constbacterium
+
+	gene1_0_0_Constbacterium : [ lb_gene1_0_0_Constbacterium .. ub_gene1_0_0_Constbacterium ] init 1;
+	protein1_0_0_Constbacterium : [ lb_protein1_0_0_Constbacterium .. ub_protein1_0_0_Constbacterium ] init 0;
+	rna1_0_0_Constbacterium : [ lb_rna1_0_0_Constbacterium .. ub_rna1_0_0_Constbacterium ] init 0;
+
+
+	// [ gene1 ]_bacterium -c_1-> [ gene1 + rna1 ]_bacterium
+	[r_bacterium_1_0_0_Constbacterium] gene1_0_0_Constbacterium > 0 & rna1_0_0_Constbacterium < ub_rna1_0_0_Constbacterium -> 
+		c_r_bacterium_1_0_0_Constbacterium * gene1_0_0_Constbacterium : 
+			(rna1_0_0_Constbacterium' = rna1_0_0_Constbacterium + 1) ;
+
+	// [ rna1 ]_bacterium -c_1-> [  ]_bacterium
+	[r_bacterium_2_0_0_Constbacterium] rna1_0_0_Constbacterium > 0 -> 
+		c_r_bacterium_2_0_0_Constbacterium * rna1_0_0_Constbacterium : 
+			(rna1_0_0_Constbacterium' = rna1_0_0_Constbacterium-1) ;
+
+	// [ rna1 ]_bacterium -c_2-> [ rna1 + protein1 ]_bacterium
+	[r_bacterium_3_0_0_Constbacterium] rna1_0_0_Constbacterium > 0 & protein1_0_0_Constbacterium < ub_protein1_0_0_Constbacterium -> 
+		c_r_bacterium_3_0_0_Constbacterium * rna1_0_0_Constbacterium : 
+			(protein1_0_0_Constbacterium' = protein1_0_0_Constbacterium + 1) ;
+
+	// [ protein1 ]_bacterium -c_3-> [  ]_bacterium
+	[r_bacterium_4_0_0_Constbacterium] protein1_0_0_Constbacterium > 0 -> 
+		c_r_bacterium_4_0_0_Constbacterium * protein1_0_0_Constbacterium : 
+			(protein1_0_0_Constbacterium' = protein1_0_0_Constbacterium-1) ;
+
+
+endmodule
+
+
+const int molecule;
+const int rule;
+rewards "molecules"
+	molecule = 0 : 1;
+	molecule = 1 : gene1_0_0_Constbacterium;
+	molecule = 2 : protein1_0_0_Constbacterium;
+	molecule = 3 : rna1_0_0_Constbacterium;
+endrewards
+rewards "rules"
+	[ r_bacterium_1_0_0_Constbacterium ] rule = 1: 1;
+	[ r_bacterium_2_0_0_Constbacterium ] rule = 2: 1;
+	[ r_bacterium_3_0_0_Constbacterium ] rule = 3: 1;
+	[ r_bacterium_4_0_0_Constbacterium ] rule = 4: 1;
+endrewards

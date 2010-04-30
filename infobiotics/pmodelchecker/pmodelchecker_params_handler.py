@@ -1,6 +1,10 @@
 from common.files import read, write
 from infobiotics.shared.api import ParamsHandler, List, Unicode, Button, Instance, Int
-from infobiotics.pmodelchecker.api import TemporalFormula, TemporalFormulaParameter, ModelParameters
+#from infobiotics.pmodelchecker.api import (
+#    TemporalFormula, TemporalFormulaParameter, ModelParameters,
+#)
+from model_parameters import ModelParameters
+from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
