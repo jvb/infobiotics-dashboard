@@ -47,34 +47,35 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                     ),
                     Item('handler._prism_model_str',
                         show_label = False, 
-                        style = 'custom',
+#                        style = 'custom',
+                        style = 'readonly',
                         editor = CodeEditor(lexer='null'),
                     ),
-                    Item(label='Ctrl-F toggles Find, Ctrl-D duplicates line.'),
+                    Item(label='Ctrl-F toggles Find'),#, Ctrl-D duplicates line.'), # not when "style = 'readonly'"
                     show_border = True,
                 ),
-                buttons = ['OK','Revert','Undo','Redo'],
+                buttons = ['OK'],#,'Revert','Undo'], # not when "style = 'readonly'"
                 width=640, height=480,
                 resizable = True,
                 id = 'edit_prism_model_view',
             )
         if self.edit_traits(view = edit_prism_model_view, kind='livemodal').result: # if kind is not live no traits are updated! (translate has model_specification='')
+            # not when "style = 'readonly'"
             if self._prism_model_str != _prism_model_str:
-                file = os.path.abspath(os.path.join(self.model._cwd, self.model.PRISM_model)) #TODO use shadow trait for abspath
                 try:
-                    with write(file) as f:
+                    with write(self.model.PRISM_model_) as f:
                         f.write(self._prism_model_str)
                 except IOError, e:
-                    print e
-                self._prism_model_str_changed = True
-                
-    _prism_model_str_changed = Bool(False)
-        
-    retranslate_prism_model = Button(desc='whether to translate the PRISM model from the P system model again.\nThis will overwrite any changes that have been made to the PRISM model file.')
-    
-    def _retranslate_prism_model_fired(self):
-        self.model.translate_model_specification()
-        self._prism_model_str_changed = False
+                    print e #TODO popup message instead
+#                self._prism_model_str_changed = True
+#                
+#    _prism_model_str_changed = Bool(False)
+#        
+#    retranslate_prism_model = Button(desc='whether to translate the PRISM model from the P system model again.\nThis will overwrite any changes that have been made to the PRISM model file.')
+#    
+#    def _retranslate_prism_model_fired(self):
+#        self.model.translate_model_specification()
+#        self._prism_model_str_changed = False
 
 
     model_parameters = DelegatesTo('_model_parameters')

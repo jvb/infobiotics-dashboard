@@ -9,7 +9,7 @@ prism_params_group = VGroup(
     Item('model_specification', label='P system model'),
     VGroup(
         HGroup(
-            Item('handler.retranslate_prism_model', label='Retranslate', show_label=False, visible_when='handler._prism_model_str_changed'),
+#            Item('handler.retranslate_prism_model', label='Retranslate', show_label=False, visible_when='handler._prism_model_str_changed'),
             Item('PRISM_model', label='PRISM model'),
             Item('handler.edit_prism_model', label='Edit', show_label=False, enabled_when='object.PRISM_model != ""'),
         ),
@@ -45,14 +45,14 @@ prism_params_group = VGroup(
 #        #    Item('parameters_file', label='PRISM parameters file'),
 #        ),
         HGroup(
-            Item('handler.confidence', enabled_when='object.task=="Approximate"'),
+            Item('handler.confidence'),
             Item('handler._custom_confidence', show_label=False, enabled_when='handler.confidence=="custom"'),
-            Item('precision', enabled_when='object.task=="Approximate"'),
-            Item('number_samples', label='Number of samples', enabled_when='object.task=="Approximate"'),
-            enabled_when='task != "Translate"',
+            Item('precision'),
+            Item('number_samples', label='Number of samples'),
+            enabled_when='object.task == "Approximate"',
         ),
         VGroup(
-            Item('results_file', enabled_when='object.task == "Approximate" or object.task == "Verify"'),
+            Item('results_file', enabled_when='object.task in ("Approximate", "Verify")'),
             Item('states_file', enabled_when='object.task=="Build"'),
             Item('transitions_file', enabled_when='object.task=="Build"'),
         ),
