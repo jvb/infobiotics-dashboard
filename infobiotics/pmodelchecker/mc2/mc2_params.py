@@ -1,5 +1,4 @@
 from infobiotics.pmodelchecker.api import PModelCheckerParams
-from infobiotics.shared.api import Bool, File
 
 class MC2Params(PModelCheckerParams):
     

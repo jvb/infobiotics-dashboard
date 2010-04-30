@@ -10,6 +10,7 @@ class PModelCheckerParamsHandler(ParamsHandler):
     _model_parameters = Instance(ModelParameters)
     
     def init(self, info): #TODO object_model_specification_changed(self, info):
+        super(PModelCheckerParamsHandler, self).init(info)
         self._model_parameters = ModelParameters(_cwd=self.model._cwd)
         # must create _model_parameters here rather than __model_parmeters_default() 
         # because DelegatesTo('_model_parameters') causes it to be created before _cwd.

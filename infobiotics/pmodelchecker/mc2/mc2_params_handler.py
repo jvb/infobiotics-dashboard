@@ -1,13 +1,15 @@
-from infobiotics.shared.api import (
-    ParamsView, Int, Range, Property, Instance, on_trait_change, Button,
+from infobiotics.common.api import ParamsView
+from enthought.traits.api import (
+    Int, Range, Property, Instance, on_trait_change, Button,
 )
 from infobiotics.pmodelchecker.api import (
     PModelCheckerParamsHandler, 
-#    mc2_params_group, mc2_mcss_experiment_group,
 )
 from mc2_params_group import mc2_params_group
 from mc2_mcss_experiment_group import mc2_mcss_experiment_group
 from infobiotics.mcss.api import McssExperiment
+from commons.api import can_read, can_write
+import tables
 
 mc2_params_view = ParamsView(
     mc2_params_group,
@@ -73,8 +75,6 @@ class MC2ParamsHandler(PModelCheckerParamsHandler):
 
     def object_simulations_file_hdf5_changed(self, info):
         ''' Tries to extract 'number_of_runs' from 'simulations_file_hdf5'. '''
-        from common.files import can_read, can_write
-        import tables
         if can_read(self.model.simulations_file_hdf5) and self.simulations_generatedHDF5:
             with tables.openFile(self.simulations_file_hdf5, 'r') as f:
                 if not f.root._v_attrs.__contains__('mcss_version'):

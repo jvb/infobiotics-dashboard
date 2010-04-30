@@ -1,4 +1,4 @@
-from infobiotics.shared.api import Group, VGroup, Item
+from enthought.traits.ui.api import Group, VGroup, Item
 
 mc2_mcss_experiment_group = Group(
     VGroup(

@@ -93,6 +93,7 @@ class ParamsView(View): # can be used to edit parameters without performing the 
         values = [
             VGroup(
                 _cwd_group,
+#                '_',
                 values,
                 show_border=True,
             ),

@@ -8,7 +8,7 @@ from enthought.traits.api import Enum, Property, Str, Int, Range, Bool
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
     def _handler_default(self):
-        from infobiotics.pmodelchecker.prism_experiment_handler import PRISMExperimentHandler
+        from infobiotics.pmodelchecker.prism.prism_experiment_handler import PRISMExperimentHandler
         return PRISMExperimentHandler(model=self)
 
     pattern_list = [
@@ -150,6 +150,6 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = PRISMExperiment()
-    experiment.load('test/Const/modelCheckingPRISM/Const_PRISM.params')
+    experiment.load('test/Const/Const_PRISM.params')
     experiment.configure()
     

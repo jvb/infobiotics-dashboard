@@ -1,14 +1,7 @@
 from infobiotics.pmodelchecker.api import PModelCheckerExperiment
-from infobiotics.shared.api import Str, Int
+from enthought.traits.api import Str, Int
 
 class MC2Experiment(PModelCheckerExperiment):
-
-##    parameters = MC2Parameters
-#    def _params_file_changed(self, params_file):
-##        self.parameters = MC2Parameters(params_file)
-#        parameters = MC2Parameters(params_file)
-#        self.max_simulation = parameters.number_samples
-#        self.max_simulation = McssParameters(parameters.mcss_params_file).runs
 
     _pattern_list = [
         'Running mcss',

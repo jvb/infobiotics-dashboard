@@ -1,6 +1,5 @@
-from infobiotics.shared.api import (
-    ExperimentProgressHandler, property_depends_on,
-)
+from infobiotics.common.api import ExperimentProgressHandler
+from enthought.traits.api import property_depends_on
 
 class MC2ExperimentProgressHandler(ExperimentProgressHandler):
 
