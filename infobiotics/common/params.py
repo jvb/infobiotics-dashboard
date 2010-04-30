@@ -174,7 +174,7 @@ class Params(HasTraits):
             # handle IOError ---
             logger.exception(e)
             if self._interactive:
-                from infobiotics.shared.api import message
+                from enthought.traits.ui.message import auto_close_message, error, message
                 message(e, title='Error')
             else:
                 print e
@@ -413,7 +413,6 @@ def traits_repr(self, *names):
          name = Str('Jon')
          age = Int(28)
          def __repr__(self):
-             from infobiotics.shared.api import traits_repr
              return traits_repr(self, [name, age])
     
     '''

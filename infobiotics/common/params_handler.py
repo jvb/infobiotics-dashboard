@@ -77,7 +77,7 @@ class ParamsHandler(Controller):
             file_name = self.model._params_file,
             filter = self.filter,
             title = title,
-            id = 'infobiotics.shared.params_handler:ParamsHandler.get_load_file_name_using_Traits_FileDialog',
+            id = 'ParamsHandler.get_load_file_name_using_Traits_FileDialog',
         )
         if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
             return fd.file_name
@@ -119,7 +119,7 @@ class ParamsHandler(Controller):
             file_name = self.model._params_file,
             filter = self.filter,
             title = title,
-            id = 'infobiotics.shared.params_handler:ParamsHandler.get_save_file_name_using_Traits_FileDialog',
+            id = 'ParamsHandler.get_save_file_name_using_Traits_FileDialog',
         )
         if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
             # get whether to copy input files with relative paths or not

@@ -1,6 +1,7 @@
 from enthought.traits.api import HasTraits, Str, Float, Int, List, Button, Any
 from enthought.traits.ui.api import (
     View, Item, HGroup, VGroup, Group, Spring, ListEditor, TableEditor,
+    Handler, CodeEditor, Spring
 )
 from enthought.traits.ui.table_column import ObjectColumn
 
@@ -42,19 +43,15 @@ temporal_formulas_group = VGroup(
         Item('handler.remove_temporal_formula', show_label=False, enabled_when='len(handler.temporal_formulas) > 0 and handler.selected_temporal_formula is not None'),
         Spring(),
     ),
-    label='Temporal formulas',
 )
-
 
 class TemporalFormulaParameter(HasTraits):
     name = Str
     lower = Float(0)
     step = Float(0.5)
     upper = Float(1)
-    #FIXME replicate range_or_value from model_parameter_names
-
-
-from enthought.traits.ui.api import Handler
+    # don't replicate range_or_value from model_parameter_names, 
+    # if they want a constant they can just put it in the formula 
 
 class TemporalFormulaHandler(Handler):
     
@@ -67,9 +64,6 @@ class TemporalFormulaHandler(Handler):
                 except AttributeError:
                     pass
 
-
-from enthought.traits.ui.api import VGroup, CodeEditor, Spring 
-    
 temporal_formula_view = View(
     VGroup(
         Item(label='Formula:'),
@@ -86,7 +80,7 @@ temporal_formula_view = View(
             tooltip='Multiple lines will be concatenated.'), 
         HGroup(
             Spring(),
-            Item('model_parameter_name_to_insert', label='Model parameters:'),
+            Item('model_parameter_name_to_insert', label='Model parameters:'), #FIXME descriptions (EnumEditor?)
             Item('insert', show_label=False),
             Spring(),
         ),

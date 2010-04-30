@@ -39,6 +39,9 @@ class ModelParameter(PModelCheckerParameter):
     def traits_view(self):
         model_parameter_view.title=self.name
         return model_parameter_view
+    
+    #FIXME get 'kind' of modelParameter and use it table, either moleculeContants or ruleConstant
+    
     id = Str
     name = Str
     description = Str
@@ -263,7 +266,7 @@ model_parameters_group = Group(
         show_label=False, 
         editor=moleculeConstants_table_editor,
     ),
-    
+    Item('rewardConstants', editor=EnumEditor()), #FIXME    
 )
 
 
