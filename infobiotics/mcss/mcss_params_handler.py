@@ -1,10 +1,9 @@
 from enthought.traits.api import (
     Trait, Bool, Property, 
 )
-from enthought.traits.ui.api import VGroup 
 import os.path
 from commons.api import can_access
-from infobiotics.common.api import ParamsHandler, ParamsView, _cwd_group
+from infobiotics.common.api import ParamsHandler, ParamsView
 from mcss_params_group import mcss_params_group
 
 #mcss_params_view = ParamsView(

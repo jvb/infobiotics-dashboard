@@ -5,9 +5,7 @@ from enthought.traits.ui.api import (
 mcss_params_group = Group(
     VGroup(
         VGroup(
-            Item('model_file', 
-                id='model_file',
-            ),
+            Item('model_file'),
             HGroup(
                 Item('handler.model_format', 
                     label='XML type',
