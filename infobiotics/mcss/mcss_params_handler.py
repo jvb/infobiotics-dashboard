@@ -19,6 +19,8 @@ class McssParamsHandler(ParamsHandler):
         id='McssParamsHandler' # for saving window position and size
     )
     
+    help_url = 'http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'
+    
     model_format = Trait(
         'P system XML',
         {

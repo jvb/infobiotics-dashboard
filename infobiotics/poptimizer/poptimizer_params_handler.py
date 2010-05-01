@@ -20,6 +20,8 @@ class POptimizerParamsHandler(ParamsHandler):
         ('Experiment parameters', ['*.params','*.xml']), 
         ('All files', ['*']),
     ]
+
+    help_url = 'http://www.infobiotics.org/infobiotics-workbench/optimisation/optimisation_Claudio.html'
     
 #    model_format = Trait(
 #        'P system XML',

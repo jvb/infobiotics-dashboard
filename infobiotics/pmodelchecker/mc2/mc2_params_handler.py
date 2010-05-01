@@ -20,6 +20,8 @@ class MC2ParamsHandler(PModelCheckerParamsHandler):
 
     traits_view = mc2_params_view
     
+    help_url = 'http://www.brc.dcs.gla.ac.uk/software/mc2/'
+    
     def init(self, info):
         super(MC2ParamsHandler, self).init(info)
         if info.initialized:
