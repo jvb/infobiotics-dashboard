@@ -1,7 +1,8 @@
 from infobiotics.pmodelchecker.api import PModelCheckerExperiment
-from enthought.traits.api import Str, Int
+from infobiotics.pmodelchecker.mc2.api import MC2Params
+from enthought.traits.api import Str, Int, Range
 
-class MC2Experiment(PModelCheckerExperiment):
+class MC2Experiment(MC2Params, PModelCheckerExperiment):
 
     def _handler_default(self):
         from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
@@ -39,5 +40,5 @@ class MC2Experiment(PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = MC2Experiment()
-    experiment.load('test/Const/modelCheckingMC2/Const_MC2.params')
+    experiment.load('test/Const/Const_MC2.params')
     experiment.configure()

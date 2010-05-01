@@ -1,6 +1,8 @@
 from infobiotics.pmodelchecker.api import PModelCheckerExperimentHandler
+from mc2_params_handler import MC2ParamsHandler
+from mc2_experiment_progress_handler import MC2ExperimentProgressHandler
 
-class MC2ExperimentHandler(PModelCheckerExperimentHandler):
+class MC2ExperimentHandler(MC2ParamsHandler, PModelCheckerExperimentHandler):
 
     _progress_handler = MC2ExperimentProgressHandler 
 

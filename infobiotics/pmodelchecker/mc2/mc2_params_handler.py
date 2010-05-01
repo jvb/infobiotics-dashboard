@@ -70,7 +70,11 @@ class MC2ParamsHandler(PModelCheckerParamsHandler):
     edit_mcss_experiment = Button(label='Edit')
     
     def _edit_mcss_experiment_fired(self): #TODO
-        self._mcss_experiment.edit()
+        from infobiotics.common.api import ParamsView
+        view = ParamsView(
+            mc2_mcss_experiment_group,
+        )
+        self._mcss_experiment.edit(view=view)
 
 
     def object_simulations_file_hdf5_changed(self, info):

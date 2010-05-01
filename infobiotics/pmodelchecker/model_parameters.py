@@ -266,7 +266,7 @@ model_parameters_group = Group(
         show_label=False, 
         editor=moleculeConstants_table_editor,
     ),
-    Item('rewardConstants', editor=EnumEditor()), #FIXME    
+#    Item('rewardConstants', editor=EnumEditor()), #FIXME    
 )
 
 
