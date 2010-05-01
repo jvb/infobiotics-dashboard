@@ -5,7 +5,7 @@ from files import (
     path_join_overlapping, split_directories, 
     can_access, can_read, can_write, can_execute, 
     read, write, append, update,
-    whereis,
+    which,
 )
 
 from sequences import flatten, overlapping, join_overlapping
