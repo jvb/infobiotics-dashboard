@@ -1,9 +1,8 @@
 from commons.api import can_read, mkdir_p
 import os
-os.environ['ETS_TOOLKIT']='qt4'
+os.environ['ETS_TOOLKIT']='qt4' #TODO ETSConfig
 from enthought.traits.api import Property, Str, List, Unicode, Bool
 from enthought.pyface.api import FileDialog, OK
-
 from enthought.traits.ui.api import Controller, View, Item
 #from enthought.traits.ui.file_dialog2 import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
@@ -30,7 +29,7 @@ from enthought.traits.ui.api import Controller, View, Item
 #    )
 
 class ParamsHandler(Controller):
-
+    
     title = Property(Str, depends_on='model._params_file, model._cwd')
 
     def _get_title(self):
@@ -52,7 +51,21 @@ class ParamsHandler(Controller):
             
     def init(self, info):
         info.ui.title = self.title 
+
+    help_html = Str
+    help_string = Str
+    help_url = Str
     
+    def help(self, info):
+        if len(self.help_url) > 0:
+            import webbrowser
+            webrowser = webrowser.get('firefox')
+            webbrowser.open(self.help_url, new=1, autoraise=True)
+        elif len(self.help_string) > 0:
+            pass # HTMLEditor
+        elif len(self.help_string) > 0:
+            pass # TextEditor
+
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
         params = info.object
