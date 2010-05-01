@@ -19,6 +19,8 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     traits_view = prism_params_view
 
+    help_url = 'http://www.prismmodelchecker.org/manual/Main/Introduction'
+
     _prism_model_str = Str
 
     def object_PRISM_model_changed(self, info):
