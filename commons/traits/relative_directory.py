@@ -85,7 +85,7 @@ class RelativeDirectory(RelativeFile):
 
     def full_info(self, object, name, value):
         ''' Constructs an error string to be incorporated into a TraitError. '''
-        return self._full_info(object, name, value, kind='directory ')
+        return self._full_info(object, name, value, kind='directory')
            
     def validate(self, object, name, value):
         ''' Calls RelativeFile._validate with os.path.isdir as function. '''

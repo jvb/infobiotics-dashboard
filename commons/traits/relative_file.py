@@ -112,7 +112,7 @@ class RelativeFile(BaseFile):
         '''
         return self._full_info(object, name, value)
         
-    def _full_info(self, object, name, value, kind='file name '):
+    def _full_info(self, object, name, value, kind='file name'):
         ''' Constructs an error string to be incorporated into a TraitError.
         
         '''
@@ -137,9 +137,9 @@ class RelativeFile(BaseFile):
         
         info += kind
         
-        if self.directory != '':
+        if self.directory != '' and not self.absolute:
 #            info += '\n' # make tooltips easier to read # now done using wrap
-            info += "in '%s'" % os.path.abspath(self.directory)
+            info += " in '%s'" % os.path.abspath(self.directory)
 #            info += '\n'  
         
         return info
