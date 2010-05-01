@@ -1,5 +1,14 @@
-import os
-#os.environ['ETS_TOOLKIT']='qt4' # must be before Enthought import statements
+'''
+Must set toolkit to 'qt4' (TraitsBackendQt) before any Traits imports.  
+Doing this in Params *should* ensure that objects created through 
+infobiotics.api don't try to use wx
+'''
+import os # used elsewhere than os.environ
+#os.environ['ETS_TOOLKIT']='qt4'
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
+ETSConfig.company = 'Infobiotics'
+
 from enthought.traits.api import (
     HasTraits, Str, Undefined, Bool, List, TraitError, Instance,
 )
@@ -35,7 +44,6 @@ class Params(HasTraits):
 #        logger = logging.getLogger(level=logging.DEBUG)
         logger.debug('__cwd_default(%s) returning %s', self, _cwd)
         return _cwd
-
 
     def __init__(self, file=None, **traits):
         super(Params, self).__init__(**traits)
