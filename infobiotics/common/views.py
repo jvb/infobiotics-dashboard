@@ -32,8 +32,7 @@ shared_actions = [ # ParamsView and ExperimentView
 help_action = Action(
     name='&Help', 
     action='help',
-#    tooltip='Display some relevant information',
-    enabled_when='len(handler.help_url) + len(handler.help_html) + len(handler.help_str) > 0', # see ParamsHandler  
+    visible_when='handler.has_help', # see ParamsHandler  
 )
 
 #shared_actions = shared_actions + ['Help'] # TraitsUI help which doesn't work in TraitsBackendQt
@@ -87,10 +86,10 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     def set_content(self, *values):
         values = [
             VGroup(
-                _params_program_group,
                 _cwd_group,
 #                '_',
                 values,
+                _params_program_group,
                 show_border=True,
             ),
         ]

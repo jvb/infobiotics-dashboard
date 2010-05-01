@@ -60,7 +60,7 @@ class Params(HasTraits):
         _params_program = helper._params_program
         try:
             helper._params_program = _params_program # if _params_program does not exist it will raise the TraitError here, otherwise it would be raised after the method returns
-            print 'found', self._params_program_name, 'at', _params_program, 'in', helper.preferences.filename
+#            print 'found', self._params_program_name, 'at', _params_program, 'in', helper.preferences.filename
             return _params_program
         except TraitError:
             _params_program = which(self._params_program_name)
@@ -78,7 +78,7 @@ class Params(HasTraits):
                 )
                 sys.exit(1)
             else:
-                print 'found', self._params_program_name, 'at', _params_program
+#                print 'found', self._params_program_name, 'at', _params_program
                 preferences = get_default_preferences()
                 preferences.set(self.__get_preferences_path()+'._params_program', _params_program) # if we set with self._params_program or call save_preferences here we get an infinite recursion!
                 preferences.flush()
