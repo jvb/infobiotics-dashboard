@@ -29,11 +29,7 @@ shared_actions = [ # ParamsView and ExperimentView
     'Undo',
 ] 
 
-help_action = Action(
-    name='&Help', 
-    action='help',
-    visible_when='handler.has_help', # see ParamsHandler  
-)
+from commons.traits.ui.api import help_action
 
 #shared_actions = shared_actions + ['Help'] # TraitsUI help which doesn't work in TraitsBackendQt
 shared_actions = shared_actions + [help_action]

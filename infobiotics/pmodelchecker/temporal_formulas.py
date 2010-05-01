@@ -1,9 +1,10 @@
 from enthought.traits.api import HasTraits, Str, Float, Int, List, Button, Any
 from enthought.traits.ui.api import (
     View, Item, HGroup, VGroup, Group, Spring, ListEditor, TableEditor,
-    Handler, CodeEditor, Spring
+    CodeEditor, Spring
 )
 from enthought.traits.ui.table_column import ObjectColumn
+from commons.traits.ui.api import HelpfulController, help_action
 
 temporal_formulas_group = VGroup(
     HGroup(   
@@ -53,7 +54,9 @@ class TemporalFormulaParameter(HasTraits):
     # don't replicate range_or_value from model_parameter_names, 
     # if they want a constant they can just put it in the formula 
 
-class TemporalFormulaHandler(Handler):
+class TemporalFormulaHandler(HelpfulController):
+    
+    help_url = 'http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction'
     
     def object_insert_changed(self, info):
         ''' Set focus back to CodeEditor. Works despite raising AttributeError! '''
@@ -114,7 +117,7 @@ temporal_formula_view = View(
         ),
         show_border = True,
     ),
-    buttons = ['Undo', 'Cancel', 'OK'],#, 'Revert'],
+    buttons = ['Undo', 'Cancel', 'OK', help_action],#, 'Revert'],
     resizable = True,
     title = 'Edit temporal formula',
     handler = TemporalFormulaHandler(),
@@ -172,8 +175,8 @@ class TemporalFormula(HasTraits):
         self.parameters_string = parameters_string
 
 
-if __name__ == '__main__':
-#    execfile('mc2_experiment.py')
-    execfile('prism_params.py')
-    
+#if __name__ == '__main__':
+##    execfile('mc2/mc2_experiment.py')
+#    execfile('prism/prism_params.py')
+##    IOError: Cannot read 'test/Const/Const_PRISM.params'.    
     

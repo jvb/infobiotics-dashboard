@@ -3,8 +3,8 @@ import os
 os.environ['ETS_TOOLKIT']='qt4' #TODO ETSConfig
 from enthought.traits.api import Property, Str, List, Unicode, Bool, HTML
 from enthought.pyface.api import FileDialog, OK
-from enthought.traits.ui.api import Controller, View, Item
-import webbrowser
+from enthought.traits.ui.api import View, Item
+from commons.traits.ui.api import HelpfulController
 #from enthought.traits.ui.file_dialog2 import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
 #)
@@ -29,7 +29,7 @@ import webbrowser
 #        Item('copy', label='Copy required files with relative paths to new directory?', enabled_when='object.copy_enabled'),
 #    )
 
-class ParamsHandler(Controller):
+class ParamsHandler(HelpfulController):
     
     title = Property(Str, depends_on='model._params_file, model._cwd')
 
@@ -52,28 +52,6 @@ class ParamsHandler(Controller):
             
     def init(self, info):
         info.ui.title = self.title 
-
-    help_url = Str
-    help_string_maybe_html = Str
-    
-    has_help = Property(depends_on='help_url, help_string_maybe_html')
-    
-    def _get_has_help(self):
-        return True if self.help_url != '' or self.help_string_maybe_html != '' else False
-    
-    def help(self, info):
-        if len(self.help_url) > 0:
-            webbrowser.open(self.help_url, new=1, autoraise=True)
-        else:
-            view = View(
-                Item('handler.help_string_maybe_html', show_label=False, style='custom'),
-                buttons=['Close'],
-                width=640, height=480,
-                scrollable=True,
-                resizable=True,
-                id = 'ParamsHandler.help'
-            )
-            self.edit_traits(view=view)
 
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''

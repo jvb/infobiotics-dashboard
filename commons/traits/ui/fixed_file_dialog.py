@@ -32,23 +32,27 @@ from os.path import (basename, dirname, exists, getatime, getctime, getmtime,
 
 from time import localtime, strftime
 
-from ..api import (Bool, Button, CList, Event, File, HasPrivateTraits,
-    Instance, Int, Interface, Property, Str, cached_property, implements, List, Unicode)
+from enthought.traits.api import (
+    Bool, Button, CList, Event, File, HasPrivateTraits, Instance, Int, 
+    Interface, Property, Str, cached_property, implements, List, Unicode
+)
 
-from ..trait_base import user_name_for
+from enthought.traits.trait_base import user_name_for
 
-from .api import (CodeEditor, FileEditor, HGroup, HSplit, Handler, HistoryEditor,
-    ImageEditor, InstanceEditor, Item, UIInfo, VGroup, VSplit, View, spring, Spring)
+from enthought.traits.ui.api import (
+    CodeEditor, FileEditor, HGroup, HSplit, Handler, HistoryEditor, ImageEditor,
+    InstanceEditor, Item, UIInfo, VGroup, VSplit, View, spring, Spring
+)
 
-from .ui_traits import AView
+from enthought.traits.ui.ui_traits import AView
 
-from ...pyface.api import ImageResource
+from enthought.pyface.api import ImageResource
 
-from ...pyface.timer.api import do_later
+from enthought.pyface.timer.api import do_later
 
-from .helper import commatize
+from enthought.traits.ui.helper import commatize
 
-from .toolkit import toolkit
+from enthought.traits.ui.toolkit import toolkit
 
 #-------------------------------------------------------------------------------
 #  Constants:
