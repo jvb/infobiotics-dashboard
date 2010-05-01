@@ -196,6 +196,11 @@ class ParamsHandler(Controller):
 #        else:
 #            self.model._dirty = False
 
+#    def closed(self, info, is_ok): # close() stops window from ever shutting even when calling super()
+#        if is_ok:
+#            from enthought.preferences.api import get_default_preferences
+#            get_default_preferences().flush()
+    
 
 if __name__ == '__main__':
     execfile('params.py')

@@ -3,6 +3,10 @@ from enthought.traits.api import Str, Int
 
 class MC2Experiment(PModelCheckerExperiment):
 
+    def _handler_default(self):
+        from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
+        return MC2ExperimentHandler(model=self)
+
     _pattern_list = [
         'Running mcss',
         'Simulation number [0-9]+ of [0-9]+', # previously 'Generating simulations in MC2 format'
@@ -34,6 +38,6 @@ class MC2Experiment(PModelCheckerExperiment):
 
 
 if __name__ == '__main__':
-    experiment = MC2Experiemnt()
+    experiment = MC2Experiment()
     experiment.load('test/Const/modelCheckingMC2/Const_MC2.params')
     experiment.configure()

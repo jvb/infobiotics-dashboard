@@ -7,25 +7,90 @@ import os # used elsewhere than os.environ
 #os.environ['ETS_TOOLKIT']='qt4'
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-ETSConfig.company = 'Infobiotics'
+ETSConfig.company = 'infobiotics'
 
 from enthought.traits.api import (
-    HasTraits, Str, Undefined, Bool, List, TraitError, Instance,
+    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, on_trait_change
 )
 from enthought.traits.ui.api import Controller
 from infobiotics.common.api import (
     ParamsRelativeFile, ParamsRelativeDirectory,
 )
 from xml import sax
-from commons.api import key_from_value, can_access, read, write, logging
-from commons.traits.api import RelativeDirectory
+from commons.api import key_from_value, can_access, read, write, which, logging
+from commons.traits.api import RelativeFile, RelativeDirectory
 
 logger = logging.getLogger(level=logging.ERROR)
+
+from enthought.preferences.api import (
+    set_default_preferences,
+    ScopedPreferences, 
+    PreferencesHelper, 
+    get_default_preferences,
+)
+
+set_default_preferences(
+    ScopedPreferences(
+        filename=os.path.join(ETSConfig.application_data,'preferences.ini')
+    )
+) 
+#TODO can we now call get_default_preferences in another class and it will work,
+# or is this only for Params subclasses, or even just this class? 
+
+class ParamsPreferencesHelper(PreferencesHelper):
+    _params_program = RelativeFile(absolute=True, auto_set=True, executable=True)
 
 class Params(HasTraits): 
 
     _parameters_name = Str(Undefined, desc='the name attribute of the parameter tag in the params XML file')
     _parameter_set_name = Str(Undefined, desc='the name attribute of the parameterSet tag in the params XML file')
+
+    _params_program_name = Str
+    _params_program = RelativeFile(absolute=True, auto_set=True, executable=True)
+
+    def __get_preferences_path(self):
+        return self._params_program_name
+
+    def __params_program_default(self):
+        ''' Try to use a previously defined _params_program. '''
+        # using a helper here means we can test whether the path in the preferences file actually exists and is executable, and do something else if it doesn't 
+        helper = ParamsPreferencesHelper(
+            preferences_path=self.__get_preferences_path()
+        )
+        _params_program = helper._params_program
+        try:
+            helper._params_program = _params_program # if _params_program does not exist it will raise the TraitError here, otherwise it would be raised after the method returns
+            print 'found', self._params_program_name, 'at', _params_program, 'in', helper.preferences.filename
+            return _params_program
+        except TraitError:
+            _params_program = which(self._params_program_name)
+            if _params_program is None:
+                # we can't find it so print error message and exit #FIXME what does this do in the interpreter? 
+                import sys
+                sys.stderr.write(
+                    "error: '%s' could not be located on PATH. " \
+                    "Either change PATH to include '%s' " \
+                    "or amend '%s' with its correct location.\n" % (
+                        self._params_program_name, 
+                        self._params_program_name, 
+                        get_default_preferences().filename,
+                    )
+                )
+                sys.exit(1)
+            else:
+                print 'found', self._params_program_name, 'at', _params_program
+                preferences = get_default_preferences()
+                preferences.set(self.__get_preferences_path()+'._params_program', _params_program) # if we set with self._params_program or call save_preferences here we get an infinite recursion!
+                preferences.flush()
+                return _params_program
+
+    @on_trait_change('_params_program')
+    def save_preferences(self):
+        print 'got here'
+        # write changed _params_program to the preferences file
+        preferences = get_default_preferences()
+        preferences.set(self.__get_preferences_path() + '._params_program', self._params_program)
+        preferences.flush()
     
     _dirty = Bool(False)
     _unresetable = List(Str)

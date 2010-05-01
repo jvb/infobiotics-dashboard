@@ -4,12 +4,14 @@ from commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
 
 class POptimizerParams(Params):
     
-    _parameters_name = 'poptimizer'
-    _parameter_set_name = 'poptimizer'
-        
     def _handler_default(self):
         from infobiotics.poptimizer.api import POptimizerParamsHandler
         return POptimizerParamsHandler(model=self)
+        
+    _params_program_name = 'poptimizer'
+    
+    _parameters_name = 'poptimizer'
+    _parameter_set_name = 'poptimizer'
         
     target_file = Str(desc='a filename for target time series data')
     target_obj_num = Int(1, desc='the number of objects in the input time series data')

@@ -3,10 +3,16 @@ from enthought.traits.api import Enum, Bool, Range, Long
 from commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 
 class McssParams(Params):
+
+    def _handler_default(self):
+        from infobiotics.mcss.api import McssParamsHandler
+        return McssParamsHandler(model=self)
+
+    _params_program_name = 'mcss'
     
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
-    
+        
     model_file = ParamsRelativeFile('model.lpp', 
         exists=True, 
         desc='the model file to simulate', 
@@ -61,10 +67,6 @@ class McssParams(Params):
             'log_degraded', 'dump', 'periodic_x', 'periodic_y', 'periodic_z',
             'division_direction', 'keep_divisions', 'growth_type' 
         ]
-        
-    def _handler_default(self):
-        from infobiotics.mcss.api import McssParamsHandler
-        return McssParamsHandler(model=self)
 
 
 if __name__ == '__main__':

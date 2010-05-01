@@ -3,12 +3,12 @@ from enthought.traits.api import Str, Enum
 
 class PRISMParams(PModelCheckerParams):
 
-    _parameter_set_name = 'prism'
-
     def _handler_default(self):
         from prism_params_handler import PRISMParamsHandler
 #        from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler
         return PRISMParamsHandler(model=self)
+
+    _parameter_set_name = 'prism'
 
     model_checker = 'PRISM'
     results_file = 'results.psm'

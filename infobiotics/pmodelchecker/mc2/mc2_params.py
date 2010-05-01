@@ -2,12 +2,11 @@ from infobiotics.pmodelchecker.api import PModelCheckerParams
 
 class MC2Params(PModelCheckerParams):
     
-    _parameter_set_name = 'mc2'
-    
     def _handler_default(self):
-#        from infobiotics.pmodelchecker.mc2.mc2_params_handler import MC2ParamsHandler
-        from mc2_params_handler import MC2ParamsHandler
+        from infobiotics.pmodelchecker.mc2.api import MC2ParamsHandler
         return MC2ParamsHandler(model=self)
+
+    _parameter_set_name = 'mc2'
     
     model_checker = 'MC2'
 

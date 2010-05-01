@@ -52,6 +52,13 @@ experiment_actions = [ # ExperimentView only
     'Cancel',
 ]
 
+_params_program_group = HGroup(
+    Item('_params_program', 
+        label='Program',
+        visible_when='"Dashboard" not in handler.__class__.__name__', 
+    ),
+) 
+
 _cwd_group = HGroup(
     Item('_cwd', 
         label='Current working directory', 
@@ -80,6 +87,7 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     def set_content(self, *values):
         values = [
             VGroup(
+                _params_program_group,
                 _cwd_group,
 #                '_',
                 values,

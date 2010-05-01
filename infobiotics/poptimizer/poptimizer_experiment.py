@@ -56,8 +56,6 @@ class MPLFigureEditor(BasicEditorFactory):
 
 class POptimizerExperiment(Experiment):
 
-    _params_program = 'poptimizer'
-    
     best_fitnesses = List(Float)
     figure = Instance(Figure, 
         Figure(

@@ -30,7 +30,6 @@ class Experiment(Params):
 #    the Experiment superclass.    
 #    
 #    '''
-    _params_program = ParamsRelativeFile(exists=True, executable=True)
     _params_program_kwargs = ListStr
     _output_pattern_list = ListStr
     _error_pattern_list = ListStr([
@@ -68,6 +67,7 @@ class Experiment(Params):
             '''
             starting = True
     
+            #FIXME are these still relevant now that _params_program is found in preferences or PATH?
             if self._params_program == '':
                 print "warning self._params_program == ''"
             if self._params_file == '':

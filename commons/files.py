@@ -84,9 +84,7 @@ def update(file):
     return write(file, mode='r+')
 
 def which(program):
-    '''
-    from: http://jimmyg.org/blog/2009/working-with-python-subprocess.html as whereis
-    '''
+    ''' from: 'http://jimmyg.org/blog/2009/working-with-python-subprocess.html' as whereis '''
     for path in os.environ.get('PATH', '').split(':'):
         if os.path.exists(os.path.join(path, program)) and not os.path.isdir(os.path.join(path, program)):
             return os.path.join(path, program)
