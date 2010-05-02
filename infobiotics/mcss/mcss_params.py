@@ -13,7 +13,7 @@ class McssParams(Params):
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
         
-    model_file = ParamsRelativeFile('model.lpp', 
+    model_file = ParamsRelativeFile('', 
         exists=True, 
         desc='the model file to simulate', 
         directory_name='_cwd', 
@@ -71,7 +71,7 @@ class McssParams(Params):
 
 if __name__ == '__main__':
     parameters = McssParams()
-#    parameters.load('reactions1.params')
+#    parameters.load('test/models/reactions1.params')
 #    print parameters # test __repr__
     parameters.configure()
             

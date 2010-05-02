@@ -49,6 +49,6 @@ class PRISMParams(PModelCheckerParams):
 
 if __name__ == '__main__':
     parameters = PRISMParams()
-    parameters.load('test/Const/Const_PRISM.params')
+#    parameters.load('test/Const/Const_PRISM.params')
     parameters.configure()
                         

@@ -136,7 +136,7 @@ class POptimizerParams(Params):
 
 if __name__ == '__main__':
     parameters = POptimizerParams()
-    parameters.load('test/fourinitial/four_initial_inputpara.xml')
+#    parameters.load('test/fourinitial/four_initial_inputpara.xml')
 #    parameters.load('test/promoter/all_para_promoter_inputpara.xml')
 #    parameters.load('test/threegene/threegene_inputpara.xml')
     parameters.configure()
