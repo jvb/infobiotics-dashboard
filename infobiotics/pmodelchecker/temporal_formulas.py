@@ -56,7 +56,7 @@ class TemporalFormulaParameter(HasTraits):
 
 class TemporalFormulaHandler(HelpfulController):
     
-    help_url = 'http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction'
+    help_urls = [('Property specification', 'http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction')]
     
     def object_insert_changed(self, info):
         ''' Set focus back to CodeEditor. Works despite raising AttributeError! '''
@@ -173,10 +173,3 @@ class TemporalFormula(HasTraits):
                     parameters_string += ', ' 
                 parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
         self.parameters_string = parameters_string
-
-
-#if __name__ == '__main__':
-##    execfile('mc2/mc2_experiment.py')
-#    execfile('prism/prism_params.py')
-##    IOError: Cannot read 'test/Const/Const_PRISM.params'.    
-    
