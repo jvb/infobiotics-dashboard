@@ -29,23 +29,34 @@ shared_actions = [ # ParamsView and ExperimentView
     'Undo',
 ] 
 
-from commons.traits.ui.api import help_action
+#from commons.traits.ui.api import help_action
 
 #shared_actions = shared_actions + ['Help'] # TraitsUI help which doesn't work in TraitsBackendQt
-shared_actions = shared_actions + [help_action]
+#shared_actions = shared_actions + [help_action]
 
 params_actions = [ # ParamsView only
-    load_action, 
-    save_action, 
+#    load_action, 
+#    save_action, 
     'OK',
 ]
 
 experiment_actions = [ # ExperimentView only
-    load_action, 
-    save_action, 
+#    load_action, 
+#    save_action, 
     perform_action, 
     'Cancel',
 ]
+
+from enthought.traits.ui.api import Menu, MenuBar, ToolBar
+
+file_menu = Menu(
+    load_action, save_action,
+    name = '&File'
+)
+
+#TODO about_action
+
+toolbar = ToolBar(load_action, save_action)
 
 _params_program_group = HGroup(
     Item('_params_program', 
@@ -65,27 +76,22 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     buttons = shared_actions + params_actions
     resizable = True
 
-#    id = 'ParamsView' # instances should define their own id 
+#    toolbar=toolbar
 
-#    statusbar = [
-##        StatusItem(
+#    statusbar = [ 
+##        StatusItem( #TODO status StatusItem
 ##            name='_cwd', # better to be editable: use '_cwd_group' above
 ##            width=1.0
 ##        ),
 #    ]
 
-#    # better to allow instances to choose where to put '_cwd_group'
-#    # can't add top-level group with show_border=True to values either (really?)
-##    def set_content(self, *values): #TODO check this
-##        values = [_cwd_group] + list(values)
-##        super(ParamsView, self).set_content(*values) 
     def set_content(self, *values):
         values = [
             VGroup(
+                _params_program_group,
                 _cwd_group,
 #                '_',
                 values,
-                _params_program_group,
                 show_border=True,
             ),
         ]
@@ -94,18 +100,4 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     
 class ExperimentView(ParamsView):
     buttons = shared_actions + experiment_actions
-
-#def test_ParamsView_set_content():
-#    from enthought.traits.api import HasTraits, Int
-#    class Test(HasTraits):
-#        _cwd = Int
-#        i = Int
-#        view = ParamsView(
-#            'i',
-#        )
-#    test = Test()
-#    test.configure_traits()
-#    
-#if __name__ == '__main__':
-#    test_ParamsView_set_content()
-#        
+        

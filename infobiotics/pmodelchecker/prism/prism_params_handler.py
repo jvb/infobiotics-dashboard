@@ -1,7 +1,6 @@
 from __future__ import with_statement
 import os.path
 from commons.api import read, write
-from infobiotics.common.api import ParamsView
 from enthought.traits.api import (
     Trait, Range, Button, Str, Bool, Instance, DelegatesTo,
 )
@@ -10,16 +9,19 @@ from infobiotics.pmodelchecker.api import (
 )
 from prism_params_group import prism_params_group
 
-prism_params_view = ParamsView(
-    prism_params_group,
-    id = 'prism_params_view'
-)
-
 class PRISMParamsHandler(PModelCheckerParamsHandler):
 
-    traits_view = prism_params_view
+    def _params_group_default(self):
+        return prism_params_group
+    
+    id = 'PRISMParamsHandler'
 
-    help_url = 'http://www.prismmodelchecker.org/manual/Main/Introduction'
+    help_urls = [
+        ('Introduction to PRISM','http://www.prismmodelchecker.org/manual/Main/Introduction'),
+        ('The PRISM language','http://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction'),
+        ('Property specifiation','http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction'),
+        ('Tutorial for systems biologists','http://www.prismmodelchecker.org/tutorial/circadian.php'),
+    ]
 
     _prism_model_str = Str
 

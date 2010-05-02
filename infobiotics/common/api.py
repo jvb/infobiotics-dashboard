@@ -68,7 +68,7 @@ class ParamsRelativeDirectory(RelativeDirectory):
                 executable=executable,
                 **metadata)
 
-from views import ParamsView, ExperimentView, _cwd_group
+from views import ParamsView, ExperimentView, _cwd_group, MenuBar, file_menu
 
 from params_handler import ParamsHandler
 from params import Params

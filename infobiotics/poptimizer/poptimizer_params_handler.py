@@ -1,28 +1,23 @@
-from infobiotics.common.api import ParamsHandler, ParamsView
+from infobiotics.common.api import ParamsHandler
 from poptimizer_params_group import poptimizer_params_group
 from enthought.traits.api import Trait
-#import os.path
-#from commons.api import can_access
-
-#mcss_params_view = ParamsView(
-#    mcss_params_group,
-#    id='mcss_params_view'
-#)
 
 class POptimizerParamsHandler(ParamsHandler):
 
-    traits_view = ParamsView(
-        poptimizer_params_group,
-        id='POptimizerParamsHandler'
-    )
+    def _params_group_default(self):
+        return poptimizer_params_group
+    
+    id = 'POptimizerParamsHandler'
 
+    help_urls = [
+        ('Documentation','http://www.infobiotics.org/infobiotics-workbench/optimisation/optimisation_Claudio.html'),
+    ]
+    
     filters = [ # used to create wildcard and filter traits for FileDialog and OpenFileDialog respectively
         ('Experiment parameters', ['*.params','*.xml']), 
         ('All files', ['*']),
     ]
 
-    help_url = 'http://www.infobiotics.org/infobiotics-workbench/optimisation/optimisation_Claudio.html'
-    
 #    model_format = Trait(
 #        'P system XML',
 #        {

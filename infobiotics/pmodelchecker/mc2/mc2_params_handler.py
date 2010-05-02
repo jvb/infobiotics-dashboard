@@ -11,16 +11,16 @@ from infobiotics.mcss.api import McssExperiment
 from commons.api import can_read, can_write
 import tables
 
-mc2_params_view = ParamsView(
-    mc2_params_group,
-    id = 'mc2_params_view'
-)
-
 class MC2ParamsHandler(PModelCheckerParamsHandler):
 
-    traits_view = mc2_params_view
+    def _params_group_default(self):
+        return mc2_params_group
     
-    help_url = 'http://www.brc.dcs.gla.ac.uk/software/mc2/'
+    id = 'MC2ParamsHandler'
+    
+    help_urls = [
+        ('MC2 webpage','http://www.brc.dcs.gla.ac.uk/software/mc2/'),
+    ]
     
     def init(self, info):
         super(MC2ParamsHandler, self).init(info)

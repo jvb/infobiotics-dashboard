@@ -6,20 +6,17 @@ from commons.api import can_access
 from infobiotics.common.api import ParamsHandler, ParamsView
 from mcss_params_group import mcss_params_group
 
-#mcss_params_view = ParamsView(
-#    mcss_params_group,
-#    id='mcss_params_view' # for saving window position and size
-#)
-
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
 
-    traits_view = ParamsView(
-        mcss_params_group,
-        id='McssParamsHandler' # for saving window position and size
-    )
+    def _params_group_default(self):
+        return mcss_params_group
     
-    help_url = 'http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'
+    id = 'McssParamsHandler'
+    
+    help_urls = [
+        ('Documentation','http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'),
+    ]
     
     model_format = Trait(
         'P system XML',

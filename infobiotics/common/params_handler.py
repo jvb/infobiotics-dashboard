@@ -1,9 +1,10 @@
 from commons.api import can_read, mkdir_p
 import os
 os.environ['ETS_TOOLKIT']='qt4' #TODO ETSConfig
-from enthought.traits.api import Property, Str, List, Unicode, Bool, HTML
+from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance
 from enthought.pyface.api import FileDialog, OK
-from enthought.traits.ui.api import View, Item
+from enthought.traits.ui.api import View, Item, Group
+from infobiotics.common.api import ParamsView, MenuBar, file_menu
 from commons.traits.ui.api import HelpfulController
 #from enthought.traits.ui.file_dialog2 import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
@@ -30,6 +31,27 @@ from commons.traits.ui.api import HelpfulController
 #    )
 
 class ParamsHandler(HelpfulController):
+    
+    def traits_view(self):
+        help_menu = self.get_help_menu() # see HelpfulController
+        menubar = MenuBar(
+            file_menu,
+            help_menu,
+        ) if help_menu is not None else MenuBar(
+            file_menu,
+        ) 
+        return ParamsView(
+            self.params_group,
+            id = self.id,
+            menubar = menubar,
+        )
+        
+    params_group = Instance(Group) 
+    
+    def _params_group_default(self):
+        raise NotImplementedError
+
+    id = Str(desc='the ID to use when preserving window size and position')
     
     title = Property(Str, depends_on='model._params_file, model._cwd')
 
