@@ -36,7 +36,7 @@ prism_params_group = VGroup(
         ),
         Group(
             temporal_formulas_group,
-            label='Temproral Formulas',
+            label='Temporal Formulas',
             enabled_when='object.task != "Build"',
         ),
         enabled_when='object.task != "Translate"',
