@@ -24,3 +24,5 @@ syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/onePoint\.xml$
 syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/constitutive\.sm$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/formula\.csl$
