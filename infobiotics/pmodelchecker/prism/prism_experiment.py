@@ -2,7 +2,7 @@ import os.path
 from infobiotics.pmodelchecker.api import (
     PModelCheckerExperiment, 
 )
-from prism_params import PRISMParams
+from infobiotics.pmodelchecker.prism.api import PRISMParams
 from enthought.traits.api import Enum, Property, Str, Int, Range, Bool
 
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):

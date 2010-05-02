@@ -1,10 +1,11 @@
-from infobiotics.common.api import ExperimentProgressHandler, percentage
+from infobiotics.common.api import ExperimentProgressHandler
+from commons.traits.api import Percentage
 from enthought.traits.api import Property, property_depends_on
 from enthought.traits.ui.api import ProgressEditor, View, Item
 
 class McssProgressHandler(ExperimentProgressHandler):
     
-    progress = Property(percentage)
+    progress = Property(Percentage)
     
     @property_depends_on('model.time_in_run, model.runs, model.max_time')#model.run
     def _get_progress(self):

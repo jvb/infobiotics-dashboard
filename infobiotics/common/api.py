@@ -68,21 +68,11 @@ class ParamsRelativeDirectory(RelativeDirectory):
                 executable=executable,
                 **metadata)
 
-from views import ParamsView, ExperimentView, _cwd_group, MenuBar, file_menu
+from views import ParamsView, ExperimentView, MenuBar, file_menu
 
 from params_handler import ParamsHandler
 from params import Params
 
-from enthought.traits.api import Range
-       
-percentage = Range(0.0, 100.0, 0.0)
-
 from experiment import Experiment
 from experiment_progress_handler import ExperimentProgressHandler
 from experiment_handler import ExperimentHandler
-
-import os
-
-#import unified_logging as logging  
-#
-#logger = logging.getLogger()

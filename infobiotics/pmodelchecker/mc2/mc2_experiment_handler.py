@@ -1,15 +1,9 @@
-from infobiotics.pmodelchecker.api import PModelCheckerExperimentHandler
-from mc2_params_handler import MC2ParamsHandler
-from mc2_experiment_progress_handler import MC2ExperimentProgressHandler
+from infobiotics.pmodelchecker.mc2.api import MC2ParamsHandler, MC2ExperimentProgressHandler
+from infobiotics.common.api import ExperimentHandler
 
-class MC2ExperimentHandler(MC2ParamsHandler, PModelCheckerExperimentHandler):
+class MC2ExperimentHandler(MC2ParamsHandler, ExperimentHandler):
 
     _progress_handler = MC2ExperimentProgressHandler 
-
-#    traits_view = ExperimentView(
-#        Item('_cwd', label='Working directory', tooltip='Relative paths will be relative to this directory.'),
-#    )
-
 
 #    def has_valid_parameters(self):
 #        '''

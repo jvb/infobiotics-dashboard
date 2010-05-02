@@ -1,17 +1,7 @@
-from infobiotics.common.api import ExperimentView
-from infobiotics.pmodelchecker.api import PModelCheckerExperimentHandler
-from prism_params_group import prism_params_group
-from prism_params_handler import PRISMParamsHandler
-from prism_experiment_progress_handler import PRISMExperimentProgressHandler 
+from infobiotics.pmodelchecker.prism.api import PRISMParamsHandler, PRISMExperimentProgressHandler 
+from infobiotics.common.api import ExperimentHandler
 
-prism_experiment_view = ExperimentView(
-    prism_params_group,
-    id = 'prism_experiment_view',
-) 
-
-class PRISMExperimentHandler(PModelCheckerExperimentHandler, PRISMParamsHandler):
-    
-    traits_view = prism_experiment_view 
+class PRISMExperimentHandler(PRISMParamsHandler, ExperimentHandler):
     
     _progress_handler = PRISMExperimentProgressHandler
 
