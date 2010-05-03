@@ -1,0 +1,4 @@
+P=?[ (Time=1000)U([protein1_(0,0)] >= 0 ^ [protein1_(0,0)] < 0 + 5){Time=1000}]
+B Result
+0 
+5 
