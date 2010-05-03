@@ -1,5 +1,6 @@
 from infobiotics.pmodelchecker.api import PModelCheckerParams
 from enthought.traits.api import Str, Enum
+import os.path
 
 class PRISMParams(PModelCheckerParams):
 
@@ -14,7 +15,8 @@ class PRISMParams(PModelCheckerParams):
     results_file = 'results.psm'
 
     def translate_model_specification(self):
-        super(PRISMParams, self).translate_model_specification(self._cwd, self.model_specification, self.PRISM_model)
+#        super(PRISMParams, self).translate_model_specification(self._cwd, self.model_specification, self.PRISM_model)
+        super(PRISMParams, self).translate_model_specification(os.path.dirname(self.model_specification_), self.model_specification, self.PRISM_model)
         PRISM_model = self.PRISM_model
         self.PRISM_model = ''
         self.PRISM_model = PRISM_model
@@ -49,6 +51,5 @@ class PRISMParams(PModelCheckerParams):
 
 if __name__ == '__main__':
     parameters = PRISMParams()
-    parameters.load('test/Const/Const_PRISM.params')
     parameters.configure()
                         

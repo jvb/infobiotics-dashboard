@@ -1,14 +1,3 @@
-'''
-Must set toolkit to 'qt4' (TraitsBackendQt) before any Traits imports.  
-Doing this in Params *should* ensure that objects created through 
-infobiotics.api don't try to use wx
-'''
-import os # used elsewhere than os.environ
-#os.environ['ETS_TOOLKIT']='qt4'
-from enthought.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'qt4'
-ETSConfig.company = 'infobiotics'
-
 from enthought.traits.api import (
     HasTraits, Str, Undefined, Bool, List, TraitError, Instance, on_trait_change
 )
@@ -16,24 +5,15 @@ from enthought.traits.ui.api import Controller
 from infobiotics.common.api import (
     ParamsRelativeFile, ParamsRelativeDirectory,
 )
-from xml import sax
 from commons.api import key_from_value, can_access, read, write, which, logging
 from commons.traits.api import RelativeFile, RelativeDirectory
+import os
+from xml import sax
 
 logger = logging.getLogger(level=logging.ERROR)
 
-from enthought.preferences.api import (
-    set_default_preferences,
-    ScopedPreferences, 
-    PreferencesHelper, 
-    get_default_preferences,
-)
+from enthought.preferences.api import PreferencesHelper, get_default_preferences
 
-set_default_preferences(
-    ScopedPreferences(
-        filename=os.path.join(ETSConfig.application_data,'preferences.ini')
-    )
-) 
 #TODO can we now call get_default_preferences in another class and it will work,
 # or is this only for Params subclasses, or even just this class? 
 
@@ -89,14 +69,13 @@ class Params(HasTraits):
     def save_preferences(self):
         # write changed _params_program to the preferences file
         preferences = get_default_preferences()
-#        print 'got here', preferences.filename
         preferences.set(self.__get_preferences_path() + '._params_program', self._params_program)
         preferences.set(self.__get_preferences_path() + '._cwd', self._cwd)
         preferences.flush()
     
     _cwd = RelativeDirectory(absolute=True, exists=True, auto_set=True) # infinite recursion if ParamsRelativeDirectory because _cwd='_cwd'
     
-    def __cwd_default(self):
+    def __cwd_default(self): #TODO get_preference(name, contigency_function)
         helper = ParamsPreferencesHelper(
             preferences_path=self.__get_preferences_path()
         )

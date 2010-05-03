@@ -46,14 +46,13 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         edit_prism_model_view = View(
                 Group(
                     HGroup(
-                        Item(label='Editing PRISM model:'),
+                        Item(label='PRISM model:'),
                         Item('PRISM_model', show_label=False, style='readonly'),
                         Item(label='(Ctrl-F to find)'),#, Ctrl-D duplicates line)'), # not when "style = 'readonly'"
                     ),
                     Item('handler._prism_model_str',
                         show_label = False, 
-#                        style = 'custom',
-                        style = 'readonly',
+                        style = 'readonly', #TODO style = 'custom',
                         editor = CodeEditor(lexer='null'),
                     ),
                     show_border = True,

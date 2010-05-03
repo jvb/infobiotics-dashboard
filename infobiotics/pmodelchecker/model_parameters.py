@@ -199,7 +199,8 @@ class ModelParameters(HasTraits):
                 self.rewardConstant_descriptions = [rewardConstant.description.replace('A', 'a') for rewardConstant in handler.rewardConstants]
                 self.rewardConstant = self.rewardConstant_descriptions[0]
         except IOError, e:
-            print e, 'ModelParameters.__cwd_changed()'
+#            print e, 'ModelParameters.__cwd_changed()'
+            pass
     
     all_model_parameters = Property(depends_on='ruleConstants, moleculeConstants') 
     def _get_all_model_parameters(self):
@@ -313,7 +314,6 @@ model_parameters_group = Group(
 if __name__ == '__main__':
     from prism.api import PRISMExperiment
     experiment = PRISMExperiment()
-    experiment.load('prism/test/Const/Const_PRISM.params')
-    experiment.configure()
-    
-
+#    experiment.load('prism/test/Const/Const_PRISM.params')
+#    print experiment.__repr__()
+#    experiment.configure()

@@ -151,6 +151,6 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = PRISMExperiment()
-    experiment.load('test/Const/Const_PRISM.params')
+#    experiment.load('test/Const/Const_PRISM.params')
     experiment.configure()
     
