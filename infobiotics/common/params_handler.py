@@ -33,6 +33,9 @@ from commons.traits.ui.api import HelpfulController
 class ParamsHandler(HelpfulController):
     
     def traits_view(self):
+        return self.get_traits_view(ParamsView)
+    
+    def get_traits_view(self, ViewClass):
         help_menu = self.get_help_menu() # see HelpfulController
         menubar = MenuBar(
             file_menu,
@@ -40,11 +43,11 @@ class ParamsHandler(HelpfulController):
         ) if help_menu is not None else MenuBar(
             file_menu,
         ) 
-        return ParamsView(
+        return ViewClass(
             self.params_group,
             id = self.id,
             menubar = menubar,
-        )
+        ) 
         
     params_group = Instance(Group) 
     

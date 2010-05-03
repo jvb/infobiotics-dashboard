@@ -1,23 +1,12 @@
-from enthought.traits.api import Instance, Property, Bool
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
-from infobiotics.common.api import ExperimentView, MenuBar, file_menu
+from infobiotics.common.api import ExperimentView
+from enthought.traits.api import Instance, Property, Bool
 
 class ExperimentHandler(ParamsHandler):
     
     def traits_view(self):
-        help_menu = self.get_help_menu() # see HelpfulController
-        menubar = MenuBar(
-            file_menu,
-            help_menu,
-        ) if help_menu is not None else MenuBar(
-            file_menu,
-        ) 
-        return ExperimentView(
-            self.params_group,
-            id = self.id,
-            menubar = menubar,
-        )
+        return self.get_traits_view(ExperimentView)
         
     _progress_handler = Instance(ExperimentProgressHandler)
 
