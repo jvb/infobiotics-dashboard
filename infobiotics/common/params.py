@@ -39,6 +39,7 @@ set_default_preferences(
 
 class ParamsPreferencesHelper(PreferencesHelper):
     _params_program = RelativeFile(absolute=True, auto_set=True, executable=True)
+    _cwd = RelativeDirectory(absolute=True, exists=True, auto_set=True)
 
 class Params(HasTraits): 
 
@@ -84,16 +85,26 @@ class Params(HasTraits):
                 preferences.flush()
                 return _params_program
 
-    @on_trait_change('_params_program')
+    @on_trait_change('_params_program, _cwd')
     def save_preferences(self):
-        print 'got here'
         # write changed _params_program to the preferences file
         preferences = get_default_preferences()
         preferences.set(self.__get_preferences_path() + '._params_program', self._params_program)
+        preferences.set(self.__get_preferences_path() + '._cwd', self._cwd)
         preferences.flush()
     
-    _dirty = Bool(False)
-    _unresetable = List(Str)
+    _cwd = RelativeDirectory(absolute=True, exists=True, auto_set=True) # infinite recursion if ParamsRelativeDirectory because _cwd='_cwd'
+    
+    def __cwd_default(self):
+        helper = ParamsPreferencesHelper(
+            preferences_path=self.__get_preferences_path()
+        )
+        _cwd = helper._cwd
+        try:
+            helper._cwd = _cwd
+            return _cwd
+        except TraitError:
+            return os.getcwd()
 
     _params_file = ParamsRelativeFile(absolute=True, exists=True, readable=True, writable=True)
 
@@ -101,14 +112,8 @@ class Params(HasTraits):
         self._cwd = os.path.dirname(_params_file)
         self._dirty = False
         
-    _cwd = RelativeDirectory(absolute=True, exists=True, auto_set=True) # infinite recursion if ParamsRelativeDirectory because _cwd='_cwd'
-    
-    def __cwd_default(self):
-        #TODO try and load _cwd from preferences? and use in load dialogs
-        _cwd = os.getcwd()
-#        logger = logging.getLogger(level=logging.DEBUG)
-        logger.debug('__cwd_default(%s) returning %s', self, _cwd)
-        return _cwd
+    _dirty = Bool(False)
+    _unresetable = List(Str)
 
     def __init__(self, file=None, **traits):
         super(Params, self).__init__(**traits)
