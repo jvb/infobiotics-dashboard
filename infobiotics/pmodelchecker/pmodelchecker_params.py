@@ -1,6 +1,7 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
 from enthought.traits.api import Enum, Str, Float, Bool
 from commons.traits.api import LongGreaterThanZero
+import os.path
 
 class PModelCheckerParams(Params):
     ''' Base class for PRISMParams and MC2Params. '''
@@ -48,7 +49,8 @@ class PModelCheckerParams(Params):
     mcss_params_file = ParamsRelativeFile(filters=['*.params'], desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
     
     def _model_specification_changed(self):
-        self.translate_model_specification() # must be reimplemented in subclasses
+        if os.path.isfile(self.model_specification):
+            self.translate_model_specification() # must be reimplemented in subclasses
 
     def translate_model_specification(self, dir, model_specification, PRISM_model=''):
         ''' Performs an experiment with task='Translate' to generate the 

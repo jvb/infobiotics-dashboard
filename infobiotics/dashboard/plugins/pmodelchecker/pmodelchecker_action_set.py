@@ -8,7 +8,7 @@
 
 from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from actions import *
+from actions import PRISMExperimentAction, MC2ExperimentAction
             
             
 class PModelCheckerActionSet(WorkbenchActionSet):
@@ -37,9 +37,9 @@ class PModelCheckerActionSet(WorkbenchActionSet):
         # Experiment menu
 #        Action(path='MenuBar/Experiment', name='PModelChecker',
 #            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:NewPModelCheckerAction'),
-        Action(path='MenuBar/Experiment', name='PModelChecker',
+        Action(path='MenuBar/Experiment', name='PModelChecker (PRISM)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
-        Action(path='MenuBar/Experiment', name='PModelChecker',
+        Action(path='MenuBar/Experiment', name='PModelChecker (MC2)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
 #        Action(path='MenuBar/Experiment', name='PModelChecker',
 #            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:'),
@@ -47,9 +47,9 @@ class PModelCheckerActionSet(WorkbenchActionSet):
         # Experiment toolbar
 #        Action(path='ToolBar/Experiment', name='PModelChecker',
 #            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:NewPModelCheckerAction'),
-        Action(path='ToolBar/Experiment', name='PModelChecker',
+        Action(path='ToolBar/Experiment', name='PModelChecker (PRISM)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
-        Action(path='ToolBar/Experiment', name='PModelChecker',
+        Action(path='ToolBar/Experiment', name='PModelChecker (MC2)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
 #        Action(path='ToolBar/Experiment', name='PModelChecker',
 #            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:'),

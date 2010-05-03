@@ -6,24 +6,23 @@
 # $Date: 2010-01-25 15:19:58 +0000 (Mon, 25 Jan 2010) $
 
 from enthought.pyface.action.api import Action
-from prism_experiment import PRISMExperiment
-from mc2_experiment import MC2Experiment
+#from prism_experiment import PRISMExperiment
+#from mc2_experiment import MC2Experiment
+from infobiotics.api import PRISMExperiment, MC2Experiment
 
 class PRISMExperimentAction(Action):
     name = 'PModelChecker (PRISM)'
     tooltip = 'Load a PRISM experiment from a parameters file.'
     def perform(self, event=None):
         obj = PRISMExperiment(application=self.window.workbench.application)
-        obj.load()    
-        obj.edit(kind='modal')#nonmodal')
+        obj.edit()
 
-class MC2ExperimentAction(PyFaceAction):
+class MC2ExperimentAction(Action):
     name = 'PModelChecker (MC2)'
     tooltip = 'Load an MC2 experiment from a parameters file.'
     def perform(self, event=None):
         obj = MC2Experiment(application=self.window.workbench.application)
-        obj.load()    
-        obj.edit(kind='modal')#nonmodal')
+        obj.edit()
 
 
 #from pmodelchecker_experiment_editor import PModelCheckerExperimentEditor

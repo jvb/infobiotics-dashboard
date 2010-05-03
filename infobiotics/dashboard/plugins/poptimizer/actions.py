@@ -5,10 +5,11 @@
 # $Revision: 411 $
 # $Date: 2010-01-25 18:03:26 +0000 (Mon, 25 Jan 2010) $
 
-from enthought.pyface.action.api import Action as PyFaceAction
-from poptimizer_experiment import POptimizerExperiment
+from enthought.pyface.action.api import Action
+#from poptimizer_experiment import POptimizerExperiment
+from infobiotics.api import POptimizerExperiment
 
-class POptimizerExperimentAction(PyFaceAction):
+class POptimizerExperimentAction(Action):
     name = 'Optimisation (POptimizer)'
     tooltip = 'Optimise the parameters and structure of a P system model.'
     def perform(self, event=None):

@@ -8,7 +8,7 @@
 
 from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from actions import *
+from actions import McssExperimentAction
             
             
 class McssActionSet(WorkbenchActionSet):
@@ -59,12 +59,12 @@ class McssActionSet(WorkbenchActionSet):
         # Experiment menu
         Action(path='MenuBar/Experiment', name='mcss',
 #            group='McssGroup',
-            class_name='infobiotics.dashboard.plugins.mcss.actions:NewMcssExperimentAction'),
+            class_name='infobiotics.dashboard.plugins.mcss.actions:McssExperimentAction'),
         
         # Experiment toolbar
         Action(path='ToolBar/Experiment', name='mcss',
 #            group='McssGroup',
-            class_name='infobiotics.dashboard.plugins.mcss.actions:NewMcssExperimentAction'),
+            class_name='infobiotics.dashboard.plugins.mcss.actions:McssExperimentAction'),
 #        Action(path='ToolBar/Experiment', name='Load mcss parameters',
 #            group='McssGroup',
 #            class_name='infobiotics.dashboard.plugins.mcss.actions:LoadMcssParametersAction'),

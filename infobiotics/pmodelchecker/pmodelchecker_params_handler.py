@@ -3,6 +3,7 @@ from infobiotics.common.api import ParamsHandler
 from enthought.traits.api import List, Unicode, Button, Instance, Int
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
+import os.path
 
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
@@ -23,6 +24,8 @@ class PModelCheckerParamsHandler(ParamsHandler):
     temporal_formulas = List(TemporalFormula)
     
     def object_temporal_formulas_changed(self, info):
+        if not os.path.isfile(info.object.temporal_formulas_):
+            return
         with read(info.object.temporal_formulas_) as f: 
             lines = f.readlines()
         if len(lines) == 0 or lines[0].strip() != 'Formulas:':

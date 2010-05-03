@@ -101,7 +101,7 @@ class Params(HasTraits):
         self._cwd = os.path.dirname(_params_file)
         self._dirty = False
         
-    _cwd = RelativeDirectory(exists=True, auto_set=True) # infinite recursion if ParamsRelativeDirectory because _cwd='_cwd'
+    _cwd = RelativeDirectory(absolute=True, exists=True, auto_set=True) # infinite recursion if ParamsRelativeDirectory because _cwd='_cwd'
     
     def __cwd_default(self):
         #TODO try and load _cwd from preferences? and use in load dialogs

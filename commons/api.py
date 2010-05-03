@@ -1,3 +1,5 @@
+from colours import colour, colours
+
 from dicts import key_from_value
 
 from files import (
@@ -7,6 +9,10 @@ from files import (
     read, write, append, update,
     which,
 )
+
+from lists import copy, unique
+
+from md5sum import md5sum
 
 from sequences import flatten, overlapping, join_overlapping
 

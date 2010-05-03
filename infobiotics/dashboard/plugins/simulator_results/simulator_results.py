@@ -34,7 +34,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from random import randint
-from infobiotics.shared import colours
+from commons.api import colours
 #from shared import main
 from ui_player_control_widget import Ui_ControlsWidget
 from ui_plots_preview_dialog import Ui_PlotsPreviewDialog

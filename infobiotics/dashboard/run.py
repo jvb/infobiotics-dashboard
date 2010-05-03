@@ -10,12 +10,12 @@ from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
 #from enthought.plugins.ipython_shell.ipython_shell_plugin import IPythonShellPlugin # IPythonShellPlugin is not supported by Qt backend, yet.
 #from enthought.envisage.ui.single_project.project_plugin import ProjectPlugin
 from infobiotics.dashboard.app import InfobioticsDashboardWorkbenchApplication
-#from infobiotics.dashboard.plugins.experiments.ui_plugin import ExperimentsUIPlugin
-#from infobiotics.dashboard.plugins.mcss.ui_plugin import McssUIPlugin
+from infobiotics.dashboard.plugins.experiments.ui_plugin import ExperimentsUIPlugin
+from infobiotics.dashboard.plugins.mcss.ui_plugin import McssUIPlugin
 from infobiotics.dashboard.plugins.pmodelchecker.ui_plugin import PModelCheckerUIPlugin
 #from infobiotics.dashboard.plugins.poptimizer.ui_plugin import POptimizerUIPlugin
 #from infobiotics.dashboard.plugins.bnf.ui_plugin import BNFUIPlugin
-#from infobiotics.dashboard.plugins.simulator_results.ui_plugin import SimulatorResultsUIPlugin
+from infobiotics.dashboard.plugins.simulator_results.ui_plugin import SimulatorResultsUIPlugin
 #from infobiotics.dashboard.plugins.example.ui_plugin import ExampleUIPlugin
 #from infobiotics.dashboard.plugins.unified_open_action.unified_open_action_ui_plugin import UnifiedOpenActionUIPlugin
 
@@ -31,25 +31,25 @@ def main():
             CorePlugin(),
             WorkbenchPlugin(),
 
-            DeveloperPlugin(),
-            DeveloperUIPlugin(),
-            PythonShellPlugin(),
+#            DeveloperPlugin(),
+#            DeveloperUIPlugin(),
+#            PythonShellPlugin(),
 #            IPythonShellPlugin(),
             TextEditorPlugin(),
 
 #            ProjectPlugin(),
 
-#            ExperimentsUIPlugin(),
-#            McssUIPlugin(),
+            ExperimentsUIPlugin(),
+            McssUIPlugin(),
             PModelCheckerUIPlugin(),
 #            POptimizerUIPlugin(),
-#            
-#            SimulatorResultsUIPlugin(),
-###            McssResultsUIPlugin(),
-##            UnifiedOpenActionUIPlugin(),
-#
+            
+            SimulatorResultsUIPlugin(),
+#            McssResultsUIPlugin(),
+#            UnifiedOpenActionUIPlugin(),
+
 #            BNFUIPlugin(),
-#
+
 ##            McssPlugin(), # testing Envisage services, see mcss_plugin docstring
          
 #            ExampleUIPlugin(),   

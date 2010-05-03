@@ -7,19 +7,17 @@
 
 
 from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
-from enthought.pyface.action.api import Action as PyFaceAction
+from enthought.pyface.action.api import Action
 #from mcss_experiment_editor import McssExperimentEditor
-from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
-from mcss_experiment import McssExperiment
+#from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
+#from mcss_experiment import McssExperiment
+from infobiotics.api import McssExperiment
 
 
-class NewMcssExperimentAction(PyFaceAction):
-    ''' ...
-     
-    '''
+class McssExperimentAction(Action):
     id = 'infobiotics.dashboard.plugins.mcss.actions:NewMcssExperimentAction'
-    name = 'mcss'
-    tooltip = 'Simulate a model'
+    name = 'Stochastic simulation (mcss)'
+    tooltip = 'Perform a simulation experiment with mcss'
     
     def perform(self, event=None):
         obj=McssExperiment(application=self.window.workbench.application)
@@ -28,7 +26,7 @@ class NewMcssExperimentAction(PyFaceAction):
 #            kind=ParamsExperimentEditor,
 #            use_existing=False
 #        )
-        obj.edit_traits(kind='nonmodal')
+        obj.edit()
 
 
 #class LoadMcssParametersAction(PyFaceAction): #TODO
@@ -53,7 +51,7 @@ class NewMcssExperimentAction(PyFaceAction):
 #        raise NotImplementedError
 
 
-class UndoAction(PyFaceAction):
+class UndoAction(Action):
     id = 'infobiotics.dashboard.plugins.mcss.actions.UndoAction'
     name = '&Undo'
     tooltip = 'Undo the last change'
@@ -68,7 +66,7 @@ class UndoAction(PyFaceAction):
                     ui.handler._on_undo(ui.info)
             
             
-class RedoAction(PyFaceAction):
+class RedoAction(Action):
     id = 'infobiotics.dashboard.plugins.mcss.actions.RedoAction'
     name = '&Redo'
     tooltip = 'Redo the previous undo action'
