@@ -2,7 +2,7 @@ from enthought.pyface.action.api import Action
 from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
 #from mcss_experiment_editor import McssExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
-from infobiotics.dashboard.mcss.mcss_dashboard_experiment import McssDashboardExperiment
+from infobiotics.dashboard.mcss.api import McssDashboardExperiment
 
 class McssExperimentAction(Action):
     id = 'infobiotics.dashboard.plugins.mcss.actions:NewMcssExperimentAction'
