@@ -4,7 +4,7 @@ Adapted from qt4/extras/bounds_editor.py, qt4/file_editor.py, and qt4/html_edito
 
 from enthought.traits.ui.qt4.text_editor import SimpleEditor as SimpleTextEditor
 from enthought.traits.ui.api import FileEditor
-from enthought.traits.api import Str, Bool, TraitError
+from enthought.traits.api import Str, Bool, TraitError, on_trait_change
 from commons.traits.relative_directory import RelativeDirectory
 from commons.strings import wrap
 import os
@@ -15,24 +15,13 @@ class SimpleEditor(SimpleTextEditor):
     directory = RelativeDirectory(exists=True)
     exists = Bool(False)
     
-    def refresh(self):
-        ''' Trigger re-validation of trait value. '''
-        if self.control is not None:
-            self.set_value(self.value)
-    
-    def _exists_changed(self):
-        self.refresh()
-
-    def _directory_changed(self, directory):
-        self.refresh()
-
     def init(self, parent):
         factory = self.factory # RelativeFileEditor below
         self.directory = factory.directory
         self.sync_value(factory.directory_name, 'directory', 'from')
         self.sync_value(factory.exists_name, 'exists', 'from')
             
-        # file_editor.SimpleEditor ---
+        # same as file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
         layout = QtGui.QHBoxLayout(self.control)
         layout.setMargin(0)
@@ -54,27 +43,27 @@ class SimpleEditor(SimpleTextEditor):
                                self.show_file_dialog)
 
         self.set_tooltip(control) # != self.control
-        # end of file_editor.SimpleEditor ---
+        # end of similarity ---
         
         # ensure invalid is set appropriately for hard-coded/default value ---
         if self.value is not None:
-            self.set_value(self.value)
-#        else:
-#            self.set_value('hello')
+            self.update_object()
 
+    @on_trait_change('exists, directory')
     def update_object(self):
-        """ Handles the user changing the contents of the edit control.
-        """
-        self._update(unicode(self._file_name.text()))
+        ''' Handles the user changing the contents of the edit control. '''
+        if self.control is not None:
+            self._update(unicode(self._file_name.text()))
 
-    def update_editor (self, value=None):
-        """ Updates the editor when the object trait changes externally to the 
-            editor.
-        """
+    def update_editor(self, value=None):
+        ''' Updates the editor when the object trait changes externally to the editor. ''' 
         if value is not None:
             self._file_name.setText(value) # triggers update_object
         else: 
             self._file_name.setText(self.str_value) # triggers update_object
+        self.update_object() 
+        # needed to refresh invalid state when a valid value is set while the 
+        # editor is in an invalid state
 
     def show_file_dialog(self):
         ''' Displays the pop-up file dialog. '''
@@ -112,14 +101,7 @@ class SimpleEditor(SimpleTextEditor):
         try:
             if self.factory.truncate_ext:
                 file_name = os.path.splitext(file_name)[0]
-            self.set_value(file_name)
-        except TraitError, excp:
-            pass
-
-    def set_value(self, value):
-        ''' Fixes non-removal of invalid state. '''
-        try:
-            self.value = value
+            self.value = file_name
             if self._error is not None:
                 self._error = None
                 self.ui.errors -= 1
