@@ -52,71 +52,73 @@ class Experiment(Params):
 #        ''' An example of responding to an Event. '''
 #        self.child.logfile_read = sys.stdout
 
+#    @profile
+    def _spawn(self):
+        ''' Start the program and try to match output.
+        
+        Spawns the program (starting it in self.cwd), 
+        compiles list of patterns for expect_list, 
+        adds EOF to list,
+        calls 'started' hook,
+        loops calling the '_output_pattern_matched' hook with the index of the pattern
+        and the match until EOF whereupon it calls the 'finished' hook.
+         
+        '''
+        self.starting = True
+
+        #FIXME are these still relevant now that _params_program is found in preferences or PATH?
+        if self._params_program == '':
+            print "warning self._params_program == ''"
+        if self._params_file == '':
+            print "warning self._params_file == ''"
+
+#            print self._params_program, self._params_file, self._params_program_kwargs, self._cwd
+
+        # spawn process
+        self.child = expect.spawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
+        # note that the expect module doesn't like list traits so we copy them using [:] 
+
+        # useful for debugging
+#            self.child.logfile_read = sys.stdout #TODO comment out in release
+
+        self.started = True
+
+        # compile pattern list for expect_list
+        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
+        
+        # append EOF to compiled pattern list
+        compiled_pattern_list.append(expect.EOF)
+        eof_index = compiled_pattern_list.index(expect.EOF)
+        
+        # append TIMEOUT to compiled pattern list
+        compiled_pattern_list.append(expect.TIMEOUT)
+        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+        
+        # expect loop
+        patterns_matched = 0
+        while True:
+            pattern_index = self.child.expect_list(compiled_pattern_list)
+            if pattern_index == eof_index:
+                if patterns_matched == 0:
+                    if self.child.before != '':
+                        print self.child.before
+                # process has finished, perhaps prematurely
+                break
+            elif pattern_index == timeout_index:
+                self.timed_out = True
+            else:
+                self._output_pattern_matched(pattern_index, self.child.match.group())
+                patterns_matched += 1
+        print patterns_matched
+
+        self.finished = True
+
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
-        def _spawn():
-            ''' Start the program and try to match output.
-            
-            Spawns the program (starting it in self.cwd), 
-            compiles list of patterns for expect_list, 
-            adds EOF to list,
-            calls 'started' hook,
-            loops calling the '_output_pattern_matched' hook with the index of the pattern
-            and the match until EOF whereupon it calls the 'finished' hook.
-             
-            '''
-            starting = True
-    
-            #FIXME are these still relevant now that _params_program is found in preferences or PATH?
-            if self._params_program == '':
-                print "warning self._params_program == ''"
-            if self._params_file == '':
-                print "warning self._params_file == ''"
-    
-#            print self._params_program, self._params_file, self._params_program_kwargs, self._cwd
-    
-            # spawn process
-            self.child = expect.spawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
-            # note that the expect module doesn't like list traits so we copy them using [:] 
-    
-            # useful for debugging
-#            self.child.logfile_read = sys.stdout #TODO comment out in release
-    
-            self.started = True
-    
-            # compile pattern list for expect_list
-            compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
-            
-            # append EOF to compiled pattern list
-            compiled_pattern_list.append(expect.EOF)
-            eof_index = compiled_pattern_list.index(expect.EOF)
-            
-            # append TIMEOUT to compiled pattern list
-            compiled_pattern_list.append(expect.TIMEOUT)
-            timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
-            
-            # expect loop
-            patterns_matched = 0
-            while True:
-                pattern_index = self.child.expect_list(compiled_pattern_list)
-                if pattern_index == eof_index:
-                    if patterns_matched == 0:
-                        if self.child.before != '':
-                            print self.child.before
-                    # process has finished, perhaps prematurely
-                    break
-                elif pattern_index == timeout_index:
-                    self.timed_out = True
-                else:
-                    self._output_pattern_matched(pattern_index, self.child.match.group())
-                    patterns_matched += 1
-    
-            self.finished = True
-
         if thread:
-            Thread(target=_spawn).start()
+            Thread(target=self._spawn).start()
         else:
-            _spawn()
+            self._spawn()
             #TODO call serial progress function from here
         return True
 
