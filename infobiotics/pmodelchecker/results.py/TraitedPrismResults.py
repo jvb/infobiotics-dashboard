@@ -64,7 +64,7 @@ class TraitedPrismVariable(HasTraits):
 
 
 
-from infobiotics.dashboard.shared.mayavi import extent, normalized_extent#, MlabWidget
+from commons.mayavi import extent, normalized_extent#, MlabWidget
 #from enthought.traits.api import on_trait_change
 #class CheckerResultsSurface(MlabWidget):
 #    """ encapsulates a PRISMResults object, 
@@ -489,7 +489,8 @@ class TraitedPrismResultsPlotter(HasTraits):
     
     
     
-    
+
+# http://markmail.org/search/?q=RangeEditor+is+still+the+intermediate+value%20list:com.enthought.mail.enthought-dev#query:RangeEditor%20is%20still%20the%20intermediate%20value%20list%3Acom.enthought.mail.enthought-dev+page:1+mid:ypjjb752y3c5uklx+state:results    
 
 '''
 Hello all,
@@ -589,4 +590,33 @@ when the slider is dragged it prints:
 2.2
 3.3
 but shows intermediate values like 2.26116 (picture attached).
+'''
+
+'''
+Jonathan,
+
+It sounds like what you really want to do is provide your own 'evaluate' 
+method, something like this:
+
+def my_evaluate(value):
+    if value < 2:
+        raise ValueError('value is too small'):
+    else:
+        return value**2
+
+You can also specify your own 'format', such as "%02.2f".
+
+Bryce
+'''
+
+'''
+Hi Bryce,
+
+'format' helped me to correct the look of the range labels, thanks.
+
+'evaluate' helps me get the correct value but the RangeEditor still
+displays the intermediate value (see attached).
+
+Jon
+
 '''
