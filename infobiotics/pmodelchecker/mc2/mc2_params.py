@@ -37,6 +37,6 @@ class MC2Params(PModelCheckerParams):
 
 if __name__ == '__main__':
     parameters = MC2Params()
-#    parameters.load('test/Const/Const_MC2.params')
+    parameters.load('test/Const/Const_MC2.params')
     parameters.configure()
     
