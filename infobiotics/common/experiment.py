@@ -73,6 +73,8 @@ class Experiment(Params):
             if self._params_file == '':
                 print "warning self._params_file == ''"
     
+#            print self._params_program, self._params_file, self._params_program_kwargs, self._cwd
+    
             # spawn process
             self.child = expect.spawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
             # note that the expect module doesn't like list traits so we copy them using [:] 

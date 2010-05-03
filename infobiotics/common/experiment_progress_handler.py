@@ -13,7 +13,7 @@ class CancelExperimentMixin(object):
     
     @on_trait_change('cancel')
     def cancelled(self):
-        pass
+        print 'cancelled'
 
 class ExperimentProgressHandler(ParamsHandler):#, CancelExperimentMixin):
     
@@ -23,13 +23,17 @@ class ExperimentProgressHandler(ParamsHandler):#, CancelExperimentMixin):
     def _get_progress(self):
         raise NotImplementedError
     
+    def _set_progress(self): # only need when progress being edited with a RangeEditor
+        return
+
     def _get_status(self):
-        raise NotImplementedError
-    
+        return ''
+        
 #    def model_finished_fired(self): #TODO
 #        print 'finished'
 
     traits_view = View(
         Item('controller.progress', editor=DefaultOverride(low_label='0%', high_label='100%', format='%2.1f')),
-        'controller.status', #TODO
+        Item('controller.status', style='readonly', visible_when='len(controller.status) > 0'),
+#        Item('controller.cancel'),
     )

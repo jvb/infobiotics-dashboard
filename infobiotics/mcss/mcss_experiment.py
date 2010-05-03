@@ -1,6 +1,6 @@
 from mcss_params import McssParams
 from infobiotics.common.api import Experiment
-from enthought.traits.api import Float, Int
+from enthought.traits.api import Int, Float
 
 class McssExperiment(McssParams, Experiment):
     
@@ -23,7 +23,7 @@ class McssExperiment(McssParams, Experiment):
             self.run = int(run)
             self.time_in_run = float(time_in_run)
         else:
-            super(McssExperimentProgressHandler, self).pattern_matched(pattern_index, match)
+            super(McssExperiment, self).pattern_matched(pattern_index, match)
 
 
 if __name__ == '__main__':

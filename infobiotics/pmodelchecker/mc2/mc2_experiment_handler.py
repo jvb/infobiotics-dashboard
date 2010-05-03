@@ -3,7 +3,8 @@ from infobiotics.common.api import ExperimentHandler
 
 class MC2ExperimentHandler(MC2ParamsHandler, ExperimentHandler):
 
-    _progress_handler = MC2ExperimentProgressHandler 
+    def __progress_handler_default(self):
+        return MC2ExperimentProgressHandler(model=self.model) 
 
 #    def has_valid_parameters(self):
 #        '''
