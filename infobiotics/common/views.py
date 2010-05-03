@@ -78,12 +78,12 @@ class ParamsView(View): # can be used to edit parameters without performing the 
 
 #    toolbar=toolbar
 
-#    statusbar = [ 
-##        StatusItem( #TODO status StatusItem
-##            name='_cwd', # better to be editable: use '_cwd_group' above
-##            width=1.0
-##        ),
-#    ]
+    statusbar = [ 
+        StatusItem(
+            name='handler.status',
+            width=1.0
+        ),
+    ]
 
     def set_content(self, *values):
         values = [

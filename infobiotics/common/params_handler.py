@@ -78,6 +78,8 @@ class ParamsHandler(HelpfulController):
     def init(self, info):
         info.ui.title = self.title 
 
+    status = Str
+
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
         params = info.object
@@ -86,6 +88,7 @@ class ParamsHandler(HelpfulController):
 #        file_name = self.get_load_file_name_using_Traits_FileDialog(title)
         if file_name is not None:
             params.load(file_name)
+            self.status = "Loaded '%s'." % file_name
         
     def get_load_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
@@ -122,6 +125,7 @@ class ParamsHandler(HelpfulController):
             if self.copy: #TODO prompt to overwrite existing files in new directory
                 pass
             params.save(file_name, force=True, copy=self.copy) # user will have been prompted to overwrite by the GUI
+            self.status = "Saved '%s'." % file_name
                                    
     def get_save_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
