@@ -1,5 +1,10 @@
-from enthought.traits.ui.tabular_adapter \
-    import TabularAdapter
+from infobiotics.common.api import ExperimentProgressHandler
+from enthought.traits.api import (
+    HasTraits, Str, DictStrStr, Instance, property_depends_on, List, Float, 
+    Int, Range, Constant, Property
+)
+from enthought.traits.ui.api import View, VGroup, Item, HGroup, TabularEditor
+from enthought.traits.ui.tabular_adapter import TabularAdapter
 
 class Module(HasTraits):
     '''PosReg(X=3,Y=1)''' 
@@ -49,7 +54,6 @@ class MPLFigureEditor(BasicEditorFactory):
     klass = _MPLFigureEditor
 
 
-
 class POptimizerExperimentProgressHandler(ExperimentProgressHandler):
 
     @property_depends_on('pass')
@@ -58,7 +62,7 @@ class POptimizerExperimentProgressHandler(ExperimentProgressHandler):
 
     def _get_status(self):
         pass
-    
+
     best_fitnesses = List(Float)
     figure = Instance(Figure, 
         Figure(

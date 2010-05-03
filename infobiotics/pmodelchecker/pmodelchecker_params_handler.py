@@ -1,6 +1,8 @@
-from common.files import read, write
-from infobiotics.shared.api import ParamsHandler, List, Unicode, Button, Instance, Int
-from infobiotics.pmodelchecker.api import TemporalFormula, TemporalFormulaParameter, ModelParameters
+from commons.api import read, write
+from infobiotics.common.api import ParamsHandler
+from enthought.traits.api import List, Unicode, Button, Instance, Int
+from model_parameters import ModelParameters
+from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
@@ -8,6 +10,7 @@ class PModelCheckerParamsHandler(ParamsHandler):
     _model_parameters = Instance(ModelParameters)
     
     def init(self, info): #TODO object_model_specification_changed(self, info):
+        super(PModelCheckerParamsHandler, self).init(info)
         self._model_parameters = ModelParameters(_cwd=self.model._cwd)
         # must create _model_parameters here rather than __model_parmeters_default() 
         # because DelegatesTo('_model_parameters') causes it to be created before _cwd.

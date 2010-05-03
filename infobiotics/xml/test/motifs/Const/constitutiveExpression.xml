@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<PSystem name="constitutiveExpression">
+  <alphabetOfObjects>
+    <object name="gene1"/>
+    <object name="protein1"/>
+    <object name="rna1"/>
+  </alphabetOfObjects>
+  <compartmentLabels>
+    <compartmentLabel label="bacterium"/>
+  </compartmentLabels>
+  <membraneStructure>
+    <compartment name="bacterium" label="bacterium"/>
+  </membraneStructure>
+  <initialMultisets>
+    <initialMultiset label="bacterium">
+      <object name="gene1" multiplicity="1"/>
+    </initialMultiset>
+  </initialMultisets>
+  <ruleSets>
+    <ruleSet label="bacterium">
+      <module name="UnReg" objects="1" constants="0.025" labels="bacterium" file="basicLibrary.plb"/>
+      <module name="PostTransc" objects="1" constants="0.07,3,0.01" labels="bacterium" file="basicLibrary.plb"/>
+    </ruleSet>
+  </ruleSets>
+</PSystem>

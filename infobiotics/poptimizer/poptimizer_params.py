@@ -1,16 +1,24 @@
-from infobiotics.shared.api import Params
+from infobiotics.common.api import Params, ParamsRelativeFile
+from enthought.traits.api import Str, Int, Long, Bool, Range, on_trait_change, Trait #TODO remove Trait
+from commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
 
 class POptimizerParams(Params):
     
+    def _handler_default(self):
+        from infobiotics.poptimizer.api import POptimizerParamsHandler
+        return POptimizerParamsHandler(model=self)
+        
+    _params_program_name = 'poptimizer'
+    
     _parameters_name = 'poptimizer'
     _parameter_set_name = 'poptimizer'
-        
+    
     target_file = Str(desc='a filename for target time series data')
     target_obj_num = Int(1, desc='the number of objects in the input time series data')
     initial_file = Str(desc='a filename for non-zero initial values settings of some objects')
     num_initials = Int(desc='the number of files for initial values')
-    nonfix_module_lib_file = File(exists=True, directory_name='_cwd', auto_set=True, desc='a filename for the non-fixed module library to evolve models')
-    fix_module_lib_file = File(directory_name='_cwd', auto_set=True, desc='a filename for the fixed module library')
+    nonfix_module_lib_file = ParamsRelativeFile(exists=True, desc='a filename for the non-fixed module library to evolve models')
+    fix_module_lib_file = ParamsRelativeFile(desc='a filename for the fixed module library')
     molecules = Str(desc='the possible values for all variables when instantiating a module in the library (colon-separated list of strings)')
     seednum = Long(desc='the seed number to initialize the random generator')
     
@@ -19,6 +27,7 @@ class POptimizerParams(Params):
     maxmodulesno = IntGreaterThanZero(10, desc='the maximum number of modules contain in one model')
     simu_runs = IntGreaterThanZero(20, desc='the number of simulations when running the simulator to calculate the fitness of one individual')
 
+    #TODO change these to Enum and move Trait to handler
 #    fitness_func_type = Str(desc='the fitness function chosen to do the model quality evaluation')
     fitness_func_type = Trait(
         'Random-weighted sum',
@@ -124,3 +133,11 @@ class POptimizerParams(Params):
         
     def _nonfix_module_lib_file_changed(self, library): pass #TODO update maxmodulesno, maxgeno, popsize
 
+
+if __name__ == '__main__':
+    parameters = POptimizerParams()
+#    parameters.load('test/fourinitial/four_initial_inputpara.xml')
+#    parameters.load('test/promoter/all_para_promoter_inputpara.xml')
+#    parameters.load('test/threegene/threegene_inputpara.xml')
+    parameters.configure()
+    

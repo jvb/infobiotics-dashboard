@@ -1,0 +1,3 @@
+#!/bin/sh
+export PYTHONPATH=/usr/share/infobiotics-dashboard:$PYTHONPATH
+python /usr/share/infobiotics-dashboard/infobiotics/dashboard/run.py

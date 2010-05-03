@@ -1,18 +1,10 @@
-from infobiotics.shared.api import ExperimentView, ExperimentHandler 
-from infobiotics.mcss.api import (
-    McssParamsHandler, McssProgressHandler, mcss_params_group,
-) 
+from infobiotics.mcss.api import McssParamsHandler, McssExperimentProgressHandler
+from infobiotics.common.api import ExperimentHandler
 
-mcss_experient_view = ExperimentView(
-    mcss_params_group,
-)
-
-class McssExperimentHandler(ExperimentHandler, McssParamsHandler):
-
-    traits_view = mcss_experient_view
+class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
     def __progress_handler_default(self):
-        return McssProgressHandler(model=self)
+        return McssExperimentProgressHandler(model=self.model)
 
 
 if __name__ == '__main__':

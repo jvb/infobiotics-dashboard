@@ -10,3 +10,25 @@ syntax: regexp
 ^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
 syntax: regexp
 ^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/basicLibrary\.xml$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/constitutiveExpression\.xml$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/constitutiveExpressionModel\.xml$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/onePoint\.xml$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/constitutive\.sm$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/formula\.csl$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/modelParameters\.xml$
+syntax: regexp
+\.xml$
+syntax: regexp
+\.h5$

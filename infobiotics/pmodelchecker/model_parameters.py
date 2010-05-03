@@ -1,6 +1,17 @@
 from __future__ import with_statement
-from enthought.traits.api import HasTraits, Str, Float, Enum, Property
-from enthought.traits.ui.api import View, Item, HGroup, VGroup
+from enthought.traits.api import (
+    HasTraits, Str, Float, Int, Undefined, Range, Enum, Property, List, Tuple, 
+    Instance, Dict
+) 
+from enthought.traits.ui.api import (
+    View, Item, HGroup, VGroup, TableEditor, TextEditor, Group, VSplit,
+)
+from xml.sax import ContentHandler
+from xml import sax
+from enthought.traits.ui.table_column import ObjectColumn, ExpressionColumn
+import os.path
+from commons.traits.api import RelativeDirectory
+from commons.api import read
 
 range_or_value_group = VGroup(
     Item('range_or_value', style='custom'),
@@ -27,22 +38,36 @@ model_parameter_view = View(
     buttons = ['OK', 'Cancel'] 
 )    
 
-class PModelCheckerParameter(HasTraits):
-    range_or_value = Enum(['range','value'])
-    lower = Float(0)
-    step = Float(1.0) # Range('lower','upper', 'value')
-    upper = Float(2.0) #FIXME these aren't good defaults
-    value = Float(1.0)
-    
-class ModelParameter(PModelCheckerParameter):
-    ''' modelVariable or ruleConstant. '''
-    def traits_view(self):
-        model_parameter_view.title=self.name
-        return model_parameter_view
+class ModelVariable(HasTraits):
     id = Str
     name = Str
     description = Str
+
+    def __repr__(self):
+        return '''%s(
+    id = '%s',
+    name = '%s', 
+    description = '%s', 
+)''' % (self.__class__.__name__, self.id, self.name, self.description)
+
+    
+class RuleConstant(ModelVariable):
+
+    def traits_view(self):
+        model_parameter_view.title=self.name
+        return model_parameter_view
+    
+    kind = Str('rule constant')
+
+    value = Float(Undefined)
+    lower = Float(Undefined)
+    step  = Range('lower','upper', 'value', editor=TextEditor)
+    upper = Float(Undefined)
+    
+    range_or_value = Enum(['range','value'])
+
     value_string = Property(depends_on='range_or_value, value, lower, step, upper')
+ 
     def _get_value_string(self):
         if self.range_or_value == 'value':
             return '%s=%s' % (self.name, self.value)
@@ -51,54 +76,62 @@ class ModelParameter(PModelCheckerParameter):
     
     def __repr__(self):
         if self.range_or_value == 'value':
-            return '''ModelParameter(
-    id = %s,
-    name = %s, 
-    description = %s, 
+            return '''%s(
+    id = '%s',
+    name = '%s', 
+    description = '%s', 
     value = %s, 
-)''' % (self.id, self.name, self.description, self.value)
+)''' % (self.__class__.__name__, self.id, self.name, self.description, self.value)
         else:
-            return '''ModelParameter(
-    id = %s,
-    name = %s, 
-    description = %s, 
+            return '''%s(
+    id = '%s',
+    name = '%s', 
+    description = '%s', 
     lower = %s, 
     step = %s, 
     upper = %s, 
-)''' % (self.id, self.name, self.description, self.lower, self.step, self.upper)
+)''' % (self.__class__.__name__, self.id, self.name, self.description, self.lower, self.step, self.upper)
 
-    def __str__(self):
+    def __str__(self): #TODO
         return super(HasTraits, self).__str__()
 
+class MoleculeConstant(RuleConstant):
+    ''' As RuleConstant but only allows integer values. '''
 
-from enthought.traits.api import Int 
+    kind = 'molecule constant'
+    
+    value = Int(Undefined)
+    lower = Int(Undefined)
+    step  = Int(Undefined)
+    upper = Int(Undefined)
+    
+class RewardConstant(HasTraits):
+    name = Str
+    description = Str
+    value = Int(Undefined) 
+    
+    def __repr__(self):
+        return '''%s(
+    name = '%s', 
+    description = '%s', 
+    value = %s, 
+)''' % (self.__class__.__name__, self.name, self.description, self.value)
 
-class MoleculeConstant(ModelParameter):
-    ''' Subclass of ModelParameter than only allows integer values. '''
-    value = Int(1)
-    lower = Int(0)
-    step = Int(1)
-    upper = Int(2)
-    
-    
-from xml.sax import ContentHandler
 
 class ModelParametersXMLReader(ContentHandler):
-    ''' Parses modelParameters.xml created by pmodelchecker --task=Translate.
+    ''' From modelParameters.xml (pmodelchecker <params_file> --task=Translate)
 
-    Adapted from ParamsXMLReader.   
-    
+    Adapted from ParamsXMLReader.
     See also http://docs.python.org/library/xml.sax.handler.html
-    
     '''
     def __init__(self):
+        ContentHandler.__init__(self) # can't use super() here !?
         self.modelVariables = []
         self.ruleConstants = []
         self.moleculeConstants = []
         self.rewardConstants = []
         self.switch1 = ''
         self.switch2 = ''
-        ContentHandler.__init__(self)
 
     elements1 = ('modelVariables', 'ruleConstants', 'moleculeConstants', 'rewardConstants')
     elements2 = ('variable', 'constant')
@@ -107,13 +140,16 @@ class ModelParametersXMLReader(ContentHandler):
         if name in self.elements1:
             self.switch1 = name
         elif name in self.elements2 and self.switch1 in self.elements1:
-            if self.switch1 == 'moleculeConstants':
-                self.model_parameter = MoleculeConstant()
-            elif self.switch1 == 'ruleConstants': return # TODO
-            elif self.switch1 == 'modelVariables':
-                self.model_parameter = ModelParameter()
-            elif self.switch1 == 'rewardConstants': return #TODO
-            self.model_parameter.id=attrs['id']
+            if self.switch1 == 'modelVariables':
+                self.object = ModelVariable()
+            elif self.switch1 == 'ruleConstants':
+                self.object = RuleConstant()
+            elif self.switch1 == 'moleculeConstants':
+                self.object = MoleculeConstant()
+            elif self.switch1 == 'rewardConstants':
+                self.object = RewardConstant()
+            if self.switch1 in ('modelVariables', 'ruleConstants', 'moleculeConstants'):
+                self.object.id=attrs['id']
         elif name in ('name', 'description', 'value'):
             self.switch2 = name
 
@@ -122,34 +158,33 @@ class ModelParametersXMLReader(ContentHandler):
         content = content.strip()
         if len(content) > 0:
             if self.switch2 == 'name':
-                self.model_parameter.name = content
+                self.object.name = content
             elif self.switch2 == 'description':
-                self.model_parameter.description = content
+                self.object.description = content
             elif self.switch2 == 'value' and self.switch1 == 'rewardConstants':
-                pass#self.model_parameter.value = content #TODO
+                self.object.value = int(content)
      
     def endElement(self, name):
         if name in self.elements2:
-            getattr(self, self.switch1).append(self.model_parameter)
+            getattr(self, self.switch1).append(self.object)
 
-
-from enthought.traits.api import File, List, Tuple, Instance, DelegatesTo
-from enthought.traits.ui.table_column import ObjectColumn, ExpressionColumn
-import os
-from enthought.traits.directory import Directory
-from common.files import read
 
 class ModelParameters(HasTraits):
-    _cwd = Directory
-    modelVariables = List(ModelParameter) 
-    ruleConstants = List(ModelParameter) 
-    moleculeConstants = List(MoleculeConstant) 
+    _cwd = RelativeDirectory
+    modelVariables = List(ModelVariable) 
+    ruleConstants = List(RuleConstant) 
+    moleculeConstants = List(MoleculeConstant)
+    rewardConstants = List(RewardConstant)
+    rewardConstant_descriptions = List(Str)
+    rewardConstant = Enum(Undefined, values='rewardConstant_descriptions')
+    
+    def _rewardConstant_changed(self):
+        self.rewardConstants[self.rewardConstant_descriptions.index(self.rewardConstant)].value #TODO do something with this value
     
     def __cwd_changed(self):
         model_parameters_file = os.path.join(self._cwd, 'modelParameters.xml')
         try:
             with read(model_parameters_file) as f:
-                from xml import sax
                 parser = sax.make_parser()
                 handler = ModelParametersXMLReader()
                 parser.setContentHandler(handler)
@@ -160,17 +195,20 @@ class ModelParameters(HasTraits):
                 self.modelVariables = handler.modelVariables
                 self.ruleConstants = handler.ruleConstants
                 self.moleculeConstants = handler.moleculeConstants
+                self.rewardConstants = handler.rewardConstants
+                self.rewardConstant_descriptions = [rewardConstant.description.replace('A', 'a') for rewardConstant in handler.rewardConstants]
+                self.rewardConstant = self.rewardConstant_descriptions[0]
         except IOError, e:
             print e, 'ModelParameters.__cwd_changed()'
     
-    _all_model_parameters = Property(depends_on='modelVariables, ruleConstants, moleculeConstants')
-    def _get__all_model_parameters(self):
-        return self.modelVariables + self.ruleConstants + self.moleculeConstants
+    all_model_parameters = Property(depends_on='ruleConstants, moleculeConstants') 
+    def _get_all_model_parameters(self):
+        return self.ruleConstants + self.moleculeConstants
     
-    model_parameters = Property(depends_on='_all_model_parameters', desc='example_parameter_name=10, another_parameter=low:high:step')
+    model_parameters = Property(depends_on='all_model_parameters', desc='parameter=10, another_parameter=low:high:step')
 
     def _get_model_parameters(self):
-        return ','.join([model_parameter.value_string for model_parameter in self._all_model_parameters])
+        return ','.join([model_parameter.value_string for model_parameter in self.all_model_parameters])
     
     def _set_model_parameters(self, model_parameters):
         model_parameters = model_parameters.split(',')
@@ -182,61 +220,100 @@ class ModelParameters(HasTraits):
             else:
                 range_or_value = 'value'
                 value = value
-            for model_parameter in self._all_model_parameters:
+            for model_parameter in self.all_model_parameters:
                 if model_parameter.name == name:
+                    if isinstance(model_parameter, MoleculeConstant):
+                        type = int
+                    elif isinstance(model_parameter, RuleConstant):
+                        type = float
                     if range_or_value == 'value':
-                        model_parameter.value = int(value) if isinstance(model_parameter, MoleculeConstant) else float(value)
+                        model_parameter.value = type(value)
                     else:
-                        model_parameter.lower = int(lower) if isinstance(model_parameter, MoleculeConstant) else float(lower)
-                        model_parameter.step = int(step) if isinstance(model_parameter, MoleculeConstant) else float(step)
-                        model_parameter.upper = int(upper) if isinstance(model_parameter, MoleculeConstant) else float(upper)
+                        model_parameter.lower = type(lower)
+                        model_parameter.step  = type(step)
+                        model_parameter.upper = type(upper)
                     model_parameter.range_or_value = range_or_value
                     break
 
-    def __len__(self):
-        return len(self.modelVariables) + len(self.ruleConstants) + len(self.moleculeConstants)
+    def __len__(self): #FIXME why?
+        return len(self.ruleConstants) + len(self.moleculeConstants)
 
-    def traits_view(self):
-        return View(
-            model_parameters_group,
-            buttons=['OK','Cancel'],
-            title='Edit model parameters',
-            resizable=True,
-        )
+#    def traits_view(self):
+#        return View(
+#            model_parameters_group,
+#            buttons=['OK','Cancel'],
+#            title='Edit model parameters',
+#            resizable=True,
+#        )
     
-    dclick = Tuple(Instance(ModelParameter), Instance(ObjectColumn))
+    dclick = Tuple(Instance(RuleConstant), Instance(ObjectColumn))
     
     def _dclick_changed(self, info):
         self.dclick[0].edit_traits(kind='livemodal')
 
     
-from enthought.traits.ui.api import Group, TableEditor
+ruleConstants_table_editor = TableEditor(
+    columns=[
+        ObjectColumn(name='name',
+            width=0.4,
+        ),
+        ExpressionColumn(name='value',
+            expression='object.value_string.split("=")[1]',
+            width=0.25,
+            tooltip='Double-click to edit model parameter',
+        ),
+        ObjectColumn(name='description',
+            width=0.5,
+        ),
+    ],
+    sortable=True,
+    dclick='dclick',
+    editable=False,
+) 
 
-model_parameters_group = Group(
-    Item('_all_model_parameters', #FIXME change to moleculeConstants if necessary
-        show_label=False, 
-        editor=TableEditor(
-            columns=[
-                ObjectColumn(name='name',
-                    width=0.25,
-                ),
-                ExpressionColumn(name='value',
-                    expression='object.value_string.split("=")[1]',
-                    width=0.25,
-                    tooltip='Double-click to edit model parameter',
-                ),
-                ObjectColumn(name='description',
-                    width=0.5,
-                ),
-            ],
-            sortable=True,
-            dclick='dclick',
+moleculeConstants_table_editor = TableEditor(
+    columns=[
+        ObjectColumn(name='name',
+            width=0.4,
             editable=False,
         ),
+        ObjectColumn(name='value',
+            width=0.1,
+        ),
+        ObjectColumn(name='description',
+            width=0.5,
+            editable=False,
+        ),
+    ],
+    sortable=True,
+) 
+
+model_parameters_group = Group(
+    VGroup(
+        Item(label='Molecule constants:'),
+        Item('moleculeConstants',
+            show_label=False, 
+            editor=moleculeConstants_table_editor,
+        ),
+        visible_when='len(object.moleculeConstants) > 0',
     ),
-#    label='Model parameters',
+    VGroup(
+        Item(label='Rule constants:'),
+        Item('ruleConstants',
+            show_label=False,
+            editor=ruleConstants_table_editor,
+        ),
+        visible_when='len(object.ruleConstants) > 0',
+    ),
+    Item(label='Rewards:'),
+    Item('rewardConstant', show_label=False),
 )
 
 
 if __name__ == '__main__':
-    execfile('prism_experiment.py')
+    from prism.api import PRISMExperiment
+    experiment = PRISMExperiment()
+    experiment.load('prism/test/Const/Const_PRISM.params')
+    experiment.configure()
+    
+

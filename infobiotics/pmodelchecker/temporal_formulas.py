@@ -1,8 +1,10 @@
-from infobiotics.shared.api import (
-    HasTraits, Str, Float, List, Button, Any, 
-    View, Item, HGroup, VGroup, ListEditor,  
-    TableEditor, ObjectColumn, Group, Spring,
+from enthought.traits.api import HasTraits, Str, Float, Int, List, Button, Any
+from enthought.traits.ui.api import (
+    View, Item, HGroup, VGroup, Group, Spring, ListEditor, TableEditor,
+    CodeEditor, Spring
 )
+from enthought.traits.ui.table_column import ObjectColumn
+from commons.traits.ui.api import HelpfulController, help_action
 
 temporal_formulas_group = VGroup(
     HGroup(   
@@ -42,21 +44,19 @@ temporal_formulas_group = VGroup(
         Item('handler.remove_temporal_formula', show_label=False, enabled_when='len(handler.temporal_formulas) > 0 and handler.selected_temporal_formula is not None'),
         Spring(),
     ),
-#    label='Temporal formulas',
 )
-
 
 class TemporalFormulaParameter(HasTraits):
     name = Str
     lower = Float(0)
     step = Float(0.5)
     upper = Float(1)
-    #FIXME replicate range_or_value from model_parameter_names
+    # don't replicate range_or_value from model_parameter_names, 
+    # if they want a constant they can just put it in the formula 
 
-
-from enthought.traits.ui.api import Handler
-
-class TemporalFormulaHandler(Handler):
+class TemporalFormulaHandler(HelpfulController):
+    
+    help_urls = [('Property specification', 'http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction')]
     
     def object_insert_changed(self, info):
         ''' Set focus back to CodeEditor. Works despite raising AttributeError! '''
@@ -67,9 +67,6 @@ class TemporalFormulaHandler(Handler):
                 except AttributeError:
                     pass
 
-
-from enthought.traits.ui.api import VGroup, CodeEditor, Spring 
-    
 temporal_formula_view = View(
     VGroup(
         Item(label='Formula:'),
@@ -86,7 +83,7 @@ temporal_formula_view = View(
             tooltip='Multiple lines will be concatenated.'), 
         HGroup(
             Spring(),
-            Item('model_parameter_name_to_insert', label='Model parameters:'),
+            Item('model_parameter_name_to_insert', label='Model parameters:'), #FIXME descriptions (EnumEditor?)
             Item('insert', show_label=False),
             Spring(),
         ),
@@ -108,7 +105,6 @@ temporal_formula_view = View(
                         ),
                         show_border=True,
                     ),
-    #                title='Edit Temporal Formula Parameter',
                 ),
                 selected='selected',
             ),
@@ -121,7 +117,7 @@ temporal_formula_view = View(
         ),
         show_border = True,
     ),
-    buttons = ['Undo', 'Cancel', 'OK'],#, 'Revert'],
+    buttons = ['Undo', 'Cancel', 'OK', help_action],#, 'Revert'],
     resizable = True,
     title = 'Edit temporal formula',
     handler = TemporalFormulaHandler(),
@@ -145,11 +141,10 @@ class TemporalFormula(HasTraits):
     def _insert_fired(self):
         lines = self.formula.split('\n')
         line = lines[self.line]
-        line = line[:self.column] + self.model_parameter_name_to_insert + line[self.column:]
+        line = line[:self.column] + self.model_parameter_name_to_insert + ' ' + line[self.column:]
         lines[self.line] = line
         self.formula = '\n'.join(lines)
-        
-        # set focus back to CodeEditor
+        # focus given back to CodeEditor in TemporalFormulaHandler.object_insert_changed()
         
 
     formula = Str('P = ? [ true U[A,A] (  >= X ) ]') #TODO better example? #TODO help?
@@ -178,10 +173,3 @@ class TemporalFormula(HasTraits):
                     parameters_string += ', ' 
                 parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
         self.parameters_string = parameters_string
-
-
-if __name__ == '__main__':
-#    execfile('mc2_experiment.py')
-    execfile('prism_params.py')
-    
-    
