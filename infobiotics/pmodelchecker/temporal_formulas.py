@@ -1,77 +1,160 @@
-from infobiotics.shared.api import (
-    HasTraits, Str, Float, List, Button, Any, 
-    View, Item, HGroup, VGroup, ListEditor,  
-    TableEditor, ObjectColumn, 
+from enthought.traits.api import HasTraits, Str, Float, Int, List, Button, Any
+from enthought.traits.ui.api import (
+    View, Item, HGroup, VGroup, Group, Spring, ListEditor, TableEditor,
+    CodeEditor, Spring
 )
-    
-temporal_formula_view = View(
-    Item('formula'),
-    Item('parameters', 
-        style='custom', 
-        editor=ListEditor(
-            style='custom',
-            use_notebook=True,
-            page_name='.name',
-            view = View(
-                Item('name'),
-                Item('lower_bound'),
-                Item('step'),
-                Item('upper_bound'),
-                title='Edit Temporal Formula Parameter',
-            ),
-            selected='selected',
+from enthought.traits.ui.table_column import ObjectColumn
+from commons.traits.ui.api import HelpfulController, help_action
+
+temporal_formulas_group = VGroup(
+    HGroup(   
+        Item('temporal_formulas'),#, label='File'),
+    ),
+    Item('handler.temporal_formulas', 
+        label='Temporal formulas', 
+        show_label=False,
+        editor=TableEditor(
+            columns=[
+                ObjectColumn(name='formula',
+                    width=0.5,
+                    editable=False,
+                ),
+                ObjectColumn(name='parameters_string', 
+                    label='Parameters (name=lower:step:upper)', 
+                    width=0.5,
+                    editable=False,
+                ),
+            ],
+            selection_mode='row', selected='handler.selected_temporal_formula',
+            dclick='handler.edit_temporal_formula', # fires PModelCheckerHandler.object__edit_temporal_formula_changed()!
+            rows=2,
+#            menu=Menu(), #TODO
+            # not in traitsbackendqt-3.2.0 (@24005)
+#            on_dclick=on_dclick, 
+#            reorderable=True,
+#            deletable=True,
+#            editable=True, row_factory=TemporalFormula, auto_add=True,
+#            editable=True, edit_view=temporal_formula_view,
         ),
     ),
     HGroup(
-        Item('add_new_parameter', show_label=False), 
-        Item('remove_current_parameter', show_label=False),
+        Spring(),
+        Item('handler.add_temporal_formula', show_label=False),
+        Item('handler.edit_temporal_formula', show_label=False, enabled_when='handler.selected_temporal_formula is not None'),
+        Item('handler.remove_temporal_formula', show_label=False, enabled_when='len(handler.temporal_formulas) > 0 and handler.selected_temporal_formula is not None'),
+        Spring(),
     ),
-    buttons = [
-        'OK', 
-        'Cancel',
-    ],
-    width=600,
-    resizable=True,
-    title='Edit temporal formula properties',
 )
 
 class TemporalFormulaParameter(HasTraits):
     name = Str
-    lower_bound = Float(0)
-    upper_bound = Float(1)
-    step=Float(0.5)
+    lower = Float(0)
+    step = Float(0.5)
+    upper = Float(1)
+    # don't replicate range_or_value from model_parameter_names, 
+    # if they want a constant they can just put it in the formula 
+
+class TemporalFormulaHandler(HelpfulController):
+    
+    help_urls = [('Property specification', 'http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction')]
+    
+    def object_insert_changed(self, info):
+        ''' Set focus back to CodeEditor. Works despite raising AttributeError! '''
+        for editor in info.ui._editors:
+            if hasattr(editor, '_scintilla'):
+                try:
+                    editor._scintilla.setFocus(True)
+                except AttributeError:
+                    pass
+
+temporal_formula_view = View(
+    VGroup(
+        Item(label='Formula:'),
+        Item('formula', 
+            show_label=False,
+            style='custom', 
+            editor=CodeEditor(
+                lexer='null', 
+                show_line_numbers=False, 
+                auto_set=True, 
+                line='line', 
+                column='column',
+            ), 
+            tooltip='Multiple lines will be concatenated.'), 
+        HGroup(
+            Spring(),
+            Item('model_parameter_name_to_insert', label='Model parameters:'), #FIXME descriptions (EnumEditor?)
+            Item('insert', show_label=False),
+            Spring(),
+        ),
+        Item(label='Formula parameters:'),
+        Item('parameters',
+            show_label=False,
+            style='custom', 
+            editor=ListEditor(
+                style='custom',
+                use_notebook=True,
+                page_name='.name',
+                view = View(
+                    Group(    
+                        Item('name'),
+                        HGroup(
+                            Item('lower'),
+                            Item('step'),
+                            Item('upper'),
+                        ),
+                        show_border=True,
+                    ),
+                ),
+                selected='selected',
+            ),
+        ),
+        HGroup(
+            Spring(),
+            Item('add_new_parameter', show_label=False), 
+            Item('remove_current_parameter', show_label=False, enabled_when='len(object.parameters) > 1'),
+            Spring(),
+        ),
+        show_border = True,
+    ),
+    buttons = ['Undo', 'Cancel', 'OK', help_action],#, 'Revert'],
+    resizable = True,
+    title = 'Edit temporal formula',
+    handler = TemporalFormulaHandler(),
+    height=100,
+    id = 'temporal_formula_view',
+)
+
+
+from enthought.traits.api import Int, Str, Button, List, Enum, Unicode
 
 class TemporalFormula(HasTraits):
-    '''
-    MC2 formula_parameters string:
-    """
-    Formulas
-    "<formula>" {<paramName> = <lower>:<step>:<upper>, ..., <paramName> = <lower>:<step>:<upper>}
-    "<another_formula>" {...}
-    """
+
+    traits_view = temporal_formula_view
     
-    PRISM formulas file format:
-    """
-    <formula1>
-    <formula2>
-    """
+    line = Int
+    column = Int
+    model_parameter_names = List(Unicode)
+    model_parameter_name_to_insert = Enum(values='model_parameter_names')
+    insert = Button
     
-    PRISM formula_parameters string:
-    """
-    parameter_name=low:upper:step, parameter_name_2=low:up:step
-    """
-    '''
+    def _insert_fired(self):
+        lines = self.formula.split('\n')
+        line = lines[self.line]
+        line = line[:self.column] + self.model_parameter_name_to_insert + ' ' + line[self.column:]
+        lines[self.line] = line
+        self.formula = '\n'.join(lines)
+        # focus given back to CodeEditor in TemporalFormulaHandler.object_insert_changed()
+        
+
+    formula = Str('P = ? [ true U[A,A] (  >= X ) ]') #TODO better example? #TODO help?
+    parameters = List(TemporalFormulaParameter, [TemporalFormulaParameter(name='A'), TemporalFormulaParameter(name='X')])
     
-    formula = Str('P=a') #TODO better example? #TODO help?
-    parameters = List(TemporalFormulaParameter, [TemporalFormulaParameter(name='a')])
-    
-    parameters_string = Str #TODO rename
+    parameters_string = Str
     add_new_parameter = Button
     remove_current_parameter = Button
     
     selected = Any
-#    def _selected_changed(self, selected):
-#        print selected
 
     def _add_new_parameter_fired(self):
         self.parameters.append(TemporalFormulaParameter())
@@ -88,65 +171,5 @@ class TemporalFormula(HasTraits):
             if len(parameter.name) > 0:
                 if i != 0:
                     parameters_string += ', ' 
-                parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower_bound, parameter.step, parameter.upper_bound)
+                parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
         self.parameters_string = parameters_string
-
-#    def __eq__(self, other):
-#        if self.formula == other.formula:
-#            matching_parameters = []
-#            for parameter in self.parameters:
-#                for other_parameter in other.parameters:
-#                    print parameter, other_parameter
-#                    if parameter == other_parameter:
-#                        matching_parameters.append(other_parameter)
-#            if len(matching_parameters) == len(self.parameters):
-#                return True
-#        return False
-        
-    traits_view = temporal_formula_view
-
-temporal_formulas_group = VGroup(
-    HGroup(   
-        Item('temporal_formulas', label='File'),
-    ),
-    Item('handler._temporal_formulas_list', 
-        label='Temporal formulas', 
-        show_label=False,
-        editor=TableEditor(
-            columns=[
-                ObjectColumn(name='formula',
-                    width=0.5,
-                    editable=False,
-                ),
-                ObjectColumn(name='parameters_string', 
-                    label='Parameters (name=lower:step:upper)', 
-                    width=0.5,
-                    editable=False,
-                ),
-            ],
-            selection_mode='row', selected='object.selected_temporal_formula',
-            dclick='_edit_temporal_formula', # fires PModelCheckerHandler.object__edit_temporal_formula_changed()!
-#            dclick='object._edit_temporal_formula', # so does this
-#            dclick='handler.dclick', #TEST event trait on handler, works
-            rows=2,
-#            menu=Menu(), #TODO
-            # not in traitsbackendqt-3.2.0 (@24005)
-#            on_dclick=on_dclick, 
-#            reorderable=True,
-#            deletable=True,
-#            editable=True, row_factory=TemporalFormula, auto_add=True,
-#            editable=True, edit_view=temporal_formula_view,
-        ),
-    ),
-    HGroup(
-        Item('handler._add_temporal_formula', show_label=False),
-        Item('handler._edit_temporal_formula', show_label=False, enabled_when='object.selected_temporal_formula is not None'),
-        Item('handler._remove_temporal_formula', show_label=False, enabled_when='len(object._temporal_formulas_list) > 0 and object._selected_temporal_formula is not None'),
-    ),
-    label='Temporal formulas',
-)
-
-
-if __name__ == '__main__':
-    execfile('mc2_experiment.py')
-    

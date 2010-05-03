@@ -6,7 +6,7 @@
 # $Date: 2010-01-26 14:45:50 +0000 (Tue, 26 Jan 2010) $
 
 from __future__ import with_statement # not required in Python >=2.6
-from infobiotics.shared.traits_imports import *
+from infobiotics.common._ets_imports import *
 from infobiotics.dashboard.plugins.experiments.params_experiment import *
 from mcss_experiment_handler import McssExperimentHandler
 import signal
