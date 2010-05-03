@@ -89,7 +89,7 @@ class Params(HasTraits):
     def save_preferences(self):
         # write changed _params_program to the preferences file
         preferences = get_default_preferences()
-        print 'got here', preferences.filename
+#        print 'got here', preferences.filename
         preferences.set(self.__get_preferences_path() + '._params_program', self._params_program)
         preferences.set(self.__get_preferences_path() + '._cwd', self._cwd)
         preferences.flush()
