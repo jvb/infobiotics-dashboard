@@ -7,14 +7,11 @@
 
 
 from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
-from enthought.pyface.action.api import Action as PyFaceAction
+from enthought.pyface.action.api import Action as PyFaceAction #TODO
 from simulator_results import SimulationResultsDialog
 from editor import SimulatorResultsEditor
 
-class NewSimulatorResultsAction(PyFaceAction):
-    ''' ...
-     
-    '''
+class SimulatorResultsAction(PyFaceAction): #TODO
     name = 'Simulator Results'
     tooltip = 'Plot simulation results'
     

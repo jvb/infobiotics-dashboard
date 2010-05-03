@@ -10,6 +10,9 @@ class ExperimentHandler(ParamsHandler):
         
     _progress_handler = Instance(ExperimentProgressHandler)
 
+    def __progress_handler_changed(self):
+        print self._progress_handler
+
     def __progress_handler_default(self):
         raise NotImplementedError
 
@@ -17,6 +20,9 @@ class ExperimentHandler(ParamsHandler):
         self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates
 
     def perform(self, info):
+#        if self.close(info, True):
+#            self._on_close(info)
+        info.ui.control.setVisible(False) # if we do self._on_close(info) then subclasses can't catch events including 'finished'
         if info.object.perform(thread=True):
             self._show_progress()
 

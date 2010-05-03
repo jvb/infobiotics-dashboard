@@ -1,15 +1,6 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: mcss_action_set.py 120 2009-12-08 14:48:20Z jvb $
-# $HeadURL: svn+ssh://infobiotics.dyndns.org/svn/infobiotics/Infobiotics Dashboard/trunk/infobiotics/workbench/plugins/mcss/mcss_action_set.py $
-# $Author: jvb $
-# $Revision: 120 $
-# $Date: 2009-12-08 14:48:20 +0000 (Tue, 08 Dec 2009) $
-
-
-from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from actions import *
-            
+from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
+from actions import SimulatorResultsAction
             
 class  SimulatorResultsActionSet(WorkbenchActionSet):
 
@@ -18,7 +9,6 @@ class  SimulatorResultsActionSet(WorkbenchActionSet):
 #    visible_for_perspectives = ['BNF','Foo'] # The Ids of the perspectives that the action set is visible in
 #    enabled_for_views = ['Red'] # The Ids of the views that the action set is enabled for
 #    visible_for_views = ['Red'] # The Ids of the views that the action set is visible for
-        
     
     # 'ActionSet' interface
     id = 'infobiotics.dashboard.plugins.simulator_results.action_set' # The action set's globally unique identifier
@@ -44,16 +34,16 @@ class  SimulatorResultsActionSet(WorkbenchActionSet):
         # Experiment menu
         Action(
             path='MenuBar/Results', 
-            name='SimulatorResults',
+            name='Plotting',
 #            group='McssGroup',
-            class_name='infobiotics.dashboard.plugins.simulator_results.actions:NewSimulatorResultsAction',
+            class_name='infobiotics.dashboard.plugins.simulator_results.actions:SimulatorResultsAction',
         ),
         
         # Experiment toolbar
         Action(
             path='ToolBar/Results', 
-            name='SimulatorResults',
+            name='Plotting',
 #            group='McssGroup',
-            class_name='infobiotics.dashboard.plugins.simulator_results.actions:NewSimulatorResultsAction',
+            class_name='infobiotics.dashboard.plugins.simulator_results.actions:SimulatorResultsAction',
         ),
     ]

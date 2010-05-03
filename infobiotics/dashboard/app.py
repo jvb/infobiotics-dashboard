@@ -13,7 +13,7 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
         return AboutDialog(
             parent = self.workbench.active_window.control,
 #            image  = ImageResource('logo/infobiotics_logo-1'),
-            image  = ImageResource('logo/infobiotics_logo-2'),
+#            image  = ImageResource('logo/infobiotics_logo-2'),
             additions = [
                 'Infobiotics Dashboard',
                 'by',
@@ -39,17 +39,9 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
         return None
 
     def setup(self):
-        ''' Call by infobiotics.dashboard.run.main() before 
-        application.start()
-        
-        '''
-        print 'setup' #TEST called automatically
-#        print self.preferences.dump()
-#        print self.preferences.get('dashboard.colour') # # green if flushed
-#        print self.preferences.get('dashboard.colour', 'blue') # blue 
-#        self.preferences.set('dashboard.colour', 'green')
-#        print self.preferences.get('dashboard.colour') # green
-#        self.preferences.flush() # write to file
+        ''' Called by infobiotics.dashboard.run.main() before application.start(). '''
+        pass
+        #TODO read preferences here?
 
 
 if __name__ == '__main__':

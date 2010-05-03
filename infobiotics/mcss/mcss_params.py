@@ -13,7 +13,7 @@ class McssParams(Params):
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
         
-    model_file = ParamsRelativeFile('', 
+    model_file = ParamsRelativeFile('', #FIXME model_file is not set on load after handler has been created
         exists=True, 
         desc='the model file to simulate', 
         directory_name='_cwd', 

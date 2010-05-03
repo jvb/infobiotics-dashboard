@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: simulator_results.py 356 2009-10-02 16:31:22Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/gui/trunk/src/simulator_results/simulator_results.py $
-# $Author: jvb $
-# $Revision: 356 $
-# $Date: 2009-10-02 17:31:22 +0100 (Fri, 02 Oct 2009) $
-
-
 #try:
 #    import shared.settings
 #except Exception, error_string:
@@ -22,6 +14,7 @@ from PyQt4.QtGui import QWidget, QApplication, QHBoxLayout, QVBoxLayout, QWidget
     QPushButton, QBrush, QColor, QFileDialog, QMessageBox, QSpinBox, QPixmap, \
     QSizePolicy, QAbstractItemView, QListView, QIcon, QDoubleSpinBox, qApp, \
     QGridLayout
+from commons.qt4 import centre_window
 #import shared.TraitsUI
 from enthought.mayavi.core.pipeline_base import PipelineBase
 from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
@@ -34,8 +27,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from random import randint
-from commons.api import colours
-#from shared import main
+from commons import colours
+import main
 from ui_player_control_widget import Ui_ControlsWidget
 from ui_plots_preview_dialog import Ui_PlotsPreviewDialog
 from ui_simulation_results_dialog import Ui_SimulationResultsDialog
@@ -1486,7 +1479,7 @@ class SurfacesListWidget(QWidget):
         self.setLayout(self.v)
         
         self.resize(640,480)
-        shared.widgets.centre_window(self)
+        centre_window(self)
 
 
     def showItem(self, item):
@@ -1498,7 +1491,7 @@ class SurfacesListWidget(QWidget):
         self.label.setToolTip('Drag to resize image, right-click to save.')
         pixmap = self.label.pixmap()
         self.label.resize(pixmap.width() * 4, pixmap.height() * 4)
-        from shared.widgets import centre_window; centre_window(self.label)
+        centre_window(self.label)
         self.label.show()
         self.label.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self.label, SIGNAL('customContextMenuRequested(const QPoint &)'), self.saveLabel)
@@ -1787,7 +1780,7 @@ if __name__ == "__main__":
 #            w.ui.surfacePlotButton.click()
     elif len(argv) == 2:
         w = SimulationResultsDialog(filename=argv[1])
-    from shared.widgets import centre_window; centre_window(w)
+    centre_window(w)
     w.show()
 #    shared.settings.restore_window_size_and_position(w)
     main.end_with_qt_event_loop()

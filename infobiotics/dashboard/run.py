@@ -56,7 +56,7 @@ def main():
         ]
     )
 
-#    application.setup() #TEST called automatically
+    application.setup()
     
 #    from enthought.preferences.api import set_default_preferences, ScopedPreferences
 #    set_default_preferences(ScopedPreferences(filename='preferences.ini'))

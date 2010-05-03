@@ -1,15 +1,6 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: action_set.py 405 2010-01-25 13:13:07Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/mcss/action_set.py $
-# $Author: jvb $
-# $Revision: 405 $
-# $Date: 2010-01-25 13:13:07 +0000 (Mon, 25 Jan 2010) $
-
-
-from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
+from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
 from actions import McssExperimentAction
-            
             
 class McssActionSet(WorkbenchActionSet):
     
@@ -48,7 +39,7 @@ class McssActionSet(WorkbenchActionSet):
         
     actions = [
         
-        #Edit menu
+        # Edit menu
         Action(path='MenuBar/Edit', name='Undo',  
           group='UndoRedoGroup',
           class_name='infobiotics.dashboard.plugins.mcss.actions:UndoAction'),
@@ -57,18 +48,12 @@ class McssActionSet(WorkbenchActionSet):
           class_name='infobiotics.dashboard.plugins.mcss.actions:RedoAction'),
         
         # Experiment menu
-        Action(path='MenuBar/Experiment', name='mcss',
+        Action(path='MenuBar/Experiment', name='Simulation (mcss)',
 #            group='McssGroup',
             class_name='infobiotics.dashboard.plugins.mcss.actions:McssExperimentAction'),
         
         # Experiment toolbar
-        Action(path='ToolBar/Experiment', name='mcss',
+        Action(path='ToolBar/Experiment', name='Simulation (mcss)',
 #            group='McssGroup',
             class_name='infobiotics.dashboard.plugins.mcss.actions:McssExperimentAction'),
-#        Action(path='ToolBar/Experiment', name='Load mcss parameters',
-#            group='McssGroup',
-#            class_name='infobiotics.dashboard.plugins.mcss.actions:LoadMcssParametersAction'),
-#        Action(path='ToolBar/Experiment', name='Save mcss parameters',
-#            group='McssGroup',
-#            class_name='infobiotics.dashboard.plugins.mcss.actions:SaveMcssParametersAction'),
     ]

@@ -89,6 +89,7 @@ class Params(HasTraits):
     def save_preferences(self):
         # write changed _params_program to the preferences file
         preferences = get_default_preferences()
+        print 'got here', preferences.filename
         preferences.set(self.__get_preferences_path() + '._params_program', self._params_program)
         preferences.set(self.__get_preferences_path() + '._cwd', self._cwd)
         preferences.flush()
@@ -345,7 +346,7 @@ class Params(HasTraits):
         
     def edit(self, **args):
         self._interactive = True
-        self.handler.edit_traits(kind='live', **args)
+        self.handler.edit_traits(**args)
 
 
 from xml.sax import ContentHandler

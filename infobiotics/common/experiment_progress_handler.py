@@ -19,7 +19,7 @@ class ExperimentProgressHandler(ParamsHandler):#, CancelExperimentMixin):
     
     progress = Property(Percentage) # subclasses must repeat this line!?
     status = Property(Str)
-
+    
     def _get_progress(self):
         raise NotImplementedError
     
@@ -29,11 +29,11 @@ class ExperimentProgressHandler(ParamsHandler):#, CancelExperimentMixin):
     def _get_status(self):
         return ''
         
-#    def model_finished_fired(self): #TODO
-#        print 'finished'
-
     traits_view = View(
         Item('controller.progress', editor=DefaultOverride(low_label='0%', high_label='100%', format='%2.1f')),
         Item('controller.status', style='readonly', visible_when='len(controller.status) > 0'),
 #        Item('controller.cancel'),
     )
+
+    def object_finished_changed(self, info):
+        print 'ExperimentProgressHandler.object_finished_changed(self, info)'

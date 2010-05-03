@@ -29,28 +29,20 @@ class PModelCheckerActionSet(WorkbenchActionSet):
     ]
 
     tool_bars = [
-        ToolBar(name='PModelChecker', id='PModelChecker toolbar', path='ToolBar/Experiment'),
+#        ToolBar(name='PModelChecker', id='PModelChecker toolbar', path='ToolBar/Experiment'),
     ]
         
     actions = [
         
         # Experiment menu
-#        Action(path='MenuBar/Experiment', name='PModelChecker',
-#            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:NewPModelCheckerAction'),
-        Action(path='MenuBar/Experiment', name='PModelChecker (PRISM)',
+        Action(path='MenuBar/Experiment', name='Model checking (PRISM)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
-        Action(path='MenuBar/Experiment', name='PModelChecker (MC2)',
+        Action(path='MenuBar/Experiment', name='Model checking (MC2)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
-#        Action(path='MenuBar/Experiment', name='PModelChecker',
-#            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:'),
         
         # Experiment toolbar
-#        Action(path='ToolBar/Experiment', name='PModelChecker',
-#            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:NewPModelCheckerAction'),
-        Action(path='ToolBar/Experiment', name='PModelChecker (PRISM)',
+        Action(path='ToolBar/Experiment', name='Model checking (PRISM)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
-        Action(path='ToolBar/Experiment', name='PModelChecker (MC2)',
+        Action(path='ToolBar/Experiment', name='Model checking (MC2)',
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
-#        Action(path='ToolBar/Experiment', name='PModelChecker',
-#            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:'),
     ]

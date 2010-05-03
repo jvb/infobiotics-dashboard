@@ -92,6 +92,7 @@ class ParamsHandler(HelpfulController):
             wildcard=self.wildcard, 
             title=title,
             default_filename = self.model._params_file,
+            default_directory = self.model._cwd_
         )
         if fd.open() == OK:
             return fd.path

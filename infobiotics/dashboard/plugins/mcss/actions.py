@@ -1,18 +1,8 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: actions.py 411 2010-01-25 18:03:26Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/mcss/actions.py $
-# $Author: jvb $
-# $Revision: 411 $
-# $Date: 2010-01-25 18:03:26 +0000 (Mon, 25 Jan 2010) $
-
-
-from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
 from enthought.pyface.action.api import Action
+from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
 #from mcss_experiment_editor import McssExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
-#from mcss_experiment import McssExperiment
-from infobiotics.api import McssExperiment
-
+from infobiotics.dashboard.mcss.mcss_dashboard_experiment import McssDashboardExperiment
 
 class McssExperimentAction(Action):
     id = 'infobiotics.dashboard.plugins.mcss.actions:NewMcssExperimentAction'
@@ -20,7 +10,7 @@ class McssExperimentAction(Action):
     tooltip = 'Perform a simulation experiment with mcss'
     
     def perform(self, event=None):
-        obj=McssExperiment(application=self.window.workbench.application)
+        obj=McssDashboardExperiment(application=self.window.workbench.application)
 #        self.window.workbench.edit(
 #            obj=obj,
 #            kind=ParamsExperimentEditor,

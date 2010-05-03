@@ -45,6 +45,7 @@ class Experiment(Params):
     started = Event
     timed_out = Event
     finished = Event
+    finished_without_output = Event
     
 #    @on_trait_change('started')
 #    def forward_program_output_to_stdout(self):
@@ -101,7 +102,7 @@ class Experiment(Params):
             if pattern_index == eof_index:
                 if patterns_matched == 0:
                     if self.child.before != '':
-                        print self.child.before
+                        self.finished_without_output = True
                 # process has finished, perhaps prematurely
                 break
             elif pattern_index == timeout_index:
@@ -109,9 +110,15 @@ class Experiment(Params):
             else:
                 self._output_pattern_matched(pattern_index, self.child.match.group())
                 patterns_matched += 1
-        print patterns_matched
+#        print patterns_matched
 
         self.finished = True
+
+    def _finished_without_output_fired(self):
+        print self.child.before
+
+#    def _finished_fired(self):
+#        print 'finished'
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''

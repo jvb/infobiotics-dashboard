@@ -1,9 +1,4 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: experiment.py 413 2010-01-26 14:45:50Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/mcss/experiment.py $
-# $Author: jvb $
-# $Revision: 413 $
-# $Date: 2010-01-26 14:45:50 +0000 (Tue, 26 Jan 2010) $
+# this is old code and should not to be used. 
 
 from __future__ import with_statement # not required in Python >=2.6
 from infobiotics.shared.traits_imports import *
@@ -16,70 +11,6 @@ from infobiotics.dashboard.shared.unified_logging import unified_logging
 logger = unified_logging.get_logger('mcss_experiment')
 
 class McssExperiment(ParamsExperiment):
-
-    program = File('/usr/bin/mcss')#, filter=['mcss'], exists=True) #TODO load from preferences using 'name' in ParamsExperiment
-#    parameters_name = 'mcss'
-    parameter_set_name = 'SimulationParameters'
-    handler = McssExperimentHandler
-
-    def _model_file_changed(self, model_file):
-        ''' updates model_format so that duplicate_initial_amounts is visible for SBML files even when their extension is XML. '''
-        if self.model_file.lower().endswith('.sbml'):
-            self.model_format = 'SBML'
-        else:
-            self.model_format = 'P system XML'
-    
-    model_file = File('model.lpp', filter=['All model files (*.lpp *.sbml)', 'Lattice population P system files (*.lpp)', 'P system XML files (*.xml)', 'Systems Biology Markup Language files (*.sbml)', 'All files (*)'], desc='the model file to simulate')
-    model_format = Trait(
-        'P system XML',
-        {'P system XML' : 'xml',
-         'SBML': 'sbml',
-#         'Lattice population P system' : 'lpp',
-        },
-        desc='the model specification format'
-    )
-    duplicate_initial_amounts = Bool(False, desc='whether to duplicate initial amounts for all templates in the SBML model')
-    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
-    max_time = FloatGreaterThanZero(desc='the maximum time to run simulation')
-    log_interval = FloatGreaterThanZero(desc='the time interval between which to log data') 
-    runs = Long(1, desc='the number of simulation runs to perform')
-    data_file = File('simulation.h5', desc='the file to save simulation data to')
-    seed = Long(0, desc='the random number seed (0=randomly generated)')
-    compress = Bool(True, desc='whether to compress HDF5 output')
-    compression_level = Range(0, 9, 9, desc='the HDF5 compression level (0-9; 9=best)')
-    simulation_algorithm = Enum(['dmq','dm','ldm','dmgd','dmcp'], desc='the stochastic simulation algorithm to use')
-
-    log_type = Enum(['levels','reactions'], desc='the type of data logging to perform')
-    log_memory = Bool(False, desc='whether to log output to memory')
-    log_propensities = Bool(False, desc='whether to log reaction propensities')
-    log_volumes = Bool(False, desc='whether to log compartment volumes')
-    log_steady_state = Bool(True, desc='whether to log up to max_time if steady state reached')
-    log_degraded = Bool(False, desc='whether to log levels of degraded species')
-    dump = Bool(False, desc='whether to dump model to binary format')
-   
-    periodic_x = Bool(False, desc='whether the x dimension of the lattice has a periodic boundary condition')
-    periodic_y = Bool(False, desc='whether the y dimension of the lattice has a periodic boundary condition')
-    periodic_z = Bool(False, desc='whether the z dimension of the lattice has a periodic boundary condition')
-    division_direction = Enum(['x','y','z'], desc='the direction of cell division (x,y,z)')
-    keep_divisions = Bool(False, desc='whether to keep dividing cells')
-    growth_type = Enum(['none','linear','exponential','function'], desc='the volume growth type')
-    
-    # not in parameter_names
-    show_progress = Bool(False, desc='whether to output the current time to screen at each log interval')
-
-    def parameter_names(self):
-        return [
-            'model_file', 'model_format', 'duplicate_initial_amounts', 
-            'just_psystem', 'max_time', 'log_interval', 'runs', 'data_file', 
-            'seed', 'compress', 'compression_level', 'show_progress', 
-            'simulation_algorithm', 'log_type', 'log_memory', 
-            'log_propensities', 'log_volumes', 'log_steady_state', 
-            'log_degraded', 'dump', 'periodic_x', 'periodic_y', 'periodic_z',
-            'division_direction', 'keep_divisions', 'growth_type' 
-        ]
-    
-    def has_valid_parameters(self): #TODO
-        return True
 
     def perform(self):
         if not self.save(self.file):
@@ -215,16 +146,4 @@ class McssExperiment(ParamsExperiment):
             else:
                 # finished successfully
                 pass
-                #TODO messagebox inviting user to view results
-  
-
-if __name__ == '__main__':
-    self = McssExperiment()
-#    print self.parameter_file_string()
-#    os.chdir('/home/jvb/phd/eclipse/infobiotics/dashboard/')
-#    self.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/pmodelchecker/Const/constitutiveExpressionModel.params')
-#    self.configure_traits()
-    self.configure()
-#    self.edit()
-#    self.print_parameters()
-
+           
