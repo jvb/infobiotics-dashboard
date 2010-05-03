@@ -10,5 +10,10 @@ class SimpleEditor(SimpleRelativeFileEditor):
         return dlg
 
 class RelativeDirectoryEditor(RelativeFileEditor): # EditorFactory
-    pass
+    
+    def _get_simple_editor_class(self):
+        return SimpleEditor
+
+    def _get_custom_editor_class(self):
+        return SimpleEditor
     
