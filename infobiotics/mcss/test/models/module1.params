@@ -6,7 +6,7 @@
     <!-- parameter definitions -->
     <parameterSet name="SimulationParameters">
         <parameter name="model_file" value="module1.sbml"/>
-        <parameter name="model_format" value="xml"/>
+        <parameter name="model_format" value="sbml"/>
         <parameter name="duplicate_initial_amounts" value="false"/>
         <parameter name="just_psystem" value="false"/>
         <parameter name="max_time" value="3600.0"/>
@@ -16,8 +16,7 @@
         <parameter name="seed" value="0"/>
         <parameter name="compress" value="true"/>
         <parameter name="compression_level" value="9"/>
-        <parameter name="show_progress" value="false"/>
-        <parameter name="simulation_algorithm" value="dm"/>
+        <parameter name="simulation_algorithm" value="dmq"/>
         <parameter name="log_type" value="levels"/>
         <parameter name="log_memory" value="false"/>
         <parameter name="log_propensities" value="false"/>
