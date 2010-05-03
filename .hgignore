@@ -30,3 +30,5 @@ syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/modelParameters\.xml$
 syntax: regexp
 \.xml$
+syntax: regexp
+\.h5$
