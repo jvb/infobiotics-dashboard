@@ -26,3 +26,7 @@ syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/constitutive\.sm$
 syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/formula\.csl$
+syntax: regexp
+^infobiotics/pmodelchecker/prism/test/Const/modelParameters\.xml$
+syntax: regexp
+\.xml$
