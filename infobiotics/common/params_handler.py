@@ -1,12 +1,14 @@
+from infobiotics.common.api import ParamsView, MenuBar, file_menu
 from commons.api import can_read, mkdir_p
 import os
-os.environ['ETS_TOOLKIT']='qt4' #TODO ETSConfig
 from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance
 from enthought.pyface.api import FileDialog, OK
 from enthought.traits.ui.api import View, Item, Group
-from infobiotics.common.api import ParamsView, MenuBar, file_menu
 from commons.traits.ui.api import HelpfulController
-#from enthought.traits.ui.file_dialog2 import (
+from infobiotics.common.params import ParamsPreferencesHelper
+from enthought.preferences.api import get_default_preferences
+
+#from enthought.traits.ui.fixed_file_dialog import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
 #)
 #
@@ -69,14 +71,38 @@ class ParamsHandler(HelpfulController):
                 return '%s %s (%s)' % (self.model._parameters_name, basename, dirname)
             return 
         else:
-            return self.model._parameters_name
+            return self.model._parameters_name #TODO change to self.model._params_program_name, and above
 
     def _title_changed(self, title):
         if self.info is not None and self.info.initialized:
             self.info.ui.title = title
             
     def init(self, info):
-        info.ui.title = self.title 
+        info.ui.title = self.title
+        self.load_preferences()
+        self.status = "Please ensure the current working directory is correct."
+
+    def load_preferences(self):
+        helper = ParamsPreferencesHelper(
+            preferences_path=self.model._preferences_path
+        )
+        # restoring self.model._cwd here, moved from Params._cwd_default
+        _cwd = helper._cwd
+        try:
+            helper._cwd = _cwd # ensure helper checks _cwd is a file that exists, etc., rather than model or _cwd's editor 
+            self.model._cwd = _cwd
+        except TraitError:
+            self.model._cwd = os.getcwd()
+
+    def save_preferences(self):
+        preferences = get_default_preferences()
+        preferences.set(self.model._preferences_path + '._cwd', self.model._cwd)
+        preferences.flush()
+
+    def closed(self, info, is_ok): # must return True or else window is unscloseable!
+        if is_ok:
+            self.save_preferences()
+        return True
 
     status = Str
 
@@ -212,11 +238,6 @@ class ParamsHandler(HelpfulController):
 #            info.ui.title += '*'
 #        else:
 #            self.model._dirty = False
-
-#    def closed(self, info, is_ok): # close() stops window from ever shutting even when calling super()
-#        if is_ok:
-#            from enthought.preferences.api import get_default_preferences
-#            get_default_preferences().flush()
     
 
 if __name__ == '__main__':

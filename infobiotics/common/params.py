@@ -1,5 +1,6 @@
 from enthought.traits.api import (
-    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, on_trait_change
+    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property,
+    on_trait_change
 )
 from enthought.traits.ui.api import Controller
 from infobiotics.common.api import (
@@ -27,16 +28,18 @@ class Params(HasTraits):
     _parameter_set_name = Str(Undefined, desc='the name attribute of the parameterSet tag in the params XML file')
 
     _params_program_name = Str
-    _params_program = RelativeFile(absolute=True, auto_set=True, executable=True)
+    _params_program = RelativeFile(absolute=True, auto_set=True, executable=True, exists=True)
 
-    def __get_preferences_path(self):
-        return self._params_program_name
+    _preferences_path = Property(depends_on='_params_program_name')
+    
+    def _get__preferences_path(self):
+        return self._params_program_name #TODO change to include subprograms i.e. pmodelchecker.mc2
 
-    def __params_program_default(self):
+    def __params_program_default(self): #TODO get_preference(name, contigency_function)
         ''' Try to use a previously defined _params_program. '''
         # using a helper here means we can test whether the path in the preferences file actually exists and is executable, and do something else if it doesn't 
         helper = ParamsPreferencesHelper(
-            preferences_path=self.__get_preferences_path()
+            preferences_path=self._preferences_path
         )
         _params_program = helper._params_program
         try:
@@ -65,32 +68,36 @@ class Params(HasTraits):
                 preferences.flush()
                 return _params_program
 
-    @on_trait_change('_params_program, _cwd')
+    @on_trait_change('_params_program') 
     def save_preferences(self):
-        # write changed _params_program to the preferences file
         preferences = get_default_preferences()
-        preferences.set(self.__get_preferences_path() + '._params_program', self._params_program)
-        preferences.set(self.__get_preferences_path() + '._cwd', self._cwd)
+        # write changed _params_program to the preferences file
+        preferences.set(self._preferences_path + '._params_program', self._params_program)
+        # _cwd is overwritten by its RelativeFileEditor so now loading it in handler.init() and saving it in handler.close() 
         preferences.flush()
     
     _cwd = RelativeDirectory(absolute=True, exists=True, auto_set=True) # infinite recursion if ParamsRelativeDirectory because _cwd='_cwd'
     
-    def __cwd_default(self): #TODO get_preference(name, contigency_function)
-        helper = ParamsPreferencesHelper(
-            preferences_path=self.__get_preferences_path()
-        )
-        _cwd = helper._cwd
-        try:
-            helper._cwd = _cwd
-            return _cwd
-        except TraitError:
-            return os.getcwd()
+    def __cwd_default(self):
+        # moved to  
+#        helper = ParamsPreferencesHelper(
+#            preferences_path=self.__get_preferences_path()
+#        )
+#        _cwd = helper._cwd
+#        try:
+#            helper._cwd = _cwd
+#            return _cwd
+#        except TraitError:
+#            return os.getcwd()
+        # for Params objects created in scripts it makes sense to use current directory 
+        #TODO check whether "p = McssParams(_cwd='/tmp'); print p._cwd" works now  
+        return os.getcwd()
 
     _params_file = ParamsRelativeFile(absolute=True, exists=True, readable=True, writable=True)
 
     def __params_file_changed(self, _params_file):
         self._cwd = os.path.dirname(_params_file)
-        self._dirty = False
+        self._dirty = False #TODO use dirty for prompting to save on perform
         
     _dirty = Bool(False)
     _unresetable = List(Str)
@@ -161,9 +168,9 @@ class Params(HasTraits):
 
         try:
             # set parameters from dictionary
-            for k, v in parameters_dictionary.iteritems():
-                set_trait_value_from_parameter_value(self, k, v)
-                # must specify directory/directory_name in model_file = File() else: enthought.traits.trait_errors.TraitError: The 'model_file' trait of a McssParams instance must be an existing file name in '/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/shared', but a value of 'module1.sbml' <type 'str'> was specified.
+            for name, value in parameters_dictionary.iteritems():
+#                set_trait_value_from_parameter_value(self, name, value)
+                setattr(self, name, trait_value_from_parameter_value(self, name, value))
         except TraitError, e:
             raise e
             self._cwd = old #TODO does this ever get reached?
@@ -322,10 +329,12 @@ class Params(HasTraits):
     def configure(self, **args):
         self._interactive = True
         self.handler.configure_traits(**args)
+        self.save_preferences()
         
     def edit(self, **args):
         self._interactive = True
         self.handler.edit_traits(**args)
+        self.save_preferences()
 
 
 from xml.sax import ContentHandler
@@ -388,13 +397,15 @@ def trait_value_from_parameter_value(self, name, value): # change name to 'trait
     ''' Return parameter trait value from a parameter value string. '''
 #    assert name in self.parameter_names()
     trait = self.trait(name)
+    if trait is None:
+        return
     type = trait.trait_type.__class__.__name__
-    if type == 'DelegatesTo':
-        _delegate = trait._delegate
-        setattr(eval('self.%s' % (_delegate)), name, value)
-        #FIXME should go in 'set_trait_value_from_parameter_value'
-        return value
-    elif type == 'Bool': # convert from lowercase truth values
+#    if type == 'DelegatesTo':
+#        _delegate = trait._delegate
+#        setattr(eval('self.%s' % (_delegate)), name, value)
+#        #FIXME should go in 'set_trait_value_from_parameter_value'
+#        return value
+    if type == 'Bool': # convert from lowercase truth values
         return True if value == 'true' else False
     elif type in ('Int', 'IntGreaterThanZero'):
         return int(value) 
