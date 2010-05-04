@@ -10,7 +10,7 @@ p.description='''Infobiotics Dashboard\
 Infobiotics Dashboard is a graphical front-end to the Infobiotics Workbench,
 a suite of tools for modelling and designing multi-cellular biological systems.
 '''
-p.url='http://www.infobiotics.org/workbench/dashboard'
+p.url='http://www.infobiotics.org/infobiotics-workbench/' #TODO /dashboard/
 
 p.depends='python-qt4, python-qscintilla2, '\
 'python-numpy, '\
@@ -31,14 +31,12 @@ p.section='science'
 #os.chdir('..')
 
 p['/usr/share/doc/infobiotics-dashboard']=[
-    'AUTHORS',
-#    'ChangeLog',
-    'COPYING',
-    'LICENSE',
-#    'NEWS',
-    'README',
-    'THANKS',
-    'VERSION',
+    'AUTHORS.txt',
+    'COPYING.txt',
+    'LICENSE.txt',
+    'README.txt',
+    'THANKS.txt',
+    'VERSION.txt',
 ]
 
 #find infobiotics -type f | egrep -v '(\/\.svn\/)|(\.pyc)'#|(\.ui)'
