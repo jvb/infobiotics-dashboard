@@ -5,7 +5,7 @@ syntax: regexp
 
 modelParameters.xml
 
-doc/epydoc/
+docs/epydoc/
 
 .pyc
 .svn
@@ -46,3 +46,5 @@ syntax: regexp
 ^dist$
 syntax: regexp
 ^InfobioticsDashboard\.egg-info$
+syntax: regexp
+^docs$
