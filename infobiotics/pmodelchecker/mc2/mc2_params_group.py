@@ -10,7 +10,7 @@ mc2_params_group = VGroup(
     ),
     HGroup(
         Item('mcss_params_file', label='mcss parameters file'),
-        Item('handler.edit_mcss_experiment', show_label=False),
+        Item('handler.edit_mc2_mcss_experiment', label='&Edit', show_label=False, enabled_when='handler._mc2_mcss_experiment is not None'),
         enabled_when='not object.simulations_generatedHDF5 and not object.simulations_generatedMC2',
     ),
     HGroup(
