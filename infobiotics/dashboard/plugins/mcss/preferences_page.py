@@ -27,7 +27,7 @@ class McssPreferencesPage(PreferencesPage):
     preferences_path = 'infobiotics.dashboard.plugins.mcss' # The path to the preference node that contains the preferences #TODO does this get used?
 
     # Preferences
-    path_to_mcss = File('/usr/bin/mcss')
+    path_to_mcss = File('/usr/bin/mcss') #TODO
 
     # View
     traits_view = View('path_to_mcss')

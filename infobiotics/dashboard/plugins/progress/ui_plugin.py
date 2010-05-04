@@ -1,10 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: ui_plugin.py 411 2010-01-25 18:03:26Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/experiments/ui_plugin.py $
-# $Author: jvb $
-# $Revision: 411 $
-# $Date: 2010-01-25 18:03:26 +0000 (Mon, 25 Jan 2010) $
-
 from enthought.pyface.workbench.api import Perspective, PerspectiveItem
     
 class ExperimentsPerspective(Perspective):

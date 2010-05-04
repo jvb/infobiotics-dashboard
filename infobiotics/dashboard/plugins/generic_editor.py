@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: experiment_editor.py 405 2010-01-25 13:13:07Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/mcss/experiment_editor.py $
-# $Author: jvb $
-# $Revision: 405 $
-# $Date: 2010-01-25 13:13:07 +0000 (Mon, 25 Jan 2010) $
-
-
 from os.path import basename
 from enthought.pyface.workbench.api import TraitsUIEditor
 from enthought.pyface.api import FileDialog, CANCEL
@@ -13,7 +5,6 @@ from enthought.traits.api import Code, Instance
 from enthought.traits.ui.api import CodeEditor, Group, Item, View
 from enthought.traits.ui.key_bindings import KeyBinding, KeyBindings
 from enthought.traits.ui.menu import NoButtons
-
 
 def _id_generator():
     """ A generator that returns the next number for untitled files. """
@@ -27,8 +18,7 @@ def _id_generator():
 
 _id_generator = _id_generator()
 
-
-class ParamsExperimentEditor(TraitsUIEditor):
+class GenericEditor(TraitsUIEditor):
 
 #    key_bindings = Instance(KeyBindings)
 
@@ -51,7 +41,7 @@ class ParamsExperimentEditor(TraitsUIEditor):
     def _get_unique_id(self, prefix=None):
         """ Return a unique id for a new set of parameters. """
         if prefix is None:
-            prefix = self.obj.name + ' experiment'
+            prefix = self.obj.name
 
         id = prefix + str(_id_generator.next())
         while self.window.get_editor_by_id(id) is not None:

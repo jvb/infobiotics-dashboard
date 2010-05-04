@@ -1,13 +1,4 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: actions.py 408 2010-01-25 15:19:58Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/pmodelchecker/actions.py $
-# $Author: jvb $
-# $Revision: 408 $
-# $Date: 2010-01-25 15:19:58 +0000 (Mon, 25 Jan 2010) $
-
 from enthought.pyface.action.api import Action
-#from prism_experiment import PRISMExperiment
-#from mc2_experiment import MC2Experiment
 from infobiotics.api import PRISMExperiment, MC2Experiment
 
 class PRISMExperimentAction(Action):
@@ -23,7 +14,6 @@ class MC2ExperimentAction(Action):
     def perform(self, event=None):
         obj = MC2Experiment(application=self.window.workbench.application)
         obj.edit()
-
 
 #from pmodelchecker_experiment_editor import PModelCheckerExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
