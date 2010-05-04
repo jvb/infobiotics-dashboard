@@ -66,16 +66,19 @@ class ParamsHandler(HelpfulController):
             dirname, basename = os.path.split(path)
             dirname = os.path.relpath(dirname, self.model._cwd)
             if dirname == '.':
-                return '%s %s' % (self.model._parameters_name, basename)
+                return '%s %s' % (self.model._params_program_name, basename)
             else:
-                return '%s %s (%s)' % (self.model._parameters_name, basename, dirname)
+                return '%s %s (%s)' % (self.model._params_program_name, basename, dirname)
             return 
         else:
-            return self.model._parameters_name #TODO change to self.model._params_program_name, and above
+            return self.model._params_program_name
 
     def _title_changed(self, title):
         if self.info is not None and self.info.initialized:
-            self.info.ui.title = title
+            if self.info.ui is not None:
+                self.info.ui.title = title
+#            else:
+#                print self.__class__.__name__
             
     def init(self, info):
         info.ui.title = self.title

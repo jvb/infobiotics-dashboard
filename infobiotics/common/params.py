@@ -64,7 +64,7 @@ class Params(HasTraits):
             else:
 #                print 'found', self._params_program_name, 'at', _params_program
                 preferences = get_default_preferences()
-                preferences.set(self.__get_preferences_path()+'._params_program', _params_program) # if we set with self._params_program or call save_preferences here we get an infinite recursion!
+                preferences.set(self._preferences_path+'._params_program', _params_program) # if we set with self._params_program or call save_preferences here we get an infinite recursion!
                 preferences.flush()
                 return _params_program
 

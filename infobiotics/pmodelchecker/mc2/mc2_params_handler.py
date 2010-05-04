@@ -32,7 +32,7 @@ class MC2ParamsHandler(PModelCheckerParamsHandler):
     edit_mc2_mcss_experiment = Button(label='Edit')
     
     def _edit_mc2_mcss_experiment_fired(self):
-        self._mc2_mcss_experiment.edit()
+        self._mc2_mcss_experiment.handler.edit_traits()
     
     def object_simulations_file_hdf5_changed(self, info):
         ''' Tries to extract 'number_of_runs' from 'simulations_file_hdf5'. '''
