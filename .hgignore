@@ -1,6 +1,25 @@
+syntax: regexp
+\.xml$
+syntax: regexp
+\.h5$
+
+modelParameters.xml
+
+doc/epydoc/
+
 .pyc
 .svn
-doc/epydoc/
+
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$
+
+sdist
+syntax: glob
+distribute-*.egg
+syntax: glob
+distribute-*
 
 syntax: regexp
 ^infobiotics/mcss/results/test/aba_signalling_01\.1\.0\.h5$
@@ -10,10 +29,6 @@ syntax: regexp
 ^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
 syntax: regexp
 ^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
-syntax: regexp
-^\.project$
-syntax: regexp
-^\.pydevproject$
 syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/basicLibrary\.xml$
 syntax: regexp
@@ -26,9 +41,8 @@ syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/constitutive\.sm$
 syntax: regexp
 ^infobiotics/pmodelchecker/prism/test/Const/formula\.csl$
+
 syntax: regexp
-^infobiotics/pmodelchecker/prism/test/Const/modelParameters\.xml$
+^dist$
 syntax: regexp
-\.xml$
-syntax: regexp
-\.h5$
+^InfobioticsDashboard\.egg-info$
