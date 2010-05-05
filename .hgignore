@@ -13,11 +13,6 @@ syntax: regexp
 ^dist$
 ^MANIFEST$
 ^InfobioticsDashboard\.egg-info$
-^infobiotics/pmodelchecker/prism/test/\.xml$
-^infobiotics/pmodelchecker/prism/test/\.sm$
-^infobiotics/pmodelchecker/prism/test/\.csl$
-^infobiotics/pmodelchecker/mc2/test/\.pctl$
 ^infobiotics/poptimizer/test/run0\.zip$
-^infobiotics/poptimizer/test/\.h5$
 
 ^sdist$
