@@ -10,7 +10,7 @@ from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
 #from enthought.plugins.ipython_shell.ipython_shell_plugin import IPythonShellPlugin # IPythonShellPlugin is not supported by Qt backend, yet.
 #from enthought.envisage.ui.single_project.project_plugin import ProjectPlugin
 from infobiotics.dashboard.app import InfobioticsDashboardWorkbenchApplication
-from infobiotics.dashboard.plugins.experiments.ui_plugin import ExperimentsUIPlugin
+#from infobiotics.dashboard.plugins.experiments.ui_plugin import ExperimentsUIPlugin
 from infobiotics.dashboard.plugins.mcss.ui_plugin import McssUIPlugin
 from infobiotics.dashboard.plugins.pmodelchecker.ui_plugin import PModelCheckerUIPlugin
 #from infobiotics.dashboard.plugins.poptimizer.ui_plugin import POptimizerUIPlugin
@@ -39,7 +39,7 @@ def main():
 
 #            ProjectPlugin(),
 
-            ExperimentsUIPlugin(),
+#            ExperimentsUIPlugin(),
             McssUIPlugin(),
             PModelCheckerUIPlugin(),
 #            POptimizerUIPlugin(),
