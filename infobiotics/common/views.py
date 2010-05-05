@@ -3,7 +3,8 @@ Views, Groups, Items, Actions and KeyBindings that are common to ParamsHandler
 subclasses.
 '''
 
-from enthought.traits.ui.api import Action, View, HGroup, VGroup, Item, StatusItem
+from enthought.traits.ui.menu import Action
+from enthought.traits.ui.api import View, HGroup, VGroup, Item, StatusItem
 
 load_action = Action(
     name='&Load', 
@@ -47,7 +48,7 @@ experiment_actions = [ # ExperimentView only
     'Cancel',
 ]
 
-from enthought.traits.ui.api import Menu, MenuBar, ToolBar
+from enthought.traits.ui.menu import Menu, MenuBar, ToolBar
 
 file_menu = Menu(
     load_action, save_action,
@@ -88,7 +89,10 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     def set_content(self, *values):
         values = [
             VGroup(
-                _params_program_group,
+                _params_program_group, #TODO could move _params_program_group 
+                                       #to ExperimentView but for PModelChecker 
+                                       #running itself to create 
+                                       # modelParameters.xml and PRISM_model                
                 _cwd_group,
 #                '_',
                 values,

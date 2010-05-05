@@ -1,5 +1,6 @@
 from enthought.traits.api import Property, Str, Bool, List, Tuple, HasTraits
-from enthought.traits.ui.api import Controller, View, Item, Action, Menu
+from enthought.traits.ui.api import Controller, View, Item
+from enthought.traits.ui.menu import Action, Menu
 from commons import webbrowsing
 
 help_action = Action(
