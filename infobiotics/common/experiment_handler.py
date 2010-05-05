@@ -17,17 +17,19 @@ class ExperimentHandler(ParamsHandler):
         raise NotImplementedError
 
     def _show_progress(self):
-        self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates
+        self._progress_handler.edit_traits(kind='live')#modal') # must be live to receive progress updates
 
     def perform(self, info):
-#        if self.close(info, True):
-#            self._on_close(info)
-        info.ui.control.setVisible(False) # if we do self._on_close(info) then subclasses can't catch events including 'finished'
+##        if self.close(info, True):
+##            self._on_close(info)
+#        info.ui.control.setVisible(False) # if we do self._on_close(info) then subclasses can't catch events including 'finished'
         if info.object.perform(thread=True):
             self._show_progress()
 
     has_valid_parameters = Property(Bool, depends_on='info.ui.errors')
     def _get_has_valid_parameters(self):
         # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
+#        if self.info.ui is None:
+#            return False
         return False if self.info.ui.errors > 0 else True
     
