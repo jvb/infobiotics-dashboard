@@ -4,23 +4,20 @@ modelParameters.xml
 *.svn
 *.h5
 distribute-*
+.project
+.pydevproject
 
 syntax: regexp
-^\.project$
-^\.pydevproject$
 ^docs$
+^build$
 ^dist$
-^sdist$
 ^MANIFEST$
 ^InfobioticsDashboard\.egg-info$
-^infobiotics/mcss/results/test/aba_signalling_01\.1\.0\.h5$
+^infobiotics/pmodelchecker/prism/test/\.xml$
+^infobiotics/pmodelchecker/prism/test/\.sm$
+^infobiotics/pmodelchecker/prism/test/\.csl$
+^infobiotics/pmodelchecker/mc2/test/\.pctl$
 ^infobiotics/poptimizer/test/run0\.zip$
-^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
-^infobiotics/poptimizer/test/fourinitial/simulation\.h5$
-^infobiotics/pmodelchecker/prism/test/Const/basicLibrary\.xml$
-^infobiotics/pmodelchecker/prism/test/Const/constitutiveExpression\.xml$
-^infobiotics/pmodelchecker/prism/test/Const/constitutiveExpressionModel\.xml$
-^infobiotics/pmodelchecker/prism/test/Const/onePoint\.xml$
-^infobiotics/pmodelchecker/prism/test/Const/constitutive\.sm$
-^infobiotics/pmodelchecker/prism/test/Const/formula\.csl$
+^infobiotics/poptimizer/test/\.h5$
 
+^sdist$
