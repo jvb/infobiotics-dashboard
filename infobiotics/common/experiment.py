@@ -1,6 +1,6 @@
 import platform
 if platform.system() == 'Windows':
-    import wexpect as expect #TODO test with and include wexpect in sys.path
+    import winpexpect as expect
 else:
     import pexpect as expect
 from enthought.traits.api import ListStr, Str, Event, Property, Bool
