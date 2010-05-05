@@ -13,14 +13,8 @@ from xml import sax
 
 logger = logging.getLogger(level=logging.ERROR)
 
-from enthought.preferences.api import PreferencesHelper, get_default_preferences
-
-#TODO can we now call get_default_preferences in another class and it will work,
-# or is this only for Params subclasses, or even just this class? 
-
-class ParamsPreferencesHelper(PreferencesHelper):
-    _params_program = RelativeFile(absolute=True, auto_set=True, executable=True)
-    _cwd = RelativeDirectory(absolute=True, exists=True, auto_set=True)
+from enthought.preferences.api import get_default_preferences
+from params_preferences_helper import ParamsPreferencesHelper 
 
 class Params(HasTraits): 
 
@@ -29,6 +23,7 @@ class Params(HasTraits):
 
     _params_program_name = Str
     _params_program = RelativeFile(absolute=True, auto_set=True, executable=True, exists=True)
+    #TODO move to Experiment?
 
     _preferences_path = Property(depends_on='_params_program_name')
     
@@ -68,7 +63,7 @@ class Params(HasTraits):
                 preferences.flush()
                 return _params_program
 
-    @on_trait_change('_params_program') 
+#    @on_trait_change('_params_program') 
     def save_preferences(self):
         preferences = get_default_preferences()
         # write changed _params_program to the preferences file

@@ -5,7 +5,7 @@ from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance
 from enthought.pyface.api import FileDialog, OK
 from enthought.traits.ui.api import View, Item, Group
 from commons.traits.ui.api import HelpfulController
-from infobiotics.common.params import ParamsPreferencesHelper
+from infobiotics.common.params_preferences_helper import ParamsPreferencesHelper
 from enthought.preferences.api import get_default_preferences
 
 #from enthought.traits.ui.fixed_file_dialog import (
@@ -87,8 +87,10 @@ class ParamsHandler(HelpfulController):
 
     def load_preferences(self):
         helper = ParamsPreferencesHelper(
-            preferences_path=self.model._preferences_path
+            preferences=get_default_preferences(),
+            preferences_path=self.model._preferences_path,
         )
+#        print get_default_preferences().filename
         # restoring self.model._cwd here, moved from Params._cwd_default
         _cwd = helper._cwd
         try:
