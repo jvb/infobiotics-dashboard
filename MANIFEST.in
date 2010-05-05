@@ -1,3 +1,3 @@
-include *·txt
+include *.txt
 include install.bat
 include distribute_setup.py
