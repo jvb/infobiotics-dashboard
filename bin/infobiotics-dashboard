@@ -1,3 +1,4 @@
-#!/bin/bash
-export PYTHONPATH=..:$PYTHONPATH
-dashboard
+#!/bin/sh
+export PYTHONPATH=/usr/share/infobiotics-dashboard:$PYTHONPATH
+export ETS_TOOLKIT=qt4
+infobiotics-dashboard.py
