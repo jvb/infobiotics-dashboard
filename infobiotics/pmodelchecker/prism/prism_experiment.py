@@ -71,82 +71,82 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 #        id='PRISMExpect.view',
 #    )
 
-    has_valid_parameters = Property(Bool)
-    
-    def _get_has_valid_parameters(self):
-        errors = not super(PRISMExperiment, self).has_valid_parameters
-        print 'errors =', errors
-        print self.has_valid_parameters()
+#    has_valid_parameters = Property(Bool)
+#    
+#    def _get_has_valid_parameters(self):
+#        errors = not super(PRISMExperiment, self).has_valid_parameters
+#        print 'errors =', errors
+#        print self.has_valid_parameters()
             
-    def has_valid_parameters(self):
-        ''' Tests parameter values and enables 'Perform' action if successful.
-        
-        '''
-        from infobiotics.dashboard.shared.files import can_read, can_write
+#    def has_valid_parameters(self):
+#        ''' Tests parameter values and enables 'Perform' action if successful.
+#        
+#        '''
+#        from infobiotics.dashboard.shared.files import can_read, can_write
+#
+#        #TODO switch on self.task?
+#
+#        problems = []
+#
+#        if not can_read(self.model_specification):
+#            problems.append('Model specification %s cannot be read' % self.model_specification)
+#        else:
+#            # further tests
+#            pass
+#            #TODO try and parse model_specification
+#        
+#        if self.number_samples < 1:
+#            problems.append('The number of samples must be greater than 1')
+#        
+#        #formula_parameters should have been moved to pmodelchecker...
+#                
+#        #TODO model_parameters
+#        print self.confidence, self.confidence_
+#        if not self.confidence < 0.5:
+#            problems.append('Confidence must be greater than 50% (less than 0.5)')
+#        
+#        if not self.precision > 0:
+#            problems.append('Precision must be greater than 0')
+#                
+#        if not can_write(self.results_file):
+#            problems.append('Results file %s cannot be written' % self.results_file)
+#        
+#        if not can_write(self.states_file):
+#            problems.append('States file %s cannot be written' % self.states_file)
+#                
+#        if not can_write(self.transitions_file):
+#            problems.append('Transitions file %s cannot be written' % self.transitions_file)
+#        
+#        if not can_write(self.parameters_file):
+#            problems.append('Parameters file %s cannot be written' % self.parameters_file)
+#        
+#        if not can_read(self.PRISM_model):
+#            problems.append('PRISM model %s cannot be read' % self.PRISM_model)
+#            #FIXME prints when changed from bad to good file!
+#
+#        if not can_write(self.PRISM_model):
+#            problems.append('PRISM model %s cannot be written' % self.PRISM_model)
+#
+#        #TODO more tests
+#
+#        print problems, '\n'
+#        
+##        self.perform_action.tooltip = 'OK'
+#        if len(problems) > 0:
+#            self.problem = '\n'.join(problems)
+#        else:
+#            self.problem = ''
+##            # call superclass's validate method
+##            return super(PRISMExperiment, self).has_valid_parameters()
+#            return True
 
-        #TODO switch on self.task?
-
-        problems = []
-
-        if not can_read(self.model_specification):
-            problems.append('Model specification %s cannot be read' % self.model_specification)
-        else:
-            # further tests
-            pass
-            #TODO try and parse model_specification
-        
-        if self.number_samples < 1:
-            problems.append('The number of samples must be greater than 1')
-        
-        #formula_parameters should have been moved to pmodelchecker...
-                
-        #TODO model_parameters
-        print self.confidence, self.confidence_
-        if not self.confidence < 0.5:
-            problems.append('Confidence must be greater than 50% (less than 0.5)')
-        
-        if not self.precision > 0:
-            problems.append('Precision must be greater than 0')
-                
-        if not can_write(self.results_file):
-            problems.append('Results file %s cannot be written' % self.results_file)
-        
-        if not can_write(self.states_file):
-            problems.append('States file %s cannot be written' % self.states_file)
-                
-        if not can_write(self.transitions_file):
-            problems.append('Transitions file %s cannot be written' % self.transitions_file)
-        
-        if not can_write(self.parameters_file):
-            problems.append('Parameters file %s cannot be written' % self.parameters_file)
-        
-        if not can_read(self.PRISM_model):
-            problems.append('PRISM model %s cannot be read' % self.PRISM_model)
-            #FIXME prints when changed from bad to good file!
-
-        if not can_write(self.PRISM_model):
-            problems.append('PRISM model %s cannot be written' % self.PRISM_model)
-
-        #TODO more tests
-
-        print problems, '\n'
-        
-#        self.perform_action.tooltip = 'OK'
-        if len(problems) > 0:
-            self.problem = '\n'.join(problems)
-        else:
-            self.problem = ''
-#            # call superclass's validate method
-#            return super(PRISMExperiment, self).has_valid_parameters()
-            return True
-
-    def perform(self):
+    def perform(self, thread=True):
         # if prism model doesn't exist quickly do a Translate to create it
         if hasattr(self, 'PRISM_model_'):
             if not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
                 self.translate_model_specification()
         # perform the experiment
-        super(PRISMExperiment, self).perform()
+        super(PRISMExperiment, self).perform(thread)
 
 
 if __name__ == '__main__':
