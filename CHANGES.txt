@@ -1,1 +1,1 @@
-v0.1dev, 20100504 -- Initial release.
+v0.1.0dev, 20100505 -- Development release.

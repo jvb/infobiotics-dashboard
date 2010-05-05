@@ -26,10 +26,11 @@ class ExperimentProgressHandler(ParamsHandler):#, CancelExperimentMixin):
         return
 
     traits_view = View(
-        Item('controller.progress', editor=DefaultOverride(low_label='0%', high_label='100%', format='%2.1f')),
-        Item('controller.status', style='readonly', visible_when='len(controller.status) > 0'),
-#        Item('controller.cancel'),
+        Item('handler.progress', editor=DefaultOverride(low_label='0%', high_label='100%', format='%2.1f')),
+        Item('handler.status', style='readonly', visible_when='len(handler.status) > 0'),
+#        Item('handler.cancel'),
     )
 
     def object_finished_changed(self, info):
-        print 'ExperimentProgressHandler.object_finished_changed(self, info)'
+        if self.close(info, True):
+            self._on_close(info)

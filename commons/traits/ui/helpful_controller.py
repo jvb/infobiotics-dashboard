@@ -77,7 +77,10 @@ class HelpfulController(Controller):
     def get_help_menu(self):
         actions = self.get_help_actions()
         if len(actions) > 0:
-            return Menu(*actions, name='&Help')
+            # for python2.5 compatibility:
+            kwargs = {'name':'&Help'}
+            return Menu(*actions, **kwargs)
+#            return Menu(*actions, name='&Help')
         else:
             return
     
@@ -93,7 +96,7 @@ def test_get_help_actions():
     for action in t.get_help_actions():
         print action.name, action.action
     t.help_str_1(info='')
-#    print t.get_help_menu()
+    print t.get_help_menu()
     
 if __name__ == '__main__':
     test_get_help_actions()

@@ -6,7 +6,7 @@ from sequences import join_overlapping
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except OSError as exc: # Python >2.5
+    except OSError, exc: # Python >2.5
         if exc.errno == errno.EEXIST:
             pass
         else: raise
@@ -83,11 +83,12 @@ def append(file):
 def update(file):
     return write(file, mode='r+')
 
-#def which(program):
-#    ''' from: 'http://jimmyg.org/blog/2009/working-with-python-subprocess.html' as whereis '''
-#    for path in os.environ.get('PATH', '').split(':'):
-#        if os.path.exists(os.path.join(path, program)) and not os.path.isdir(os.path.join(path, program)):
-#            return os.path.join(path, program)
-#    return None
-from thirdparty.which import which
+##def which(program):
+##    ''' from: 'http://jimmyg.org/blog/2009/working-with-python-subprocess.html' as whereis '''
+##    for path in os.environ.get('PATH', '').split(':'):
+##        if os.path.exists(os.path.join(path, program)) and not os.path.isdir(os.path.join(path, program)):
+##            return os.path.join(path, program)
+##    return None
+#from thirdparty.which import which
+from which import which
     

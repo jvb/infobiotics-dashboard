@@ -10,9 +10,6 @@ class ExperimentHandler(ParamsHandler):
         
     _progress_handler = Instance(ExperimentProgressHandler)
 
-    def __progress_handler_changed(self):
-        print self._progress_handler
-
     def __progress_handler_default(self):
         raise NotImplementedError
 

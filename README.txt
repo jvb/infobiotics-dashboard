@@ -1,48 +1,80 @@
+=====================
 Infobiotics Dashboard
+=====================
+
 Copyright 2008, 2009, 2010 Jonathan Blakes, jvb@cs.nott.ac.uk
 Released under GNU GPL version 3.
 
-************
+
 Dependencies
-************
+============
 
-When installed with easy_install this software has the following dependencies:
+This software has the following dependencies:
 
-	Python - http://www.python.org/
-	NumPy - http://numpy.scipy.org/
-	HDF5 - http://www.hdfgroup.org/HDF5/
-	Qt - http://qt.nokia.com/
-	PyQt - http://www.riverbankcomputing.co.uk/software/pyqt/
-	mcss, pmodelchecker, poptimizer - http://www.infobiotic.org/
+* Python >= 2.6 (http://www.python.org/)
+* HDF5 >= 1.8 (http://www.hdfgroup.org/HDF5/)
+* VTK >= 5.2 (http://www.vtk.org/)
 
-When installed without easy_install this software also requires:
+* NumPy >= 1.2.1 (http://numpy.scipy.org/)
+* Matplotlib >= 99.1 (http://matplotlib.sourceforge.net/)
 
-	PyTables - http://www.pytables.org/
-	Matplotlib - http://matplotlib.sourceforge.net/
-	Enthought Tool Suite (Mayavi) - http://www.enthought.com/products/ets.php
-	
+All of the above dependencies can be fulfilled by installing the Enthought
+Python Distribution (http://www.enthought.com/products/epd.php).
 
-************
+
+* Qt >= (http://qt.nokia.com/)
+* PyQt >= 4.7(http://www.riverbankcomputing.co.uk/software/pyqt/)
+* QScintilla2 (http://www.riverbankcomputing.co.uk/software/qscintilla/download)
+
+On Windows all of the above dependencies can be fulfilled by installing the 
+Basic and Advanced Python modules of Python(x,y) (http://www.pythonxy.com/).
+
+
+* Infobiotics Workbench (http://www.infobiotic.org/infobiotics-workbench)
+
+On Debian-based GNU/Linux systems all of the above dependencies can be 
+fulfilled by adding the APT line:
+
+http://www.infobiotic.net/infobiotics-apt
+
+to /etc/apt/sources.list and in a terminal:
+
+$ sudo apt-get install infobiotics-workbench python-vtk python-qt4 python-qscintilla2
+
+NumPy must be installed with either: 
+
+$ pip install numpy
+
+or
+
+$ easy_install numpy
+
+Matplotlib must be similarly be installed with:
+
+& pip install http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-0.99.1/matplotlib-0.99.1.2.tar.gz/download 
+
+
 Installation
-************
+============
 
-From source:
+Unpacked the downloaded archive and in a terminal:
 
-python setup.py install
+$ python setup.py install
+
 or
-easy_install infobiotics-dashboard-<version>.tar.gz
-or
-pip infobiotics-dashboard-<version>.tar.gz
 
-From Debian binary package (as root):
+$ pip install --upgrade InfobioticsDashboard-<version>.<archive-format>
 
-gdebi infobiotics-dashboard_<version>_all.deb
-	
-*******
+which will install the Infobiotics Dashboard and the latest versions of 
+PyTables (http://www.pytables.org/), 
+most of the Enthought Tool Suite (http://www.enthought.com/products/ets.php) 
+and a few other packages from the Python Package Index 
+(http://pypi.python.org/pypi).
+
+
 Running
-*******
+=======
 
-From Debian binary package:
+To run the Infobiotics Dashboard at the terminal type:
 
-infobiotics-dashboard
-
+$ infobiotics-dashboard.py

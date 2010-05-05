@@ -6,7 +6,7 @@ from enthought.traits.ui.api import ProgressEditor, View, Item
 
 class McssExperimentProgressHandler(ExperimentProgressHandler):
     
-    progress = Property(Percentage)
+#    progress = Property(Percentage)
     
     @property_depends_on('model.time_in_run, model.runs, model.max_time')#, model.run')
     def _get_progress(self):

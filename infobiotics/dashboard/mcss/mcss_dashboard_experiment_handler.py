@@ -14,8 +14,8 @@ class McssDashboardExperimentHandler(McssExperimentHandler):#, DashboardExperime
         #TODO maybe raise experiments queue view here (moved to new class DashboardExperimentHandler)
         super(McssDashboardExperimentHandler, self)._show_progress()
 
-    def object_finished_changed(self, info):
-        self.show_results()
+#    def object_finished_changed(self, info):
+#        super(McssDashboardExperimentHandler, self).object_finished_changed(info)
         
     def show_results(self):
         from infobiotics.dashboard.plugins.simulator_results.simulator_results import SimulationResultsDialog

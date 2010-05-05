@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from enthought.traits.api import (
     HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property,
     on_trait_change

@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from infobiotics.common.api import ParamsView
 from enthought.traits.api import (
     Int, Range, Property, Instance, on_trait_change, Button,

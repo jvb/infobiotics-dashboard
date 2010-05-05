@@ -8,7 +8,7 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
     def object_finished_changed(self, info):
         self.show_results()
-        self._on_close(info)
+        super(McssExperimentHandler, self).object_finished_changed(info)
         
     def show_results(self):
         from infobiotics.dashboard.plugins.simulator_results.simulator_results import SimulationResultsDialog, centre_window
