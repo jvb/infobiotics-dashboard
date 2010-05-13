@@ -1,4 +1,4 @@
-from commons.api import which
+from infobiotics.commons.api import which
 import subprocess, webbrowser
 
 def dedicated_window(url):             

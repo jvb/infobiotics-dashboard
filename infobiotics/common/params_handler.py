@@ -1,10 +1,10 @@
 from infobiotics.common.api import ParamsView, MenuBar, file_menu
-from commons.api import can_read, mkdir_p
+from infobiotics.commons.api import can_read, mkdir_p
 import os
 from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance
 from enthought.pyface.api import FileDialog, OK
 from enthought.traits.ui.api import View, Item, Group
-from commons.traits.ui.api import HelpfulController
+from infobiotics.commons.traits.ui.api import HelpfulController
 from infobiotics.common.params_preferences_helper import ParamsPreferencesHelper
 from enthought.preferences.api import get_default_preferences
 

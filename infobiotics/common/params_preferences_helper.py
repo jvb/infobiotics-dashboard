@@ -1,5 +1,5 @@
 from enthought.preferences.api import PreferencesHelper
-from commons.traits.api import RelativeFile, RelativeDirectory
+from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 
 class ParamsPreferencesHelper(PreferencesHelper):
     ''' Traits-based type checking and conversion from ini format files.'''

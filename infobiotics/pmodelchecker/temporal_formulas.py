@@ -4,7 +4,7 @@ from enthought.traits.ui.api import (
     CodeEditor, Spring
 )
 from enthought.traits.ui.table_column import ObjectColumn
-from commons.traits.ui.api import HelpfulController, help_action
+from infobiotics.commons.traits.ui.api import HelpfulController, help_action
 
 temporal_formulas_group = VGroup(
     HGroup(   

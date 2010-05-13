@@ -7,8 +7,8 @@ from enthought.traits.ui.api import Controller
 from infobiotics.common.api import (
     ParamsRelativeFile, ParamsRelativeDirectory,
 )
-from commons.api import key_from_value, can_access, read, write, which, logging
-from commons.traits.api import RelativeFile, RelativeDirectory
+from infobiotics.commons.api import key_from_value, can_access, read, write, which, logging
+from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 import os
 from xml import sax
 
@@ -481,7 +481,7 @@ def traits_repr(self, *names):
              return traits_repr(self, [name, age])
     
     '''
-    from commons.sequences import flatten
+    from infobiotics.commons.sequences import flatten
     names = flatten(names)
     repr = self.__class__.__name__ + '('
     for i, name in enumerate(names):

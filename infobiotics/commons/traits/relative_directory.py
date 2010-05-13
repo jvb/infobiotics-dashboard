@@ -92,7 +92,7 @@ class RelativeDirectory(RelativeFile):
         return self._validate(object, name, value, os.path.isdir)
    
     def create_editor(self):
-        from commons.traits.ui.qt4.relative_directory_editor import RelativeDirectoryEditor
+        from infobiotics.commons.traits.ui.qt4.relative_directory_editor import RelativeDirectoryEditor
         editor = RelativeDirectoryEditor(
             filter=self.filter or [],
             auto_set=self.auto_set,

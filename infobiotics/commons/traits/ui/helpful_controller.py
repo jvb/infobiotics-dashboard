@@ -1,7 +1,7 @@
 from enthought.traits.api import Property, Str, Bool, List, Tuple, HasTraits
 from enthought.traits.ui.api import Controller, View, Item
 from enthought.traits.ui.menu import Action, Menu
-from commons import webbrowsing
+from infobiotics.commons import webbrowsing
 
 help_action = Action(
     name='&Help', # the '&' might cause problems with KeyBindings...

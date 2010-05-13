@@ -2,9 +2,9 @@ from infobiotics.common.api import ParamsHandler
 from enthought.traits.api import (
     Button, Property, Str, on_trait_change,
 )
-from commons.traits.api import Percentage
+from infobiotics.commons.traits.api import Percentage
 from enthought.traits.ui.api import (
-    View, Item, DefaultOverride,                              
+    View, Item, DefaultOverride, TextEditor,                      
 )
 
 #class CancelExperimentMixin(object):
@@ -26,7 +26,8 @@ class ExperimentProgressHandler(ParamsHandler):#, CancelExperimentMixin):
         return
 
     traits_view = View(
-        Item('handler.progress', editor=DefaultOverride(low_label='0%', high_label='100%', format='%2.1f')),
+#        Item('handler.progress', editor=DefaultOverride(low_label='0%', high_label='100%', format='%2.1f')), #FIXME         Item('handler.progress', editor=DefaultOverride(low_label='0%', high_label='100%', format='%2.1f')),
+        Item('handler.progress', editor=TextEditor()),
         Item('handler.status', style='readonly', visible_when='len(handler.status) > 0'),
 #        Item('handler.cancel'),
     )

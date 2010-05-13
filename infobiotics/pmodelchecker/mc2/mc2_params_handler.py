@@ -11,7 +11,7 @@ from mc2_params_group import mc2_params_group
 from mc2_mcss_experiment import MC2McssExperiment
 from mc2_mcss_experiment_group import mc2_mcss_experiment_group
 from infobiotics.mcss.api import McssExperiment
-from commons.api import can_read, can_write
+from infobiotics.commons.api import can_read, can_write
 import tables
 
 class MC2ParamsHandler(PModelCheckerParamsHandler):

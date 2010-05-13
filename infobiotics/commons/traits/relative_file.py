@@ -1,6 +1,6 @@
 import os
 from enthought.traits.api import BaseFile
-from commons.api import can_read, can_write, can_execute
+from infobiotics.commons.api import can_read, can_write, can_execute
 
 class RelativeFile(BaseFile):
     """ Defines a trait whose value must be the name of a file (which can be 
@@ -259,7 +259,7 @@ class RelativeFile(BaseFile):
         object.__dict__[ name + '_' ] = value
     
     def create_editor(self):
-        from commons.traits.ui.qt4.relative_file_editor import RelativeFileEditor
+        from infobiotics.commons.traits.ui.qt4.relative_file_editor import RelativeFileEditor
         editor = RelativeFileEditor(
             absolute=self.absolute,
             auto_set=self.auto_set,

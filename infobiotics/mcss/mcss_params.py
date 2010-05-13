@@ -1,6 +1,6 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
 from enthought.traits.api import Enum, Bool, Range, Long
-from commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
+from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 
 class McssParams(Params):
 

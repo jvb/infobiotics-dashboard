@@ -1,6 +1,6 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
 from enthought.traits.api import Enum, Str, Float, Bool
-from commons.traits.api import LongGreaterThanZero
+from infobiotics.commons.traits.api import LongGreaterThanZero
 import os.path
 
 class PModelCheckerParams(Params):

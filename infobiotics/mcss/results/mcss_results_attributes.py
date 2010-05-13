@@ -1,5 +1,5 @@
 from enthought.traits.api import Enum, HasTraits, Int, Str
-from commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero, RelativeFile
+from infobiotics.commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero, RelativeFile
 
 ModelFormat = Enum(['sbml','xml'])
 SimulationAlgorithm = Enum(['dm','ldm','...'])

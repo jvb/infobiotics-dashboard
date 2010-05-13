@@ -10,8 +10,8 @@ from xml.sax import ContentHandler
 from xml import sax
 from enthought.traits.ui.table_column import ObjectColumn, ExpressionColumn
 import os.path
-from commons.traits.api import RelativeDirectory
-from commons.api import read
+from infobiotics.commons.traits.api import RelativeDirectory
+from infobiotics.commons.api import read
 
 range_or_value_group = VGroup(
     Item('range_or_value', style='custom'),

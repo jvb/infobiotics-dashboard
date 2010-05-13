@@ -64,7 +64,7 @@ class TraitedPrismVariable(HasTraits):
 
 
 
-from commons.mayavi import extent, normalized_extent#, MlabWidget
+from infobiotics.commons.mayavi import extent, normalized_extent#, MlabWidget
 #from enthought.traits.api import on_trait_change
 #class CheckerResultsSurface(MlabWidget):
 #    """ encapsulates a PRISMResults object, 

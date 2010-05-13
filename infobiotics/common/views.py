@@ -30,7 +30,7 @@ shared_actions = [ # ParamsView and ExperimentView
     'Undo',
 ] 
 
-#from commons.traits.ui.api import help_action
+#from infobiotics.commons.traits.ui.api import help_action
 
 #shared_actions = shared_actions + ['Help'] # TraitsUI help which doesn't work in TraitsBackendQt
 #shared_actions = shared_actions + [help_action]

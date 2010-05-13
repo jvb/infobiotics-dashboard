@@ -1,6 +1,6 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
 from enthought.traits.api import Str, Int, Long, Bool, Range, on_trait_change, Trait #TODO remove Trait
-from commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
+from infobiotics.commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
 
 class POptimizerParams(Params):
     

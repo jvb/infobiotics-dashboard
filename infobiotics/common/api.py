@@ -1,4 +1,4 @@
-from commons.traits.api import RelativeFile, RelativeDirectory
+from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 
 class ParamsRelativeFile(RelativeFile):
     ''' Extends RelativeFile to provide default traits values for Params

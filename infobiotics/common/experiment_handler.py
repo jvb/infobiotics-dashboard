@@ -26,7 +26,7 @@ class ExperimentHandler(ParamsHandler):
     has_valid_parameters = Property(Bool, depends_on='info.ui.errors')
     def _get_has_valid_parameters(self):
         # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
-#        if self.info.ui is None:
-#            return False
+        if self.info.ui is None:
+            return False
         return False if self.info.ui.errors > 0 else True
     

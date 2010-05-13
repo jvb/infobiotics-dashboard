@@ -5,8 +5,8 @@ Adapted from qt4/extras/bounds_editor.py, qt4/file_editor.py, and qt4/html_edito
 from enthought.traits.ui.qt4.text_editor import SimpleEditor as SimpleTextEditor
 from enthought.traits.ui.api import FileEditor
 from enthought.traits.api import Str, Bool, TraitError, on_trait_change
-from commons.traits.relative_directory import RelativeDirectory
-from commons.strings import wrap
+from infobiotics.commons.traits.relative_directory import RelativeDirectory
+from infobiotics.commons.strings import wrap
 import os
 from PyQt4 import QtCore, QtGui
 

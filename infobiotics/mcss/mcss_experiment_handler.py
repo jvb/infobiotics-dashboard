@@ -8,12 +8,12 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
     def object_finished_changed(self, info):
         self.show_results()
-        super(McssExperimentHandler, self).object_finished_changed(info)
+#        super(McssExperimentHandler, self).object_finished_changed(info) #TODO
         
     def show_results(self):
         from infobiotics.dashboard.plugins.simulator_results.simulator_results import SimulationResultsDialog, centre_window
         w = SimulationResultsDialog(filename=self.model.data_file_)
-        from commons.qt4 import centre_window
+        from infobiotics.commons.qt4 import centre_window
         centre_window(w)
         w.show()
 

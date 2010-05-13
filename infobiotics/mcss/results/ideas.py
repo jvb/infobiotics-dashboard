@@ -1,5 +1,5 @@
 from enthought.traits.api import HasTraits, Float, Instance, List, Property
-from commons.traits.float_greater_than_zero import FloatGreaterThanZero
+from infobiotics.commons.traits.float_greater_than_zero import FloatGreaterThanZero
 from mcss_results_attributes import McssResultsAttributes 
 
 ParamsProgramName = Enum(['mcss','pmodelchecker','poptimizer']) 

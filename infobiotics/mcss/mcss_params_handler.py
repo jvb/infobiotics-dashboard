@@ -2,7 +2,7 @@ from enthought.traits.api import (
     Trait, Bool, Property, 
 )
 import os.path
-from commons.api import can_access
+from infobiotics.commons.api import can_access
 from infobiotics.common.api import ParamsHandler, ParamsView
 from mcss_params_group import mcss_params_group
 

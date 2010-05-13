@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from commons.api import read, write
+from infobiotics.commons.api import read, write
 from infobiotics.common.api import ParamsHandler
 from enthought.traits.api import List, Unicode, Button, Instance, Int
 from model_parameters import ModelParameters

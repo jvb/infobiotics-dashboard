@@ -1,6 +1,6 @@
 from __future__ import with_statement
 import os.path
-from commons.api import read, write
+from infobiotics.commons.api import read, write
 from enthought.traits.api import (
     Trait, Range, Button, Str, Bool, Instance, DelegatesTo,
 )

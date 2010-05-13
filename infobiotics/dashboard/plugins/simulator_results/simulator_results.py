@@ -14,7 +14,7 @@ from PyQt4.QtGui import QWidget, QApplication, QHBoxLayout, QVBoxLayout, QWidget
     QPushButton, QBrush, QColor, QFileDialog, QMessageBox, QSpinBox, QPixmap, \
     QSizePolicy, QAbstractItemView, QListView, QIcon, QDoubleSpinBox, qApp, \
     QGridLayout
-from commons.qt4 import centre_window
+from infobiotics.commons.qt4 import centre_window
 #import shared.TraitsUI
 from enthought.mayavi.core.pipeline_base import PipelineBase
 from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
@@ -27,7 +27,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from random import randint
-from commons import colours
+from infobiotics.commons import colours
 import main
 from ui_player_control_widget import Ui_ControlsWidget
 from ui_plots_preview_dialog import Ui_PlotsPreviewDialog
