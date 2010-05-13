@@ -6,13 +6,15 @@
 # $Date: 2010-01-25 13:13:07 +0000 (Mon, 25 Jan 2010) $
 
 
-from enthought.envisage.api import Plugin
+from enthought.envisage.api import Plugin, contributes_to
 from enthought.traits.api import List
 from enthought.pyface.workbench.api import Perspective, PerspectiveItem
 
 from action_set import McssActionSet
 from preferences_page import McssPreferencesPage
 
+import os
+from enthought.etsconfig.api import ETSConfig
 
 class McssUIPlugin(Plugin):
 
@@ -47,3 +49,9 @@ class McssUIPlugin(Plugin):
     def _experiments_default(self):
         from mcss_experiment import McssExperiment
         return McssExperiment()
+    
+    # file:///home/jvb/src/ETS_3.4.0/AppTools/docs/html/preferences/PreferencesInEnvisage.html
+    
+    preferences = List(contributes_to='enthought.envisage.preferences')
+    def _preferences_default(self):
+        return ['file://%s' % os.path.join(ETSConfig.application_data, 'preferences.ini')]

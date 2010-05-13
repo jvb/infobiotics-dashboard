@@ -5,15 +5,16 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
     """ The Infobiotics Dashboard (Envisage Workbench) application. """
 
     # implements IApplication and WorkbenchApplication interfaces
-    id = 'infobiotics.dashboard.app' # The application's globally unique Id.
+    id = 'dashboard' # The application's globally unique Id.
     name = 'Infobiotics Dashboard' # The name of the application (also used on window title bars etc)
 #    icon = ImageResource('icons/application.png') # The icon used on window title bars etc
     
     def _about_dialog_default(self):
         return AboutDialog(
             parent = self.workbench.active_window.control,
-#            image  = ImageResource('logo/infobiotics_logo-1'),
-#            image  = ImageResource('logo/infobiotics_logo-2'),
+#            image = ImageResource('logo/infobiotics_logo-1'),
+#            image = ImageResource('logo/infobiotics_logo-2'),
+            image=None,
             additions = [
                 'Infobiotics Dashboard',
                 'by',

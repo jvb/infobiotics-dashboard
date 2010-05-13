@@ -17,7 +17,7 @@ from enthought.preferences.api import (
 ) 
 
 preferences_file_name = os.path.join(ETSConfig.application_data, 'preferences.ini') 
-print "Using preferences file '%s'" % preferences_file_name 
+#print "Using preferences file '%s'" % preferences_file_name 
 preferences = ScopedPreferences(filename=preferences_file_name)
 
 import platform
@@ -30,3 +30,6 @@ if platform.system() == 'Windows':
         preferences.set('poptimizer._params_program_file', 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\poptimizer.EXE'),
 
 set_default_preferences(preferences)
+
+preferences.flush()
+
