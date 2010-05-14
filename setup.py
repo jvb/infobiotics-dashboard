@@ -93,8 +93,8 @@ setup(
         'TraitsBackendQt>=3.3.0',
         'Mayavi>=3.3.1',
         'configobj',#==4.7.2',
-        'tables>=2.1.2',
-
+#        'tables>=2.1.2',
+        'pytables>=2.1.2',
 #        'which==1.1.0', # in infobiotics.thirdparty
 
 #        'winpexpect==1.2', # done outside setup()
