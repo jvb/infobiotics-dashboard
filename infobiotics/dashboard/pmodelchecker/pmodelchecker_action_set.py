@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: pmodelchecker_action_set.py 383 2010-01-22 10:48:47Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/pmodelchecker/pmodelchecker_action_set.py $
-# $Author: jvb $
-# $Revision: 383 $
-# $Date: 2010-01-22 10:48:47 +0000 (Fri, 22 Jan 2010) $
-
-
 #from actions import *
 from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet

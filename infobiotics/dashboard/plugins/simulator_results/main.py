@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Workbench. See LICENSE for copyright.
-# $Id: main.py 342 2009-09-09 11:49:07Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/gui/trunk/src/shared/main.py $
-# $Author: jvb $
-# $Revision: 342 $
-# $Date: 2009-09-09 12:49:07 +0100 (Wed, 09 Sep 2009) $
-
-
 '''
 Setup and teardown of Infobiotics PyQt/Traits applications. 
 '''

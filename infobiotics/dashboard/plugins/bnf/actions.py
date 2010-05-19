@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: actions.py 411 2010-01-25 18:03:26Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/bnf/actions.py $
-# $Author: jvb $
-# $Revision: 411 $
-# $Date: 2010-01-25 18:03:26 +0000 (Mon, 25 Jan 2010) $
-
-
 from enthought.pyface.action.api import Action as PyFaceAction
 from enthought.pyface.constant import * # OK, NO, CANCEL, YES
 from enthought.io.api import File

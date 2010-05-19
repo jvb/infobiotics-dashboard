@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: PlotsListWidget.py 342 2009-09-09 11:49:07Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/gui/trunk/src/simulator_results/PlotsListWidget.py $
-# $Author: jvb $
-# $Revision: 342 $
-# $Date: 2009-09-09 12:49:07 +0100 (Wed, 09 Sep 2009) $
-
-
 from PyQt4.QtGui import QListWidget, QListWidgetItem, QIcon
 
 

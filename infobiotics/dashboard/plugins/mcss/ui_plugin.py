@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: ui_plugin.py 405 2010-01-25 13:13:07Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/mcss/ui_plugin.py $
-# $Author: jvb $
-# $Revision: 405 $
-# $Date: 2010-01-25 13:13:07 +0000 (Mon, 25 Jan 2010) $
-
-
 from enthought.envisage.api import Plugin, contributes_to
 from enthought.traits.api import List
 from enthought.pyface.workbench.api import Perspective, PerspectiveItem

@@ -1,10 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: preferences_page.py 405 2010-01-25 13:13:07Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/mcss/preferences_page.py $
-# $Author: jvb $
-# $Revision: 405 $
-# $Date: 2010-01-25 13:13:07 +0000 (Mon, 25 Jan 2010) $
-
 '''
 see:
 file:///home/jvb/src/ETS_3.3.1/AppTools_3.3.1/docs/html/preferences/PreferencesInEnvisage.html

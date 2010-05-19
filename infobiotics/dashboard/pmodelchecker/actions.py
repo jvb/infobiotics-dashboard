@@ -1,10 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: actions.py 408 2010-01-25 15:19:58Z jvb $
-# $HeadURL: https://psiren.cs.nott.ac.uk/repos/infobiotics/dashboard/trunk/infobiotics/dashboard/plugins/pmodelchecker/actions.py $
-# $Author: jvb $
-# $Revision: 408 $
-# $Date: 2010-01-25 15:19:58 +0000 (Mon, 25 Jan 2010) $
-
 import os; os.environ['ETS_TOOLKIT']='qt4'
 from enthought.pyface.action.api import Action as PyFaceAction
 from prism_experiment import PRISMExperiment

@@ -1,11 +1,3 @@
-# This file is part of the Infobiotics Dashboard. See LICENSE for copyright.
-# $Id: mcss_ui_plugin.py 120 2009-12-08 14:48:20Z jvb $
-# $HeadURL: svn+ssh://infobiotics.dyndns.org/svn/infobiotics/Infobiotics Dashboard/trunk/infobiotics/workbench/plugins/mcss/mcss_ui_plugin.py $
-# $Author: jvb $
-# $Revision: 120 $
-# $Date: 2009-12-08 14:48:20 +0000 (Tue, 08 Dec 2009) $
-
-
 from enthought.envisage.api import Plugin
 from enthought.traits.api import List
 #from enthought.pyface.workbench.api import Perspective, PerspectiveItem
