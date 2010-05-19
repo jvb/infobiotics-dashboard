@@ -1,6 +1,0 @@
-plac_gFP 1
-pR_gLacI 1
-plux_gCI 1
-plux_gLacI 1
-gLuxR 1
-s3OC6ext 5

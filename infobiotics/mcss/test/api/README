@@ -1,7 +1,0 @@
-examples of how to write and compile programs using the libmcss api.
-
-the api-example code is simple and commented, and just runs a simulation using the parameter file specified on the command line, logs the levels of all the species to memory, then prints to levels to the screen. For example, for the module1 example in the examples/ directory:
-
-$ api-example module1.params
-
-the Makefile included in the api-example directory provides a simple example of how to write a makefile which will compile and link your application with the libmcss api.
