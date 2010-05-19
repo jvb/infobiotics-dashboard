@@ -231,7 +231,6 @@ setup(
     packages=find_packages(
         exclude=[
             '*.tests', '*.tests.*', 'tests.*', 'tests', # http://packages.python.org/distribute/setuptools.html#using-find-packages
-            'expect', #TODO
         ]
     ),
 

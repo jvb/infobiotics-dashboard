@@ -13,6 +13,12 @@ syntax: regexp
 ^dist$
 ^MANIFEST$
 ^InfobioticsDashboard\.egg-info$
-^infobiotics/poptimizer/test/run0\.zip$
 
-^sdist$
+syntax: glob
+infobiotics-dashboard*.deb
+infobiotics-dashboard*.dsc
+infobiotics-dashboard*.tar.gz
+infobiotics-dashboard*.tar.gz.cdbs-config_list
+
+syntax: regexp
+^tests/old$

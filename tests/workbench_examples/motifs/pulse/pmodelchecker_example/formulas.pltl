@@ -1,0 +1,2 @@
+Formulas:
+"P=?[ (Time=D)U([protein3_0_0_IFFLbacterium] >= 50){Time=D}]"																			{D =0:5:1000}
