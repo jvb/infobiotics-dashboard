@@ -32,7 +32,6 @@ INSTALL_REQUIRES = [
     'Mayavi',
     'configobj',
 #    'which==1.1.0', # in infobiotics.thirdparty
-    'tables>=2.1.2',
     'numpy',#>=1.3.0', 
     'matplotlib'#,==0.99.1', 
 ]
@@ -48,6 +47,17 @@ else: # assume POSIX
     INSTALL_REQUIRES += [
         'pexpect',
     ]
+
+# use 'pytables' instead of 'tables' for mac
+if sys.platform.startswith('darwin'):
+    INSTALL_REQUIRES += [
+        'pytables>=2.1.2',
+    ]
+else:
+    INSTALL_REQUIRES += [
+        'tables>=2.1.2',
+    ]
+
 
 # explicitly include hard-to-find modules for py2app #TODO and py2exe
 INCLUDES = [
@@ -140,7 +150,15 @@ if sys.platform.startswith('darwin'):
     extra_options = dict(
         setup_requires=['py2app'],
         app=['bin/infobiotics-dashboard.py'],
-        options=dict(py2app=dict(argv_emulation=True, includes=INCLUDES)), # Cross-platform applications generally expect sys.argv to be used for opening files.
+        options=dict(
+            py2app=dict(
+                argv_emulation=True, 
+                includes=INCLUDES,
+                frameworks=[
+                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib',
+                ],
+            ),
+        ), # Cross-platform applications generally expect sys.argv to be used for opening files.
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("enthought/pyface/images", glob.glob("/Library/Frameworks/.framework/Versions/Current/lib/python26/site-packages/enthought/pyface/images/*.png")), #FIXME
@@ -230,7 +248,7 @@ setup(
 
     packages=find_packages(
         exclude=[
-            '*.tests', '*.tests.*', 'tests.*', 'tests', # http://packages.python.org/distribute/setuptools.html#using-find-packages
+#            '*.tests', '*.tests.*', 'tests.*', 'tests', # http://packages.python.org/distribute/setuptools.html#using-find-packages
         ]
     ),
 
