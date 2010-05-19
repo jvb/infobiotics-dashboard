@@ -20,8 +20,8 @@ preferences_file_name = os.path.join(ETSConfig.application_data, 'preferences.in
 #print "Using preferences file '%s'" % preferences_file_name 
 preferences = ScopedPreferences(filename=preferences_file_name)
 
-import platform
-if platform.system() == 'Windows':
+import sys
+if sys.platform.startswith('win'):
     if preferences.get('mcss._params_program_file', None) is None:
         preferences.set('mcss._params_program_file', 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\mcss.EXE'),
     if preferences.get('pmodelchecker._params_program_file', None) is None:

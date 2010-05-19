@@ -1,5 +1,7 @@
 #!/bin/bash
+echo "Installing to local Python distribution."
 echo "Please see README.txt for system-specific installation instructions."
-pip install numpy
-pip install http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-0.99.1/matplotlib-0.99.1.2.tar.gz/download
+easy_install pip
+REM pip install --upgrade numpy
+REM pip install --upgrade http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-0.99.1/matplotlib-0.99.1.2.tar.gz/download
 pip install .

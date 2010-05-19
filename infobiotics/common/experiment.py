@@ -1,6 +1,6 @@
-import platform
-if platform.system() == 'Windows':
-    import winpexpect as expect
+import sys
+if sys.platform.startswith('win'):
+    import infobiotics.thirdparty.wexpect as expect
 else:
     import pexpect as expect
 from enthought.traits.api import ListStr, Str, Event, Property, Bool

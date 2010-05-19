@@ -1,1 +1,5 @@
-v0.1.0dev, 20100505 -- Development release.
+v0.0.1, 20100517
+
+* changed version number to 0.0.1 for make-deb.sh 
+
+v0.0.1dev, 20100517 -- Development release.
