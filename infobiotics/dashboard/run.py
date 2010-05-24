@@ -1,6 +1,8 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 ETSConfig.company = 'infobiotics'
+
+print 'loading plugins...',
 from enthought.envisage.core_plugin import CorePlugin
 from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
 #from enthought.envisage.developer.developer_plugin import DeveloperPlugin
@@ -18,6 +20,7 @@ from infobiotics.dashboard.plugins.pmodelchecker.ui_plugin import PModelCheckerU
 from infobiotics.dashboard.plugins.simulator_results.ui_plugin import SimulatorResultsUIPlugin
 #from infobiotics.dashboard.plugins.example.ui_plugin import ExampleUIPlugin
 #from infobiotics.dashboard.plugins.unified_open_action.unified_open_action_ui_plugin import UnifiedOpenActionUIPlugin
+print 'loaded'
 
 def main():
     ''' Main entry point for Infobiotics Dashboard.
@@ -25,6 +28,7 @@ def main():
     Creates the Workbench Application from a collection of plugins.
     
     '''
+    print 'starting workbench'
     application = InfobioticsDashboardWorkbenchApplication(
         
         plugins=[
@@ -56,8 +60,6 @@ def main():
         ]
     )
 
-    application.setup()
-    
 #    from enthought.preferences.api import set_default_preferences, ScopedPreferences
 #    set_default_preferences(ScopedPreferences(filename='preferences.ini'))
 #    application.preferences.dump()

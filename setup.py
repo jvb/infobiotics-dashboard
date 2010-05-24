@@ -63,6 +63,8 @@ else:
 INCLUDES = [
     'sip',
     'PyQt4',
+    'PyQt4.QtCore',
+    'PyQt4.QtGui',
     'PyQt4.Qsci',
     'PyQt4.QtNetwork',
     'enthought.traits.ui.qt4',
@@ -157,6 +159,37 @@ if sys.platform.startswith('darwin'):
                 frameworks=[
                     '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib',
                 ],
+                plist=dict(
+                    # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18
+#                    LSPrefersPPC=True,
+                    CFBundleIdentifier='org.infobiotics.infobiotics-workbench',
+                    CFBundleGetInfoString='The Infobiotics Dashboard, part of the Infobiotics Workbench.',
+                    LSBackgroundOnly=False, # If True, the bundle will be a faceless background application.
+                    LSUIElement=False, # If True, the bundle will be an agent application. It will not appear in the Dock or Force Quit window, but still can come to the foreground and present a UI.
+#                    CFBundleURLTypes = [{}], # An array of dictionaries describing URL schemes supported by the bundle.
+#                    NSServices = [{}] # An array of dictionaries specifying the services provided by the application.
+                    CFBundleDocumentTypes=[ # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#associating-actions-with-file-types
+#                        {
+#                            'CFBundleTypeExtensions': ['html','htm'],
+#                            'CFBundleTypeName': 'HTML Document',
+#                            'CFBundleTypeRole': 'Viewer',
+#                            'CFBundleTypeIconFile': 'Icon.icns',
+#                        },
+                        {
+                            'CFBundleTypeExtensions' : ['h5'], 
+                            'CFBundleTypeName': 'mcss simulation',
+                            'CFBundleTypeRole': 'Viewer',
+                            'CFBundleTypeIconFile': 'mcss_simulation.icns',
+                        },
+                        { 
+                            'CFBundleTypeExtensions' : ['lpp','sps','plb','lat'],
+                            'CFBundleTypeName': 'Lattice Population P System model file',
+                            'CFBundleTypeRole': 'Viewer',
+                            'CFBundleTypeIconFile': 'lattice_population_p_system_model_file.icns',
+                        },    
+                    ],
+                    
+                ),
             ),
         ), # Cross-platform applications generally expect sys.argv to be used for opening files.
         data_files=[

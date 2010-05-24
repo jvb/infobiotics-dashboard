@@ -1,3 +1,7 @@
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
+ETSConfig.company = 'infobiotics'
+
 from enthought.envisage.ui.workbench.api import WorkbenchApplication
 from enthought.pyface.api import AboutDialog, ImageResource, SplashScreen
 
@@ -14,7 +18,6 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
             parent = self.workbench.active_window.control,
 #            image = ImageResource('logo/infobiotics_logo-1'),
 #            image = ImageResource('logo/infobiotics_logo-2'),
-            image=None,
             additions = [
                 'Infobiotics Dashboard',
                 'by',
@@ -39,11 +42,13 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
 #        return splash_screen
         return None
 
-    def setup(self):
-        ''' Called by infobiotics.dashboard.run.main() before application.start(). '''
-        pass
-        #TODO read preferences here?
+    def run(self):
+        print 'running'
+        super(InfobioticsDashboardWorkbenchApplication, self).run()
 
+    def _started_fired(self):
+        print 'started'
+        
 
 if __name__ == '__main__':
     execfile('run.py')
