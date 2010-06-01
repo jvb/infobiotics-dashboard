@@ -10,7 +10,8 @@ class McssExperimentProgressHandler(ExperimentProgressHandler):
     
     @property_depends_on('model.time_in_run, model.runs, model.max_time')#, model.run')
     def _get_progress(self):
-        return int((((self.model.time_in_run) + ((self.model.run - 1) * self.model.max_time)) / (self.model.max_time * self.model.runs)) * 100) 
+        percentage = int((((self.model.time_in_run) + ((self.model.run - 1) * self.model.max_time)) / (self.model.max_time * self.model.runs)) * 100) 
+        return percentage
         
     def object_finished_changed(self, info):
         self._on_close(info)

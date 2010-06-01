@@ -1,6 +1,26 @@
 import sys
 if sys.platform.startswith('win'):
-    import infobiotics.thirdparty.wexpect as expect
+#    import infobiotics.thirdparty.wexpect as expect
+# ModuleFinder can't handle runtime changes to __path__, but win32com uses them
+    import pywintypes
+    import pythoncom
+    import win32api
+    try:
+    # if this doesn't work, try import modulefinder
+        import py2exe.mf as modulefinder
+        import win32com
+        for p in win32com.__path__[1:]:
+            modulefinder.AddPackagePath("win32com", p)
+        for extra in ["win32com.shell"]: #,"win32com.mapi"
+            __import__(extra)
+            m = sys.modules[extra]
+            for p in m.__path__[1:]:
+                modulefinder.AddPackagePath(extra, p)
+    except ImportError:
+        # no build path setup, no worries.
+        pass
+    import winpexpect as expect
+    print "don\'t forget about winpexpect.winspawn"
 else:
     import pexpect as expect
 from enthought.traits.api import ListStr, Str, Event, Property, Bool

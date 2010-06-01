@@ -40,7 +40,7 @@ INSTALL_REQUIRES = [
 import sys
 if sys.platform.startswith('win'):
     INSTALL_REQUIRES += [
-#        'winpexpect>=1.3', #TODO doesn't work! 
+        'winpexpect>=1.3', #TODO doesn't work! 
 #        'wexpect==507', #TODO use 'http://sage.math.washington.edu/home/goreckc/sage/wexpect/wexpect.py' instead
     ]
 else: # assume POSIX
@@ -116,6 +116,7 @@ INCLUDES = [
     'vtk',
     'encodings',
     'tables',
+#    'pywintypes',
 ]
 
 
@@ -146,6 +147,7 @@ manifestVersion="1.0">
 </assembly>
 """
 
+import matplotlib
 import glob
 
 if sys.platform.startswith('darwin'):
@@ -198,10 +200,30 @@ if sys.platform.startswith('darwin'):
         ],
 )
 elif sys.platform.startswith('win'):
-#    try:
-#        import py2exe
-#    except ImportError, e:
-#        sys.stderr.write('%s\n' % e)
+    try:
+        import py2exe
+        
+        # http://markmail.org/thread/qkdwu7gbwrmop6so
+        
+        # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
+        import sys
+        import pywintypes
+        import pythoncom
+        import win32api
+        # if this doesn't work, try import modulefinder
+        import py2exe.mf as modulefinder
+        import win32com
+        for p in win32com.__path__[1:]:
+            modulefinder.AddPackagePath("win32com", p)
+        for extra in ["win32com.shell"]: #,"win32com.mapi"
+            __import__(extra)
+            m = sys.modules[extra]
+            for p in m.__path__[1:]:
+                modulefinder.AddPackagePath(extra, p)        
+                
+        
+    except ImportError, e:
+        sys.stderr.write('%s\n' % e)
     extra_options = dict(
         setup_requires=['py2exe'],
         windows=['bin/infobiotics-dashboard.pyw'],
@@ -216,9 +238,9 @@ elif sys.platform.startswith('win'):
 #        options={"py2exe" : {"includes" : ["sip", "PyQt4._qt"]}} # http://www.py2exe.org/index.cgi/Py2exeAndPyQt
         options=dict(
             py2exe=dict(
-                includes=INCLUDES + ['pywintypes'], #'includes': ['py2exe_includes'], # http://markmail.org/thread/qkdwu7gbwrmop6so
+                includes=INCLUDES,# + ['pywintypes'], #'includes': ['py2exe_includes'], # http://markmail.org/thread/qkdwu7gbwrmop6so
                 unbuffered=True,
-                optimize=2,
+#                optimize=2,
                 excludes=[
                     'Tkinter', 
                     'Tkconstants', 
@@ -227,22 +249,26 @@ elif sys.platform.startswith('win'):
                     'numpy.f2py',
                     'wx',
                 ],
-                dll_excludes=[ "mswsock.dll", "powrprof.dll" ], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
-                packages=["win32api"],
+                
+                # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
+                dll_excludes=[ "mswsock.dll", "powrprof.dll" ],
+                packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
+                
                 skip_archive=True,
-                bundle_files=2,
+ #               bundle_files=2,
             )
         ),
 #        dependency_links=[
 #            'http://sage.math.washington.edu/home/goreckc/sage/wexpect/wexpect.py#egg=wexpect-507',
 #        ],
-        data_files=[
+        data_files=[        
 #            ("images", glob.glob("images/*.png")), #TODO
             ("enthought/pyface/images", glob.glob("C:\/Python26/Lib/site-packages/enthought/pyface/images/*.png")), #TODO
             ('enthought/mayavi/preferences', ['C:\/Python26/Lib/site-packages/enthought/mayavi/preferences/preferences.ini']),
             ('enthought/tvtk/plugins/scene', ['C:\/Python26/Lib/site-packages/enthought/tvtk/plugins/scene/preferences.ini']),
             ('enthought/mayavi/core/lut', ['C:\/Python26/Lib/site-packages/enthought/mayavi/core/lut/pylab_luts.pkl']),
-        ],
+            ('enthought/envisage/ui/workbench', ['C:\/Python26/Lib/site-packages/enthought/envisage/ui/workbench/preferences.ini']),
+        ] + matplotlib.get_py2exe_datafiles(), # http://www.py2exe.org/index.cgi/MatPlotLib
     )
 else: # assume 'linux2'
     extra_options = dict(

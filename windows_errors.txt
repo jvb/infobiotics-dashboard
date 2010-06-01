@@ -1,0 +1,176 @@
+The following modules appear to be missing
+['AppKit', 'DLFCN', 'ExtensionClass', 'Foundation', 'IronPython.Runtime.Exceptio
+ns', 'IronPythonConsole', 'Numeric', 'PyObjCTools', 'System', 'System.Windows.Fo
+rms.Clipboard', '_conditions_pro', '_curses', '_imaging_gif', '_imagingagg', '_s
+cproxy', '_tkagg', '_transforms', '_wxagg', 'builtins', 'cairo', 'cairo.gtk', 'c
+lr', 'config', 'core.abs', 'core.max', 'core.min', 'core.round', 'dl', 'dnd_edit
+or', 'fltk', 'gobject', 'gtk', 'gtk.glade', 'hexdump', 'ipy_completers', 'ipy_sy
+stem_conf', 'jinja2.debugrenderer', 'lib.add_newdoc', 'libvtkCommonPython', 'lib
+vtkFilteringPython', 'libvtkGenericFilteringPython', 'libvtkGeovisPython', 'libv
+tkGraphicsPython', 'libvtkHybridPython', 'libvtkIOPython', 'libvtkImagingPython'
+, 'libvtkInfovisPython', 'libvtkParallelPython', 'libvtkRenderingPython', 'libvt
+kViewsPython', 'libvtkVolumeRenderingPython', 'libvtkWidgetsPython', 'matplotlib
+.backends._backend_gdk', 'matplotlib.backends._gtkagg', 'matplotlib.backends._ma
+cosx', 'mcss_experiment', 'mlab.amax', 'mlab.amin', 'modes.editingmodes', 'mpl_t
+oolkits.natgrid', 'numarray', 'numarray.generic', 'numarray.records', 'numarray.
+strings', 'numpy.dft.old', 'numpy.lib.mlab', 'numpy.linalg.old', 'objc', 'opener
+s', 'ordered_set_editor', 'pango', 'plot_editor', 'pretty', 'projections.get_pro
+jection_class', 'projections.get_projection_names', 'projections.projection_fact
+ory', 'pydb', 'pydb.fns', 'pyemf', 'pygments.formatters.HtmlFormatter', 'pygment
+s.formatters.LatexFormatter', 'pygments.formatters.TerminalFormatter', 'pygments
+.lexers.CLexer', 'pygments.lexers.PythonConsoleLexer', 'pygments.lexers.PythonLe
+xer', 'pygments.lexers.RstLexer', 'pygments.lexers.TextLexer', 'pytz.zoneinfo',
+'qt', 'resource', 'shell_editor', 'simplejson', 'site_mayavi', 'sitecustomize',
+'startup', 'tables._parameters_pro', 'tables._table_pro', 'tables.index', 'table
+s.lrucacheExtension', 'testing.Tester', 'tvtk_classes', 'tvtk_classes.vtk_versio
+n', 'tvtk_local', 'ui_wizard', 'user_mayavi', 'usercustomize', 'value_editor', '
+wx.aui', 'wx.grid', 'wx.html', 'wx.lib.scrolledpanel', 'wx.py', 'wx.wizard', 'wx
+Python', 'numpy.Complex', 'numpy.Complex32', 'numpy.Complex64', 'numpy.Float', '
+numpy.Float32', 'numpy.Float64', 'numpy.Int', 'numpy.Int16', 'numpy.Int32', 'num
+py.Int8', 'numpy.UInt16', 'numpy.UInt32', 'numpy.UInt8', 'numpy.absolute', 'nump
+y.arccos', 'numpy.arccosh', 'numpy.arcsin', 'numpy.arcsinh', 'numpy.arctan', 'nu
+mpy.arctanh', 'numpy.bitwise_and', 'numpy.bitwise_or', 'numpy.bitwise_xor', 'num
+py.bool_', 'numpy.ceil', 'numpy.complexfloating', 'numpy.conjugate', 'numpy.core
+.absolute', 'numpy.core.add', 'numpy.core.bitwise_and', 'numpy.core.bitwise_or',
+ 'numpy.core.bitwise_xor', 'numpy.core.cdouble', 'numpy.core.complexfloating', '
+numpy.core.conjugate', 'numpy.core.csingle', 'numpy.core.divide', 'numpy.core.do
+uble', 'numpy.core.equal', 'numpy.core.float64', 'numpy.core.float_', 'numpy.cor
+e.greater', 'numpy.core.greater_equal', 'numpy.core.inexact', 'numpy.core.intc',
+ 'numpy.core.integer', 'numpy.core.invert', 'numpy.core.isfinite', 'numpy.core.i
+sinf', 'numpy.core.isnan', 'numpy.core.left_shift', 'numpy.core.less', 'numpy.co
+re.less_equal', 'numpy.core.ma', 'numpy.core.maximum', 'numpy.core.multiply', 'n
+umpy.core.not_equal', 'numpy.core.number', 'numpy.core.power', 'numpy.core.remai
+nder', 'numpy.core.right_shift', 'numpy.core.signbit', 'numpy.core.sin', 'numpy.
+core.single', 'numpy.core.sqrt', 'numpy.core.subtract', 'numpy.cosh', 'numpy.div
+ide', 'numpy.fabs', 'numpy.floating', 'numpy.floor', 'numpy.floor_divide', 'nump
+y.fmod', 'numpy.greater', 'numpy.hypot', 'numpy.invert', 'numpy.isinf', 'numpy.l
+eft_shift', 'numpy.less', 'numpy.log', 'numpy.logical_and', 'numpy.logical_not',
+ 'numpy.logical_or', 'numpy.logical_xor', 'numpy.maximum', 'numpy.minimum', 'num
+py.negative', 'numpy.not_equal', 'numpy.power', 'numpy.random.rand', 'numpy.rand
+om.randn', 'numpy.remainder', 'numpy.right_shift', 'numpy.sign', 'numpy.sinh', '
+numpy.tan', 'numpy.tanh', 'numpy.true_divide', 'vtk.vtkVersion']
+
+*** binary dependencies ***
+Your executable(s) also depend on these dlls which are not included,
+you may or may not need to distribute them.
+
+Make sure you have the license if you distribute any of them, and
+make sure you don't distribute files belonging to the operating system.
+
+   OLEAUT32.dll - C:\Windows\system32\OLEAUT32.dll
+   USER32.dll - C:\Windows\system32\USER32.dll
+   IMM32.dll - C:\Windows\system32\IMM32.dll
+   WINMM.dll - C:\Windows\system32\WINMM.dll
+   MSVCP90.dll - C:\Python26\DLLs\MSVCP90.dll
+   ADVAPI32.dll - C:\Windows\system32\ADVAPI32.dll
+   msvcrt.dll - C:\Windows\system32\msvcrt.dll
+   WS2_32.dll - C:\Windows\system32\WS2_32.dll
+   GDI32.dll - C:\Windows\system32\GDI32.dll
+   NETAPI32.dll - C:\Windows\system32\NETAPI32.dll
+   SHLWAPI.dll - C:\Windows\system32\SHLWAPI.dll
+   KERNEL32.dll - C:\Windows\system32\KERNEL32.dll
+   mfc90.dll - C:\Python26\lib\site-packages\pythonwin\mfc90.dll
+   WSOCK32.dll - C:\Windows\system32\WSOCK32.dll
+   VERSION.dll - C:\Windows\system32\VERSION.dll
+   ole32.dll - C:\Windows\system32\ole32.dll
+   OPENGL32.dll - C:\Windows\system32\OPENGL32.dll
+   SHELL32.dll - C:\Windows\system32\SHELL32.dll
+   ntdll.dll - C:\Windows\system32\ntdll.dll
+   COMDLG32.dll - C:\Windows\system32\COMDLG32.dll
+   COMCTL32.dll - C:\Windows\system32\COMCTL32.dll
+   WINSPOOL.DRV - C:\Windows\system32\WINSPOOL.DRV
+C:\dashboard\dist\.\py2exe\build_exe.py:16: DeprecationWarning: the sets module
+is deprecated
+Traceback (most recent call last):
+  File "enthought\pyface\ui\qt4\action\action_item.pyc", line 131, in _qt4_on_tr
+iggered
+  File "enthought\traits\ui\qt4\ui_base.pyc", line 131, in perform
+  File "enthought\traits\ui\ui.pyc", line 699, in do_undoable
+  File "enthought\traits\ui\qt4\ui_base.pyc", line 136, in _perform
+  File "infobiotics\commons\traits\ui\helpful_controller.pyc", line 53, in actio
+n_method
+
+  File "infobiotics\commons\webbrowsing.pyc", line 5, in dedicated_window
+
+  File "infobiotics\thirdparty\which.pyc", line 248, in which
+
+infobiotics.thirdparty.which.WhichError: Could not find 'google-chrome' on the p
+ath.
+Traceback (most recent call last):
+  File "enthought\pyface\ui\qt4\action\action_item.pyc", line 131, in _qt4_on_tr
+iggered
+  File "enthought\traits\ui\qt4\ui_base.pyc", line 131, in perform
+  File "enthought\traits\ui\ui.pyc", line 699, in do_undoable
+  File "enthought\traits\ui\qt4\ui_base.pyc", line 136, in _perform
+  File "infobiotics\commons\traits\ui\helpful_controller.pyc", line 53, in actio
+n_method
+
+  File "infobiotics\commons\webbrowsing.pyc", line 5, in dedicated_window
+
+  File "infobiotics\thirdparty\which.pyc", line 248, in which
+
+infobiotics.thirdparty.which.WhichError: Could not find 'google-chrome' on the p
+ath.
+Traceback (most recent call last):
+  File "enthought\pyface\ui\qt4\action\action_item.pyc", line 299, in _qt4_on_tr
+iggered
+  File "enthought\pyface\workbench\action\action_controller.pyc", line 35, in pe
+rform
+  File "infobiotics\dashboard\plugins\pmodelchecker\actions.pyc", line 9, in per
+form
+  File "infobiotics\common\params.pyc", line 332, in edit
+
+  File "enthought\traits\ui\handler.pyc", line 445, in edit_traits
+  File "enthought\traits\ui\view.pyc", line 429, in ui
+  File "enthought\traits\ui\ui.pyc", line 218, in ui
+  File "enthought\traits\ui\qt4\toolkit.pyc", line 157, in ui_live
+  File "enthought\traits\ui\qt4\ui_live.pyc", line 39, in ui_live
+  File "enthought\traits\ui\qt4\ui_live.pyc", line 59, in _ui_dialog
+  File "enthought\traits\ui\qt4\ui_base.pyc", line 403, in display_ui
+  File "enthought\traits\ui\ui.pyc", line 413, in prepare_ui
+  File "infobiotics\pmodelchecker\prism\prism_params_handler.pyc", line 87, in i
+nit
+
+  File "infobiotics\pmodelchecker\pmodelchecker_params_handler.pyc", line 15, in
+ init
+
+  File "infobiotics\common\params_handler.pyc", line 85, in init
+
+  File "infobiotics\common\params_handler.pyc", line 99, in load_preferences
+
+NameError: global name 'TraitError' is not defined
+Traceback (most recent call last):
+  File "enthought\pyface\ui\qt4\action\action_item.pyc", line 299, in _qt4_on_tr
+iggered
+  File "enthought\pyface\workbench\action\action_controller.pyc", line 35, in pe
+rform
+  File "infobiotics\dashboard\plugins\pmodelchecker\actions.pyc", line 16, in pe
+rform
+  File "infobiotics\common\params.pyc", line 332, in edit
+
+  File "enthought\traits\ui\handler.pyc", line 445, in edit_traits
+  File "enthought\traits\ui\view.pyc", line 429, in ui
+  File "enthought\traits\ui\ui.pyc", line 218, in ui
+  File "enthought\traits\ui\qt4\toolkit.pyc", line 157, in ui_live
+  File "enthought\traits\ui\qt4\ui_live.pyc", line 39, in ui_live
+  File "enthought\traits\ui\qt4\ui_live.pyc", line 59, in _ui_dialog
+  File "enthought\traits\ui\qt4\ui_base.pyc", line 403, in display_ui
+  File "enthought\traits\ui\ui.pyc", line 413, in prepare_ui
+  File "infobiotics\pmodelchecker\pmodelchecker_params_handler.pyc", line 15, in
+ init
+
+  File "infobiotics\common\params_handler.pyc", line 85, in init
+
+  File "infobiotics\common\params_handler.pyc", line 99, in load_preferences
+
+NameError: global name 'TraitError' is not defined
+Exception in thread Thread-1:
+Traceback (most recent call last):
+  File "threading.pyc", line 525, in __bootstrap_inner
+  File "threading.pyc", line 477, in run
+  File "infobiotics\common\experiment.pyc", line 99, in _spawn
+  File "pexpect.pyc", line 429, in __init__
+  File "pexpect.pyc", line 527, in _spawn
+NameError: global name 'pty' is not defined
+
+cat: dist/pexpect_error.txt: No such file or directory
