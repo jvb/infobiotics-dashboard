@@ -82,6 +82,3 @@ def append(file):
 
 def update(file):
     return write(file, mode='r+')
-
-#from which import which # pip install which
-from infobiotics.thirdparty.which import which    

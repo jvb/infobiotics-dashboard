@@ -1,7 +1,9 @@
 import sys
 if sys.platform.startswith('win'):
-#    import infobiotics.thirdparty.wexpect as expect
-# ModuleFinder can't handle runtime changes to __path__, but win32com uses them
+
+    # for py2exe frozen executables:
+    
+    # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
     import pywintypes
     import pythoncom
     import win32api
@@ -19,8 +21,8 @@ if sys.platform.startswith('win'):
     except ImportError:
         # no build path setup, no worries.
         pass
+    
     import winpexpect as expect
-    print "don\'t forget about winpexpect.winspawn"
 else:
     import pexpect as expect
 from enthought.traits.api import ListStr, Str, Event, Property, Bool
@@ -96,7 +98,10 @@ class Experiment(Params):
 #            print self._params_program, self._params_file, self._params_program_kwargs, self._cwd
 
         # spawn process
-        self.child = expect.spawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
+        if sys.platform.startswith('win'):
+            self.child = expect.winspawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
+        else:    
+            self.child = expect.spawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
         # note that the expect module doesn't like list traits so we copy them using [:] 
 
         # useful for debugging
