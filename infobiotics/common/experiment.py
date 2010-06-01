@@ -22,12 +22,116 @@ if sys.platform.startswith('win'):
         # no build path setup, no worries.
         pass
     
-    import winpexpect as expect
+    import infobiotics.thirdparty.winpexpect as expect
 else:
-    import pexpect as expect
+#    import pexpect as expect
+    import infobiotics.thirdparty.pexpect as expect
 from enthought.traits.api import ListStr, Str, Event, Property, Bool
 from threading import Thread
 from infobiotics.common.api import Params, ParamsRelativeFile
+
+'''
+from which import which, WhichError
+import os
+import winpexpect as expect
+
+
+# mcss-specific
+
+_params_program = 'mcss'
+_params_file = 'module1.params'
+_params_program_kwargs = ['sho', 'runs=2', 'max_time=100']
+_cwd = os.getcwd()
+_output_pattern_list = [
+    '[0-9]+ [0-9]+', # 'time_in_run, run'
+]
+
+
+# Experiment
+
+_error_pattern_list = [
+#    '^I/O warning : failed to load external entity ".+"', # libxml++
+    "^[eE]rror: couldn't parse command line parameter .*$", 
+#    '^[eE]rror: unknown parameter .*', 
+#    '^[eE]rror: value .*', 
+#    '^[eE]rror[^:].+\nline [0-9]+: \([0-9]+ \[Error\]\) .*', # Fran & LibSBML 'error reading sbml input file\nline 1: (00002 [Error]) File unreadable.' 
+#    '^[eE]rror[^:].*', # Fran 'error ...'
+#    '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress' or 'error: value'
+#    '^.+: command not found', # bash
+]
+
+try:
+    command = which(_params_program)
+    print 'using', command
+except WhichError:
+    exit("Error: Cannot locate '%s' on environment PATH." % _params_program)    
+
+child = expect.winspawn(command, [_params_file] + _params_program_kwargs[:], cwd=_cwd)
+
+compiled_pattern_list = child.compile_pattern_list(_output_pattern_list + _error_pattern_list)
+        
+compiled_pattern_list.append(expect.EOF)
+eof_index = compiled_pattern_list.index(expect.EOF)
+
+compiled_pattern_list.append(expect.TIMEOUT)
+timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+
+patterns_matched = 0
+
+while True:
+
+    pattern_index = child.expect_list(compiled_pattern_list)
+    
+    if pattern_index == eof_index:
+        if patterns_matched == 0:
+            if child.before != '':
+                finished_without_output = True
+                print child.before
+        # process has finished, perhaps prematurely
+        break
+        
+    elif pattern_index == timeout_index:
+        timed_out = True
+        
+    else:
+        match = child.match.group() # only gets the *first* match for the line
+        
+        # McssExperiment
+        if pattern_index == 0: # '1 20.5'
+            time_in_run, run = match.split(' ')
+            print float(time_in_run), int(run)
+        # Experiment
+#        '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
+#        '^[eE]rror[^:].+\nline [0-9]+: \([0-9]+ \[Error\]\) .*', # Fran & LibSBML 'error reading sbml input file\nline 1: (00002 [Error]) File unreadable.' 
+#        '^[eE]rror[^:].*', # Fran 'error ...'
+#        '^.+: command not found', # bash
+#        '^I/O warning : failed to load external entity ".+"', # libxml++
+        #elif pattern_index == 1 + len(_output_pattern_list):
+        #    print match
+        #elif pattern_index == 2 + len(_output_pattern_list):
+        #    print match
+        #elif pattern_index == 3 + len(_output_pattern_list):
+        #    print match
+        #elif pattern_index == 4 + len(_output_pattern_list):
+        #    print match
+        #elif pattern_index == 5 + len(_output_pattern_list):
+        #    print match
+        elif len(_output_pattern_list) <= pattern_index < len(_output_pattern_list) + len(_error_pattern_list):
+            pass
+#            print 'child.match.string = ', child.match.string
+#            print 'child.match.re.pattern = ', child.match.re.pattern
+            print 'child.before =', child.before
+            print 'match = ', match
+            print 'child.after =', child.after
+            print
+
+
+        patterns_matched += 1
+
+print 'child.before =', child.before
+print 'child.after =', child.after
+#print patterns_matched
+'''
 
 class Experiment(Params):
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.

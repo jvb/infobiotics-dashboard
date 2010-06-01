@@ -23,7 +23,7 @@ class McssExperiment(McssParams, Experiment):
         if pattern_index == 0: # '1 20.5'
             time_in_run, run = match.split(' ')
             self.run = int(run)
-#            self.time_in_run = float(time_in_run) 
+            self.time_in_run = float(time_in_run) 
         else:
             super(McssExperiment, self).pattern_matched(pattern_index, match)
 
