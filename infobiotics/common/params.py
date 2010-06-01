@@ -7,7 +7,8 @@ from enthought.traits.ui.api import Controller
 from infobiotics.common.api import (
     ParamsRelativeFile, ParamsRelativeDirectory,
 )
-from infobiotics.commons.api import key_from_value, can_access, read, write, which, logging
+from infobiotics.commons.api import key_from_value, can_access, read, write, logging
+from infobiotics.thirdparty.which import which, WhichError
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 import os
 from xml import sax
@@ -43,7 +44,10 @@ class Params(HasTraits):
 #            print 'found', self._params_program_name, 'at', _params_program, 'in', helper.preferences.filename
             return _params_program
         except TraitError:
-            _params_program = which(self._params_program_name)
+            try:
+                _params_program = which(self._params_program_name)
+            except WhichError:
+                _params_program = None
             if _params_program is None:
                 # we can't find it so print error message and exit #FIXME what does this do in the interpreter? 
                 import sys

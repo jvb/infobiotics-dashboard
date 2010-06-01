@@ -7,7 +7,6 @@ from files import (
     path_join_overlapping, split_directories, 
     can_access, can_read, can_write, can_execute, 
     read, write, append, update,
-    which,
 )
 
 from lists import copy, unique
