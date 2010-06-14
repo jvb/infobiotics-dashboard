@@ -1,35 +1,16 @@
-import os; os.environ['ETS_TOOLKIT']='qt4'
-import time
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import Instance
 from enthought.traits.ui.qt4.editor import Editor
-#from PyQt4.QtCore import *
 from PyQt4.QtGui import (
-    QWidget, QVBoxLayout, QProgressBar, QHBoxLayout, QDialogButtonBox, QLabel, 
+    QWidget, QVBoxLayout, QProgressBar, QDialogButtonBox, QLabel, QGridLayout,  
 )
 from PyQt4.QtCore import SLOT, SIGNAL
+import time
 
 class SimpleEditor(Editor):
-    """
-    Show a progress bar with all the optional goodies
 
-    """
-    
-    progress_bar = Instance(QProgressBar)
-    
     def init(self, parent):
-#        title=self.factory.title
-#        message=self.factory.message
-#        min=self.factory.min
-#        max=self.factory.max
-#        can_cancel=self.factory.can_cancel
-#        show_time=self.factory.show_time
-#        show_percent=self.factory.show_percent
-
-#        message_trait?
-#        min_trait?
-#        max_trait?
-#        show_value_and_max? 
-
         self.control = self._create_control(parent)
         self.set_tooltip()
         self.reset()
@@ -37,52 +18,47 @@ class SimpleEditor(Editor):
     def _create_control(self, parent):
         layout = QVBoxLayout()
         
-        if len(self.factory.message) > 0:
-            label = QLabel(self.factory.message)
-            layout.addWidget(label)
+        if len(self.factory.title) > 0:
+            title = QLabel('<B>%s</B>' % self.factory.title)
+            layout.addWidget(title)
     
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setRange(self.factory.min, self.factory.max)
-        
-        if self.factory.can_cancel:
-            buttons = QDialogButtonBox()
-            buttons.addButton(u'Cancel', QDialogButtonBox.RejectRole)
-            buttons.connect(buttons, SIGNAL('rejected()'), self.cancelled)
-            layout2 = QHBoxLayout()
-            layout2.addWidget(self.progress_bar)
-            layout2.addWidget(buttons)
-            layout.addLayout(layout2)
-        else:
-            layout.addWidget(self.progress_bar)
+        if len(self.factory.message) > 0:
+            message = QLabel(self.factory.message)
+            layout.addWidget(message)
+    
+        self._progress_bar = QProgressBar()
+        self._progress_bar.setRange(self.factory.min, self.factory.max)
+        layout.addWidget(self._progress_bar)
         
         if self.factory.show_time:
-            self._elapsed_control = self._create_time_label(layout, "Elapsed time: ")
-            self._estimated_control = self._create_time_label(layout, "Estimated time: ")
-            self._remaining_control = self._create_time_label(layout, "Remaining time: ")
+            elapsed_label = QLabel('Elapsed time:')
+            estimated_label = QLabel('Estimated time:')
+            remaining_label = QLabel('Remaining time:')
+            self._elapsed_control = QLabel('unknown')
+            self._estimated_control = QLabel('unknown')
+            self._remaining_control = QLabel('unknown')
+            grid_layout = QGridLayout()
+            grid_layout.addWidget(elapsed_label, 0, 0)
+            grid_layout.addWidget(self._elapsed_control, 0, 1)
+            grid_layout.addWidget(estimated_label, 1, 0)
+            grid_layout.addWidget(self._estimated_control, 1, 1)
+            grid_layout.addWidget(remaining_label, 2, 0)
+            grid_layout.addWidget(self._remaining_control, 2, 1)
+            grid_layout.setColumnStretch(1, 1)
+            layout.addLayout(grid_layout)
         
         if self.factory.show_percent:
-#            self.progress_bar.setTextVisible()
-            self.progress_bar.setFormat('%p%')
+            self._progress_bar.setFormat('%p%')
         else:
-            self.progress_bar.setFormat('%v/%m')
-            self.progress_bar.setFormat('%p% (%v/%m)')
+            self._progress_bar.setFormat('%v/%m')
+#            self._progress_bar.setFormat('%p% (%v/%m)')
+
+#        if self.factory.hide_text:
+#            self._progress_bar.setTextVisible(False)
             
         widget = QWidget()
         widget.setLayout(layout)
         return widget
-
-    def cancelled(self):
-        print 'cancelled' #TODO accept a callable 'cancel' trait
-
-    def _create_time_label(self, layout, text):
-        dummy = QLabel(text)
-#        dummy.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
-        label = QLabel('unknown')
-        layout2 = QHBoxLayout()
-        layout2.addWidget(dummy)
-        layout2.addWidget(label)
-        layout.addLayout(layout2)
-        return label
 
     def _set_time_label(self, value, control):
         hours = value / 3600
@@ -95,7 +71,7 @@ class SimpleEditor(Editor):
         if self.factory.min <= self.value <= self.factory.max:
             if self.value == self.factory.min:
                 self.reset()
-            self.progress_bar.setValue(self.value)
+            self._progress_bar.setValue(self.value)
 
         if self.factory.show_time:
             if (self.factory.max != self.factory.min):
@@ -112,7 +88,7 @@ class SimpleEditor(Editor):
                 self._set_time_label(remaining, self._remaining_control)            
 
     def reset(self):
-        self.progress_bar.reset()
+        self._progress_bar.reset()
         self._start_time = time.time()
 
 
@@ -120,7 +96,7 @@ if __name__ == '__main__':
     
     import os; os.environ['ETS_TOOLKIT']='qt4'
     from enthought.traits.api import HasTraits, Int, Button
-    from enthought.traits.ui.api import ProgressEditor, View, Item
+    from enthought.traits.ui.api import ProgressEditor, View, Item, HGroup, Spring
     
     class Test(HasTraits):
         progress = Int
@@ -133,17 +109,24 @@ if __name__ == '__main__':
                 time.sleep(0.05)
         
         view = View(
-            Item('go', show_label=False),
             Item('progress', 
+                show_label=False,
                 editor=ProgressEditor(
-                    can_cancel=True,
+                    title='title',
                     message='message',
                     show_percent = True,
                     show_time = True,
                     min=0,
                     max=100,
+                    can_cancel=True,
                 )
             ),
+            HGroup(
+                Spring(),
+                Item('go', show_label=False),
+            ),
+            resizable=True, 
         )
         
     Test().configure_traits()
+    
