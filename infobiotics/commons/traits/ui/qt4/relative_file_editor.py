@@ -128,6 +128,9 @@ class RelativeFileEditor(FileEditor): # EditorFactory
     def _get_simple_editor_class(self):
         return SimpleEditor
 
+    def _get_readonly_editor_class(self):
+        return SimpleTextEditor
+
     def _get_custom_editor_class(self):
         return SimpleEditor
     
