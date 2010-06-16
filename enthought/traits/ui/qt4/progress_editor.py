@@ -1,11 +1,9 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import Instance
 from enthought.traits.ui.qt4.editor import Editor
 from PyQt4.QtGui import (
-    QWidget, QVBoxLayout, QProgressBar, QDialogButtonBox, QLabel, QGridLayout,  
+    QWidget, QVBoxLayout, QProgressBar, QLabel, QGridLayout,  
 )
-from PyQt4.QtCore import SLOT, SIGNAL
 import time
 
 class SimpleEditor(Editor):
@@ -94,7 +92,6 @@ class SimpleEditor(Editor):
 
 if __name__ == '__main__':
     
-    import os; os.environ['ETS_TOOLKIT']='qt4'
     from enthought.traits.api import HasTraits, Int, Button
     from enthought.traits.ui.api import ProgressEditor, View, Item, HGroup, Spring
     

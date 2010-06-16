@@ -1,13 +1,13 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import Instance, Callable, Int, Unicode, Bool, Str, on_trait_change
+from enthought.traits.api import Callable, Int, Unicode, Bool, Str, on_trait_change
 from enthought.traits.ui.qt4.editor import Editor
 from enthought.traits.ui.api import BasicEditorFactory
 from PyQt4.QtGui import (
     QWidget, QVBoxLayout, QProgressBar, QDialogButtonBox, QLabel, QGridLayout,
-    QTextEdit,   
+#    QTextEdit, 
 )
-from PyQt4.QtCore import SLOT, SIGNAL
+from PyQt4.QtCore import SIGNAL
 import time
 
 class _CancellableProgressEditor(Editor):
@@ -38,6 +38,7 @@ class _CancellableProgressEditor(Editor):
     def change_range(self):
         if self._progress_bar is not None:
             self._progress_bar.setRange(self.min, self.max)
+            self.update_editor()
     
     def init(self, parent):
 
@@ -204,7 +205,7 @@ if __name__ == '__main__':
     import os; os.environ['ETS_TOOLKIT']='qt4'
     from enthought.traits.api import HasTraits, Int, Button
     from enthought.traits.ui.api import View, Item, HGroup, Spring
-    from enthought.traits.ui.qt4.cancellable_progress_editor import CancellableProgressEditor
+#    from infobiotics.commons.traits.ui.qt4.cancellable_progress_editor import CancellableProgressEditor
     
     def cancel():
         print 'cancelled'
