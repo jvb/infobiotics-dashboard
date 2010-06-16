@@ -2,13 +2,27 @@ from infobiotics.common.api import Params, ParamsRelativeFile
 from enthought.traits.api import Enum, Bool, Range, Long
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 
+from infobiotics.common.api import ParamsPreferencesHelper, ParamsPreferencesPage
+
+PREFERENCES_PATH = 'mcss'
+
+class McssParamsPreferencesHelper(ParamsPreferencesHelper):
+    preferences_path = PREFERENCES_PATH 
+
+class McssParamsPreferencesPage(ParamsPreferencesPage):
+    preferences_path = PREFERENCES_PATH
+    name = PREFERENCES_PATH
+
+
 class McssParams(Params):
+
+#    preferences_path = PREFERENCES_PATH
 
     def _handler_default(self):
         from infobiotics.mcss.api import McssParamsHandler
         return McssParamsHandler(model=self)
 
-    _params_program_name = 'mcss'
+    executable_name = 'mcss'
     
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'

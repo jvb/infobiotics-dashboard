@@ -59,25 +59,28 @@ file_menu = Menu(
 
 toolbar = ToolBar(load_action, save_action)
 
-_params_program_group = HGroup(
-    Item('_params_program', 
+executable_group = HGroup(
+    Item('executable', 
         label='Program',
         visible_when='"Dashboard" not in handler.__class__.__name__', 
     ),
+    visible_when='object.__class__.__name__ not in ("McssParams", "POptimizerParams")', # only needed for PRISMParams (and MC2Params? TODO)
 ) 
 
-_cwd_group = HGroup(
-    Item('_cwd', 
+directory_group = HGroup(
+    Item('directory', 
         label='Current working directory', 
         tooltip='Relative paths will be resolved to this directory.',
     ),
 )
 
 class ParamsView(View): # can be used to edit parameters without performing the experiment (why would you want to do that?)
+    
     buttons = shared_actions + params_actions
+    
     resizable = True
 
-#    toolbar=toolbar
+    toolbar = toolbar
 
     statusbar = [ 
         StatusItem(
@@ -89,11 +92,8 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     def set_content(self, *values):
         values = [
             VGroup(
-                _params_program_group, #TODO could move _params_program_group 
-                                       #to ExperimentView but for PModelChecker 
-                                       #running itself to create 
-                                       # modelParameters.xml and PRISM_model                
-                _cwd_group,
+                executable_group, #TODO could move executable_group to ExperimentView but for PModelChecker running itself to create modelParameters.xml and PRISM_model
+                directory_group,
 #                '_',
                 values,
                 show_border=True,
@@ -103,5 +103,6 @@ class ParamsView(View): # can be used to edit parameters without performing the 
         
     
 class ExperimentView(ParamsView):
+    
     buttons = shared_actions + experiment_actions
         

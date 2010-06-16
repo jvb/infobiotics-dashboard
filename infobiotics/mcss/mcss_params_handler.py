@@ -5,9 +5,15 @@ import os.path
 from infobiotics.commons.api import can_access
 from infobiotics.common.api import ParamsHandler, ParamsView
 from mcss_params_group import mcss_params_group
+from preferences import McssParamsPreferencesPage
 
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
+
+
+    def _preferences_page_default(self):
+        return McssParamsPreferencesPage()
+
 
     def _params_group_default(self):
         return mcss_params_group

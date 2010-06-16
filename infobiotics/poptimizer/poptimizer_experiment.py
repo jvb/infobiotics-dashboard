@@ -78,7 +78,7 @@ class POptimizerExperiment(Experiment):
     generations = Constant(10) #TODO remove, get 'maxgeno' from 'parameters' instead
     overall_progress = Property(Range(0.0, 100.0), depends_on='parameter_optimization_subtotal, current_generation')
     
-    params_program = 'poptimizer'
+#    executable_name = 'poptimizer'
 #    pattern_list = [
 #        'initialization',
 #        'parameter optimization [0-9]+/[0-9]+',

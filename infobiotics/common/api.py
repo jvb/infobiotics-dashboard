@@ -76,3 +76,5 @@ from params import Params
 from experiment import Experiment
 from experiment_progress_handler import ExperimentProgressHandler
 from experiment_handler import ExperimentHandler
+
+from preferences import ParamsPreferencesHelper, ParamsPreferencesPage

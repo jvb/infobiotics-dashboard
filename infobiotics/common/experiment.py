@@ -38,9 +38,9 @@ import winpexpect as expect
 
 # mcss-specific
 
-_params_program = 'mcss'
+executable = 'mcss'
 _params_file = 'module1.params'
-_params_program_kwargs = ['sho', 'runs=2', 'max_time=100']
+executable_kwargs = ['sho', 'runs=2', 'max_time=100']
 _cwd = os.getcwd()
 _output_pattern_list = [
     '[0-9]+ [0-9]+', # 'time_in_run, run'
@@ -61,12 +61,12 @@ _error_pattern_list = [
 ]
 
 try:
-    command = which(_params_program)
+    command = which(executable)
     print 'using', command
 except WhichError:
-    exit("Error: Cannot locate '%s' on environment PATH." % _params_program)    
+    exit("Error: Cannot locate '%s' on environment PATH." % executable)    
 
-child = expect.winspawn(command, [_params_file] + _params_program_kwargs[:], cwd=_cwd)
+child = expect.winspawn(command, [_params_file] + executable_kwargs[:], cwd=_cwd)
 
 compiled_pattern_list = child.compile_pattern_list(_output_pattern_list + _error_pattern_list)
         
@@ -156,7 +156,7 @@ class Experiment(Params):
 #    the Experiment superclass.    
 #    
 #    '''
-    _params_program_kwargs = ListStr
+    executable_kwargs = ListStr
     _output_pattern_list = ListStr
     _error_pattern_list = ListStr([
         '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
@@ -193,19 +193,19 @@ class Experiment(Params):
         '''
         self.starting = True
 
-        #FIXME are these still relevant now that _params_program is found in preferences or PATH?
-        if self._params_program == '':
-            print "warning self._params_program == ''"
+        #FIXME are these still relevant now that executable is found in preferences or PATH?
+        if self.executable == '':
+            print "warning self.executable == ''"
         if self._params_file == '':
             print "warning self._params_file == ''"
 
-#            print self._params_program, self._params_file, self._params_program_kwargs, self._cwd
+#            print self.executable, self._params_file, self.executable_kwargs, self._cwd
 
         # spawn process
         if sys.platform.startswith('win'):
-            self.child = expect.winspawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
+            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self._cwd) # _cwd defined in Params
         else:    
-            self.child = expect.spawn(self._params_program, [self._params_file] + self._params_program_kwargs[:], cwd=self._cwd) # _cwd defined in Params
+            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self._cwd) # _cwd defined in Params
         # note that the expect module doesn't like list traits so we copy them using [:] 
 
         # useful for debugging

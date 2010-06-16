@@ -8,7 +8,7 @@ class POptimizerParams(Params):
         from infobiotics.poptimizer.api import POptimizerParamsHandler
         return POptimizerParamsHandler(model=self)
         
-    _params_program_name = 'poptimizer'
+    executable_name = 'poptimizer'
     
     _parameters_name = 'poptimizer'
     _parameter_set_name = 'poptimizer'

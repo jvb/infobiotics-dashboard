@@ -1,4 +1,5 @@
 from infobiotics.common.api import ParamsView, MenuBar, file_menu
+from enthought.traits.ui.api import Menu, Action
 from infobiotics.commons.api import can_read, mkdir_p
 import os
 from enthought.traits.api import (
@@ -7,8 +8,10 @@ from enthought.traits.api import (
 from enthought.pyface.api import FileDialog, OK
 from enthought.traits.ui.api import View, Item, Group
 from infobiotics.commons.traits.ui.api import HelpfulController
-from infobiotics.common.params_preferences_helper import ParamsPreferencesHelper
-from enthought.preferences.api import get_default_preferences
+#from infobiotics.common.params_preferences_helper import ParamsPreferencesHelper
+#from enthought.preferences.api import get_default_preferences #TODO
+from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
+
 
 #from enthought.traits.ui.fixed_file_dialog import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
@@ -34,6 +37,16 @@ from enthought.preferences.api import get_default_preferences
 #        Item('copy', label='Copy required files with relative paths to new directory?', enabled_when='object.copy_enabled'),
 #    )
 
+tools_menu = Menu(
+    Action(
+        name='&Preferences', 
+        action='edit_preferences', 
+        tooltip='TODO',
+        enabled_when='len(controller._preferences_pages) > 0', # 
+    ),
+    name='&Tools'
+)
+
 class ParamsHandler(HelpfulController):
     
     def traits_view(self):
@@ -43,9 +56,11 @@ class ParamsHandler(HelpfulController):
         help_menu = self.get_help_menu() # see HelpfulController
         menubar = MenuBar(
             file_menu,
+            tools_menu,
             help_menu,
         ) if help_menu is not None else MenuBar(
             file_menu,
+            tools_menu,
         ) 
         return ViewClass(
             self.params_group,
@@ -68,12 +83,12 @@ class ParamsHandler(HelpfulController):
             dirname, basename = os.path.split(path)
             dirname = os.path.relpath(dirname, self.model._cwd)
             if dirname == '.':
-                return '%s %s' % (self.model._params_program_name, basename)
+                return '%s %s' % (self.model.executable_name, basename)
             else:
-                return '%s %s (%s)' % (self.model._params_program_name, basename, dirname)
+                return '%s %s (%s)' % (self.model.executable_name, basename, dirname)
             return 
         else:
-            return self.model._params_program_name
+            return self.model.executable_name
 
     def _title_changed(self, title):
         if self.info is not None and self.info.initialized:
@@ -81,37 +96,65 @@ class ParamsHandler(HelpfulController):
                 self.info.ui.title = title
 #            else:
 #                print self.__class__.__name__
+
+
+
+    preferences_page = Instance(PreferencesPage)
+    def _preferences_page_default(self):
+        raise NotImplementedError('e.g. return McssParamsPreferencesPage')
+    
+    preferences_pages = List(PreferencesPage)
+    def _preferences_pages_default(self):
+        ''' Subclasses of ParamsHandler should override this method if more than one PreferencesPage is used. '''
+        return [self.preferences_page]
+    
+    _preferences_pages = Property(depends_on='preferences_pages', desc='filters instances of None from preferences_pages for enabled_when in Preferences Action')
+    def _get__preferences_pages(self):
+        return [page for page in self.preferences_pages if page is not None]
+    
+    def edit_preferences(self, info):
+        preferences_manager = PreferencesManager(pages=self._preferences_pages) # must pass in pages manually 
+        ui = preferences_manager.edit_traits(kind='modal') # should edit preferencs modally
+        if ui.result: # only save preferences if OK pressed
+            for page in self.preferences_pages: # save preferences for each page as they could have different preferences nodes (files)
+                page.preferences.save() # must save preferences manually
+
+
+
+    status = Str
             
     def init(self, info):
+#        self.status = "Please ensure the current working directory is correct."
         info.ui.title = self.title
-        self.load_preferences()
-        self.status = "Please ensure the current working directory is correct."
-
-    def load_preferences(self):
-        helper = ParamsPreferencesHelper(
-            preferences=get_default_preferences(),
-            preferences_path=self.model._preferences_path,
-        )
-#        print get_default_preferences().filename
-        # restoring self.model._cwd here, moved from Params._cwd_default
-        _cwd = helper._cwd
-        try:
-            helper._cwd = _cwd # ensure helper checks _cwd is a file that exists, etc., rather than model or _cwd's editor 
-            self.model._cwd = _cwd
-        except TraitError:
-            self.model._cwd = os.getcwd()
-
-    def save_preferences(self):
-        preferences = get_default_preferences()
-        preferences.set(self.model._preferences_path + '._cwd', self.model._cwd)
-        preferences.flush()
+#        self.load_preferences()
 
     def closed(self, info, is_ok): # must return True or else window is unscloseable!
         if is_ok:
-            self.save_preferences()
+            pass
+#            self.save_preferences()
         return True
 
-    status = Str
+#    def load_preferences(self):
+#        helper = ParamsPreferencesHelper(
+#            preferences=get_default_preferences(),
+#            preferences_path=self.model._preferences_path,
+#        )
+##        print get_default_preferences().filename
+#        # restoring self.model._cwd here, moved from Params._cwd_default
+#        _cwd = helper._cwd
+#        try:
+#            helper._cwd = _cwd # ensure helper checks _cwd is a file that exists, etc., rather than model or _cwd's editor 
+#            self.model._cwd = _cwd
+#        except TraitError:
+#            self.model._cwd = os.getcwd()
+#
+#    def save_preferences(self):
+#        preferences = get_default_preferences()
+#        preferences.set(self.model._preferences_path + '._cwd', self.model._cwd)
+#        preferences.flush()
+
+
+
 
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''

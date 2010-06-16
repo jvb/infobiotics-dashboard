@@ -71,7 +71,7 @@ try:
     import struct
     #import resource
     import types
-    #import pty
+    import pty
     #import tty
     #import termios
     #import fcntl

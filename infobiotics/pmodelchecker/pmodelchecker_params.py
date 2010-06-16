@@ -6,7 +6,7 @@ import os.path
 class PModelCheckerParams(Params):
     ''' Base class for PRISMParams and MC2Params. '''
 
-    _params_program_name = 'pmodelchecker'
+    executable_name = 'pmodelchecker'
     
     _parameters_name = 'pmodelchecker'
 
