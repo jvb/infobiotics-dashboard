@@ -24,7 +24,7 @@ class Params(HasTraits):
     _parameter_set_name = Str(Undefined, desc='the name attribute of the parameterSet tag in the params XML file')
 
     _params_program_name = Str
-    _params_program = RelativeFile(absolute=True, auto_set=True, executable=True, exists=True)
+    _params_program = RelativeFile(absolute=True, auto_set=True)#, executable=True, exists=True)
     #TODO move to Experiment?
 
     _preferences_path = Property(depends_on='_params_program_name')

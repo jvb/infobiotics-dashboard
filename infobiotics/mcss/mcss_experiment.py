@@ -29,4 +29,4 @@ class McssExperiment(McssParams, Experiment):
 
 
 if __name__ == '__main__':
-    McssExperiment('test/models/module1.params').configure()
+    McssExperiment().configure()
