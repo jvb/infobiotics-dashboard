@@ -52,25 +52,25 @@ class PModelCheckerParams(Params):
         if os.path.isfile(self.model_specification):
             self.translate_model_specification() # must be reimplemented in subclasses
 
-    def translate_model_specification(self, dir, model_specification, PRISM_model=''):
+    def translate_model_specification(self, directory, model_specification, PRISM_model=''):
         ''' Performs an experiment with task='Translate' to generate the 
         PRISM model and modelParameters.xml from LPP model specification. '''
         import tempfile
         if PRISM_model == '':
-            PRISM_model_temp_file = tempfile.NamedTemporaryFile(dir=dir)
+            PRISM_model_temp_file = tempfile.NamedTemporaryFile(dir=directory)
             PRISM_model = PRISM_model_temp_file.name
             
         from prism.api import PRISMExperiment
-        translate_experiment = PRISMExperiment(_cwd=dir)
+        translate_experiment = PRISMExperiment(directory=directory)
         translate_experiment.trait_setq(model_specification=model_specification, PRISM_model=PRISM_model, task='Translate')
         
-        params_temp_file = tempfile.NamedTemporaryFile(dir=dir) 
+        params_temp_file = tempfile.NamedTemporaryFile(dir=directory) 
         params_temp_file_name = params_temp_file.name
         translate_experiment.save(params_temp_file_name)
         translate_experiment.perform()
     
     #    import os.path
-    #    if not os.path.exists(os.path.abspath(os.path.join(translate_experiment._cwd, translate_experiment.PRISM_model))):
+    #    if not os.path.exists(os.path.abspath(os.path.join(translate_experiment.directory, translate_experiment.PRISM_model))):
     #        del temp_file
     #        raise Exception('%s was not created.' % self.PRISM_model)
 

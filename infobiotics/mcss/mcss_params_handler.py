@@ -1,24 +1,19 @@
-from enthought.traits.api import (
-    Trait, Bool, Property, 
-)
-import os.path
-from infobiotics.commons.api import can_access
-from infobiotics.common.api import ParamsHandler, ParamsView
+import infobiotics # set up TraitsUI backend before traits imports
+from enthought.traits.api import Trait
+from infobiotics.common.api import ParamsHandler
 from mcss_params_group import mcss_params_group
-from preferences import McssParamsPreferencesPage
+from mcss_preferences import McssParamsPreferencesPage
+import os.path
 
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
 
-
-    def _preferences_page_default(self):
-        return McssParamsPreferencesPage()
-
-
+    preferences_page = McssParamsPreferencesPage() 
+    
     def _params_group_default(self):
         return mcss_params_group
     
-    id = 'McssParamsHandler'
+    id = 'McssParamsHandler' #TODO is this used save the window position, possibly via View(id=...)?
     
     help_urls = [
         ('Documentation','http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'),

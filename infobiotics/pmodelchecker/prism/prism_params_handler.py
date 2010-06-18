@@ -26,7 +26,7 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     _prism_model_str = Str
 
     def object_PRISM_model_changed(self, info):
-        file = os.path.abspath(os.path.join(info.object._cwd, info.object.PRISM_model)) #TODO use shadow trait for abspath
+        file = os.path.abspath(os.path.join(info.object.directory, info.object.PRISM_model)) #TODO use shadow trait for abspath
         if os.path.exists(file) and not os.path.isdir(file): 
             try:
                 with read(file) as f:

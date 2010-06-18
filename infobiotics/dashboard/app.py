@@ -1,6 +1,6 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-ETSConfig.company = 'infobiotics'
+#ETSConfig.company = 'infobiotics'
 
 from enthought.envisage.ui.workbench.api import WorkbenchApplication
 from enthought.pyface.api import AboutDialog, ImageResource, SplashScreen

@@ -41,7 +41,7 @@ import winpexpect as expect
 executable = 'mcss'
 _params_file = 'module1.params'
 executable_kwargs = ['sho', 'runs=2', 'max_time=100']
-_cwd = os.getcwd()
+directory = os.getcwd()
 _output_pattern_list = [
     '[0-9]+ [0-9]+', # 'time_in_run, run'
 ]
@@ -66,7 +66,7 @@ try:
 except WhichError:
     exit("Error: Cannot locate '%s' on environment PATH." % executable)    
 
-child = expect.winspawn(command, [_params_file] + executable_kwargs[:], cwd=_cwd)
+child = expect.winspawn(command, [_params_file] + executable_kwargs[:], cwd=directory)
 
 compiled_pattern_list = child.compile_pattern_list(_output_pattern_list + _error_pattern_list)
         
@@ -199,13 +199,13 @@ class Experiment(Params):
         if self._params_file == '':
             print "warning self._params_file == ''"
 
-#            print self.executable, self._params_file, self.executable_kwargs, self._cwd
+#            print self.executable, self._params_file, self.executable_kwargs, self.directory
 
         # spawn process
         if sys.platform.startswith('win'):
-            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self._cwd) # _cwd defined in Params
+            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
         else:    
-            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self._cwd) # _cwd defined in Params
+            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
         # note that the expect module doesn't like list traits so we copy them using [:] 
 
         # useful for debugging
@@ -251,6 +251,20 @@ class Experiment(Params):
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
+        import os
+        if not os.path.isfile(self.executable):
+            if self._interactive:
+                #TODO message box explaining that executable does not exist or is not executable and that another should be specified using the preferences dialog
+                while True:
+                    if not self.handler.edit_preferences(): # self.executable will be updated if True returned
+                        return False
+                    elif os.path.isfile(self.executable):
+                        break
+            else:
+                import sys
+                sys.stderr.write("'%s' does not exist. Please specify an alternative %s executable either by using McssExperiment(executable=/full/path/to/executable, ...) or by editing the 'executable' entry in section [%s] of the preferences file '%s'.\n" % (self.executable, self.executable_name, self.executable_name, self.preferences_helper.preferences.filename))
+                return False
+                    
         if thread:
             Thread(target=self._spawn).start()
         else:

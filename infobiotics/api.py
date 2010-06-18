@@ -1,6 +1,4 @@
-from enthought.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'qt4'
-ETSConfig.company = 'infobiotics'
+from preferences import preferences
 
 from mcss.api import McssExperiment
 

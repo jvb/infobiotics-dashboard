@@ -170,7 +170,7 @@ class ModelParametersXMLReader(ContentHandler):
 
 
 class ModelParameters(HasTraits):
-    _cwd = RelativeDirectory
+    directory = RelativeDirectory
     modelVariables = List(ModelVariable) 
     ruleConstants = List(RuleConstant) 
     moleculeConstants = List(MoleculeConstant)
@@ -181,8 +181,8 @@ class ModelParameters(HasTraits):
     def _rewardConstant_changed(self):
         self.rewardConstants[self.rewardConstant_descriptions.index(self.rewardConstant)].value #TODO do something with this value
     
-    def __cwd_changed(self):
-        model_parameters_file = os.path.join(self._cwd, 'modelParameters.xml')
+    def _directory_changed(self):
+        model_parameters_file = os.path.join(self.directory, 'modelParameters.xml')
         try:
             with read(model_parameters_file) as f:
                 parser = sax.make_parser()
@@ -199,7 +199,7 @@ class ModelParameters(HasTraits):
                 self.rewardConstant_descriptions = [rewardConstant.description.replace('A', 'a') for rewardConstant in handler.rewardConstants]
                 self.rewardConstant = self.rewardConstant_descriptions[0]
         except IOError, e:
-#            print e, 'ModelParameters.__cwd_changed()'
+#            print e, 'ModelParameters._directory_changed()'
             pass
     
     all_model_parameters = Property(depends_on='ruleConstants, moleculeConstants') 

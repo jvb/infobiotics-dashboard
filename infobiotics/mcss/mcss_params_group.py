@@ -1,6 +1,4 @@
-from enthought.traits.ui.api import (
-    Group, VGroup, Item, HGroup, TextEditor,
-)
+from enthought.traits.ui.api import Group, VGroup, Item, HGroup, TextEditor
 
 mcss_params_group = Group(
     VGroup(

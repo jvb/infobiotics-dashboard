@@ -8,8 +8,6 @@ try:
 except:
     pass
 
-
-
 # For py2app / py2exe support
 try:
     import modulefinder

@@ -4,13 +4,19 @@ from enthought.preferences.ui.api import PreferencesPage
 from enthought.traits.ui.api import View, Group 
 
 # it is necessary to duplicate preference trait definitions in Helpers and Pages so the definitions are shared here
-EXECUTABLE_TRAIT = RelativeFile
-DIRECTORY_TRAIT = RelativeDirectory
+EXECUTABLE_TRAIT = RelativeFile(absolute=True, auto_set=True)
+DIRECTORY_TRAIT = RelativeDirectory(absolute=True, auto_set=True)
 
 # names of preferences traits must be public, i.e. not begin with '_'
 
 class ParamsPreferencesHelper(PreferencesHelper):
-
+    
+    def _preferences_default(self):
+        ''' Must override this method in PreferencesHelper or else it picks up 
+        the wrong preferences even after set_default_preferences()! '''
+        from infobiotics.preferences import preferences
+        return preferences
+    
     def _preferences_path(self):
         raise NotImplementedError('ParamsPreferencesHelper subclasses must provide a preferences_path, probably via a module-level constant such as PREFERENCES_PATH.')
     
@@ -19,6 +25,12 @@ class ParamsPreferencesHelper(PreferencesHelper):
 
 class ParamsPreferencesPage(PreferencesPage):
     
+    def _preferences_default(self):
+        ''' Must override this method in PreferencesHelper or else it picks up 
+        the wrong preferences even after set_default_preferences()! '''
+        from infobiotics.preferences import preferences
+        return preferences
+
     def _preferences_path_default(self):
         raise NotImplementedError('ParamsPreferencesPage subclasses must provide a preferences_path, probably via a module-level constant such as PREFERENCES_PATH.')
 
@@ -34,30 +46,22 @@ class ParamsPreferencesPage(PreferencesPage):
     view = View(
         Group(
             'executable',
+            'directory',
             show_border=True,
         ),        
     )
 
-#TODO use in Params
-#from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
-#from enthought.traits.api import HasTraits, Instance, List, Undefined
-#from enthought.preferences.api import bind_preference
-#from enthought.traits.ui.api import Controller, View, Group, Item, MenuBar, Menu, Action 
-#
-#class Params(HasTraits):
-#    executable = EXECUTABLE_TRAIT # must be public, i.e. does not begin with '_'
-#    
-#    def __init__(self, **traits):
-#        super(Params, self).__init__(**traits)
-#        bind_preference(self, 'executable', 'Params.executable') # uses global preferences via get_default_preferences()
-#    
-#    def save_default_preferences(self):
-#        helper = ParamsPreferencesHelper() # must use a PreferencesHelper and not a PreferencesPage
-#        helper.executable = 'example'
-#        helper.preferences.save()
-##        # equivalent to:
-##        from enthought.preferences.api import get_default_preferences
-##        preferences = get_default_preferences()
-##        preferences.set('Params.executable', 'example')
-##        preferences.save()
+
+if __name__ == '__main__':
+
+    PREFERENCES_PATH = 'mcss'
     
+    class McssParamsPreferencesHelper(ParamsPreferencesHelper):
+        preferences_path = PREFERENCES_PATH 
+    
+    class McssParamsPreferencesPage(ParamsPreferencesPage):
+        preferences_path = PREFERENCES_PATH
+        name = PREFERENCES_PATH
+
+    print McssParamsPreferencesHelper().executable
+    McssParamsPreferencesPage().configure_traits()

@@ -1,6 +1,6 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-ETSConfig.company = 'infobiotics'
+#ETSConfig.company = 'infobiotics'
 
 print 'loading plugins...',
 from enthought.envisage.core_plugin import CorePlugin

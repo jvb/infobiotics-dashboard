@@ -2,7 +2,7 @@ from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 
 class ParamsRelativeFile(RelativeFile):
     ''' Extends RelativeFile to provide default traits values for Params
-    subclasses particularly "directory_name='_cwd'" and 'auto_set=True'. '''
+    subclasses particularly "directory_name='directory'" and 'auto_set=True'. '''
     
     def __init__(self, 
         value='', 
@@ -12,7 +12,7 @@ class ParamsRelativeFile(RelativeFile):
         exists=False,
         exists_name='',
         directory='', 
-        directory_name='_cwd',
+        directory_name='directory',
         absolute=False,
         readable=None, 
         writable=None, 
@@ -36,7 +36,7 @@ class ParamsRelativeFile(RelativeFile):
 
 class ParamsRelativeDirectory(RelativeDirectory):
     ''' Extends RelativeDirectory to provide default traits values for Params
-    subclasses particularly "directory_name='_cwd'" and 'auto_set=True'. '''
+    subclasses particularly "directory_name='directory'" and 'auto_set=True'. '''
     
     def __init__(self, 
         value='', 
@@ -46,7 +46,7 @@ class ParamsRelativeDirectory(RelativeDirectory):
         exists=False,  
         exists_name='',
         directory='', 
-        directory_name='_cwd',
+        directory_name='directory',
         absolute=False,
         readable=None, 
         writable=None, 
@@ -77,4 +77,4 @@ from experiment import Experiment
 from experiment_progress_handler import ExperimentProgressHandler
 from experiment_handler import ExperimentHandler
 
-from preferences import ParamsPreferencesHelper, ParamsPreferencesPage
+from params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage

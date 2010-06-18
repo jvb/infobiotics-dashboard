@@ -2,16 +2,11 @@ from infobiotics.common.api import ParamsView, MenuBar, file_menu
 from enthought.traits.ui.api import Menu, Action
 from infobiotics.commons.api import can_read, mkdir_p
 import os
-from enthought.traits.api import (
-    Property, Str, List, Unicode, Bool, Instance, TraitError,
-)
+from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance, TraitError
 from enthought.pyface.api import FileDialog, OK
 from enthought.traits.ui.api import View, Item, Group
 from infobiotics.commons.traits.ui.api import HelpfulController
-#from infobiotics.common.params_preferences_helper import ParamsPreferencesHelper
-#from enthought.preferences.api import get_default_preferences #TODO
 from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
-
 
 #from enthought.traits.ui.fixed_file_dialog import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
@@ -75,13 +70,13 @@ class ParamsHandler(HelpfulController):
 
     id = Str(desc='the ID to use when preserving window size and position')
     
-    title = Property(Str, depends_on='model._params_file, model._cwd')
+    title = Property(Str, depends_on='model._params_file, model.directory')
 
     def _get_title(self):
         path = self.model._params_file
         if len(path) > 0:
             dirname, basename = os.path.split(path)
-            dirname = os.path.relpath(dirname, self.model._cwd)
+            dirname = os.path.relpath(dirname, self.model.directory)
             if dirname == '.':
                 return '%s %s' % (self.model.executable_name, basename)
             else:
@@ -96,7 +91,6 @@ class ParamsHandler(HelpfulController):
                 self.info.ui.title = title
 #            else:
 #                print self.__class__.__name__
-
 
 
     preferences_page = Instance(PreferencesPage)
@@ -114,11 +108,11 @@ class ParamsHandler(HelpfulController):
     
     def edit_preferences(self, info):
         preferences_manager = PreferencesManager(pages=self._preferences_pages) # must pass in pages manually 
-        ui = preferences_manager.edit_traits(kind='modal') # should edit preferencs modally
+        ui = preferences_manager.edit_traits(kind='modal') # should edit preferences modally
         if ui.result: # only save preferences if OK pressed
             for page in self.preferences_pages: # save preferences for each page as they could have different preferences nodes (files)
                 page.preferences.save() # must save preferences manually
-
+        return ui.result
 
 
     status = Str
@@ -126,35 +120,11 @@ class ParamsHandler(HelpfulController):
     def init(self, info):
 #        self.status = "Please ensure the current working directory is correct."
         info.ui.title = self.title
-#        self.load_preferences()
 
     def closed(self, info, is_ok): # must return True or else window is unscloseable!
         if is_ok:
-            pass
-#            self.save_preferences()
+            self.model.save_preferences()
         return True
-
-#    def load_preferences(self):
-#        helper = ParamsPreferencesHelper(
-#            preferences=get_default_preferences(),
-#            preferences_path=self.model._preferences_path,
-#        )
-##        print get_default_preferences().filename
-#        # restoring self.model._cwd here, moved from Params._cwd_default
-#        _cwd = helper._cwd
-#        try:
-#            helper._cwd = _cwd # ensure helper checks _cwd is a file that exists, etc., rather than model or _cwd's editor 
-#            self.model._cwd = _cwd
-#        except TraitError:
-#            self.model._cwd = os.getcwd()
-#
-#    def save_preferences(self):
-#        preferences = get_default_preferences()
-#        preferences.set(self.model._preferences_path + '._cwd', self.model._cwd)
-#        preferences.flush()
-
-
-
 
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
@@ -171,7 +141,7 @@ class ParamsHandler(HelpfulController):
             wildcard=self.wildcard, 
             title=title,
             default_filename = self.model._params_file,
-            default_directory = self.model._cwd_
+            default_directory = self.model.directory_ # note extra '_' in directory_, this means that it uses the shadow value of the trait 'directory' which is the full path
         )
         if fd.open() == OK:
             return fd.path
@@ -288,8 +258,4 @@ class ParamsHandler(HelpfulController):
 #            info.ui.title += '*'
 #        else:
 #            self.model._dirty = False
-    
-
-if __name__ == '__main__':
-    execfile('params.py')
     

@@ -13,9 +13,9 @@ class PModelCheckerParamsHandler(ParamsHandler):
     
     def init(self, info): #TODO object_model_specification_changed(self, info):
         super(PModelCheckerParamsHandler, self).init(info)
-        self._model_parameters = ModelParameters(_cwd=self.model._cwd)
+        self._model_parameters = ModelParameters(directory=self.model.directory)
         # must create _model_parameters here rather than __model_parmeters_default() 
-        # because DelegatesTo('_model_parameters') causes it to be created before _cwd.
+        # because DelegatesTo('_model_parameters') causes it to be created before directory.
 
     model_parameter_names = List(Unicode)
     

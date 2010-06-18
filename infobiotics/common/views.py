@@ -69,7 +69,6 @@ executable_group = HGroup(
 
 directory_group = HGroup(
     Item('directory', 
-        label='Current working directory', 
         tooltip='Relative paths will be resolved to this directory.',
     ),
 )

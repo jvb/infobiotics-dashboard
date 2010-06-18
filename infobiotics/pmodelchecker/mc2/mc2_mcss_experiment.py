@@ -29,7 +29,7 @@ class MC2McssExperiment(McssExperiment):
     
     _mc2_experiment = Any#Instance(MC2Params) # otherwise when MC2Params(): TraitError: The '_mc2_experiment' trait of a MC2McssExperiment instance must be a MC2Params or None, but a value of MC2Params(model_specification='', model_checker='MC2', temporal_formulas='', number_samples=10000, results_file='', simulations_generatedHDF5=False, simulations_file_hdf5='', simulations_generatedMC2=False, simulations_file_MC2='', mcss_params_file='') <class '__main__.MC2Params'> was specified.
     
-    _cwd = DelegatesTo('_mc2_experiment', prefix='_cwd', listenable=False)
+    directory = DelegatesTo('_mc2_experiment', prefix='directory', listenable=False)
     model_file = DelegatesTo('_mc2_experiment', prefix='model_specification')
     data_file = DelegatesTo('_mc2_experiment', prefix='simulations_file_hdf5')
     runs = DelegatesTo('_mc2_experiment', prefix='number_samples')

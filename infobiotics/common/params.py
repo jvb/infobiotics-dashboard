@@ -1,4 +1,6 @@
-from __future__ import with_statement
+from __future__ import with_statement # from __future__ imports must come first
+import infobiotics # set up TraitsUI backend before traits imports
+from infobiotics.common.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, EXECUTABLE_TRAIT, DIRECTORY_TRAIT
 from enthought.traits.api import (
     HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property,
 #    on_trait_change
@@ -8,41 +10,24 @@ from infobiotics.common.api import (
     ParamsRelativeFile, #ParamsRelativeDirectory,
 )
 from infobiotics.commons.api import key_from_value, can_access, read, write, logging
-#from infobiotics.thirdparty.which import which, WhichError
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 import os
 from xml import sax
 
 logger = logging.getLogger(level=logging.ERROR)
 
-#from enthought.preferences.api import get_default_preferences
-#from params_preferences_helper import ParamsPreferencesHelper 
-
 class Params(HasTraits): 
 
     _parameters_name = Str(Undefined, desc='the name attribute of the parameter tag in the params XML file')
     _parameter_set_name = Str(Undefined, desc='the name attribute of the parameterSet tag in the params XML file')
 
-    executable_name = Str
-    executable = RelativeFile(absolute=True, auto_set=True)#, executable=True, exists=True) #TODO name_trait='executable_name'
-
     _preferences_path = Property(depends_on='executable_name')
-    
     def _get__preferences_path(self):
-        return self.executable_name #TODO change to include subprograms i.e. pmodelchecker.mc2
-
+        return self.executable_name
+    executable_name = Str
+    executable = EXECUTABLE_TRAIT#(absolute=True, auto_set=True, executable=True, exists=True) #TODO name_trait='executable_name'
 #    def __params_program_default(self): #TODO get_preference(name, contigency_function)
-#        ''' Try to use a previously defined _params_program. '''
-#        # using a helper here means we can test whether the path in the preferences file actually exists and is executable, and do something else if it doesn't 
-#        helper = ParamsPreferencesHelper(
-##            preferences_path=self._preferences_path
-#        )
-#        _params_program = helper._params_program
-#        try:
-#            helper._params_program = _params_program # if _params_program does not exist it will raise the TraitError here, otherwise it would be raised after the method returns
-##            print 'found', self._params_program_name, 'at', _params_program, 'in', helper.preferences.filename
-#            return _params_program
-#        except TraitError:
+#            from infobiotics.thirdparty.which import which, WhichError
 #            try:
 #                _params_program = which(self._params_program_name)
 #            except WhichError:
@@ -60,71 +45,76 @@ class Params(HasTraits):
 #                    )
 #                )
 #                sys.exit(1)
-#            else:
-##                print 'found', self._params_program_name, 'at', _params_program
-#                preferences = get_default_preferences()
-#                preferences.set(self._preferences_path+'._params_program', _params_program) # if we set with self._params_program or call save_preferences here we get an infinite recursion!
-#                preferences.flush()
-#                return _params_program
-#
-##    @on_trait_change('_params_program') 
-#    def save_preferences(self):
-#        preferences = get_default_preferences()
-#        # write changed _params_program to the preferences file
-#        preferences.set(self._preferences_path + '._params_program', self._params_program)
-#        # _cwd is overwritten by its RelativeFileEditor so now loading it in handler.init() and saving it in handler.close() 
-#        preferences.flush()
-    
     directory = RelativeDirectory(absolute=True, exists=True, auto_set=True, desc='the location file names can be relative to.') # infinite recursion if ParamsRelativeDirectory because directory='directory'
-    
     def _directory_default(self):
-        # moved to  
-#        helper = ParamsPreferencesHelper(
-#            preferences_path=self.__get_preferences_path()
-#        )
-#        _cwd = helper._cwd
-#        try:
-#            helper._cwd = _cwd
-#            return _cwd
-#        except TraitError:
-#            return os.getcwd()
-        # for Params objects created in scripts it makes sense to use current directory 
-        #TODO check whether "p = McssParams(_cwd='/tmp'); print p._cwd" works now  
-        return os.getcwd()
+        directory = self.preferences_helper.directory
+        return directory if directory != '' else os.getcwd()  
 
     _params_file = ParamsRelativeFile(absolute=True, exists=True, readable=True, writable=True)
-
     def __params_file_changed(self, _params_file):
         self.directory = os.path.dirname(_params_file)
         self._dirty = False #TODO use dirty for prompting to save on perform
-        
     _dirty = Bool(False)
+
     _unresetable = List(Str)
     
     preferences = List(Str, ['executable','directory'], desc='a list of trait names to bind to preferences')
-#
-    def __init__(self, file=None, **traits):
-#    
-        self.load_preferences()
+
+    # interactive methods ---
         
+    _interactive = False
+
+    handler = Instance(Controller)
+    
+    def _handler_default(self):
+        '''
+        e.g.
+            from infobiotics.mcss.api import McssParamsHandler
+            return McssParamsHandler(model=self)
+        '''
+        raise NotImplementedError
+    
+    def configure(self, **args):
+        self._interactive = True
+        self.handler.configure_traits(**args)
+        
+    def edit(self, **args):
+        self._interactive = True
+        ui = self.handler.edit_traits(**args)
+
+    def __init__(self, file=None, **traits):
+        from infobiotics.preferences import preferences
+        print preferences.filename
+        preferences.dump()
+        self.bind_preferences()
+#        
         super(Params, self).__init__(**traits)
         self.on_trait_change(self.update_repr, self.parameter_names())
-        
+#
         if file is not None:
             self.load(file)
 
+    preferences_helper = Instance(ParamsPreferencesHelper)
+    def _preferences_helper(self):
+        raise NotImplementedError('Params subclasses must provide a ParamsPreferencesHelper instance for preferences_helper')
+            
     def bind_preferences(self):
         from enthought.preferences.api import bind_preference
-        for preference in self.preferences:
-            bind_preference(self, preference, '.'.join((self._preferences_path, preference)))
-            
-    def load_preferences(self):
-        self.bind_preferences()
+#        for preference in self.preferences:
+#            print '.'.join((self._preferences_path, preference))
+#            bind_preference(self, preference, '.'.join((self._preferences_path, preference)))
+        self.bound_preferences = [bind_preference(self, preference, '.'.join((self._preferences_path, preference))) for preference in self.preferences]
+        
+    def save_preferences(self):
+        ''' Called from self.handler.close() '''
+        print self.preferences_helper.directory
+        print self.directory
+#        self.preferences_helper.directory = self.directory
+#        self.preferences_helper.preferences.flush() 
+
         
     def load(self, file=''):
-        '''  
-        
-        Reads parameters file, 
+        ''' Reads parameters file, 
         resets traits,
         sets traits to new parameters,
         
@@ -325,33 +315,6 @@ class Params(HasTraits):
         self.repr = self.__repr__()
 
     
-    # interactive methods ---
-        
-    _interactive = False
-
-    handler = Instance(Controller)
-    
-    def _handler_default(self):
-        '''
-        e.g.
-            from infobiotics.mcss.api import McssParamsHandler
-            return McssParamsHandler(model=self)
-        '''
-        raise NotImplementedError
-    
-    def configure(self, **args):
-        self._interactive = True
-        print self.handler.configure_traits(**args)
-#        self.save_preferences()
-        
-    def edit(self, **args):
-        self._interactive = True
-        ui = self.handler.edit_traits(**args)
-        if ui.result:
-            pass
-#            self.save_preferences()
-
-
 from xml.sax import ContentHandler
 
 class ParamsXMLReader(ContentHandler):

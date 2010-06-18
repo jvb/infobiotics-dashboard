@@ -11,7 +11,7 @@ class MC2Params(PModelCheckerParams):
     model_checker = 'MC2'
 
     def translate_model_specification(self):
-        super(MC2Params, self).translate_model_specification(self._cwd, self.model_specification)
+        super(MC2Params, self).translate_model_specification(self.directory, self.model_specification)
     
     def parameter_names(self):
         ''' Returns the subset of PModelChecker parameter names required for a 
