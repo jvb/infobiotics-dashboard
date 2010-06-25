@@ -7,9 +7,11 @@ Enthought's TraitsUI backend modules that are dynamically loaded.
 '''
 
 import sip
-from PyQt4 import *
+import PyQt4
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 from PyQt4 import Qsci
-from PyQt4 import QtNetwork
+#from PyQt4 import QtNetwork
 
 import numpy
 

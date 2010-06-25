@@ -114,7 +114,7 @@ import glob
 import sys
 if sys.platform.startswith('darwin'):
     extra_options = dict(
-        setup_requires=['py2app'],
+        setup_requires=['py2app', 'pexpect'],
         app=['bin/infobiotics-dashboard.py'],
         options=dict(
             py2app=dict(
