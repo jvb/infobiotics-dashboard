@@ -1,3 +1,6 @@
+# find another way to import ProgressEditor, py2app's modulefinder fails with:
+# ImportError 'enthought.pyface' if this is a package!
+
 '''
 This package adds missing modules to TraitsBackendQt
 (http://pypi.python.org/pypi/TraitsBackendQt/).
