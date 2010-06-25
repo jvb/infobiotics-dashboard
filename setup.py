@@ -1,16 +1,19 @@
 '''
 distutils install script for Infobiotics Dashboard
 
-Source distribution:
+Install locally.
+$ python setup.py install
+
+Build source distribution:
 $ python setup.py sdist
 
-Mac app:
-$ python setup.py py2app
+Build Mac app:
+$ sh py2app.sh
 
-Windows executable:
-$ python setup.py py2exe
+Build Windows executable:
+$ sh py2exe.sh
 
-Debian package:
+Build Debian package:
 ./make-deb.sh
 
 '''
@@ -19,105 +22,64 @@ Debian package:
 from distribute_setup import use_setuptools
 use_setuptools()
 
-from setuptools import setup, find_packages
-
-INSTALL_REQUIRES = [
-    'EnthoughtBase>=3.0.4',
-    'AppTools>=3.3.1',
-    'Traits>=3.3.0',
-    'EnvisageCore>=3.1.2',
-    'TraitsGUI>=3.3.0',
-    'EnvisagePlugins>=3.1.2',
-    'TraitsBackendQt>=3.3.0',
-    'Mayavi',
-    'configobj',
-#    'which==1.1.0', # in infobiotics.thirdparty
-    'numpy',#>=1.3.0', 
-    'matplotlib'#,==0.99.1', 
-]
-
-# get correct pexpect for platform
-import sys
-if sys.platform.startswith('win'):
-    INSTALL_REQUIRES += [
-        'winpexpect>=1.3', #TODO doesn't work! 
-#        'wexpect==507', #TODO use 'http://sage.math.washington.edu/home/goreckc/sage/wexpect/wexpect.py' instead
-    ]
-else: # assume POSIX
-    INSTALL_REQUIRES += [
-        'pexpect',
-    ]
-
-# use 'pytables' instead of 'tables' for mac
-if sys.platform.startswith('darwin'):
-    INSTALL_REQUIRES += [
-        'pytables>=2.1.2',
-    ]
-else:
-    INSTALL_REQUIRES += [
-        'tables>=2.1.2',
-    ]
-
-
-# explicitly include hard-to-find modules for py2app #TODO and py2exe
-INCLUDES = [
-    'sip',
-    'PyQt4',
-    'PyQt4.QtCore',
-    'PyQt4.QtGui',
-    'PyQt4.Qsci',
-    'PyQt4.QtNetwork',
-    'enthought.traits.ui.qt4',
-    'enthought.pyface.ui.qt4.action.action_item',
-    'enthought.pyface.ui.qt4.action.menu_manager',
-    'enthought.pyface.ui.qt4.action.menu_bar_manager',
-    'enthought.pyface.ui.qt4.action.status_bar_manager',
-    'enthought.pyface.ui.qt4.action.tool_bar_manager',
-    'enthought.tvtk.vtk_module',
-    'enthought.tvtk.pyface.ui.qt4.init',
-    'enthought.tvtk.pyface.ui.qt4',
-    'enthought.tvtk.pyface.ui.qt4.scene_editor',
-    'enthought.pyface.ui.qt4.about_dialog',
-    'enthought.pyface.ui.qt4.application_window',
-    'enthought.pyface.ui.qt4.clipboard',
-    'enthought.pyface.ui.qt4.confirmation_dialog',
-    'enthought.pyface.ui.qt4.dialog',
-    'enthought.pyface.ui.qt4.directory_dialog',
-    'enthought.pyface.ui.qt4.file_dialog',
-    'enthought.pyface.ui.qt4.gui',
-    'enthought.pyface.ui.qt4.heading_text',
-    'enthought.pyface.ui.qt4.image_cache',
-    'enthought.pyface.ui.qt4.image_resource',
-    'enthought.pyface.ui.qt4.init',
-    'enthought.pyface.ui.qt4.message_dialog',
-    'enthought.pyface.ui.qt4.progress_dialog',
-    'enthought.pyface.ui.qt4.python_editor',
-    'enthought.pyface.ui.qt4.python_shell',
-    'enthought.pyface.ui.qt4.resource_manager',
-    'enthought.pyface.ui.qt4.splash_screen',
-    'enthought.pyface.ui.qt4.split_widget',
-    'enthought.pyface.ui.qt4.system_metrics',
-    'enthought.pyface.ui.qt4.widget',
-    'enthought.pyface.ui.qt4.window',
-    'enthought.pyface.ui.qt4.workbench.editor',
-    'enthought.pyface.ui.qt4.workbench.split_tab_widget',
-    'enthought.pyface.ui.qt4.workbench.view',
-    'enthought.pyface.ui.qt4.workbench.workbench_window_layout',
-    'enthought.envisage.ui.workbench.action.api',
-    'enthought.plugins.ipython_shell.actions',
-    'enthought.plugins.ipython_shell.actions.ipython_shell_actions',
-    'enthought.plugins.refresh_code.actions',
-    'enthought.plugins.remote_editor.actions',
-    'enthought.plugins.text_editor.actions',
-    'enthought.tvtk.plugins.scene.ui.actions',
-    #TODO see py2exe_includes.py at http://markmail.org/thread/qkdwu7gbwrmop6so
-    'numpy',
-    'matplotlib',
-    'vtk',
-    'encodings',
-    'tables',
-#    'pywintypes',
-]
+# see py2exe_includes.py at http://markmail.org/thread/qkdwu7gbwrmop6so
+## explicitly include hard-to-find modules for py2app #TODO and py2exe
+#INCLUDES = [
+#    'sip',
+#    'PyQt4',
+#    'PyQt4.QtCore',
+#    'PyQt4.QtGui',
+#    'PyQt4.Qsci',
+#    'PyQt4.QtNetwork',
+#    'enthought.traits.ui.qt4',
+#    'enthought.pyface.ui.qt4.action.action_item',
+#    'enthought.pyface.ui.qt4.action.menu_manager',
+#    'enthought.pyface.ui.qt4.action.menu_bar_manager',
+#    'enthought.pyface.ui.qt4.action.status_bar_manager',
+#    'enthought.pyface.ui.qt4.action.tool_bar_manager',
+#    'enthought.tvtk.vtk_module',
+#    'enthought.tvtk.pyface.ui.qt4.init',
+#    'enthought.tvtk.pyface.ui.qt4',
+#    'enthought.tvtk.pyface.ui.qt4.scene_editor',
+#    'enthought.pyface.ui.qt4.about_dialog',
+#    'enthought.pyface.ui.qt4.application_window',
+#    'enthought.pyface.ui.qt4.clipboard',
+#    'enthought.pyface.ui.qt4.confirmation_dialog',
+#    'enthought.pyface.ui.qt4.dialog',
+#    'enthought.pyface.ui.qt4.directory_dialog',
+#    'enthought.pyface.ui.qt4.file_dialog',
+#    'enthought.pyface.ui.qt4.gui',
+#    'enthought.pyface.ui.qt4.heading_text',
+#    'enthought.pyface.ui.qt4.image_cache',
+#    'enthought.pyface.ui.qt4.image_resource',
+#    'enthought.pyface.ui.qt4.init',
+#    'enthought.pyface.ui.qt4.message_dialog',
+#    'enthought.pyface.ui.qt4.progress_dialog',
+#    'enthought.pyface.ui.qt4.python_editor',
+#    'enthought.pyface.ui.qt4.python_shell',
+#    'enthought.pyface.ui.qt4.resource_manager',
+#    'enthought.pyface.ui.qt4.splash_screen',
+#    'enthought.pyface.ui.qt4.split_widget',
+#    'enthought.pyface.ui.qt4.system_metrics',
+#    'enthought.pyface.ui.qt4.widget',
+#    'enthought.pyface.ui.qt4.window',
+#    'enthought.pyface.ui.qt4.workbench.editor',
+#    'enthought.pyface.ui.qt4.workbench.split_tab_widget',
+#    'enthought.pyface.ui.qt4.workbench.view',
+#    'enthought.pyface.ui.qt4.workbench.workbench_window_layout',
+#    'enthought.envisage.ui.workbench.action.api',
+#    'enthought.plugins.ipython_shell.actions',
+#    'enthought.plugins.ipython_shell.actions.ipython_shell_actions',
+#    'enthought.plugins.refresh_code.actions',
+#    'enthought.plugins.remote_editor.actions',
+#    'enthought.plugins.text_editor.actions',
+#    'enthought.tvtk.plugins.scene.ui.actions',
+#    'numpy',
+#    'matplotlib',
+#    'vtk',
+#    'encodings',
+#    'tables',
+#]
 
 
 # Manifest file to allow py2exe to use the winxp look and feel
@@ -149,51 +111,52 @@ manifestVersion="1.0">
 
 import matplotlib
 import glob
-
+import sys
 if sys.platform.startswith('darwin'):
     extra_options = dict(
         setup_requires=['py2app'],
         app=['bin/infobiotics-dashboard.py'],
         options=dict(
             py2app=dict(
-                argv_emulation=True, 
-                includes=INCLUDES,
+                argv_emulation=True, # cross-platform applications generally expect sys.argv to be used for opening files
+#                includes=INCLUDES,
+                includes=['py2imports'], # better than INCLUDES?
                 frameworks=[
                     '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib',
                 ],
-                plist=dict(
-                    # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18
-#                    LSPrefersPPC=True,
-                    CFBundleIdentifier='org.infobiotics.infobiotics-workbench',
-                    CFBundleGetInfoString='The Infobiotics Dashboard, part of the Infobiotics Workbench.',
-                    LSBackgroundOnly=False, # If True, the bundle will be a faceless background application.
-                    LSUIElement=False, # If True, the bundle will be an agent application. It will not appear in the Dock or Force Quit window, but still can come to the foreground and present a UI.
-#                    CFBundleURLTypes = [{}], # An array of dictionaries describing URL schemes supported by the bundle.
-#                    NSServices = [{}] # An array of dictionaries specifying the services provided by the application.
-                    CFBundleDocumentTypes=[ # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#associating-actions-with-file-types
+#                plist=dict(
+#                    # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18
+##                    LSPrefersPPC=True,
+#                    CFBundleIdentifier='org.infobiotics.infobiotics-workbench',
+#                    CFBundleGetInfoString='The Infobiotics Dashboard, part of the Infobiotics Workbench.',
+#                    LSBackgroundOnly=False, # If True, the bundle will be a faceless background application.
+#                    LSUIElement=False, # If True, the bundle will be an agent application. It will not appear in the Dock or Force Quit window, but still can come to the foreground and present a UI.
+##                    CFBundleURLTypes = [{}], # An array of dictionaries describing URL schemes supported by the bundle.
+##                    NSServices = [{}] # An array of dictionaries specifying the services provided by the application.
+#                    CFBundleDocumentTypes=[ # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#associating-actions-with-file-types
+##                        {
+##                            'CFBundleTypeExtensions': ['html','htm'],
+##                            'CFBundleTypeName': 'HTML Document',
+##                            'CFBundleTypeRole': 'Viewer',
+##                            'CFBundleTypeIconFile': 'Icon.icns',
+##                        },
 #                        {
-#                            'CFBundleTypeExtensions': ['html','htm'],
-#                            'CFBundleTypeName': 'HTML Document',
+#                            'CFBundleTypeExtensions' : ['h5'], 
+#                            'CFBundleTypeName': 'mcss simulation',
 #                            'CFBundleTypeRole': 'Viewer',
-#                            'CFBundleTypeIconFile': 'Icon.icns',
+#                            'CFBundleTypeIconFile': 'mcss_simulation.icns',
 #                        },
-                        {
-                            'CFBundleTypeExtensions' : ['h5'], 
-                            'CFBundleTypeName': 'mcss simulation',
-                            'CFBundleTypeRole': 'Viewer',
-                            'CFBundleTypeIconFile': 'mcss_simulation.icns',
-                        },
-                        { 
-                            'CFBundleTypeExtensions' : ['lpp','sps','plb','lat'],
-                            'CFBundleTypeName': 'Lattice Population P System model file',
-                            'CFBundleTypeRole': 'Viewer',
-                            'CFBundleTypeIconFile': 'lattice_population_p_system_model_file.icns',
-                        },    
-                    ],
-                    
-                ),
+#                        { 
+#                            'CFBundleTypeExtensions' : ['lpp','sps','plb','lat'],
+#                            'CFBundleTypeName': 'Lattice Population P System model file',
+#                            'CFBundleTypeRole': 'Viewer',
+#                            'CFBundleTypeIconFile': 'lattice_population_p_system_model_file.icns',
+#                        },    
+#                    ],
+#                    
+#                ),
             ),
-        ), # Cross-platform applications generally expect sys.argv to be used for opening files.
+        ), 
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("enthought/pyface/images", glob.glob("/Library/Frameworks/.framework/Versions/Current/lib/python26/site-packages/enthought/pyface/images/*.png")), #FIXME
@@ -202,7 +165,7 @@ if sys.platform.startswith('darwin'):
 elif sys.platform.startswith('win'):
     try:
         import py2exe
-        
+       
         # http://markmail.org/thread/qkdwu7gbwrmop6so
         
         # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
@@ -220,27 +183,27 @@ elif sys.platform.startswith('win'):
             m = sys.modules[extra]
             for p in m.__path__[1:]:
                 modulefinder.AddPackagePath(extra, p)        
-                
         
     except ImportError, e:
         sys.stderr.write('%s\n' % e)
+        
     extra_options = dict(
         setup_requires=['py2exe'],
-        windows=['bin/infobiotics-dashboard.pyw'],
-#        windows=[
+        windows=[
+            'bin/infobiotics-dashboard.pyw', # .pyw are launched without opening a console window
 #            dict(
 #                script="bin/infobiotics-dashboard.pyw",
 #                other_resources=[(24,1,manifest)],
 #                # If you have a windows icon, this is where to specify it
 ##               "icon_resources": [(2, "images/example.ico")],
 #            ),
-#        ],
-#        options={"py2exe" : {"includes" : ["sip", "PyQt4._qt"]}} # http://www.py2exe.org/index.cgi/Py2exeAndPyQt
+        ],
         options=dict(
             py2exe=dict(
-                includes=INCLUDES,# + ['pywintypes'], #'includes': ['py2exe_includes'], # http://markmail.org/thread/qkdwu7gbwrmop6so
-                unbuffered=True,
-#                optimize=2,
+###                includes=['sip','PyQt4._qt'], # http://www.py2exe.org/index.cgi/Py2exeAndPyQt
+##                includes=INCLUDES,# + ['pywintypes'], #'includes': ['py2exe_includes'], # http://markmail.org/thread/qkdwu7gbwrmop6so
+#                includes=INCLUDES,
+                includes=['py2imports'], # better than INCLUDES?
                 excludes=[
                     'Tkinter', 
                     'Tkconstants', 
@@ -249,18 +212,15 @@ elif sys.platform.startswith('win'):
                     'numpy.f2py',
                     'wx',
                 ],
-                
-                # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
-                dll_excludes=[ "mswsock.dll", "powrprof.dll" ],
+                dll_excludes=["mswsock.dll", "powrprof.dll"], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
                 packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
-                
-                skip_archive=True,
+                skip_archive=True, # required so that it is easier to unzip tvtk_classes.zip (?)
  #               bundle_files=2,
+                unbuffered=True,
+##                optimize=2,
+#                optimize=0, # default (?) but best to be explicit
             )
         ),
-#        dependency_links=[
-#            'http://sage.math.washington.edu/home/goreckc/sage/wexpect/wexpect.py#egg=wexpect-507',
-#        ],
         data_files=[        
 #            ("images", glob.glob("images/*.png")), #TODO
             ("enthought/pyface/images", glob.glob("C:\/Python26/Lib/site-packages/enthought/pyface/images/*.png")), #TODO
@@ -270,7 +230,7 @@ elif sys.platform.startswith('win'):
             ('enthought/envisage/ui/workbench', ['C:\/Python26/Lib/site-packages/enthought/envisage/ui/workbench/preferences.ini']),
         ] + matplotlib.get_py2exe_datafiles(), # http://www.py2exe.org/index.cgi/MatPlotLib
     )
-else: # assume 'linux2'
+else: # assume sys.platform.startswith('linux'):
     extra_options = dict(
         scripts=['bin/infobiotics-dashboard'],
         data_files=[
@@ -278,10 +238,44 @@ else: # assume 'linux2'
         ],
     )
 
+# dependencies when doing 'python setup.py install' 
+INSTALL_REQUIRES = [
+    'EnthoughtBase>=3.0.4',
+    'AppTools>=3.3.1',
+    'Traits>=3.3.0',
+    'EnvisageCore>=3.1.2',
+    'TraitsGUI>=3.3.0',
+    'EnvisagePlugins>=3.1.2',
+    'TraitsBackendQt>=3.3.0',
+    'Mayavi',
+    'configobj', # for enthought.preferences
+    'numpy',#>=1.3.0', 
+    'matplotlib'#,==0.99.1', 
+#    'which==1.1.0', # in infobiotics.thirdparty
+]
+INSTALL_REQUIRES += ['winpexpect>=1.3'] if sys.platform.startswith('win') else ['pexpect'] # winpexpect is preferred over wexpect on Windows
+INSTALL_REQUIRES += ['pytables>=2.1.2'] if sys.platform.startswith('darwin') else ['tables>=2.1.2'] # tables is called 'pytables' on Mac (at least it is in EPD)
+
+CLASSIFIERS=[ # http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    'Development Status :: 4 - Beta',
+    'Environment :: X11 Applications :: Qt',
+    'Intended Audience :: Education',
+    'Intended Audience :: Science/Research',
+    'Natural Language :: English',
+    'License :: OSI Approved :: GNU General Public License (GPL)',
+    'Operating System :: POSIX :: Linux',
+    'Programming Language :: Python :: 2.5',
+    'Topic :: Scientific/Engineering :: Bio-Informatics',
+    'Topic :: Scientific/Engineering :: Visualization',
+    'Topic :: Text Editors :: Integrated Development Environments (IDE)',          
+]
+
 VERSION=open('VERSION.txt').read().strip('\n')
 
+from setuptools import setup, find_packages
 setup(
     # PyPI metadata
+    version=VERSION,
     name='InfobioticsDashboard',
     author='Jonathan Blakes',
     author_email='jvb@cs.nott.ac.uk',
@@ -290,19 +284,7 @@ setup(
     description='Infobiotics Dashboard is a graphical front-end to the Infobiotics Workbench, a suite of tools for modelling and designing multi-cellular biological systems.',
     long_description=open('README.txt').read(),
     keywords='biology, modelling, modeling, simulation',
-    classifiers=[ # http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 4 - Beta',
-        'Environment :: X11 Applications :: Qt',
-        'Intended Audience :: Education',
-        'Intended Audience :: Science/Research',
-        'Natural Language :: English',
-        'License :: OSI Approved :: GNU General Public License (GPL)',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2.5',
-        'Topic :: Scientific/Engineering :: Bio-Informatics',
-        'Topic :: Scientific/Engineering :: Visualization',
-        'Topic :: Text Editors :: Integrated Development Environments (IDE)',          
-    ],
+    classifiers=CLASSIFIERS,
     platforms='any',
 
     packages=find_packages(
@@ -313,7 +295,6 @@ setup(
 
     install_requires=INSTALL_REQUIRES,
 #    requires=[''],
-    version=VERSION,
 #    provides=[
 #        ('InfobioticsDashboard','') #TODO
 #    ],

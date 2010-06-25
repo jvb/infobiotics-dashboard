@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "removing .pyc files"
-find -name "*.pyc" -delete
+find . -name "*.pyc" -delete
 
 echo "removing build directories"
 rm -rf build/ dist/ debian/ tmp*/ 2&>/dev/null
