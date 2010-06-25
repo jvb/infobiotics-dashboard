@@ -1,0 +1,123 @@
+jvb@fingal:~/tmp/dashboard$ dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard
+loading plugins... loaded
+starting workbench
+running
+started
+/Users/jvb/.infobiotics/preferences.ini
+
+ Node() {}
+   Node(application) {}
+     Node(mcss) {}
+   Node(default) {}
+     Node(pmodelchecker) {'executable': '/Application/InfobioticsWorkbench/pmodelchecker'}
+     Node(mcss) {'executable': '/Application/InfobioticsWorkbench/mcss'}
+     Node(poptimizer) {'executable': '/Application/InfobioticsWorkbench/poptimizer'}
+
+/Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources
+/Users/jvb/.infobiotics/preferences.ini
+
+ Node() {}
+   Node(application) {}
+     Node(mcss) {}
+   Node(default) {}
+     Node(pmodelchecker) {'executable': '/Application/InfobioticsWorkbench/pmodelchecker'}
+     Node(mcss) {'executable': '/Application/InfobioticsWorkbench/mcss'}
+     Node(poptimizer) {'executable': '/Application/InfobioticsWorkbench/poptimizer'}
+Exception occurred in traits notification handler.
+Please check the log file for details.
+Exception occurred in traits notification handler for object: <infobiotics.pmodelchecker.prism.prism_experiment_handler.PRISMExperimentHandler object at 0x1fc791b0>, trait: model, old value: None, new value: PRISMExperiment(_params_file=)
+Traceback (most recent call last):
+  File "enthought/traits/trait_notifiers.pyc", line 446, in call_0
+  File "enthought/traits/trait_notifiers.pyc", line 424, in dispatch
+  File "enthought/traits/has_traits.pyc", line 1349, in wrapper0
+  File "enthought/traits/has_traits.pyc", line 3653, in notify
+  File "infobiotics/common/params_handler.pyc", line 76, in _get_title
+  File "infobiotics/commons/traits/relative_file.pyc", line 246, in post_setattr
+  File "infobiotics/commons/traits/relative_file.pyc", line 151, in _set_directory_from_directory_name
+  File "infobiotics/common/params.pyc", line 50, in _directory_default
+AttributeError: 'NoneType' object has no attribute 'directory'
+"Exception occurred in traits notification handler for object: <infobiotics.pmodelchecker.prism.prism_experiment_handler.PRISMExperimentHandler object at 0x1fc791b0>, trait: model, old value: None, new value: PRISMExperiment(_params_file=)" trait_notifiers:244(_log_exception) [enthought.traits(40)]
+Traceback (most recent call last):
+  File "enthought/traits/trait_notifiers.pyc", line 446, in call_0
+  File "enthought/traits/trait_notifiers.pyc", line 424, in dispatch
+  File "enthought/traits/has_traits.pyc", line 1349, in wrapper0
+  File "enthought/traits/has_traits.pyc", line 3653, in notify
+  File "infobiotics/common/params_handler.pyc", line 76, in _get_title
+  File "infobiotics/commons/traits/relative_file.pyc", line 246, in post_setattr
+  File "infobiotics/commons/traits/relative_file.pyc", line 151, in _set_directory_from_directory_name
+  File "infobiotics/common/params.pyc", line 50, in _directory_default
+AttributeError: 'NoneType' object has no attribute 'directory'
+Traceback (most recent call last):
+  File "enthought/pyface/ui/qt4/action/action_item.pyc", line 299, in _qt4_on_triggered
+  File "enthought/pyface/workbench/action/action_controller.pyc", line 35, in perform
+  File "infobiotics/dashboard/plugins/pmodelchecker/actions.pyc", line 9, in perform
+  File "infobiotics/common/params.pyc", line 83, in edit
+  File "enthought/traits/ui/handler.pyc", line 445, in edit_traits
+  File "enthought/traits/ui/view.pyc", line 429, in ui
+  File "enthought/traits/ui/ui.pyc", line 218, in ui
+  File "enthought/traits/ui/qt4/toolkit.pyc", line 157, in ui_live
+  File "enthought/traits/ui/qt4/ui_live.pyc", line 39, in ui_live
+  File "enthought/traits/ui/qt4/ui_live.pyc", line 59, in _ui_dialog
+  File "enthought/traits/ui/qt4/ui_base.pyc", line 403, in display_ui
+  File "enthought/traits/ui/ui.pyc", line 413, in prepare_ui
+  File "infobiotics/pmodelchecker/prism/prism_params_handler.pyc", line 87, in init
+  File "infobiotics/pmodelchecker/pmodelchecker_params_handler.pyc", line 16, in init
+  File "infobiotics/common/params.pyc", line 50, in _directory_default
+AttributeError: 'NoneType' object has no attribute 'directory'
+/Users/jvb/.infobiotics/preferences.ini
+
+ Node() {}
+   Node(application) {}
+     Node(mcss) {}
+   Node(default) {}
+     Node(pmodelchecker) {'executable': '/Application/InfobioticsWorkbench/pmodelchecker'}
+     Node(mcss) {'executable': '/Application/InfobioticsWorkbench/mcss'}
+     Node(poptimizer) {'executable': '/Application/InfobioticsWorkbench/poptimizer'}
+Exception occurred in traits notification handler for object: <infobiotics.pmodelchecker.mc2.mc2_experiment_handler.MC2ExperimentHandler object at 0x24bba6c0>, trait: model, old value: None, new value: MC2Experiment(_params_file=)
+Traceback (most recent call last):
+  File "enthought/traits/trait_notifiers.pyc", line 446, in call_0
+  File "enthought/traits/trait_notifiers.pyc", line 424, in dispatch
+  File "enthought/traits/has_traits.pyc", line 1349, in wrapper0
+  File "enthought/traits/has_traits.pyc", line 3653, in notify
+  File "infobiotics/common/params_handler.pyc", line 76, in _get_title
+  File "infobiotics/commons/traits/relative_file.pyc", line 246, in post_setattr
+  File "infobiotics/commons/traits/relative_file.pyc", line 151, in _set_directory_from_directory_name
+  File "infobiotics/common/params.pyc", line 50, in _directory_default
+AttributeError: 'NoneType' object has no attribute 'directory'
+"Exception occurred in traits notification handler for object: <infobiotics.pmodelchecker.mc2.mc2_experiment_handler.MC2ExperimentHandler object at 0x24bba6c0>, trait: model, old value: None, new value: MC2Experiment(_params_file=)" trait_notifiers:244(_log_exception) [enthought.traits(40)]
+Traceback (most recent call last):
+  File "enthought/traits/trait_notifiers.pyc", line 446, in call_0
+  File "enthought/traits/trait_notifiers.pyc", line 424, in dispatch
+  File "enthought/traits/has_traits.pyc", line 1349, in wrapper0
+  File "enthought/traits/has_traits.pyc", line 3653, in notify
+  File "infobiotics/common/params_handler.pyc", line 76, in _get_title
+  File "infobiotics/commons/traits/relative_file.pyc", line 246, in post_setattr
+  File "infobiotics/commons/traits/relative_file.pyc", line 151, in _set_directory_from_directory_name
+  File "infobiotics/common/params.pyc", line 50, in _directory_default
+AttributeError: 'NoneType' object has no attribute 'directory'
+Traceback (most recent call last):
+  File "enthought/pyface/ui/qt4/action/action_item.pyc", line 299, in _qt4_on_triggered
+  File "enthought/pyface/workbench/action/action_controller.pyc", line 35, in perform
+  File "infobiotics/dashboard/plugins/pmodelchecker/actions.pyc", line 16, in perform
+  File "infobiotics/common/params.pyc", line 83, in edit
+  File "enthought/traits/ui/handler.pyc", line 445, in edit_traits
+  File "enthought/traits/ui/view.pyc", line 429, in ui
+  File "enthought/traits/ui/ui.pyc", line 218, in ui
+  File "enthought/traits/ui/qt4/toolkit.pyc", line 157, in ui_live
+  File "enthought/traits/ui/qt4/ui_live.pyc", line 39, in ui_live
+  File "enthought/traits/ui/qt4/ui_live.pyc", line 59, in _ui_dialog
+  File "enthought/traits/ui/qt4/ui_base.pyc", line 403, in display_ui
+  File "enthought/traits/ui/ui.pyc", line 413, in prepare_ui
+  File "infobiotics/pmodelchecker/pmodelchecker_params_handler.pyc", line 16, in init
+  File "infobiotics/common/params.pyc", line 50, in _directory_default
+AttributeError: 'NoneType' object has no attribute 'directory'
+/Users/jvb/.infobiotics/preferences.ini
+
+ Node() {}
+   Node(application) {}
+     Node(mcss) {}
+   Node(default) {}
+     Node(pmodelchecker) {'executable': '/Application/InfobioticsWorkbench/pmodelchecker'}
+     Node(mcss) {'executable': '/Application/InfobioticsWorkbench/mcss'}
+     Node(poptimizer) {'executable': '/Application/InfobioticsWorkbench/poptimizer'}
+
