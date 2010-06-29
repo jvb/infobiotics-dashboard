@@ -8,10 +8,10 @@ Build source distribution:
 $ python setup.py sdist
 
 Build Mac app:
-$ sh py2app.sh
+$ bash py2app.sh
 
 Build Windows executable:
-$ sh py2exe.sh
+$ bash py2exe.sh
 
 Build Debian package:
 ./make-deb.sh
@@ -22,92 +22,33 @@ Build Debian package:
 from distribute_setup import use_setuptools
 use_setuptools()
 
-# see py2exe_includes.py at http://markmail.org/thread/qkdwu7gbwrmop6so
-## explicitly include hard-to-find modules for py2app #TODO and py2exe
-#INCLUDES = [
-#    'sip',
-#    'PyQt4',
-#    'PyQt4.QtCore',
-#    'PyQt4.QtGui',
-#    'PyQt4.Qsci',
-#    'PyQt4.QtNetwork',
-#    'enthought.traits.ui.qt4',
-#    'enthought.pyface.ui.qt4.action.action_item',
-#    'enthought.pyface.ui.qt4.action.menu_manager',
-#    'enthought.pyface.ui.qt4.action.menu_bar_manager',
-#    'enthought.pyface.ui.qt4.action.status_bar_manager',
-#    'enthought.pyface.ui.qt4.action.tool_bar_manager',
-#    'enthought.tvtk.vtk_module',
-#    'enthought.tvtk.pyface.ui.qt4.init',
-#    'enthought.tvtk.pyface.ui.qt4',
-#    'enthought.tvtk.pyface.ui.qt4.scene_editor',
-#    'enthought.pyface.ui.qt4.about_dialog',
-#    'enthought.pyface.ui.qt4.application_window',
-#    'enthought.pyface.ui.qt4.clipboard',
-#    'enthought.pyface.ui.qt4.confirmation_dialog',
-#    'enthought.pyface.ui.qt4.dialog',
-#    'enthought.pyface.ui.qt4.directory_dialog',
-#    'enthought.pyface.ui.qt4.file_dialog',
-#    'enthought.pyface.ui.qt4.gui',
-#    'enthought.pyface.ui.qt4.heading_text',
-#    'enthought.pyface.ui.qt4.image_cache',
-#    'enthought.pyface.ui.qt4.image_resource',
-#    'enthought.pyface.ui.qt4.init',
-#    'enthought.pyface.ui.qt4.message_dialog',
-#    'enthought.pyface.ui.qt4.progress_dialog',
-#    'enthought.pyface.ui.qt4.python_editor',
-#    'enthought.pyface.ui.qt4.python_shell',
-#    'enthought.pyface.ui.qt4.resource_manager',
-#    'enthought.pyface.ui.qt4.splash_screen',
-#    'enthought.pyface.ui.qt4.split_widget',
-#    'enthought.pyface.ui.qt4.system_metrics',
-#    'enthought.pyface.ui.qt4.widget',
-#    'enthought.pyface.ui.qt4.window',
-#    'enthought.pyface.ui.qt4.workbench.editor',
-#    'enthought.pyface.ui.qt4.workbench.split_tab_widget',
-#    'enthought.pyface.ui.qt4.workbench.view',
-#    'enthought.pyface.ui.qt4.workbench.workbench_window_layout',
-#    'enthought.envisage.ui.workbench.action.api',
-#    'enthought.plugins.ipython_shell.actions',
-#    'enthought.plugins.ipython_shell.actions.ipython_shell_actions',
-#    'enthought.plugins.refresh_code.actions',
-#    'enthought.plugins.remote_editor.actions',
-#    'enthought.plugins.text_editor.actions',
-#    'enthought.tvtk.plugins.scene.ui.actions',
-#    'numpy',
-#    'matplotlib',
-#    'vtk',
-#    'encodings',
-#    'tables',
-#]
 
-
-# Manifest file to allow py2exe to use the winxp look and feel
-manifest = """
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<assembly xmlns="urn:schemas-microsoft-com:asm.v1"
-manifestVersion="1.0">
-<assemblyIdentity
-    version="0.64.1.0"
-    processorArchitecture="x86"
-    name="Controls"
-    type="win32"
-/>
-<description>Your Application</description>
-<dependency>
-    <dependentAssembly>
-        <assemblyIdentity
-            type="win32"
-            name="Microsoft.Windows.Common-Controls"
-            version="6.0.0.0"
-            processorArchitecture="X86"
-            publicKeyToken="6595b64144ccf1df"
-            language="*"
-        />
-    </dependentAssembly>
-</dependency>
-</assembly>
-"""
+## Manifest file to allow py2exe to use the winxp look and feel
+#manifest = """
+#<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+#<assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+#manifestVersion="1.0">
+#<assemblyIdentity
+#    version="0.64.1.0"
+#    processorArchitecture="x86"
+#    name="Controls"
+#    type="win32"
+#/>
+#<description>Your Application</description>
+#<dependency>
+#    <dependentAssembly>
+#        <assemblyIdentity
+#            type="win32"
+#            name="Microsoft.Windows.Common-Controls"
+#            version="6.0.0.0"
+#            processorArchitecture="X86"
+#            publicKeyToken="6595b64144ccf1df"
+#            language="*"
+#        />
+#    </dependentAssembly>
+#</dependency>
+#</assembly>
+#"""
 
 import matplotlib
 import glob

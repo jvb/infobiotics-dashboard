@@ -1,6 +1,16 @@
 #!/bin/bash
 
+# use CS proxy
 export http_proxy=http://wwwcache-20.cs.nott.ac.uk:3128
+
+# variables: 
+
+# TMPDIR is a prefix: the directory 'PyQt4_Qsci' is created inside it
+TMPDIR=/var/tmp
+
+# EPDVER and PYVER change with the version of EPD, update as necessary
+EPDVER=6.2
+PYVER=2.6
 
 echo "Installer for sip/PyQt4/QScintilla"
 echo
@@ -15,9 +25,14 @@ read
 echo
 sudo echo "Started..."
 
+# fix symbolic links in EPD
+#sudo rm -rf /Library/Frameworks/Python.framework/Versions/$EPDVER/include/python$EPDVER
+#sudo rm -rf /Library/Frameworks/Python.framework/Versions/$EPDVER/lib/python$EPDVER
+sudo ln -s /Library/Frameworks/Python.framework/Versions/$EPDVER/include/python$PYVER /Library/Frameworks/Python.framework/Versions/$EPDVER/include/python$EPDVER
+sudo ln -s /Library/Frameworks/Python.framework/Versions/$EPDVER/lib/python$PYVER /Library/Frameworks/Python.framework/Versions/$EPDVER/lib/python$EPDVER
+
 # change to temporary directory
-TMPDIR=/var/tmp
-mkdir -p $TMPDIR/PyQt4 && cd $TMPDIR/PyQt4
+mkdir -p $TMPDIR/PyQt4_Qsci && cd $TMPDIR/PyQt4_Qsci
 
 # sip
 SIP_VERSION=4.10.2
