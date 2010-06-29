@@ -122,7 +122,7 @@ if sys.platform.startswith('darwin'):
 #                includes=INCLUDES,
                 includes=['py2imports'], # better than INCLUDES?
                 frameworks=[
-                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib',
+#                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib',
                 ],
 #                plist=dict(
 #                    # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18

@@ -11,7 +11,7 @@ import PyQt4
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import Qsci
-#from PyQt4 import QtNetwork
+from PyQt4 import QtNetwork
 
 import numpy
 
