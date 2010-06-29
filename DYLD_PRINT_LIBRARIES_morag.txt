@@ -1,0 +1,302 @@
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard
+dyld: loaded: /usr/lib/libSystem.B.dylib
+dyld: loaded: /usr/lib/system/libmathCommon.A.dylib
+dyld: loaded: /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
+dyld: loaded: /usr/lib/libauto.dylib
+dyld: loaded: /usr/lib/libicucore.A.dylib
+dyld: loaded: /usr/lib/libobjc.A.dylib
+dyld: loaded: /usr/lib/libz.1.dylib
+dyld: loaded: /usr/lib/libstdc++.6.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Frameworks/Python.framework/Versions/6.2/Python
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_ctypes.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_struct.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_imaging.so
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libjpeg.7.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/array.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/strop.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/operator.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/time.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_collections.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/gestalt.so
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Carbon
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/CarbonSound.framework/Versions/A/CarbonSound
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/CommonPanels.framework/Versions/A/CommonPanels
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Help.framework/Versions/A/Help
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/HIToolbox
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/HTMLRendering.framework/Versions/A/HTMLRendering
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/ImageCapture.framework/Versions/A/ImageCapture
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Ink.framework/Versions/A/Ink
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/NavigationServices.framework/Versions/A/NavigationServices
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/OpenScripting.framework/Versions/A/OpenScripting
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Print
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/SecurityHI.framework/Versions/A/SecurityHI
+dyld: loaded: /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/SpeechRecognition.framework/Versions/A/SpeechRecognition
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices
+dyld: loaded: /System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CarbonCore.framework/Versions/A/CarbonCore
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CFNetwork.framework/Versions/A/CFNetwork
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Metadata
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/OSServices.framework/Versions/A/OSServices
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/SearchKit.framework/Versions/A/SearchKit
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/AE.framework/Versions/A/AE
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/LaunchServices
+dyld: loaded: /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/DictionaryServices.framework/Versions/A/DictionaryServices
+dyld: loaded: /System/Library/Frameworks/IOKit.framework/Versions/A/IOKit
+dyld: loaded: /System/Library/Frameworks/DiskArbitration.framework/Versions/A/DiskArbitration
+dyld: loaded: /usr/lib/libbsm.0.dylib
+dyld: loaded: /System/Library/Frameworks/NetFS.framework/Versions/A/NetFS
+dyld: loaded: /usr/lib/system/libkxld.dylib
+dyld: loaded: /System/Library/Frameworks/Security.framework/Versions/A/Security
+dyld: loaded: /usr/lib/libsqlite3.dylib
+dyld: loaded: /System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration
+dyld: loaded: /usr/lib/libxslt.1.dylib
+dyld: loaded: /usr/lib/libxml2.2.dylib
+dyld: loaded: /System/Library/Frameworks/Foundation.framework/Versions/C/Foundation
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/ImageIO
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreText.framework/Versions/A/CoreText
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/ATS
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ColorSync.framework/Versions/A/ColorSync
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/HIServices
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/LangAnalysis.framework/Versions/A/LangAnalysis
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/PrintCore
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/QD.framework/Versions/A/QD
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/SpeechSynthesis.framework/Versions/A/SpeechSynthesis
+dyld: loaded: /System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libTIFF.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libGIF.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libPng.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libRadiance.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libJPEG.dylib
+dyld: loaded: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vImage.framework/Versions/A/vImage
+dyld: loaded: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/vecLib
+dyld: loaded: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libvDSP.dylib
+dyld: loaded: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libvMisc.dylib
+dyld: loaded: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
+dyld: loaded: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLAPACK.dylib
+dyld: loaded: /usr/lib/libcrypto.0.9.8.dylib
+dyld: loaded: /System/Library/PrivateFrameworks/TrustEvaluationAgent.framework/Versions/A/TrustEvaluationAgent
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/Resources/libFontParser.dylib
+dyld: loaded: /usr/lib/libcups.2.dylib
+dyld: loaded: /System/Library/Frameworks/Kerberos.framework/Versions/A/Kerberos
+dyld: loaded: /usr/lib/libresolv.9.dylib
+dyld: loaded: /System/Library/PrivateFrameworks/CoreUI.framework/Versions/A/CoreUI
+dyld: loaded: /System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore
+dyld: loaded: /System/Library/PrivateFrameworks/DesktopServicesPriv.framework/Versions/A/DesktopServicesPriv
+dyld: loaded: /System/Library/Frameworks/AudioToolbox.framework/Versions/A/AudioToolbox
+dyld: loaded: /System/Library/PrivateFrameworks/FamilyControls.framework/Versions/A/FamilyControls
+dyld: loaded: /System/Library/PrivateFrameworks/MultitouchSupport.framework/Versions/A/MultitouchSupport
+dyld: loaded: /System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo
+dyld: loaded: /System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL
+dyld: loaded: /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLImage.dylib
+dyld: loaded: /System/Library/Frameworks/OpenCL.framework/Versions/A/OpenCL
+dyld: loaded: /System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface
+dyld: loaded: /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLU.dylib
+dyld: loaded: /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
+dyld: loaded: /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLProgrammability.dylib
+dyld: loaded: /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libCoreVMClient.dylib
+dyld: loaded: /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGFXShared.dylib
+dyld: loaded: /System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit
+dyld: loaded: /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib
+dyld: loaded: /System/Library/Frameworks/SecurityFoundation.framework/Versions/A/SecurityFoundation
+dyld: loaded: /System/Library/Frameworks/OpenDirectory.framework/Versions/A/OpenDirectory
+dyld: loaded: /System/Library/Frameworks/OpenDirectory.framework/Versions/A/Frameworks/CFOpenDirectory.framework/Versions/A/CFOpenDirectory
+dyld: loaded: /System/Library/PrivateFrameworks/PasswordServer.framework/Versions/A/PasswordServer
+dyld: loaded: /System/Library/Frameworks/DirectoryService.framework/Versions/A/DirectoryService
+dyld: loaded: /usr/lib/libsasl2.2.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/MacOS.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/enthought/traits/ctraits.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_weakref.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_functools.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/enthought/traits/protocols/_speedups.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/cStringIO.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/datetime.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/itertools.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/PyQt4/QtCore.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/QtCore.framework/Versions/4/QtCore
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/sip.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/PyQt4/QtGui.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/QtGui.framework/Versions/4/QtGui
+dyld: loaded: /System/Library/Frameworks/AppKit.framework/Versions/C/AppKit
+dyld: loaded: /System/Library/Frameworks/CoreData.framework/Versions/A/CoreData
+dyld: loaded: /usr/lib/liblangid.dylib
+Tue Jun 29 15:14:55 fingal InfobioticsDashboard[29451] <Error>: kCGErrorFailure: Set a breakpoint @ CGErrorBreakpoint() to catch errors as they are logged.
+_RegisterApplication(), FAILED TO establish the default connection to the WindowServer, _CGSDefaultConnection() is NULL.
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Frameworks/ColorSync.framework/Versions/A/Resources/ColorSyncDeprecated.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libCSync.A.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libRIP.A.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/Resources/libFontRegistry.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libCGXType.A.dylib
+dyld: loaded: /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/Resources/libTrueTypeScaler.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/core/multiarray.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/core/umath.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/core/_sort.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/core/_dotblas.so
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_intel.dylib
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_intel_thread.dylib
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_core.dylib
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_p4m.dylib
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_p4p.dylib
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libiomp5.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/cPickle.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/core/scalarmath.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/math.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/lib/_compiled_base.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/linalg/lapack_lite.so
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_lapack.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/fft/fftpack_lite.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/random/mtrand.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/binascii.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/zlib.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/PyQt4/QtSvg.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/QtSvg.framework/Versions/4/QtSvg
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/PyQt4/Qsci.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libqscintilla2.5.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/select.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/fcntl.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_hashlib.so
+dyld: loaded: /usr/lib/libssl.0.9.7.dylib
+dyld: loaded: /usr/lib/libcrypto.0.9.7.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_sha256.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_sha512.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/icglue.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_Res.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_File.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/termios.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/tables/utilsExtension.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libhdf5.6.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/tables/hdf5Extension.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/tables/tableExtension.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/tables/numexpr/interpreter.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_bisect.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_heapq.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_random.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/dl.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkCommonPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkCommonPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkCommon.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtksys.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkFilteringPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkFilteringPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkFiltering.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkIOPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkIOPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkIO.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkDICOMParser.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkNetCDF.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkmetaio.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtksqlite.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkpng.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtktiff.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkzlib.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkjpeg.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkexpat.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkImagingPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkImagingPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkImaging.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkGraphicsPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkGraphicsPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkGraphics.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkverdict.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkGenericFilteringPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkGenericFilteringPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkGenericFiltering.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkRenderingPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkRenderingPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkRendering.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkftgl.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkfreetype.5.4.dylib
+dyld: loaded: /System/Library/Frameworks/AGL.framework/Versions/A/AGL
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkVolumeRenderingPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkVolumeRenderingPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkVolumeRendering.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkHybridPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkHybridPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkHybrid.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkexoIIc.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkWidgetsPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkWidgetsPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkWidgets.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkGeovisPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkGeovisPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkGeovis.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkproj4.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkViewsPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkViews.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkInfovisPythonD.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkInfovis.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtklibxml2.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libvtkalglib.5.4.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkInfovisPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/vtk/libvtkViewsPython.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/enthought/tvtk/array_ext.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_socket.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_ssl.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_scproxy.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_locale.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/ft2font.so
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libfreetype.6.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/_path.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/_csv.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/nxutils.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/_cntr.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/_image.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/_png.so
+dyld: loaded: /Library/Frameworks/Python.framework/Versions/6.2/lib/libpng12.0.dylib
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/unicodedata.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/backends/_backend_agg.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/PyQt4/Qt.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/wx/_core_.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libwx_macu-2.8.0.dylib
+dyld: loaded: /System/Library/Frameworks/Cocoa.framework/Versions/A/Cocoa
+dyld: loaded: /System/Library/Frameworks/QuickTime.framework/Versions/A/QuickTime
+dyld: loaded: /usr/lib/libiconv.2.dylib
+dyld: loaded: /System/Library/Frameworks/WebKit.framework/Versions/A/WebKit
+dyld: loaded: /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore
+dyld: loaded: /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/WebCore
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/wx/_gdi_.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/wx/_windows_.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/wx/_controls_.so
+dyld: loaded: /Users/jvb/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/wx/_misc_.so
+2010-06-29 15:15:04.382 InfobioticsDashboard[29451:903] An uncaught exception was raised
+2010-06-29 15:15:04.384 InfobioticsDashboard[29451:903] Error (1002) creating CGSWindow
+2010-06-29 15:15:04.438 InfobioticsDashboard[29451:903] *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'Error (1002) creating CGSWindow'
+*** Call stack at first throw:
+(
+	0   CoreFoundation                      0x965c5bba __raiseError + 410
+	1   libobjc.A.dylib                     0x96024509 objc_exception_throw + 56
+	2   CoreFoundation                      0x965c58e8 +[NSException raise:format:arguments:] + 136
+	3   CoreFoundation                      0x965c585a +[NSException raise:format:] + 58
+	4   AppKit                              0x93468c9a _NSCreateWindowWithOpaqueShape2 + 519
+	5   AppKit                              0x933edbbe -[NSWindow _commonAwake] + 1624
+	6   AppKit                              0x9340ce89 -[NSWindow _makeKeyRegardlessOfVisibility] + 110
+	7   AppKit                              0x9340cde1 -[NSWindow makeKeyAndOrderFront:] + 39
+	8   QtGui                               0x027ad85a _ZN14QWidgetPrivate8show_sysEv + 1178
+	9   QtGui                               0x0286690b _ZN14QWidgetPrivate11show_helperEv + 475
+	10  QtGui                               0x02866ec3 _ZN7QWidget10setVisibleEb + 1091
+	11  QtGui.so                            0x023c57b3 _ZNK10sipQWidget10metaObjectEv + 17763
+	12  Python                              0x005bbfd5 PyEval_EvalFrameEx + 19429
+	13  Python                              0x005bc956 PyEval_EvalFrameEx + 21862
+	14  Python                              0x005bc956 PyEval_EvalFrameEx + 21862
+	15  Python                              0x005bc956 PyEval_EvalFrameEx + 21862
+	16  Python                              0x005bc956 PyEval_EvalFrameEx + 21862
+	17  Python                              0x005bc956 PyEval_EvalFrameEx + 21862
+	18  Python                              0x005be14d PyEval_EvalCodeEx + 2109
+	19  Python                              0x005be2d7 PyEval_EvalCode + 87
+	20  Python                              0x005e3068 PyRun_FileExFlags + 168
+	21  Python                              0x005b191e PyAST_FromNode + 8622
+	22  Python                              0x005bbfd5 PyEval_EvalFrameEx + 19429
+	23  Python                              0x005be14d PyEval_EvalCodeEx + 2109
+	24  Python                              0x005bc1bc PyEval_EvalFrameEx + 19916
+	25  Python                              0x005be14d PyEval_EvalCodeEx + 2109
+	26  Python                              0x005be2d7 PyEval_EvalCode + 87
+	27  Python                              0x005e3068 PyRun_FileExFlags + 168
+	28  Python                              0x005e3ff3 PyRun_SimpleFileExFlags + 867
+	29  Python                              0x005e4178 PyRun_SimpleFile + 40
+	30  InfobioticsDashboard                0x00007b9f start + 23863
+	31  InfobioticsDashboard                0x00008091 main + 297
+	32  InfobioticsDashboard                0x00001f63 start + 251
+	33  InfobioticsDashboard                0x00001e91 start + 41
+	34  ???                                 0x00000002 0x0 + 2
+)

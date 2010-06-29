@@ -259,4 +259,8 @@ install_name_tool -change "@rpath/libhdf5.6.dylib" "@loader_path/../../../../../
 
 otool -L /Users/nataliokrasnogor/tmp/dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/lib-dynload/tables/utilsExtension.so
 
-ƒ
+
+cat DYLD_PRINT_LIBRARIES.txt | cut -d' ' -f 3- | egrep '^/' | xargs otool -L > ldd.txt
+python fix_dylib_paths.py
+bash cp_libs.sh
+bash ldd_changes.sh

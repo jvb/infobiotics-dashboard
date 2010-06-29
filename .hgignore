@@ -22,3 +22,8 @@ infobiotics-dashboard*.tar.gz.cdbs-config_list
 
 syntax: regexp
 ^tests/old$
+
+syntax: regexp
+^ldd_changes\.sh$
+syntax: regexp
+^cp_libs\.sh$
