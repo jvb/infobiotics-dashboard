@@ -4,7 +4,7 @@ import os.path
 
 class PRISMParams(PModelCheckerParams):
 
-    def _handler_default(self):
+    def _get_handler(self):
         from prism_params_handler import PRISMParamsHandler
 #        from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler
         return PRISMParamsHandler(model=self)

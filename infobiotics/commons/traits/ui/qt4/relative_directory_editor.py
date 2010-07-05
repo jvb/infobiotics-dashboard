@@ -9,7 +9,7 @@ class SimpleEditor(SimpleRelativeFileEditor):
         ''' Creates the correct type of file dialog. '''
         dlg = QtGui.QFileDialog(self.control.parentWidget(), self.name, self.directory)
         dlg.setFileMode(QtGui.QFileDialog.Directory)
-#        dlg.setOption(QtGui.QFileDialog.ShowDirsOnly)
+        dlg.setOption(QtGui.QFileDialog.ShowDirsOnly, False)
         dlg.setFilter(QDir.Dirs)
         if len(self.factory.filter) > 0:
             dlg.setNameFilters(self.factory.filter)

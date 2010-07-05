@@ -7,10 +7,11 @@ from enthought.traits.api import (
 )
 from enthought.traits.ui.api import Controller
 from infobiotics.common.api import ParamsRelativeFile
-from infobiotics.commons.api import key_from_value, can_access, read, write, logging
+from infobiotics.commons.api import key_from_value, can_access, read, write, logging, can_execute
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 import os
 from xml import sax
+from infobiotics.thirdparty.which import which, WhichError
 
 logger = logging.getLogger(level=logging.ERROR)
 
@@ -19,97 +20,93 @@ class Params(HasTraits):
     _parameters_name = Str(Undefined, desc='the name attribute of the parameter tag in the params XML file')
     _parameter_set_name = Str(Undefined, desc='the name attribute of the parameterSet tag in the params XML file')
 
-    _preferences_path = Property(depends_on='executable_name')
-    def _get__preferences_path(self):
-        return self.executable_name
-    executable_name = Str
-    executable = EXECUTABLE_TRAIT(absolute=True, auto_set=True, executable=True) #TODO name_trait='executable_name'
-#    def __params_program_default(self): #TODO get_preference(name, contigency_function)
-#            from infobiotics.thirdparty.which import which, WhichError
-#            try:
-#                _params_program = which(self._params_program_name)
-#            except WhichError:
-#                _params_program = None
-#            if _params_program is None:
-#                # we can't find it so print error message and exit #FIXME what does this do in the interpreter? 
-#                import sys
-#                sys.stderr.write(
-#                    "error: '%s' could not be located on PATH. " \
-#                    "Either change PATH to include '%s' " \
-#                    "or amend '%s' with its correct location.\n" % (
-#                        self._params_program_name, 
-#                        self._params_program_name, 
-#                        get_default_preferences().filename,
-#                    )
-#                )
-#                sys.exit(1)
-    directory = DIRECTORY_TRAIT # infinite recursion if ParamsRelativeDirectory because directory='directory'
-    def _directory_default(self):
-        directory = self.preferences_helper.default_directory
-        return directory if directory != '' else os.getcwd()  
-
     _params_file = ParamsRelativeFile(absolute=True, exists=True, readable=True, writable=True)
+    
     def __params_file_changed(self, _params_file):
         self.directory = os.path.dirname(_params_file)
         self._dirty = False #TODO use dirty for prompting to save on perform
+    
     _dirty = Bool(False)
 
-    _unresetable = List(Str)
+
+
+
+
+
+    executable_name = Str
+
+    _preferences_path = Property(depends_on='executable_name')
+
+    def _get__preferences_path(self):
+        return self.executable_name
+
+    preferences_helper = Property(Instance(ParamsPreferencesHelper))
     
+    def _get_preferences_helper(self):
+        raise NotImplementedError('Params subclasses must provide a _get_preferences_helper methods that returns an instance of (a subclass of) ParamsPreferencesHelper.')
+
     preferences = List(Str, ['executable','directory'], desc='a list of trait names to bind to preferences')
-
-    # interactive methods ---
-        
-    _interactive = False
-
-    handler = Instance(Controller)
     
-    def _handler_default(self):
-        '''
-        e.g.
-            from infobiotics.mcss.api import McssParamsHandler
-            return McssParamsHandler(model=self)
-        '''
-        raise NotImplementedError
-    
-    def configure(self, **args):
-        self._interactive = True
-        self.handler.configure_traits(**args)
-        
-    def edit(self, **args):
-        self._interactive = True
-        ui = self.handler.edit_traits(**args)
+    executable = EXECUTABLE_TRAIT
 
+    def _executable_default(self):
+        executable = self.preferences_helper.executable
+        try:
+            which_executable = which(self.executable_name)
+        except WhichError, e:
+            print e
+        return executable if can_execute(executable) else which_executable
+
+    directory = DIRECTORY_TRAIT # infinite recursion if ParamsRelativeDirectory because directory='directory'
+    
+#    def _directory_default(self):
+#        directory = self.preferences_helper.directory
+#        return directory if directory != '' else os.getcwd()  
+
+    def _directory_changed(self, old, new):
+        print 'directory(self, old, new)', self, old, new
+        
     def __init__(self, file=None, **traits):
         from infobiotics.preferences import preferences
-        print preferences.filename
+#        print preferences.filename
         preferences.dump()
         self.bind_preferences()
 #        
         super(Params, self).__init__(**traits)
+#        self.bind_preferences()#TODO
         self.on_trait_change(self.update_repr, self.parameter_names())
 #
         if file is not None:
             self.load(file)
 
-    preferences_helper = Instance(ParamsPreferencesHelper)
-    def _preferences_helper(self):
-        raise NotImplementedError('Params subclasses must provide a ParamsPreferencesHelper instance for preferences_helper')
-            
+
+
     def bind_preferences(self):
+        ''' Very tricky! Must explicitly pass preferences to bind_preference,
+        otherwise the trait we are binding to does not get updated. '''
         from enthought.preferences.api import bind_preference
-#        for preference in self.preferences:
-#            print '.'.join((self._preferences_path, preference))
-#            bind_preference(self, preference, '.'.join((self._preferences_path, preference)))
-        self.bound_preferences = [bind_preference(self, preference, '.'.join((self._preferences_path, preference))) for preference in self.preferences]
+#       # must assign bound_preferences otherwise bindings will be lost when this method returns 
+        self.bound_preferences = [bind_preference(self, preference, '.'.join((self._preferences_path, preference)), infobiotics.preferences.preferences) for preference in self.preferences]
+#        for bound_preference in self.bound_preferences:
+#            print bound_preference.preferences
         
     def save_preferences(self):
-        ''' Called from self.handler.close() '''
-        print self.preferences_helper.directory
-        print self.directory
-#        self.preferences_helper.directory = self.directory
-#        self.preferences_helper.preferences.flush() 
+        from infobiotics.preferences import preferences
+        preferences.dump()
+#        ''' Called from self.handler.close() '''
+#        helper = self.preferences_helper
+##        print helper.preferences
+#
+##        pass
+        print 'self.executable =', self.executable
+        print 'self.preferences_helper.executable =', self.preferences_helper.executable
+##        self.preferences_helper.executable = self.executable
+##        self.preferences_helper.directory = self.directory
+##        self.preferences_helper.preferences.flush()
+##        self.preferences_helper.preferences.dump()
 
+
+    _unresetable = List(Str)
         
     def load(self, file=''):
         ''' Reads parameters file, 
@@ -154,7 +151,7 @@ class Params(HasTraits):
         # the file we are loading
         self._unresetable = self.reset(self.parameter_names())
         if len(self._unresetable) > 0:
-            logger.warn("Some parameters were not reset: %s", self._unresetable)
+            logger.warn("Some parameters were not reset: %s", ', '.join(self._unresetable))
 
         # change directory so that setting of File traits with relative paths works
         if not os.path.isabs(file):
@@ -251,6 +248,7 @@ class Params(HasTraits):
         self._params_file = file
         return True
 
+
     def reset(self, traits=None):
         ''' Resets some or all of an object's trait attributes to their default
         values. Identical to HasTraits.reset_traits(). 
@@ -258,8 +256,9 @@ class Params(HasTraits):
         Used when loading params files because they may not contain all   
         parameters and we don't want the previous values to remain.
         
-        Returns a list of attributes that the method was unable to reset, which
-        is empty if all the attributes were successfully reset. 
+        Returns a list of attributes that the method was unable to reset, 
+        (all saved in _unresetable) 
+        which is empty if all the attributes were successfully reset. 
         
         '''
         return self.reset_traits(traits)
@@ -311,6 +310,31 @@ class Params(HasTraits):
     # on_trait_change set in __init__
     def update_repr(self):
         self.repr = self.__repr__()
+
+
+
+    # interactive methods ---
+        
+    _interactive = False
+
+    handler = Property(Instance('ParamsHandler'))#Controller    
+    def _get_handler(self):
+        '''
+        e.g.
+            from infobiotics.mcss.api import McssParamsHandler
+            return McssParamsHandler(model=self)
+        '''
+        raise NotImplementedError
+    
+    def configure(self, **args):
+        self._interactive = True
+        self.handler.configure_traits(**args)
+        
+    def edit(self, **args):
+        self._interactive = True
+        ui = self.handler.edit_traits(**args)
+
+
 
     
 from xml.sax import ContentHandler

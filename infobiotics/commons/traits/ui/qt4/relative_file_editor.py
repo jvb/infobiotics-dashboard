@@ -30,10 +30,10 @@ class SimpleEditor(SimpleTextEditor):
         layout.addWidget(control)
 
         if self.factory.auto_set:
-            signal = QtCore.SIGNAL('textEdited(QString)')
+            signal = QtCore.SIGNAL('textEdited(QString)') # Unlike textChanged(), this signal is not emitted when the text is changed programmatically, for example, by calling setText().
         else:
             # Assume enter_set is set, or else the value will never get updated.
-            signal = QtCore.SIGNAL('editingFinished()')
+            signal = QtCore.SIGNAL('editingFinished()') # This signal is emitted when the Return or Enter key is pressed or the line edit loses focus.
         QtCore.QObject.connect(control, signal, self.update_object)
 
         button = QtGui.QPushButton("Browse...")
@@ -45,11 +45,9 @@ class SimpleEditor(SimpleTextEditor):
         self.set_tooltip(control) # != self.control
         # end of similarity ---
         
-        # ensure invalid is set appropriately for hard-coded/default value ---
-        if self.value is not None:
-#            self.update_object()
-            print 'value =', self.value
-            self.update_editor(self.value)
+#        # ensure invalid is set appropriately for hard-coded/default value ---
+#        if self.value is not None:
+#            self.update_editor(self.value) # which then calls self.update_object, which in turn calls self._update
 
     @on_trait_change('exists, directory')
     def update_object(self):
@@ -60,9 +58,10 @@ class SimpleEditor(SimpleTextEditor):
     def update_editor(self, value=None):
         ''' Updates the editor when the object trait changes externally to the editor. ''' 
         if value is not None:
-            self._file_name.setText(value) # triggers update_object
+            self._file_name.setText(value)
         else: 
-            self._file_name.setText(self.str_value) # triggers update_object
+#            self._file_name.setText(self.str_value)
+            self._file_name.setText(self.value)
         self.update_object() 
         # needed to refresh invalid state when a valid value is set while the 
         # editor is in an invalid state

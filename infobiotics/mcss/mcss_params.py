@@ -1,26 +1,26 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
-from enthought.traits.api import Enum, Bool, Range, Long
+from enthought.traits.api import Enum, Bool, Range, Long, Property
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 from infobiotics.mcss.mcss_preferences import McssParamsPreferencesHelper
 
 class McssParams(Params):
 
-    def _handler_default(self):
+    def _get_handler(self):
         from infobiotics.mcss.api import McssParamsHandler
         return McssParamsHandler(model=self)
 
-    preferences_helper = McssParamsPreferencesHelper()
+    def _get_preferences_helper(self):
+        helper = McssParamsPreferencesHelper()
+#        print helper.preferences
+        return helper
 
     executable_name = 'mcss'
     
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
         
-    model_file = ParamsRelativeFile(#FIXME doesn't uninvalidate!
+    model_file = ParamsRelativeFile(desc='the model file to simulate',
         exists=True, 
-        desc='the model file to simulate', 
-#        directory_name='directory', 
-#        auto_set=True,
         filter=[
             'All model files (*.lpp *.sbml)', 
             'Lattice population P system files (*.lpp)', 
@@ -73,6 +73,6 @@ class McssParams(Params):
 
 if __name__ == '__main__':
     parameters = McssParams()
-    parameters.load('../../tests/workbench_examples/modules/module1.params')
+#    parameters.load('../../tests/workbench_examples/modules/module1.params')
     parameters.configure()
             

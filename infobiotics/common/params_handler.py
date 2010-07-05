@@ -37,7 +37,7 @@ tools_menu = Menu(
         name='&Preferences', 
         action='edit_preferences', 
         tooltip='TODO',
-        enabled_when='len(controller._preferences_pages) > 0', # 
+        enabled_when='len(controller._preferences_pages) > 0',
     ),
     name='&Tools'
 )
@@ -93,14 +93,15 @@ class ParamsHandler(HelpfulController):
 #                print self.__class__.__name__
 
 
-    preferences_page = Instance(PreferencesPage)
-    def _preferences_page_default(self):
-        raise NotImplementedError('e.g. return McssParamsPreferencesPage')
-    
     preferences_pages = List(PreferencesPage)
     def _preferences_pages_default(self):
         ''' Subclasses of ParamsHandler should override this method if more than one PreferencesPage is used. '''
         return [self.preferences_page]
+    
+    preferences_page = Instance(PreferencesPage)
+    def _preferences_page_default(self):
+#        raise NotImplementedError('e.g. return McssParamsPreferencesPage')
+        return None
     
     _preferences_pages = Property(depends_on='preferences_pages', desc='filters instances of None from preferences_pages for enabled_when in Preferences Action')
     def _get__preferences_pages(self):
@@ -109,16 +110,16 @@ class ParamsHandler(HelpfulController):
     def edit_preferences(self, info):
         preferences_manager = PreferencesManager(pages=self._preferences_pages) # must pass in pages manually 
         ui = preferences_manager.edit_traits(kind='modal') # should edit preferences modally
-        if ui.result: # only save preferences if OK pressed
-            for page in self.preferences_pages: # save preferences for each page as they could have different preferences nodes (files)
-                page.preferences.save() # must save preferences manually
+#        if ui.result: # only save preferences if OK pressed
+#            for page in self.preferences_pages: # save preferences for each page as they could have different preferences nodes (files)
+#                page.preferences.save() # must save preferences manually
         return ui.result
 
 
     status = Str
     
     def init(self, info):
-#        self.status = "Please ensure the current working directory is correct."
+        self.status = "Please ensure the current working directory is correct:"
         info.ui.title = self.title
 
     def closed(self, info, is_ok): # must return True or else window is unscloseable!
@@ -172,14 +173,14 @@ class ParamsHandler(HelpfulController):
             if self.copy: #TODO prompt to overwrite existing files in new directory
                 pass
             params.save(file_name, force=True, copy=self.copy) # user will have been prompted to overwrite by the GUI
-            self.status = "Saved '%s'." % file_name
+            self.status = "Saved '%s'." % shorten_path(file_name, 71)
                                    
     def get_save_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
             action='save as', 
             wildcard=self.wildcard,
             title = title,
-            default_directory = os.path.dirname(self.model._params_file),
+            default_directory = os.path.dirname(self.model._params_file), #TODO
         )
         if fd.open() == OK:
             return fd.path
@@ -260,3 +261,6 @@ class ParamsHandler(HelpfulController):
 #        else:
 #            self.model._dirty = False
     
+    
+if __name__ == '__main__':
+    execfile('params.py')

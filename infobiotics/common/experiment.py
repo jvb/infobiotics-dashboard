@@ -251,20 +251,40 @@ class Experiment(Params):
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
-        import os
-        if not os.path.isfile(self.executable):
-            if self._interactive:
-                #TODO message box explaining that executable does not exist or is not executable and that another should be specified using the preferences dialog
-                while True:
-                    if not self.handler.edit_preferences(): # self.executable will be updated if True returned
-                        return False
-                    elif os.path.isfile(self.executable):
-                        break
-            else:
-                import sys
-                sys.stderr.write("'%s' does not exist. Please specify an alternative %s executable either by using McssExperiment(executable=/full/path/to/executable, ...) or by editing the 'executable' entry in section [%s] of the preferences file '%s'.\n" % (self.executable, self.executable_name, self.executable_name, self.preferences_helper.preferences.filename))
-                return False
-                    
+##    def __params_program_default(self): #TODO get_preference(name, contigency_function)
+##            from infobiotics.thirdparty.which import which, WhichError
+##            try:
+##                _params_program = which(self._params_program_name)
+##            except WhichError:
+##                _params_program = None
+##            if _params_program is None:
+##                # we can't find it so print error message and exit #FIXME what does this do in the interpreter? 
+##                import sys
+##                sys.stderr.write(
+##                    "error: '%s' could not be located on PATH. " \
+##                    "Either change PATH to include '%s' " \
+##                    "or amend '%s' with its correct location.\n" % (
+##                        self._params_program_name, 
+##                        self._params_program_name, 
+##                        get_default_preferences().filename,
+##                    )
+##                )
+##                sys.exit(1)
+#
+#        import os
+#        if not os.path.isfile(self.executable):
+#            if self._interactive:
+#                #TODO message box explaining that executable does not exist or is not executable and that another should be specified using the preferences dialog
+#                while True:
+#                    if not self.handler.edit_preferences(self.handler.info): # self.executable will be updated if True returned
+#                        return False
+#                    elif os.path.isfile(self.executable):
+#                        break
+#            else:
+#                import sys
+#                sys.stderr.write("'%s' does not exist. Please specify an alternative %s executable either by using McssExperiment(executable=/full/path/to/executable, ...) or by editing the 'executable' entry in section [%s] of the preferences file '%s'.\n" % (self.executable, self.executable_name, self.executable_name, self.preferences_helper.preferences.filename))
+#                return False
+#
         if thread:
             Thread(target=self._spawn).start()
         else:

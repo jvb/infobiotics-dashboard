@@ -249,26 +249,15 @@ class RelativeFile(BaseStr):
         self.error(object, name, value)
 
     def post_setattr(self, object, name, value):
-        ''' Sets self.abspath. '''
-#        if value == '':
-#            self.abspath = value
-#        elif not os.path.isabs(value):
-
         # only required here the first time the value is set
         self._set_directory_from_directory_name(object)
-        
         if not os.path.isabs(value):
             if not os.path.isabs(self.directory):
                 directory = os.path.join(os.getcwd(), self.directory)
             else:
                 directory = self.directory
-#            self.abspath = os.path.join(directory, value)
-#        else:
-#            self.abspath = value
             value = os.path.join(directory, value)
-        #TODO remove self.abspath and only use the shadow value
-#        object.__dict__[ name + '_' ] = self.abspath # create shadow value
-        object.__dict__[ name + '_' ] = value
+        object.__dict__[name+'_'] = value # create shadow value
     
     def create_editor(self):
         from infobiotics.commons.traits.ui.qt4.relative_file_editor import RelativeFileEditor

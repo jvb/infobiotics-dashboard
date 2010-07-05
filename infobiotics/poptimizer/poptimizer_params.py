@@ -4,7 +4,7 @@ from infobiotics.commons.traits.api import FloatGreaterThanZero, IntGreaterThanZ
 
 class POptimizerParams(Params):
     
-    def _handler_default(self):
+    def _get_handler(self):
         from infobiotics.poptimizer.api import POptimizerParamsHandler
         return POptimizerParamsHandler(model=self)
         

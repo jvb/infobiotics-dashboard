@@ -5,7 +5,7 @@ from enthought.traits.api import Int, Float
 
 class McssExperiment(McssParams, Experiment):
     
-    def _handler_default(self):
+    def _get_handler(self):
         from infobiotics.mcss.api import McssExperimentHandler
         return McssExperimentHandler(model=self)
     
@@ -29,4 +29,6 @@ class McssExperiment(McssParams, Experiment):
 
 
 if __name__ == '__main__':
-    McssExperiment().configure()
+    experiment = McssExperiment()
+    experiment.load('../../tests/workbench_examples/modules/module1.params')
+    experiment.configure()

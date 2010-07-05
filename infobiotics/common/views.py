@@ -22,7 +22,6 @@ perform_action = Action(
     name='&Perform', 
     action='perform', 
     tooltip='Perform the experiment with the current parameters',
-#    enabled_when='controller.has_valid_parameters',
     enabled_when='handler.has_valid_parameters',
 )
 
@@ -102,10 +101,10 @@ class ParamsView(View): # can be used to edit parameters without performing the 
         values = [
             VGroup(
                 status_group,
-                executable_group, #TODO could move executable_group to ExperimentView but for PModelChecker running itself to create modelParameters.xml and PRISM_model
                 directory_group,
 #                '_',
                 values,
+                executable_group, #TODO could move executable_group to ExperimentView but for PModelChecker running itself to create modelParameters.xml and PRISM_model
                 show_border=True,
             ),
         ]

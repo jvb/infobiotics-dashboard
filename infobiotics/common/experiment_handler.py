@@ -31,7 +31,7 @@ class ExperimentHandler(ParamsHandler):
             return False
         if self.info.ui.errors > 0:
             return False
-        elif not os.path.isfile(self.model.executable): 
+        elif not os.path.isfile(self.model.executable):
             return False
         return True
     
