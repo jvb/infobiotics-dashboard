@@ -24,9 +24,9 @@ class RelativeDirectory(RelativeFile):
         ----------
         value : string
             The default value for the trait
-        filter : string
-            A wildcard string to filter directories in the file dialog box used 
-            by the attribute trait editor.
+        filter : list
+            A list of wildcard strings to filter filenames in the file dialog 
+            box used by the attribute trait editor.
         auto_set : boolean
             Indicates whether the file editor updates the trait value after
             every key stroke.

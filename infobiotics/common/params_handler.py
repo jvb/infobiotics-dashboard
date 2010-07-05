@@ -116,7 +116,7 @@ class ParamsHandler(HelpfulController):
 
 
     status = Str
-            
+    
     def init(self, info):
 #        self.status = "Please ensure the current working directory is correct."
         info.ui.title = self.title
@@ -134,7 +134,8 @@ class ParamsHandler(HelpfulController):
 #        file_name = self.get_load_file_name_using_Traits_FileDialog(title)
         if file_name is not None:
             params.load(file_name)
-            self.status = "Loaded '%s'." % file_name
+            from infobiotics.commons.strings import shorten_path
+            self.status = "Loaded '%s'." % shorten_path(file_name, 70)
         
     def get_load_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(

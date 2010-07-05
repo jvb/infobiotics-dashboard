@@ -1,8 +1,10 @@
 import os
-from enthought.traits.api import BaseFile
+#from enthought.traits.api import BaseFile
+from enthought.traits.api import BaseStr
 from infobiotics.commons.api import can_read, can_write, can_execute
 
-class RelativeFile(BaseFile):
+#class RelativeFile(BaseFile):
+class RelativeFile(BaseStr):
     """ Defines a trait whose value must be the name of a file (which can be 
     relative to a directory other than the current working directory, as
     specified by 'directory_name').
@@ -25,9 +27,9 @@ class RelativeFile(BaseFile):
         ----------
         value : string
             The default value for the trait
-        filter : string
-            A wildcard string to filter filenames in the file dialog box used by
-            the attribute trait editor.
+        filter : list
+            A list of wildcard strings to filter filenames in the file dialog 
+            box used by the attribute trait editor.
         auto_set : boolean
             Indicates whether the file editor updates the trait value after
             every key stroke.
@@ -93,8 +95,18 @@ class RelativeFile(BaseFile):
         self.executable = executable
 
         super(RelativeFile, self).__init__(
-            value, filter, auto_set, entries, exists, **metadata
+#            value, filter, auto_set, entries, exists, **metadata
+            value, **metadata
         )
+
+        if isinstance(filter, (str, unicode)):
+            filter = [filter]
+        self.filter = filter
+        self.auto_set = auto_set
+        self.entries = entries
+        self.exists = exists
+        
+#        self.editor = self.create_editor() # problem with circular imports - try not subclassing BaseFile instead.
 
 #    default_value = ''
 #
@@ -171,7 +183,7 @@ class RelativeFile(BaseFile):
         and abspath = '/tmp/file'
         return 'file'
         """
-        value = super(BaseFile, self).validate(object, name, value) # validate value using BaseStr's validator 
+        value = super(RelativeFile, self).validate(object, name, value) # validate value using BaseStr's validator 
 #        print 'value =', value
         
         self._set_directory_from_directory_name(object)

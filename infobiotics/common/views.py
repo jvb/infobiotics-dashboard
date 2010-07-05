@@ -59,9 +59,19 @@ file_menu = Menu(
 
 toolbar = ToolBar(load_action, save_action)
 
+from enthought.traits.ui.api import TextEditor
+status_group = HGroup( # better than status bar because long texts can be shown
+    Item('handler.status',
+        show_label=False,
+        editor=TextEditor(),
+        style='readonly',
+    ),
+    visible_when='len(handler.status) > 0'
+)
+
 executable_group = HGroup(
     Item('executable', 
-        label='Program',
+#        label='Program',
         visible_when='"Dashboard" not in handler.__class__.__name__', 
     ),
     visible_when='object.__class__.__name__ not in ("McssParams", "POptimizerParams")', # only needed for PRISMParams (and MC2Params? TODO)
@@ -69,7 +79,7 @@ executable_group = HGroup(
 
 directory_group = HGroup(
     Item('directory', 
-        tooltip='Relative paths will be resolved to this directory.',
+#        tooltip='Relative file paths will be resolved to this directory.',
     ),
 )
 
@@ -80,17 +90,18 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     resizable = True
 
     toolbar = toolbar
-
-    statusbar = [ 
-        StatusItem(
-            name='handler.status',
-            width=1.0
-        ),
-    ]
+    
+#    statusbar = [ # removed in favour of status_group 
+#        StatusItem(
+#            name='handler.status',
+#            width=1.0
+#        ),
+#    ]
 
     def set_content(self, *values):
         values = [
             VGroup(
+                status_group,
                 executable_group, #TODO could move executable_group to ExperimentView but for PModelChecker running itself to create modelParameters.xml and PRISM_model
                 directory_group,
 #                '_',

@@ -6,9 +6,7 @@ from enthought.traits.api import (
 #    on_trait_change
 )
 from enthought.traits.ui.api import Controller
-from infobiotics.common.api import (
-    ParamsRelativeFile, #ParamsRelativeDirectory,
-)
+from infobiotics.common.api import ParamsRelativeFile
 from infobiotics.commons.api import key_from_value, can_access, read, write, logging
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 import os
@@ -25,7 +23,7 @@ class Params(HasTraits):
     def _get__preferences_path(self):
         return self.executable_name
     executable_name = Str
-    executable = EXECUTABLE_TRAIT#(absolute=True, auto_set=True, executable=True, exists=True) #TODO name_trait='executable_name'
+    executable = EXECUTABLE_TRAIT(absolute=True, auto_set=True, executable=True) #TODO name_trait='executable_name'
 #    def __params_program_default(self): #TODO get_preference(name, contigency_function)
 #            from infobiotics.thirdparty.which import which, WhichError
 #            try:
@@ -45,9 +43,9 @@ class Params(HasTraits):
 #                    )
 #                )
 #                sys.exit(1)
-    directory = RelativeDirectory(absolute=True, exists=True, auto_set=True, desc='the location file names can be relative to.') # infinite recursion if ParamsRelativeDirectory because directory='directory'
+    directory = DIRECTORY_TRAIT # infinite recursion if ParamsRelativeDirectory because directory='directory'
     def _directory_default(self):
-        directory = self.preferences_helper.directory
+        directory = self.preferences_helper.default_directory
         return directory if directory != '' else os.getcwd()  
 
     _params_file = ParamsRelativeFile(absolute=True, exists=True, readable=True, writable=True)

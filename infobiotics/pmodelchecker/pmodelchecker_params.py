@@ -2,9 +2,12 @@ from infobiotics.common.api import Params, ParamsRelativeFile
 from enthought.traits.api import Enum, Str, Float, Bool
 from infobiotics.commons.traits.api import LongGreaterThanZero
 import os.path
+from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
 
 class PModelCheckerParams(Params):
     ''' Base class for PRISMParams and MC2Params. '''
+
+    preferences_helper = PModelCheckerParamsPreferencesHelper()
 
     executable_name = 'pmodelchecker'
     

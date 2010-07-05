@@ -1,5 +1,17 @@
+import os.path
+def shorten_path(path, width=80):
+    if len(path) <= width:
+        return path
+    else:
+        split = os.path.split(path)
+        if len(split) == 1:
+            return '...%s' % path[-(width-3):] 
+        else:
+            path = os.path.join('...', *split[1:])
+        return shorten_path(path, width)
+
 ## {{{ http://code.activestate.com/recipes/148061/ (r6)
-def wrap(text, width):
+def wrap(text, width=80):
     """
     A word-wrap function that preserves existing line breaks
     and most spaces in the text. Expects that existing line

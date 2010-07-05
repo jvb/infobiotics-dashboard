@@ -47,7 +47,9 @@ class SimpleEditor(SimpleTextEditor):
         
         # ensure invalid is set appropriately for hard-coded/default value ---
         if self.value is not None:
-            self.update_object()
+#            self.update_object()
+            print 'value =', self.value
+            self.update_editor(self.value)
 
     @on_trait_change('exists, directory')
     def update_object(self):
@@ -91,9 +93,11 @@ class SimpleEditor(SimpleTextEditor):
         dlg = QtGui.QFileDialog(self.control.parentWidget(), self.name, self.directory)
         if self.exists: 
             dlg.setFileMode(QtGui.QFileDialog.ExistingFile)
-        dlg.selectFile(self._file_name.text())
         if len(self.factory.filter) > 0:
-            dlg.setFilters(self.factory.filter)
+            dlg.setNameFilters(self.factory.filter)
+        
+        dlg.selectFile(self._file_name.text())
+        
         return dlg
 
     def _update(self, file_name):

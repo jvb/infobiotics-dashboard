@@ -24,8 +24,8 @@ if sys.platform.startswith('win'):
     
     import infobiotics.thirdparty.winpexpect as expect
 else:
-#    import pexpect as expect
-    import infobiotics.thirdparty.pexpect as expect
+    import pexpect as expect
+#    import infobiotics.thirdparty.pexpect as expect
 from enthought.traits.api import ListStr, Str, Event, Property, Bool
 from threading import Thread
 from infobiotics.common.api import Params, ParamsRelativeFile

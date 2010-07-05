@@ -19,7 +19,7 @@ class ParamsRelativeFile(RelativeFile):
         executable=None,
         **metadata
     ):
-        super(RelativeFile, self).__init__(
+        super(ParamsRelativeFile, self).__init__(
                 value, 
                 filter, 
                 auto_set=auto_set, 
@@ -53,7 +53,7 @@ class ParamsRelativeDirectory(RelativeDirectory):
         executable=None,
         **metadata
     ):
-        super(RelativeDirectory, self).__init__(
+        super(ParamsRelativeDirectory, self).__init__(
                 value, 
                 filter, 
                 auto_set=auto_set, 
