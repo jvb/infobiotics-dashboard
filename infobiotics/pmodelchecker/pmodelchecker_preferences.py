@@ -1,6 +1,6 @@
 from infobiotics.common.api import ParamsPreferencesHelper, ParamsPreferencesPage
 
-PREFERENCES_PATH = 'pmodelchcecker'
+PREFERENCES_PATH = 'pmodelchecker'
 
 class PModelCheckerParamsPreferencesHelper(ParamsPreferencesHelper):
     preferences_path = PREFERENCES_PATH 

@@ -7,5 +7,5 @@ class McssDashboardExperiment(McssExperiment):
     
     application = Instance(InfobioticsDashboardWorkbenchApplication)
     
-    def _get_handler(self):
+    def _handler_default(self):
         return McssDashboardExperimentHandler(model=self, application=self.application)

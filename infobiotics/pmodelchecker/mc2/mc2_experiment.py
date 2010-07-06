@@ -5,7 +5,7 @@ from enthought.traits.api import Str, Int, Range
 
 class MC2Experiment(MC2Params, PModelCheckerExperiment):
 
-    def _get_handler(self):
+    def _handler_default(self):
         from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
         return MC2ExperimentHandler(model=self)
 

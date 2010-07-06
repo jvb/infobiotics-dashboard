@@ -1,6 +1,4 @@
 from infobiotics.mcss.api import McssExperimentProgressHandler
 
-class McssDashboardExperimentProgressHandler(McssExperimentProgressHandler):#, CancelExperimentMixin):
+class McssDashboardExperimentProgressHandler(McssExperimentProgressHandler):
     pass
-
-#    progress = Property(Percentage)
