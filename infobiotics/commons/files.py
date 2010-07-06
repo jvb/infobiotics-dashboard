@@ -67,7 +67,7 @@ def can_write(path):
     if can_access(path):
         return can_access(path, os.W_OK)
     else:
-        # if we got here then the file might not exist but we can still test if
+        # if we get here then the file might not exist but we can still test if
         # the directory it should be in is writable.
         return can_write(os.path.dirname(os.path.abspath(path)))
 

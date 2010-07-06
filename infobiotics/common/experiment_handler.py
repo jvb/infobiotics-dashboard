@@ -15,9 +15,10 @@ class ExperimentHandler(ParamsHandler):
         raise NotImplementedError('e.g. return McssExperimentProgressHandler(model=self.model)')
 
     def _show_progress(self):
-        self._progress_handler.edit_traits(kind='live')#modal') # must be live to receive progress updates
+        self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates
 
     def perform(self, info):
+        # hide window?
 ##        if self.close(info, True):
 ##            self._on_close(info)
 #        info.ui.control.setVisible(False) # if we do self._on_close(info) then subclasses can't catch events including 'finished'

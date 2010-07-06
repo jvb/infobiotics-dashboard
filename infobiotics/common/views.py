@@ -68,13 +68,13 @@ status_group = HGroup( # better than status bar because long texts can be shown
     visible_when='len(handler.status) > 0'
 )
 
-executable_group = HGroup(
-    Item('executable', 
-#        label='Program',
-        visible_when='"Dashboard" not in handler.__class__.__name__', 
-    ),
-    visible_when='object.__class__.__name__ not in ("McssParams", "POptimizerParams")', # only needed for PRISMParams (and MC2Params? TODO)
-) 
+#executable_group = HGroup(
+#    Item('executable', 
+##        label='Program',
+#        visible_when='"Dashboard" not in handler.__class__.__name__', 
+#    ),
+#    visible_when='object.__class__.__name__ not in ("McssParams", "POptimizerParams")', # only needed for PRISMParams (and MC2Params? TODO)
+#) 
 
 directory_group = HGroup(
     Item('directory', 
@@ -104,7 +104,7 @@ class ParamsView(View): # can be used to edit parameters without performing the 
                 directory_group,
 #                '_',
                 values,
-                executable_group, #TODO could move executable_group to ExperimentView but for PModelChecker running itself to create modelParameters.xml and PRISM_model
+#                executable_group, #TODO could move executable_group to ExperimentView but for PModelChecker running itself to create modelParameters.xml and PRISM_model
                 show_border=True,
             ),
         ]

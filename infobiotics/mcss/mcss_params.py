@@ -5,13 +5,12 @@ from infobiotics.mcss.mcss_preferences import McssParamsPreferencesHelper
 
 class McssParams(Params):
 
-    def _get_handler(self):
+    def _handler_default(self):
         from infobiotics.mcss.api import McssParamsHandler
         return McssParamsHandler(model=self)
 
-    def _get_preferences_helper(self):
+    def _preferences_helper_default(self):
         helper = McssParamsPreferencesHelper()
-#        print helper.preferences
         return helper
 
     executable_name = 'mcss'
@@ -73,6 +72,7 @@ class McssParams(Params):
 
 if __name__ == '__main__':
     parameters = McssParams()
-#    parameters.load('../../tests/workbench_examples/modules/module1.params')
+    parameters.load('../../tests/workbench_examples/modules/module1.params')
+#    parameters.edit()
     parameters.configure()
             

@@ -1,6 +1,6 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import Callable, Int, Unicode, Bool, Str, on_trait_change
+from enthought.traits.api import Callable, Int, Unicode, Bool, Str, on_trait_change, Undefined
 from enthought.traits.ui.qt4.editor import Editor
 from enthought.traits.ui.api import BasicEditorFactory
 from PyQt4.QtGui import (
@@ -159,6 +159,9 @@ class _CancellableProgressEditor(Editor):
         if self.factory.show_time:
             if (self.factory.max != self.factory.min):
                 percent = (float(self.value) - self.factory.min)/(self.factory.max - self.factory.min)
+                # if float(<undefined>) raises an error here then probably the
+                # name of the trait this is editing is mispelled or owned by
+                # the handler, e.g. 'handler.progress' instead of 'progress'. 
             else:
                 percent = 1.0
             if self.factory.show_time and (percent != 0):

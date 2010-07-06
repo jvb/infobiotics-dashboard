@@ -13,7 +13,7 @@ class McssParamsHandler(ParamsHandler):
     def _params_group_default(self):
         return mcss_params_group
     
-    id = 'McssParamsHandler' #TODO is this used save the window position, possibly via View(id=...)?
+    id = 'McssParamsHandler'
     
     help_urls = [
         ('Documentation','http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'),

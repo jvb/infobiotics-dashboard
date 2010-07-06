@@ -8,13 +8,15 @@ EXECUTABLE_TRAIT = RelativeFile(absolute=True, auto_set=True, executable=True, e
 DIRECTORY_TRAIT = RelativeDirectory(absolute=True, auto_set=True, writable=True, exists=True, desc='the location file paths can be relative to.') # writable alone does not implies exists
 # names of preferences traits must be public, i.e. not begin with '_'
 
+import infobiotics.preferences # calls set_default_preferences, do not remove
+
 class ParamsPreferencesHelper(PreferencesHelper):
     
-    def _preferences_default(self):
-        ''' Needed to override this method in PreferencesHelper because it was
-        picking up the wrong preferences even after set_default_preferences()! '''
-        from infobiotics.preferences import preferences
-        return preferences
+#    def _preferences_default(self):
+#        ''' Needed to override this method in PreferencesHelper because it was
+#        picking up the wrong preferences even after set_default_preferences()! '''
+#        from infobiotics.preferences import preferences
+#        return preferences
     
     def _preferences_path(self):
         raise NotImplementedError('ParamsPreferencesHelper subclasses must provide a preferences_path, probably via a module-level constant such as PREFERENCES_PATH.')
@@ -24,11 +26,11 @@ class ParamsPreferencesHelper(PreferencesHelper):
 
 class ParamsPreferencesPage(PreferencesPage):
     
-    def _preferences_default(self):
-        ''' Must override this method in PreferencesHelper or else it picks up 
-        the wrong preferences even after set_default_preferences()! '''
-        from infobiotics.preferences import preferences
-        return preferences
+#    def _preferences_default(self):
+#        ''' Must override this method in PreferencesHelper or else it picks up 
+#        the wrong preferences even after set_default_preferences()! '''
+#        from infobiotics.preferences import preferences
+#        return preferences
 
     def _preferences_path_default(self):
         raise NotImplementedError('ParamsPreferencesPage subclasses must provide a preferences_path, probably via a module-level constant such as PREFERENCES_PATH.')
@@ -40,12 +42,12 @@ class ParamsPreferencesPage(PreferencesPage):
         raise NotImplementedError('ParamsPreferencesPage subclasses must provide a name, which might be the same as the preferences_path.')
     
     executable = EXECUTABLE_TRAIT
-    directory = DIRECTORY_TRAIT
+#    directory = DIRECTORY_TRAIT
     
     view = View(
         Group(
             'executable',
-            'directory',
+#            'directory',
             show_border=True,
         ),        
     )

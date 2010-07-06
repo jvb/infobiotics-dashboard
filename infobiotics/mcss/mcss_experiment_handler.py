@@ -7,8 +7,9 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
         return McssExperimentProgressHandler(model=self.model)
 
     def object_finished_changed(self, info):
+        ''' Triggered when experiment's expect loop finishes. '''
+        self._progress_handler.message = 'Loading results...' # doesn't change the message!
         self.show_results()
-#        super(McssExperimentHandler, self).object_finished_changed(info) #TODO
         
     def show_results(self):
         import os.path
@@ -19,8 +20,10 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
             centre_window(w)
             w.show()
         else:
+            print 'never been here before'
             from enthought.traits.ui.message import auto_close_message
             auto_close_message(self.child.before)
+
 
 if __name__ == '__main__':
     execfile('mcss_experiment.py')

@@ -21,5 +21,6 @@ rm -rf InfobioticsDashboard.egg-info/ 2&>/dev/null
 echo "removing PKG-INFO"
 rm PKG-INFO 2&>/dev/null
 
-rm duh duh_
+# used for comparing different builds
+rm duh duh_ 2&>/dev/null
 

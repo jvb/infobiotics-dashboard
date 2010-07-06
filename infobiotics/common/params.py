@@ -15,6 +15,8 @@ from infobiotics.thirdparty.which import which, WhichError
 
 logger = logging.getLogger(level=logging.ERROR)
 
+import infobiotics.preferences # calls set_default_preferences, do not remove
+
 class Params(HasTraits): 
 
     _parameters_name = Str(Undefined, desc='the name attribute of the parameter tag in the params XML file')
@@ -22,17 +24,6 @@ class Params(HasTraits):
 
     _params_file = ParamsRelativeFile(absolute=True, exists=True, readable=True, writable=True)
     
-    def __params_file_changed(self, _params_file):
-        self.directory = os.path.dirname(_params_file)
-        self._dirty = False #TODO use dirty for prompting to save on perform
-    
-    _dirty = Bool(False)
-
-
-
-
-
-
     executable_name = Str
 
     _preferences_path = Property(depends_on='executable_name')
@@ -40,9 +31,8 @@ class Params(HasTraits):
     def _get__preferences_path(self):
         return self.executable_name
 
-    preferences_helper = Property(Instance(ParamsPreferencesHelper))
-    
-    def _get_preferences_helper(self):
+    preferences_helper = Instance(ParamsPreferencesHelper)
+    def _preferences_helper_default(self):
         raise NotImplementedError('Params subclasses must provide a _get_preferences_helper methods that returns an instance of (a subclass of) ParamsPreferencesHelper.')
 
     preferences = List(Str, ['executable','directory'], desc='a list of trait names to bind to preferences')
@@ -50,62 +40,42 @@ class Params(HasTraits):
     executable = EXECUTABLE_TRAIT
 
     def _executable_default(self):
-        executable = self.preferences_helper.executable
         try:
-            which_executable = which(self.executable_name)
-        except WhichError, e:
+            executable = self.preferences_helper.executable # load saved or default
+            return executable
+        except TraitError, e:
             print e
-        return executable if can_execute(executable) else which_executable
+            try:
+                alternative = which(self.executable_name) # search path for alternative
+                return alternative
+            except WhichError, e:
+                print e
+                return Undefined # fail ignomiously
 
     directory = DIRECTORY_TRAIT # infinite recursion if ParamsRelativeDirectory because directory='directory'
     
-#    def _directory_default(self):
-#        directory = self.preferences_helper.directory
-#        return directory if directory != '' else os.getcwd()  
-
-    def _directory_changed(self, old, new):
-        print 'directory(self, old, new)', self, old, new
-        
     def __init__(self, file=None, **traits):
-        from infobiotics.preferences import preferences
-#        print preferences.filename
-        preferences.dump()
         self.bind_preferences()
-#        
         super(Params, self).__init__(**traits)
-#        self.bind_preferences()#TODO
         self.on_trait_change(self.update_repr, self.parameter_names())
-#
         if file is not None:
             self.load(file)
 
-
-
     def bind_preferences(self):
-        ''' Very tricky! Must explicitly pass preferences to bind_preference,
-        otherwise the trait we are binding to does not get updated. '''
+        ''' Changes to preferences object will update bound trait value and 
+        vice versa. Uses get_default_preferences and therefore 
+        set_default_preferences must have been called with the correct preferences object.
+        '''
         from enthought.preferences.api import bind_preference
-#       # must assign bound_preferences otherwise bindings will be lost when this method returns 
-        self.bound_preferences = [bind_preference(self, preference, '.'.join((self._preferences_path, preference)), infobiotics.preferences.preferences) for preference in self.preferences]
-#        for bound_preference in self.bound_preferences:
-#            print bound_preference.preferences
+        # must assign bound_preferences otherwise bindings will be lost when this method returns 
+        self.bound_preferences = [bind_preference(self, preference, '.'.join((self._preferences_path, preference))) for preference in self.preferences]
         
     def save_preferences(self):
-        from infobiotics.preferences import preferences
-        preferences.dump()
-#        ''' Called from self.handler.close() '''
-#        helper = self.preferences_helper
-##        print helper.preferences
-#
-##        pass
-        print 'self.executable =', self.executable
-        print 'self.preferences_helper.executable =', self.preferences_helper.executable
-##        self.preferences_helper.executable = self.executable
-##        self.preferences_helper.directory = self.directory
-##        self.preferences_helper.preferences.flush()
-##        self.preferences_helper.preferences.dump()
+        ''' Called from self.handler.close() '''
+        from enthought.preferences.api import get_default_preferences
+        get_default_preferences().save()
 
-
+        
     _unresetable = List(Str)
         
     def load(self, file=''):
@@ -157,26 +127,23 @@ class Params(HasTraits):
         if not os.path.isabs(file):
             file = os.path.abspath(file)
 
-#        old = os.getcwd() # remember where we are now
-#        new = os.path.dirname(file)
-#        chdir(new) #TODO just set _cwd here and restore if it fails would be much better than changing the current directory
-    
-        old = self.directory
+        # change directory here so that relative paths don't trigger TraitError
         self.directory = os.path.dirname(file)
 
-        try:
-            # set parameters from dictionary
-            for name, value in parameters_dictionary.iteritems():
-#                set_trait_value_from_parameter_value(self, name, value)
-                setattr(self, name, trait_value_from_parameter_value(self, name, value))
-        except TraitError, e:
-            raise e
-            self.directory = old #TODO does this ever get reached?
-
+        # set parameters from dictionary, passing if values are not suitable
+        for name, value in parameters_dictionary.iteritems():
+            try:
+                set_trait_value_from_parameter_value(self, name, value)
+            except TraitError:
+                pass
+            
         # success!
-        logger.debug("Loaded '%s'." % file)
-        self._params_file = file # update self._params_file, and self.directory via self.__params_file_changed()
+#        logger.debug("Loaded '%s'." % file)
+        self._params_file = file
+        self._dirty = False #TODO use dirty for prompting to save on perform
         return True
+
+    _dirty = Bool(False)
 
     def save(self, file='', force=False, copy=False):
         # handle whether or not to overwrite an existing file ---
@@ -244,8 +211,10 @@ class Params(HasTraits):
             return False
             
         # success!
-        logger.debug("Saved '%s'." % file)
+#        logger.debug("Saved '%s'." % file)
+        self.directory = os.path.dirname(file)
         self._params_file = file
+        self._dirty = False #TODO use dirty for prompting to save on perform    
         return True
 
 
@@ -317,8 +286,8 @@ class Params(HasTraits):
         
     _interactive = False
 
-    handler = Property(Instance('ParamsHandler'))#Controller    
-    def _get_handler(self):
+    handler = Instance(Controller)
+    def _handler_default(self):
         '''
         e.g.
             from infobiotics.mcss.api import McssParamsHandler

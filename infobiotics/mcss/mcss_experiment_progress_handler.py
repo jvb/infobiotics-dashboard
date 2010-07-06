@@ -1,20 +1,19 @@
 from __future__ import division
 from infobiotics.common.api import ExperimentProgressHandler
-from infobiotics.commons.traits.api import Percentage
-from enthought.traits.api import Property, property_depends_on
+from enthought.traits.api import on_trait_change
 
 class McssExperimentProgressHandler(ExperimentProgressHandler):
-    
-#    progress = Property(Percentage)
-    
-    @property_depends_on('model.time_in_run, model.runs, model.max_time')#, model.run')
-    def _get_progress(self):
-        percentage = int((((self.model.time_in_run) + ((self.model.run - 1) * self.model.max_time)) / (self.model.max_time * self.model.runs)) * 100) 
-        return percentage
-        
-    def object_finished_changed(self, info):
-        self._on_close(info)
 
+    def _message_default(self):
+        return 'Simulating %s' % self.model.model_file
+
+    min = 0
+    max = 100
+    
+    @on_trait_change('model.time_in_run, model.runs, model.max_time')
+    def update_progress(self):
+        self.progress = int((((self.model.time_in_run) + ((self.model.run - 1) * self.model.max_time)) / (self.model.max_time * self.model.runs)) * 100)
+        
 
 if __name__ == '__main__':
     execfile('mcss_experiment.py')

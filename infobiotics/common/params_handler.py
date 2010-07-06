@@ -44,7 +44,7 @@ tools_menu = Menu(
 
 class ParamsHandler(HelpfulController):
     
-    def traits_view(self):
+    def traits_view(self): # overriden in ExperimentHandler
         return self.get_traits_view(ParamsView)
     
     def get_traits_view(self, ViewClass):
@@ -64,7 +64,6 @@ class ParamsHandler(HelpfulController):
         ) 
         
     params_group = Instance(Group) 
-    
     def _params_group_default(self):
         raise NotImplementedError
 
@@ -89,8 +88,6 @@ class ParamsHandler(HelpfulController):
         if self.info is not None and self.info.initialized:
             if self.info.ui is not None:
                 self.info.ui.title = title
-#            else:
-#                print self.__class__.__name__
 
 
     preferences_pages = List(PreferencesPage)
@@ -110,9 +107,10 @@ class ParamsHandler(HelpfulController):
     def edit_preferences(self, info):
         preferences_manager = PreferencesManager(pages=self._preferences_pages) # must pass in pages manually 
         ui = preferences_manager.edit_traits(kind='modal') # should edit preferences modally
-#        if ui.result: # only save preferences if OK pressed
-#            for page in self.preferences_pages: # save preferences for each page as they could have different preferences nodes (files)
-#                page.preferences.save() # must save preferences manually
+        if ui.result: # only save preferences if OK pressed
+            for page in self.preferences_pages: # save preferences for each page as they could have different preferences nodes (files)
+                page.preferences.save() # must save preferences manually
+                print page.preferences
         return ui.result
 
 

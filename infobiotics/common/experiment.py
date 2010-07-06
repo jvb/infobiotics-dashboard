@@ -198,7 +198,6 @@ class Experiment(Params):
             print "warning self.executable == ''"
         if self._params_file == '':
             print "warning self._params_file == ''"
-
 #            print self.executable, self._params_file, self.executable_kwargs, self.directory
 
         # spawn process
@@ -239,12 +238,11 @@ class Experiment(Params):
             else:
                 self._output_pattern_matched(pattern_index, self.child.match.group())
                 patterns_matched += 1
+        self.finished = True
 #        print patterns_matched
 
-        self.finished = True
-
     def _finished_without_output_fired(self):
-        print self.child.before
+        print '_finished_without_output_fired', self.child.before
 
 #    def _finished_fired(self):
 #        print 'finished'

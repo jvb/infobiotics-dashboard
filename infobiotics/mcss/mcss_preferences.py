@@ -1,6 +1,6 @@
 from infobiotics.common.api import ParamsPreferencesHelper, ParamsPreferencesPage
 
-PREFERENCES_PATH = 'mcss'
+PREFERENCES_PATH = 'mcss' #TODO
 
 class McssParamsPreferencesHelper(ParamsPreferencesHelper):
     preferences_path = PREFERENCES_PATH 

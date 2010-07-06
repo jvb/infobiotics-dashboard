@@ -50,11 +50,11 @@ mcss_params_group = Group(
         label='Spatial'
     ),
     
-    VGroup(
-        Item(label='Copy and paste the script below to reproduce this experiment.'),
-        Item('repr', show_label=False, style='custom', editor=TextEditor()), #TODO
-        label='script',
-    ),
+#    VGroup(
+#        Item(label='Copy and paste the script below to reproduce this experiment.'),
+#        Item('repr', show_label=False, style='custom', editor=TextEditor()), #TODO
+#        label='script',
+#    ),
     
     layout='tabbed',
 )
