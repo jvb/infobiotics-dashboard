@@ -44,7 +44,16 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
 
     def run(self):
         print 'running'
+
+        #HACK to fix dashboard preferences being in '.infobiotics/dashboard' instead of '.infobiotics' 
+        from infobiotics.preferences import preferences
+        filename = preferences.filename
+        import os.path
+        if not os.path.exists(filename): 
+            open(filename, 'w').close() 
+        
         super(InfobioticsDashboardWorkbenchApplication, self).run()
+            
 
     def _started_fired(self):
         print 'started'
