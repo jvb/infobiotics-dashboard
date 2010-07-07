@@ -42,11 +42,13 @@ class Params(HasTraits):
     def _executable_default(self):
         try:
             executable = self.preferences_helper.executable # load saved or default
+#            print 'got here'
             return executable
         except TraitError, e:
             print e
             try:
                 alternative = which(self.executable_name) # search path for alternative
+#                print 'got here 2'
                 return alternative
             except WhichError, e:
                 print e
@@ -66,9 +68,12 @@ class Params(HasTraits):
         vice versa. Uses get_default_preferences and therefore 
         set_default_preferences must have been called with the correct preferences object.
         '''
-        from enthought.preferences.api import bind_preference
+        from enthought.preferences.api import bind_preference #, get_default_preferences
+	#print get_default_preferences()
+	from infobiotics.preferences import preferences
+        #print preferences
         # must assign bound_preferences otherwise bindings will be lost when this method returns 
-        self.bound_preferences = [bind_preference(self, preference, '.'.join((self._preferences_path, preference))) for preference in self.preferences]
+        self.bound_preferences = [bind_preference(self, preference, '.'.join([self._preferences_path, preference]), infobiotics.preferences.preferences) for preference in self.preferences]
         
     def save_preferences(self):
         ''' Called from self.handler.close() '''

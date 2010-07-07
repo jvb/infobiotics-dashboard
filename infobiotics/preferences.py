@@ -25,9 +25,9 @@ elif sys.platform.startswith('win'):
     #TODO directory as well? Might be better here than in Params._directory_default()?
 
 elif sys.platform.startswith('darwin'):
-    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/Application/InfobioticsWorkbench/mcss'), #TODO check these
-    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, '/Application/InfobioticsWorkbench/pmodelchecker'),
-    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, '/Application/InfobioticsWorkbench/poptimizer'),
+    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'), #TODO check these
+    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, '/usr/bin/pmodelchecker'),
+    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, '/usr/bin/poptimizer'),
 else:
     raise ValueError('Not running on Windows, Mac or Linux!')
 
@@ -45,7 +45,7 @@ preferences.set('default/poptimizer.directory', os.getcwd())
 #elif sys.platform.startswith('win'):
 #    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\mcss.EXE'),
 #elif sys.platform.startswith('darwin'):
-#    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/Application/InfobioticsWorkbench/mcss'), #TODO check these
+#    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'), #TODO check these
 #else:
 #    raise ValueError('Not running on Windows, Mac or Linux!')
 #preferences.set('default/mcss.directory', os.getcwd())
