@@ -14,15 +14,18 @@ DEFAULT_PMODELCHECKER_EXECUTABLE = 'default/pmodelchecker.executable'
 DEFAULT_POPTIMIZER_EXECUTABLE = 'default/poptimizer.executable'
 
 if sys.platform.startswith('linux'):
-    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'),
+#    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'),
+    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss'),
     preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, '/usr/bin/pmodelchecker'),
     preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, '/usr/bin/poptimizer'),
 
 elif sys.platform.startswith('win'):
-    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\mcss.EXE'),
+#    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\mcss.EXE'),
+#    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\pmodelchecker.EXE'),
+#    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\poptimizer.EXE'),
+    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss.exe'),
     preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\pmodelchecker.EXE'),
     preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\poptimizer.EXE'),
-    #TODO directory as well? Might be better here than in Params._directory_default()?
 
 elif sys.platform.startswith('darwin'):
     preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'), #TODO check these

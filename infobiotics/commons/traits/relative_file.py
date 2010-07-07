@@ -2,6 +2,7 @@ import os
 #from enthought.traits.api import BaseFile
 from enthought.traits.api import BaseStr
 from infobiotics.commons.api import can_read, can_write, can_execute
+from infobiotics.thirdparty.which import which, WhichError
 
 #class RelativeFile(BaseFile):
 class RelativeFile(BaseStr):
@@ -81,7 +82,9 @@ class RelativeFile(BaseStr):
         if directory != '' and directory_name != '':
             raise ValueError, "Please specify only 'directory' or 'directory_name', the value of '%s' named in the attribute directory_name will override '%s' in the attribute directory of the %s trait." % (directory_name, directory, self.__class__.__name__)
         
-        self.directory = directory if directory != '' else os.getcwd() # can't set this in class definition: it will always be the location of the module  
+#        self.directory = directory if directory != '' else os.getcwd() # can't set this in class definition: it will always be the location of the module  
+        self.directory = directory  
+
         self.directory_name = directory_name
 
         self.exists_name = exists_name
@@ -189,6 +192,13 @@ class RelativeFile(BaseStr):
         self._set_directory_from_directory_name(object)
         
         directory = self.directory
+        if directory == '':
+            if not os.path.isabs(value):
+                try:
+                    value = which(value)
+                except WhichError:
+                    print 'WhichError, value =', value #TODO
+                    pass
         if not os.path.isabs(directory):
             directory = os.path.join(os.getcwd(), directory)
 #        print 'directory =', directory

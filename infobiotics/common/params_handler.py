@@ -110,7 +110,6 @@ class ParamsHandler(HelpfulController):
         if ui.result: # only save preferences if OK pressed
             for page in self.preferences_pages: # save preferences for each page as they could have different preferences nodes (files)
                 page.preferences.save() # must save preferences manually
-                print page.preferences
         return ui.result
 
 
