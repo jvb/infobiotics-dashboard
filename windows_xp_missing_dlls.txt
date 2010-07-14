@@ -1,0 +1,29 @@
+QtSvg4.dll - D:\Python26\Lib\site-packages\PyQt4\bin\QtSvg4.dll
+SHELL32.DLL - D:\WINDOWS\system32\SHELL32.DLL
+NETAPI32.dll - D:\WINDOWS\system32\NETAPI32.dll
+OPENGL32.dll - D:\WINDOWS\system32\OPENGL32.dll
+SHLWAPI.DLL - D:\WINDOWS\system32\SHLWAPI.DLL
+MSVCP90.dll - D:\Python26\DLLs\MSVCP90.dll
+COMDLG32.DLL - D:\WINDOWS\system32\COMDLG32.DLL
+qscintilla2.dll - D:\Python26\Lib\site-packages\PyQt4\bin\qscintilla2.dll
+AVIFIL32.dll - D:\WINDOWS\system32\AVIFIL32.dll
+OLEAUT32.dll - D:\WINDOWS\system32\OLEAUT32.dll
+IMM32.DLL - D:\WINDOWS\system32\IMM32.DLL
+VERSION.dll - D:\WINDOWS\system32\VERSION.dll
+QtNetwork.pyd - D:\Python26\lib\site-packages\PyQt4\QtNetwork.pyd
+msvcrt.dll - D:\WINDOWS\system32\msvcrt.dll
+mfc90.dll - D:\Python26\lib\site-packages\pythonwin\mfc90.dll
+WINMM.DLL - D:\WINDOWS\system32\WINMM.DLL
+AVICAP32.dll - D:\WINDOWS\system32\AVICAP32.dll
+KERNEL32.dll - D:\WINDOWS\system32\KERNEL32.dll
+ADVAPI32.dll - D:\WINDOWS\system32\ADVAPI32.dll
+USER32.dll - D:\WINDOWS\system32\USER32.dll
+ole32.dll - D:\WINDOWS\system32\ole32.dll
+GDI32.dll - D:\WINDOWS\system32\GDI32.dll
+WINSPOOL.DRV - D:\WINDOWS\system32\WINSPOOL.DRV
+MPR.dll - D:\WINDOWS\system32\MPR.dll
+WSOCK32.dll - D:\WINDOWS\system32\WSOCK32.dll
+WS2_32.dll - D:\WINDOWS\system32\WS2_32.dll
+QtXmlPatterns4.dll - D:\Python26\Lib\site-packages\PyQt4\bin\QtXmlPatterns4.dll
+
+/cygdrive/d/Python26/Scripts/*.dll
