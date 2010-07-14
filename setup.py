@@ -19,6 +19,7 @@ Build Debian package:
 '''
 
 # bootstrap install Distribute
+import setuptools #TODO bit suspicious about this but Jamie said it was OK.
 from distribute_setup import use_setuptools
 use_setuptools()
 
@@ -127,7 +128,13 @@ elif sys.platform.startswith('win'):
         
     except ImportError, e:
         sys.stderr.write('%s\n' % e)
-        
+
+    import sys # needed for sys.prefix in mayavi_preferences and data_files below
+    # touch mayavi preferences.ini #TODO should probably be in py2exe.sh but since this only happens if we call 'python setup.py py2exe' it is probably ok here.
+    import os
+    mayavi_preferences=os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')
+    if not os.path.exists(mayavi_preferences): 
+        open(mayavi_preferences, 'w').close()
     extra_options = dict(
         setup_requires=['py2exe'],
         windows=[
@@ -155,20 +162,21 @@ elif sys.platform.startswith('win'):
                 ],
                 dll_excludes=["mswsock.dll", "powrprof.dll"], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
                 packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
-                skip_archive=True, # required so that it is easier to unzip tvtk_classes.zip (?)
- #               bundle_files=2,
                 unbuffered=True,
-##                optimize=2,
-#                optimize=0, # default (?) but best to be explicit
+#               optimize=0,
+                #bundle_files=2,
+                skip_archive=True, # required so that it is easier to unzip tvtk_classes.zip (?)
             )
         ),
         data_files=[        
 #            ("images", glob.glob("images/*.png")), #TODO
-            ("enthought/pyface/images", glob.glob("C:\/Python26/Lib/site-packages/enthought/pyface/images/*.png")), #TODO
-            ('enthought/mayavi/preferences', ['C:\/Python26/Lib/site-packages/enthought/mayavi/preferences/preferences.ini']),
-            ('enthought/tvtk/plugins/scene', ['C:\/Python26/Lib/site-packages/enthought/tvtk/plugins/scene/preferences.ini']),
-            ('enthought/mayavi/core/lut', ['C:\/Python26/Lib/site-packages/enthought/mayavi/core/lut/pylab_luts.pkl']),
-            ('enthought/envisage/ui/workbench', ['C:\/Python26/Lib/site-packages/enthought/envisage/ui/workbench/preferences.ini']),
+#            ("Microsoft.VC90.CRT",glob.glob("Microsoft.VC90.CRT/*")),
+            ("",glob.glob("Microsoft.VC90.CRT/*")),
+            ("enthought/pyface/images", glob.glob(os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\pyface\\images\\*.png'))),
+            ('enthought/mayavi/preferences', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')]),
+            ('enthought/tvtk/plugins/scene', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\tvtk\\plugins\\scene\\preferences.ini')]),
+            ('enthought/mayavi/core/lut', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\core\\lut\\pylab_luts.pkl')]),
+            ('enthought/envisage/ui/workbench', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\envisage\\ui\\workbench\\preferences.ini')]),
         ] + matplotlib.get_py2exe_datafiles(), # http://www.py2exe.org/index.cgi/MatPlotLib
     )
 else: # assume sys.platform.startswith('linux'):
