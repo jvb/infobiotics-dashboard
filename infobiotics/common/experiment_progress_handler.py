@@ -9,10 +9,10 @@ class ExperimentProgressHandler(Controller):
     # traits controlling presentation of progress 
     title = Str
     message = Str
-    min = Int
-    max = Int
-    cancel = Callable
-    show_time = Bool(True)
+    min = Int(0)
+    max = Int(0)
+#    cancel = Callable
+#    show_time = Bool(False)
     
     def init(self, info):
         self.info.ui.title = self.model.handler.title
@@ -33,8 +33,8 @@ class ExperimentProgressHandler(Controller):
                 show_percent = True,
                 can_cancel=False, 
 #                cancelled=cancel,
-                show_time = True,
-                    show_time_name = 'show_time',
+                show_time = False,
+                    show_time_name = 'show_time', # overrides show_time above
                 show_max = False,
                 show_value = False,
 #                prefix_message=True,

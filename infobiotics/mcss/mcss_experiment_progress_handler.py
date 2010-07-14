@@ -7,8 +7,7 @@ class McssExperimentProgressHandler(ExperimentProgressHandler):
     def _message_default(self):
         return 'Simulating %s' % self.model.model_file
 
-    min = 0
-    max = 100
+#    max = 100 # defaults to zero
     
     @on_trait_change('model.time_in_run, model.runs, model.max_time')
     def update_progress(self):

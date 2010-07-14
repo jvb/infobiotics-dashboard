@@ -4,7 +4,8 @@ from enthought.preferences.ui.api import PreferencesPage
 from enthought.traits.ui.api import View, Group, Item
 
 # it is necessary to duplicate preference trait definitions in Helpers and Pages so the definitions are shared here
-EXECUTABLE_TRAIT = RelativeFile(auto_set=True, executable=True, exists=True) # executable implies exists 
+#EXECUTABLE_TRAIT = RelativeFile(auto_set=True, executable=True, exists=True) # executable implies exists 
+EXECUTABLE_TRAIT = RelativeFile(auto_set=True) #FIXME see above
 DIRECTORY_TRAIT = RelativeDirectory(absolute=True, auto_set=True, writable=True, exists=True, desc='the location file paths can be relative to.') # writable alone does not implies exists
 # names of preferences traits must be public, i.e. not begin with '_'
 

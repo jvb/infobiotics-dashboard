@@ -9,7 +9,8 @@ class McssExperiment(McssParams, Experiment):
         from infobiotics.mcss.api import McssExperimentHandler
         return McssExperimentHandler(model=self)
     
-    executable_kwargs = ['show_progress=true']#, 'max_time=333', 'runs=66'] # testing
+#    executable_kwargs = ['show_progress=true']#, 'max_time=333', 'runs=66'] # testing
+    executable_kwargs = ['show_progress=false']
     _output_pattern_list = [
         '[0-9]+ [0-9]+', # 'time_in_run, run'
     ] 

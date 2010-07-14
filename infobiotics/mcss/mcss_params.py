@@ -1,5 +1,5 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
-from enthought.traits.api import Enum, Bool, Range, Long, Property
+from enthought.traits.api import Enum, Bool, Range, Long, Property, Float
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 from infobiotics.mcss.mcss_preferences import McssParamsPreferencesHelper
 
@@ -30,10 +30,10 @@ class McssParams(Params):
         entries=10,
     )
     model_format = Enum(['xml','sbml','lpp'], desc='the model specification format')
-    duplicate_initial_amounts = Bool(desc='whether to duplicate initial amounts for all templates in the SBML model')
-    just_psystem = Bool(desc='whether to just initialise the P system and not perform the simulation')
+    duplicate_initial_amounts = Bool(False, desc='whether to duplicate initial amounts for all templates in the SBML model')
+    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
     max_time = FloatGreaterThanZero(desc='the maximum time to run simulation')
-    log_interval = FloatGreaterThanZero(desc='the time interval between which to log data') 
+    log_interval = FloatGreaterThanZero(1.0, desc='the time interval between which to log data') 
     runs = LongGreaterThanZero(1, desc='the number of simulation runs to perform')
     data_file = ParamsRelativeFile('simulation.h5', writable=True, desc='the file to save simulation data to')
     seed = Long(0, desc='the random number seed (0=randomly generated)')
@@ -53,11 +53,12 @@ class McssParams(Params):
     periodic_y = Bool(desc='whether the y dimension of the lattice has a periodic boundary condition')
     periodic_z = Bool(desc='whether the z dimension of the lattice has a periodic boundary condition')
     division_direction = Enum(['x','y','z'], desc='the direction of cell division (x,y,z)')
-    keep_divisions = Bool(desc='whether to keep dividing cells')
+    keep_divisions = Bool(False, desc='whether to keep dividing cells (no need for degradation rates to emulate dilution by cell division)')
     growth_type = Enum(['none','linear','exponential','function'], desc='the volume growth type')
     
-    show_progress = Bool(desc='whether to output the current time to screen at each log interval') # not in parameter_names below
-
+    show_progress = Bool(False, desc='whether to output the current time to screen at each log interval') # not in parameter_names below
+    progress_interval = Float(0.0, desc='time interval within each run to output progress information') #TODO
+    
     def parameter_names(self):
         return [
             'model_file', 'model_format', 'duplicate_initial_amounts', 

@@ -197,7 +197,7 @@ class RelativeFile(BaseStr):
                 try:
                     value = which(value)
                 except WhichError:
-                    print 'WhichError, value =', value #TODO
+#                    print 'WhichError, value =', value #TODO
                     pass
         if not os.path.isabs(directory):
             directory = os.path.join(os.getcwd(), directory)

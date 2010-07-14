@@ -30,109 +30,6 @@ from enthought.traits.api import ListStr, Str, Event, Property, Bool
 from threading import Thread
 from infobiotics.common.api import Params, ParamsRelativeFile
 
-'''
-from which import which, WhichError
-import os
-import winpexpect as expect
-
-
-# mcss-specific
-
-executable = 'mcss'
-_params_file = 'module1.params'
-executable_kwargs = ['sho', 'runs=2', 'max_time=100']
-directory = os.getcwd()
-_output_pattern_list = [
-    '[0-9]+ [0-9]+', # 'time_in_run, run'
-]
-
-
-# Experiment
-
-_error_pattern_list = [
-#    '^I/O warning : failed to load external entity ".+"', # libxml++
-    "^[eE]rror: couldn't parse command line parameter .*$", 
-#    '^[eE]rror: unknown parameter .*', 
-#    '^[eE]rror: value .*', 
-#    '^[eE]rror[^:].+\nline [0-9]+: \([0-9]+ \[Error\]\) .*', # Fran & LibSBML 'error reading sbml input file\nline 1: (00002 [Error]) File unreadable.' 
-#    '^[eE]rror[^:].*', # Fran 'error ...'
-#    '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress' or 'error: value'
-#    '^.+: command not found', # bash
-]
-
-try:
-    command = which(executable)
-    print 'using', command
-except WhichError:
-    exit("Error: Cannot locate '%s' on environment PATH." % executable)    
-
-child = expect.winspawn(command, [_params_file] + executable_kwargs[:], cwd=directory)
-
-compiled_pattern_list = child.compile_pattern_list(_output_pattern_list + _error_pattern_list)
-        
-compiled_pattern_list.append(expect.EOF)
-eof_index = compiled_pattern_list.index(expect.EOF)
-
-compiled_pattern_list.append(expect.TIMEOUT)
-timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
-
-patterns_matched = 0
-
-while True:
-
-    pattern_index = child.expect_list(compiled_pattern_list)
-    
-    if pattern_index == eof_index:
-        if patterns_matched == 0:
-            if child.before != '':
-                finished_without_output = True
-                print child.before
-        # process has finished, perhaps prematurely
-        break
-        
-    elif pattern_index == timeout_index:
-        timed_out = True
-        
-    else:
-        match = child.match.group() # only gets the *first* match for the line
-        
-        # McssExperiment
-        if pattern_index == 0: # '1 20.5'
-            time_in_run, run = match.split(' ')
-            print float(time_in_run), int(run)
-        # Experiment
-#        '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
-#        '^[eE]rror[^:].+\nline [0-9]+: \([0-9]+ \[Error\]\) .*', # Fran & LibSBML 'error reading sbml input file\nline 1: (00002 [Error]) File unreadable.' 
-#        '^[eE]rror[^:].*', # Fran 'error ...'
-#        '^.+: command not found', # bash
-#        '^I/O warning : failed to load external entity ".+"', # libxml++
-        #elif pattern_index == 1 + len(_output_pattern_list):
-        #    print match
-        #elif pattern_index == 2 + len(_output_pattern_list):
-        #    print match
-        #elif pattern_index == 3 + len(_output_pattern_list):
-        #    print match
-        #elif pattern_index == 4 + len(_output_pattern_list):
-        #    print match
-        #elif pattern_index == 5 + len(_output_pattern_list):
-        #    print match
-        elif len(_output_pattern_list) <= pattern_index < len(_output_pattern_list) + len(_error_pattern_list):
-            pass
-#            print 'child.match.string = ', child.match.string
-#            print 'child.match.re.pattern = ', child.match.re.pattern
-            print 'child.before =', child.before
-            print 'match = ', match
-            print 'child.after =', child.after
-            print
-
-
-        patterns_matched += 1
-
-print 'child.before =', child.before
-print 'child.after =', child.after
-#print patterns_matched
-'''
-
 class Experiment(Params):
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.
 #    
@@ -193,55 +90,54 @@ class Experiment(Params):
         '''
         self.starting = True
 
-        #FIXME are these still relevant now that executable is found in preferences or PATH?
-        if self.executable == '':
-            print "warning self.executable == ''"
-        if self._params_file == '':
-            print "warning self._params_file == ''"
-#            print self.executable, self._params_file, self.executable_kwargs, self.directory
-
-        # spawn process
-#        if sys.platform.startswith('win'):
-#            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
-#        else:    
-#            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
-        # note that the expect module doesn't like list traits so we copy them using [:] 
-
-        # useful for debugging
-#            self.child.logfile_read = sys.stdout #TODO comment out in release
-
-#        self.started = True
-
-        # compile pattern list for expect_list
-#        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
-        
-        # append EOF to compiled pattern list
-#        compiled_pattern_list.append(expect.EOF)
-#        eof_index = compiled_pattern_list.index(expect.EOF)
-        
-        # append TIMEOUT to compiled pattern list
-#        compiled_pattern_list.append(expect.TIMEOUT)
-#        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
-        
-        # expect loop
-#        patterns_matched = 0
-#        while True:
-#            pattern_index = self.child.expect_list(compiled_pattern_list)
-#            if pattern_index == eof_index:
-#                if patterns_matched == 0:
-#                    if self.child.before != '':
-#                        self.finished_without_output = True
-#                # process has finished, perhaps prematurely
-#                break
-#            elif pattern_index == timeout_index:
-#                self.timed_out = True
-#            else:
-#                self._output_pattern_matched(pattern_index, self.child.match.group())
-#                patterns_matched += 1
+#        #FIXME are these still relevant now that executable is found in preferences or PATH?
+#        if self.executable == '':
+#            print "warning self.executable == ''"
+#        if self._params_file == '':
+#            print "warning self._params_file == ''"
+##            print self.executable, self._params_file, self.executable_kwargs, self.directory
+#        # spawn process
+##        if sys.platform.startswith('win'):
+##            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
+##        else:    
+##            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
+#        # note that the expect module doesn't like list traits so we copy them using [:] 
+#
+#        # useful for debugging
+##            self.child.logfile_read = sys.stdout #TODO comment out in release
+#
+##        self.started = True
+#
+#        # compile pattern list for expect_list
+##        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
+#        
+#        # append EOF to compiled pattern list
+##        compiled_pattern_list.append(expect.EOF)
+##        eof_index = compiled_pattern_list.index(expect.EOF)
+#        
+#        # append TIMEOUT to compiled pattern list
+##        compiled_pattern_list.append(expect.TIMEOUT)
+##        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+#        
+#        # expect loop
+##        patterns_matched = 0
+##        while True:
+##            pattern_index = self.child.expect_list(compiled_pattern_list)
+##            if pattern_index == eof_index:
+##                if patterns_matched == 0:
+##                    if self.child.before != '':
+##                        self.finished_without_output = True
+##                # process has finished, perhaps prematurely
+##                break
+##            elif pattern_index == timeout_index:
+##                self.timed_out = True
+##            else:
+##                self._output_pattern_matched(pattern_index, self.child.match.group())
+##                patterns_matched += 1
         import subprocess
         p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
         self.started = True
-	p.wait()
+        p.wait()
         self.finished = True
 #        print patterns_matched
 

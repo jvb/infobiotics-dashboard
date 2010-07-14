@@ -34,6 +34,6 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = MC2Experiment()
-    experiment.load('test/Const/Const_MC2.params')
+    experiment.load('../../../tests/workbench_examples/motifs/NAR/pmodelchecker_example/NAR_MC2.params')
     experiment.configure()
     

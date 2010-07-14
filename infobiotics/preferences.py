@@ -13,26 +13,15 @@ DEFAULT_MCSS_EXECUTABLE = 'default/mcss.executable'
 DEFAULT_PMODELCHECKER_EXECUTABLE = 'default/pmodelchecker.executable'
 DEFAULT_POPTIMIZER_EXECUTABLE = 'default/poptimizer.executable'
 
-if sys.platform.startswith('linux'):
+if sys.platform.startswith('win'):
+    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss.exe'),
+    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'pmodelchecker.exe'),
+    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'poptimizer.exe'),
+else:
 #    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'),
     preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss'),
-    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, '/usr/bin/pmodelchecker'),
-    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, '/usr/bin/poptimizer'),
-
-elif sys.platform.startswith('win'):
-#    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\mcss.EXE'),
-#    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\pmodelchecker.EXE'),
-#    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\poptimizer.EXE'),
-    preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss.exe'),
-    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\pmodelchecker.EXE'),
-    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'C:\\Program Files\\Infobiotics-Workbench\\infobiotics-workbench\\poptimizer.EXE'),
-
-elif sys.platform.startswith('darwin'):
-    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'), #TODO check these
-    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, '/usr/bin/pmodelchecker'),
-    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, '/usr/bin/poptimizer'),
-else:
-    raise ValueError('Not running on Windows, Mac or Linux!')
+    preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'pmodelchecker'),
+    preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'poptimizer'),
 
 preferences.set('default/mcss.directory', os.path.expanduser('~'))
 preferences.set('default/pmodelchecker.directory', os.path.expanduser('~'))
