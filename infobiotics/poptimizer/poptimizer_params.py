@@ -1,6 +1,7 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
 from enthought.traits.api import Str, Int, Long, Bool, Range, on_trait_change, Trait #TODO remove Trait
 from infobiotics.commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
+from infobiotics.poptimizer.poptimizer_preferences import POptimizerParamsPreferencesHelper
 
 class POptimizerParams(Params):
     
@@ -8,6 +9,10 @@ class POptimizerParams(Params):
         from infobiotics.poptimizer.api import POptimizerParamsHandler
         return POptimizerParamsHandler(model=self)
         
+    def _preferences_helper_default(self):
+        helper = POptimizerParamsPreferencesHelper()
+        return helper
+
     executable_name = 'poptimizer'
     
     _parameters_name = 'poptimizer'
