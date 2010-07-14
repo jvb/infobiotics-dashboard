@@ -34,9 +34,9 @@ elif sys.platform.startswith('darwin'):
 else:
     raise ValueError('Not running on Windows, Mac or Linux!')
 
-preferences.set('default/mcss.directory', os.getcwd())
-preferences.set('default/pmodelchecker.directory', os.getcwd())
-preferences.set('default/poptimizer.directory', os.getcwd())
+preferences.set('default/mcss.directory', os.path.expanduser('~'))
+preferences.set('default/pmodelchecker.directory', os.path.expanduser('~'))
+preferences.set('default/poptimizer.directory', os.path.expanduser('~'))
 
 ## per plugin-style preferences, in the transient 'default' scope #TODO
 #import infobiotics.preferences

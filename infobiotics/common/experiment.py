@@ -201,43 +201,47 @@ class Experiment(Params):
 #            print self.executable, self._params_file, self.executable_kwargs, self.directory
 
         # spawn process
-        if sys.platform.startswith('win'):
-            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
-        else:    
-            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
+#        if sys.platform.startswith('win'):
+#            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
+#        else:    
+#            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
         # note that the expect module doesn't like list traits so we copy them using [:] 
 
         # useful for debugging
 #            self.child.logfile_read = sys.stdout #TODO comment out in release
 
-        self.started = True
+#        self.started = True
 
         # compile pattern list for expect_list
-        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
+#        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
         
         # append EOF to compiled pattern list
-        compiled_pattern_list.append(expect.EOF)
-        eof_index = compiled_pattern_list.index(expect.EOF)
+#        compiled_pattern_list.append(expect.EOF)
+#        eof_index = compiled_pattern_list.index(expect.EOF)
         
         # append TIMEOUT to compiled pattern list
-        compiled_pattern_list.append(expect.TIMEOUT)
-        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+#        compiled_pattern_list.append(expect.TIMEOUT)
+#        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
         
         # expect loop
-        patterns_matched = 0
-        while True:
-            pattern_index = self.child.expect_list(compiled_pattern_list)
-            if pattern_index == eof_index:
-                if patterns_matched == 0:
-                    if self.child.before != '':
-                        self.finished_without_output = True
-                # process has finished, perhaps prematurely
-                break
-            elif pattern_index == timeout_index:
-                self.timed_out = True
-            else:
-                self._output_pattern_matched(pattern_index, self.child.match.group())
-                patterns_matched += 1
+#        patterns_matched = 0
+#        while True:
+#            pattern_index = self.child.expect_list(compiled_pattern_list)
+#            if pattern_index == eof_index:
+#                if patterns_matched == 0:
+#                    if self.child.before != '':
+#                        self.finished_without_output = True
+#                # process has finished, perhaps prematurely
+#                break
+#            elif pattern_index == timeout_index:
+#                self.timed_out = True
+#            else:
+#                self._output_pattern_matched(pattern_index, self.child.match.group())
+#                patterns_matched += 1
+        import subprocess
+        p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
+        self.started = True
+	p.wait()
         self.finished = True
 #        print patterns_matched
 

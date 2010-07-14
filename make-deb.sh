@@ -7,6 +7,9 @@ MAINTAINER="Jonathan Blakes <jvb@cs.nott.ac.uk>"
 PYPKGNAME=${PKGNAME}
 PYPKGBASE=${PKGBASE}
 PYDEPS="python-vtk, python-qt4, python-qscintilla2, python-numpy (>= 1.3.0), python-matplotlib, python-pexpect, mcss, poptimizer, pmodelchecker, python-apptools (>=3.3.1), python-traitsbackendqt (>=3.3.0), python-traits (>=3.3.0), python-traitsgui (>=3.3.0), python-enthoughtbase(>=3.0.4), python-envisagecore(>=3.1.2), python-envisageplugins(>=3.1.2), python-tables(>=2.1.2), mayavi2, python-configobj"
+LASTVERSION=$(echo $VERSION | cut -f 3 -d '.')
+LASTVERSION=$(echo "${LASTVERSION}-1" | bc)
+LASTVERSION="$(echo $VERSION | cut -f1,2 -d '.').${LASTVERSION}"
 
 echo "creating ${PKGBASE} debian packages..."
 
@@ -43,6 +46,7 @@ Standards-Version: 3.8.3.0
 Package: ${PYPKGNAME}
 Architecture: ${ARCH}
 Depends: \${misc:Depends}, \${python:Depends}, ${PKGNAME}, ${PYDEPS}
+Replaces: ${PYPKGBASE}-${LASTVERSION}
 Description: ${PKGNAME}.
 EOF
 # copyright
