@@ -1,10 +1,15 @@
 from infobiotics.pmodelchecker.mc2.api import MC2ParamsHandler, MC2ExperimentProgressHandler
-from infobiotics.common.api import ExperimentHandler
+from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
 
-class MC2ExperimentHandler(MC2ParamsHandler, ExperimentHandler):
+class MC2ExperimentHandler(MC2ParamsHandler, PModelCheckerExperimentHandler):
 
     def __progress_handler_default(self):
         return MC2ExperimentProgressHandler(model=self.model) 
+
+#    def object_finished_changed(self, info):
+#        ''' Triggered when experiment's expect loop finishes. '''
+#        self._progress_handler.message = 'Loading results...' # doesn't change the message!
+#        self.show_results() # PModelCheckerExperimentHandler.show_results() #TODO
 
 #    def has_valid_parameters(self):
 #        '''

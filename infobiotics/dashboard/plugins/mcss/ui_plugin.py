@@ -29,8 +29,8 @@ class McssUIPlugin(Plugin):
 #        return []
 #
     preferences_pages = List(contributes_to='enthought.envisage.ui.workbench.preferences_pages')
-    def _preferences_pages_default(self):
-        return [McssPreferencesPage]
+#    def _preferences_pages_default(self):
+#        return [McssPreferencesPage]
 
     openers = List(contributes_to='infobiotics.dashboard.plugins.unified_open_action.unified_open_action_plugin.openers')
     def _openers_default(self):

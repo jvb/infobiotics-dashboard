@@ -10,6 +10,7 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
         ''' Triggered when experiment's expect loop finishes. '''
         self._progress_handler.message = 'Loading results...' # doesn't change the message!
         self.show_results()
+        self._progress_handler.message = '' #TEST
         
     def show_results(self):
         import os.path

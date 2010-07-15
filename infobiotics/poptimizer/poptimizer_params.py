@@ -6,7 +6,7 @@ from infobiotics.poptimizer.poptimizer_preferences import POptimizerParamsPrefer
 class POptimizerParams(Params):
     
     def _handler_default(self):
-        from infobiotics.poptimizer.api import POptimizerParamsHandler
+        from infobiotics.poptimizer.poptimizer_params_handler import POptimizerParamsHandler
         return POptimizerParamsHandler(model=self)
         
     def _preferences_helper_default(self):

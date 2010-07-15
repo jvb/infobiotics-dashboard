@@ -3,6 +3,9 @@ from enthought.traits.api import Int, Str, Callable, Bool
 from infobiotics.commons.traits.ui.qt4.cancellable_progress_editor import CancellableProgressEditor
 
 class ExperimentProgressHandler(Controller):
+    '''
+    self.model == info.object == Instance(Experiment)
+    '''
     
     progress = Int
 

@@ -8,14 +8,14 @@ from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
 #from enthought.envisage.developer.developer_plugin import DeveloperPlugin
 #from enthought.envisage.developer.ui.developer_ui_plugin import DeveloperUIPlugin
 from enthought.plugins.text_editor.text_editor_plugin import TextEditorPlugin
-#from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
+from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
 #from enthought.plugins.ipython_shell.ipython_shell_plugin import IPythonShellPlugin # IPythonShellPlugin is not supported by Qt backend, yet.
 #from enthought.envisage.ui.single_project.project_plugin import ProjectPlugin
 from infobiotics.dashboard.app import InfobioticsDashboardWorkbenchApplication
 #from infobiotics.dashboard.plugins.experiments.ui_plugin import ExperimentsUIPlugin
 from infobiotics.dashboard.plugins.mcss.ui_plugin import McssUIPlugin
 from infobiotics.dashboard.plugins.pmodelchecker.ui_plugin import PModelCheckerUIPlugin
-#from infobiotics.dashboard.plugins.poptimizer.ui_plugin import POptimizerUIPlugin
+from infobiotics.dashboard.plugins.poptimizer.ui_plugin import POptimizerUIPlugin
 #from infobiotics.dashboard.plugins.bnf.ui_plugin import BNFUIPlugin
 from infobiotics.dashboard.plugins.simulator_results.ui_plugin import SimulatorResultsUIPlugin
 #from infobiotics.dashboard.plugins.example.ui_plugin import ExampleUIPlugin
@@ -37,7 +37,7 @@ def main():
 
 #            DeveloperPlugin(),
 #            DeveloperUIPlugin(),
-#            PythonShellPlugin(),
+            PythonShellPlugin(),
 #            IPythonShellPlugin(),
             TextEditorPlugin(),
 
@@ -46,7 +46,7 @@ def main():
 #            ExperimentsUIPlugin(),
             McssUIPlugin(),
             PModelCheckerUIPlugin(),
-#            POptimizerUIPlugin(),
+            POptimizerUIPlugin(),
             
             SimulatorResultsUIPlugin(),
 #            McssResultsUIPlugin(),

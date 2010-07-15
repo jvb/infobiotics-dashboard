@@ -24,7 +24,8 @@ class McssExperiment(McssParams, Experiment):
             self.run = int(run)
             self.time_in_run = float(time_in_run)
         else:
-            super(McssExperiment, self).pattern_matched(pattern_index, match)
+            super(McssExperiment, self)._output_pattern_matched(pattern_index, match)
+            
 
 if __name__ == '__main__':
     experiment = McssExperiment()

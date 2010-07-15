@@ -200,10 +200,7 @@ class Experiment(Params):
             elif pattern_index == 1:
                 # do something else
             else:
-                # pattern_index not defined by this class, pass to superclass
-                ParamsExpect._output_pattern_matched(self, pattern_index, match)
-                # or
-#                super(McssExpect, self)._output_pattern_matched(pattern_index, match)
+                super(McssExperiment, self)._output_pattern_matched(pattern_index, match)
                 
         '''
         self._error_string = match.split('rror')[1].strip(':') if 'rror' in match else match

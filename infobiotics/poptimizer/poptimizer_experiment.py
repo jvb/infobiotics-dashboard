@@ -1,6 +1,10 @@
-
-from enthought.traits.ui.tabular_adapter \
-    import TabularAdapter
+from enthought.traits.api import HasTraits, Str, DictStrStr, List, Float, Instance, Constant, Int, Range, Property
+from infobiotics.poptimizer.api import POptimizerParams
+from infobiotics.common.api import Experiment
+from matplotlib.figure import Figure, SubplotParams
+from enthought.traits.ui.api import View, VGroup, Item, HGroup, TabularEditor
+from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
+from enthought.traits.ui.tabular_adapter import TabularAdapter
 
 class Module(HasTraits):
     '''PosReg(X=3,Y=1)''' 
@@ -8,54 +12,12 @@ class Module(HasTraits):
     parameters = DictStrStr
     parameters_str = Str
     
+class POptimizerExperiment(POptimizerParams, Experiment):
 
-        
-
-
-from PyQt4.QtGui import QWidget, QSizePolicy
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from matplotlib.figure import Figure
-from matplotlib.figure import SubplotParams
-from enthought.traits.ui.qt4.editor import Editor
-from enthought.traits.ui.basic_editor_factory import BasicEditorFactory
-
-class _MPLFigureEditor(Editor):
-    scrollable = True
-    widget = Instance(QWidget)
+    def _handler_default(self):
+        from infobiotics.poptimizer.api import POptimizerExperimentHandler
+        return POptimizerExperimentHandler(model=self)
     
-    def init(self, parent):
-        ''' self.value is the trait being edited. '''
-        
-#        # with additional widgets such as the Matplotlib navigation toolbar
-#        widget = QWidget()
-#        widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-#        layout = QGridLayout(widget)
-#        mpl_control = FigureCanvas(self.value)
-#        layout.addWidget(mpl_control)
-#        toolbar = NavigationToolbar(mpl_control, widget)
-#        layout.addWidget(toolbar)
-
-        # without additional widgets
-        widget = FigureCanvas(self.value)
-        widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-#        widget.setMinimumSize(300,300)
-        
-        self.control = widget
-#        self.set_tooltip('')
-    
-    def update_editor(self):
-        pass
-#        self.control.update()
-    
-
-class MPLFigureEditor(BasicEditorFactory):
-    klass = _MPLFigureEditor
-
-
-
-class POptimizerExperiment(Experiment):
-
     best_fitnesses = List(Float)
     figure = Instance(Figure, 
         Figure(
@@ -78,26 +40,17 @@ class POptimizerExperiment(Experiment):
     generations = Constant(10) #TODO remove, get 'maxgeno' from 'parameters' instead
     overall_progress = Property(Range(0.0, 100.0), depends_on='parameter_optimization_subtotal, current_generation')
     
-#    executable_name = 'poptimizer'
-#    pattern_list = [
-#        'initialization',
-#        'parameter optimization [0-9]+/[0-9]+',
-#        '[0-9]+ [0-9]+[.][0-9]+ .+\n',
-#        'simulate final model',
-#    ]
-    def _pattern_list_default(self):
-        return [
-            'initialization',
-            'parameter optimization [0-9]+/[0-9]+',
-            '[0-9]+ [0-9]+[.][0-9]+ .+\n',
-            'simulate final model',
-        ]
+    _output_pattern_list = [
+        'initialization',
+        'parameter optimization [0-9]+/[0-9]+',
+        '[0-9]+ [0-9]+[.][0-9]+ .+\n',
+        'simulate final model',
+    ]
     
     def _starting_fired(self):
-        print '_starting_fired'
         self.axes = self.figure.add_subplot(111)
     
-    def pattern_matched(self, pattern_index, match):
+    def _output_pattern_matched(self, pattern_index, match):
 #        '''
 #        initialization
 #        parameter optimization 1/2
@@ -137,7 +90,7 @@ class POptimizerExperiment(Experiment):
             self.status = 'Simulating final model'
 #            self.overall_progress = 99
         elif pattern_index > 3:
-            ParamsExpect.pattern_matched(self, pattern_index, match)
+            super(POptimizerExperiment, self)._output_pattern_matched(pattern_index, match)
     
     def _finished_fired(self):
         self.status = 'Finished'
@@ -147,7 +100,7 @@ class POptimizerExperiment(Experiment):
         subtotal = ((self.parameter_optimization_subtotal/self.parameter_optimization_total)*100) + (100 * self.current_generation)
         total = 100 * self.generations
         return float((subtotal / total) * 100)
-        
+
     traits_view = View(
         VGroup(
             VGroup(
@@ -197,4 +150,5 @@ class POptimizerExperiment(Experiment):
     )
 
 
-    
+if __name__ == '__main__':
+    POptimizerExperiment().configure()
