@@ -146,6 +146,7 @@ elif sys.platform.startswith('win'):
 ##               "icon_resources": [(2, "images/example.ico")],
 #            ),
         ],
+#        zipfile = None,
         options=dict(
             py2exe=dict(
 ###                includes=['sip','PyQt4._qt'], # http://www.py2exe.org/index.cgi/Py2exeAndPyQt
@@ -160,11 +161,11 @@ elif sys.platform.startswith('win'):
                     'numpy.f2py',
                     'wx',
                 ],
-                dll_excludes=["mswsock.dll", "powrprof.dll"], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
+                dll_excludes=["mswsock.dll", "powrprof.dll", "MSVCP90.dll"], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
                 packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
                 unbuffered=True,
 #               optimize=0,
-                #bundle_files=2,
+                bundle_files=3,
                 skip_archive=True, # required so that it is easier to unzip tvtk_classes.zip (?)
             )
         ),
