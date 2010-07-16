@@ -1,5 +1,5 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
-from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property
+from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Bool
 from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Heading, Label, Spring
 from numpy import array, arange, zeros, float32
 from bisect import bisect
@@ -205,12 +205,17 @@ class TraitedPrismResults(HasTraits):
     variables = List(TraitedPrismVariable)
     results = Array
     scene = Instance(MlabSceneModel, ())
+    can_be_3d = Bool(False)
     
     def __init__(self, property, variables, results, **metadata):
         HasTraits.__init__(self, **metadata)
         
         self.property = property
         self.variables = variables
+
+        if len(self.variables) > 1:
+            self.can_be_3d = True
+        
         self.results = results
         
         self.variablesNames = [variable.name for variable in self.variables]
@@ -219,27 +224,68 @@ class TraitedPrismResults(HasTraits):
         self.add_trait('notXAxis', List([name for name in self.variablesNames if name != self.xAxis]))
         self.add_trait('yAxis', Enum(values='notXAxis'))
         self.add_trait('notAxes', List(TraitedPrismVariable, maxlen=len(self.variables)-2))
-        self.updateNotAxes()
         
-        self.plotSurface()
+#        if self.can_be_3d:
+##            self.plotSurface(first_time=True)
+#            
+##            self.xAxis = 'x'
+##            self.yAxis = 'y'
+##            print self.getScalarsIndicies()
+##            scalars = eval('self.results[%s]' % self.getScalarsIndicies())
+##            print scalars
+##    
+##            self.xAxis = 'y'
+##            self.yAxis = 'x'
+##            print self.getScalarsIndicies()
+##            scalars = eval('self.results[%s]' % self.getScalarsIndicies())
+##            print scalars.transpose()
+##                        
+##            exit()
 
     def getScalarsIndicies(self):
+        ''' Can't do this with a list comprehension because "else" is not allowed. '''
         s = ''
         for i, variable in enumerate(self.variables):
             s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.valueIndex)
             s += ',' if i != len(self.variables) - 1 else ''
         return s
+
+#    def _value_changed_for_variables(self, new): #MAGIC #DEPRECATED
+    @on_trait_change('variables:value')
+    def updateSurface(self):
+        scalars = eval('self.results[%s]' % self.getScalarsIndicies())
+        print self.xAxisVariable.resultsIndex, self.yAxisVariable.resultsIndex
+        if self.xAxisVariable.resultsIndex > self.yAxisVariable.resultsIndex:
+            scalars = scalars.transpose() #TODO transposing_n_dimensional_arrays.py
+        self.surface.mlab_source.scalars=scalars
     
-    @on_trait_change('xAxis, yAxis')
-    def plotSurface(self):
+    
+    @on_trait_change('xAxis, yAxis, scene.activated')
+    def plotSurface(self, first_time=False):
+        self.notXAxis = [name for name in self.variablesNames if name != self.xAxis]
+        self.xAxisVariable = [variable for variable in self.variables if variable.name == self.xAxis][0]
+        self.yAxisVariable = [variable for variable in self.variables if variable.name == self.yAxis][0]
+        #TODO use index for transposing scalars 
+
+        self.notAxes = [variable for variable in self.variables if variable.name != self.xAxis and variable.name != self.yAxis]
         #TODO recalculate extent
         x = [variable.values for variable in self.variables if variable.name == self.xAxis]
         y = [variable.values for variable in self.variables if variable.name == self.yAxis]
         scalars = eval('self.results[%s]' % self.getScalarsIndicies())
-        self.surface = self.scene.mlab.surf(scalars, colormap='jet', extent=normalized_extent(x, y, scalars))
-        self.ranges = extent(x,y,scalars)
+        print self.xAxisVariable.resultsIndex, self.yAxisVariable.resultsIndex
+        if self.xAxisVariable.resultsIndex > self.yAxisVariable.resultsIndex:
+            scalars = scalars.transpose() #TODO transposing_n_dimensional_arrays.py
+        mlab = self.scene.mlab
+        mlab.clf()
+        self.surface = mlab.surf(scalars, colormap='jet', extent=normalized_extent(x, y, scalars))
+        self.axes = mlab.axes(ranges=extent(x,y,scalars), nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result", color=(0,0,0))
+        self.title = mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
+        self.scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
 
-    @on_trait_change('scene.activated')
+
+
+
+#    @on_trait_change('scene.activated')
     def create_pipeline(self):
         """ set traits for items in figure """
 #        figure = self.scene.mlab.gcf()
@@ -280,31 +326,11 @@ class TraitedPrismResults(HasTraits):
 #        # since VTK-5.2 the actual widget is accessed through its representation property (see https://mail.enthought.com/pipermail/enthought-dev/2009-May/021342.html) - we using at least VTK-5.4
 #        scalar_bar_widget.representation.set(position=[0.9,0.08], position2=[0.09,0.42])
 
-
-#   used to discover good view parameters 
-    @on_trait_change('scene.view') #TODO change to when view is moved
-    def print_view(self):
-        print self.scene.mlab.view()
+##   used to discover good view parameters 
+#    @on_trait_change('scene.view') #TODO change to when view is moved
+#    def print_view(self):
+#        print self.scene.mlab.view()
     
-    
-    
-    def _value_changed_for_variables(self, new):
-        self.updateSurface()
-
-    def updateSurface(self):
-        scalars = eval('self.results[%s]' % self.getScalarsIndicies())
-        self.surface.mlab_source.scalars=scalars
-
-    def _xAxis_changed(self):
-        self.notXAxis = [name for name in self.variablesNames if name != self.xAxis]
-    
-    def _notAxes_default(self):
-        return [variable for variable in self.variables if variable.name != self.xAxis and variable.name != self.yAxis]
-    
-    @on_trait_change('xAxis, yAxis')
-    def updateNotAxes(self):
-        self.notAxes = self._notAxes_default()
-
     def traits_view(self):
         return View(
 #            Heading(self.property),
@@ -466,11 +492,14 @@ class TraitedPrismResults(HasTraits):
 #instances = TraitedPrismResults.fromPsmFile('4_variables.psm')
 #instances = TraitedPrismResults.fromPsmFile('3_results.psm')
 #instances = TraitedPrismResults.fromPsmFile('2_properties.psm')
-instances = TraitedPrismResults.fromPsmFile('/home/jvb/Desktop/motifs/Const/modelChecking/Const_results.mc2')
+#instances = TraitedPrismResults.fromPsmFile('/home/jvb/Desktop/motifs/Const/modelChecking/Const_results.mc2')
+#instances = TraitedPrismResults.fromPsmFile('results.psm')
+instances = TraitedPrismResults.fromPsmFile('1-4_variables.psm')
+
 #for instance in instances:
 #    instance.print_traits()
-instances[0].configure_traits()
-
+instances[2].plotSurface()
+instances[2].configure_traits()
 
 
     
