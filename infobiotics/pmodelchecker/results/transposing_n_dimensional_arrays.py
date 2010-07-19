@@ -1,35 +1,90 @@
 import numpy as np
 
-n = 2
+x = range(2)
+y = range(3)
+z = range(4)
+w = range(1)
 
-##a = np.arange(n**2).reshape((n,n))
-#a = np.arange(n**3).reshape((n,n,n))
-##a = np.arange(n**4).reshape((n,n,n,n))
-#
-#print 'a'
-#print a
-#print
-#
-#print 'a.transpose()'
-#print a.transpose()
-#print
-#
-#print 'a.transpose([2,1,0])'
-#print a.transpose([2,1,0])
-#print
-#
-#print 'a.transpose([1,2,0])'
-#print a.transpose([1,2,0])
-#print
-#
-#print 'a.transpose([0,2,1])'
-#print a.transpose([0,2,1])
+#print '4 variables:'
+#print 'x y z w Result'
+a = np.arange(len(x)*len(y)*len(z)*len(w)).reshape((len(x),len(y),len(z),len(w)))
+#for xi, xd in enumerate(x):
+#    for yi, yd in enumerate(y):
+#        for zi, zd in enumerate(z):
+#            for wi, wd in enumerate(w):
+#                print xd, yd, zd, wd, a[xi,yi,zi,wi]
 #print
 
-# make b a 3-dimensional array of shape (2,3,4)
-b = np.arange(24).reshape(2,3,4)
-print b, '\n' * 2
+#print a '\n'
 
-#print b.transpose()
-#print b.reshape(3,2,4)
-print b.transpose(1,2,0)
+#for b in (
+#    a[:,0,0,:],
+##    a[:,0,0,:],
+##    a[:,0,1,:],
+##    a[:,:,0,0],
+##    a[:,:,1,0],
+##    a[:,0,:,0],
+##    a[:,1,:,0],
+##    a[0,:,:,0],
+##    a[1,:,:,0],
+#):
+#    print b
+#    print b.shape
+#    print b.T
+#    print b.T.shape
+#    print b.swapaxes(0,1) 
+#    print b.swapaxes(0,1).shape
+#    print
+    
+#print a[1,:,:,0]
+#print a[1,:,:,0].shape
+#print a[1,:,:,0].T
+#print a[1,:,:,0].T.shape
+print a
+print a.shape
+print
+#print a.T.shape
+print a.transpose(3,1,2,0)
+print a.transpose(3,1,2,0).shape
+print a.swapaxes(3,0).shape
+print
+print a.swapaxes(3,0)[0,:,:,1]
+print a[1,:,:,0].transpose()
+
+
+
+#for isAxis in (True, False):
+#    s += ':' if isAxis else xi 
+#    s += ',' if i < 4 else ''
+    
+#for xi, xd in enumerate(x):
+#    for yi, yd in enumerate(y):
+#        for zi, zd in enumerate(z):
+#            for wi, wd in enumerate(w):
+##                print xd, yd, zd, wd, a[xi,yi,zi,wi]
+#                s = ''
+#                s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.valueIndex)
+#                s += ',' if i != len(self.variables) - 1 else ''
+#                print s
+
+#for xi, xd in enumerate(x):
+#    s = ''
+#    for isAxis in (True, False):
+#        s += ':' if isAxis else str(xi) 
+#        s += ','
+#        print 1
+#        for yi, yd in enumerate(y):
+#            for isAxis in (True, False):
+#                s += ':' if isAxis else str(yi) 
+#                s += ','
+#                print 2
+#                for zi, zd in enumerate(z):
+#                    for isAxis in (True, False):
+#                        s += ':' if isAxis else str(zi) 
+#                        s += ','
+#                        print 3
+#                        for wi, wd in enumerate(w):
+#                            for isAxis in (True, False):
+#                                s += ':' if isAxis else str(wi)
+#                                print 4
+#                                print s

@@ -1,15 +1,18 @@
 from numpy import min, max
+import numpy as np
 
 def extent(x, y, z):
     return [min(x), max(x), min(y), max(y), min(z), max(z)]  
 
-def normalize(value, maximum, minimum=0, scale=1):
+def normalize(value, maximum, minimum, scale=1):
     return ((value - minimum) / (maximum - minimum)) * scale
 
 def normalized_extent(x, y, z):
-    """ returns a list [xmin, xmax, ymin, ymax, zmin, zmax] where min = 0 and max = 1.
-        By normalizing the extents of the surface we get a 3D plot that fits perfectly into a cube,
-        even if there are many more x values than y values, or vice versa.
+    """ Returns a list [xmin, xmax, ymin, ymax, zmin, zmax] where min = 0 and max = 1.
+ 
+    By normalizing the extents of the surface we get a 3D plot that fits 
+    perfectly into a cube, even when there are many more x values than y values
+    and vice versa.
     
     """
     xmin = min(x)
@@ -19,14 +22,36 @@ def normalized_extent(x, y, z):
     zmin = min(z)
     zmax = max(z)
     return [
-            normalize(xmin, xmax, xmin), 
-            normalize(xmax, xmax, xmin), 
-            normalize(ymin, ymax, ymin), 
-            normalize(ymax, ymax, ymin), 
-            normalize(zmin, zmax, zmin), 
-            normalize(zmax, zmax, zmin)
-           ] 
+        normalize(xmin, xmax, xmin), 
+        normalize(xmax, xmax, xmin), 
+        normalize(ymin, ymax, ymin), 
+        normalize(ymax, ymax, ymin), 
+        normalize(zmin, zmax, zmin), 
+        normalize(zmax, zmax, zmin)
+    ] 
 
+def normalize_array_by_other_array(a, other):
+    min = np.min(other)
+    return (a - min) * 1 / (np.max(other) - min)
+    # brackets are vital here because only '(a - min)' returns an array
+
+def normalized_extent_z_by_other_array(x, y, z, other):
+    xmin = min(x)
+    xmax = max(x)
+    ymin = min(y)
+    ymax = max(y)
+    normalized_z = normalize_array_by_other_array(z, other)
+    zmin = min(normalized_z)
+    zmax = max(normalized_z)
+    return [
+        normalize(xmin, xmax, xmin), 
+        normalize(xmax, xmax, xmin), 
+        normalize(ymin, ymax, ymin), 
+        normalize(ymax, ymax, ymin), 
+        zmin, 
+        zmax,
+    ] 
+    
 def anim():
     from enthought.mayavi import mlab as M
     M.options.offscreen = True

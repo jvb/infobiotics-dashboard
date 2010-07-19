@@ -1,6 +1,6 @@
 import numpy as np
 
-x = range(2)
+x = np.arange(0, 1.1111, 0.5555)
 y = range(3)
 z = range(4)
 w = range(1)
