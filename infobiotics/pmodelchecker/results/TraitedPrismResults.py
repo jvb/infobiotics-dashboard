@@ -55,8 +55,8 @@ class TraitedPrismVariable(HasTraits):
                 Item('name', show_label=False, style='readonly'),
                 Item('value', show_label=False,
                     editor=RangeEditor(
-                        format=self.format,
-                        evaluate=self.evaluateValue, #TODO evaluate_name?
+                        evaluate=self.evaluateValue, # evaluate_name works
+                        format=self.format,          # but format_name doesn't
                         mode='slider', 
                         low_name='start', 
                         high_name='stop',
@@ -82,6 +82,7 @@ class TraitedPrismResults(HasTraits):
     property = Str
     variables = List(TraitedPrismVariable)
     results = Array
+    
     scene = Instance(MlabSceneModel, ())
 
 #    can_be_3d = Bool(False)
@@ -134,77 +135,64 @@ class TraitedPrismResults(HasTraits):
                 s += ','
         return s
 
-    @on_trait_change('variables:value') # ':' means call when 'value' attribute of items in variables change but not the object assigned to 'variables' changes 
-    def updateSurface(self):
-#        self.surface.mlab_source.reset(scalars = self.get_scalars())
-#        self.plotSurface()
-        self.surface.mlab_source.scalars = self.get_scalars()
-
     def get_scalars(self):
-        print 2
         ''' Return a 2-dimensional slice of the results array. '''
         scalars = eval('self.results[%s]' % self.getScalarsIndicies())
         if self.xAxisVariable.resultsIndex > self.yAxisVariable.resultsIndex:
             # transpose scalars if axes are swapped using either:
-            # results.swapaxes(x,y) or scalars.transpose() or scalars.T
+            # scalars.transpose() or scalars.T (or results.swapaxes(x,y) initially) 
             scalars = scalars.T
-#        return scalars
-        normalized = normalize_array_by_other_array(scalars, self.results) 
-        print normalized
-        return normalized
+        return scalars
+#        normalized = normalize_array_by_other_array(scalars, self.results) 
+#        print normalized
+#        return normalized
+#        # this doesn't work because then the scalarbar is set to 0 or 1
     
-    @on_trait_change('xAxis, yAxis')
-    def change_data(self):
-        print 3
-        #TODO recalculate extent
-#        self.surface.mlab_source.reset(x=self.xAxisVariable.values, y=self.yAxisVariable.values, scalars=self.get_scalars())
-        self.plotSurface()
+    @on_trait_change('variables:value') # ':' means call when 'value' attribute of items in variables change but not the object assigned to 'variables' changes 
+    def updateSurface(self):
+        self.plot.mlab_source.scalars = self.get_scalars()
 
-    def plotSurface(self):
-        print 1
-        x = self.xAxisVariable.values
-        y = self.yAxisVariable.values
-        print 'x =', x, ', y =', y
+    @on_trait_change('xAxis, yAxis')
+    def change_data(self): #self.axes.axes.ranges = ...
         mlab = self.scene.mlab
         mlab.clf()
-        scalars = self.get_scalars()
-#        self.ranges = extent(x,y,scalars) # used in add_actors
-        self.ranges = extent(x,y,self.results) # used in add_actors
-        print 'ranges =', self.ranges
-#        self.surface = mlab.surf(scalars, colormap='jet', extent=normalized_extent(x, y, scalars))
-        extent_ = normalized_extent_z_by_other_array(x, y, scalars, self.results)
-        print 'extent_', extent_ 
-#        self.surface = mlab.surf(scalars, colormap='jet', extent=extent_)
-        self.surface = mlab.surf(scalars, colormap='jet', extent=[0,1,0,1,0,1])
-        if self.scene.scene_editor is not None:
-            print 'got here'
-            self.axes = mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
-            self.title = mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
-            self.scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
-
-    @on_trait_change('scene.activated')
-    def add_actors(self):
-        print 1.5
-        mlab = self.scene.mlab
+        self.create_plot()
+        #TODO recalculate extent
         self.axes = mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
         self.title = mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
         self.scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
 
-#        # set scene's foreground and background colours
-##        self.scene.scene_editor.background = (1,1,1) # white background
-##        self.scene.scene_editor.foreground = (0,0,0) # black text
-#        
-##        self.scene.scene_editor.isometric_view() # finally works! but below is better
-        self.scene.mlab.view(225, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4  
+    def create_plot(self):
+        scalars = self.get_scalars() #FIXME scalars aren't changing, maybe dataset looks same from all directions?
+        x = self.xAxisVariable.values
+        y = self.yAxisVariable.values
+        self.ranges = extent(x, y, scalars) # used in add_actors
+#        self.ranges = extent(x, y, self.results)#,scalars) # used in add_actors
+        self.plot = self.scene.mlab.surf(x, y, scalars, colormap='jet', extent=[0,1,0,1,0,1])
+
+    @on_trait_change('scene.activated')
+    def add_actors(self):
+        if not hasattr(self, 'ranges'): return #TODO remove
+        mlab = self.scene.mlab
+        self.axes = mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
+        self.title = mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
+        self.scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
+        
+#        self.scene.scene_editor.isometric_view() # finally works! but below is better
+        mlab.view(225, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4  
 
 #        # setting scalarbar title and label fonts
 #        scalarbar.title_text_property.set(font_size=4)
 #        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
 #        
 #        # set position and size of scalarbar
-#        scalar_bar_widget = self.surface.module_manager.scalar_lut_manager.scalar_bar_widget
+#        scalar_bar_widget = self.plot.module_manager.scalar_lut_manager.scalar_bar_widget
 #        # since VTK-5.2 the actual widget is accessed through its representation property (see https://mail.enthought.com/pipermail/enthought-dev/2009-May/021342.html) - we using at least VTK-5.4
 #        scalar_bar_widget.representation.set(position=[0.9,0.08], position2=[0.09,0.42])
+#
+#        # set scene's foreground and background colours
+#        self.scene.scene_editor.background = (1,1,1) # white background
+#        self.scene.scene_editor.foreground = (0,0,0) # black text
 
     def traits_view(self):
         return View(
@@ -293,8 +281,7 @@ class TraitedPrismResultsPlotter(HasTraits):
             '''            
             variableValues = array([line.split(' ')[:-1] for line in lines[2:]], float32)
             variableValuesStrs = [line.split(' ')[:-1] for line in lines[2:]]
-            print variableValuesStrs
-            #TODO find decimal places code
+#            print variableValuesStrs #TODO find decimal places code
             
             listOfTraitedPrismVariableInstances = []
             for i in range(len(variableNames)):
@@ -372,6 +359,6 @@ class TraitedPrismResultsPlotter(HasTraits):
 if __name__ == '__main__':
     main = TraitedPrismResultsPlotter()
     main.load('1-4_variables.psm')
-    main.results[3].plotSurface()
+    main.results[2].create_plot()
     main.configure_traits()
         

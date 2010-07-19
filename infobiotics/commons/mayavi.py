@@ -7,7 +7,7 @@ def extent(x, y, z):
 def normalize(value, maximum, minimum, scale=1):
     return ((value - minimum) / (maximum - minimum)) * scale
 
-def normalized_extent(x, y, z):
+def normalized_extent(x, y, z): #FIXME this is stupid because it will always return [0,1,0,1,0,1]!
     """ Returns a list [xmin, xmax, ymin, ymax, zmin, zmax] where min = 0 and max = 1.
  
     By normalizing the extents of the surface we get a 3D plot that fits 
