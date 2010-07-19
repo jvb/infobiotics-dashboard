@@ -6,6 +6,7 @@ print '1 variable:'
 print 'x Result'
 #a = np.linspace(0, 1000, n).reshape((n,))
 a = np.random.binomial(100,0.1,n).reshape((n,))
+a = np.arange()
 for xi, x in enumerate(np.linspace(0, 100, n)):
     print x, a[xi] 
 print

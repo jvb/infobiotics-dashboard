@@ -66,37 +66,37 @@ if sys.platform.startswith('darwin'):
                 frameworks=[
 #                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib',
                 ],
-#                plist=dict(
-#                    # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18
-##                    LSPrefersPPC=True,
-#                    CFBundleIdentifier='org.infobiotics.infobiotics-workbench',
-#                    CFBundleGetInfoString='The Infobiotics Dashboard, part of the Infobiotics Workbench.',
-#                    LSBackgroundOnly=False, # If True, the bundle will be a faceless background application.
-#                    LSUIElement=False, # If True, the bundle will be an agent application. It will not appear in the Dock or Force Quit window, but still can come to the foreground and present a UI.
-##                    CFBundleURLTypes = [{}], # An array of dictionaries describing URL schemes supported by the bundle.
-##                    NSServices = [{}] # An array of dictionaries specifying the services provided by the application.
-#                    CFBundleDocumentTypes=[ # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#associating-actions-with-file-types
-##                        {
-##                            'CFBundleTypeExtensions': ['html','htm'],
-##                            'CFBundleTypeName': 'HTML Document',
-##                            'CFBundleTypeRole': 'Viewer',
-##                            'CFBundleTypeIconFile': 'Icon.icns',
-##                        },
+                plist=dict(
+                    # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18
+#                    LSPrefersPPC=True,
+                    CFBundleIdentifier='org.infobiotics.infobiotics-workbench',
+                    CFBundleGetInfoString='The Infobiotics Dashboard, part of the Infobiotics Workbench.',
+                    LSBackgroundOnly=False, # If True, the bundle will be a faceless background application.
+                    LSUIElement=False, # If True, the bundle will be an agent application. It will not appear in the Dock or Force Quit window, but still can come to the foreground and present a UI.
+#                    CFBundleURLTypes = [{}], # An array of dictionaries describing URL schemes supported by the bundle.
+#                    NSServices = [{}] # An array of dictionaries specifying the services provided by the application.
+                    CFBundleDocumentTypes=[ # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#associating-actions-with-file-types
 #                        {
-#                            'CFBundleTypeExtensions' : ['h5'], 
-#                            'CFBundleTypeName': 'mcss simulation',
+#                            'CFBundleTypeExtensions': ['html','htm'],
+#                            'CFBundleTypeName': 'HTML Document',
 #                            'CFBundleTypeRole': 'Viewer',
-#                            'CFBundleTypeIconFile': 'mcss_simulation.icns',
+#                            'CFBundleTypeIconFile': 'Icon.icns',
 #                        },
-#                        { 
-#                            'CFBundleTypeExtensions' : ['lpp','sps','plb','lat'],
-#                            'CFBundleTypeName': 'Lattice Population P System model file',
-#                            'CFBundleTypeRole': 'Viewer',
-#                            'CFBundleTypeIconFile': 'lattice_population_p_system_model_file.icns',
-#                        },    
-#                    ],
-#                    
-#                ),
+                        {
+                            'CFBundleTypeExtensions' : ['h5'], 
+                            'CFBundleTypeName': 'mcss simulation',
+                            'CFBundleTypeRole': 'Viewer',
+                            'CFBundleTypeIconFile': 'mcss_simulation.icns',
+                        },
+                        { 
+                            'CFBundleTypeExtensions' : ['lpp','sps','plb','lat'],
+                            'CFBundleTypeName': 'Lattice Population P System model file',
+                            'CFBundleTypeRole': 'Viewer',
+                            'CFBundleTypeIconFile': 'lattice_population_p_system_model_file.icns',
+                        },    
+                    ],
+                    
+                ),
             ),
         ), 
         data_files=[
@@ -172,7 +172,7 @@ elif sys.platform.startswith('win'):
         data_files=[        
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("Microsoft.VC90.CRT",glob.glob("Microsoft.VC90.CRT/*")),
-            ("",glob.glob("Microsoft.VC90.CRT/*")),
+            ("",glob.glob("Microsoft.VC90.CRT/*")), #TODO remove, and in MANIFEST.in
             ("enthought/pyface/images", glob.glob(os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\pyface\\images\\*.png'))),
             ('enthought/mayavi/preferences', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')]),
             ('enthought/tvtk/plugins/scene', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\tvtk\\plugins\\scene\\preferences.ini')]),
