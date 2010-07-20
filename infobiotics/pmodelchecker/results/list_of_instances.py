@@ -1,7 +1,7 @@
 ''' Displaying a list of objects as their views. '''
 
 from enthought.traits.api import HasTraits, Int, Button, Str, List
-from enthought.traits.ui.api import View, HGroup, Item, ListEditor, InstanceEditor
+from enthought.traits.ui.api import View, HGroup, Item, ListEditor, InstanceEditor, VGroup
 
 class MySubClass(HasTraits):
     ''' The class of objects in the list. '''
@@ -39,19 +39,28 @@ class MainClass(HasTraits):
     push = Button
     pop = Button 
     
+    text = Str
+    
     traits_view = View(
-        'push',
-        'pop',
-        Item('my_list',
-            show_label=False,
-            style='readonly',
-            editor=ListEditor(
-                editor=InstanceEditor(),
-                style='custom',
-            )
+        VGroup(
+           'push',
+            Item('my_list',
+                show_label=False,
+                style='readonly',
+                editor=ListEditor(
+                    editor=InstanceEditor(),
+                    style='custom',
+                ),
+                springy=False,
+                padding=15,
+                resizable=False,
+                height=50,
+            ),
+            Item('text', style='custom', springy=True),
+            'pop',
         ),
         resizable=True,
-        width=400, height=400,
+#        width=400, height=400,
         id='list_of_instances',
     )
 

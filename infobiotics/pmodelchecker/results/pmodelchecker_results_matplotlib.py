@@ -1,12 +1,15 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
-from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Button, on_trait_change, Tuple#, Color
-from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, TextEditor#, InstanceEditor
+from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Button, on_trait_change, Tuple, cached_property, Bool#, Color
+from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, TextEditor, CheckListEditor#, InstanceEditor
 import numpy as np
 from bisect import bisect
 #from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor#, MayaviScene 
 #from enthought.tvtk.pyface.api import Scene
 #from enthought.mayavi.core.api import PipelineBase
 #from infobiotics.commons.mayavi import extent
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor 
 
 class TraitedPrismVariable(HasTraits):
     name = Str
@@ -70,8 +73,6 @@ class TraitedPrismResults(HasTraits):
     variables = List(TraitedPrismVariable)
     results = Array
     
-#    scene = Instance(MlabSceneModel, ())
-
     axisVariables = Property(List(TraitedPrismVariable), depends_on='variables')
     def _get_axisVariables(self):
         ''' Returns the set of variables with more than 1 possible value (that can therefore be an axis). '''
@@ -101,169 +102,132 @@ class TraitedPrismResults(HasTraits):
                 return variable
         raise ValueError("'%s' not found in variables." % self.xAxis)
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-#    yAxisVariable = Property(Instance(TraitedPrismVariable), depends_on='yAxis')
-#    def _get_yAxisVariable(self):
-#        for variable in self.variables:
-#            if variable.name == self.yAxis:
-#                return variable
-#        return None
-#        raise ValueError("'%s' not found in variables." % self.yAxis)
-#
-#    scalars_indicies = Property(Str)
-#    def _get_scalars_indicies(self):
-#        ''' Returns an evalable string corresponding to an extended slice of the results array. '''
-#        # Can't do this with a list comprehension because "else" is not allowed by the grammar/language.
-#        s = ''
-#        for i, variable in enumerate(self.variables):
-#            s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.valueIndex)
-#            if i < len(self.variables) - 1:
-#                s += ','
-#        return s
-#
-#    scalars = Property(Array)
-#    def _get_scalars(self):
-#        ''' Return a 2-dimensional slice of the results array. '''
-#        scalars = eval('self.results[%s]' % self.scalars_indicies)
-#        if self.xAxisVariable.resultsIndex > self.yAxisVariable.resultsIndex:
-#            # transpose scalars if axes are swapped using either:
-#            # scalars.transpose() or scalars.T (or even results.swapaxes(x,y)) 
-#            scalars = scalars.T
-#        return scalars
-#
-#    fake_scalars = Property(Array)
-#    def _get_fake_scalars(self):
-#        ''' Returns an ndarray with the same shape as scalars but the same min 
-#        and max as self.results. '''
-#        min = np.min(self.results)
-#        max = np.max(self.results)
-##        fake_scalars = np.random.random_integers(min, high=max, size=self.scalars.shape) # not necessarily ints
-#        fake_scalars = np.random.random_sample(size=self.scalars.shape) * (max - min) + min # floats using element-wise multiplication and addition
-#        fake_scalars[0,0] = min # ensure min in array
-#        fake_scalars[-1,-1] = max # ensure max in array
-#        return fake_scalars
-#
-#    @on_trait_change('variables:value') # ':' means call when 'value' attribute of items in variables change but not the object assigned to 'variables' changes 
-#    def update_surface(self):
-#        self.surface.mlab_source.scalars = self.scalars # self.surface.mlab_source.(re)set(scalars=self.scalars)
-#
-#    @on_trait_change('xAxis, yAxis')
-#    def change_data(self):
-#        self.scene.mlab.clf(figure=self.scene.mayavi_scene)
-#        self.surface = self.create_surface()
-#        self.add_actors_and_update_scalars()
-#
-#    def create_surface(self):
-#        return self.scene.mlab.surf(self.fake_scalars, colormap='jet', extent=[0,1,0,1,0,1], figure=self.scene.mayavi_scene)
-#        
-#    surface = Instance(PipelineBase)
-#    def _surface_default(self):
-#        if len(self.axisVariables) > 1:
-#            return self.create_surface()
-#
-#    ranges = Property(Tuple((Float, Float, Float, Float, Float, Float)))
-#    def _get_ranges(self):
-#        return extent(self.xAxisVariable.values, self.yAxisVariable.values, self.results)
-#        
-#    @on_trait_change('scene.activated')
-#    def add_actors_and_update_scalars(self):
-#        if self.surface is None:
-#            return
-#        
-#        mlab = self.scene.mlab
-#        mlab.figure(self.scene.mayavi_scene) # setting figure here avoids mlab.axes(figure=self.scene.mayavi_scene, ...) for each actor
-#
-#        mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
-#        mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
-#        mlab.outline(extent=[0,1,0,1,0,1])
-#        
-#        scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
-#        scalarbar.title_text_property.set(font_size=4)
-#        scalarbar.label_text_property.set(font_size=4)#, italic=0, bold=0)#, line_spacing=0.5)
-#        # since VTK-5.2 the actual widget is accessed through its representation property (see https://mail.enthought.com/pipermail/enthought-dev/2009-May/021342.html) - we using at least VTK-5.4
-#        scalar_bar_widget = self.surface.module_manager.scalar_lut_manager.scalar_bar_widget
-#        scalar_bar_widget.representation.set(position=[0.9,0.08], position2=[0.09,0.42])
-#
-##        # set scene's foreground and background colours
-##        self.scene.scene_editor.background = (0,0,0) # black background
-##        self.scene.scene_editor.foreground = (1,1,1) # white text
-#
-#        self.update_surface()
-#
-#        mlab.view(225, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4   
-#    
-#    reset_view = Button
-#    def _reset_view_fired(self):
-#        mlab = self.scene.mlab
-#        mlab.figure(self.scene.mayavi_scene)
-#        mlab.view(225, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4
 
+    scalars_indicies = Property(Str, depends_on='xAxis, variables:valueIndex')
+    @cached_property
+    def _get_scalars_indicies(self):
+        ''' Returns an evalable string corresponding to an extended slice of the results array. '''
+        # Can't do this with a list comprehension because "else" is not allowed by the grammar/language.
+        s = ''
+        for i, variable in enumerate(self.variables):
+            s += ':' if variable.name == self.xAxis else str(variable.valueIndex)
+            if i < len(self.variables) - 1:
+                s += ','
+        return s
+
+    scalars = Property(Array, depends_on='scalars_indicies')
+    @cached_property
+    def _get_scalars(self):
+        ''' Return a 1-dimensional slice of the results array. '''
+        scalars = eval('self.results[%s]' % self.scalars_indicies)
+        return scalars
+
+   
+    min_result = Property(Float, depends_on='results')
+    @cached_property
+    def _get_min_result(self):
+        return np.min(self.results)
+    
+    max_result = Property(Float, depends_on='results')
+    @cached_property
+    def _get_max_result(self):
+        return np.max(self.results)
+    
+
+    @on_trait_change('xAxis, yAxis, variables:value, variables:plot')
+    def update_figure(self):
+        axes = self.axes
+        axes.clear()
+        axes.set_title(self.property)
+        axes.set_xlabel(self.xAxis)
+        axes.set_ylabel('Result')
+        axes.grid(True)
+
+        x = self.xAxisVariable.values
+
+        line = axes.plot(x, self.scalars)
+    
+#        print self.axisVariablesNames
+#        print self.notXAxisVariablesNames
+#        print [variable.name for variable in self.variables if len(variable.values) < 2]
+#        print 
+        if len(self.notXAxisVariablesNames) > 1:
+            pass
+##            axes.plot(self.notAxes[0]
+##            print self.notAxes[0].values
+##            s = ''
+##            for i, variable in enumerate(self.variables):
+##                s += ':' if variable.name == self.xAxis else str(variable.valueIndex)
+##                if i < len(self.variables) - 1:
+##                    s += ','
+##                scalars = eval('self.results[%s]' % s)
+##                print scalars
+#            print self.results[:,0]
+#            print
+#            print self.results[:,:]
+#            print
+#            print self.results[:,1]
+#            print self.results[:,2]
+##            axes.plot(x, self.results[:,0])
+##            axes.plot(x, self.results[:,1])
+##            axes.plot(x, self.results[:,2])
+#            for i in range(len(self.results[:])):
+#                axes.plot(x, self.results[:, i])
+
+#            for variable in self.notAxes:
+#                if variable.plot:
+#                    for i in range(len(variable.values)):
+#                        axes.plot(x, self.results[:, i])
+                    
+    
+        
+        # can only set axes limits after plotting
+        self.axes.set_xlim(np.min(x), np.max(x))
+        self.axes.set_ylim(self.min_result, self.max_result)
+        
+        if self.figure.canvas is not None:
+            self.figure.canvas.draw()
+    
+    figure = Instance(Figure)
+
+    def __init__(self, **traits):
+        super(HasTraits, self).__init__(**traits)
+        self.figure = Figure()
+        self.axes = self.figure.add_subplot(111)
+        self.update_figure()
+    
     def traits_view(self):
         return View(
-#            VGroup(
-#                HGroup(
-#                    Label('Axis variables: '),
-#                    Item('xAxis', label='X'),
-#                    Item('yAxis', label='Y'),
-#                    Spring(),
-#                    Item('reset_view', show_label=False,),
-#                    visible_when='object.surface is not None',
-#                ),
-#                Item(
-#                    'scene', 
-#                    show_label=False,
-#                    editor=SceneEditor(scene_class=Scene),#MayaviScene),
-#                    height=250,
-#                    width=300, 
-#                    resizable=True
-#                ),
-#                Item('notAxes', 
-#                    visible_when='len(notAxes) > 0', 
-#                    show_label=False, 
-#                    editor=ListEditor(style='custom'), 
-#                    resizable=False, 
-#                    style='readonly',
-#                ),
-#                show_border=True,
-#                visible_when='object.surface is not None',
-#            ),
             VGroup(
                 HGroup(
-                    Label('Axis variables: '),
-                    Item('xAxis', label='X'),
-                    Item('yAxis', label='Y'),
-                    Spring(),
-                    Item('reset_view', show_label=False,),
-#                    visible_when='object.surface is not None',
-                ),
-                Item(
-                    'scene', 
-                    show_label=False,
-                    editor=SceneEditor(scene_class=Scene),#MayaviScene),
-                    height=250,
-                    width=300, 
-                    resizable=True
+                    Label('Plot result for'),
+                    Label('each', defined_when='object.notXAxisVariablesNames > 0'),
+                    Item('yAxis', show_label=False, defined_when='object.notXAxisVariablesNames > 0'),
+#                    Item('notXAxisVariablesNames', style='custom', 
+#                        editor=CheckListEditor(
+#                            name='object.notXAxisVariablesNames', # can't use this until EPD > 6.2: http://markmail.org/message/lf6qfg47xhl5j6u2
+#                        )
+#                    ),
+                    Label('at all', defined_when='object.notXAxisVariablesNames > 0'),
+                    Item('xAxis', show_label=False),
+                    Label('when', defined_when='len(object.notAxes) > 0'), 
                 ),
                 Item('notAxes', 
-                    visible_when='len(notAxes) > 0', 
+                    defined_when='len(object.notAxes) > 0', 
                     show_label=False, 
                     editor=ListEditor(style='custom'), 
                     resizable=False, 
                     style='readonly',
                 ),
+                Item(
+                    'figure', 
+                    show_label=False,
+                    editor=MPLFigureEditor(),
+                    height=250,
+                    width=300, 
+                    resizable=True
+                ),
                 show_border=True,
-#                visible_when='object.surface is not None',
             ),
             resizable=True,
             title='%s' % self.property,
@@ -390,20 +354,31 @@ class TraitedPrismResultsPlotter(HasTraits):
         self.results = listOfTraitedPrismResultsInstances
         self.fileName = fileName
 
+#    selected = Instance(TraitedPrismResults)
+#    def _selected_default(self):
+#        return self.results[0]
+#    def _selected_changed(self):
+#        print self.selected
+
     def traits_view(self):
         return View(
             VGroup(
                 Item('results', show_label=False, style='custom', 
-                     editor=ListEditor(use_notebook=True, page_name='.property'),
+                    editor=ListEditor(use_notebook=True, page_name='.property', 
+#                        selected='selected', # setting selected doesn't seem to change tab 
+#                        dock_style='tab', # dunno what this does
+                    ),
                 ),
                 show_border=True,
             ),
             title='%s' % self.fileName,
+            resizable=True,
         )
 
 
 if __name__ == '__main__':
     main = TraitedPrismResultsPlotter()
     main.load('1-4_variables.psm')
+#    main.selected = main.results[1]
     main.configure_traits()
         

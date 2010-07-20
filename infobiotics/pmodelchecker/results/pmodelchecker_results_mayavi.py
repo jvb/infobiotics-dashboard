@@ -1,6 +1,6 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
-from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Button, on_trait_change, Tuple#, Color
-from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, TextEditor#, InstanceEditor
+from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Button, on_trait_change, Tuple
+from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, TextEditor
 import numpy as np
 from bisect import bisect
 from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor#, MayaviScene 
@@ -200,40 +200,47 @@ class TraitedPrismResults(HasTraits):
         return View(
             VGroup(
                 HGroup(
-                    Label('Axis variables: '),
-                    Item('xAxis', label='X'),
-                    Item('yAxis', label='Y'),
-                    Spring(),
-                    Item('reset_view', show_label=False,),
-                    visible_when='object.surface is not None',
+                    Label('Plot result for'),
+                    Item('yAxis', show_label=False),
+                    Label('against'),
+                    Item('xAxis', show_label=False),
+                    Label('when', resizable=False, defined_when='len(object.notAxes) > 0',),
+                    defined_when='object.surface is not None',
                 ),
-                Item(
-                    'scene', 
-                    show_label=False,
-                    editor=SceneEditor(scene_class=Scene),#MayaviScene),
-                    height=250,
-                    width=300, 
-                    resizable=True
+                VGroup(
+                    Item('notAxes', 
+                        show_label=False, 
+                        editor=ListEditor(style='custom'), 
+                        style='readonly',
+                        visible_when='len(object.notAxes) > 0',
+                        resizable=False, springy=False, height=20, # must set these enable scene to fill all available space
+                    ),
+                    Item(
+                        'scene', 
+                        show_label=False,
+                        editor=SceneEditor(scene_class=Scene),#MayaviScene),
+                    ),
                 ),
-                Item('notAxes', 
-                    visible_when='len(notAxes) > 0', 
-                    show_label=False, 
-                    editor=ListEditor(style='custom'), 
-                    resizable=False, 
-                    style='readonly',
-                ),
+                HGroup(Spring(), Item('reset_view', show_label=False,),),
                 show_border=True,
-                visible_when='object.surface is not None',
+                defined_when='object.surface is not None',
             ),
-            resizable=True,
             title='%s' % self.property,
         )
     
 
-
 class TraitedPrismResultsPlotter(HasTraits):
     fileName = Str
     results = List(TraitedPrismResults)
+    
+    surfaces = Property(List(TraitedPrismResults))
+    def _get_surfaces(self):
+        return [result for result in self.results if len(result.variables) > 1] 
+    
+    def __init__(self, fileName=None, **traits):
+        super(TraitedPrismResultsPlotter, self).__init__(**traits)
+        if fileName is not None:
+            self.load(fileName)
     
     def load(self, fileName):
         ''' Sets self.results with results from fileName. '''
@@ -329,9 +336,7 @@ class TraitedPrismResultsPlotter(HasTraits):
 #            print resultValues
             
             # reshape into dimensions of variables
-#            print resultValues, shape #TODO remove
             resultValues = resultValues.reshape(shape)
-#            print resultValues[1,1,1,1] #TODO remove
             
             # create TraitedPrismResults instance and append it
             '''
@@ -352,13 +357,27 @@ class TraitedPrismResultsPlotter(HasTraits):
 
     def traits_view(self):
         return View(
-            VGroup(
-                Item('results', show_label=False, style='custom', 
-                     editor=ListEditor(use_notebook=True, page_name='.property'),
+            HGroup(
+#                Item('results', show_label=False, style='custom',  #TODO use for matplotlib figures
+#                    editor=ListEditor(
+#                        use_notebook=True, 
+#                        page_name='.property',
+#                    ),
+#                ),
+                Item('surfaces', show_label=False, style='custom', 
+                    editor=ListEditor(
+                        use_notebook=True, 
+                        page_name='.property',
+                    ),
+                    defined_when='len(object.surfaces) > 1'
                 ),
                 show_border=True,
+                defined_when='len(object.results) > 0',
             ),
+            Label("No results found in '%s'" % self.fileName, defined_when='len(object.results) == 0'),
             title='%s' % self.fileName,
+            resizable=True,
+            id='view_%s' % self.fileName,
         )
 
 

@@ -32,6 +32,9 @@ class _MPLFigureEditor(Editor):
     def update_editor(self):
         pass
 #        self.control.update()
+
+    def update(self, value):
+        self.widget.figure.canvas.draw()
     
 
 class MPLFigureEditor(BasicEditorFactory):
