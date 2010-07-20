@@ -1,12 +1,12 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
-from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Bool, on_trait_change
+from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Bool, on_trait_change, cached_property
 from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Heading, Label, Spring, TextEditor, InstanceEditor
 from numpy import array, arange, zeros, float32
 import numpy as np
 from bisect import bisect
-from enthought.tvtk.pyface.scene_editor import SceneEditor
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
+from enthought.mayavi.core.ui.api import MayaviScene, MlabSceneModel, SceneEditor
+from enthought.tvtk.pyface.api import Scene
+from enthought.mayavi.core.api import PipelineBase
 from infobiotics.commons.mayavi import extent, normalized_extent, normalized_extent_z_by_other_array
 
 def normalize_array_by_other_array(a, other):
@@ -125,7 +125,8 @@ class TraitedPrismResults(HasTraits):
         return None
         raise ValueError("'%s' not found in variables." % self.yAxis)
 
-    def getScalarsIndicies(self):
+    scalars_indicies = Property(Str)
+    def _get_scalars_indicies(self):
         ''' Returns an evalable string corresponding to an extended slice of the results array. '''
         # Can't do this with a list comprehension because "else" is not allowed by the grammar/language.
         s = ''
@@ -135,77 +136,103 @@ class TraitedPrismResults(HasTraits):
                 s += ','
         return s
 
-    def get_scalars(self):
+    scalars = Property(Array)
+    def _get_scalars(self):
         ''' Return a 2-dimensional slice of the results array. '''
-        scalars = eval('self.results[%s]' % self.getScalarsIndicies())
+        scalars = eval('self.results[%s]' % self.scalars_indicies)
         if self.xAxisVariable.resultsIndex > self.yAxisVariable.resultsIndex:
             # transpose scalars if axes are swapped using either:
-            # scalars.transpose() or scalars.T (or results.swapaxes(x,y) initially) 
+            # scalars.transpose() or scalars.T (or even results.swapaxes(x,y)) 
             scalars = scalars.T
         return scalars
-#        normalized = normalize_array_by_other_array(scalars, self.results) 
-#        print normalized
-#        return normalized
-#        # this doesn't work because then the scalarbar is set to 0 or 1
-    
+
+    fake_scalars = Property(Array)
+    def _get_fake_scalars(self):
+        ''' Returns an ndarray with the same shape as scalars but the same min 
+        and max as self.results. '''
+        min = np.min(self.results)
+        max = np.max(self.results)
+#        fake_scalars = np.random.random_integers(min, high=max, size=self.scalars.shape) # not necessarily ints
+        fake_scalars = np.random.random_sample(size=self.scalars.shape) * (max - min) + min # floats using element-wise multiplication and addition
+        fake_scalars[0,0] = min # ensure min in array
+        fake_scalars[-1,-1] = max # ensure max in array
+        return fake_scalars
+
     @on_trait_change('variables:value') # ':' means call when 'value' attribute of items in variables change but not the object assigned to 'variables' changes 
-    def updateSurface(self):
-        self.plot.mlab_source.scalars = self.get_scalars()
+    def update_surface(self):
+        self.surface.mlab_source.scalars = self.scalars
+#        self.surface.mlab_source.reset(scalars=self.scalars)
 
     @on_trait_change('xAxis, yAxis')
     def change_data(self): #self.axes.axes.ranges = ...
         mlab = self.scene.mlab
-        mlab.clf()
-        self.create_plot()
+        mlab.clf(figure=self.scene.mayavi_scene)
+        self.create_surface()
         #TODO recalculate extent
-        self.axes = mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
-        self.title = mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
+        self.axes = mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result", figure=self.scene.mayavi_scene)#, color=(0,0,0))
+        self.title = mlab.title("%s" % self.property, size=0.5, height=0.85, figure=self.scene.mayavi_scene)#, color=(0,0,0))
         self.scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
+        self.outline = mlab.outline(extent=[0,1,0,1,0,1], figure=self.scene.mayavi_scene)
+        self.update_surface()
 
-    def create_plot(self):
-        scalars = self.get_scalars() #FIXME scalars aren't changing, maybe dataset looks same from all directions?
+#    surface = Instance(PipelineBase)
+#    def _surface_default(self):
+#        pass
+
+        
+    def create_surface(self):
         x = self.xAxisVariable.values
         y = self.yAxisVariable.values
-        self.ranges = extent(x, y, scalars) # used in add_actors
-#        self.ranges = extent(x, y, self.results)#,scalars) # used in add_actors
-        self.plot = self.scene.mlab.surf(x, y, scalars, colormap='jet', extent=[0,1,0,1,0,1])
+        
+        # using min
+        self.surface = self.scene.mlab.surf(self.fake_scalars, colormap='jet', extent=[0,1,0,1,0,1], figure=self.scene.mayavi_scene)
+#        self.surface = self.scene.mlab.surf(x,y, self.fake_scalars, colormap='jet', extent=[0,1,0,1,0,1])
+#        self.surface = self.scene.mlab.surf(x, y, min_max, colormap='jet', warp_scale='auto', figure=self.scene.mayavi_scene)
+#        self.update_surface()
+
+        self.ranges = extent(x, y, self.results)#,scalars) # used in add_actors
 
     @on_trait_change('scene.activated')
     def add_actors(self):
         if not hasattr(self, 'ranges'): return #TODO remove
         mlab = self.scene.mlab
-        self.axes = mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
-        self.title = mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
+        self.axes = mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result", figure=self.scene.mayavi_scene)#, color=(0,0,0))
+        self.title = mlab.title("%s" % self.property, size=0.5, height=0.85, figure=self.scene.mayavi_scene)#, color=(0,0,0))
         self.scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
+        self.outline = mlab.outline(extent=[0,1,0,1,0,1], figure=self.scene.mayavi_scene)
         
 #        self.scene.scene_editor.isometric_view() # finally works! but below is better
         mlab.view(225, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4  
+
+        self.update_surface()
 
 #        # setting scalarbar title and label fonts
 #        scalarbar.title_text_property.set(font_size=4)
 #        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
 #        
 #        # set position and size of scalarbar
-#        scalar_bar_widget = self.plot.module_manager.scalar_lut_manager.scalar_bar_widget
+#        scalar_bar_widget = self.surface.module_manager.scalar_lut_manager.scalar_bar_widget
 #        # since VTK-5.2 the actual widget is accessed through its representation property (see https://mail.enthought.com/pipermail/enthought-dev/2009-May/021342.html) - we using at least VTK-5.4
 #        scalar_bar_widget.representation.set(position=[0.9,0.08], position2=[0.09,0.42])
 #
 #        # set scene's foreground and background colours
 #        self.scene.scene_editor.background = (1,1,1) # white background
 #        self.scene.scene_editor.foreground = (0,0,0) # black text
+    
+
 
     def traits_view(self):
         return View(
             VGroup(
                 HGroup(
-                    Label('Variables to plot: '),
+                    Label('Variables to surface: '),
                     Item('xAxis', label='X'),
                     Item('yAxis', label='Y'),
                 ),
                 Item(
                     'scene', 
                     show_label=False,
-                    editor=SceneEditor(scene_class=MayaviScene),
+                    editor=SceneEditor(scene_class=Scene),#MayaviScene),
                     height=250,
                     width=300, 
                     resizable=True
@@ -359,6 +386,6 @@ class TraitedPrismResultsPlotter(HasTraits):
 if __name__ == '__main__':
     main = TraitedPrismResultsPlotter()
     main.load('1-4_variables.psm')
-    main.results[2].create_plot()
+    main.results[2].create_surface()
     main.configure_traits()
         
