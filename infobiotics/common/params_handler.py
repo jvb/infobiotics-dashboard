@@ -170,6 +170,7 @@ class ParamsHandler(HelpfulController):
             if self.copy: #TODO prompt to overwrite existing files in new directory
                 pass
             params.save(file_name, force=True, copy=self.copy) # user will have been prompted to overwrite by the GUI
+            from infobiotics.commons.strings import shorten_path
             self.status = "Saved '%s'." % shorten_path(file_name, 71)
                                    
     def get_save_file_name_using_PyFace_FileDialog(self, title):

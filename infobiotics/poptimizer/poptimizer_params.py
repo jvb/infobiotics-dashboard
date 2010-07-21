@@ -15,8 +15,8 @@ class POptimizerParams(Params):
 
     executable_name = 'poptimizer'
     
-    _parameters_name = 'poptimizer'
-    _parameter_set_name = 'poptimizer'
+    _parameters_name = 'POptimizerParameters'
+    _parameter_set_name = 'POptimizerParameters'
     
     target_file = Str(desc='a filename for target time series data')
     target_obj_num = Int(1, desc='the number of objects in the input time series data')

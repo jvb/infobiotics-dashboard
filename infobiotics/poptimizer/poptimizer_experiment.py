@@ -152,3 +152,4 @@ class POptimizerExperiment(POptimizerParams, Experiment):
 
 if __name__ == '__main__':
     POptimizerExperiment().configure()
+    

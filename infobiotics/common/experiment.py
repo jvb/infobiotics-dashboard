@@ -139,7 +139,9 @@ class Experiment(Params):
             su = subprocess.STARTUPINFO() 
             su.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
             su.wShowWindow = subprocess.SW_HIDE 
-        p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], startupinfo=su, cwd=self.directory) # directory defined in Params
+            p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], startupinfo=su, cwd=self.directory) # directory defined in Params
+        else:
+            p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
         self.started = True
         p.wait()
         self.finished = True
