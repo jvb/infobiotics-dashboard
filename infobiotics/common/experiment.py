@@ -135,7 +135,11 @@ class Experiment(Params):
 ##                self._output_pattern_matched(pattern_index, self.child.match.group())
 ##                patterns_matched += 1
         import subprocess
-        p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
+        if subprocess.mswindows: # http://www.gossamer-threads.com/lists/python/python/783937#783937
+            su = subprocess.STARTUPINFO() 
+            su.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
+            su.wShowWindow = subprocess.SW_HIDE 
+        p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], startupinfo=su, cwd=self.directory) # directory defined in Params
         self.started = True
         p.wait()
         self.finished = True
