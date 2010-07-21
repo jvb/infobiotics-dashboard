@@ -62,7 +62,7 @@ class TraitedPrismVariable(HasTraits):
                     tooltip='Warning: the value shown in the box may not be the same as the actual value of this variable (shown to the right)',
                 ),
                 Item('value', show_label=False, style='readonly',
-                    editor=TextEditor(), #TODO format
+                    editor=TextEditor(format_str=self.format),
                 ),
             ),
         )

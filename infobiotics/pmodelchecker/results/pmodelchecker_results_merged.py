@@ -1,33 +1,61 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
-from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Button, on_trait_change, Tuple, cached_property, Bool
-from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, TextEditor#, CheckListEditor
+from enthought.traits.api import (
+    HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, 
+    Property, Button, on_trait_change, Tuple, cached_property, Bool, 
+    DelegatesTo,
+)
+from enthought.traits.ui.api import (
+    View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, 
+    TextEditor, 
+#    CheckListEditor,
+)
+
 import numpy as np
+
 from bisect import bisect
 
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.tvtk.pyface.scene_editor import SceneEditor
-from enthought.tvtk.pyface.api import Scene
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-from enthought.mayavi.core.pipeline_base import PipelineBase
-#from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor#, MayaviScene 
-#from enthought.mayavi.core.api import PipelineBase
+# check if mayavi2 version < 3.3.0        
+import enthought.mayavi.__version__
+version = enthought.mayavi.__version__.__version__
+version_info = version.split('.') 
+major = int(version_info[0])
+minor = int(version_info[1])
+if major < 3 or (major == 3 and minor < 3):
+    outdated_mayavi = True
+else:
+    outdated_mayavi = False
+
+if outdated_mayavi:
+    # Mayavi < 3.3
+    from enthought.tvtk.pyface.api import Scene
+    from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
+    from enthought.tvtk.pyface.scene_editor import SceneEditor
+    from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
+    from enthought.mayavi.core.pipeline_base import PipelineBase
+else:
+    # Mayavi >= 3.3
+    from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor, MayaviScene 
+    from enthought.mayavi.core.api import Scene, PipelineBase
+
 from infobiotics.commons.mayavi import extent
 
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor 
 
-class TraitedPrismVariable(HasTraits):
+
+class PModelCheckerResultsPropertyVariable(HasTraits):
     name = Str
     values = List
-    resultsIndex = Int
+    result_array_index = Int
     start = Float
     stop = Float
     value = Range('start', 'stop', 'start') 
-    valueIndex = Int
+    value_index = Int
     format = Unicode
     
-    def findIndexInValues(self, value):
+    def find_index_in_values(self, value):
         ''' Returns the index of the item closest to value in self.values. '''
         next = bisect(self.values, value)
         prev = next - 1
@@ -43,14 +71,14 @@ class TraitedPrismVariable(HasTraits):
             # value is closer to next
             return next
 
-    def evaluateValue(self, value):
+    def evaluate_value(self, value):
         ''' Returns the value closest '''
-        self.valueIndex = self.findIndexInValues(value)
-        return self.values[self.valueIndex]
+        self.value_index = self.find_index_in_values(value)
+        return self.values[self.value_index]
         
     def _value_changed(self, value):
-        ''' Sets the valueIndex to be used even when the value is set programmatically. '''
-        self.value = self.evaluateValue(value)
+        ''' Sets the value_index to be used even when the value is set programmatically. '''
+        self.value = self.evaluate_value(value)
 
     def traits_view(self):
         return View(
@@ -58,7 +86,7 @@ class TraitedPrismVariable(HasTraits):
                 Item('name', show_label=False, style='readonly'),
                 Item('value', show_label=False,
                     editor=RangeEditor(
-                        evaluate=self.evaluateValue, # evaluate_name works
+                        evaluate=self.evaluate_value, # evaluate_name works
                         format=self.format,          # but format_name doesn't, so we need traits_view method to access self
                         mode='slider', 
                         low_name='start', 
@@ -68,20 +96,32 @@ class TraitedPrismVariable(HasTraits):
                     tooltip='Warning: the value shown in the box may not be the same as the actual value of this variable (shown to the right)',
                 ),
                 Item('value', show_label=False, style='readonly',
-                    editor=TextEditor(), #TODO format
+                    editor=TextEditor(format_str=self.format),
                 ),
             ),
         )
 
 
 
-class TraitedPrismResults(HasTraits):
+class PModelCheckerResultsPropertyVisualisation(HasTraits):
+    property = Instance('PModelCheckerResultsProperty')
+    property_string = DelegatesTo('property')
+    variables = DelegatesTo('property')
+    result_array = DelegatesTo('property')
+    type = Str
+    def _type_default(self):
+        raise NotImplementedError('Subclasses of PModelCheckerResultsPropertyVisualisation should specify a type.')
 
-    property = Str
-    variables = List(TraitedPrismVariable)
-    results = Array
-    
-    axisVariables = Property(List(TraitedPrismVariable), depends_on='variables')
+    def __init__(self, property, **traits):
+        self.property = property # must come before __init__ because that tries to use it as a delegates
+        super(PModelCheckerResultsPropertyVisualisation, self).__init__(**traits)
+        self.init()
+
+    def init(self):
+        ''' Used by subclasses to initialise their visualisation apparatus. '''
+        pass
+        
+    axisVariables = Property(List(PModelCheckerResultsPropertyVariable), depends_on='variables')
     def _get_axisVariables(self):
         ''' Returns the set of variables with more than 1 possible value (that can therefore be an axis). '''
         return [variable for variable in self.variables if len(variable.values) > 1]
@@ -98,38 +138,41 @@ class TraitedPrismResults(HasTraits):
     
     yAxis = Enum(values='notXAxisVariablesNames') #TODO change name so as not to conflict with mayavi
     
-    notAxes = Property(List(TraitedPrismVariable), depends_on='xAxis, yAxis')
+    notAxes = Property(List(PModelCheckerResultsPropertyVariable), depends_on='xAxis, yAxis')
     def _get_notAxes(self):
         return [variable for variable in self.variables if variable.name not in (self.xAxis, self.yAxis)]
 
-    xAxisVariable = Property(Instance(TraitedPrismVariable), depends_on='xAxis')
+    xAxisVariable = Property(Instance(PModelCheckerResultsPropertyVariable), depends_on='xAxis')
     def _get_xAxisVariable(self):
         for variable in self.variables:
             if variable.name == self.xAxis:
                 return variable
         raise ValueError("'%s' not found in variables." % self.xAxis)
     
-    yAxisVariable = Property(Instance(TraitedPrismVariable), depends_on='yAxis')
+    yAxisVariable = Property(Instance(PModelCheckerResultsPropertyVariable), depends_on='yAxis')
     def _get_yAxisVariable(self):
         for variable in self.variables:
             if variable.name == self.yAxis:
                 return variable
         return None
         raise ValueError("'%s' not found in variables." % self.yAxis)
+        
+        
+class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisation):
+    ''' Interactive Matplotlib figure showing the results for a PModelCheckerResultsProperty. '''
+    type = 'Figure'
+    figure = Instance(Figure)
+    legend = Bool(True)
 
-
-
-class TraitedPrismResultsMatplotlib(TraitedPrismResults):
-
-    scalars_indicies = Property(Str, depends_on='xAxis, variables:valueIndex')
+    scalars_indicies = Property(Str, depends_on='xAxis, variables:value_index')
     @cached_property
     def _get_scalars_indicies(self):
-        ''' Returns an evalable string corresponding to an extended slice of the results array. '''
+        ''' Returns an evalable string corresponding to an extended slice of result_array. '''
         # Can't do this with a list comprehension because "else" is not allowed by the grammar/language.
         s = ''
         for i, variable in enumerate(self.variables):
-#            s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.valueIndex)
-            s += ':' if variable.name == self.xAxis else str(variable.valueIndex)
+#            s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.value_index)
+            s += ':' if variable.name == self.xAxis else str(variable.value_index)
             if i < len(self.variables) - 1:
                 s += ','
         return s
@@ -137,41 +180,41 @@ class TraitedPrismResultsMatplotlib(TraitedPrismResults):
     scalars = Property(Array, depends_on='scalars_indicies')
     @cached_property
     def _get_scalars(self):
-        ''' Return a 1-dimensional slice of the results array. '''
-        scalars = eval('self.results[%s]' % self.scalars_indicies)
+        ''' Return a 1-dimensional slice of result_array. '''
+        scalars = eval('self.result_array[%s]' % self.scalars_indicies)
         return scalars
 
    
-    min_result = Property(Float, depends_on='results')
+    min_result = Property(Float, depends_on='result_array')
     @cached_property
     def _get_min_result(self):
-        return np.min(self.results)
+        return np.min(self.result_array)
     
-    max_result = Property(Float, depends_on='results')
+    max_result = Property(Float, depends_on='result_array')
     @cached_property
     def _get_max_result(self):
-        return np.max(self.results)
+        return np.max(self.result_array)
     
     dependent_axis_label = Str
     def _dependent_axis_label_default(self):
-#        return self.property.split('=')[0].strip() #TODO
+#        return self.property_string.split('=')[0].strip() #TODO
         return 'Result'
 
     @on_trait_change('xAxis, yAxis, variables:value, variables:plot')
     def update_figure(self):
         axes = self.axes
         axes.clear()
-        axes.set_title(self.property)
+        axes.set_title(self.property_string)
         axes.set_xlabel(self.xAxis)
         axes.set_ylabel('Result')
         axes.grid(True)
 
         x = self.xAxisVariable.values
 
-
-
-        if len(self.notXAxisVariablesNames) >= 1:
-            # slice results without changing self.yAxisVariable.valueIndex
+        if len(self.notXAxisVariablesNames) < 2:
+            axes.plot(x, self.scalars)
+        else:
+            # slice result_array without changing self.yAxisVariable.value_index
             for j, v in enumerate(self.yAxisVariable.values):
                 s = ''
                 for i, variable in enumerate(self.variables):
@@ -180,23 +223,17 @@ class TraitedPrismResultsMatplotlib(TraitedPrismResults):
                     elif variable.name == self.yAxis:
                         s += str(j)
                     else:
-                        s += str(variable.valueIndex)
+                        s += str(variable.value_index)
                     if i < len(self.variables) - 1:
                         s += ','
-                scalars = eval('self.results[%s]' % s)
+                scalars = eval('self.result_array[%s]' % s)
                 label='%s=%s' % (self.yAxis, v)
                 for variable in self.variables:
                     if variable not in (self.xAxisVariable, self.yAxisVariable):
                         label += ', %s=%s' % (variable.name, variable.value)
                 axes.plot(x, scalars, label=label)
-            
             if self.legend:
                 self.axes.legend(loc='best')
-            
-            print self.yAxis, self.notXAxisVariablesNames
-                
-        else:
-            line = axes.plot(x, self.scalars)
 
         # can only set axes limits after plotting
         self.axes.set_xlim(np.min(x), np.max(x))
@@ -205,12 +242,7 @@ class TraitedPrismResultsMatplotlib(TraitedPrismResults):
         if self.figure.canvas is not None:
             self.figure.canvas.draw()
     
-    legend = Bool(True)
-    
-    figure = Instance(Figure)
-
-    def __init__(self, **traits):
-        super(HasTraits, self).__init__(**traits)
+    def init(self):
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
         self.update_figure()
@@ -253,8 +285,8 @@ class TraitedPrismResultsMatplotlib(TraitedPrismResults):
                 show_border=True,
             ),
             Item('detach', show_label=False),
-            resizable=True,
-            title='%s' % self.property,
+#            resizable=True,
+#            title='%s' % self.property_string,
         )
 
     detach = Button
@@ -262,39 +294,37 @@ class TraitedPrismResultsMatplotlib(TraitedPrismResults):
         self.edit_traits()
 
 
-
-
-
-class TraitedPrismResultsMayavi(TraitedPrismResults):
+class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisation):
+    type = 'Surface'
     scene = Instance(MlabSceneModel, ())
 
     scalars_indicies = Property(Str)
     def _get_scalars_indicies(self):
-        ''' Returns an evalable string corresponding to an extended slice of the results array. '''
+        ''' Returns an evalable string corresponding to an extended slice of result_array. '''
         # Can't do this with a list comprehension because "else" is not allowed by the grammar/language.
         s = ''
         for i, variable in enumerate(self.variables):
-            s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.valueIndex)
+            s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.value_index)
             if i < len(self.variables) - 1:
                 s += ','
         return s
 
     scalars = Property(Array)
     def _get_scalars(self):
-        ''' Return a 2-dimensional slice of the results array. '''
-        scalars = eval('self.results[%s]' % self.scalars_indicies)
-        if self.xAxisVariable.resultsIndex > self.yAxisVariable.resultsIndex:
+        ''' Return a 2-dimensional slice of result_array. '''
+        scalars = eval('self.result_array[%s]' % self.scalars_indicies)
+        if self.xAxisVariable.result_array_index > self.yAxisVariable.result_array_index:
             # transpose scalars if axes are swapped using either:
-            # scalars.transpose() or scalars.T (or even results.swapaxes(x,y)) 
+            # scalars.transpose() or scalars.T (or even result_array.swapaxes(x,y)) 
             scalars = scalars.T
         return scalars
 
     fake_scalars = Property(Array)
     def _get_fake_scalars(self):
         ''' Returns an ndarray with the same shape as scalars but the same min 
-        and max as self.results. '''
-        min = np.min(self.results)
-        max = np.max(self.results)
+        and max as self.result_array. '''
+        min = np.min(self.result_array)
+        max = np.max(self.result_array)
 #        fake_scalars = np.random.random_integers(min, high=max, size=self.scalars.shape) # not necessarily ints
         fake_scalars = np.random.random_sample(size=self.scalars.shape) * (max - min) + min # floats using element-wise multiplication and addition
         fake_scalars[0,0] = min # ensure min in array
@@ -322,7 +352,7 @@ class TraitedPrismResultsMayavi(TraitedPrismResults):
 
     ranges = Property(Tuple((Float, Float, Float, Float, Float, Float)))
     def _get_ranges(self):
-        return extent(self.xAxisVariable.values, self.yAxisVariable.values, self.results)
+        return extent(self.xAxisVariable.values, self.yAxisVariable.values, self.result_array)
         
     @on_trait_change('scene.activated')
     def add_actors_and_update_scalars(self):
@@ -332,7 +362,7 @@ class TraitedPrismResultsMayavi(TraitedPrismResults):
         mlab.figure(self.scene.mayavi_scene) # setting figure here avoids mlab.axes(figure=self.scene.mayavi_scene, ...) for each actor
 
         mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
-        mlab.title("%s" % self.property, size=0.5, height=0.85)#, color=(0,0,0))
+        mlab.title("%s" % self.property_string, size=0.5, height=0.85)#, color=(0,0,0))
         mlab.outline(extent=[0,1,0,1,0,1])
         
         scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
@@ -378,7 +408,7 @@ class TraitedPrismResultsMayavi(TraitedPrismResults):
                     Item(
                         'scene', 
                         show_label=False,
-                        editor=SceneEditor(scene_class=Scene),#TODO MayaviScene),
+                        editor=SceneEditor(scene_class=MayaviScene),#Scene),
                     ),
                 ),
                 HGroup(
@@ -388,41 +418,124 @@ class TraitedPrismResultsMayavi(TraitedPrismResults):
                 show_border=True,
                 defined_when='object.surface is not None',
             ),
-            title='%s' % self.property,
+#            title='%s' % self.property_string,
         )
 
 
+visualisation_classes = [PModelCheckerResultsPropertyFigure, PModelCheckerResultsPropertySurface]
 
-    
 
+class PModelCheckerResultsProperty(HasTraits):
+    #TODO file_name
+    #TODO file_md5sum
+    results_string = Str #TODO a copy of the results file for just this property
+    property_string = Str
+    variables = List(PModelCheckerResultsPropertyVariable)
+    result_array = Array
 
-class TraitedPrismResultsPlotter(HasTraits):
-    fileName = Str
-    results = List(TraitedPrismResults)
+    visualisations = List(PModelCheckerResultsPropertyVisualisation)
+    def _visualisations_default(self):
+        return [visualisation for visualisation in [cls(property=self) for cls in visualisation_classes] if visualisation is not None] #FIXME
 
-    surfaces = Property(List(TraitedPrismResults), depends_on='results')
-    @cached_property
-    def _get_surfaces(self):
-        return [result for result in self.results if result.surface is not None] 
+    traits_view = View(
+        VGroup(
+            Item('visualisations',
+                show_label=False, 
+                style='custom', 
+                editor=ListEditor(
+                    use_notebook=True, 
+                    page_name='.type',
+                ),
+#                defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
+            ),
+            show_border=True,
+#            defined_when='len(object.properties) > 0', #TODO remove
+        ),
+    )
+
+        
+class PModelCheckerResults(HasTraits):
+    fileName = Str #TODO RelativeFile and _fileName_changed #TODO lowercase_with_underscores
+
+    properties = List(PModelCheckerResultsProperty)
+
+#    times_get_surfaces_called = 0
+#    surfaces = Property(List(PModelCheckerResultsPropertySurface), depends_on='properties')
+#    @cached_property
+#    def _get_surfaces(self):
+#        self.times_get_surfaces_called += 1
+#        if self.outdated_mayavi:
+#            return []
+##        return [result for result in self.properties if result.surface is not None] 
+#        return [PModelCheckerResultsPropertySurface(property) for property in self.properties] 
+#    
+#    times_get_figures_called = 0
+#    figures = Property(List(PModelCheckerResultsPropertyFigure), depends_on='properties')
+#    @cached_property
+#    def _get_figures(self):
+#        self.times_get_figures_called += 1
+#        return [PModelCheckerResultsPropertyFigure(property) for property in self.properties] 
+
+#    selected = Instance(PModelCheckerResultsProperty)
+#    def _selected_default(self):
+#        return self.properties[0]
+#    def _selected_changed(self):
+#        print self.selected
+
+    def traits_view(self):
+        return View(
+            Label("No properties found in '%s'" % self.fileName, defined_when='len(object.properties) == 0'), #TODO replace with message in text box
+#            Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'),
+#            HGroup(
+#                Item('properties', show_label=False, style='custom', #TODO use for matplotlib figures 
+#                    editor=ListEditor(use_notebook=True, page_name='.property_string', 
+##                        selected='selected', # setting selected doesn't seem to change tab #TODO try select instead 
+##                        dock_style='tab', # dunno what this does
+#                    ),
+#                ),
+#                Item('surfaces', show_label=False, style='custom', 
+#                    editor=ListEditor(
+#                        use_notebook=True, 
+#                        page_name='.property_string',
+#                    ),
+#                    defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first!
+#                ),
+#                show_border=True,
+#                defined_when='len(object.properties) > 0',
+#            ),
+            VGroup(
+                Item('properties', show_label=False, style='custom', 
+                    editor=ListEditor(
+                        use_notebook=True, 
+                        page_name='.property_string',
+                    ),
+#                    defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first!
+                ),
+                show_border=True,
+                defined_when='len(object.properties) > 0',
+            ),
+            title='%s' % self.fileName,
+            resizable=True,
+            id='view_%s' % self.fileName,
+        )    
     
     def __init__(self, fileName=None, **traits):
-        super(TraitedPrismResultsPlotter, self).__init__(**traits)
+        super(PModelCheckerResults, self).__init__(**traits)
         if fileName is not None:
             self.load(fileName)
     
     def load(self, fileName):
-        ''' Sets self.results with results from fileName. '''
+        ''' Sets self.properties with properties from fileName. '''
         
         # read .psm file 
         file = open(fileName, "r")
-        string = file.read()
+        lines = [line.strip() for line in file.read().split("\n")]
         file.close()
         
         # split and strip lines
-        lines = [line.strip() for line in string.split("\n")]
         
-        # handle multiple sets of results in same file
-        results = []
+        # handle multiple sets of properties in same file
+        properties = []
         started = ended = -1
         for i, line in enumerate(lines):
             if str(line).endswith(":"):
@@ -430,24 +543,24 @@ class TraitedPrismResultsPlotter(HasTraits):
             elif len(line) == 0:
                 ended = i
             if started != -1 and ended != -1:
-                results.append(lines[started:ended])
-#                results.append([line.strip() for line in lines[started:ended]])
+                properties.append(lines[started:ended])
+#                properties.append([line.strip() for line in lines[started:ended]])
                 started = ended = -1
             if started == -1 and ended != -1:
                 ended = -1
         if started != -1 and ended == -1:
-            results.append(lines[started:len(lines)])            
+            properties.append(lines[started:len(lines)])            
 #        
-        # remove headers without 2 lines of results
-        for lines in reversed(results):
+        # remove properties without 2 lines of values (i.e. a property with just a header or a single result that isn't amenable to visualisation)
+        for lines in reversed(properties):
             if not (len(lines) >= 4 and lines[0].endswith(':') and lines[1].endswith('Result')):
-                results.pop()
+                properties.pop()
         
-        # create TraitedPrismVariables and return list of TraitedPrismResults
-        listOfTraitedPrismResultsInstances = []
-        for lines in results:
-            # extract property
-            property = lines[0].split(':')[0]
+        # create PModelCheckerResultsPropertyVariables and return list of PModelCheckerResultsProperty
+        listOfPModelCheckerResultsPropertyInstances = []
+        for lines in properties:
+            # extract property string
+            property_string = lines[0].split(':')[0]
 
             # extract variables names ignoring 'Result'
             variableNames = lines[1].split(' ')[:-1]
@@ -461,15 +574,12 @@ class TraitedPrismResultsPlotter(HasTraits):
            [0 1 0 0 4]]
             '''            
             variableValues = np.array([line.split(' ')[:-1] for line in lines[2:]], np.float32)
-            variableValuesStrs = [line.split(' ')[:-1] for line in lines[2:]]
-#            print variableValuesStrs #TODO find decimal places code
+#            variableValuesStrs = [line.split(' ')[:-1] for line in lines[2:]]; print variableValuesStrs #TODO find decimal places code
             
-            listOfTraitedPrismVariableInstances = []
+            listOfPModelCheckerResultsPropertyVariableInstances = []
             for i in range(len(variableNames)):
                 # extract this variables column, remove duplicates and sort
-#                print variableValues[:,i]
                 sortedSet = sorted(set(variableValues[:,i]))
-#                print sortedSet
 
                 # change format to integer if only trailing zeros after decimal point
                 onlyTrailingZero = True
@@ -481,101 +591,55 @@ class TraitedPrismResultsPlotter(HasTraits):
                 else:
                     format = '%02.2f'
 
-                # create TraitedPrismVariable instance and append it
-                instance = TraitedPrismVariable(
+                # create PModelCheckerResultsPropertyVariable instance and append it
+                instance = PModelCheckerResultsPropertyVariable(
                     name=variableNames[i],
                     values=sortedSet,
-                    resultsIndex=i,
-                    start=float(sortedSet[0]), # this is problematic
+                    result_array_index=i,
+                    start=float(sortedSet[0]), #FIXME this is problematic
 #                    startLabel=str(sortedSet[0]),
                     stop=float(sortedSet[-1]),
 #                    stopLabel=str(sortedSet[-1])
                     format=format
                 )
-#                print instance.values
-#                print instance.start, instance.stop
-                listOfTraitedPrismVariableInstances.append(instance)
+                listOfPModelCheckerResultsPropertyVariableInstances.append(instance)
             
             # get dimensions tuple from length of each variables values
-            shape = tuple([len(instance.values) for instance in listOfTraitedPrismVariableInstances])
+            shape = tuple([len(instance.values) for instance in listOfPModelCheckerResultsPropertyVariableInstances])
         
-            # extract results column from lines excluding variables columns
-            resultValues = np.array([line.split(' ')[-1] for line in lines[2:]], np.float32)
-#            print resultValues
+            # extract result column from lines excluding variables columns
+            result_array = np.array([line.split(' ')[-1] for line in lines[2:]], np.float32)
             
             # reshape into dimensions of variables
-#            print resultValues, shape #TODO remove
-            resultValues = resultValues.reshape(shape)
-#            print resultValues[1,1,1,1] #TODO remove
+            result_array = result_array.reshape(shape)
             
-            # create TraitedPrismResults instance and append it
-            '''
-            class TraitedPrismResults(HasTraits):                
-                property = Str
-                variables = List(TraitedPrismVariable)
-                results = Array
-            '''
-            instance = TraitedPrismResults(
-                property=property, 
-                variables=listOfTraitedPrismVariableInstances, 
-                results=resultValues,
+            # create PModelCheckerResultsProperty instance and append it
+            instance = PModelCheckerResultsProperty(
+                property_string=property_string, 
+                variables=listOfPModelCheckerResultsPropertyVariableInstances, 
+                result_array=result_array,
             )
-            listOfTraitedPrismResultsInstances.append(instance)
+            listOfPModelCheckerResultsPropertyInstances.append(instance)
             
-        self.results = listOfTraitedPrismResultsInstances
+        self.properties = listOfPModelCheckerResultsPropertyInstances # setting this triggers the creation of the plots
         self.fileName = fileName
-
-#    selected = Instance(TraitedPrismResults)
-#    def _selected_default(self):
-#        return self.results[0]
-#    def _selected_changed(self):
-#        print self.selected
-
-    outdated_mayavi = Bool
-    def _outdated_mayavi_default(self):
-        # check if mayavi2 version >= 3.4.0        
-        import enthought.mayavi.__version__
-        version = enthought.mayavi.__version__.__version__
-        version_info = version.split('.') 
-        major = int(version_info[0])
-        minor = int(version_info[1])
-#        micro = int(version_info[2])
-        if major < 3 or (major == 3 and minor < 3):
-            return True
-        return False
-
-    def traits_view(self):
-        return View(
-            Label("No results found in '%s'" % self.fileName, defined_when='len(object.results) == 0'),
-            Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'),
-            HGroup(
-                Item('results', show_label=False, style='custom', #TODO use for matplotlib figures 
-                    editor=ListEditor(use_notebook=True, page_name='.property', 
-#                        selected='selected', # setting selected doesn't seem to change tab 
-#                        dock_style='tab', # dunno what this does
-                    ),
-                ),
-                Item('surfaces', show_label=False, style='custom', 
-                    editor=ListEditor(
-                        use_notebook=True, 
-                        page_name='.property',
-                    ),
-                    defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first!
-                ),
-                show_border=True,
-                defined_when='len(object.results) > 0',
-            ),
-            title='%s' % self.fileName,
-            resizable=True,
-            id='view_%s' % self.fileName,
-        )
-
+        #TODO save file name and mdf5sum of file into each property
 
 
 if __name__ == '__main__':
-    main = TraitedPrismResultsPlotter()
-    main.load('1-4_variables.psm')
+    main = PModelCheckerResults('1-4_variables.psm')
+#    main.load('1-4_variables.psm')
 #    main.load('2d_function.psm')
-#    main.selected = main.results[1]
+
+#    main.selected = main.properties[1]
+
+#    for property in main.properties: 
+#        print property.property_string
+#        print [variable.name for variable in property.variables] 
+#        print 
+
+#    print main.figures
+
     main.configure_traits()
-        
+
+            
