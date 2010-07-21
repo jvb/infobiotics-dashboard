@@ -1,11 +1,17 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
-from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Button, on_trait_change, Tuple
+from enthought.traits.api import HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, Property, Button, on_trait_change, Tuple, Bool
 from enthought.traits.ui.api import View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, TextEditor
 import numpy as np
 from bisect import bisect
-from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor#, MayaviScene 
+
+from enthought.tvtk.pyface.scene_editor import SceneEditor
+from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
+from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
+from enthought.mayavi.core.pipeline_base import PipelineBase
+#from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor#, MayaviScene 
+#from enthought.mayavi.core.api import PipelineBase
+
 from enthought.tvtk.pyface.api import Scene
-from enthought.mayavi.core.api import PipelineBase
 from infobiotics.commons.mayavi import extent
 
 class TraitedPrismVariable(HasTraits):
@@ -153,11 +159,12 @@ class TraitedPrismResults(HasTraits):
 
     def create_surface(self):
         return self.scene.mlab.surf(self.fake_scalars, colormap='jet', extent=[0,1,0,1,0,1], figure=self.scene.mayavi_scene)
-        
+
     surface = Instance(PipelineBase)
     def _surface_default(self):
         if len(self.axisVariables) > 1:
             return self.create_surface()
+        return None
 
     ranges = Property(Tuple((Float, Float, Float, Float, Float, Float)))
     def _get_ranges(self):
@@ -167,7 +174,6 @@ class TraitedPrismResults(HasTraits):
     def add_actors_and_update_scalars(self):
         if self.surface is None:
             return
-        
         mlab = self.scene.mlab
         mlab.figure(self.scene.mayavi_scene) # setting figure here avoids mlab.axes(figure=self.scene.mayavi_scene, ...) for each actor
 
@@ -218,24 +224,29 @@ class TraitedPrismResults(HasTraits):
                     Item(
                         'scene', 
                         show_label=False,
-                        editor=SceneEditor(scene_class=Scene),#MayaviScene),
+                        editor=SceneEditor(scene_class=Scene),#TODO MayaviScene),
                     ),
                 ),
-                HGroup(Spring(), Item('reset_view', show_label=False,),),
+                HGroup(
+                    Spring(), 
+                    Item('reset_view', show_label=False),
+                ),
                 show_border=True,
                 defined_when='object.surface is not None',
             ),
             title='%s' % self.property,
         )
     
+from enthought.traits.api import cached_property
 
 class TraitedPrismResultsPlotter(HasTraits):
     fileName = Str
     results = List(TraitedPrismResults)
-    
-    surfaces = Property(List(TraitedPrismResults))
+
+    surfaces = Property(List(TraitedPrismResults), depends_on='results')
+    @cached_property
     def _get_surfaces(self):
-        return [result for result in self.results if len(result.variables) > 1] 
+        return [result for result in self.results if result.surface is not None] 
     
     def __init__(self, fileName=None, **traits):
         super(TraitedPrismResultsPlotter, self).__init__(**traits)
@@ -324,8 +335,6 @@ class TraitedPrismResultsPlotter(HasTraits):
 #                    stopLabel=str(sortedSet[-1])
                     format=format
                 )
-#                print instance.values
-#                print instance.start, instance.stop
                 listOfTraitedPrismVariableInstances.append(instance)
             
             # get dimensions tuple from length of each variables values
@@ -333,7 +342,6 @@ class TraitedPrismResultsPlotter(HasTraits):
         
             # extract results column from lines excluding variables columns
             resultValues = np.array([line.split(' ')[-1] for line in lines[2:]], np.float32)
-#            print resultValues
             
             # reshape into dimensions of variables
             resultValues = resultValues.reshape(shape)
@@ -355,8 +363,24 @@ class TraitedPrismResultsPlotter(HasTraits):
         self.results = listOfTraitedPrismResultsInstances
         self.fileName = fileName
 
+
+    outdated_mayavi = Bool
+    def _outdated_mayavi_default(self):
+        # check if mayavi2 version >= 3.4.0        
+        import enthought.mayavi.__version__
+        version = enthought.mayavi.__version__.__version__
+        version_info = version.split('.') 
+        major = int(version_info[0])
+        minor = int(version_info[1])
+#        micro = int(version_info[2])
+        if major < 3 or (major == 3 and minor < 3):
+            return True
+        return False
+
     def traits_view(self):
         return View(
+            Label("No results found in '%s'" % self.fileName, defined_when='len(object.results) == 0'),
+            Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'),
             HGroup(
 #                Item('results', show_label=False, style='custom',  #TODO use for matplotlib figures
 #                    editor=ListEditor(
@@ -369,12 +393,11 @@ class TraitedPrismResultsPlotter(HasTraits):
                         use_notebook=True, 
                         page_name='.property',
                     ),
-                    defined_when='len(object.surfaces) > 1'
+                    defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first!
                 ),
                 show_border=True,
                 defined_when='len(object.results) > 0',
             ),
-            Label("No results found in '%s'" % self.fileName, defined_when='len(object.results) == 0'),
             title='%s' % self.fileName,
             resizable=True,
             id='view_%s' % self.fileName,
@@ -383,6 +406,6 @@ class TraitedPrismResultsPlotter(HasTraits):
 
 if __name__ == '__main__':
     main = TraitedPrismResultsPlotter()
-    main.load('1-4_variables.psm')
+#    main.load('1-4_variables.psm')
+    main.load('2d_function.psm')
     main.configure_traits()
-        

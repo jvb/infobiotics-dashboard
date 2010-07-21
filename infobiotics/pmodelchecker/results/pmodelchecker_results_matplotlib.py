@@ -62,7 +62,7 @@ class TraitedPrismVariable(HasTraits):
                     tooltip='Warning: the value shown in the box may not be the same as the actual value of this variable (shown to the right)',
                 ),
                 Item('value', show_label=False, style='readonly',
-                    editor=TextEditor(),
+                    editor=TextEditor(), #TODO format
                 ),
             ),
         )
@@ -88,12 +88,11 @@ class TraitedPrismResults(HasTraits):
     def _get_notXAxisVariablesNames(self):
         return [variable.name for variable in self.axisVariables if variable.name != self.xAxis] 
     
-    yAxis = Enum(values='notXAxisVariablesNames') 
+    yAxis = Enum(values='notXAxisVariablesNames') #TODO change name so as not to conflict with mayavi
     
-    notAxes = Property(List(TraitedPrismVariable), depends_on='xAxis')#, yAxis')
+    notAxes = Property(List(TraitedPrismVariable), depends_on='xAxis, yAxis')
     def _get_notAxes(self):
-#        return [variable for variable in self.variables if variable.name not in (self.xAxis, self.yAxis)]
-        return [variable for variable in self.variables if variable.name != self.xAxis]
+        return [variable for variable in self.variables if variable.name not in (self.xAxis, self.yAxis)]
 
     xAxisVariable = Property(Instance(TraitedPrismVariable), depends_on='xAxis')
     def _get_xAxisVariable(self):
@@ -102,6 +101,13 @@ class TraitedPrismResults(HasTraits):
                 return variable
         raise ValueError("'%s' not found in variables." % self.xAxis)
     
+    yAxisVariable = Property(Instance(TraitedPrismVariable), depends_on='yAxis')
+    def _get_yAxisVariable(self):
+        for variable in self.variables:
+            if variable.name == self.yAxis:
+                return variable
+        return None
+        raise ValueError("'%s' not found in variables." % self.yAxis)
 
     scalars_indicies = Property(Str, depends_on='xAxis, variables:valueIndex')
     @cached_property
@@ -110,6 +116,7 @@ class TraitedPrismResults(HasTraits):
         # Can't do this with a list comprehension because "else" is not allowed by the grammar/language.
         s = ''
         for i, variable in enumerate(self.variables):
+#            s += ':' if variable.name == self.xAxis or variable.name == self.yAxis else str(variable.valueIndex)
             s += ':' if variable.name == self.xAxis else str(variable.valueIndex)
             if i < len(self.variables) - 1:
                 s += ','
@@ -133,6 +140,10 @@ class TraitedPrismResults(HasTraits):
     def _get_max_result(self):
         return np.max(self.results)
     
+    dependent_axis_label = Str
+    def _dependent_axis_label_default(self):
+#        return self.property.split('=')[0].strip() #TODO
+        return 'Result'
 
     @on_trait_change('xAxis, yAxis, variables:value, variables:plot')
     def update_figure(self):
@@ -145,48 +156,44 @@ class TraitedPrismResults(HasTraits):
 
         x = self.xAxisVariable.values
 
-        line = axes.plot(x, self.scalars)
-    
-#        print self.axisVariablesNames
-#        print self.notXAxisVariablesNames
-#        print [variable.name for variable in self.variables if len(variable.values) < 2]
-#        print 
-        if len(self.notXAxisVariablesNames) > 1:
-            pass
-##            axes.plot(self.notAxes[0]
-##            print self.notAxes[0].values
-##            s = ''
-##            for i, variable in enumerate(self.variables):
-##                s += ':' if variable.name == self.xAxis else str(variable.valueIndex)
-##                if i < len(self.variables) - 1:
-##                    s += ','
-##                scalars = eval('self.results[%s]' % s)
-##                print scalars
-#            print self.results[:,0]
-#            print
-#            print self.results[:,:]
-#            print
-#            print self.results[:,1]
-#            print self.results[:,2]
-##            axes.plot(x, self.results[:,0])
-##            axes.plot(x, self.results[:,1])
-##            axes.plot(x, self.results[:,2])
-#            for i in range(len(self.results[:])):
-#                axes.plot(x, self.results[:, i])
 
-#            for variable in self.notAxes:
-#                if variable.plot:
-#                    for i in range(len(variable.values)):
-#                        axes.plot(x, self.results[:, i])
-                    
-    
-        
+
+        if len(self.notXAxisVariablesNames) >= 1:
+            # slice results without changing self.yAxisVariable.valueIndex
+            for j, v in enumerate(self.yAxisVariable.values):
+                s = ''
+                for i, variable in enumerate(self.variables):
+                    if variable.name == self.xAxis:
+                        s += ':' 
+                    elif variable.name == self.yAxis:
+                        s += str(j)
+                    else:
+                        s += str(variable.valueIndex)
+                    if i < len(self.variables) - 1:
+                        s += ','
+                scalars = eval('self.results[%s]' % s)
+                label='%s=%s' % (self.yAxis, v)
+                for variable in self.variables:
+                    if variable not in (self.xAxisVariable, self.yAxisVariable):
+                        label += ', %s=%s' % (variable.name, variable.value)
+                axes.plot(x, scalars, label=label)
+            
+            if self.legend:
+                self.axes.legend(loc='best')
+            
+            print self.yAxis, self.notXAxisVariablesNames
+                
+        else:
+            line = axes.plot(x, self.scalars)
+
         # can only set axes limits after plotting
         self.axes.set_xlim(np.min(x), np.max(x))
         self.axes.set_ylim(self.min_result, self.max_result)
         
         if self.figure.canvas is not None:
             self.figure.canvas.draw()
+    
+    legend = Bool(True)
     
     figure = Instance(Figure)
 
@@ -200,38 +207,48 @@ class TraitedPrismResults(HasTraits):
         return View(
             VGroup(
                 HGroup(
-                    Label('Plot result for'),
-                    Label('each', defined_when='object.notXAxisVariablesNames > 0'),
-                    Item('yAxis', show_label=False, defined_when='object.notXAxisVariablesNames > 0'),
+                    Label('Plot of'),
+                    Item('dependent_axis_label', show_label=False, style='readonly'),
+                    Label('for each'),
+#                    Item('yAxis', show_label=False, defined_when='len(object.notXAxisVariablesNames) > 1'), # choice case
+#                    Item('yAxis', show_label=False, style='readonly', defined_when='len(object.notXAxisVariablesNames) == 1'), # no choice case #FIXME text doesn't change when value of yAxis changes 
+                    Item('yAxis', show_label=False),
 #                    Item('notXAxisVariablesNames', style='custom', 
 #                        editor=CheckListEditor(
 #                            name='object.notXAxisVariablesNames', # can't use this until EPD > 6.2: http://markmail.org/message/lf6qfg47xhl5j6u2
 #                        )
 #                    ),
-                    Label('at all', defined_when='object.notXAxisVariablesNames > 0'),
+                    Label('at all'),
                     Item('xAxis', show_label=False),
-                    Label('when', defined_when='len(object.notAxes) > 0'), 
+                    Label('when', defined_when='len(object.notAxes) > 0'),
+                    defined_when='len(object.notXAxisVariablesNames) > 0', 
                 ),
                 Item('notAxes', 
-                    defined_when='len(object.notAxes) > 0', 
                     show_label=False, 
                     editor=ListEditor(style='custom'), 
                     resizable=False, 
                     style='readonly',
+                    defined_when='len(object.notAxes) > 0', 
                 ),
                 Item(
                     'figure', 
                     show_label=False,
-                    editor=MPLFigureEditor(),
-                    height=250,
-                    width=300, 
+                    editor=MPLFigureEditor(toolbar=True), #TODO Figure.set_figsize_inches( (w,h) ) # http://www.scipy.org/Cookbook/Matplotlib/AdjustingImageSize
+#                    height=250,
+#                    width=300, 
                     resizable=True
                 ),
                 show_border=True,
             ),
+            Item('detach', show_label=False),
             resizable=True,
             title='%s' % self.property,
         )
+
+    detach = Button
+    def _detach_fired(self):
+        self.edit_traits()
+
     
 
 
@@ -379,6 +396,7 @@ class TraitedPrismResultsPlotter(HasTraits):
 if __name__ == '__main__':
     main = TraitedPrismResultsPlotter()
     main.load('1-4_variables.psm')
+#    main.load('2d_function.psm')
 #    main.selected = main.results[1]
     main.configure_traits()
         
