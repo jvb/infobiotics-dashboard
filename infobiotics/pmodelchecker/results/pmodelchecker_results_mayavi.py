@@ -10,7 +10,6 @@ from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
 from enthought.mayavi.core.pipeline_base import PipelineBase
 #from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor#, MayaviScene 
 #from enthought.mayavi.core.api import PipelineBase
-
 from enthought.tvtk.pyface.api import Scene
 from infobiotics.commons.mayavi import extent
 
