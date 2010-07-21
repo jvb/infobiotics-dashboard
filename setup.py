@@ -23,34 +23,6 @@ import setuptools #TODO bit suspicious about this but Jamie said it was OK.
 from distribute_setup import use_setuptools
 use_setuptools()
 
-
-## Manifest file to allow py2exe to use the winxp look and feel
-#manifest = """
-#<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-#<assembly xmlns="urn:schemas-microsoft-com:asm.v1"
-#manifestVersion="1.0">
-#<assemblyIdentity
-#    version="0.64.1.0"
-#    processorArchitecture="x86"
-#    name="Controls"
-#    type="win32"
-#/>
-#<description>Your Application</description>
-#<dependency>
-#    <dependentAssembly>
-#        <assemblyIdentity
-#            type="win32"
-#            name="Microsoft.Windows.Common-Controls"
-#            version="6.0.0.0"
-#            processorArchitecture="X86"
-#            publicKeyToken="6595b64144ccf1df"
-#            language="*"
-#        />
-#    </dependentAssembly>
-#</dependency>
-#</assembly>
-#"""
-
 import matplotlib
 import glob
 import sys
@@ -105,11 +77,10 @@ if sys.platform.startswith('darwin'):
         ],
 )
 elif sys.platform.startswith('win'):
+    
+    # http://markmail.org/thread/qkdwu7gbwrmop6so
     try:
         import py2exe
-       
-        # http://markmail.org/thread/qkdwu7gbwrmop6so
-        
         # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
         import sys
         import pywintypes
@@ -125,26 +96,53 @@ elif sys.platform.startswith('win'):
             m = sys.modules[extra]
             for p in m.__path__[1:]:
                 modulefinder.AddPackagePath(extra, p)        
-        
     except ImportError, e:
         sys.stderr.write('%s\n' % e)
 
     import sys # needed for sys.prefix in mayavi_preferences and data_files below
+    
     # touch mayavi preferences.ini #TODO should probably be in py2exe.sh but since this only happens if we call 'python setup.py py2exe' it is probably ok here.
     import os
     mayavi_preferences=os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')
     if not os.path.exists(mayavi_preferences): 
         open(mayavi_preferences, 'w').close()
+    
+    # contents of manifest file that allow py2exe frozen apps to use the XP look and feel
+    manifest = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+manifestVersion="1.0">
+<assemblyIdentity
+    version="0.64.1.0"
+    processorArchitecture="x86"
+    name="Controls"
+    type="win32"
+/>
+<description>Your Application</description>
+<dependency>
+    <dependentAssembly>
+        <assemblyIdentity
+            type="win32"
+            name="Microsoft.Windows.Common-Controls"
+            version="6.0.0.0"
+            processorArchitecture="X86"
+            publicKeyToken="6595b64144ccf1df"
+            language="*"
+        />
+    </dependentAssembly>
+</dependency>
+</assembly>
+"""
+    
     extra_options = dict(
         setup_requires=['py2exe'],
         windows=[
-            'bin/infobiotics-dashboard.pyw', # .pyw are launched without opening a console window
-#            dict(
-#                script="bin/infobiotics-dashboard.pyw",
-#                other_resources=[(24,1,manifest)],
-#                # If you have a windows icon, this is where to specify it
-##               "icon_resources": [(2, "images/example.ico")],
-#            ),
+#            'bin/infobiotics-dashboard.pyw', # see dict below
+            dict(
+                script="bin/infobiotics-dashboard.pyw", # .pyw are launched without opening a console window
+#               "icon_resources": [(2, "images/example.ico")], #TODO If you have a windows icon, this is where to specify it
+                other_resources=[(24,1,manifest)],
+            ),
         ],
 #        zipfile = None,
         options=dict(
@@ -164,15 +162,15 @@ elif sys.platform.startswith('win'):
                 dll_excludes=["mswsock.dll", "powrprof.dll", "MSVCP90.dll"], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
                 packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
                 unbuffered=True,
-#               optimize=0,
+                optimize=0,
                 bundle_files=3,
-                skip_archive=True, # required so that it is easier to unzip tvtk_classes.zip (?)
+                skip_archive=True, # required so that it is easier to unzip tvtk_classes.zip
             )
         ),
         data_files=[        
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("Microsoft.VC90.CRT",glob.glob("Microsoft.VC90.CRT/*")),
-            ("",glob.glob("Microsoft.VC90.CRT/*")), #TODO remove, and in MANIFEST.in
+#            ("",glob.glob("Microsoft.VC90.CRT/*")), #TODO remove, and in MANIFEST.in
             ("enthought/pyface/images", glob.glob(os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\pyface\\images\\*.png'))),
             ('enthought/mayavi/preferences', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')]),
             ('enthought/tvtk/plugins/scene', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\tvtk\\plugins\\scene\\preferences.ini')]),
@@ -184,7 +182,9 @@ else: # assume sys.platform.startswith('linux'):
     extra_options = dict(
         scripts=['bin/infobiotics-dashboard'],
         data_files=[
-#        ("images", glob.glob("images/*.png")), #TODO
+#            ("images", glob.glob("images/*.png")), #TODO
+            ('/usr/share/applications',['infobiotics-dashboard.desktop']),
+            ('/usr/share/pixmaps',['infobiotics-workbench.xpm','infobiotics-workbench.png']),
         ],
     )
 
@@ -197,7 +197,7 @@ INSTALL_REQUIRES = [
     'TraitsGUI>=3.3.0',
     'EnvisagePlugins>=3.1.2',
     'TraitsBackendQt>=3.3.0',
-    'Mayavi',
+    'Mayavi',#TODO >=3.4.0',
     'configobj', # for enthought.preferences
     'numpy',#>=1.3.0', 
     'matplotlib'#,==0.99.1', 

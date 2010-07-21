@@ -6,6 +6,8 @@ modulefinder when running py2app and py2exe, in particular this includes
 Enthought's TraitsUI backend modules that are dynamically loaded.
 '''
 
+#if False: #TODO?
+
 import sip
 import PyQt4
 from PyQt4 import QtCore

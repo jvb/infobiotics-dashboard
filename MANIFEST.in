@@ -1,12 +1,6 @@
 include *.txt
-include install.bat uninstall.bat
 include distribute_setup.py
 include make-deb.sh
 include make_app.sh make_clean.sh
 include bin/infobiotics-dashboard bin/infobiotics-dashboard.py bin/infobiotics-dashboard.pyw 
-include Microsoft.VC90.CRT/MSVCP90.dll Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest 
-recursive-include tests *
-
-include bin/mcss.py
-include make_bbfreeze.py
 
