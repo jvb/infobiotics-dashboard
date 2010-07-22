@@ -20,6 +20,6 @@ class MC2DashboardExperimentHandler(MC2ExperimentHandler):
         ''' Called by PModelCheckerExperimentHandler.object_finished_changed. '''
         self.application.workbench.edit(
             obj=PModelCheckerResults(file_name=self.model.results_file_),
-            kind=PModelCheckerResultsResultsEditor,
+            kind=PModelCheckerResultsEditor,
             use_existing=False,
         )

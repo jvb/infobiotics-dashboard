@@ -6,9 +6,11 @@ from enthought.traits.api import (
 )
 from enthought.traits.ui.api import (
     View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, 
-    TextEditor, InstanceEditor,  
+    TextEditor, InstanceEditor, CodeEditor, 
 #    CheckListEditor,
 )
+
+import os.path
 
 from infobiotics.commons.traits.relative_file import RelativeFile 
 
@@ -337,7 +339,11 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
 
     title_text = Property(Str)
     def _get_title_text(self):
-        return "%s (%s)" % (self.property_string, ','.join(['%s=%s' % (variable.name, variable.value) for variable in self.variables if variable not in (self.xAxisVariable, self.yAxisVariable)]))
+        s = "%s" % self.property_string
+        if len(self.variables) > 2:
+            s += ' '
+            s += '(%s)' % ','.join(['%s=%s' % (variable.name, variable.value) for variable in self.variables if variable not in (self.xAxisVariable, self.yAxisVariable)])
+        return s
     
     @on_trait_change('xAxis, yAxis')
     def change_data(self):
@@ -427,17 +433,16 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
         )
 
 
-from enthought.traits.ui.api import CodeEditor
-
 class PModelCheckerResultsPropertyRawData(PModelCheckerResultsPropertyVisualisation):
     type = 'Data'
     raw_data = DelegatesTo('property')
     md5sum = DelegatesTo('property')
     full_file_name = Property(Str)
     def _get_full_file_name(self):
-        return self.property.file_name_
+        return os.path.normpath(self.property.file_name_)
     
     def update(self):
+        # gets called by PModelCheckerResultsProperty.update_visualisations()
         pass
     
     view = View(
@@ -448,8 +453,8 @@ class PModelCheckerResultsPropertyRawData(PModelCheckerResultsPropertyVisualisat
                 style='readonly',
             ),
             VGroup(
-                Item('full_file_name', label='From'),
-                Item('md5sum', label='md5sum'),
+                Item('full_file_name', label='in'),
+                Item('md5sum', label='with md5sum'),
             ),
             show_border=True,
         ),
@@ -511,13 +516,20 @@ class PModelCheckerResultsProperty(HasTraits):
 
         
 class PModelCheckerResults(HasTraits):
-    file_name = RelativeFile(exists=True)
+
+    file_name = RelativeFile(
+        absolute=True,
+        exists=True,
+        filter=[
+            'PModelChecker results files (*.psm)',
+        ],
+    )
 
     properties = List(PModelCheckerResultsProperty)
 
     selected = Instance(PModelCheckerResultsProperty)
-#    def _selected_default(self):
-#        return self.properties[0]
+    def _properties_changed(self):
+        self.selected = self.properties[0]
 
     def __init__(self, file_name=None, **traits):
         super(PModelCheckerResults, self).__init__(**traits)
@@ -632,33 +644,48 @@ class PModelCheckerResults(HasTraits):
         self.properties = listOfPModelCheckerResultsPropertyInstances # setting this triggers the creation of the plots
 #        self.file_name = file_name
 
+    values = Property(List(Tuple(PModelCheckerResultsProperty, Str)), depends_on='properties')
+    @cached_property
+    def _get_values(self):
+        return [(property, property.property_string) for property in self.properties]
+
     def traits_view(self):
         return View(
-            Label("No properties found in '%s'" % self.file_name, defined_when='len(object.properties) == 0'), #TODO replace with message in text box
-#            Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'),
             VGroup(
                 Item('file_name', label='Results file'),
-                Item('selected',
-                    label='Property',
-                    editor=InstanceEditor(
-                        name='object.properties',
-                        editable=False,
-                    ),
-                ),
+#                Label("No properties found in '%s'" % self.file_name, defined_when='len(object.properties) == 0'), #TODO replace with message in text box
+#                Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'), #TODO
                 VGroup(
-                    Item('properties', 
-                        show_label=False, 
-                        style='custom', 
-                        editor=ListEditor(
-                            use_notebook=True, 
-                            page_name='.property_string',
-                            selected='object.selected',
+                    Item('selected',
+                        label='Property',
+                        editor=InstanceEditor(
+                            name='object.properties', #FIXME doesn't update with properties
+                            editable=False,
                         ),
-#                        defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
+                        visible_when='len(object.properties) > 1',
                     ),
+#                    Item('selected',
+#                        label='Property',
+#                        editor=CheckListEditor( # bug in CheckListEditor or rather Editor than prevents this for working
+#                            name='values',
+#                        ),
+#                        visible_when='len(object.properties) > 1',
+#                    ),
+                    VGroup(
+                        Item('properties', 
+                            show_label=False, 
+                            style='custom', 
+                            editor=ListEditor(
+                                use_notebook=True, 
+                                page_name='.property_string',
+                                selected='object.selected',
+                            ),
+    #                        defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
+                        ),
+                    ),
+                    visible_when='len(object.properties) > 0',
                 ),
                 show_border=True,
-                defined_when='len(object.properties) > 0',
             ),
             title='%s' % self.file_name,
             resizable=True,

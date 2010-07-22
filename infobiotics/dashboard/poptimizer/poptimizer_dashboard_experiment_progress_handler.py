@@ -1,2 +1,7 @@
-class POptimizerExperimentDashboardProgressHandler(POptimizerExperimentProgressHandler, CancelExperimentMixin):
-    pass
+from infobiotics.poptimizer.api import POptimizerExperimentProgressHandler
+from enthought.traits.api import Instance
+from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
+
+class POptimizerDashboardExperimentProgressHandler(POptimizerExperimentProgressHandler):
+
+    application = Instance(InfobioticsDashboardWorkbenchApplication)

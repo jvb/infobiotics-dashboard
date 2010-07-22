@@ -1,33 +1,21 @@
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from enthought.envisage.ui.action.api import ToolBar, Action
+from enthought.envisage.ui.action.api import Group, Action
             
 class PModelCheckerActionSet(WorkbenchActionSet):
     
     id = 'infobiotics.dashboard.plugins.pmodelchecker.action_set'
 
-    tool_bars = [
-        ToolBar(
-            id='Results', 
-        ),
-    ]
-        
     actions = [
         Action(
-            path='MenuBar/Results', 
-            name='PModelChecker',
+            name='Open &PModelChecker results...', 
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PModelCheckerResultsAction',
+            group='ResultsGroup',
+            path='MenuBar/File', 
         ),
-        Action(
-            path='ToolBar/Results', 
-            name='PModelChecker',
-            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PModelCheckerResultsAction',
-        ),
-        Action(path='MenuBar/Experiment', name='Model checking (PRISM)',
-            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
-        Action(path='MenuBar/Experiment', name='Model checking (MC2)',
-            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
-        Action(path='ToolBar/Experiment', name='Model checking (PRISM)',
-            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
-        Action(path='ToolBar/Experiment', name='Model checking (MC2)',
-            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
+
+        Action(path='MenuBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
+        Action(path='ToolBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
+
+        Action(path='MenuBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
+        Action(path='ToolBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
     ]

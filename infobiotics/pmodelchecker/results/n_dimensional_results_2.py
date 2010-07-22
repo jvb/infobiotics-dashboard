@@ -1,8 +1,8 @@
 import numpy as np
 from math import sin, cos, tan
 
-x = np.linspace(-4, 4, 10)
-y = np.linspace(-4, 4, 10)
+x = np.linspace(-4, 4, 100)
+y = np.linspace(-4, 4, 100)
 z = np.linspace(-4, 4, 10)
 w = np.linspace(-4, 4, 10)
 u = np.linspace(-4, 4, 10)

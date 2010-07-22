@@ -4,8 +4,8 @@ from simulator_results import SimulationResultsDialog
 from editor import SimulatorResultsEditor
 
 class SimulatorResultsAction(PyFaceAction): #TODO
-    name = 'Simulator Results'
-    tooltip = 'Plot simulation results'
+    name = 'mcss'
+    tooltip = 'Visualise mcss simulations.'
     
     def perform(self, event=None):
         self.window.workbench.edit(

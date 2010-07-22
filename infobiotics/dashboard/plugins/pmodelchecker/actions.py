@@ -4,20 +4,20 @@ from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 from editor import PModelCheckerResultsEditor 
 
 class PRISMExperimentAction(Action):
-    name = 'PModelChecker (PRISM)'
-    tooltip = 'Load a PRISM experiment from a parameters file.'
+    name = 'PModelChecker: PRISM'
+    tooltip = 'Check properties of a model using PRISM.'
     def perform(self, event=None):
         PRISMDashboardExperiment(application=self.window.workbench.application).edit()
 
 class MC2ExperimentAction(Action):
-    name = 'PModelChecker (MC2)'
-    tooltip = 'Load an MC2 experiment from a parameters file.'
+    name = 'PModelChecker: MC2'
+    tooltip = 'Check properties of a model using MC2.'
     def perform(self, event=None):
         MC2DashboardExperiment(application=self.window.workbench.application).edit()
 
 class PModelCheckerResultsAction(Action):
     name = 'PModelChecker Results'
-    tooltip = 'Load PModelChecker results from a file.'
+    tooltip = 'Visualise checked properties.'
     def perform(self, event=None):
 #        PModelCheckerResults().edit()
         self.window.workbench.edit(

@@ -17,6 +17,15 @@ from enthought.pyface.workbench.api import TraitsUIEditor
 
 class PModelCheckerResultsEditor(TraitsUIEditor):
 
+    def _name_default(self):
+        if len(self.obj.file_name) > 0:
+            return self.obj.file_name
+        else:
+            return 'PModelChecker results'
+
+    def _obj_file_name_changed(self):
+        self.name = self.obj.file_name
+
     def create_ui(self, parent):
         return self.obj.edit_traits(kind='subpanel')#, parent=parent)
         
