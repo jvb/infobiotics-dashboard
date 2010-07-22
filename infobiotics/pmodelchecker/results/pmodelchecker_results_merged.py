@@ -102,12 +102,13 @@ class PModelCheckerResultsPropertyVariable(HasTraits):
         )
 
 
-
 class PModelCheckerResultsPropertyVisualisation(HasTraits):
     property = Instance('PModelCheckerResultsProperty')
     property_string = DelegatesTo('property')
     variables = DelegatesTo('property')
     result_array = DelegatesTo('property')
+    axisVariables = DelegatesTo('property')    
+
     type = Str
     def _type_default(self):
         raise NotImplementedError('Subclasses of PModelCheckerResultsPropertyVisualisation should specify a type.')
@@ -118,14 +119,9 @@ class PModelCheckerResultsPropertyVisualisation(HasTraits):
         self.init()
 
     def init(self):
-        ''' Used by subclasses to initialise their visualisation apparatus. '''
+        ''' Can be overridden by subclasses to initialise their visualisation apparatus. '''
         pass
-        
-    axisVariables = Property(List(PModelCheckerResultsPropertyVariable), depends_on='variables')
-    def _get_axisVariables(self):
-        ''' Returns the set of variables with more than 1 possible value (that can therefore be an axis). '''
-        return [variable for variable in self.variables if len(variable.values) > 1]
-
+    
     axisVariablesNames = Property(List(Str), depends_on='axisVariables')
     def _get_axisVariablesNames(self):
         return [variable.name for variable in self.axisVariables]
@@ -136,7 +132,7 @@ class PModelCheckerResultsPropertyVisualisation(HasTraits):
     def _get_notXAxisVariablesNames(self):
         return [variable.name for variable in self.axisVariables if variable.name != self.xAxis] 
     
-    yAxis = Enum(values='notXAxisVariablesNames') #TODO change name so as not to conflict with mayavi
+    yAxis = Enum(values='notXAxisVariablesNames')
     
     notAxes = Property(List(PModelCheckerResultsPropertyVariable), depends_on='xAxis, yAxis')
     def _get_notAxes(self):
@@ -156,6 +152,10 @@ class PModelCheckerResultsPropertyVisualisation(HasTraits):
                 return variable
         return None
         raise ValueError("'%s' not found in variables." % self.yAxis)
+
+    dependent_axis_label = Str
+    def _dependent_axis_label_default(self):
+        return 'Result'#self.property_string.split('=')[0].strip() #FIXME
         
         
 class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisation):
@@ -165,7 +165,7 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
     legend = Bool(True)
 
     scalars_indicies = Property(Str, depends_on='xAxis, variables:value_index')
-    @cached_property
+    @cached_property #TODO uncache?
     def _get_scalars_indicies(self):
         ''' Returns an evalable string corresponding to an extended slice of result_array. '''
         # Can't do this with a list comprehension because "else" is not allowed by the grammar/language.
@@ -195,13 +195,8 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
     def _get_max_result(self):
         return np.max(self.result_array)
     
-    dependent_axis_label = Str
-    def _dependent_axis_label_default(self):
-#        return self.property_string.split('=')[0].strip() #TODO
-        return 'Result'
-
-    @on_trait_change('xAxis, yAxis, variables:value, variables:plot')
-    def update_figure(self):
+    @on_trait_change('xAxis, yAxis')#, variables:value')
+    def update(self):
         axes = self.axes
         axes.clear()
         axes.set_title(self.property_string)
@@ -211,7 +206,7 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
 
         x = self.xAxisVariable.values
 
-        if len(self.notXAxisVariablesNames) < 2:
+        if len(self.notXAxisVariablesNames) < 1:
             axes.plot(x, self.scalars)
         else:
             # slice result_array without changing self.yAxisVariable.value_index
@@ -245,13 +240,12 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
     def init(self):
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
-        self.update_figure()
+        self.update()
     
     def traits_view(self):
         return View(
             VGroup(
                 HGroup(
-                    Label('Plot of'),
                     Item('dependent_axis_label', show_label=False, style='readonly'),
                     Label('for each'),
 #                    Item('yAxis', show_label=False, defined_when='len(object.notXAxisVariablesNames) > 1'), # choice case
@@ -278,15 +272,16 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
                     'figure', 
                     show_label=False,
                     editor=MPLFigureEditor(toolbar=True), #TODO Figure.set_figsize_inches( (w,h) ) # http://www.scipy.org/Cookbook/Matplotlib/AdjustingImageSize
-#                    height=250,
-#                    width=300, 
                     resizable=True
+                ),
+                HGroup(
+                    Spring(), 
+                    Item('detach', show_label=False),
                 ),
                 show_border=True,
             ),
-            Item('detach', show_label=False),
-#            resizable=True,
-#            title='%s' % self.property_string,
+            title=self.property_string,
+            resizable=True,
         )
 
     detach = Button
@@ -331,10 +326,15 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
         fake_scalars[-1,-1] = max # ensure max in array
         return fake_scalars
 
-    @on_trait_change('variables:value') # ':' means call when 'value' attribute of items in variables change but not the object assigned to 'variables' changes 
-    def update_surface(self):
+#    @on_trait_change('variables:value') # ':' means call when 'value' attribute of items in variables change but not the object assigned to 'variables' changes 
+    def update(self):
         self.surface.mlab_source.scalars = self.scalars # self.surface.mlab_source.(re)set(scalars=self.scalars)
+        self.title.text = self.title_text 
 
+    title_text = Property(Str)
+    def _get_title_text(self):
+        return "%s (%s)" % (self.property_string, ','.join(['%s=%s' % (variable.name, variable.value) for variable in self.variables if variable not in (self.xAxisVariable, self.yAxisVariable)]))
+    
     @on_trait_change('xAxis, yAxis')
     def change_data(self):
         self.scene.mlab.clf(figure=self.scene.mayavi_scene)
@@ -362,7 +362,9 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
         mlab.figure(self.scene.mayavi_scene) # setting figure here avoids mlab.axes(figure=self.scene.mayavi_scene, ...) for each actor
 
         mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
-        mlab.title("%s" % self.property_string, size=0.5, height=0.85)#, color=(0,0,0))
+        
+        self.title = mlab.title(self.title_text, size=0.4, height=0.88)
+        
         mlab.outline(extent=[0,1,0,1,0,1])
         
         scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
@@ -376,12 +378,11 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
 #        self.scene.scene_editor.background = (0,0,0) # black background
 #        self.scene.scene_editor.foreground = (1,1,1) # white text
 
-        self.update_surface()
+        self.update()
 
-        mlab.view(225, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4   
-    
     reset_view = Button
-    def _reset_view_fired(self):
+    @on_trait_change('scene.activated, reset_view')
+    def reorient_view(self):
         mlab = self.scene.mlab
         mlab.figure(self.scene.mayavi_scene)
         mlab.view(225, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4
@@ -390,7 +391,8 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
         return View(
             VGroup(
                 HGroup(
-                    Label('Plot result for'),
+                    Item('dependent_axis_label', show_label=False, style='readonly'),
+                    Label('for'),
                     Item('yAxis', show_label=False),
                     Label('against'),
                     Item('xAxis', show_label=False),
@@ -418,11 +420,11 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
                 show_border=True,
                 defined_when='object.surface is not None',
             ),
-#            title='%s' % self.property_string,
         )
 
 
-visualisation_classes = [PModelCheckerResultsPropertyFigure, PModelCheckerResultsPropertySurface]
+# a list of tuples of (callable, the minimum number of axes required for the visualisation)  
+visualisation_classes = [(PModelCheckerResultsPropertyFigure, 1), (PModelCheckerResultsPropertySurface, 2)]
 
 
 class PModelCheckerResultsProperty(HasTraits):
@@ -430,12 +432,26 @@ class PModelCheckerResultsProperty(HasTraits):
     #TODO file_md5sum
     results_string = Str #TODO a copy of the results file for just this property
     property_string = Str
-    variables = List(PModelCheckerResultsPropertyVariable)
+    variables = List(Instance('PModelCheckerResultsPropertyVariable'))
     result_array = Array
 
-    visualisations = List(PModelCheckerResultsPropertyVisualisation)
+    visualisations = List(Instance('PModelCheckerResultsPropertyVisualisation'))
     def _visualisations_default(self):
-        return [visualisation for visualisation in [cls(property=self) for cls in visualisation_classes] if visualisation is not None] #FIXME
+        return [klass(property=self) for klass, min_axes in visualisation_classes if len(self.axisVariables) >= min_axes]
+
+    @on_trait_change('variables:value')
+    def update_visualisations(self):
+        ''' Unfortunately this is necessary because change to value of items in 
+        variables are not propagating to the visualisations, and not necessarily
+        due to delegation! '''
+        for visualisation in self.visualisations:
+            visualisation.update()
+
+    axisVariables = Property(List(PModelCheckerResultsPropertyVariable), depends_on='variables')
+    @cached_property
+    def _get_axisVariables(self):
+        ''' Returns the set of variables with more than 1 possible value (that can therefore be an axis). '''
+        return [variable for variable in self.variables if len(variable.values) > 1]
 
     traits_view = View(
         VGroup(
@@ -459,23 +475,6 @@ class PModelCheckerResults(HasTraits):
 
     properties = List(PModelCheckerResultsProperty)
 
-#    times_get_surfaces_called = 0
-#    surfaces = Property(List(PModelCheckerResultsPropertySurface), depends_on='properties')
-#    @cached_property
-#    def _get_surfaces(self):
-#        self.times_get_surfaces_called += 1
-#        if self.outdated_mayavi:
-#            return []
-##        return [result for result in self.properties if result.surface is not None] 
-#        return [PModelCheckerResultsPropertySurface(property) for property in self.properties] 
-#    
-#    times_get_figures_called = 0
-#    figures = Property(List(PModelCheckerResultsPropertyFigure), depends_on='properties')
-#    @cached_property
-#    def _get_figures(self):
-#        self.times_get_figures_called += 1
-#        return [PModelCheckerResultsPropertyFigure(property) for property in self.properties] 
-
 #    selected = Instance(PModelCheckerResultsProperty)
 #    def _selected_default(self):
 #        return self.properties[0]
@@ -486,30 +485,13 @@ class PModelCheckerResults(HasTraits):
         return View(
             Label("No properties found in '%s'" % self.fileName, defined_when='len(object.properties) == 0'), #TODO replace with message in text box
 #            Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'),
-#            HGroup(
-#                Item('properties', show_label=False, style='custom', #TODO use for matplotlib figures 
-#                    editor=ListEditor(use_notebook=True, page_name='.property_string', 
-##                        selected='selected', # setting selected doesn't seem to change tab #TODO try select instead 
-##                        dock_style='tab', # dunno what this does
-#                    ),
-#                ),
-#                Item('surfaces', show_label=False, style='custom', 
-#                    editor=ListEditor(
-#                        use_notebook=True, 
-#                        page_name='.property_string',
-#                    ),
-#                    defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first!
-#                ),
-#                show_border=True,
-#                defined_when='len(object.properties) > 0',
-#            ),
             VGroup(
                 Item('properties', show_label=False, style='custom', 
                     editor=ListEditor(
                         use_notebook=True, 
                         page_name='.property_string',
                     ),
-#                    defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first!
+#                    defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
                 ),
                 show_border=True,
                 defined_when='len(object.properties) > 0',

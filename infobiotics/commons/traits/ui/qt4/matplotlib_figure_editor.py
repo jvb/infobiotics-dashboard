@@ -16,9 +16,9 @@ class _MPLFigureEditor(Editor):
         layout = QGridLayout(widget)
         canvas = FigureCanvas(self.value)
         toolbar = NavigationToolbar(canvas, widget)
-        layout.addWidget(canvas)
         if self.factory.toolbar:
             layout.addWidget(toolbar)
+        layout.addWidget(canvas)
         self.control = widget
 
 #        self.set_tooltip('')
