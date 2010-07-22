@@ -1,7 +1,7 @@
-from enthought.envisage.api import Plugin, contributes_to
+from enthought.envisage.api import Plugin#, contributes_to
 from enthought.traits.api import List
-from enthought.pyface.workbench.api import Perspective, PerspectiveItem
-from pmodelchecker_action_set import PModelCheckerActionSet
+#from enthought.pyface.workbench.api import Perspective, PerspectiveItem
+from action_set import PModelCheckerActionSet
 
 class PModelCheckerUIPlugin(Plugin):
     id = 'infobiotics.dashboard.plugins.pmodelchecker.ui_plugin.PModelCheckerUIPlugin'
@@ -31,4 +31,3 @@ class PModelCheckerUIPlugin(Plugin):
 #        ['pkgfile://infobiotics.dashboard.plugins.pmodelchecker/preferences.ini'], 
 #        contributes_to='enthought.envisage.preferences'
 #    )
-   

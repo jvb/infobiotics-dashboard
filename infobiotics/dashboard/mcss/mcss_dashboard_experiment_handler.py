@@ -3,12 +3,12 @@ from enthought.traits.api import Instance
 from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
 from infobiotics.dashboard.mcss.api import McssDashboardExperimentProgressHandler
 
-class McssDashboardExperimentHandler(McssExperimentHandler):#, DashboardExperimentHandler):
+class McssDashboardExperimentHandler(McssExperimentHandler):#, DashboardExperimentHandler): #TODO what would/could/should this do?
 
     application = Instance(InfobioticsDashboardWorkbenchApplication)
 
     def __progress_handler_default(self):
-        return McssDashboardExperimentProgressHandler(model=self.model)
+        return McssDashboardExperimentProgressHandler(model=self.model, application=self.application)
 
     def _show_progress(self):
         #TODO maybe raise experiments queue view here (moved to new class DashboardExperimentHandler)

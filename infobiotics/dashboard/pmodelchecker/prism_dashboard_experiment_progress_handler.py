@@ -1,7 +1,7 @@
-from infobiotics.mcss.api import McssExperimentProgressHandler
+from infobiotics.pmodelchecker.prism.api import PRISMExperimentProgressHandler    
 from enthought.traits.api import Instance
 from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
 
-class McssDashboardExperimentProgressHandler(McssExperimentProgressHandler):
+class PRISMDashboardExperimentProgressHandler(PRISMExperimentProgressHandler):
 
     application = Instance(InfobioticsDashboardWorkbenchApplication)

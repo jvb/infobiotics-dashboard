@@ -1,10 +1,9 @@
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from enthought.envisage.ui.action.api import Action#, Group, Menu, ToolBar
-from actions import PRISMExperimentAction, MC2ExperimentAction
+from enthought.envisage.ui.action.api import Action
             
 class PModelCheckerActionSet(WorkbenchActionSet):
     
-    id = 'infobiotics.dashboard.plugins.pmodelchecker.pmodelchecker_action_set' # The action set's globally unique identifier
+    id = 'infobiotics.dashboard.plugins.pmodelchecker.action_set'
 
     actions = [
         

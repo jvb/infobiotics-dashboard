@@ -1,5 +1,5 @@
 from enthought.pyface.action.api import Action
-from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
+#from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
 #from mcss_experiment_editor import McssExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
 from infobiotics.dashboard.mcss.api import McssDashboardExperiment
@@ -10,6 +10,7 @@ class McssExperimentAction(Action):
     tooltip = 'Perform a simulation experiment with mcss'
     
     def perform(self, event=None):
+#        obj=McssExperimentEditor...
         obj=McssDashboardExperiment(application=self.window.workbench.application)
 #        self.window.workbench.edit(
 #            obj=obj,

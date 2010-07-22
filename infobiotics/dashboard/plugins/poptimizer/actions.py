@@ -1,10 +1,15 @@
 from enthought.pyface.action.api import Action
-from infobiotics.api import POptimizerExperiment
+from infobiotics.dashboard.poptimizer.api import POptimizerDashboardExperiment
+#from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
 
 class POptimizerExperimentAction(Action):
     name = 'Optimisation (POptimizer)'
     tooltip = 'Optimise the structure and parameters and of a Lattice Population P system model.'
     def perform(self, event=None):
-        obj = POptimizerExperiment(application=self.window.workbench.application)
-#        obj.load()
+        obj = POptimizerDashboardExperiment(application=self.window.workbench.application)
+#        self.window.workbench.edit(
+#            obj=obj,
+#            kind=ParamsExperimentEditor,
+#            use_existing=False
+#        )
         obj.edit()
