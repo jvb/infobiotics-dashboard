@@ -1,19 +1,30 @@
 from enthought.pyface.action.api import Action
-from infobiotics.api import PRISMExperiment, MC2Experiment
+from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperiment, MC2DashboardExperiment
+from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
+from editor import PModelCheckerResultsEditor 
 
 class PRISMExperimentAction(Action):
     name = 'PModelChecker (PRISM)'
     tooltip = 'Load a PRISM experiment from a parameters file.'
     def perform(self, event=None):
-        obj = PRISMExperiment(application=self.window.workbench.application)
-        obj.edit()
+        PRISMDashboardExperiment(application=self.window.workbench.application).edit()
 
 class MC2ExperimentAction(Action):
     name = 'PModelChecker (MC2)'
     tooltip = 'Load an MC2 experiment from a parameters file.'
     def perform(self, event=None):
-        obj = MC2Experiment(application=self.window.workbench.application)
-        obj.edit()
+        MC2DashboardExperiment(application=self.window.workbench.application).edit()
+
+class PModelCheckerResultsAction(Action):
+    name = 'PModelChecker Results'
+    tooltip = 'Load PModelChecker results from a file.'
+    def perform(self, event=None):
+#        PModelCheckerResults().edit()
+        self.window.workbench.edit(
+            obj=PModelCheckerResults(),
+            kind=PModelCheckerResultsEditor,
+            use_existing=False
+        )
 
 #from pmodelchecker_experiment_editor import PModelCheckerExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor

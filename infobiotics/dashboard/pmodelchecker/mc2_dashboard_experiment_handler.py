@@ -2,6 +2,8 @@ from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
 from enthought.traits.api import Instance
 from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
 from infobiotics.dashboard.pmodelchecker.api import MC2DashboardExperimentProgressHandler
+from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
+from infobiotics.dashboard.plugins.pmodelchecker.editor import PModelCheckerResultsEditor
 
 class MC2DashboardExperimentHandler(MC2ExperimentHandler):
 
@@ -15,9 +17,7 @@ class MC2DashboardExperimentHandler(MC2ExperimentHandler):
         super(MC2DashboardExperimentHandler, self)._show_progress()
 
     def show_results(self):
-        ''' Called by PModelCheckerExperimentHandler.object_finished_changed. ''' #TODO?
-        from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
-        from infobiotics.dashboard.plugins.pmodelchecker.editor import PModelCheckerResultsResultsEditor #TODO editors
+        ''' Called by PModelCheckerExperimentHandler.object_finished_changed. '''
         self.application.workbench.edit(
             obj=PModelCheckerResults(file_name=self.model.results_file_),
             kind=PModelCheckerResultsResultsEditor,

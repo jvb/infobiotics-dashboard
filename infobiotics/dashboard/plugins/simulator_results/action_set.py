@@ -1,6 +1,6 @@
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
 from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
-from actions import SimulatorResultsAction
+#from actions import SimulatorResultsAction
             
 class  SimulatorResultsActionSet(WorkbenchActionSet):
 
@@ -15,7 +15,6 @@ class  SimulatorResultsActionSet(WorkbenchActionSet):
 
     menus = [
              
-        # Experiment menu
         Menu(
             name='Results', path='MenuBar', after='Experiment',
 #            groups=['McssGroup']
@@ -30,16 +29,12 @@ class  SimulatorResultsActionSet(WorkbenchActionSet):
     ]
         
     actions = [
-        
-        # Experiment menu
         Action(
             path='MenuBar/Results', 
             name='Plotting',
 #            group='McssGroup',
             class_name='infobiotics.dashboard.plugins.simulator_results.actions:SimulatorResultsAction',
         ),
-        
-        # Experiment toolbar
         Action(
             path='ToolBar/Results', 
             name='Plotting',
