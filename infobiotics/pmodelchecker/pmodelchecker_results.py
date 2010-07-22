@@ -655,33 +655,31 @@ class PModelCheckerResults(HasTraits):
                 Item('file_name', label='Results file'),
 #                Label("No properties found in '%s'" % self.file_name, defined_when='len(object.properties) == 0'), #TODO replace with message in text box
 #                Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'), #TODO
-                VGroup(
-                    Item('selected',
-                        label='Property',
-                        editor=InstanceEditor(
-                            name='object.properties', #FIXME doesn't update with properties
-                            editable=False,
-                        ),
-                        visible_when='len(object.properties) > 1',
+                Item('selected',
+                    label='Property',
+                    editor=InstanceEditor(
+                        name='object.properties', #FIXME doesn't update with properties
+                        editable=False,
                     ),
-#                    Item('selected',
-#                        label='Property',
-#                        editor=CheckListEditor( # bug in CheckListEditor or rather Editor than prevents this for working
-#                            name='values',
-#                        ),
-#                        visible_when='len(object.properties) > 1',
+                    visible_when='len(object.properties) > 1',
+                ),
+#                Item('selected',
+#                    label='Property',
+#                    editor=CheckListEditor( # bug in CheckListEditor or rather Editor than prevents this for working
+#                        name='values',
 #                    ),
-                    VGroup(
-                        Item('properties', 
-                            show_label=False, 
-                            style='custom', 
-                            editor=ListEditor(
-                                use_notebook=True, 
-                                page_name='.property_string',
-                                selected='object.selected',
-                            ),
-    #                        defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
+#                    visible_when='len(object.properties) > 1',
+#                ),
+                VGroup(
+                    Item('properties', 
+                        show_label=False, 
+                        style='custom', 
+                        editor=ListEditor(
+                            use_notebook=True, 
+                            page_name='.property_string',
+                            selected='object.selected',
                         ),
+#                        defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
                     ),
                     visible_when='len(object.properties) > 0',
                 ),

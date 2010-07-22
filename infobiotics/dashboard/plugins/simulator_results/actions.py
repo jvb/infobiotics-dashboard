@@ -8,8 +8,11 @@ class SimulatorResultsAction(PyFaceAction): #TODO
     tooltip = 'Visualise mcss simulations.'
     
     def perform(self, event=None):
+        obj = SimulationResultsDialog()
+        if not obj.loaded:
+            return
         self.window.workbench.edit(
-            obj=SimulationResultsDialog(),
+            obj=obj,
             kind=SimulatorResultsEditor,
             use_existing=False
         )

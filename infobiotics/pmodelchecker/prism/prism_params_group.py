@@ -44,7 +44,7 @@ prism_params_group = VGroup(
             layout='tabbed',
         ),
         HGroup(
-            Item('handler.confidence'),
+            Item('handler.confidence'), #TODO TextEditor?
             Item('handler._custom_confidence', show_label=False, enabled_when='handler.confidence=="custom"'),
             Item('precision'),
             Item('number_samples', label='Number of samples'),

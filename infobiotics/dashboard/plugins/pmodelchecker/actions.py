@@ -1,6 +1,7 @@
 from enthought.pyface.action.api import Action
 from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperiment, MC2DashboardExperiment
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
+from enthought.pyface.api import FileDialog, OK
 from editor import PModelCheckerResultsEditor 
 
 class PRISMExperimentAction(Action):
@@ -19,9 +20,16 @@ class PModelCheckerResultsAction(Action):
     name = 'PModelChecker Results'
     tooltip = 'Visualise checked properties.'
     def perform(self, event=None):
-#        PModelCheckerResults().edit()
+        fd = FileDialog(
+            wildcard='PModelChecker results files (*.psm)', 
+            title='Select a PModelChecker results file',
+        )
+        if fd.open() != OK:
+            return 
+        obj = PModelCheckerResults(fd.path)
+#        obj.edit()
         self.window.workbench.edit(
-            obj=PModelCheckerResults(),
+            obj=obj,
             kind=PModelCheckerResultsEditor,
             use_existing=False
         )

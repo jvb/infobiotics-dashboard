@@ -44,23 +44,23 @@ class _CancellableProgressEditor(Editor):
 
         self.title = self.factory.title
         if len(self.factory.title_name) > 0:
-            self.sync_value(self.factory.title_name, 'title', 'from')
+            self.sync_value(self.factory.title_name, 'title')#, 'from')
         
         self.message = self.factory.message
         if len(self.factory.message_name) > 0:
-            self.sync_value(self.factory.message_name, 'message', 'from')
+            self.sync_value(self.factory.message_name, 'message')#, 'from')
 
         self.min = self.factory.min
         if len(self.factory.min_name) > 0:
-            self.sync_value(self.factory.min_name, 'min', 'from')
+            self.sync_value(self.factory.min_name, 'min')#, 'from')
 
         self.max = self.factory.max
         if len(self.factory.max_name) > 0:
-            self.sync_value(self.factory.max_name, 'max', 'from')
+            self.sync_value(self.factory.max_name, 'max')#, 'from')
         
         self.show_time = self.factory.show_time
         if len(self.factory.show_time_name) > 0:
-            self.sync_value(self.factory.show_time_name, 'show_time', 'from')
+            self.sync_value(self.factory.show_time_name, 'show_time')#, 'from')
         
         self.control = self._create_control(parent)
         self.set_tooltip()

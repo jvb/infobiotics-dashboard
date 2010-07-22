@@ -26,7 +26,7 @@ if sys.platform.startswith('win'):
 else:
     import pexpect as expect
 #    import infobiotics.thirdparty.pexpect as expect
-from enthought.traits.api import ListStr, Str, Event, Property, Bool
+from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change
 from threading import Thread
 from infobiotics.common.api import Params, ParamsRelativeFile
 
@@ -70,12 +70,6 @@ class Experiment(Params):
     finished = Event
     finished_without_output = Event
     
-#    @on_trait_change('started')
-#    def forward_program_output_to_stdout(self):
-##    def _started_fired(self):
-#        ''' An example of responding to an Event. '''
-#        self.child.logfile_read = sys.stdout
-
 #    @profile
     def _spawn(self):
         ''' Start the program and try to match output.
@@ -89,51 +83,49 @@ class Experiment(Params):
          
         '''
         self.starting = True
-
-#        #FIXME are these still relevant now that executable is found in preferences or PATH?
-#        if self.executable == '':
-#            print "warning self.executable == ''"
-#        if self._params_file == '':
-#            print "warning self._params_file == ''"
-##            print self.executable, self._params_file, self.executable_kwargs, self.directory
-#        # spawn process
-##        if sys.platform.startswith('win'):
-##            self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
-##        else:    
-##            self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
-#        # note that the expect module doesn't like list traits so we copy them using [:] 
+        
+#        try:
+#    
+#            # spawn process
+#            if sys.platform.startswith('win'):
+#                self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
+#            else:    
+#                self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
+#            # note that the expect module doesn't like list traits so we copy them using [:] 
+#            # and directory is defined in Params
+#    
+#            # compile pattern list for expect_list
+#            compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
+#            
+#            # append EOF to compiled pattern list
+#            compiled_pattern_list.append(expect.EOF)
+#            eof_index = compiled_pattern_list.index(expect.EOF)
+#            
+#            # append TIMEOUT to compiled pattern list
+#            compiled_pattern_list.append(expect.TIMEOUT)
+#            timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+#            
+#            self.started = True
 #
-#        # useful for debugging
-##            self.child.logfile_read = sys.stdout #TODO comment out in release
-#
-##        self.started = True
-#
-#        # compile pattern list for expect_list
-##        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
-#        
-#        # append EOF to compiled pattern list
-##        compiled_pattern_list.append(expect.EOF)
-##        eof_index = compiled_pattern_list.index(expect.EOF)
-#        
-#        # append TIMEOUT to compiled pattern list
-##        compiled_pattern_list.append(expect.TIMEOUT)
-##        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
-#        
-#        # expect loop
-##        patterns_matched = 0
-##        while True:
-##            pattern_index = self.child.expect_list(compiled_pattern_list)
-##            if pattern_index == eof_index:
-##                if patterns_matched == 0:
-##                    if self.child.before != '':
-##                        self.finished_without_output = True
-##                # process has finished, perhaps prematurely
-##                break
-##            elif pattern_index == timeout_index:
-##                self.timed_out = True
-##            else:
-##                self._output_pattern_matched(pattern_index, self.child.match.group())
-##                patterns_matched += 1
+#            # expect loop
+#            patterns_matched = 0
+#            while True:
+#                pattern_index = self.child.expect_list(compiled_pattern_list, searchwindowsize=100)
+#                if pattern_index == eof_index:
+#                    if patterns_matched == 0:
+#                        if self.child.before != '':
+#                            self.finished_without_output = True
+#                    # process has finished, perhaps prematurely
+#                    break
+#                elif pattern_index == timeout_index:
+#                    self.timed_out = True
+#                else:
+#                    self._output_pattern_matched(pattern_index, self.child.match.group())
+#                    patterns_matched += 1
+##            print patterns_matched
+#    
+#        except Exception, e:
+#            print e
         import subprocess
         if subprocess.mswindows: # http://www.gossamer-threads.com/lists/python/python/783937#783937
             su = subprocess.STARTUPINFO() 
@@ -144,51 +136,30 @@ class Experiment(Params):
             p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
         self.started = True
         p.wait()
+
+        # trigger ExperimentHandler.show_results()
         self.finished = True
-#        print patterns_matched
 
-    def _finished_without_output_fired(self):
-        print '_finished_without_output_fired', self.child.before
+#    @on_trait_change('started')
+#    def forward_program_output_to_stdout(self):
+#        self.child.logfile_read = sys.stdout
 
-#    def _finished_fired(self):
+#    @on_trait_change('started')
+#    def print_experiment_command_line(self):
+#        # debugging #TODO silence
+#        print 'executable =', self.executable
+#        print 'params file =', self._params_file
+#        print 'overridden parameters =', self.executable_kwargs
+#        print 'directory =', self.directory
+
+#    def _finished_fired(self): # object_finished_fired in 
 #        print 'finished'
+
+#    def _finished_without_output_fired(self):
+#        print '_finished_without_output_fired', self.child.before
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
-##    def __params_program_default(self): #TODO get_preference(name, contigency_function)
-##            from infobiotics.thirdparty.which import which, WhichError
-##            try:
-##                _params_program = which(self._params_program_name)
-##            except WhichError:
-##                _params_program = None
-##            if _params_program is None:
-##                # we can't find it so print error message and exit #FIXME what does this do in the interpreter? 
-##                import sys
-##                sys.stderr.write(
-##                    "error: '%s' could not be located on PATH. " \
-##                    "Either change PATH to include '%s' " \
-##                    "or amend '%s' with its correct location.\n" % (
-##                        self._params_program_name, 
-##                        self._params_program_name, 
-##                        get_default_preferences().filename,
-##                    )
-##                )
-##                sys.exit(1)
-#
-#        import os
-#        if not os.path.isfile(self.executable):
-#            if self._interactive:
-#                #TODO message box explaining that executable does not exist or is not executable and that another should be specified using the preferences dialog
-#                while True:
-#                    if not self.handler.edit_preferences(self.handler.info): # self.executable will be updated if True returned
-#                        return False
-#                    elif os.path.isfile(self.executable):
-#                        break
-#            else:
-#                import sys
-#                sys.stderr.write("'%s' does not exist. Please specify an alternative %s executable either by using McssExperiment(executable=/full/path/to/executable, ...) or by editing the 'executable' entry in section [%s] of the preferences file '%s'.\n" % (self.executable, self.executable_name, self.executable_name, self.preferences_helper.preferences.filename))
-#                return False
-#
         if thread:
             Thread(target=self._spawn).start()
         else:

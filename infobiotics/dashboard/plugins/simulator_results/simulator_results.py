@@ -325,6 +325,8 @@ class SimulationResultsDialog(QWidget):
         self.current_directory = QDir.currentPath()
 #        self.load_settings()
         self.loaded = self.load(filename)
+        if not self.loaded:
+            self.close()
         self.updateUi()
 
 #    def load_settings(self):

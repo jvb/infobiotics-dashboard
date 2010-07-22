@@ -11,7 +11,7 @@ from files import (
 
 from lists import copy, unique
 
-from md5sum import md5sum
+#from md5sum import md5sum
 
 from sequences import flatten, overlapping, join_overlapping
 

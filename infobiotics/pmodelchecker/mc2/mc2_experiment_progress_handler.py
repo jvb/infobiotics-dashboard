@@ -1,11 +1,12 @@
 from infobiotics.common.api import ExperimentProgressHandler
-from enthought.traits.api import property_depends_on
+from enthought.traits.api import on_trait_change
 
 class MC2ExperimentProgressHandler(ExperimentProgressHandler):
 
-    @property_depends_on('max_simulation, simulation')
-    def _get_progress(self):
-        return (100 / self.max_simulation) * self.simulation 
+    @on_trait_change('model.max_simulation, model.simulation')
+    def update_progress(self):
+        self.progress = int((100 / self.max_simulation) * self.simulation) 
 
-    def _get_status(self):
-        return 'MC2ExperimentProgressHandler._get_status()'
+#    @on_trait_change('model.max_simulation, model.simulation')
+#    def update_message(self):
+#        return 'MC2ExperimentProgressHandler._get_status()'
