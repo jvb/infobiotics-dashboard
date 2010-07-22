@@ -10,41 +10,35 @@ class ExperimentProgressHandler(Controller):
     progress = Int
 
     # traits controlling presentation of progress 
-    title = Str
     message = Str
-    min = Int(0)
     max = Int(0)
-    show_time = Bool(False)
-#    cancel = Callable #TODO
     
     def init(self, info):
         self.info.ui.title = self.model.handler.title
     
-    def _progress_changed(self):
+    def _progress_changed(self, info):
+        print info #FIXME
         print self.min, self.max, self.show_time
         print self.progress
     
     traits_view = View(
-#        Item('handler.progress', 
-        Item('progress', 
+        Item('handler.progress',
             show_label=False,
             editor=CancellableProgressEditor(
-#                title='Title',
-                    title_name='title',
-#                message='Message',
-                    message_name='handler.message',
-#                min=0,
-                    min_name='min',
-                max=100,
-#                    max_name='max',
-#                show_text=False,
-                show_percent = True,
-#                show_time = True,
-#                    show_time_name = 'show_time', # overrides show_time above
-                show_max = True,
-                show_value = True,
-#                prefix_message=True,
-                can_cancel=False, 
+                title_name='title',
+                message_name='message',
+                min=0,
+                min_name='min',
+                max=0,
+                max_name='max',
+                show_text=False,
+                show_percent=False,
+                show_time=False,
+#                show_time_name='show_time', # overrides show_time above
+                show_max=False,
+                show_value=False,
+                prefix_message=False,
+                can_cancel=False,
 #                cancelled=cancel,
             ),
         ),

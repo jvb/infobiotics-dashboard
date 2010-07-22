@@ -10,7 +10,6 @@ class ExperimentHandler(ParamsHandler):
         return self.get_traits_view(ExperimentView)
         
     _progress_handler = Instance(ExperimentProgressHandler)
-
     def __progress_handler_default(self):
         raise NotImplementedError('e.g. return McssExperimentProgressHandler(model=self.model)')
 

@@ -4,6 +4,7 @@
 
 from enthought.envisage.ui.workbench.api import WorkbenchApplication
 from enthought.pyface.api import AboutDialog, ImageResource, SplashScreen
+from enthought.traits.api import Event
 
 class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
     """ The Infobiotics Dashboard (Envisage Workbench) application. """
@@ -56,7 +57,12 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
 
 #    def _started_fired(self):
 #        print 'started' #TODO logger
-        
+    
+    exiting = Event
+    
+    def exit(self):
+        self.exiting = True # handlers listening for this event can act on it but not stop it
+        super(InfobioticsDashboardWorkbenchApplication, self).exit()
 
 if __name__ == '__main__':
     execfile('run.py')

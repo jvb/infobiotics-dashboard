@@ -66,7 +66,6 @@ def main():
             
             POptimizerUIPlugin(),
 
-
         ]
     )
 
