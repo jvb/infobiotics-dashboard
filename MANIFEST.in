@@ -1,6 +1,7 @@
-include *.txt
+include AUTHORS.txt CHANGES.txt COPYING.txt LICENSE.txt NAME.txt README.txt THANKS.txt VERSION.txt
 include distribute_setup.py
-include make-deb.sh
-include make_app.sh make_clean.sh
+include clean.sh make-deb.sh py2app.sh py2exe.sh PyQt4_QSci.sh rm_distribute.sh 
+include endo.sh epydoc.sh
 include bin/infobiotics-dashboard bin/infobiotics-dashboard.py bin/infobiotics-dashboard.pyw 
+include examples/*
 
