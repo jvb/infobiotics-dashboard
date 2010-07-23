@@ -1,4 +1,4 @@
-Changing figure size when saving matplotlib plots using sandbox/dpi.py
+Adding Dashboard progress bars to view list
 
 Saving text files - rolling our own Envisage TextEditor plugin
 

@@ -688,6 +688,7 @@ class SimulationResultsDialog(QWidget):
                 self.plotsPreviewDialog.addPlots(plots)
     #            if len(plots) > 8:
     #                self.plotsPreviewDialog.showMaximized()
+                centre_window(self.plotsPreviewDialog)
                 self.plotsPreviewDialog.show()
                 # bring to fore (needed in this order)
                 self.plotsPreviewDialog.raise_()
@@ -815,10 +816,11 @@ def arrange(number):
 
 
 
-from enthought.traits.api import HasTraits, Instance, Str
+from enthought.traits.api import HasTraits, Instance, Str, Button
 from matplotlib.figure import Figure
-from enthought.traits.ui.api import View, VGroup, Item
+from enthought.traits.ui.api import View, VGroup, Item, HGroup, Spring
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
+from infobiotics.commons.matplotlib_ import resize_and_save_matplotlib_figure
 
 class TraitsPlot(HasTraits):
     figure = Instance(Figure, ())
@@ -826,19 +828,27 @@ class TraitsPlot(HasTraits):
     
     def traits_view(self):
         return View(
-#            VGroup(
+            VGroup(
                 Item('figure',
                     show_label=False,
                     editor=MPLFigureEditor(
                         toolbar=True
                     ),
                 ),
-#                show_border=True,
-#            ),
+                HGroup(
+                    Spring(),
+                    Item('save_resized', show_label=False),
+                ),
+                show_border=True,
+            ),
             width=640, height=480,
             resizable=True,
             title=self.title
         )
+            
+    save_resized = Button
+    def _save_resized_fired(self):
+        resize_and_save_matplotlib_figure(self.figure)
 
 
 class PlotsPreviewDialog(QWidget):

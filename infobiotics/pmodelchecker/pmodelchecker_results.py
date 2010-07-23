@@ -49,6 +49,7 @@ from matplotlib.figure import Figure
 
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor 
 
+from infobiotics.commons.matplotlib_ import resize_and_save_matplotlib_figure
 
 class PModelCheckerResultsPropertyVariable(HasTraits):
     name = Str
@@ -280,14 +281,19 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
                     resizable=True
                 ),
                 HGroup(
-                    Spring(), 
                     Item('detach', show_label=False),
+                    Spring(), 
+                    Item('save_resized', show_label=False),
                 ),
                 show_border=True,
             ),
             title=self.property_string,
             resizable=True,
         )
+            
+    save_resized = Button
+    def _save_resized_fired(self):
+        resize_and_save_matplotlib_figure(self.figure)
 
     detach = Button
     def _detach_fired(self):
@@ -692,7 +698,7 @@ class PModelCheckerResults(HasTraits):
 
 
 if __name__ == '__main__':
-    main = PModelCheckerResults('results/1-4_variables.psm')
+    main = PModelCheckerResults('../../examples/1-4_variables.psm')
 #    main = PModelCheckerResults(file_name='results/1-4_variables.psm')
 #    main.load('2d_function.psm')
 
