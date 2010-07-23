@@ -1,4 +1,4 @@
-from enthought.traits.ui.api import Controller, View, Item
+from enthought.traits.ui.api import Controller, View, VGroup, Item
 from enthought.traits.api import Int, Str, Bool, Callable 
 from infobiotics.commons.traits.ui.qt4.cancellable_progress_editor import CancellableProgressEditor
 
@@ -22,25 +22,28 @@ class ExperimentProgressHandler(Controller):
         print self.progress
     
     traits_view = View(
-        Item('handler.progress',
-            show_label=False,
-            editor=CancellableProgressEditor(
-                title_name='title',
-                message_name='message',
-                min=0,
-                min_name='min',
-                max=0,
-                max_name='max',
-                show_text=False,
-                show_percent=False,
-                show_time=False,
-#                show_time_name='show_time', # overrides show_time above
-                show_max=False,
-                show_value=False,
-                prefix_message=False,
-                can_cancel=False,
-#                cancelled=cancel,
+        VGroup(
+            Item('handler.progress',
+                show_label=False,
+                editor=CancellableProgressEditor(
+                    title_name='title',
+                    message_name='message',
+                    min=0,
+                    min_name='min',
+                    max=0,
+                    max_name='max',
+                    show_text=False,
+                    show_percent=False,
+                    show_time=False,
+    #                show_time_name='show_time', # overrides show_time above
+                    show_max=False,
+                    show_value=False,
+                    prefix_message=False,
+                    can_cancel=False,
+    #                cancelled=cancel,
+                ),
             ),
+            show_border=True,
         ),
         width=250,
     )
