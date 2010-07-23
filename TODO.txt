@@ -1,13 +1,15 @@
-Adding Dashboard progress bars to view list
+* PModelResults file_name filter doesn't include *.mc2
 
-Saving text files - rolling our own Envisage TextEditor plugin
+* Adding Dashboard progress bars to view list
 
-Test simpler pexpect example, especially for PRISM.
+* Saving text files - rolling our own Envisage TextEditor plugin
 
-Project management (using Single Project plugin?)
+* Test simpler pexpect example, especially for PRISM.
 
-Sumatra
+* Project management (using Single Project plugin?)
 
-Mayavi screenshots?
+* Results management using Sumatra
 
-Mayavi videos on Debian using ffmpeg
+* Make size of Mayavi screenshots adjustable
+
+* Make Mayavi videos on Debian using ffmpeg

@@ -3,3 +3,4 @@ from temporal_formulas import TemporalFormula, TemporalFormulaParameter, tempora
 from pmodelchecker_experiment import PModelCheckerExperiment
 from pmodelchecker_params import PModelCheckerParams
 from pmodelchecker_params_handler import PModelCheckerParamsHandler
+from pmodelchecker_results import PModelCheckerResults

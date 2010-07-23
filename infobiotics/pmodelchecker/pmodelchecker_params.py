@@ -51,7 +51,9 @@ class PModelCheckerParams(Params):
     
     mcss_params_file = ParamsRelativeFile(filters=['*.params'], desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
     
-    def _model_specification_changed(self):
+    def _model_specification_changed(self): #TODO vvvvvv probably?!
+        ''' Translating the model specification probably generates 
+        modelParameters.xml needed for formula parameters and rewards. ''' 
         if os.path.isfile(self.model_specification):
             self.translate_model_specification() # must be reimplemented in subclasses
 
@@ -76,8 +78,3 @@ class PModelCheckerParams(Params):
     #    if not os.path.exists(os.path.abspath(os.path.join(translate_experiment.directory, translate_experiment.PRISM_model))):
     #        del temp_file
     #        raise Exception('%s was not created.' % self.PRISM_model)
-
-
-if __name__ == '__main__':
-    execfile('prism/prism_params.py')
-    

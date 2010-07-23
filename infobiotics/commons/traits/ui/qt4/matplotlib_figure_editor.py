@@ -15,7 +15,6 @@ class _MPLFigureEditor(Editor):
         widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         layout = QGridLayout(widget)
         canvas = FigureCanvas(self.value)
-        canvas.resize(200,200)
         toolbar = NavigationToolbar(canvas, widget)
         if self.factory.toolbar:
             layout.addWidget(toolbar)

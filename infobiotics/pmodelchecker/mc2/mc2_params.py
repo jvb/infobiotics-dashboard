@@ -10,7 +10,7 @@ class MC2Params(PModelCheckerParams):
     
     model_checker = 'MC2'
 
-    def translate_model_specification(self):
+    def translate_model_specification(self): # see PModelCheckerParams._model_specification_changed
         super(MC2Params, self).translate_model_specification(self.directory, self.model_specification)
     
     def parameter_names(self):

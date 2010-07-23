@@ -42,8 +42,11 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         _prism_model_str = self._prism_model_str
         if self._prism_model_str == '':
             self.model.translate_model_specification()
-        from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor
-        edit_prism_model_view = View(
+        from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor, Controller
+        # if this class isn't used (i.e. if a different view is used to edit this handler) the Perform button greys out, this fixes it! 
+        class PRISMModelHandler(Controller):
+            _prism_model_str = Str
+            view = View(
                 Group(
                     HGroup(
                         Item(label='PRISM model:'),
@@ -62,16 +65,15 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                 resizable = True,
                 id = 'edit_prism_model_view',
             )
-        if self.edit_traits(view = edit_prism_model_view, kind='livemodal').result: # if kind is not live no traits are updated! (translate has model_specification='')
-            # not when "style = 'readonly'"
-            if self._prism_model_str != _prism_model_str:
+        if PRISMModelHandler(_prism_model_str=_prism_model_str, model=self.model).edit_traits(kind='livemodal').result: # if kind is not live no traits are updated! (translate has model_specification='')
+            if self._prism_model_str != _prism_model_str: # this can only ever be False when "Item('handler._prism_model_str', style = 'readonly'," above
                 try:
                     with write(self.model.PRISM_model_) as f:
                         f.write(self._prism_model_str)
                 except IOError, e:
                     print e #TODO popup message instead
 #                self._prism_model_str_changed = True
-#                
+#            
 #    _prism_model_str_changed = Bool(False)
 #        
 #    retranslate_prism_model = Button(desc='whether to translate the PRISM model from the P system model again.\nThis will overwrite any changes that have been made to the PRISM model file.')

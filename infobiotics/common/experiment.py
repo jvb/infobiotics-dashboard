@@ -69,6 +69,18 @@ class Experiment(Params):
     timed_out = Event
     finished = Event
     finished_without_output = Event
+
+#    @on_trait_change('started')
+#    def forward_program_output_to_stdout(self):
+#        self.child.logfile_read = sys.stdout
+
+#    @on_trait_change('started')
+#    def print_experiment_command_line(self):
+#        # debugging #TODO silence
+#        print 'executable =', self.executable
+#        print 'params file =', self._params_file
+#        print 'overridden parameters =', self.executable_kwargs
+#        print 'directory =', self.directory
     
 #    @profile
     def _spawn(self):
@@ -133,33 +145,42 @@ class Experiment(Params):
             su.wShowWindow = subprocess.SW_HIDE 
             p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], startupinfo=su, cwd=self.directory) # directory defined in Params
         else:
-            p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], cwd=self.directory) # directory defined in Params
+            p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], 
+                cwd=self.directory, # directory defined in Params
+#                # debugging
+#                stdout=subprocess.PIPE,
+#                stderr=subprocess.PIPE,#STDOUT,
+            ) 
         self.started = True
         p.wait()
 
         # trigger ExperimentHandler.show_results()
         self.finished = True
 
-#    @on_trait_change('started')
-#    def forward_program_output_to_stdout(self):
-#        self.child.logfile_read = sys.stdout
-
-#    @on_trait_change('started')
-#    def print_experiment_command_line(self):
-#        # debugging #TODO silence
-#        print 'executable =', self.executable
-#        print 'params file =', self._params_file
-#        print 'overridden parameters =', self.executable_kwargs
-#        print 'directory =', self.directory
-
-#    def _finished_fired(self): # object_finished_fired in 
-#        print 'finished'
-
+    def _finished_fired(self):
+        del self.temp_params_file #TODO test this
+        
 #    def _finished_without_output_fired(self):
 #        print '_finished_without_output_fired', self.child.before
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
+        
+#        print 'got here also' #TODO remove this and others
+        
+        #TODO check if dirty/saved first
+
+        # save to temporary file in the same directory
+        
+        import tempfile
+        self.temp_params_file = tempfile.NamedTemporaryFile(dir=self.directory)
+            
+        self.save(self.temp_params_file.name)
+    #    import os.path
+    #    if not os.path.exists(os.path.abspath(os.path.join(translate_experiment.directory, translate_experiment.PRISM_model))):
+    #        del temp_file
+    #        raise Exception('%s was not created.' % self.PRISM_model)        
+        
         if thread:
             Thread(target=self._spawn).start()
         else:

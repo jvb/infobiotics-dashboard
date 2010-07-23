@@ -1,2 +1,2 @@
-from infobiotics.api import McssExperiment
+from infobiotics.mcss.mcss_experiment import McssExperiment
 McssExperiment().configure()

@@ -1815,67 +1815,42 @@ class Surface(HasTraits):
 
     def arrayAtPosition(self, position):
         return self.array[:, :, position]
+
+
+def test():
+    app, argv = main.begin_traits()
+    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR_output.h5')
+    if w.loaded:
+#        w.ui.averageSelectedRunsCheckBox.setChecked(True)
+        w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
+#        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
+        w.ui.speciesListWidget.selectAll()
+#        w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
+        w.ui.compartmentsListWidget.selectAll()
+#        w.ui.surfacePlotButton.click()
+        w.plot()
+        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
+        w.plotsPreviewDialog.combine()
+    centre_window(w)
+    w.show()
+    main.end_with_qt_event_loop()
          
 
-#if __name__ == "__main__":
-##    import sys
-##    argv = sys.argv
-#    app, argv = main.begin_traits()
-#    if len(argv) > 2:
-#        print "usage: python simulator_results.py {h5file}"
-#        main.end(1)
-#    if len(argv) == 1:
-##        shared.settings.register_infobiotics_settings()
-#        w = SimulationResultsDialog()
-##        filename = "~/Desktop/lacOperonModel/colonyModel.h5"
-###        filename = "../examples/models/module1.h5"
-###        filename = "~/workspaces/gui/CAPSystem/root-cut/root-cut.02.h5"#fran-model-checking/root-cut.02.h5"
-###        filename = "~/modelling/CAPPulseGeneratorBig.h5"
-###        filename = "/home/jvb/modelling/CiEModelIII/CiEModelIII-2400.h5"
-##        w = SimulationResultsDialog(filename)
-##        if w.loaded:
-##            w.ui.averageSelectedRunsCheckBox.setChecked(True)
-###           w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
-##            w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
-###           w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
-##            w.ui.compartmentsListWidget.selectAll()
-###            w.ui.speciesListWidget.selectAll()
-###            w.plot()
-##            w.ui.surfacePlotButton.click()
-#    elif len(argv) == 2:
-#        w = SimulationResultsDialog(filename=argv[1])
-#    centre_window(w)
-#    w.show()
-##    shared.settings.restore_window_size_and_position(w)
-#    main.end_with_qt_event_loop()
-
-
 if __name__ == "__main__":
+#    test()
+
 #    import sys
 #    argv = sys.argv
     app, argv = main.begin_traits()
     if len(argv) > 2:
-        print "usage: python simulator_results.py {h5file}"
+        print "usage: mcss_results.sh {h5file}"
         main.end(1)
     if len(argv) == 1:
-        w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR_output.h5')
-        if w.loaded:
-#            w.ui.averageSelectedRunsCheckBox.setChecked(True)
-            w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
-#            w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
-            w.ui.speciesListWidget.selectAll()
-#            w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
-            w.ui.compartmentsListWidget.selectAll()
-            w.plot()
-            w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
-            w.plotsPreviewDialog.combine()
-
-#            w.ui.surfacePlotButton.click()
+#        shared.settings.register_infobiotics_settings()
+        w = SimulationResultsDialog()
     elif len(argv) == 2:
         w = SimulationResultsDialog(filename=argv[1])
     centre_window(w)
     w.show()
 #    shared.settings.restore_window_size_and_position(w)
     main.end_with_qt_event_loop()
-
-
