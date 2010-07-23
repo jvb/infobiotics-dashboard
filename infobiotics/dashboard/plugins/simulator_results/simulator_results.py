@@ -36,7 +36,7 @@ import bisect
 import cStringIO as StringIO
 import decimal
 import math
-import matplotlib.pyplot as pyplot
+#import matplotlib.pyplot as pyplot
 import numpy
 import os
 import tables
@@ -815,6 +815,32 @@ def arrange(number):
 
 
 
+from enthought.traits.api import HasTraits, Instance, Str
+from matplotlib.figure import Figure
+from enthought.traits.ui.api import View, VGroup, Item
+from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
+
+class TraitsPlot(HasTraits):
+    figure = Instance(Figure, ())
+    title = Str('title')
+    
+    def traits_view(self):
+        return View(
+#            VGroup(
+                Item('figure',
+                    show_label=False,
+                    editor=MPLFigureEditor(
+                        toolbar=True
+                    ),
+                ),
+#                show_border=True,
+#            ),
+            width=640, height=480,
+            resizable=True,
+            title=self.title
+        )
+
+
 class PlotsPreviewDialog(QWidget):
 
     def __init__(self, runs=1, averaging=False, windowTitle=None, parent=None):
@@ -834,6 +860,7 @@ class PlotsPreviewDialog(QWidget):
         self.connect(self.ui.tileButton, SIGNAL("clicked()"), self.tile)
         # disable buttons and create handle lists
         self.updateUi()
+#        self.traits_plot_list = []
 
     def updateUi(self):
         self.items = self.ui.plotsListWidget.selectedItems()
@@ -863,7 +890,8 @@ class PlotsPreviewDialog(QWidget):
         label = item.label
         if colour == None:
             colour = item.plot.colour
-        line = pyplot.plot(timepoints, levels, label=label, color=colour)
+#        line = pyplot.plot(timepoints, levels, label=label, color=colour)
+        line = self.axes.plot(timepoints, levels, label=label, color=colour)
         self.lines.append(line)
 
     def errorbar(self, item, colour=None):
@@ -884,14 +912,17 @@ class PlotsPreviewDialog(QWidget):
 #        self.errorbars.append(errorbar)
 
     def legend(self):
-        pyplot.legend(loc=0, prop=self.fontManager)
+        self.axes.legend(loc=0, prop=self.fontManager)
 
     def combine(self):
         """different colours for all lines"""
         self.reset()
         for i, item in enumerate(self.items):
-            pyplot.xlabel("time (%s)" % item.plot.units)
-            pyplot.ylabel("molecules")
+#            pyplot.xlabel("time (%s)" % item.plot.units)
+#            pyplot.ylabel("molecules")
+            self.axes = self.figure.add_subplot(111)
+            self.axes.set_xlabel("time (%s)" % item.plot.units)
+            self.axes.set_ylabel("molecules")
             timepoints = item.plot.timepoints
             levels = item.plot.levels
             label = item.plot.label
@@ -909,20 +940,27 @@ class PlotsPreviewDialog(QWidget):
         rows = len(self.items)
         cols = 1
         for i, item in enumerate(self.items):
-            if len(self.items) < 6: #TODO 6 is a bit arbitary  
-                pyplot.ylabel("molecules")
             if i == 0:
-                self.sharedAxis = pyplot.subplot(rows, cols, rows - i)
-                pyplot.xlabel("time (%s)" % item.plot.units)
+#                self.sharedAxis = pyplot.subplot(rows, cols, rows - i)
+#                pyplot.xlabel("time (%s)" % item.plot.units)
+                self.sharedAxis = self.figure.add_subplot(rows, cols, rows - i)
+                self.axes = self.sharedAxis
+                self.sharedAxis.set_xlabel("time (%s)" % item.plot.units)
                 self.line(item)
                 if self.averaging:
                     self.errorbar(item)
             else:
-                axis = pyplot.subplot(rows, cols, rows - i, sharex=self.sharedAxis)
-                pyplot.setp(axis.get_xticklabels(), visible=False)
+#                axes = pyplot.subplot(rows, cols, rows - i, sharex=self.sharedAxis)
+#                pyplot.setp(axes.get_xticklabels(), visible=False)
+                self.axes = self.figure.add_subplot(rows, cols, rows - i, sharex=self.sharedAxis)
+#                pyplot.setp(self.axes.get_xticklabels(), visible=False) #TODO
                 self.line(item)
                 if self.averaging:
                     self.errorbar(item)
+#            if len(self.items) < 6: #TODO 6 is a bit arbitary  
+#                pyplot.ylabel("molecules")
+            if len(self.items) < 6: #TODO 6 is a bit arbitary  
+                self.axes.set_ylabel("molecules")
             if not self.no_labels: self.legend()
         self.finalise()
 
@@ -931,9 +969,12 @@ class PlotsPreviewDialog(QWidget):
         self.reset()
         rows, cols = arrange(len(self.items))
         for i, item in enumerate(self.items):
-            pyplot.subplot(rows, cols, i + 1)
-            pyplot.xlabel("time (%s)" % item.plot.units)
-            pyplot.ylabel("molecules")
+#            pyplot.subplot(rows, cols, i + 1)
+#            pyplot.xlabel("time (%s)" % item.plot.units)
+#            pyplot.ylabel("molecules")
+            self.axes = self.figure.add_subplot(rows, cols, i + 1)
+            self.axes.set_xlabel("time (%s)" % item.plot.units)
+            self.axes.set_ylabel("molecules")
             self.line(item)
             if self.averaging:
                 self.errorbar(item)
@@ -943,10 +984,16 @@ class PlotsPreviewDialog(QWidget):
     def figurelegend(self):
         """Create a legend for all subplots."""
         labels = [line.label for line in self.lines]
-        pyplot.figlegend(self.lines, labels, loc='bottom')
+#        pyplot.figlegend(self.lines, labels, loc='bottom')
+        self.figure.figlegend(self.lines, labels, loc='bottom')
 
     def reset(self):
-        pyplot.close()
+#        pyplot.close()
+        self.traits_plot = TraitsPlot()
+#        self.traits_plot_list.append(self.traits_plot) #FIXME keeping a reference seems to cause a Qt crash, but not keeping it will lead to GC, wtf?
+#        print self.traits_plot_list
+        self.figure = self.traits_plot.figure
+#        self.axes = None
         self.no_labels = False
         self.labels_and_title()
 
@@ -1020,11 +1067,13 @@ class PlotsPreviewDialog(QWidget):
                         for item in self.items:
                             item.label = "%s in %s (run %s)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run.run_number)
         # set main title
-        pyplot.suptitle(title)
+#        pyplot.suptitle(title)
+        self.figure.suptitle(title)
 
     def background(self):
         """Change figure background."""
-        pyplot.gcf().set_facecolor("whitesmoke")
+#        pyplot.gcf().set_facecolor("whitesmoke")
+        self.figure.set_facecolor("whitesmoke")
 
     def finalise(self):
 #        self.figlegend()
@@ -1034,8 +1083,11 @@ class PlotsPreviewDialog(QWidget):
         self.errorbars = []
         # display
         if self.windowTitle is not None:
-            pyplot.gcf().canvas.set_window_title(self.windowTitle)
-        pyplot.show()
+#            pyplot.gcf().canvas.set_window_title(self.windowTitle)
+#        pyplot.show()
+            self.traits_plot.title = self.windowTitle
+        self.traits_plot.edit_traits()
+#        self.traits_plot.configure_traits()
 
 
 
@@ -1755,6 +1807,39 @@ class Surface(HasTraits):
         return self.array[:, :, position]
          
 
+#if __name__ == "__main__":
+##    import sys
+##    argv = sys.argv
+#    app, argv = main.begin_traits()
+#    if len(argv) > 2:
+#        print "usage: python simulator_results.py {h5file}"
+#        main.end(1)
+#    if len(argv) == 1:
+##        shared.settings.register_infobiotics_settings()
+#        w = SimulationResultsDialog()
+##        filename = "~/Desktop/lacOperonModel/colonyModel.h5"
+###        filename = "../examples/models/module1.h5"
+###        filename = "~/workspaces/gui/CAPSystem/root-cut/root-cut.02.h5"#fran-model-checking/root-cut.02.h5"
+###        filename = "~/modelling/CAPPulseGeneratorBig.h5"
+###        filename = "/home/jvb/modelling/CiEModelIII/CiEModelIII-2400.h5"
+##        w = SimulationResultsDialog(filename)
+##        if w.loaded:
+##            w.ui.averageSelectedRunsCheckBox.setChecked(True)
+###           w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
+##            w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
+###           w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
+##            w.ui.compartmentsListWidget.selectAll()
+###            w.ui.speciesListWidget.selectAll()
+###            w.plot()
+##            w.ui.surfacePlotButton.click()
+#    elif len(argv) == 2:
+#        w = SimulationResultsDialog(filename=argv[1])
+#    centre_window(w)
+#    w.show()
+##    shared.settings.restore_window_size_and_position(w)
+#    main.end_with_qt_event_loop()
+
+
 if __name__ == "__main__":
 #    import sys
 #    argv = sys.argv
@@ -1763,22 +1848,18 @@ if __name__ == "__main__":
         print "usage: python simulator_results.py {h5file}"
         main.end(1)
     if len(argv) == 1:
-#        shared.settings.register_infobiotics_settings()
-        w = SimulationResultsDialog()
-#        filename = "~/Desktop/lacOperonModel/colonyModel.h5"
-##        filename = "../examples/models/module1.h5"
-##        filename = "~/workspaces/gui/CAPSystem/root-cut/root-cut.02.h5"#fran-model-checking/root-cut.02.h5"
-##        filename = "~/modelling/CAPPulseGeneratorBig.h5"
-##        filename = "/home/jvb/modelling/CiEModelIII/CiEModelIII-2400.h5"
-#        w = SimulationResultsDialog(filename)
-#        if w.loaded:
+        w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR_output.h5')
+        if w.loaded:
 #            w.ui.averageSelectedRunsCheckBox.setChecked(True)
-##           w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
+            w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
 #            w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
-##           w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
-#            w.ui.compartmentsListWidget.selectAll()
-##            w.ui.speciesListWidget.selectAll()
-##            w.plot()
+            w.ui.speciesListWidget.selectAll()
+#            w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
+            w.ui.compartmentsListWidget.selectAll()
+            w.plot()
+            w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
+            w.plotsPreviewDialog.combine()
+
 #            w.ui.surfacePlotButton.click()
     elif len(argv) == 2:
         w = SimulationResultsDialog(filename=argv[1])
@@ -1786,4 +1867,5 @@ if __name__ == "__main__":
     w.show()
 #    shared.settings.restore_window_size_and_position(w)
     main.end_with_qt_event_loop()
+
 
