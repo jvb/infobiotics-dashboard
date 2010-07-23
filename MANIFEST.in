@@ -1,9 +1,6 @@
 include AUTHORS.txt CHANGES.txt COPYING.txt LICENSE.txt NAME.txt README.txt THANKS.txt VERSION.txt
 include distribute_setup.py
-include py2imports.py
-include clean.sh make-deb.sh py2app.sh py2exe.sh PyQt4_Qsci.sh rm_distribute.sh 
+include clean.sh make-deb.sh py2imports.py py2exe.sh PyQt4_Qsci.sh py2app.sh   
 include endo.sh epydoc.sh
 include bin/infobiotics-dashboard bin/infobiotics-dashboard.py bin/infobiotics-dashboard.pyw 
-include examples/*
 include infobiotics-dashboard.desktop infobiotics-workbench.png infobiotics-workbench.xpm
-

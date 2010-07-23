@@ -1,0 +1,13 @@
+Changing figure size when saving matplotlib plots using sandbox/dpi.py
+
+Saving text files - rolling our own Envisage TextEditor plugin
+
+Test simpler pexpect example, especially for PRISM.
+
+Project management (using Single Project plugin?)
+
+Sumatra
+
+Mayavi screenshots?
+
+Mayavi videos on Debian using ffmpeg

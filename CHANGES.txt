@@ -1,5 +1,3 @@
-v0.0.1, 20100517
+v0.0.7, 20100723
 
-* changed version number to 0.0.1 for make-deb.sh 
-
-v0.0.1dev, 20100517 -- Development release.
+* incorporated POptimizer parameters and PModelChecker results 
