@@ -1,5 +1,5 @@
 from infobiotics.common.api import ParamsView, MenuBar, file_menu
-from enthought.traits.ui.api import Menu, Action
+from enthought.traits.ui.menu import Menu, Action
 from infobiotics.commons.api import can_read, mkdir_p
 import os
 from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance, TraitError
