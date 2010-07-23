@@ -8,3 +8,6 @@ class McssParamsPreferencesHelper(ParamsPreferencesHelper):
 class McssParamsPreferencesPage(ParamsPreferencesPage):
     preferences_path = PREFERENCES_PATH
     name = PREFERENCES_PATH
+
+    # uses ParamsPreferencesPage view
+    

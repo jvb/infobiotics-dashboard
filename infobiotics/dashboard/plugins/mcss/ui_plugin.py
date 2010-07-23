@@ -3,7 +3,7 @@ from enthought.traits.api import List
 from enthought.pyface.workbench.api import Perspective, PerspectiveItem
 
 from action_set import McssActionSet
-from preferences_page import McssPreferencesPage
+from infobiotics.mcss.mcss_preferences import McssParamsPreferencesPage
 
 import os
 from enthought.etsconfig.api import ETSConfig
@@ -28,9 +28,9 @@ class McssUIPlugin(Plugin):
 #    def _views_default(self):
 #        return []
 
-#    preferences_pages = List(contributes_to='enthought.envisage.ui.workbench.preferences_pages')
-#    def _preferences_pages_default(self):
-#        return [McssPreferencesPage]
+    preferences_pages = List(contributes_to='enthought.envisage.ui.workbench.preferences_pages')
+    def _preferences_pages_default(self):
+        return [McssParamsPreferencesPage]
 
 #    openers = List(contributes_to='infobiotics.dashboard.plugins.unified_open_action.unified_open_action_plugin.openers') #TODO
 #    def _openers_default(self):

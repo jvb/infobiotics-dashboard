@@ -2,8 +2,10 @@ from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 #ETSConfig.company = 'infobiotics'
 
-#import logging #TODO No handlers could be found for logger "enthought.envisage.plugin"
-#logger = logging.getLogger("enthought.envisage.plugin")
+import logging
+logger = logging.getLogger("enthought.envisage.plugin")
+logger.addHandler(logging.StreamHandler())
+
 
 from enthought.envisage.core_plugin import CorePlugin
 from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin

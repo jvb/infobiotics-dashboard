@@ -2,6 +2,7 @@ from enthought.envisage.api import Plugin#, contributes_to
 from enthought.traits.api import List
 #from enthought.pyface.workbench.api import Perspective, PerspectiveItem
 from action_set import PModelCheckerActionSet
+from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesPage
 
 class PModelCheckerUIPlugin(Plugin):
     id = 'infobiotics.dashboard.plugins.pmodelchecker.ui_plugin.PModelCheckerUIPlugin'
@@ -22,9 +23,7 @@ class PModelCheckerUIPlugin(Plugin):
         return []
 
     def _preferences_pages_default(self):
-#        from preferences_page import PModelCheckerPreferencesPage
-#        return [PModelCheckerPreferencesPage]
-        return []
+        return [PModelCheckerParamsPreferencesPage]
 
     #TODO plugin-local preferences?
 #    preferences = List(

@@ -1,6 +1,7 @@
 from enthought.envisage.api import Plugin
 from enthought.traits.api import List
 from action_set import POptimizerActionSet
+from infobiotics.poptimizer.poptimizer_preferences import POptimizerParamsPreferencesPage
 
 class POptimizerUIPlugin(Plugin):
     id = 'infobiotics.dashboard.plugins.poptimizer.ui_plugin'
@@ -21,4 +22,4 @@ class POptimizerUIPlugin(Plugin):
         return []
 
     def _preferences_pages_default(self):
-        return []
+        return [POptimizerParamsPreferencesPage]
