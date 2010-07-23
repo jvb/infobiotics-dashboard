@@ -21,7 +21,7 @@ class PModelCheckerResultsAction(Action):
     tooltip = 'Visualise checked properties.'
     def perform(self, event=None):
         fd = FileDialog(
-            wildcard='PModelChecker results files (*.psm)', 
+            wildcard=FileDialog.create_wildcard('PModelChecker results files', ['*.psm','*.mc2']),
             title='Select a PModelChecker results file',
         )
         if fd.open() != OK:
