@@ -15,6 +15,7 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
 #    icon = ImageResource('icons/application.png') # The icon used on window title bars etc #TODO
     
     def _preferences_default(self):
+        ''' Touch preferences file to make sure it exists. '''
         from infobiotics.preferences import preferences
         filename = preferences.filename
         import os.path

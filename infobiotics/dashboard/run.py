@@ -1,11 +1,15 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-#ETSConfig.company = 'infobiotics'
 
+# preferences
+from infobiotics.api import preferences
+preferences.set('default/enthought.envisage.ui.workbench.prompt_on_exit', False)
+           
+# fixes 'no handlers could be found for logger "enthought.envisage.plugin"'
 import logging
 logger = logging.getLogger("enthought.envisage.plugin")
 logger.addHandler(logging.StreamHandler())
-
+#TODO establish good logging practice 
 
 from enthought.envisage.core_plugin import CorePlugin
 from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
@@ -34,6 +38,7 @@ from infobiotics.dashboard.plugins.poptimizer.ui_plugin import POptimizerUIPlugi
 #from infobiotics.dashboard.plugins.bnf.ui_plugin import BNFUIPlugin
 
 #from infobiotics.dashboard.plugins.example.ui_plugin import ExampleUIPlugin
+#TODO optimise plugin loading
 
 def main():
     ''' Main entry point for Infobiotics Dashboard.

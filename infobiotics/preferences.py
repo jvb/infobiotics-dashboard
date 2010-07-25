@@ -18,7 +18,9 @@ if sys.platform.startswith('win'):
     preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'pmodelchecker.exe'),
     preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'poptimizer.exe'),
 else:
-#    preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'),
+    # RelativeFile traits use Which module to find files on the PATH so we don't
+    # need to hard code paths like this: 
+    #     preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'),
     preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss'),
     preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'pmodelchecker'),
     preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'poptimizer'),
@@ -27,7 +29,7 @@ preferences.set('default/mcss.directory', os.path.expanduser('~'))
 preferences.set('default/pmodelchecker.directory', os.path.expanduser('~'))
 preferences.set('default/poptimizer.directory', os.path.expanduser('~'))
 
-## per plugin-style preferences, in the transient 'default' scope #TODO
+##TODO per plugin-style preferences, in the transient 'default' scope 
 #import infobiotics.preferences
 #from enthought.preferences.api import get_default_preferences 
 #preferences = get_default_preferences() or infobiotics.preferences.preferences
