@@ -1,10 +1,20 @@
-* PModelResults file_name filter doesn't include *.mc2
+* Welcome perspective
 
-* Adding Dashboard progress bars to view list
+* splash screen
 
 * Saving text files - rolling our own Envisage TextEditor plugin
 
+* Dashboard (core) plugin
+
+* lexing and autocompletion of P system files using QScintilla
+
+* Adding Dashboard progress bars to view list
+
 * Test simpler pexpect example, especially for PRISM.
+
+* BoundsEditor for PModelCheckerResults axes
+
+* BoundsEditor for Simulation Results time start/stop
 
 * Project management (using Single Project plugin?)
 
@@ -13,3 +23,12 @@
 * Make size of Mayavi screenshots adjustable
 
 * Make Mayavi videos on Debian using ffmpeg
+
+* code coverage
+
+* unit tests (before refactoring!)
+
+* Unified 'Open File...' action
+
+* argparse
+
