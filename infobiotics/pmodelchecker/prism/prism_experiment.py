@@ -1,8 +1,6 @@
-import os.path
-from infobiotics.pmodelchecker.api import (
-    PModelCheckerExperiment, 
-)
-from infobiotics.pmodelchecker.prism.api import PRISMParams
+#import os.path
+from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExperiment
+from infobiotics.pmodelchecker.prism.prism_params import PRISMParams
 from enthought.traits.api import Enum, Property, Str, Int, Range, Bool
 
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
@@ -41,13 +39,14 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 #    property_index = Int(0)
 #    property_progress = Range(0, 100)
 
-#    #TODO uncomment?
-#    def perform(self, thread=True):
-#        # if prism model doesn't exist quickly do a Translate to create it #FIXME this shouldn't be the case
-#        if hasattr(self, 'PRISM_model_'):
-#            if not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
-#                self.translate_model_specification()
-#        return super(PRISMExperiment, self).perform(thread) #FRAGILE must return True here or the PRISMExperimentProgressHandler is never shown
+    def perform(self, thread=True):
+        # if prism model doesn't exist quickly do a Translate to create it
+        if hasattr(self, 'PRISM_model_'):
+            import os.path
+            if not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
+                print 'Translating model specification in PRISMExperiment.perform()'
+                self.translate_model_specification()
+        return super(PRISMExperiment, self).perform(thread) #FRAGILE must return True here or the PRISMExperimentProgressHandler is never shown
 
 
 def test_model_parameters():
@@ -59,22 +58,26 @@ def test_model_parameters():
     print "os.path.exists('modelParameters.xml') =", os.path.exists('modelParameters.xml') 
     experiment = PRISMExperiment()
     print 'experiment.model_specification =', experiment.model_specification 
+    print 'experiment.PRISM_model =', experiment.PRISM_model 
     print 
     
-    file = 'model_checking_prism.params'
-    experiment.load(file)
-    print 'loaded', file
-    print "os.path.exists('modelParameters.xml') =", os.path.exists('modelParameters.xml') 
-    print 'experiment.model_specification =', experiment.model_specification 
-    print
+#    experiment.starting = True
+    
+#    file = 'model_checking_prism.params'
+#    experiment.load(file)
+#    print 'loaded', file
+#    print "os.path.exists('modelParameters.xml') =", os.path.exists('modelParameters.xml') 
+#    print 'experiment.model_specification =', experiment.model_specification 
+#    print 'experiment.PRISM_model =', experiment.PRISM_model 
+#    print
     
 #    experiment.configure()
     
 
 if __name__ == '__main__':
-#    experiment = PRISMExperiment()
+#    test_model_parameters()
+    experiment = PRISMExperiment()
 ##    experiment.load('../../../tests/workbench_examples/motifs/NAR/pmodelchecker_example/NAR_PRISM.params')
 #    experiment.load('../../../examples/NAR-pmodelchecker/model_checking_prism.params')
-#    experiment.configure()
-    test_model_parameters()
+    experiment.configure()
     

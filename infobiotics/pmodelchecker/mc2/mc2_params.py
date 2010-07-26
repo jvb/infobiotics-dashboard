@@ -11,9 +11,6 @@ class MC2Params(PModelCheckerParams):
     model_checker = 'MC2'
     task = 'Approximate' # for PModelCheckerExperimentHandler.show_results
 
-    def translate_model_specification(self): # see PModelCheckerParams._model_specification_changed
-        super(MC2Params, self).translate_model_specification(self.directory, self.model_specification)
-    
     def parameter_names(self): #TODO make Property?
         ''' Returns the subset of PModelChecker parameter names required for a 
         PModelChecker experiment with MC2. '''

@@ -11,9 +11,13 @@ class PModelCheckerParamsHandler(ParamsHandler):
     
     _model_parameters = Instance(ModelParameters)
     
-    def init(self, info): #TODO object_model_specification_changed(self, info):
-        super(PModelCheckerParamsHandler, self).init(info)
+    @on_trait_fired('model._translated')
+    def create_model_parameters(self):
         self._model_parameters = ModelParameters(directory=self.model.directory)
+    
+    def init(self, info): 
+        super(PModelCheckerParamsHandler, self).init(info)
+        self.create_model_parameters() #TODO comment out and see what happens
         # must create _model_parameters here rather than __model_parmeters_default() 
         # because DelegatesTo('_model_parameters') causes it to be created before directory.
 

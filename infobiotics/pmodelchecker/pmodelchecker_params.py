@@ -1,8 +1,9 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
-from enthought.traits.api import Enum, Str, Float, Bool, Range
+from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Event
 from infobiotics.commons.traits.api import LongGreaterThanZero
-import os.path
 from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
+import tempfile
+import os.path
 
 class PModelCheckerParams(Params):
     ''' Base class for PRISMParams and MC2Params. '''
@@ -48,37 +49,30 @@ class PModelCheckerParams(Params):
     
     mcss_params_file = ParamsRelativeFile(filters=['*.params'], desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
     
-    def _model_specification_changed(self): #TODO vvvvvv probably?!
-        ''' Translating the model specification probably generates 
-        modelParameters.xml needed for formula parameters and rewards. ''' 
-        if os.path.isfile(self.model_specification):
-            self.translate_model_specification() # must be reimplemented in subclasses
-
-    def translate_model_specification(self, directory, model_specification, PRISM_model=''):
+    _translated = Event
+    
+    @on_trait_change('model_specification, PRISM_model')
+    def translate_model_specification(self):
+#    def _model_specification_changed(self):
         ''' Performs an experiment with task='Translate' to generate the 
-        PRISM model and modelParameters.xml from LPP model specification. '''
-        self.translated = False #TODO
-        import tempfile
-        if PRISM_model == '':
-            PRISM_model_temp_file = tempfile.NamedTemporaryFile(dir=directory)
-            PRISM_model = PRISM_model_temp_file.name
+        PRISM model and modelParameters.xml from self.model_specification. '''
+        
+        if self.model_specification == '':
+            return        
+        
+        if self.PRISM_model == '':
+            PRISM_model_temp_file = tempfile.NamedTemporaryFile(suffix='.sm', dir=self.directory)
+#            self.PRISM_model = PRISM_model_temp_file.name
+            self.trait_setq(PRISM_model=PRISM_model_temp_file.name)
             
-        from prism.api import PRISMExperiment
-        translate_experiment = PRISMExperiment(directory=directory)
-        translate_experiment.trait_setq( # set quietly otherwise this triggers _model_specification_changed above
-            model_specification=model_specification, 
-            PRISM_model=PRISM_model, 
+        from infobiotics.pmodelchecker.prism.api import PRISMExperiment # avoids circular import    
+        translate = PRISMExperiment(directory=self.directory)
+        translate.trait_setq( # set quietly otherwise this triggers _model_specification_changed above
+            model_specification=self.model_specification, 
+            PRISM_model=self.PRISM_model, 
             task='Translate',
         ) 
-        params_temp_file = tempfile.NamedTemporaryFile(dir=directory) 
-        params_temp_file_name = params_temp_file.name
-        translate_experiment.save(params_temp_file_name)
-        translate_experiment.perform()
-
-        self.translated = True
-    
-#        #TODO uncomment?
-#        import os.path
-#        if not os.path.exists(os.path.abspath(os.path.join(translate_experiment.directory, translate_experiment.PRISM_model))):
-#            del temp_file
-#            raise Exception('%s was not created.' % self.PRISM_model)
+        translate.perform(thread=False)
+        print open(self.PRISM_model).read()
+        self._translated = True
+        

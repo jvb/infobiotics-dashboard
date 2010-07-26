@@ -10,9 +10,8 @@ prism_params_group = VGroup(
     VGroup(
         VGroup(
             HGroup(
-    #            Item('handler.retranslate_prism_model', label='Retranslate', show_label=False, visible_when='handler._prism_model_str_changed'),
                 Item('PRISM_model', label='PRISM model'),
-                Item('handler.edit_prism_model', label='View', show_label=False, enabled_when='object.PRISM_model != ""'),
+                Item('handler.view_prism_model', label='View', show_label=False, enabled_when='handler._prism_model_str != ""'),
             ),
         ),
         HGroup(

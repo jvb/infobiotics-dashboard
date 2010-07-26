@@ -69,9 +69,9 @@ class Params(HasTraits):
         set_default_preferences must have been called with the correct preferences object.
         '''
         from enthought.preferences.api import bind_preference #, get_default_preferences
-	#print get_default_preferences()
-	from infobiotics.preferences import preferences
-        #print preferences
+#	    preferences = get_default_preferences()
+        from infobiotics.preferences import preferences
+#        print preferences
         # must assign bound_preferences otherwise bindings will be lost when this method returns 
         self.bound_preferences = [bind_preference(self, preference, '.'.join([self._preferences_path, preference]), infobiotics.preferences.preferences) for preference in self.preferences]
         

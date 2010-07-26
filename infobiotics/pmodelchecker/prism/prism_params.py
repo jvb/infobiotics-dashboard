@@ -12,12 +12,6 @@ class PRISMParams(PModelCheckerParams):
 
     model_checker = 'PRISM'
     results_file = 'results.psm'
-
-    def translate_model_specification(self): # see PModelCheckerParams._model_specification_changed
-        super(PRISMParams, self).translate_model_specification(os.path.dirname(self.model_specification_), self.model_specification, self.PRISM_model)
-        PRISM_model = self.PRISM_model
-        self.PRISM_model = ''
-        self.PRISM_model = PRISM_model
     
     def parameter_names(self):
         ''' Returns the subset of parameter names required for a particular 

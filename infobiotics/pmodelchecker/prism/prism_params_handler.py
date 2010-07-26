@@ -4,6 +4,7 @@ from infobiotics.commons.api import read, write
 from enthought.traits.api import (
     Trait, Range, Button, Str, Bool, Instance, DelegatesTo,
 )
+from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor, Controller
 from infobiotics.pmodelchecker.api import (
     PModelCheckerParamsHandler, ModelParameters,
 )
@@ -25,32 +26,27 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     _prism_model_str = Str
 
-    def object_PRISM_model_changed(self, info):
-        file = os.path.abspath(os.path.join(info.object.directory, info.object.PRISM_model)) #TODO use shadow trait for abspath
-        if os.path.exists(file) and not os.path.isdir(file): 
+    def object__translated_fired(self, info):
+        if info.object.PRISM_model != '':
             try:
-                with read(file) as f:
+                with read(info.object.PRISM_model_) as f:
+                    print 'got here'
                     self._prism_model_str = f.read()
             except IOError, e:
                 print e
         else:
             self._prism_model_str = ''
 
-    edit_prism_model = Button
+    view_prism_model = Button
 
-    def _edit_prism_model_fired(self): #TODO only view prism model?
-        _prism_model_str = self._prism_model_str
-        if self._prism_model_str == '':
-            self.model.translate_model_specification()
-        from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor, Controller
-        # if this class isn't used (i.e. if a different view is used to edit this handler) the Perform button greys out, this fixes it! 
-        class PRISMModelHandler(Controller):
-            _prism_model_str = Str
-            view = View(
+    def _view_prism_model_fired(self):
+        print '"%s"' % self._prism_model_str
+        self.edit_traits(
+            view=View(
                 Group(
                     HGroup(
                         Item(label='PRISM model:'),
-                        Item('PRISM_model', show_label=False, style='readonly'),
+                        Item('PRISM_model_', show_label=False, style='readonly'),
                         Item(label='(Ctrl-F to find)'),#, Ctrl-D duplicates line)'), # not when "style = 'readonly'"
                     ),
                     Item('handler._prism_model_str',
@@ -63,33 +59,17 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                 buttons = ['OK'],#,'Revert','Undo'], # not when "style = 'readonly'"
                 width=640, height=480,
                 resizable = True,
-                id = 'edit_prism_model_view',
+                id = 'view_prism_model_view',
             )
-        if PRISMModelHandler(_prism_model_str=_prism_model_str, model=self.model).edit_traits(kind='livemodal').result: # if kind is not live no traits are updated! (translate has model_specification='')
-            if self._prism_model_str != _prism_model_str: # this can only ever be False when "Item('handler._prism_model_str', style = 'readonly'," above
-                try:
-                    with write(self.model.PRISM_model_) as f:
-                        f.write(self._prism_model_str)
-                except IOError, e:
-                    print e #TODO popup message instead
-#                self._prism_model_str_changed = True
-#            
-#    _prism_model_str_changed = Bool(False)
-#        
-#    retranslate_prism_model = Button(desc='whether to translate the PRISM model from the P system model again.\nThis will overwrite any changes that have been made to the PRISM model file.')
-#    
-#    def _retranslate_prism_model_fired(self):
-#        self.model.translate_model_specification()
-#        self._prism_model_str_changed = False
+        )
 
-
-    model_parameters = DelegatesTo('_model_parameters')
+    model_parameters = DelegatesTo('_model_parameters') # in PModelCheckerParamsHandler
 
     def init(self, info):
         super(PRISMParamsHandler, self).init(info)
         if info.object.model_parameters != '':
 #            self._model_parameters.model_parameters = info.object.model_parameters
-            self.model_parameters = info.object.model_parameters
+            self.model_parameters = info.object.model_parameters #FIXME this is bonkers
 
     def save(self, info):
         info.object.model_parameters = self.model_parameters
