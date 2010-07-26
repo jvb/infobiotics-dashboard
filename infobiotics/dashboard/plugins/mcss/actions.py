@@ -5,7 +5,8 @@ from enthought.pyface.action.api import Action
 from infobiotics.dashboard.mcss.api import McssDashboardExperiment
 
 class McssExperimentAction(Action):
-    name = 'mcss'
+#    name = 'mcss'
+    name = 'Simulation'
     tooltip = 'Multi-compartmental stochastic simulation of a model.'
     
     def perform(self, event=None):

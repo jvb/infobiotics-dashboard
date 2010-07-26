@@ -6,19 +6,22 @@ from editor import PModelCheckerResultsEditor
 from infobiotics.dashboard.pmodelchecker import commons
 
 class PRISMExperimentAction(Action):
-    name = 'PModelChecker: PRISM'
+#    name = 'PModelChecker: PRISM'
+    name = 'Model checking (PRISM)'
     tooltip = 'Check properties of a model using PRISM.'
     def perform(self, event=None):
         PRISMDashboardExperiment(application=self.window.workbench.application).edit()
 
 class MC2ExperimentAction(Action):
-    name = 'PModelChecker: MC2'
+#    name = 'PModelChecker: MC2'
+    name = 'Model checking (MC2)'
     tooltip = 'Check properties of a model using MC2.'
     def perform(self, event=None):
         MC2DashboardExperiment(application=self.window.workbench.application).edit()
 
 class PModelCheckerResultsAction(Action):
-    name = 'PModelChecker Results'
+#    name = 'PModelChecker Results'
+    name='Open &model checking results...'
     tooltip = 'Visualise checked properties.'
     def perform(self, event=None):
         fd = FileDialog(

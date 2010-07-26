@@ -7,7 +7,7 @@ class PModelCheckerActionSet(WorkbenchActionSet):
 
     actions = [
         Action(
-            name='Open &PModelChecker results...', 
+#            name='Open &PModelChecker results...', 
             class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PModelCheckerResultsAction',
             group='ResultsGroup',
             path='MenuBar/File', 
