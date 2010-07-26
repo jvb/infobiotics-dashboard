@@ -14,10 +14,12 @@ class ExperimentHandler(ParamsHandler):
         raise NotImplementedError('e.g. return McssExperimentProgressHandler(model=self.model)')
 
     def perform(self, info):
-        # hide window?
+        ''' Hide window and show progress instead. '''
 ##        if self.close(info, True):
 ##            self._on_close(info)
-        info.ui.control.setVisible(False) # if we do self._on_close(info) then subclasses can't catch events including 'finished'
+        # if we do self._on_close(info) then subclasses can't catch events 
+        # including 'finished'
+        info.ui.control.setVisible(False) 
         if info.object.perform(thread=True):
             self._show_progress()
 

@@ -6,6 +6,10 @@ class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler)
     def __progress_handler_default(self):
         return PRISMExperimentProgressHandler(model=self.model)
 
+    def perform(self, info):
+        super(PModelCheckerExperimentHandler, self).perform(info)
+        info.ui.control.setVisible(True) 
+
 
 if __name__ == '__main__':
     execfile('prism_experiment.py')

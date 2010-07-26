@@ -8,7 +8,8 @@ class PModelCheckerExperimentHandler(ExperimentHandler):
         ''' Triggered when experiment's expect loop finishes. '''
 #        self._progress_handler.message = 'Loading results...' #TODO does this do anything?
 #        if self.model.session.interactive: #TODO
-        self.show_results()
+        if self.model.task in ('Approximate','Verify'):
+            self.show_results()
 
     def show_results(self):
         if os.path.exists(self.model.results_file_):

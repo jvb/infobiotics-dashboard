@@ -306,8 +306,8 @@ model_parameters_group = Group(
         ),
         visible_when='len(object.ruleConstants) > 0',
     ),
-    Item(label='Rewards:'),
-    Item('rewardConstant', show_label=False),
+#    Item(label='Rewards:'),
+#    Item('rewardConstant', show_label=False),
 )
 
 

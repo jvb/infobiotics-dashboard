@@ -1,0 +1,24 @@
+remove 'Translate' from tasks
+
+
+
+if self.translated:
+    use modelParameters.xml
+    
+Don't hide window if only translated
+
+
+View model only works on 2nd time and causes model to be translated AND causes parameters to be loaded.
+
+Translate model when PRISM_model changed
+
+ModelParameters <undefined> to start with (desirable?)
+
+Model_parameters not saved
+<parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>"/>
+
+formula parameters lower, step, upper should have the same precision as floats but for now just make them ints
+
+http://www.cs.nott.ac.uk/~jvb/ETS34_API/enthought.traits.ui.editors.text_editor.html for ranges/int
+
+load model parameters each time modelParameters.xml is changed

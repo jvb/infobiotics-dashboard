@@ -23,13 +23,16 @@ from bisect import bisect
 # check if mayavi2 version < 3.3.0        
 import enthought.mayavi.__version__
 version = enthought.mayavi.__version__.__version__
-version_info = version.split('.') 
-major = int(version_info[0])
-minor = int(version_info[1])
-if major < 3 or (major == 3 and minor < 3):
-    outdated_mayavi = True
+if version == '': # see enthought/mayavi/version.py
+    outdated_mayavi = False # assume we froze it on Mac OS X or Windows with EPD>=6.2
 else:
-    outdated_mayavi = False
+    version_info = version.split('.') 
+    major = int(version_info[0])
+    minor = int(version_info[1])
+    if major < 3 or (major == 3 and minor < 3):
+        outdated_mayavi = True
+    else:
+        outdated_mayavi = False
 
 if outdated_mayavi:
     # Mayavi < 3.3
