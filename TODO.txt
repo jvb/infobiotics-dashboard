@@ -1,16 +1,20 @@
+* change CorePlugin to DashboardPlugin
+
+* change infobiotics.common to infobiotics.core
+
+* introduce notion of sessions (interactive/unattended, GUI/non-GUI)
+
 * Welcome perspective
 
 * splash screen
 
 * Saving text files - rolling our own Envisage TextEditor plugin
 
-* Dashboard (core) plugin
-
 * lexing and autocompletion of P system files using QScintilla
 
 * Adding Dashboard progress bars to view list
 
-* Test simpler pexpect example, especially for PRISM.
+* Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging
 
 * BoundsEditor for PModelCheckerResults axes
 
@@ -28,7 +32,11 @@
 
 * unit tests (before refactoring!)
 
-* Unified 'Open File...' action
+* unified 'Open File...' action
 
 * argparse
+
+* decouple writable, readable from RelativeFile
+
+* decouple directory trait of file editors?
 

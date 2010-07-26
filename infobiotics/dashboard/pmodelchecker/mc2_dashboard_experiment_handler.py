@@ -1,8 +1,7 @@
 from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
 from infobiotics.dashboard.pmodelchecker.api import MC2DashboardExperimentProgressHandler
-from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
-from infobiotics.dashboard.plugins.pmodelchecker.editor import PModelCheckerResultsEditor
 from infobiotics.dashboard.core.api import DashboardExperimentHandler
+import commons
 
 class MC2DashboardExperimentHandler(MC2ExperimentHandler, DashboardExperimentHandler):
 
@@ -11,8 +10,7 @@ class MC2DashboardExperimentHandler(MC2ExperimentHandler, DashboardExperimentHan
 
     def show_results(self):
         ''' Called by PModelCheckerExperimentHandler.object_finished_changed. '''
-        self.application.workbench.edit(
-            obj=PModelCheckerResults(file_name=self.model.results_file_),
-            kind=PModelCheckerResultsEditor,
-            use_existing=False,
+        commons.edit_pmodelchecker_results_file(
+            file=self.model.results_file_,
+#            application=self.application,
         )

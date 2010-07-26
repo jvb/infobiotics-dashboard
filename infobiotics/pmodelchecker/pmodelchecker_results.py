@@ -696,6 +696,14 @@ class PModelCheckerResults(HasTraits):
             id='view_%s' % self.file_name,
         )    
 
+    def configure(self, **args): # for consistency with Params subclasses
+#        self._interactive = True
+#        self.handler.configure_traits(**args)
+        self.configure_traits(**args)
+
+    def edit(self, **args): # for consistency with Params subclasses
+        self.edit_traits(**args)
+
 
 if __name__ == '__main__':
     main = PModelCheckerResults('../../examples/1-4_variables.psm')
@@ -704,5 +712,5 @@ if __name__ == '__main__':
 
 #    main.selected = main.properties[1] # doesn't work until PModelCheckerResults.configure_traits()
 
-    main.configure_traits()
+    main.configure()
             

@@ -7,11 +7,12 @@ class PModelCheckerExperimentHandler(ExperimentHandler):
     def object_finished_changed(self, info):
         ''' Triggered when experiment's expect loop finishes. '''
 #        self._progress_handler.message = 'Loading results...' #TODO does this do anything?
+#        if self.model.session.interactive: #TODO
         self.show_results()
 
     def show_results(self):
         if os.path.exists(self.model.results_file_):
-            PModelCheckerResults(self.model.results_file_).configure_traits()
+            PModelCheckerResults(self.model.results_file_).configure()
         else:
             print "Results file '%s' does not exist, plotting aborted." % self.model.results_file_
 

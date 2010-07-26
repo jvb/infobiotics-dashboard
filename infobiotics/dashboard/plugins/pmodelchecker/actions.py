@@ -3,6 +3,7 @@ from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperiment, MC
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 from enthought.pyface.api import FileDialog, OK
 from editor import PModelCheckerResultsEditor 
+from infobiotics.dashboard.pmodelchecker import commons
 
 class PRISMExperimentAction(Action):
     name = 'PModelChecker: PRISM'
@@ -25,14 +26,14 @@ class PModelCheckerResultsAction(Action):
             title='Select a PModelChecker results file',
         )
         if fd.open() != OK:
-            return 
-        obj = PModelCheckerResults(fd.path)
-#        obj.edit()
-        self.window.workbench.edit(
-            obj=obj,
-            kind=PModelCheckerResultsEditor,
-            use_existing=False
+            return
+        commons.edit_pmodelchecker_results_file(
+            file=fd.path,
+#            application=self.application,
+            application=self.window.application,
+#            application=self.window.workbench.application,
         )
+        
 
 #from pmodelchecker_experiment_editor import PModelCheckerExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
