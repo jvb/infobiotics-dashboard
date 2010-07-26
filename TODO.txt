@@ -40,3 +40,6 @@
 
 * decouple directory trait of file editors?
 
+* FIXMEs
+
+* TODOs
