@@ -4,3 +4,4 @@ include clean.sh make-deb.sh py2imports.py py2exe.sh PyQt4_Qsci.sh py2app.sh
 include endo.sh epydoc.sh
 include bin/infobiotics-dashboard bin/infobiotics-dashboard.py bin/infobiotics-dashboard.pyw 
 include infobiotics-dashboard.desktop infobiotics-workbench.png infobiotics-workbench.xpm
+include windows_xp_missing_dlls.txt
