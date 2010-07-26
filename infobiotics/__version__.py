@@ -1,11 +1,20 @@
 '''
-http://docs.python.org/library/sys.html
-sys.version_info
-A tuple containing the five components of the version number: major, minor, micro, releaselevel, and serial. All values except releaselevel are integers; the release level is 'alpha', 'beta', 'candidate', or 'final'. The version_info value corresponding to the Python version 2.0 is (2, 0, 0, 'final', 0). The components can also be accessed by name, so sys.version_info[0] is equivalent to sys.version_info.major and so on.
+
+__version__ is a str() of the form 'major.minor.micro' version number.
+
+#__version_info__ is a tuple of (major, minor, micro, releaselevel, serial) 
+#where releaselevel is in ('alpha', 'beta', 'candidate', 'final'). For example, 
+#the "version_info value corresponding to the Python version 2.0 is 
+#(2, 0, 0, 'final', 0) 
 '''
 
-__version_info__ = (1, 1, 0)
-__version__ = '.'.join(map(str, __version_info__))
-#TODO invert these adn write version from VERSION.txt
+import os.path
 
-version = __version__
+__version__ = open(os.path.join(os.path.split(__file__)[0], '../VERSION.txt')).read()
+
+__version_info__ = tuple([int(num) for num in __version__.split('.')[:3]]) # http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package/466694#466694
+
+
+if __name__ == '__main__':
+    print __version__
+    print __version_info__

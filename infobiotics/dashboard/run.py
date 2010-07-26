@@ -11,6 +11,7 @@ logger = logging.getLogger("enthought.envisage.plugin")
 logger.addHandler(logging.StreamHandler())
 #TODO establish good logging practice 
 
+# import plugins
 from enthought.envisage.core_plugin import CorePlugin
 from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
 
@@ -48,6 +49,7 @@ def main():
     '''
     application = InfobioticsDashboardWorkbenchApplication(
         
+        # create plugins
         plugins=[
             CorePlugin(),
             WorkbenchPlugin(),

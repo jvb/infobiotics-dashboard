@@ -1,17 +1,17 @@
-#from enthought.etsconfig.api import ETSConfig
-#ETSConfig.toolkit = 'qt4'
-#ETSConfig.company = 'infobiotics'
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
 
 from enthought.envisage.ui.workbench.api import WorkbenchApplication
 from enthought.pyface.api import AboutDialog, ImageResource, SplashScreen
 from enthought.traits.api import Event
+import infobiotics.__version__
 
 class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
     """ The Infobiotics Dashboard (Envisage Workbench) application. """
 
     # implements IApplication and WorkbenchApplication interfaces
     id = 'dashboard' # The application's globally unique Id.
-    name = 'Infobiotics Dashboard' # The name of the application (also used on window title bars etc)
+    name = 'Infobiotics Dashboard %s' % infobiotics.__version__ # The name of the application (also used on window title bars etc)
 #    icon = ImageResource('icons/application.png') # The icon used on window title bars etc #TODO
     
     def _preferences_default(self):
@@ -29,7 +29,7 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
 #            image = ImageResource('logo/infobiotics_logo-1'), #TODO
 #            image = ImageResource('logo/infobiotics_logo-2'),
             additions = [
-                'Infobiotics Dashboard',
+                self.name,
                 'by',
                 'Jonathan Blakes',
                 'with',
