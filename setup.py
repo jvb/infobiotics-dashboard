@@ -23,6 +23,16 @@ import setuptools #TODO bit suspicious about this but Jamie said it was OK.
 from distribute_setup import use_setuptools
 use_setuptools()
 
+# packages that might get bundled by modulefinder by aren't ever used
+EXCLUDES=[
+    'Tkinter', 
+    'Tkconstants', 
+    'tcl', 
+    '_tkinter', 
+    'numpy.f2py',
+    'wx',
+]
+
 import matplotlib
 import glob
 import sys
@@ -33,10 +43,10 @@ if sys.platform.startswith('darwin'):
         options=dict(
             py2app=dict(
                 argv_emulation=True, # cross-platform applications generally expect sys.argv to be used for opening files
-#                includes=INCLUDES,
                 includes=['py2imports'], # better than INCLUDES?
+                excludes=EXCLUDES,         
                 frameworks=[
-#                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib',
+#                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib', # done in py2app.sh as an arg to py2exe (which would override this...?)
                 ],
                 plist=dict(
                     # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18
@@ -137,28 +147,18 @@ manifestVersion="1.0">
     extra_options = dict(
         setup_requires=['py2exe'],
         windows=[
-#            'bin/infobiotics-dashboard.pyw', # see dict below
-            dict(
-                script="bin/infobiotics-dashboard.pyw", # .pyw are launched without opening a console window
-#               "icon_resources": [(2, "images/example.ico")], #TODO If you have a windows icon, this is where to specify it
-                other_resources=[(24,1,manifest)],
-            ),
+            'bin/infobiotics-dashboard.pyw', #TODO see dict below
+#            dict(
+#                script="bin/infobiotics-dashboard.pyw", # .pyw are launched without opening a console window
+##               "icon_resources": [(2, "images/example.ico")], #TODO If you have a windows icon, this is where to specify it
+#                other_resources=[(24,1,manifest)],
+#            ),
         ],
 #        zipfile = None,
         options=dict(
             py2exe=dict(
-###                includes=['sip','PyQt4._qt'], # http://www.py2exe.org/index.cgi/Py2exeAndPyQt
-##                includes=INCLUDES,# + ['pywintypes'], #'includes': ['py2exe_includes'], # http://markmail.org/thread/qkdwu7gbwrmop6so
-#                includes=INCLUDES,
-                includes=['py2imports'], # better than INCLUDES?
-                excludes=[
-                    'Tkinter', 
-                    'Tkconstants', 
-                    'tcl', 
-                    '_tkinter', 
-                    'numpy.f2py',
-                    'wx',
-                ],
+                includes=['py2imports'],
+                excludes=EXCLUDES,
                 dll_excludes=["mswsock.dll", "powrprof.dll", "MSVCP90.dll"], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
                 packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
                 unbuffered=True,
@@ -170,7 +170,7 @@ manifestVersion="1.0">
         data_files=[        
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("Microsoft.VC90.CRT",glob.glob("Microsoft.VC90.CRT/*")),
-#            ("",glob.glob("Microsoft.VC90.CRT/*")), #TODO remove, and in MANIFEST.in
+#            ("",glob.glob("Microsoft.VC90.CRT/*")), # removed from MANIFEST.in
             ("enthought/pyface/images", glob.glob(os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\pyface\\images\\*.png'))),
             ('enthought/mayavi/preferences', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')]),
             ('enthought/tvtk/plugins/scene', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\tvtk\\plugins\\scene\\preferences.ini')]),
@@ -240,6 +240,7 @@ setup(
     packages=find_packages(
         exclude=[
 #            '*.tests', '*.tests.*', 'tests.*', 'tests', # http://packages.python.org/distribute/setuptools.html#using-find-packages
+#            'infobiotics.tests',
         ]
     ),
 
@@ -254,4 +255,3 @@ setup(
     
     **extra_options
 )
-
