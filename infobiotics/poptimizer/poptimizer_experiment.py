@@ -151,5 +151,7 @@ class POptimizerExperiment(POptimizerParams, Experiment):
 
 
 if __name__ == '__main__':
-    POptimizerExperiment().configure()
+    experiment = POptimizerExperiment()
+    experiment.load('../../examples/NAR-poptimizer/NAR_optimization.params')
+    experiment.configure()
     

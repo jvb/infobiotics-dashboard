@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<LPPsystem name="negativeAutoregulationModel">
+  <listOfPSystems>
+    <PSystem name="NAR" file="NAR.sps"/>
+  </listOfPSystems>
+  <lattice name="onePoint" file="onePointLattice.lat"/>
+  <spatialDistribution>
+    <position pSystem="NAR">
+      <Xcoordinate value="0"/>
+      <Ycoordinate value="0"/>
+    </position>
+  </spatialDistribution>
+</LPPsystem>

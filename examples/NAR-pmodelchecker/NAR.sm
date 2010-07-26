@@ -1,0 +1,81 @@
+stochastic
+
+const double c_r_bacterium_1_0_0_NARbacterium = 0.13;
+const double c_r_bacterium_2_0_0_NARbacterium = 0.002;
+const double c_r_bacterium_3_0_0_NARbacterium = 0.04;
+const double c_r_bacterium_4_0_0_NARbacterium = 0.000578;
+const double c_r_bacterium_5_0_0_NARbacterium = 0.056;
+const double c_r_bacterium_6_0_0_NARbacterium = 0.147;
+const int lb_gene1_0_0_NARbacterium;			//Lower bound for molecule gene1_0_0_NARbacterium
+const int ub_gene1_0_0_NARbacterium;			// Upper bound for molecule gene1_0_0_NARbacterium
+const int lb_protein1_0_0_NARbacterium;			//Lower bound for molecule protein1_0_0_NARbacterium
+const int ub_protein1_0_0_NARbacterium;			// Upper bound for molecule protein1_0_0_NARbacterium
+const int lb_protein1_gene1_0_0_NARbacterium;			//Lower bound for molecule protein1_gene1_0_0_NARbacterium
+const int ub_protein1_gene1_0_0_NARbacterium;			// Upper bound for molecule protein1_gene1_0_0_NARbacterium
+const int lb_rna1_0_0_NARbacterium;			//Lower bound for molecule rna1_0_0_NARbacterium
+const int ub_rna1_0_0_NARbacterium;			// Upper bound for molecule rna1_0_0_NARbacterium
+
+
+module m_0_0_NARbacterium
+
+	gene1_0_0_NARbacterium : [ lb_gene1_0_0_NARbacterium .. ub_gene1_0_0_NARbacterium ] init 1;
+	protein1_0_0_NARbacterium : [ lb_protein1_0_0_NARbacterium .. ub_protein1_0_0_NARbacterium ] init 0;
+	protein1_gene1_0_0_NARbacterium : [ lb_protein1_gene1_0_0_NARbacterium .. ub_protein1_gene1_0_0_NARbacterium ] init 0;
+	rna1_0_0_NARbacterium : [ lb_rna1_0_0_NARbacterium .. ub_rna1_0_0_NARbacterium ] init 0;
+
+
+	// [ gene1 ]_bacterium -c_1-> [ gene1 + rna1 ]_bacterium
+	[r_bacterium_1_0_0_NARbacterium] gene1_0_0_NARbacterium > 0 & rna1_0_0_NARbacterium < ub_rna1_0_0_NARbacterium -> 
+		c_r_bacterium_1_0_0_NARbacterium * gene1_0_0_NARbacterium : 
+			(rna1_0_0_NARbacterium' = rna1_0_0_NARbacterium + 1) ;
+
+	// [ rna1 ]_bacterium -c_2-> [  ]_bacterium
+	[r_bacterium_2_0_0_NARbacterium] rna1_0_0_NARbacterium > 0 -> 
+		c_r_bacterium_2_0_0_NARbacterium * rna1_0_0_NARbacterium : 
+			(rna1_0_0_NARbacterium' = rna1_0_0_NARbacterium-1) ;
+
+	// [ rna1 ]_bacterium -c_3-> [ rna1 + protein1 ]_bacterium
+	[r_bacterium_3_0_0_NARbacterium] rna1_0_0_NARbacterium > 0 & protein1_0_0_NARbacterium < ub_protein1_0_0_NARbacterium -> 
+		c_r_bacterium_3_0_0_NARbacterium * rna1_0_0_NARbacterium : 
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium + 1) ;
+
+	// [ protein1 ]_bacterium -c_4-> [  ]_bacterium
+	[r_bacterium_4_0_0_NARbacterium] protein1_0_0_NARbacterium > 0 -> 
+		c_r_bacterium_4_0_0_NARbacterium * protein1_0_0_NARbacterium : 
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium-1) ;
+
+	// [ protein1 + gene1 ]_bacterium -c_1-> [ protein1_gene1 ]_bacterium
+	[r_bacterium_5_0_0_NARbacterium] protein1_0_0_NARbacterium > 0 & gene1_0_0_NARbacterium > 0 & protein1_gene1_0_0_NARbacterium < ub_protein1_gene1_0_0_NARbacterium -> 
+		c_r_bacterium_5_0_0_NARbacterium * protein1_0_0_NARbacterium * gene1_0_0_NARbacterium : 
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium-1) &
+			(gene1_0_0_NARbacterium' = gene1_0_0_NARbacterium-1) &
+			(protein1_gene1_0_0_NARbacterium' = protein1_gene1_0_0_NARbacterium + 1) ;
+
+	// [ protein1_gene1 ]_bacterium -c_2-> [ protein1 + gene1 ]_bacterium
+	[r_bacterium_6_0_0_NARbacterium] protein1_gene1_0_0_NARbacterium > 0 & protein1_0_0_NARbacterium < ub_protein1_0_0_NARbacterium & gene1_0_0_NARbacterium < ub_gene1_0_0_NARbacterium -> 
+		c_r_bacterium_6_0_0_NARbacterium * protein1_gene1_0_0_NARbacterium : 
+			(protein1_gene1_0_0_NARbacterium' = protein1_gene1_0_0_NARbacterium-1) &
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium + 1) &
+			(gene1_0_0_NARbacterium' = gene1_0_0_NARbacterium + 1) ;
+
+
+endmodule
+
+
+const int molecule;
+const int rule;
+rewards "molecules"
+	molecule = 0 : 1;
+	molecule = 1 : gene1_0_0_NARbacterium;
+	molecule = 2 : protein1_0_0_NARbacterium;
+	molecule = 3 : protein1_gene1_0_0_NARbacterium;
+	molecule = 4 : rna1_0_0_NARbacterium;
+endrewards
+rewards "rules"
+	[ r_bacterium_1_0_0_NARbacterium ] rule = 1: 1;
+	[ r_bacterium_2_0_0_NARbacterium ] rule = 2: 1;
+	[ r_bacterium_3_0_0_NARbacterium ] rule = 3: 1;
+	[ r_bacterium_4_0_0_NARbacterium ] rule = 4: 1;
+	[ r_bacterium_5_0_0_NARbacterium ] rule = 5: 1;
+	[ r_bacterium_6_0_0_NARbacterium ] rule = 6: 1;
+endrewards

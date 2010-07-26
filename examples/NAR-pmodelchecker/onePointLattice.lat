@@ -1,0 +1,38 @@
+# Author: Francisco J. Romero-Campero 							  #
+# Date: 14 May 2010						  						  #
+# Description: A geometric lattice containing a single point      #
+
+lattice onePoint
+
+    # Dimension of the lattice and lower/upper bounds #
+	dimension	2
+	xmin			0
+	xmax			0
+	ymin			0
+	ymax			0
+
+    # Basis vector determining the points in the lattice #
+    # in this case we have a rectangular lattice         #
+	basis
+		(a,0)
+		(0,a)
+	endBasis
+
+    # Vertices used to determine the shape of the outmost membrane #
+    # of the SP systems located on each point of the lattice       #
+	vertices
+		(a/2,a/2)
+		(-a/2,a/2)
+		(-a/2,-a/2)
+		(a/2,-a/2)
+	endVertices
+
+    # Vectors pointing at the neighbours of each point of the lattice #
+	neighbours
+		(1,0)
+		(-1,0)
+		(0,1)
+		(0,-1)
+	endNeighbours
+
+endLattice

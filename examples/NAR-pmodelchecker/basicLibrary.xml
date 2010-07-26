@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<libraryOfModules name="basicLibrary">
+  <moduleDefinition name="UnReg">
+    <setOfObjects>
+      <object name="X"/>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" scale="linear" lowerBound="0" precision="0.0001" upperBound="0.2"/>
+      <constant name="c_2" scale="linear" lowerBound="0" precision="0.001" upperBound="0.01"/>
+      <constant name="c_3" scale="linear" lowerBound="0" precision="0.01" upperBound="0.05"/>
+      <constant name="c_4" scale="linear" lowerBound="0" precision="0.000001" upperBound="0.001"/>
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l"/>
+    </setOfLabels>
+    <setOfRules>
+      <rule name="r1" constant="c_1">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="geneX"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="geneX"/>
+            <object name="rnaX"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r2" constant="c_2">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="rnaX"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs/>
+      </rule>
+      <rule name="r3" constant="c_3">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="rnaX"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="rnaX"/>
+            <object name="proteinX"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r4" constant="c_4">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs/>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+  <moduleDefinition name="PosReg">
+    <setOfObjects>
+      <object name="X"/>
+      <object name="Y"/>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" scale="linear" lowerBound="0" precision="0.001" upperBound="0.1"/>
+      <constant name="c_2" scale="linear" lowerBound="0" precision="0.001" upperBound="0.2"/>
+      <constant name="c_3" scale="linear" lowerBound="0" precision="0.001" upperBound="0.1"/>
+      <constant name="c4" scale="linear" lowerBound="0" precision="0.001" upperBound="0.01"/>
+      <constant name="c5" scale="linear" lowerBound="0" precision="0.001" upperBound="0.05"/>
+      <constant name="c6" scale="linear" lowerBound="0" precision="0.000001" upperBound="0.001"/>
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l"/>
+    </setOfLabels>
+    <setOfRules>
+      <rule name="r1" constant="c_1">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX"/>
+            <object name="geneY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX_geneY"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r2" constant="c_2">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX_geneY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX"/>
+            <object name="geneY"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r3" constant="c_3">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX_geneY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX_geneY"/>
+            <object name="rnaY"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r4" constant="c_4">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="rnaY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs/>
+      </rule>
+      <rule name="r5" constant="c_5">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="rnaY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="rnaY"/>
+            <object name="proteinY"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r6" constant="c_6">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs/>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+  <moduleDefinition name="NegReg">
+    <setOfObjects>
+      <object name="X"/>
+      <object name="Y"/>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" scale="linear" lowerBound="0" precision="0.001" upperBound="0.1"/>
+      <constant name="c_2" scale="linear" lowerBound="0" precision="0.001" upperBound="0.2"/>
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l"/>
+    </setOfLabels>
+    <setOfRules>
+      <rule name="r1" constant="c_1">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX"/>
+            <object name="geneY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX_geneY"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r2" constant="c_2">
+        <lhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX_geneY"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="l">
+            <object name="proteinX"/>
+            <object name="geneY"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+</libraryOfModules>
