@@ -6,7 +6,6 @@ class PRISMParams(PModelCheckerParams):
 
     def _handler_default(self):
         from prism_params_handler import PRISMParamsHandler
-#        from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler
         return PRISMParamsHandler(model=self)
 
     _parameter_set_name = 'prism'
@@ -23,7 +22,7 @@ class PRISMParams(PModelCheckerParams):
     def parameter_names(self):
         ''' Returns the subset of parameter names required for a particular 
         PRISMExperiment. '''
-        if self.task == 'Translate':
+        if self.task == 'Translate': #TODO remove?
             return [
                 'model_checker',
                 'model_specification',

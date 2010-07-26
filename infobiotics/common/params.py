@@ -242,7 +242,6 @@ class Params(HasTraits):
             parameter_names = self.parameter_names()
         return self.reset(parameter_names)
 
-    #TODO make this a ListStr trait and use _parameter_names_default instead of parameter_names?
     #TODO change to a Property(List)? 
     #TODO change to more descriptive name, something to do with the fact that not all parameters will be returned
     def parameter_names(self):  

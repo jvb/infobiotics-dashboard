@@ -1,24 +1,24 @@
-remove 'Translate' from tasks
+! View model only works on 2nd time and causes model to be translated AND causes parameters to be loaded.
 
+! Model_parameters not saved <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>"/>
 
+! lower, step, upper of a TemporalFormulaParameter should all have the same precision when floats (PRISM uses the precision to create a finite set of intermediates) but for now just make them Int.
 
-if self.translated:
-    use modelParameters.xml
-    
-Don't hide window if only translated
+* Create model parameters each time modelParameters.xml is changed (what about wiping existing values?)
 
+* Translate automatically for PRISM and MC2 in _model_specification_changed 
+    (thought I did but I guess this needs testing)
 
-View model only works on 2nd time and causes model to be translated AND causes parameters to be loaded.
+* Only load modelParameters.xml once after 'Translate', not for new experiment.
 
-Translate model when PRISM_model changed
+* Only enable view once PRISM_model has been translated
 
-ModelParameters <undefined> to start with (desirable?)
+* Don't hide window if only translated OR remove 'Translate' from tasks
 
-Model_parameters not saved
-<parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>"/>
+* ModelParameters <undefined> to start with (desirable?)
 
-formula parameters lower, step, upper should have the same precision as floats but for now just make them ints
 
 http://www.cs.nott.ac.uk/~jvb/ETS34_API/enthought.traits.ui.editors.text_editor.html for ranges/int
 
-load model parameters each time modelParameters.xml is changed
+
+* When POptimizerExperiment finished display final model in editor and combined plot of target time series and optimised time series 
