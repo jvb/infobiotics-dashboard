@@ -1,0 +1,43 @@
+Input target file 0 : NAR_target.txt
+
+Input initial value file 0 : initial_values_NAR.txt
+
+Input module library file: basicLibrary.plb
+
+Parameter optimization method: GA
+fitness calculation method: Random weighted sum
+
+*******non-fixed module set in the model**************
+Number of modules: 2
+
+
+Module[0]:
+Module Name in Library:  UnReg
+Index in Library:2
+Number of rules: 4
+r1:  gene1-->gene1+rna1
+kc value=4.500000  scale=linear
+
+r2:  rna1-->Q
+kc value=0.010000  scale=linear
+
+r3:  rna1-->rna1+protein1
+kc value=2.500000  scale=linear
+
+r4:  protein1-->Q
+kc value=0.050000  scale=linear
+
+
+Module[1]:
+Module Name in Library:  NegReg
+Index in Library:0
+Number of rules: 2
+r1:  protein1+gene1-->protein1_gene1
+kc value=1.500000  scale=linear
+
+r2:  protein1_gene1-->protein1+gene1
+kc value=0.500000  scale=linear
+
+
+total fitness= 208.293640  total RMSE=7.169112  
+

@@ -1,0 +1,32 @@
+initialization
+parameter optimization 1/2
+parameter optimization 2/2
+0 1824.42 PosReg(X=1,Y=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+1 1824.42 PosReg(X=1,Y=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+2 1819.79 PosReg(X=1,Y=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+3 1819.79 PosReg(X=1,Y=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+4 985.58 UnReg(X=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+5 300.33 UnReg(X=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+6 219.05 UnReg(X=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+7 219.05 UnReg(X=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+8 219.05 UnReg(X=1) NegReg(X=1,Y=1) 
+parameter optimization 1/2
+parameter optimization 2/2
+9 219.05 UnReg(X=1) NegReg(X=1,Y=1) 
+simulate final model
