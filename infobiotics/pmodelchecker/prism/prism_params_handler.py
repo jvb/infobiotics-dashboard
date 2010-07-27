@@ -2,13 +2,18 @@ from __future__ import with_statement
 import os.path
 from infobiotics.commons.api import read, write
 from enthought.traits.api import (
-    Trait, Range, Button, Str, Bool, Instance, DelegatesTo,
+    Trait, Range, Button, Str, Bool, Instance, DelegatesTo, on_trait_change
 )
 from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor, Controller
 from infobiotics.pmodelchecker.api import (
     PModelCheckerParamsHandler, ModelParameters,
 )
 from prism_params_group import prism_params_group
+
+import logging
+logger = logging.getLogger(__file__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.ERROR)
 
 class PRISMParamsHandler(PModelCheckerParamsHandler):
 
@@ -26,14 +31,16 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     _prism_model_str = Str
 
-#    @on_trait_change('model._translated') #TODO below works but if this works would it be better?
-    def object__translated_changed(self, info):
-        if info.object.PRISM_model != '':
+    @on_trait_change('model._translated')
+    def model_specificiation_translated(self):
+        self._prism_model_str = ''
+        if self.model.PRISM_model != '':
             try:
-                with read(info.object.PRISM_model_) as f:
+                with read(self.model.PRISM_model_) as f:
                     self._prism_model_str = f.read()
+#                    logger.debug(self._prism_model_str)
             except IOError, e:
-                print e
+                logger.error(e)
         else:
             self._prism_model_str = ''
 

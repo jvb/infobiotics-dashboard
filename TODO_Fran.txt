@@ -1,4 +1,4 @@
-! View model only works on 2nd time and causes model to be translated AND causes parameters to be loaded.
+* Model parameters loading
 
 ! Model_parameters not saved <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>"/>
 
@@ -22,3 +22,9 @@ http://www.cs.nott.ac.uk/~jvb/ETS34_API/enthought.traits.ui.editors.text_editor.
 
 
 * When POptimizerExperiment finished display final model in editor and combined plot of target time series and optimised time series 
+
+
+tests
+-----
+load handler._prism_model_str
+model_specification handler._prism_model_str

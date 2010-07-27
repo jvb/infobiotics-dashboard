@@ -1,3 +1,5 @@
+* statusbar for PRISM: translated model_specification to PRISM_model (modificiation time)
+
 * change CorePlugin to DashboardPlugin
 
 * change infobiotics.common to infobiotics.core

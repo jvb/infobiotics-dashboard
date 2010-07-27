@@ -11,7 +11,7 @@ prism_params_group = VGroup(
         VGroup(
             HGroup(
                 Item('PRISM_model', label='PRISM model'),
-                Item('handler.view_prism_model', label='View', show_label=False, enabled_when='handler._prism_model_str != ""'),
+                Item('handler.view_prism_model', label='View', show_label=False, enabled_when='len(handler._prism_model_str) > 0')#handler._prism_model_str != ""'),
             ),
         ),
         HGroup(
