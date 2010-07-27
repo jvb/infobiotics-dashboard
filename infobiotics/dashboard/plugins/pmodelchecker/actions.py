@@ -33,9 +33,10 @@ class PModelCheckerResultsAction(Action):
         commons.edit_pmodelchecker_results_file(
             file=fd.path,
 #            application=self.application,
-            application=self.window.application,
+#            application=self.window.application,
 #            application=self.window.workbench.application,
         )
+        # if application is not None: application.workbench.edit(
         
 
 #from pmodelchecker_experiment_editor import PModelCheckerExperimentEditor

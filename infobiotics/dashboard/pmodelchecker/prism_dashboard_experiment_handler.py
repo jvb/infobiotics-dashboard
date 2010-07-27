@@ -11,8 +11,7 @@ class PRISMDashboardExperimentHandler(PRISMExperimentHandler, DashboardExperimen
 
     def show_results(self):
         ''' Called by PModelCheckerExperimentHandler.object_finished_changed. ''' #TODO?
-        self.application.workbench.edit(
-            obj=PModelCheckerResults(file_name=self.model.results_file_),
-            kind=PModelCheckerResultsEditor,
-            use_existing=False,
+        commons.edit_pmodelchecker_results_file(
+            file=self.model.results_file_,
+#            application=self.application,
         )
