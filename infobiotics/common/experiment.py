@@ -173,7 +173,7 @@ class Experiment(Params):
         # save to temporary file in the same directory
         
         import tempfile
-        self.temp_params_file = tempfile.NamedTemporaryFile(dir=self.directory)
+        self.temp_params_file = tempfile.NamedTemporaryFile(suffix='.params', dir=self.directory)
             
         self.save(self.temp_params_file.name)
     #    import os.path

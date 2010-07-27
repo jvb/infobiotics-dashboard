@@ -148,7 +148,7 @@ class Params(HasTraits):
         self._dirty = False #TODO use dirty for prompting to save on perform
         return True
 
-    _dirty = Bool(False)
+    _dirty = Bool(False) #TODO def _changed(self): if name in self.parameter_names: self._dirty = True
 
     def save(self, file='', force=False, copy=False):
         # handle whether or not to overwrite an existing file ---

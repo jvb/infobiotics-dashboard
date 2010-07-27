@@ -26,11 +26,11 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     _prism_model_str = Str
 
-    def object__translated_fired(self, info):
+#    @on_trait_change('model._translated') #TODO below works but if this works would it be better?
+    def object__translated_changed(self, info):
         if info.object.PRISM_model != '':
             try:
                 with read(info.object.PRISM_model_) as f:
-                    print 'got here'
                     self._prism_model_str = f.read()
             except IOError, e:
                 print e
@@ -40,7 +40,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     view_prism_model = Button
 
     def _view_prism_model_fired(self):
-        print '"%s"' % self._prism_model_str
         self.edit_traits(
             view=View(
                 Group(
@@ -69,7 +68,7 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         super(PRISMParamsHandler, self).init(info)
         if info.object.model_parameters != '':
 #            self._model_parameters.model_parameters = info.object.model_parameters
-            self.model_parameters = info.object.model_parameters #FIXME this is bonkers
+            self.model_parameters = info.object.model_parameters #FIXME this seems bonkers
 
     def save(self, info):
         info.object.model_parameters = self.model_parameters

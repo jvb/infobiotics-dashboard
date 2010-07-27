@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from infobiotics.commons.api import read, write
 from infobiotics.common.api import ParamsHandler
-from enthought.traits.api import List, Unicode, Button, Instance, Int
+from enthought.traits.api import List, Unicode, Button, Instance, Int, Enum, on_trait_change
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 import os.path
@@ -9,18 +9,24 @@ import os.path
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
     
-    _model_parameters = Instance(ModelParameters)
-    
-    @on_trait_fired('model._translated')
-    def create_model_parameters(self):
-        self._model_parameters = ModelParameters(directory=self.model.directory)
-    
     def init(self, info): 
         super(PModelCheckerParamsHandler, self).init(info)
+        self.sync_trait('task', info.object, mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
         self.create_model_parameters() #TODO comment out and see what happens
         # must create _model_parameters here rather than __model_parmeters_default() 
         # because DelegatesTo('_model_parameters') causes it to be created before directory.
 
+    task = Enum(['Approximate','Build','Verify'], desc='the task to perform: Build corresponding Markov chain; Verify or Approximate the input properties')
+
+#    def _task_changed(self):
+#        self.model.task = self.task
+    
+    _model_parameters = Instance(ModelParameters)
+    
+    @on_trait_change('model._translated')
+    def create_model_parameters(self):
+        self._model_parameters = ModelParameters(directory=self.model.directory)
+    
     model_parameter_names = List(Unicode)
     
     def __model_parameters_changed(self):

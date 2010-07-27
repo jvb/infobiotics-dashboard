@@ -16,7 +16,7 @@ prism_params_group = VGroup(
         ),
         HGroup(
             Spring(),
-            Item('task', emphasized=True),
+            Item('handler.task', emphasized=True),
             Spring(),
         ),
         Group(

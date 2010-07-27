@@ -41,11 +41,10 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
     def perform(self, thread=True):
         # if prism model doesn't exist quickly do a Translate to create it
-        if hasattr(self, 'PRISM_model_'):
-            import os.path
-            if not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
-                print 'Translating model specification in PRISMExperiment.perform()'
-                self.translate_model_specification()
+        import os.path
+        if hasattr(self, 'PRISM_model_') and not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
+            print 'Translating model specification in PRISMExperiment.perform()'
+            self.translate_model_specification()
         return super(PRISMExperiment, self).perform(thread) #FRAGILE must return True here or the PRISMExperimentProgressHandler is never shown
 
 
