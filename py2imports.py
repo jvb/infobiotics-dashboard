@@ -158,6 +158,7 @@ import infobiotics.dashboard.plugins.pmodelchecker.actions
 import infobiotics.dashboard.plugins.pmodelchecker.pmodelchecker_action_set
 import infobiotics.dashboard.plugins.poptimizer.__init__
 import infobiotics.dashboard.plugins.poptimizer.action_set
+import infobiotics.dashboard.plugins.poptimizer.actions
 import infobiotics.dashboard.plugins.poptimizer.ui_plugin
 import infobiotics.dashboard.plugins.simulator_results.FromToDoubleSpinBox
 import infobiotics.dashboard.plugins.simulator_results.PlotsListWidget
