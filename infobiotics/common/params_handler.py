@@ -116,7 +116,7 @@ class ParamsHandler(HelpfulController):
     status = Str
     
     def init(self, info):
-        self.status = "Please ensure the current working directory is correct:"
+        self.status = "Please ensure the current working directory is correct."
         info.ui.title = self.title
 
     def closed(self, info, is_ok): # must return True or else window is unscloseable!

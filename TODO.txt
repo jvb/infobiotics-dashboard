@@ -1,4 +1,16 @@
-* statusbar for PRISM: translated model_specification to PRISM_model (modificiation time)
+* POptimizer - prefix Strs rather than ParamsRelativeFile - still necessary?
+
+* Saving text files - rolling our own Envisage TextEditor plugin
+
+* lexing and autocompletion of P system files using QScintilla
+
+* Welcome perspective
+
+* splash screen
+
+* argparse
+
+* unified 'Open File...' action
 
 * change CorePlugin to DashboardPlugin
 
@@ -6,17 +18,9 @@
 
 * introduce notion of sessions (interactive/unattended, GUI/non-GUI)
 
-* Welcome perspective
-
-* splash screen
-
-* Saving text files - rolling our own Envisage TextEditor plugin
-
-* lexing and autocompletion of P system files using QScintilla
+* Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging
 
 * Adding Dashboard progress bars to view list
-
-* Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging
 
 * BoundsEditor for PModelCheckerResults axes
 
@@ -33,10 +37,6 @@
 * code coverage
 
 * unit tests (before refactoring!)
-
-* unified 'Open File...' action
-
-* argparse
 
 * decouple writable, readable from RelativeFile
 

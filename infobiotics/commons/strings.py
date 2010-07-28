@@ -1,14 +1,21 @@
-import os.path
+import os
 def shorten_path(path, width=80):
     if len(path) <= width:
         return path
     else:
         split = os.path.split(path)
-        if len(split) == 1:
-            return '...%s' % path[-(width-3):] 
+        head, tail = split
+        if head == '' or head == '...':
+            almost_half = (width - 3) // 2
+            return '%s...%s' % (path[:almost_half], path[len(path)-almost_half:]) 
         else:
-            path = os.path.join('...', *split[1:])
+            path = os.path.join('...', os.sep.join(head.split(os.sep)[2:]), tail)
         return shorten_path(path, width)
+#print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 30)
+#print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 40)
+#print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 50)
+#print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 60)
+#exit()
 
 ## {{{ http://code.activestate.com/recipes/148061/ (r6)
 def wrap(text, width=80):

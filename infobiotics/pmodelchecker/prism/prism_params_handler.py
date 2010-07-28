@@ -41,6 +41,8 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 #                    logger.debug(self._prism_model_str)
             except IOError, e:
                 logger.error(e)
+            from infobiotics.commons.strings import shorten_path
+            self.status = "Translated '%s' to '%s'." % (shorten_path(self.model.model_specification, 30), shorten_path(self.model.PRISM_model, 30))
         else:
             self._prism_model_str = ''
 

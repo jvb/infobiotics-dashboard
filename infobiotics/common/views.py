@@ -58,23 +58,15 @@ file_menu = Menu(
 
 toolbar = ToolBar(load_action, save_action)
 
-from enthought.traits.ui.api import TextEditor
-status_group = HGroup( # better than status bar because long texts can be shown
-    Item('handler.status',
-        show_label=False,
-        editor=TextEditor(),
-        style='readonly',
-    ),
-    visible_when='len(handler.status) > 0'
-)
-
-#executable_group = HGroup(
-#    Item('executable', 
-##        label='Program',
-#        visible_when='"Dashboard" not in handler.__class__.__name__', 
+#from enthought.traits.ui.api import TextEditor
+#status_group = HGroup( # better than status bar because long texts can be shown
+#    Item('handler.status',
+#        show_label=False,
+#        editor=TextEditor(),
+#        style='readonly',
 #    ),
-#    visible_when='object.__class__.__name__ not in ("McssParams", "POptimizerParams")', # only needed for PRISMParams (and MC2Params? TODO)
-#) 
+#    visible_when='len(handler.status) > 0'
+#)
 
 directory_group = HGroup(
     Item('directory', 
@@ -87,24 +79,25 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     buttons = shared_actions + params_actions
     
     resizable = True
+    
+    scrollable = True
 
     toolbar = toolbar
     
-#    statusbar = [ # removed in favour of status_group 
-#        StatusItem(
-#            name='handler.status',
-#            width=1.0
-#        ),
-#    ]
+    statusbar = [ 
+        StatusItem(
+            name='handler.status',
+            width=1.0
+        ),
+    ]
 
     def set_content(self, *values):
         values = [
             VGroup(
-                status_group,
+#                status_group,
                 directory_group,
 #                '_',
                 values,
-#                executable_group, #TODO could move executable_group to ExperimentView but for PModelChecker running itself to create modelParameters.xml and PRISM_model
                 show_border=True,
             ),
         ]
