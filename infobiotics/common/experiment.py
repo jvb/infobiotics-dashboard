@@ -158,7 +158,7 @@ class Experiment(Params):
         self.finished = True
 
     def _finished_fired(self):
-        del self.temp_params_file #TODO test this
+        del self.temp_params_file
         
 #    def _finished_without_output_fired(self):
 #        print '_finished_without_output_fired', self.child.before
@@ -166,20 +166,12 @@ class Experiment(Params):
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
         
-#        print 'got here also' #TODO remove this and others
-        
         #TODO check if dirty/saved first
 
         # save to temporary file in the same directory
-        
         import tempfile
-        self.temp_params_file = tempfile.NamedTemporaryFile(suffix='.params', dir=self.directory)
-            
+        self.temp_params_file = tempfile.NamedTemporaryFile(prefix=self._params_file.split('.params')[0], suffix='.params', dir=self.directory)
         self.save(self.temp_params_file.name)
-    #    import os.path
-    #    if not os.path.exists(os.path.abspath(os.path.join(translate_experiment.directory, translate_experiment.PRISM_model))):
-    #        del temp_file
-    #        raise Exception('%s was not created.' % self.PRISM_model)        
         
         if thread:
             Thread(target=self._spawn).start()
