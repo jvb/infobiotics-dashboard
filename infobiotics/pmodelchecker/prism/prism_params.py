@@ -12,6 +12,7 @@ class PRISMParams(PModelCheckerParams):
 
     model_checker = 'PRISM'
     results_file = 'results.psm'
+    temporal_formulas = 'temporal_formulas.csl'
     
     def parameter_names(self):
         ''' Returns the subset of parameter names required for a particular 

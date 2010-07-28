@@ -126,7 +126,7 @@ temporal_formula_view = View(
 )
 
 
-from enthought.traits.api import Int, Str, Button, List, Enum, Unicode
+from enthought.traits.api import Int, Str, Button, List, Enum, Unicode, Any, Property
 
 class TemporalFormula(HasTraits):
 
@@ -134,7 +134,10 @@ class TemporalFormula(HasTraits):
     
     line = Int
     column = Int
-    model_parameter_names = List(Unicode)
+    params_handler = Any#Instance(PModelCheckerParamsHandler)
+    model_parameter_names = Property(List(Unicode), depends_on='params_handler.model_parameter_names')
+    def _get_model_parameter_names(self):
+        return self.params_handler.model_parameter_names 
     model_parameter_name_to_insert = Enum(values='model_parameter_names')
     insert = Button
     

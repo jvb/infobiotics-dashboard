@@ -10,6 +10,7 @@ class MC2Params(PModelCheckerParams):
     
     model_checker = 'MC2'
     task = 'Approximate' # for PModelCheckerExperimentHandler.show_results
+    temporal_formulas = 'temporal_formulas.pltl'
 
     def parameter_names(self): #TODO make Property?
         ''' Returns the subset of PModelChecker parameter names required for a 
@@ -35,6 +36,5 @@ class MC2Params(PModelCheckerParams):
 
 if __name__ == '__main__':
     parameters = MC2Params()
-    parameters.load('test/Const/Const_MC2.params')
     parameters.configure()
     

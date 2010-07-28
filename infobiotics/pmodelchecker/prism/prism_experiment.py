@@ -48,35 +48,8 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
         return super(PRISMExperiment, self).perform(thread) #FRAGILE must return True here or the PRISMExperimentProgressHandler is never shown
 
 
-def test_model_parameters():
-    import os
-    os.chdir('../../../examples/NAR-pmodelchecker/')
-    print 'cwd =', os.getcwd()
-    print
-    
-    print "os.path.exists('modelParameters.xml') =", os.path.exists('modelParameters.xml') 
-    experiment = PRISMExperiment()
-    print 'experiment.model_specification =', experiment.model_specification 
-    print 'experiment.PRISM_model =', experiment.PRISM_model 
-    print 
-    
-#    experiment.starting = True
-    
-#    file = 'model_checking_prism.params'
-#    experiment.load(file)
-#    print 'loaded', file
-#    print "os.path.exists('modelParameters.xml') =", os.path.exists('modelParameters.xml') 
-#    print 'experiment.model_specification =', experiment.model_specification 
-#    print 'experiment.PRISM_model =', experiment.PRISM_model 
-#    print
-    
-#    experiment.configure()
-    
-
 if __name__ == '__main__':
-#    test_model_parameters()
     experiment = PRISMExperiment()
-##    experiment.load('../../../tests/workbench_examples/motifs/NAR/pmodelchecker_example/NAR_PRISM.params')
 #    experiment.load('../../../examples/NAR-pmodelchecker/model_checking_prism.params')
     experiment.configure()
     

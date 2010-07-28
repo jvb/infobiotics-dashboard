@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from enthought.traits.api import (
     HasTraits, Str, Float, Int, Undefined, Range, Enum, Property, List, Tuple, 
-    Instance, Dict
+    Instance, Dict, cached_property
 ) 
 from enthought.traits.ui.api import (
     View, Item, HGroup, VGroup, TableEditor, TextEditor, Group, VSplit,
@@ -199,16 +199,17 @@ class ModelParameters(HasTraits):
                 self.rewardConstant_descriptions = [rewardConstant.description.replace('A', 'a') for rewardConstant in handler.rewardConstants]
                 self.rewardConstant = self.rewardConstant_descriptions[0]
         except IOError, e:
-#            print e, 'ModelParameters._directory_changed()'
-            pass
+            print e, 'ModelParameters._directory_changed()'
     
     all_model_parameters = Property(depends_on='ruleConstants, moleculeConstants') 
+    @cached_property
     def _get_all_model_parameters(self):
         return self.ruleConstants + self.moleculeConstants
     
     model_parameters = Property(depends_on='all_model_parameters', desc='parameter=10, another_parameter=low:high:step')
-
+    @cached_property
     def _get_model_parameters(self):
+        print '.',
         return ','.join([model_parameter.value_string for model_parameter in self.all_model_parameters])
     
     def _set_model_parameters(self, model_parameters):
@@ -312,8 +313,5 @@ model_parameters_group = Group(
 
 
 if __name__ == '__main__':
-    from prism.api import PRISMExperiment
-    experiment = PRISMExperiment()
-#    experiment.load('prism/test/Const/Const_PRISM.params')
-#    print experiment.__repr__()
-#    experiment.configure()
+    execfile('pmodelchecker_params.py')
+    

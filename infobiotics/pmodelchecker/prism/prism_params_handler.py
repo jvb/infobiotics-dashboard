@@ -33,6 +33,8 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     @on_trait_change('model._translated')
     def model_specificiation_translated(self):
+        if not self.model._translated:
+            return
         self._prism_model_str = ''
         if self.model.PRISM_model != '':
             try:
@@ -47,7 +49,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
             self._prism_model_str = ''
 
     view_prism_model = Button
-
     def _view_prism_model_fired(self):
         self.edit_traits(
             view=View(
@@ -71,19 +72,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
             )
         )
 
-    model_parameters = DelegatesTo('_model_parameters') # in PModelCheckerParamsHandler
-
-    def init(self, info):
-        super(PRISMParamsHandler, self).init(info)
-        if info.object.model_parameters != '':
-#            self._model_parameters.model_parameters = info.object.model_parameters
-            self.model_parameters = info.object.model_parameters #FIXME this seems bonkers
-
-    def save(self, info):
-        info.object.model_parameters = self.model_parameters
-        super(PRISMParamsHandler, self).save(info)
-
-
     confidence = Trait(
         '90% (0.1)',
         {
@@ -104,6 +92,45 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         else:
             self.sync_trait('_custom_confidence', self.model, alias='confidence', mutual=False, remove=True)
             self.sync_trait('confidence_', self.model, alias='confidence', mutual=False)
+
+
+
+
+
+
+
+
+
+
+    model_parameters = DelegatesTo('model_parameters_object') # i.e. self.model_parameters_object.model_parameters (model_parameters_object is defined in PModelCheckerHandler)
+
+    
+    @on_trait_change('model_parameters_object.ruleConstants.value_string, model_parameters_object.moleculeConstants.value_string')
+    def set_model_parameters_after_change(self):
+        print self.model.model_parameters
+        print self.model_parameters_object.model_parameters
+        self.model.model_parameters = self.model_parameters_object.model_parameters
+        print self.model.model_parameters 
+
+
+
+#    def init(self, info): #TODO
+#        super(PRISMParamsHandler, self).init(info)
+#        if info.object.model_parameters != '':
+#            self.model_parameters = info.object.model_parameters
+
+#    def load(self, info): #TODO?
+##        super(PModelCheckerParamsHandler, self).load(info)
+#        super(PRISMParamsHandler, self).load(info)
+#        if self.model_parameters_object is not None:
+#            self.model_parameters_object.model_parameters = self.model.model_parameters
+
+#    def save(self, info): #TODO
+#        info.object.model_parameters = self.model_parameters
+#        super(PRISMParamsHandler, self).save(info)
+
+
+
 
 
 if __name__ == '__main__':

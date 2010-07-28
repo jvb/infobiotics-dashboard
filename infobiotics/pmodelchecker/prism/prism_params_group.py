@@ -21,7 +21,7 @@ prism_params_group = VGroup(
         ),
         Group(
             VGroup(
-                Item('handler._model_parameters', 
+                Item('handler.model_parameters_object', 
                     style='custom',
                     show_label=False, 
                     editor=InstanceEditor(

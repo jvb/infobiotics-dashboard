@@ -8,30 +8,51 @@ import os.path
 
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
+
+    task = Enum(['Approximate','Build','Verify'], desc="the task to perform:\n'Approximate' or 'Verify' the input properties\n'Build' the corresponding Markov chain")
     
     def init(self, info): 
         super(PModelCheckerParamsHandler, self).init(info)
-        self.sync_trait('task', info.object, mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
-        self.create_model_parameters() #TODO comment out and see what happens
-        # must create _model_parameters here rather than __model_parmeters_default() 
-        # because DelegatesTo('_model_parameters') causes it to be created before directory.
+        self.sync_trait('task', info.object, mutual=False) # see POptimizerParamsHandler.init()
+#        self.create_model_parameters_object()
+        # must create model_parameters_object here rather than __model_parmeters_default() 
+        # because DelegatesTo('model_parameters_object') causes it to be created before directory.
 
-    task = Enum(['Approximate','Build','Verify'], desc='the task to perform: Build corresponding Markov chain; Verify or Approximate the input properties')
+    model_parameter_names = List(Unicode) # used in TemporalFormula for model_parameter_name_to_insert Enum
+    
+    model_parameters_object = Instance(ModelParameters)
 
-#    def _task_changed(self):
-#        self.model.task = self.task
-    
-    _model_parameters = Instance(ModelParameters)
-    
     @on_trait_change('model._translated')
-    def create_model_parameters(self):
-        self._model_parameters = ModelParameters(directory=self.model.directory)
-    
-    model_parameter_names = List(Unicode)
-    
-    def __model_parameters_changed(self):
-        self.model_parameter_names = [modelVariable.name for modelVariable in self._model_parameters.modelVariables]
-    
+    def create_model_parameters_object(self):
+        if self.model._translated:
+#            print 'self.model.model_parameters before create', self.model.model_parameters
+#            if self.model_parameters_object is not None:
+#                print 'self.model_parameters_object.model_parameters before create', self.model_parameters_object.model_parameters
+            self.model_parameters_object = ModelParameters(directory=self.model.directory) if self.model._translated else None
+#            print 'self.model.model_parameters after create', self.model.model_parameters
+#            if self.model_parameters_object is not None:
+#                print 'self.model_parameters_object.model_parameters after create', self.model_parameters_object.model_parameters
+            
+            self.model_parameter_names = [modelVariable.name for modelVariable in self.model_parameters_object.modelVariables] if self.model_parameters_object is not None else [] 
+
+            if self.model.PRISM_model != '' and len(self.model.model_parameters) > 1:
+                print self.model.model_parameters
+    #            try:
+#                print 'self.model.model_parameters before restore', self.model.model_parameters
+#                if self.model_parameters_object is not None:
+#                    print 'self.model_parameters_object.model_parameters before restore', self.model_parameters_object.model_parameters
+                
+                self.model_parameters_object.model_parameters = self.model.model_parameters # sets model parameter values after loading
+
+#                print 'self.model.model_parameters after restore', self.model.model_parameters
+#                if self.model_parameters_object is not None:
+#                    print 'self.model_parameters_object.model_parameters after restore', self.model_parameters_object.model_parameters
+#            print
+
+
+
+
+
     temporal_formulas = List(TemporalFormula)
     
     def object_temporal_formulas_changed(self, info):
@@ -73,7 +94,7 @@ class PModelCheckerParamsHandler(ParamsHandler):
             temporal_formula = TemporalFormula(
                 formula=formula, 
                 parameters=parameters, 
-                model_parameter_names=self.model_parameter_names
+                params_handler=self,
             )
             self.temporal_formulas.append(temporal_formula)
 
@@ -96,7 +117,7 @@ class PModelCheckerParamsHandler(ParamsHandler):
         return result 
     
     def _add_temporal_formula_fired(self):
-        temporal_formula = TemporalFormula(model_parameter_names=self.model_parameter_names, column=23)
+        temporal_formula = TemporalFormula(params_handler=self, column=23)
         if self.__edit_temporal_formula(temporal_formula):
             self.temporal_formulas.append(temporal_formula)
             self.selected_temporal_formula = temporal_formula
@@ -114,7 +135,7 @@ class PModelCheckerParamsHandler(ParamsHandler):
 
     def save(self, info):
         super(PModelCheckerParamsHandler, self).save(info)
-        self.write_temporal_formulas_file()
+        self.write_temporal_formulas_file() #FIXME
 
     def write_temporal_formulas_file(self):
         with write(self.model.temporal_formulas_) as f:
@@ -137,5 +158,5 @@ class PModelCheckerParamsHandler(ParamsHandler):
 
 
 if __name__ == '__main__':
-    execfile('prism_params.py')
+    execfile('pmodelchecker_params.py')
     
