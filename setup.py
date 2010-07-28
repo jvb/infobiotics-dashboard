@@ -248,7 +248,6 @@ if __name__ == '__main__':
 
 """ % VERSION
 open('infobiotics/__version__.py', 'w').write(__version__py)
-print 'got here'
 
 from setuptools import setup, find_packages
 setup(
