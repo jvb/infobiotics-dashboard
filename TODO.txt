@@ -1,8 +1,6 @@
-has anyone tested the latest linux release as i'm not getting any graphs
-when opening the plot window after performing a simulation. is it just my
-installation?
+* SimulatorResults not plotting modules but is plotting NAR?
 
-* POptimizer - prefix Strs rather than ParamsRelativeFile - still necessary?
+* POptimizer: update prefix params in example
 
 * Saving text files - rolling our own Envisage TextEditor plugin
 
