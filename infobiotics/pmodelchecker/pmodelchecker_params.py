@@ -23,7 +23,6 @@ class PModelCheckerParams(Params):
     molecular_species = Str('all', desc="a string stating the name of the molecular species under study.\nThe format of the string is the following: 'moleculeName_1,moleculeName_2, ...,moleculeName_n'")
 
     temporal_formulas = ParamsRelativeFile('temporal_formulas', writable=True, desc='the name of the file containing the temporal logic formulas formalising the properties to check')
-    formula_parameters = Str(desc="a string stating the values of the parameters in the formulas as follows:\n'param=lb:ub:s,param=lb:ub:s, ...' where lb is the lower bound, up is the upper bound and s is the step.\nParameters with a single value can also be specified as follows:\n'param=value,param=value, ...'")
 
     number_samples = LongGreaterThanZero(desc='the number of simulations to generate')
     precision = Float(1.0, desc='the precision to achieve with respect to a real value')

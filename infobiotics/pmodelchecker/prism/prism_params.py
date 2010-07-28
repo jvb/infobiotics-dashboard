@@ -17,7 +17,7 @@ class PRISMParams(PModelCheckerParams):
     def parameter_names(self):
         ''' Returns the subset of parameter names required for a particular 
         PRISMExperiment. '''
-        if self.task == 'Translate': #TODO remove?
+        if self.task == 'Translate':
             return [
                 'model_checker',
                 'model_specification',
@@ -31,7 +31,6 @@ class PRISMParams(PModelCheckerParams):
                 'PRISM_model',
                 'model_parameters',
                 'temporal_formulas',
-                'formula_parameters',
                 'task',
                 'confidence',
                 'precision',
