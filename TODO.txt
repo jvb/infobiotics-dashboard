@@ -1,3 +1,7 @@
+has anyone tested the latest linux release as i'm not getting any graphs
+when opening the plot window after performing a simulation. is it just my
+installation?
+
 * POptimizer - prefix Strs rather than ParamsRelativeFile - still necessary?
 
 * Saving text files - rolling our own Envisage TextEditor plugin
