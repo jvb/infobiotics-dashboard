@@ -662,8 +662,6 @@ class PModelCheckerResults(HasTraits):
         return View(
             VGroup(
                 Item('file_name', label='Results file'),
-#                Label("No properties found in '%s'" % self.file_name, defined_when='len(object.properties) == 0'), #TODO replace with message in text box
-#                Label('This functionality is disabled because the current version of Mayavi2 is out of date.\nPlease ensure Mayavi2>=3.3.2 is installed to use this feature.\nIf you are using Ubuntu this dependency is due to be fulfilled in Ubuntu 10.10 Maverick Meerkat.', defined_when='object.outdated_mayavi'), #TODO
                 Item('selected',
                     label='Property',
                     editor=InstanceEditor(
