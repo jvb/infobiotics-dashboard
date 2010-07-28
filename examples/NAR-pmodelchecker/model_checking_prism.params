@@ -7,7 +7,7 @@
     <parameter name="model_specification" value="negativeAutoregulationModel.lpp"/>
     <parameter name="PRISM_model" value="NAR.sm"/>
     <parameter name="temporal_formulas" value="property_1.csl"/>
-    <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=0,ub_gene1_0_0_NARbacterium=1,lb_protein1_gene1_0_0_NARbacterium=0,ub_protein1_gene1_0_0_NARbacterium=1,lb_protein1_0_0_NARbacterium=0,ub_protein1_0_0_NARbacterium=10000,lb_rna1_0_0_NARbacterium=0,ub_rna1_0_0_NARbacterium=1000,rule=0,molecule=0"/>   
+    <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=0,ub_gene1_0_0_NARbacterium=1,lb_protein1_gene1_0_0_NARbacterium=0,ub_protein1_gene1_0_0_NARbacterium=1,lb_protein1_0_0_NARbacterium=0,ub_protein1_0_0_NARbacterium=10000,lb_rna1_0_0_NARbacterium=0,ub_rna1_0_0_NARbacterium=1000"/>   
 	 <parameter name="task" value="Approximate"/>
     <parameter name="number_samples" value="1000" />
     <parameter name="confidence" value="0.05" />

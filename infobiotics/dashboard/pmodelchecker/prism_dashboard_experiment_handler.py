@@ -3,6 +3,7 @@ from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperimentProg
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 from infobiotics.dashboard.plugins.pmodelchecker.editor import PModelCheckerResultsEditor
 from infobiotics.dashboard.core.api import DashboardExperimentHandler
+import commons
 
 class PRISMDashboardExperimentHandler(PRISMExperimentHandler, DashboardExperimentHandler):
 
