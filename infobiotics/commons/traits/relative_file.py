@@ -174,6 +174,9 @@ class RelativeFile(BaseStr):
 
     def validate(self, object, name, value):
         ''' Calls _validate so that we can reuse _validate for Directory traits. ''' 
+
+#        if value == '': self.error(object, name, value) #TODO probably needs an empty_ok and empty_ok_name parameters
+        
         return self._validate(object, name, value)
 
     def _validate(self, object, name, value, function=os.path.isfile):
@@ -187,8 +190,7 @@ class RelativeFile(BaseStr):
         return 'file'
         """
         value = super(RelativeFile, self).validate(object, name, value) # validate value using BaseStr's validator 
-#        print 'value =', value
-        
+
         self._set_directory_from_directory_name(object)
         
         directory = self.directory
