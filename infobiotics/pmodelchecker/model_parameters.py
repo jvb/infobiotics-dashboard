@@ -228,7 +228,7 @@ class ModelParameters(HasTraits):
     def _set_model_parameters(self, model_parameters):
         model_parameters = model_parameters.split(',')
         for model_parameter in model_parameters:
-#            if len(model_parameter) == 0: continue
+            if len(model_parameter) == 0: continue # guard
             name, value = model_parameter.split('=')
             if ':' in value:
                 range_or_value = 'range'
@@ -250,10 +250,9 @@ class ModelParameters(HasTraits):
                         model_parameter.upper = type(upper)
                     model_parameter.range_or_value = range_or_value
                     break
-#        return model_parameters #TODO does this do anything?
 
-    def __len__(self): #FIXME why?
-        return len(self.ruleConstants) + len(self.moleculeConstants)
+    def __len__(self): #TODO does this ever get called?
+        return len(self.ruleConstants) + len(self.moleculeConstants) 
 
 #    def traits_view(self):
 #        return View(
