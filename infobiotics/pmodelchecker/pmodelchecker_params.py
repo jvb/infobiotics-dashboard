@@ -50,10 +50,12 @@ class PModelCheckerParams(Params):
     
     mcss_params_file = ParamsRelativeFile(filters=['*.params'], desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
     
+    _model_specification_changed = Bool(False)
     _translated = Bool(False)
     
+    
     @on_trait_change('model_specification, PRISM_model')
-    def translate_model_specification(self):
+    def translate_model_specification(self, object, name, old, new):
 #    def _model_specification_changed(self):
         ''' Performs an experiment with task='Translate' to generate the 
         PRISM model and modelParameters.xml from self.model_specification. '''
@@ -88,6 +90,12 @@ class PModelCheckerParams(Params):
         ) 
         translate.perform(thread=False)
         
+        # needed by PModelCheckerParamsHandler.model_specification_changed
+        if name == 'model_specification':
+            self._model_specification_changed = True
+        else:
+            self._model_specification_changed = False
+
         self._translated = True
 
 

@@ -95,15 +95,26 @@ class RuleConstant(ModelVariable):
     def __str__(self): #TODO
         return super(HasTraits, self).__str__()
 
+
 class MoleculeConstant(RuleConstant):
     ''' As RuleConstant but only allows integer values. '''
 
     kind = 'molecule constant'
     
-    value = Int(Undefined)
-    lower = Int(Undefined)
-    step  = Int(Undefined)
-    upper = Int(Undefined)
+    lower = step = upper = value = Int
+    
+    def _value_changed(self):
+        self.lower = self.step = self.upper = self.value
+
+    def _get_value_string(self):
+        return '%s=%s' % (self.name, self.value)
+
+    def evaluate(self, value):
+        try:
+            return int(eval(value))
+        except:
+            raise TraitError()
+    
     
 class RewardConstant(HasTraits):
     name = Str
@@ -201,20 +212,23 @@ class ModelParameters(HasTraits):
         except IOError, e:
             print e, 'ModelParameters._directory_changed()'
     
-    all_model_parameters = Property(depends_on='ruleConstants, moleculeConstants') 
-    @cached_property
+    all_model_parameters = Property(List(RuleConstant), depends_on='ruleConstants, moleculeConstants') 
+#    @cached_property
     def _get_all_model_parameters(self):
         return self.ruleConstants + self.moleculeConstants
     
-    model_parameters = Property(depends_on='all_model_parameters', desc='parameter=10, another_parameter=low:high:step')
-    @cached_property
+    model_parameters = Property(Str, depends_on='all_model_parameters.value_string', desc='parameter=10, another_parameter=low:high:step')
+#    @cached_property
     def _get_model_parameters(self):
-        print '.',
-        return ','.join([model_parameter.value_string for model_parameter in self.all_model_parameters])
+        model_parameters = ','.join([model_parameter.value_string for model_parameter in self.all_model_parameters]) 
+#        print model_parameters
+#        print self.all_model_parameters[0]
+        return model_parameters 
     
     def _set_model_parameters(self, model_parameters):
         model_parameters = model_parameters.split(',')
-        for model_parameter in model_parameters: 
+        for model_parameter in model_parameters:
+#            if len(model_parameter) == 0: continue
             name, value = model_parameter.split('=')
             if ':' in value:
                 range_or_value = 'range'
@@ -236,6 +250,7 @@ class ModelParameters(HasTraits):
                         model_parameter.upper = type(upper)
                     model_parameter.range_or_value = range_or_value
                     break
+#        return model_parameters #TODO does this do anything?
 
     def __len__(self): #FIXME why?
         return len(self.ruleConstants) + len(self.moleculeConstants)
@@ -248,13 +263,12 @@ class ModelParameters(HasTraits):
 #            resizable=True,
 #        )
     
-    dclick = Tuple(Instance(RuleConstant), Instance(ObjectColumn))
     
+    dclick = Tuple(Instance(RuleConstant), Instance(ObjectColumn))
     def _dclick_changed(self, info):
         self.dclick[0].edit_traits(kind='livemodal')
-
-    
 ruleConstants_table_editor = TableEditor(
+    dclick='dclick',
     columns=[
         ObjectColumn(name='name',
             width=0.4,
@@ -269,10 +283,15 @@ ruleConstants_table_editor = TableEditor(
         ),
     ],
     sortable=True,
-    dclick='dclick',
     editable=False,
 ) 
 
+#def evaluate_int(value):
+#    try:
+#        return int(eval(value))
+#    except:
+#        raise TraitError()
+    
 moleculeConstants_table_editor = TableEditor(
     columns=[
         ObjectColumn(name='name',
@@ -280,14 +299,18 @@ moleculeConstants_table_editor = TableEditor(
             editable=False,
         ),
         ObjectColumn(name='value',
-            width=0.1,
+            width=0.2,
+            editor=TextEditor(
+#                evaluate=int,#evaluate_int,
+                evaluate_name='evaluate', # see MoleculeConstant.evaluate(value)
+            )
         ),
         ObjectColumn(name='description',
-            width=0.5,
+            width=0.4,
             editable=False,
         ),
     ],
-    sortable=True,
+    sortable=False,
 ) 
 
 model_parameters_group = Group(

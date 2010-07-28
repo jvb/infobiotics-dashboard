@@ -32,7 +32,7 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     _prism_model_str = Str
 
     @on_trait_change('model._translated')
-    def model_specificiation_translated(self):
+    def PRISM_model_changed(self):
         if not self.model._translated:
             return
         self._prism_model_str = ''
@@ -94,43 +94,15 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
             self.sync_trait('confidence_', self.model, alias='confidence', mutual=False)
 
 
-
-
-
-
-
-
-
-
     model_parameters = DelegatesTo('model_parameters_object') # i.e. self.model_parameters_object.model_parameters (model_parameters_object is defined in PModelCheckerHandler)
+    @on_trait_change('model_parameters')
+    def forward_changes_in_model_parameters_to_model(self):
+        self.model.model_parameters = self.model_parameters
 
-    
-    @on_trait_change('model_parameters_object.ruleConstants.value_string, model_parameters_object.moleculeConstants.value_string')
-    def set_model_parameters_after_change(self):
-        print self.model.model_parameters
-        print self.model_parameters_object.model_parameters
-        self.model.model_parameters = self.model_parameters_object.model_parameters
-        print self.model.model_parameters 
-
-
-
-#    def init(self, info): #TODO
-#        super(PRISMParamsHandler, self).init(info)
-#        if info.object.model_parameters != '':
-#            self.model_parameters = info.object.model_parameters
-
-#    def load(self, info): #TODO?
-##        super(PModelCheckerParamsHandler, self).load(info)
-#        super(PRISMParamsHandler, self).load(info)
-#        if self.model_parameters_object is not None:
-#            self.model_parameters_object.model_parameters = self.model.model_parameters
-
-#    def save(self, info): #TODO
-#        info.object.model_parameters = self.model_parameters
-#        super(PRISMParamsHandler, self).save(info)
-
-
-
+    def load(self, info):
+        super(PRISMParamsHandler, self).load(info)
+        if self.model_parameters_object is not None:
+            self.model_parameters_object.model_parameters = self.model.model_parameters # the reverse of forward_changes_in_model_parameters_to_model
 
 
 if __name__ == '__main__':

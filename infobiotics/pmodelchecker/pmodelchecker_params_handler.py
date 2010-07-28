@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from infobiotics.commons.api import read, write
 from infobiotics.common.api import ParamsHandler
-from enthought.traits.api import List, Unicode, Button, Instance, Int, Enum, on_trait_change
+from enthought.traits.api import List, Unicode, Button, Instance, Int, Enum, on_trait_change, Bool
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 import os.path
@@ -18,39 +18,15 @@ class PModelCheckerParamsHandler(ParamsHandler):
         # must create model_parameters_object here rather than __model_parmeters_default() 
         # because DelegatesTo('model_parameters_object') causes it to be created before directory.
 
-    model_parameter_names = List(Unicode) # used in TemporalFormula for model_parameter_name_to_insert Enum
-    
+
     model_parameters_object = Instance(ModelParameters)
+    model_parameter_names = List(Unicode) # used in TemporalFormula for model_parameter_name_to_insert Enum
 
     @on_trait_change('model._translated')
-    def create_model_parameters_object(self):
-        if self.model._translated:
-#            print 'self.model.model_parameters before create', self.model.model_parameters
-#            if self.model_parameters_object is not None:
-#                print 'self.model_parameters_object.model_parameters before create', self.model_parameters_object.model_parameters
-            self.model_parameters_object = ModelParameters(directory=self.model.directory) if self.model._translated else None
-#            print 'self.model.model_parameters after create', self.model.model_parameters
-#            if self.model_parameters_object is not None:
-#                print 'self.model_parameters_object.model_parameters after create', self.model_parameters_object.model_parameters
-            
-            self.model_parameter_names = [modelVariable.name for modelVariable in self.model_parameters_object.modelVariables] if self.model_parameters_object is not None else [] 
-
-            if self.model.PRISM_model != '' and len(self.model.model_parameters) > 1:
-                print self.model.model_parameters
-    #            try:
-#                print 'self.model.model_parameters before restore', self.model.model_parameters
-#                if self.model_parameters_object is not None:
-#                    print 'self.model_parameters_object.model_parameters before restore', self.model_parameters_object.model_parameters
-                
-                self.model_parameters_object.model_parameters = self.model.model_parameters # sets model parameter values after loading
-
-#                print 'self.model.model_parameters after restore', self.model.model_parameters
-#                if self.model_parameters_object is not None:
-#                    print 'self.model_parameters_object.model_parameters after restore', self.model_parameters_object.model_parameters
-#            print
-
-
-
+    def model_specification_changed(self):
+        if self.model._translated and self.model._model_specification_changed:
+            self.model_parameters_object = ModelParameters(directory=self.model.directory)
+            self.model_parameter_names = [modelVariable.name for modelVariable in self.model_parameters_object.modelVariables]
 
 
     temporal_formulas = List(TemporalFormula)

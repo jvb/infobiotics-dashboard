@@ -1,27 +1,3 @@
-* Model parameters saving
-
 * temporal formulas saving
 
-* Model parameters loading
-
-! Model_parameters not saved <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_protein1_gene1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,lb_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>,ub_rna1_0_0_NARbacterium=<undefined>:<undefined>:<undefined>"/>
-
 ! lower, step, upper of a TemporalFormulaParameter should all have the same precision when floats (PRISM uses the precision to create a finite set of intermediates) but for now just make them Int.
-
-* Create model parameters each time modelParameters.xml is changed (what about wiping existing values?)
-
-* Translate automatically for PRISM and MC2 in _model_specification_changed 
-    (thought I did but I guess this needs testing)
-
-* Only load modelParameters.xml once after 'Translate', not for new experiment.
-
-* Only enable view once PRISM_model has been translated
-
-* Don't hide window if only translated OR remove 'Translate' from tasks
-
-* ModelParameters <undefined> to start with (desirable?) -> enlarge column
-
-* dclick model parameters doesn't do anything...
-
-
-http://www.cs.nott.ac.uk/~jvb/ETS34_API/enthought.traits.ui.editors.text_editor.html for ranges/int
