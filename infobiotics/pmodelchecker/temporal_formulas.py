@@ -51,6 +51,9 @@ class TemporalFormulaParameter(HasTraits):
     lower = Float(0)
     step = Float(0.5)
     upper = Float(1)
+#    lower = Int(0)
+#    step = Int(1)
+#    upper = Int(1)
     # don't replicate range_or_value from model_parameter_names, 
     # if they want a constant they can just put it in the formula 
 
