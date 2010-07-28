@@ -27,6 +27,11 @@ ${PYTHON} setup.py py2app $* &&
 
 # post-freeze
 
+#zip dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages.zip VERSION.txt &&
+
+echo "patching font_manager.py" &&
+patch dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/font_manager.py eintr.patch && 
+
 echo "creating qt.conf" &&
 touch dist/InfobioticsDashboard.app/Contents/Resources/qt.conf &&
 

@@ -5,3 +5,4 @@ include endo.sh epydoc.sh
 include bin/infobiotics-dashboard bin/infobiotics-dashboard.py bin/infobiotics-dashboard.pyw 
 include infobiotics-dashboard.desktop infobiotics-workbench.png infobiotics-workbench.xpm
 include windows_xp_missing_dlls.txt
+include eintr.patch

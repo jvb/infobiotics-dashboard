@@ -14,9 +14,6 @@ class PModelCheckerParamsHandler(ParamsHandler):
     def init(self, info): 
         super(PModelCheckerParamsHandler, self).init(info)
         self.sync_trait('task', info.object, mutual=False) # see POptimizerParamsHandler.init()
-#        self.create_model_parameters_object()
-        # must create model_parameters_object here rather than __model_parmeters_default() 
-        # because DelegatesTo('model_parameters_object') causes it to be created before directory.
 
 
     model_parameters_object = Instance(ModelParameters)
