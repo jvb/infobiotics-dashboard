@@ -8,8 +8,6 @@ class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler)
 
     def perform(self, info):
         super(PModelCheckerExperimentHandler, self).perform(info)
-        if self.model.task == 'Translate':
-            info.ui.control.setVisible(True)
 
 
 if __name__ == '__main__':

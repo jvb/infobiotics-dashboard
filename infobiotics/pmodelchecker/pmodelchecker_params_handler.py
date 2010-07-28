@@ -9,7 +9,7 @@ import os.path
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
 
-    task = Enum(['Approximate','Build','Verify'], desc="the task to perform:\n'Approximate' or 'Verify' the input properties\n'Build' the corresponding Markov chain")
+    task = Enum(['Approximate', 'Build', 'Verify'], desc="the task to perform:\n'Approximate' or 'Verify' the input properties\n'Build' the corresponding Markov chain")
     
     def init(self, info): 
         super(PModelCheckerParamsHandler, self).init(info)
@@ -48,14 +48,14 @@ class PModelCheckerParamsHandler(ParamsHandler):
             
             # extract formula
             first = line.find('"')
-            second = line.find('"', first+1)
-            formula = line[first+1:second]
+            second = line.find('"', first + 1)
+            formula = line[first + 1:second]
             
             # extract parameters
-            parameters_start = line.find('{', second+1)
-            parameters_end = line.find('}', parameters_start+1)
+            parameters_start = line.find('{', second + 1)
+            parameters_end = line.find('}', parameters_start + 1)
             parameters = []
-            for parameter in line[parameters_start+1:parameters_end].split(','):
+            for parameter in line[parameters_start + 1:parameters_end].split(','):
                 name_and_values = parameter.split('=')
                 name = name_and_values[0].strip()
                 values = name_and_values[1].split(':')
@@ -68,8 +68,8 @@ class PModelCheckerParamsHandler(ParamsHandler):
 
             # create formula object and add to list
             temporal_formula = TemporalFormula(
-                formula=formula, 
-                parameters=parameters, 
+                formula=formula,
+                parameters=parameters,
                 params_handler=self,
             )
             self.temporal_formulas.append(temporal_formula)
@@ -111,28 +111,20 @@ class PModelCheckerParamsHandler(ParamsHandler):
 
     def save(self, info):
         super(PModelCheckerParamsHandler, self).save(info)
-        self.write_temporal_formulas_file() #FIXME
+        self.write_temporal_formulas_file()
 
     def write_temporal_formulas_file(self):
+        ''' Write temporal_formulas file, e.g.
+            
+Formulas:
+"P=?[ (Time=1000)U([protein1_(0,0)] >= B ^ [protein1_(0,0)] < B + 5){Time=1000}]" {B=0:10:300}
+"P=?[ (Time=R*10)U([protein1_(0,0)] >= A){Time=R*10}]" {R=0:20:200, A=0:1:10}
+            
+        '''
         with write(self.model.temporal_formulas_) as f:
-            '''
-            Formulas:
-            "P=?[ (Time=1000)U([protein1_(0,0)] >= B ^ [protein1_(0,0)] < B + 5){Time=1000}]" {B =0:10:300}
-            "P=?[ (Time=R*10)U([protein1_(0,0)] >= 50){Time=R*10}]" {R = 0:20:200}
-            '''
-            lines = ['Formulas:\n']
-            for temporal_formula in self.temporal_formulas:
-                line = '"%s"' % temporal_formula.formula
-                line += ' {'
-                for i, parameter in enumerate(temporal_formula.parameters):
-                    if i != 0:
-                        line += ', ' 
-                    line += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
-                line += '}\n'
-                lines.append(line)
-            f.writelines(lines)
-
-
+            f.writelines(['Formulas:\n'] + ['"' + temporal_formula.formula + '" {' + temporal_formula.parameters_string + '}' for temporal_formula in self.temporal_formulas])
+        
+        
 if __name__ == '__main__':
     execfile('pmodelchecker_params.py')
     

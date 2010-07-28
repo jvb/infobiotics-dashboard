@@ -1,7 +1,7 @@
 from enthought.traits.api import BaseFloat 
 
 class FloatWithMinimum(BaseFloat):
-    ''' usage: trait = FloatWithMinimum(minimum_value=0) '''
+    ''' Usage: trait = FloatWithMinimum(minimum_value=0) '''
     
     info_text = 'a float with a minimum value'
 
@@ -10,7 +10,7 @@ class FloatWithMinimum(BaseFloat):
             minimum_value = 0
         self.minimum_value = minimum_value
 
-    def get_default_value(self):
+    def get_default_value(self): #TODO default values don't seem to work
         # to explain the tuple with a 0 see http://code.enthought.com/projects/files/ETS31_API/enthought.traits.trait_handlers.TraitType.html#get_default_value
         return (0, self.minimum_value)
 

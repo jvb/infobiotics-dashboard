@@ -1,1 +1,0 @@
-! lower, step, upper of a TemporalFormulaParameter should all have the same precision when floats (PRISM uses the precision to create a finite set of intermediates) but for now just make them Int.

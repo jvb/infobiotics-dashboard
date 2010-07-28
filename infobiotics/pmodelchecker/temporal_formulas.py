@@ -1,10 +1,14 @@
-from enthought.traits.api import HasTraits, Str, Float, Int, List, Button, Any
+from enthought.traits.api import (
+    HasTraits, Str, Float, Int, List, Button, Any, Enum, Unicode, Any, Property,
+    on_trait_change,
+)
 from enthought.traits.ui.api import (
     View, Item, HGroup, VGroup, Group, Spring, ListEditor, TableEditor,
-    CodeEditor, Spring
+    CodeEditor, Spring, TextEditor
 )
 from enthought.traits.ui.table_column import ObjectColumn
 from infobiotics.commons.traits.ui.api import HelpfulController, help_action
+#from infobiotics.commons.traits.float_with_minimum import FloatWithMinimum
 
 temporal_formulas_group = VGroup(
     HGroup(   
@@ -47,15 +51,51 @@ temporal_formulas_group = VGroup(
 )
 
 class TemporalFormulaParameter(HasTraits):
+    # don't replicate range_or_value from model_parameter_names, 
+    # if they want a constant they can just put it in the formula 
     name = Str
     lower = Float(0)
     step = Float(0.5)
     upper = Float(1)
-#    lower = Int(0)
-#    step = Int(1)
-#    upper = Int(1)
-    # don't replicate range_or_value from model_parameter_names, 
-    # if they want a constant they can just put it in the formula 
+#    lower = FloatWithMinimum(0)
+#    step = FloatWithMinimum(0.5)
+#    upper = FloatWithMinimum(1) # default values don't seem to work
+    
+    dp = Int(desc='the most decimal places between lower, step and upper')
+
+    @on_trait_change('lower, step, upper')
+    def determine_precision(self):
+        mdp = 0
+        for value in (self.lower, self.step, self.upper):
+            split = str(value).split('.')
+            if len(split) == 2:
+                if int(split[1]) == 0:
+                    continue
+                dp = len(split[1])
+                if dp > mdp: 
+                    mdp = dp
+        self.dp = mdp
+
+    def format(self, value):
+        if self.dp > 0:
+            return "%.*f" % (self.dp, value)
+        else:
+            return "%d" % (value)
+        
+def evaluate_temporal_formula_parameter_range(value):
+    try:
+        f = float(eval(value))
+        if f < 0:
+            raise TraitError()
+        return f 
+    except:
+        raise TraitError()
+
+temporal_formula_parameter_range_editor=TextEditor(evaluate=evaluate_temporal_formula_parameter_range)
+
+class TemporalFormulaParameterItem(Item):
+    editor = temporal_formula_parameter_range_editor
+    
 
 class TemporalFormulaHandler(HelpfulController):
     
@@ -102,9 +142,15 @@ temporal_formula_view = View(
                     Group(    
                         Item('name'),
                         HGroup(
-                            Item('lower'),
-                            Item('step'),
-                            Item('upper'),
+#                            Item('lower'),
+#                            Item('step'),
+#                            Item('upper'),
+#                            Item('lower', editor=temporal_formula_parameter_range_editor),
+#                            Item('step', editor=temporal_formula_parameter_range_editor),
+#                            Item('upper', editor=temporal_formula_parameter_range_editor),
+                            TemporalFormulaParameterItem('lower'),
+                            TemporalFormulaParameterItem('step'),
+                            TemporalFormulaParameterItem('upper'),
                         ),
                         show_border=True,
                     ),
@@ -129,8 +175,6 @@ temporal_formula_view = View(
 )
 
 
-from enthought.traits.api import Int, Str, Button, List, Enum, Unicode, Any, Property
-
 class TemporalFormula(HasTraits):
 
     traits_view = temporal_formula_view
@@ -143,20 +187,18 @@ class TemporalFormula(HasTraits):
         return self.params_handler.model_parameter_names 
     model_parameter_name_to_insert = Enum(values='model_parameter_names')
     insert = Button
-    
     def _insert_fired(self):
         lines = self.formula.split('\n')
         line = lines[self.line]
         line = line[:self.column] + self.model_parameter_name_to_insert + ' ' + line[self.column:]
         lines[self.line] = line
         self.formula = '\n'.join(lines)
+        self.column = self.column + len(self.model_parameter_name_to_insert) + 2
         # focus given back to CodeEditor in TemporalFormulaHandler.object_insert_changed()
         
-
     formula = Str('P = ? [ true U[A,A] (  >= X ) ]') #TODO better example? #TODO help?
     parameters = List(TemporalFormulaParameter, [TemporalFormulaParameter(name='A'), TemporalFormulaParameter(name='X')])
     
-    parameters_string = Str
     add_new_parameter = Button
     remove_current_parameter = Button
     
@@ -171,11 +213,7 @@ class TemporalFormula(HasTraits):
         except ValueError:
             pass
             
-    def _parameters_changed(self, value):
-        parameters_string = ''
-        for i, parameter in enumerate(self.parameters):
-            if len(parameter.name) > 0:
-                if i != 0:
-                    parameters_string += ', ' 
-                parameters_string += '%s=%s:%s:%s' % (parameter.name, parameter.lower, parameter.step, parameter.upper)
-        self.parameters_string = parameters_string
+    parameters_string = Str
+    @on_trait_change('parameters, parameters.lower, parameters.step, parameters.upper')
+    def update_parameters_string(self):
+        self.parameters_string = ','.join(['%s=%s:%s:%s' % (parameter.name, parameter.format(parameter.lower), parameter.format(parameter.step), parameter.format(parameter.upper)) for parameter in self.parameters])
