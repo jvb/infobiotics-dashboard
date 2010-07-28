@@ -1,15 +1,32 @@
-from enthought.traits.api import HasTraits, Instance, Str, Button 
+import os; os.environ['ETS_TOOLKIT'] = 'qt4'
+from enthought.traits.api import HasTraits, Instance, Str, Button, Any 
 from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring, HSplit, CodeEditor
 from matplotlib.figure import Figure
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
 from infobiotics.commons.matplotlib_ import MatplotlibFigureSize, resize_and_save_matplotlib_figure
+from poptimizer_experiment import POptimizerExperiment
+
+import logging
+logger = logging.getLogger(__file__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.ERROR)
 
 class POptimizerResults(HasTraits):
     figure = Instance(Figure, ())
     title = Str
     best_model = Str
-    experiment = Instance('POptimizerExperiment')
+    experiment = Any#Instance(POptimizerExperiment)
+    def _experiment_default(self):
+        return None
+
+    edit_experiment = Button
+    def _edit_experiment_fired(self):
+        self.experiment.edit()
     
+    save_resized = Button
+    def _save_resized_fired(self):
+        resize_and_save_matplotlib_figure(self.figure)
+
     def traits_view(self):
         return View(
             HSplit(
@@ -17,7 +34,7 @@ class POptimizerResults(HasTraits):
                     HGroup(
                         Item(label='Best model found:'),
                         Spring(),
-                        Item('experiment', show_label=False),
+                        Item('edit_experiment', show_label=False, enabled_when='object.experiment is not None'),
                         Spring(),
                         Item('save_resized', show_label=False),
                     ),
@@ -40,34 +57,31 @@ class POptimizerResults(HasTraits):
             id='POptimizerResults',
         )
         
-    save_resized = Button
-    def _save_resized_fired(self):
-        resize_and_save_matplotlib_figure(self.figure)
-
     def _experiment_changed(self):
         if self.experiment is None:
             return
         try:    
-            import os
+            import os.path
             params_file = os.path.split(self.experiment._params_file)[1]
+            directory = self.experiment.directory_
             self.title = params_file
             
-            with open('bestPsystem_Run0.txt') as f:
+            with open(os.path.join(directory, 'bestPsystem_Run0.txt')) as f:
                 best_model = f.read() 
             
             self.best_model=best_model
 
-            target_file = self.experiment.target_file
+            target_file = os.path.join(directory, self.experiment.target_file)
         
-            import numpy as np
-            target = np.loadtxt(target_file, skiprows=1)
             f = open(target_file)
             species = f.readline().split()[1:]
             f.close()
+
+            import numpy as np
+            target = np.loadtxt(target_file, skiprows=1)
             time = target[:,0] # x_axis
             
-            output = np.loadtxt('outputdata.txt', skiprows=1, usecols=range(1, 3 * len(species), 3))
-        
+            output = np.loadtxt(os.path.join(directory, 'outputdata.txt'), skiprows=1, usecols=range(1, 3 * len(species), 3))
             
             fig = self.figure
             ax = fig.add_subplot(111)
@@ -83,10 +97,9 @@ class POptimizerResults(HasTraits):
             ax.legend(loc='best')
             
         except Exception, e:
-            print e
+            logger.error(e)
             
 
 if __name__ == '__main__':
-    from infobiotics.poptimizer.poptimizer_experiment import POptimizerExperiment
     experiment = POptimizerExperiment('../../../examples/NAR-poptimizer/NAR_optimization.params')
     POptimizerResults(experiment=experiment).configure_traits()

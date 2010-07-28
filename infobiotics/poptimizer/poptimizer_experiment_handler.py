@@ -1,29 +1,20 @@
 from poptimizer_params_handler import POptimizerParamsHandler
 from infobiotics.common.api import ExperimentHandler
 from poptimizer_experiment_progress_handler import POptimizerExperimentProgressHandler
+from poptimizer_results import POptimizerResults
 
 class POptimizerExperimentHandler(POptimizerParamsHandler, ExperimentHandler):
     
     def __progress_handler_default(self):
         return POptimizerExperimentProgressHandler(model=self.model)
 
-#    def object_finished_changed(self, info):
-#        ''' Triggered when experiment's expect loop finishes. '''
+    def object_finished_changed(self, info):
+        ''' Triggered when experiment's expect loop finishes. '''
 #        self._progress_handler.message = 'Loading results...' # doesn't change the message!
-#        self.show_results()
-#        
-#    def show_results(self):
-#        import os.path
-#        if os.path.exists(self.model.data_file_):
-#            from infobiotics.dashboard.plugins.simulator_results.simulator_results import SimulationResultsDialog, centre_window
-#            w = SimulationResultsDialog(filename=self.model.data_file_)
-#            from infobiotics.commons.qt4 import centre_window
-#            centre_window(w)
-#            w.show()
-#        else:
-#            print 'never been here before'
-#            from enthought.traits.ui.message import auto_close_message
-#            auto_close_message(self.child.before)
+        self.show_results()
+        
+    def show_results(self):
+        POptimizerResults(experiment=self.model).edit_traits()
 
 
 if __name__ == '__main__':
