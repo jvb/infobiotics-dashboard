@@ -176,9 +176,10 @@ class ParamsHandler(HelpfulController):
     def get_save_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
             action='save as', 
+            default_filename = self.model._params_file,
+            default_directory = self.model.directory_, 
             wildcard=self.wildcard,
             title = title,
-            default_directory = os.path.dirname(self.model._params_file), #TODO
         )
         if fd.open() == OK:
             return fd.path
