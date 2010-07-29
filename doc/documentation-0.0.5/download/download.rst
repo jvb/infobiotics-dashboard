@@ -3,7 +3,7 @@ Downloading and Installing
 
 The Infobiotics Workbench is composed of four components:  the ``infobiotics-dashboard`` graphical workflow manager; the ``mcss`` multicompartment stochastic simulator; the ``pmodelchecker`` probabilistic model checker; and the ``poptimizer`` structure and parameter optimizer. We recommend that you install the latest ``infobiotics-workbench`` package for your platform, which will automatically install all of these components, although each component can be installed independently if required.
 
-Precompiled binaries are available for a number of platforms or you can download the source code and compile it yourself. Please follow the link below for instructions on downloading and installing for your particular platform. If you experience any problems installing the Workbench please have a look at the Infobiotics Workbench `FAQ http://getsatisfaction.com/infobiotics/products/infobiotics_infobiotics_workbench`_ first, and if you are still stuck drop us a message by pressing the Feedback button at the left of this page.
+Precompiled binaries are available for a number of platforms or you can download the source code and compile it yourself. Please follow the link below for instructions on downloading and installing for your particular platform. If you experience any problems installing the Workbench please have a look at the Infobiotics Workbench `FAQ <http://getsatisfaction.com/infobiotics/products/infobiotics_infobiotics_workbench>`_ first, and if you are still stuck drop us a message by pressing the Feedback button at the left of this page.
 
 - `Linux Debian/Ubuntu deb packages`_
 - `Linux Fedora/CentOS/SUSE rpm packages`_
@@ -147,7 +147,7 @@ Download the latest tarball for your platform, unpack it and inside the director
 Macintosh binary package
 ########################
 
-A binary package is available for Mac OS X 10.4 (Tiger), 10.5 (Leopard) and 10.6 (Snow Leopard). This package will install the Infobiotics Workbench and all its components. First, download the latest dmg disk image  (infobiotics-workbench-X.X.X.dmg) from:
+A binary package is available for Mac OS X 10.6 (Snow Leopard). This package will install the Infobiotics Workbench and all its components. First, download the latest dmg disk image  (infobiotics-workbench-X.X.X.dmg) from:
 
 	http://www.infobiotics.org/infobiotics-software/apple/
 

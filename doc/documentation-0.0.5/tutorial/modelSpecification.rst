@@ -2,14 +2,14 @@
 Model Specification and Building
 ###################################
 
-The **Infobiotics modelling language** is based on **Stochastic P-systems**, SP-system for short. It allows you to specify your models in a *parsimonious* and *incremental way*. Typically, *multi-cellular models* are specified in our modelling language using *libraries of re-usable modules*, *models of individual cell types* and *geometric distributions* of clones of theses cell types. We will illustrate this using our running example based on `gene autoregulation <http://www.infobiotics.org/infobiotics-workbench/various/autoregulation.zip>`_. You can also see `video tutorial <http://www.infobiotics.org/infobiotics-workbench/various/quick_start_video.mpeg>`_.
+The **Infobiotics modelling language** is based on **Stochastic P-systems**. It enables the specification of biological models in an *incremental* and *reusable* manner. *Multi-cellular models* are typically specified in our modelling language using *libraries of modules*, *models of individual cell types* and *geometric distributions* of clones of theses cell types. We will illustrate this using our running example based on `gene autoregulation <http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial_1.html>`_.
 
 Libraries of reusable modules
 #######################################
 
-Libraries of modules must be specified using text files with the extension **plb**. You can open the file containing the library in our running example, **basicLibrary.plb**, by selecting **File -> Open text file** from the upper menu bar and navigating to its specific location.
+Libraries of modules must be specified using text files with the extension '.plb'. You can open the file containing the library in our running example, **basicLibrary.plb**, by selecting **File -> Open text file** from the menu.
 
-Our libraries are specified using the key workds *libraryOfModules ... endLibraryOfModules*. Each library is identified with a name, *basicLibrary* in our running example and consists of a collection of modules of molecular interactions. In our case we have three different modules, **UnReg**, **PosReg** and **NegReg** describing constitutive gene expression, gene positive regulation and gene negative regulation respectively. **Comments** can be included using text enclosed between # symbols. Below you have the library used in the autoregulation example::
+Our libraries are specified using the key words *libraryOfModules ... endLibraryOfModules*. Each library is identified with a name, *basicLibrary* in our running example and consists of a collection of modules that abstract sets of molecular interactions. In our case we have three different modules, **UnReg**, **PosReg** and **NegReg** describing constitutive gene expression, positive and negative gene regulation respectively. **Comments** can be included using text enclosed between # symbols. Below you have the library used in the autoregulation example::
  
    # Author: Francisco J. Romero-Campero #
    # Date: May 2010 #

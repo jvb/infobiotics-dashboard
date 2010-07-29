@@ -1,28 +1,25 @@
 .. Infobiotics documentation master file
 
-Welcome to Infobiotics Workbench
+Welcome to the Infobiotics Workbench
 =========================================
 
-**Infobiotics workbench** is a computational framework implementing a synergy between *executable biology*, *multi-compartmental stochastic simulations*, *formal model analysis* and *structural/parameter model optimisation* for **computational systems and synthetic biology**. It provides a *user-friendly front-end* allowing the modeller to design in-silico experiments, analyse and visualise results using its four components:
+The **Infobiotics Workbench** is a software platform for biological modelling, *in silico* experimentation and data analysis. Models are specified using a `modular, rule-based language <http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial_1.html>`_ that enables the rapid construction of multi-cellular systems in geometric space. Experiments that can be performed include: 
 
-   * A **modelling language** based on *P systems* which allows modular and parsimonious multi-cellular model development including geometric information.  
-
-   * A **multi-compartmental stochastic simulator** based on *Gillespie's Stochastic Simulation Algorithm* for multi-cellular systems.
-
-   * **Formal model analysis** using the stochastic model checkers `PRISM <http://www.prismmodelchecker.org/>`_ and `MC2 <http://www.brc.dcs.gla.ac.uk/software/mc2/>`_  for the study of *temporal and spatial model properties*.
-
-   * **Structural and parameter model optimisation** using *evolutionary algorithms* to automatically generate models whose dynamics match specified targets.   
-
-####################################
-Downloading and Installing
-####################################
-
-The **Infobiotics workbench** is available for download under the `GNU GPL v3 license <http://www.gnu.org/licenses/gpl.html>`_  for different platforms. Click in the link below for download: 
-
-.. toctree::
-   :maxdepth: 1
+   * *stochastic simulation* of multi-compartment models, 
    
-   download/download
+   * *formal model checking* of temporal and spatial properties, 
+   
+   * *optimisation of model structure and parameters* using evolutionary algorithms. 
+   
+The specification of models, experimental parameters and analysis of results is integrated in a helpful graphical user interface, individual experiments can also be performed from the command line.
+
+
+####################################
+Availability
+####################################
+
+Binaries are available for `Windows XP, Vista and 7 <http://www.infobiotics.org/infobiotics-workbench/download/download.html#windows-binary-package>`_, `Mac OS X 10.6 <http://www.infobiotics.org/infobiotics-workbench/download/download.html#macintosh-binary-package>`_ and Linux (`deb <http://www.infobiotics.org/infobiotics-workbench/download/download.html#linux-debian-ubuntu-deb-packages>`_ / `rpm <http://www.infobiotics.org/infobiotics-workbench/download/download.html#linux-fedora-centos-suse-rpm-packages>`_). `Source code <http://www.infobiotics.org/infobiotics-workbench/download/download.html#source-code>`_ is also available to download under the `GNU GPL v3 license <http://www.gnu.org/licenses/gpl.html>`_.
+
 
 ###################
 Getting Started
@@ -41,12 +38,14 @@ A quick start, tutorials and the complete documentation are available from the l
 Model Repository
 ###################
 
-Multiple models have been developed using the Infobiotics Workbench. Click on the link below to acces them:
+Multiple models have been developed using the Infobiotics Workbench. Click on the link below to access them:
 
 .. toctree::
    :maxdepth: 1
 
-   models/modelRepository
+   models/repressilator/repressilator
+   models/pulseGenerator
+
 
 .. Indices and tables
 .. ==================

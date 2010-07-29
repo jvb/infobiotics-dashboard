@@ -1,5 +1,5 @@
 ############################################
-Tutorial Using SBML Model Specification
+Model Specification using SBML
 ############################################
 
 Genes are a good example of biological switches. A cell can contain hundreds of thousands of genes, each of which can be switched on or off in response to internal or external signals. One important aspect of genetic switches (and switches in general) is how quickly they can be switched on. This is known as the response time of the gene. This tutorial examines the response times of three models of gene regulation, all representing mechanisms found in biological cells. You will learn how to implement these three models and perform stochastic simulations in order to quantify their response times.
