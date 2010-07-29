@@ -9,7 +9,7 @@ from enthought.traits.ui.api import Controller
 from infobiotics.common.api import ParamsRelativeFile
 from infobiotics.commons.api import key_from_value, can_access, read, write, logging, can_execute
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
-import os
+import os, sys
 from xml import sax
 from infobiotics.thirdparty.which import which, WhichError
 
@@ -73,7 +73,19 @@ class Params(HasTraits):
         from infobiotics.preferences import preferences
 #        print preferences
         # must assign bound_preferences otherwise bindings will be lost when this method returns 
-        self.bound_preferences = [bind_preference(self, preference, '.'.join([self._preferences_path, preference]), infobiotics.preferences.preferences) for preference in self.preferences]
+#        self.bound_preferences = [bind_preference(self, preference, '.'.join([self._preferences_path, preference]), infobiotics.preferences.preferences) for preference in self.preferences]
+        self.bound_preferences = []
+        for preference in self.preferences:
+            preferences_path = '.'.join([self._preferences_path, preference])
+            if preference in ('directory'):#, 'executable'):
+                path = infobiotics.preferences.preferences.get(preferences_path)
+                if not os.path.exists(path): #TODO what about None?
+#                    sys.stderr.write(path)
+#                    sys.stderr.write('\n')
+                    infobiotics.preferences.preferences.set(preferences_path, '')
+                    infobiotics.preferences.preferences.flush()
+            bound_preference = bind_preference(self, preference, preferences_path, infobiotics.preferences.preferences)
+            self.bound_preferences.append(bound_preference)
         
     def save_preferences(self):
         ''' Called from self.handler.close() '''

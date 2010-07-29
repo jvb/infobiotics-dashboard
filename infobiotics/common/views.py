@@ -79,7 +79,8 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     buttons = shared_actions + params_actions
     
     resizable = True
-    
+    width = 550
+    height = 560
     scrollable = True
 
     toolbar = toolbar
