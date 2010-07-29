@@ -210,7 +210,7 @@ class Params(HasTraits):
             logger.exception(e)
             if self._interactive:
                 from enthought.traits.ui.message import auto_close_message, error, message
-                message(e, title='Error')
+                message(str(e), title='Error')
             else:
                 print e
             return False

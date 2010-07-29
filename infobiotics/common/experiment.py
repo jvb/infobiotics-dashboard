@@ -158,7 +158,7 @@ class Experiment(Params):
         self.finished = True
 
     def _finished_fired(self):
-        del self.temp_params_file
+        del self.temp_params_file #TODO may not be enough now that 'delete=False' below
         
 #    def _finished_without_output_fired(self):
 #        print '_finished_without_output_fired', self.child.before
@@ -170,7 +170,22 @@ class Experiment(Params):
 
         # save to temporary file in the same directory
         import tempfile
-        self.temp_params_file = tempfile.NamedTemporaryFile(prefix=self._params_file.split('.params')[0], suffix='.params', dir=self.directory)
+        self.temp_params_file = tempfile.NamedTemporaryFile(prefix=self._params_file.split('.params')[0], suffix='.params', dir=self.directory, 
+        	delete=False)
+        	# see comment http://stackoverflow.com/questions/94153/how-do-i-persist-to-disk-a-temporary-file-using-python/94339#94339
+        self.temp_params_file.close()
+        '''
+tempfile.NamedTemporaryFile([mode='w+b'[, bufsize=-1[, suffix=''[, prefix='tmp'[, dir=None[, delete=True]]]]]])
+    This function operates exactly as TemporaryFile() does, except that the 
+    file is guaranteed to have a visible name in the file system (on Unix, the
+    directory entry is not unlinked). That name can be retrieved from the name 
+    member of the file object. Whether the name can be used to open the file a 
+    second time, while the named temporary file is still open, varies across 
+    platforms (it can be so used on Unix; it cannot on Windows NT or later). 
+    If delete is true (the default), the file is deleted as soon as it is 
+    closed.        
+        '''
+        # see also PModelCheckerParams.translate_model_specification
         self.save(self.temp_params_file.name)
         
         if thread:

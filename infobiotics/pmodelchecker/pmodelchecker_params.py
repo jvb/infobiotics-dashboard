@@ -55,7 +55,6 @@ class PModelCheckerParams(Params):
     
     @on_trait_change('model_specification, PRISM_model')
     def translate_model_specification(self, object, name, old, new):
-#    def _model_specification_changed(self):
         ''' Performs an experiment with task='Translate' to generate the 
         PRISM model and modelParameters.xml from self.model_specification. '''
         
@@ -67,12 +66,12 @@ class PModelCheckerParams(Params):
         
         if hasattr(self, '_PRISM_model_tempfile') and self.PRISM_model_ != self._PRISM_model_tempfile.name:
             # delete old temporary file
-            self._PRISM_model_tempfile.close()
-            del self._PRISM_model_tempfile
+            del self._PRISM_model_tempfile #TODO may not be enough now that 'delete=False' below
         
         if self.PRISM_model == '':
             # create temporary file
-            self._PRISM_model_tempfile = tempfile.NamedTemporaryFile(suffix='.sm', dir=self.directory)
+            self._PRISM_model_tempfile = tempfile.NamedTemporaryFile(suffix='.sm', dir=self.directory, delete=False)
+            self._PRISM_model_tempfile.close()
             # trigger translation with temporary file
             if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6): 
                 self.trait_set(PRISM_model=os.path.relpath(self._PRISM_model_tempfile.name, self.directory))
