@@ -1,0 +1,218 @@
+http://www.infobiotics.org/
+
+BEFORE
+Infobiotics Workbench - The ultimate goal of systems biology is the development of executable in silico models of cells and organisms, while synthetic biology aims to implement, in vitro/vivo, organisms whose behaviour is engineered. P systems, computing with membranes, abstract the structure and function of the living cell into a formalism upon which we are building a multi-scale modelling environment. By applying discrete, numerical simulation algorithms to P system models of quorum sensing in the bacterial pathogen Pseudomonas aeruginosa and root development in Arabidopsis thaliana, we aim to understand the stochastic processes governing these model organisms, and guide laboratory experiments. In addition we use evolutionary optimisation and machine learning (Genetic Programming, Learning Classifier Systems, Support Vector Machines, etc) to estimate parameters and discover structures that match observed behaviour in cellular networks with the intention of isolating these modules for use in the design of synthetic organisms. Dissipative Particle Dynamics is used for simulating (proto-)membranes. These activities are complemented by other groups in the SynBioNT Synthetic Biology Network for Modelling and Programming Cell-Chell Interactions.
+
+AFTER
+TODO
+
+
+http://www.infobiotics.org/infobiotics-workbench/index.html
+
+BEFORE
+Infobiotics workbench is a computational framework implementing a synergy between executable biology, multi-compartmental stochastic simulations, formal model analysis and structural/parameter model optimisation for computational systems and synthetic biology. It provides a user-friendly front-end allowing the modeller to design in-silico experiments, analyse and visualise results using its four components:
+ * A modelling language based on P systems which allows modular and parsimonious multi-cellular model development including geometric information.
+ * A multi-compartmental stochastic simulator based on Gillespie’s Stochastic Simulation Algorithm for multi-cellular systems.
+ * Formal model analysis using the stochastic model checkers PRISM and MC2 for the study of temporal and spatial model properties.
+ * Structural and parameter model optimisation using evolutionary algorithms to automatically generate models whose dynamics match specified targets.
+
+AFTER
+The Infobiotics Workbench is a software platform for biological modelling, in silico experimentation and data analysis. Models are specified using a modular, rule-based language (based on P systems) that enables the rapid construction of multi-cellular systems in geometric space. Experiments that can be performed include: stochastic simulation of multi-compartment models, formal checking of temporal and spatial model properties, optimisation of model structure and parameters using evolutionary algorithms. The specification of models and the performance of experiments is integrated in a graphical user interface that is designed to expose the full range of experimental capabilities and make exploring the resulting data straightforward and correct. Infobiotics Workbench experiments can also be conducted on the command line for repetitive tasks...
+
+BEFORE Downloading and Installing (subtitle)
+AFTER Availability
+
+BEFORE The Infobiotics workbench is available for download under the GNU GPL v3 license for different platforms. 
+AFTER Infobiotics Workbench software and source code [http://www.infobiotics.org/infobiotics-workbench/download/download.html#source-code] is available to download for Windows XP, Vista and 7 [http://www.infobiotics.org/infobiotics-workbench/download/download.html#windows-binary-package], Mac OS X 10.6 [http://www.infobiotics.org/infobiotics-workbench/download/download.html#macintosh-binary-package] and Linux (deb[http://www.infobiotics.org/infobiotics-workbench/download/download.html#linux-debian-ubuntu-deb-packages]/rpm[http://www.infobiotics.org/infobiotics-workbench/download/download.html#linux-fedora-centos-suse-rpm-packages]) operating systems under the GNU GPL v3 license. 
+
+
+BEFORE acces
+AFTER access
+
+BEFORE 
+ * Model Repository
+ 
+AFTER
+ * The Repressilator
+ * Pulse Generator
+ 
+
+http://www.infobiotics.org/infobiotics-workbench/download/download.html#linux-statically-compiled-binaries
+
+BROKEN link to FAQ points to this page
+If you experience any problems installing the Workbench please have a look at the Infobiotics Workbench `FAQ http://getsatisfaction.com/infobiotics/products/infobiotics_infobiotics_workbench`_ first, and if you are still stuck drop us a message by pressing the Feedback button at the left of this page.
+
+
+BEFORE
+Package     Description
+infobiotics-workbench       Metapackage which installs all Infobiotics Workbench components
+...
+prism-3.3.beta2	Prism model checker (3rd party)
+
+AFTER 
+...
+infobiotics-dashboard   Graphical user interface for Infobiotics Workbench experiments and model specification
+Traits inc. Mayavi2
+PyTables
+Matplotlib
+Numpy
+...
+prism-3.3.beta2	Prism model checker (3rd party)
+prism-3.3.1	PRISM model checker (3rd party)
+...
+
+BROKEN gzip fail to decompressed for any version > 0.0.3 (the first one!)
+http://www.infobiotics.org/infobiotics-workbench/download/download.html#linux-statically-compiled-binaries
+
+BEFORE A binary package is available for Mac OS X 10.4 (Tiger), 10.5 (Leopard) and 10.6 (Snow Leopard). 
+AFTER A binary package is available for Mac OS X 10.6 (Snow Leopard). 
+
+
+http://www.infobiotics.org/infobiotics-software/contrib/
+
+AFTER
+Enthought debs, PyTables from Debian repo
+
+
+http://www.infobiotics.org/infobiotics-workbench/quickStart/quickStart.html
+
+BEFORE
+In this quick start we will walk through an example based on genetic negative autoregulation to explain the basics of getting started with the Infobiotics Workbench.
+AFTER 
+To get started with using the Infobiotics Workbench we will walk through simulating an example model based on gene negative autoregulation with our stochastic simulator 'mcss'.
+
+BEFORE First you need to download and install Infobiotics Workbench from this [link].
+AFTER First you need to download and install Infobiotics Workbench from [here]. Alternatively you can follow our video tutorial.
+
+BEFORE Download the example containing the NAR model and unzip it to your favourite location.
+AFTER Download [this] archive file containing the NAR model example and unzip it to your favourite location.
+
+BEFORE
+The following window will appear showing the different components: simulation, model checking (PRISM and MC2) and optimisation.
+AFTER 
+The following window will appear showing the different experiments: simulation, model checking (PRISM and MC2) and optimisation (but without the opened model files shown below).
+
+BEFORE by selecting Load from the upper menu bar 
+AFTER by selecting Load from the toolbar
+
+BEFORE 
+Plot the average number of molecules over time by selecting All from the Runs panel on your left, from the Species panel at the center and from the Compartments panel on your right and clicking on the first button at the bottom right corner.
+AFTER
+Plot the average number of molecules over time for all species in all compartments by selecting checking All under Runs, Species and Compartments, then clicking on the first button ('timeseries') in the bottom right corner.
+
+BEFORE
+A window will pop up to allow you to combine graphs in different ways. Select all the graphs and click the Stack button. The following window containing the graphs will appear. You can save this graph by clicking on the last button at the bottom left corner.
+AFTER 
+A preview window will appear that allows you to combine the various timeseries in different ways. Select all the graphs (Ctrl-A) and click the Stack button to view the each timeseries with the same time axis but individual molecules axes. The following window containing the graphs will appear. You can save this graph in any size you like by clicking on the last button at the bottom left corner.
+
+BEFORE Infobiotics workbench is not
+AFTER  Infobiotics Workbench is not
+
+BEFORE Analysis of model properties
+AFTER  Checking model properties
+
+BEFORE For more details on how to use Infobiotics Workbench read our tutorial.
+AFTER  For more details on how to use Infobiotics Workbench read the tutorials [http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial.html].
+
+
+http://www.infobiotics.org/infobiotics-workbench/quickStart/modelProperties.html
+
+FIGURE show temporal formulas tab rather than model parameters
+
+BEFORE Click on the Model checking (PRISM) tab from the upper menu bar to open up the dialog window below that will allow you to specify the properties to analyse in your model.
+AFTER Click on the Model checking (PRISM) button on the toolbar to open up the dialog window below that will allow you to specify the properties to analyse in your model.
+
+BEFORE Load from the upper menu bar 
+AFTER Load from the toolbar
+
+BEFORE Run your model checking analysis by clicking on the Perfom button on the bottom right corner of the model checking window dialog.
+AFTER  Check the parameters then run the experiment by clicking on the Perform button.
+
+BEFORE Once your analysis have finished the following tab will appear automatically showing a plot of the results.
+AFTER  Once the experiment has finished the following tab will appear automatically showing a plot of the results. 
+More complex queries with several formulas and multiple variables will generate a more complex interface with 3-dimensional plots and controls with which to explore the answers, as the figure below demonstrates [picture of 3D plot.]
+
+ADD
+Structural and Parameter Optimisation
+AFTER  For more details on how to use Infobiotics Workbench read the tutorials [http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial.html].
+
+
+http://www.infobiotics.org/infobiotics-workbench/quickStart/optimization.html
+
+BEFORE
+Load the optimisation parameter file optimisation.params by clicking Load from the upper menu bar and navigating to the location of the negative autoregulation model.
+Run the optimisation procedure by clicking on the Perfom button at the bottom of the optimisation dialog window. This process should take around one minute.
+Once the optimisation have finished the following tab will appear automatically showing the output of the best model found against the desired target behavior.
+AFTER 
+Load the optimisation parameter file optimisation.params by clicking Load on the toolbar and navigating to the location of the negative autoregulation model.
+Run the predefined optimisation experiment by clicking on the Perfom button. This process should take approximately one minute.
+Once the experiment has finished the following dialog will appear automatically describing best model found and its simulated behaviour against the desired target behavior.
+
+MISSING FIGURE
+
+ADD
+AFTER  For more details on how to use Infobiotics Workbench read the tutorials [http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial.html].
+
+
+http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial.html
+
+REMOVE broken figure 
+
+BEFORE
+The tutorials below will take you through the most important features of Infobiotics workbench using running examples to illustrate them. Infobiotics workbench is available for installation for a variety of platforms. Please download and install it from this link following the instructions provided.
+Infobiotics workbench provides a user-friendly front-end allowing the modeller to specify cellular models, analyse and optimise them. Start the Infobiotics workbench by double clicking on the corresponding icon located on your desktop (Windows) or by choosing it from your Applications menu (Mac/Linux). The following window will appear.
+The links below will guide you through the different features of our workbench. Video tutorials are available in each tutorial to show you how to use the different components integrated in the workbench.
+* Tutorial Using the Infobiotics Modelling Language
+* Tutorial Using SBML Model Specification
+For a complete description of the different components of Infobiotics Workbench please read our documentation.
+AFTER  
+The tutorials below will take you through the most important features of Infobiotics Workbench using running examples to illustrate them. Video tutorials are also available to show you how to use the different components integrated in the Dashboard.
+1. Using the Infobiotics Workbench and modelling language
+2. SBML model specification
+For a complete description of the different components of Infobiotics Workbench please read the documentation [http://www.infobiotics.org/infobiotics-workbench/completeDocumentation/completeDocumentation.html].
+
+
+http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial_1.html
+
+BEFORE
+Tutorial Using the Infobiotics Modelling Language
+With this tutorial you will learn how to use the Infobiotics workbench using its own modelling language for the specification of your models. We will illustrate its different features using an example comparing three basic gene regulatory mechanisms, namely, gene unregulated expression (UnReg), positive autoregulation (PAR) and negative autoregulation (NAR).
+-
+The example used in the tutorial can be downloaded from this link: autoregulation model. Please download and extract it to your favourite location.
+-
+Infobiotics workbench provides a user-friendly front-end allowing the modeller to specify cellular models, analyse and optimise them. Start the Infobiotics workbench by double clicking on the corresponding icon located on your desktop (Windows) or by choosing it from your Applications menu (Mac/Linux). The following window will appear.
+-
+The links below will guide you through the different features of our workbench. Video tutorials are available in each section to show you how to use the different components.
+-
+Model Specification and Building
+Multi-compartmental Stochastic Simulations
+Model Formal Analysis using Model Checking
+Model Structure and Parameter Optimisation
+For a complete description of the different components of Infobiotics Workbench please read our documentation.
+
+AFTER
+Using the Infobiotics Workbench and modelling language
+With this tutorial you will learn how to use the Infobiotics workbench using its own modelling language for the specification of your models. We will illustrate its different features using an example comparing three basic gene regulatory mechanisms, namely, unregulated gene expression (UnReg), positive autoregulation (PAR) and negative autoregulation (NAR).
+The autoregulation model used in the tutorial can be downloaded here [http://www.infobiotics.org/infobiotics-workbench/various/autoregulation.zip]. Please download it now and extract it to your favourite location.
+-
+There are 4 steps in this tutorial:
+1. Model Specification and Building
+2. Multi-compartmental Stochastic Simulations
+3. Model Formal Analysis using Model Checking
+4. Model Structure and Parameter Optimisation
+-
+For a complete description of the different components of Infobiotics Workbench please read our documentation.
+
+
+http://www.infobiotics.org/infobiotics-workbench/tutorial/modelSpecification.html
+
+The Infobiotics modelling language is based on Stochastic P systems [refs]. It enables the specification of models in an incremental and reusable manner. Multi-cellular models are specified in our modelling language typically by combining libraries of modules, models of individual cell types and geometric distributions of clones of these cell types. We will illustrate this using a running example based on gene autoregulation [http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial_1.html].
+
+Libraries of reusable modules
+Libraries of modules must be specified using text files with the extension '.plb'. You can open the file containing the library in our running example, basicLibrary.plb, by selecting File -> Open text file from the menu.
+
+Our libraries are specified using the key workds libraryOfModules ... endLibraryOfModules. Each library is identified with a name (basicLibrary in this example) and consists of a collection of modules that abstract sets of molecular interactions. In our case we have three different modules, UnReg, PosReg and NegReg respectively describing constitutive gene expression, positive and negative regulation. Comments can be included using text enclosed between # symbols. Below you have the library used in the autoregulation example:
+
+
+
+
