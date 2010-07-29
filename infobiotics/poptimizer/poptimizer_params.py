@@ -35,7 +35,7 @@ An example target timeseries file with 2 objects should look like:
         """,
     )
     nonfix_module_lib_file = ParamsRelativeFile(exists=True, desc='a filename for the non-fixed module library to evolve models')
-    fix_module_lib_file = ParamsRelativeFile(desc='a filename for the fixed module library')
+    fix_module_lib_file = ParamsRelativeFile('Null', desc="a filename for the fixed module library (should be 'Null' if empty)")
     molecules = Str#TODO(desc='the possible values for all variables when instantiating a module in the library (colon-separated list of strings)')
 
     seednum = Long(desc='the seed number used to initialize the random generator')

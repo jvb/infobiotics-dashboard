@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
 from enthought.traits.api import HasTraits, Instance, Str, Button, Any 
 from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring, HSplit, CodeEditor
