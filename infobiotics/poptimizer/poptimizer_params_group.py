@@ -3,10 +3,10 @@ from enthought.traits.ui.api import Group, VGroup, Item, Spring
 poptimizer_params_group = Group(
     VGroup(
         VGroup(
-            Item('target_file', label='Filename prefix for target files'),
-            Item('target_obj_num', label='Number of target timeseries files'),
-            Item('initial_file', label='Filename prefix for initial files'),
             Item('num_initials', label='Number of initial model files'),
+            Item('initial_file', label='Prefix for initial model file names'),
+            Item('target_obj_num', label='Number of target timeseries'), #FIXME should be redundant, but isn't yet
+            Item('target_file', label='Prefix for target timeseries file names'),
             Item('nonfix_module_lib_file', label='Non-fixed module library'),
             Item('fix_module_lib_file', label='Fixed module library'),
             Item('molecules', label='Molecule names (colon-separated)'),

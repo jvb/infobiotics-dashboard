@@ -1,28 +1,55 @@
+* model checking temporal_formulas only saves when name changed!
+
+
+* Matplotlib toolbar not rendering properly in Mac and Windows
+
+* Stacked plots should have only one molecules label, grid lines and only one time axis.
+
+* Grid lines and legends should be switchable
+
 * SimulatorResults not plotting modules but is plotting NAR?
 
-* POptimizer: update prefix params in example
+
+
+* make maximum number of modules in a model EMPTY - use TextEditor(evaluate)
+
+* maxgeno and popsize != GA_maxxo and GA_psize respectively; see poptimizer_params_group.py  
+
+* TODO change fitness_func_type and para_opti_algo to Enum and move Trait to handler
+
+* need to expect not just prefix1.txt but prefix?.txt where ? is num_initials
+
+
 
 * Saving text files - rolling our own Envisage TextEditor plugin
 
 * lexing and autocompletion of P system files using QScintilla
 
+
+
 * Welcome perspective
 
 * splash screen
+
+
 
 * argparse
 
 * unified 'Open File...' action
 
-* change CorePlugin to DashboardPlugin
 
-* change infobiotics.common to infobiotics.core
+
+* Adding Dashboard progress bars to view list
 
 * introduce notion of sessions (interactive/unattended, GUI/non-GUI)
 
 * Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging
 
-* Adding Dashboard progress bars to view list
+* change CorePlugin to DashboardPlugin
+
+* change infobiotics.common to infobiotics.core
+
+
 
 * BoundsEditor for PModelCheckerResults axes
 

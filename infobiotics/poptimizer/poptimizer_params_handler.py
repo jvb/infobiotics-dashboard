@@ -1,6 +1,6 @@
 from infobiotics.common.api import ParamsHandler
 from poptimizer_params_group import poptimizer_params_group
-from enthought.traits.api import Trait
+from enthought.traits.api import Trait, on_trait_change
 
 class POptimizerParamsHandler(ParamsHandler):
 
@@ -17,6 +17,17 @@ class POptimizerParamsHandler(ParamsHandler):
         ('Experiment parameters', ['*.params','*.xml']), 
         ('All files', ['*']),
     ]
+
+
+    @on_trait_change('model:initial_file, model:target_file')
+    def warn_about_prefix(self, name, old, new):
+        if '.' in new: 
+            from enthought.traits.ui.message import auto_close_message
+            auto_close_message("\n   Please ensure '%s' is only a prefix for a file name   \n   that ends in 1.txt or similar, e.g. prefix1.txt   \n" % new, 
+                title='Caution', 
+                time=5.0,
+            )
+
 
 #    model_format = Trait(
 #        'P system XML',

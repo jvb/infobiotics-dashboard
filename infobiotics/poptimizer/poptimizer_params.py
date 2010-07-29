@@ -18,14 +18,27 @@ class POptimizerParams(Params):
     _parameters_name = 'POptimizerParameters'
     _parameter_set_name = 'POptimizerParameters'
     
-    target_file = Str(desc='a filename for target time series data')
-    target_obj_num = Int(1, desc='the number of objects in the input time series data')
-    initial_file = Str(desc='a filename for non-zero initial values settings of some objects')
-    num_initials = Int(desc='the number of files for initial values')
+    num_initials = Int(1, desc='the number of initial models to use')
+    initial_file = ParamsRelativeFile(auto_set=False, enter_set=True, desc="the prefix for initial model file names, to which\ a number and '.txt' will be added, e.g. prefix1.txt")
+    target_file = ParamsRelativeFile(auto_set=False, enter_set=True, desc="the prefix for target timeseries files, to which\ a number and '.txt' will be added, e.g. prefix1.txt")
+    target_obj_num = Int(1, #FIXME should be redundant, but isn't yet 
+        desc="""the number of objects with target timeseries.
+An example target timeseries file with 2 objects should look like: 
+
+    time protein1 rna1
+    0 0 0
+    10 71.2679 2.208
+    20 113.7169 1.3306
+    30 132.9971 0.8434
+    40 140.0816 0.5794
+    50 141.2028 0.4495
+        """,
+    )
     nonfix_module_lib_file = ParamsRelativeFile(exists=True, desc='a filename for the non-fixed module library to evolve models')
     fix_module_lib_file = ParamsRelativeFile(desc='a filename for the fixed module library')
-    molecules = Str(desc='the possible values for all variables when instantiating a module in the library (colon-separated list of strings)')
-    seednum = Long(desc='the seed number to initialize the random generator')
+    molecules = Str#TODO(desc='the possible values for all variables when instantiating a module in the library (colon-separated list of strings)')
+
+    seednum = Long(desc='the seed number used to initialize the random generator')
     
     maxtime = FloatGreaterThanZero(desc='the total simulation time of the input data')
     interval = FloatGreaterThanZero(desc='the interval time between two sampling data points of input data')

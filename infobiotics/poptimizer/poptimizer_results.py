@@ -71,7 +71,7 @@ class POptimizerResults(HasTraits):
             
             self.best_model=best_model
 
-            target_file = os.path.join(directory, self.experiment.target_file)
+            target_file = os.path.join(directory, self.experiment.target_file) + '1.txt'
         
             f = open(target_file)
             species = f.readline().split()[1:]
