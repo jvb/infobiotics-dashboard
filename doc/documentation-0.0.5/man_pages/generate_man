@@ -1,0 +1,23 @@
+#!/bin/sh
+
+CMD="./rst2man.py --traceback"
+IN_DIR=rst_input
+OUT_DIR=man_output
+
+mkdir -p $OUT_DIR/man1/
+
+./rst2man.py $IN_DIR/man_pmodelchecker.rst $OUT_DIR/pmodelchecker.1 
+gzip $OUT_DIR/pmodelchecker.1 $OUT_DIR/pmodelchecker.1.gz 
+mv $OUT_DIR/pmodelchecker.1.gz $OUT_DIR/man1/ 
+#man -M $OUT_DIR/ pmodelchecker 
+
+./rst2man.py $IN_DIR/man_mcss.rst $OUT_DIR/mcss.1 
+gzip $OUT_DIR/mcss.1 $OUT_DIR/mcss.1.gz 
+mv $OUT_DIR/mcss.1.gz $OUT_DIR/man1/ 
+#man -M $OUT_DIR/ mcss 
+
+./rst2man.py $IN_DIR/man_poptimizer.rst $OUT_DIR/poptimizer.1 
+gzip $OUT_DIR/poptimizer.1 $OUT_DIR/poptimizer.1.gz 
+mv $OUT_DIR/poptimizer.1.gz $OUT_DIR/man1/ 
+#man -M $OUT_DIR/ poptimizer 
+

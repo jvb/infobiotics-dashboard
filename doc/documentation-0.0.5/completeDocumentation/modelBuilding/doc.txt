@@ -1,0 +1,42 @@
+In our example there are present two different bacterial strains or cell types. One of them acts a **signal sender** and the other one as a **pulse generator** in response to the signal produced by the first bacterial strain. The files containing the full specification of these two bacterial strains are available here::
+
+	SPsystem senderCell
+
+	    alphabet
+	         Pconst_geneLuxI 
+	         proteinLuxI_Rib
+	         proteinLuxI
+	         rnaLuxI_RNAP
+	         rnaLuxI
+	         signal3OC6
+	     endAlphabet
+
+	     compartments
+	         media
+	         bacterium inside media
+	     endCompartments
+
+	     initialMultisets
+	         initialMultiset bacterium
+	             Pconst_geneLuxI 1
+	         endInitialMultiset
+	      endInitialMultisets
+
+	     ruleSets
+	           ruleSet media
+	                r1:  [ signal3OC6 ]_media -c1-> signal3OC6 [ ]_media		c1 = 1
+      	                r2:  signal3OC6 [ ]_bacterium -c2-> [ signal3OC6 ]_bacterium		c2 = 2
+	                r3:  [ signal3OC6 ]_bacterium -c3-> [ ]_bacterium			c3 = 1
+	           endRuleSet
+
+	           ruleSet bacterium
+	                Pconst({LuxI},{0.1},{bacterium}) from library.plb
+ 	                PostTransc({LuxI},{3.36,0.0667,0.004,3.78,0.0667},{bacterium}) from library.plb
+	                r1:  [ proteinLuxI ]_bacterium -c1-> [ proteinLuxI + signal3OC6 ]_bacterium		c1 = 1
+      	                r2:  [ signal3OC6 ]_bacterium -c2-> signal3OC6 [ ]_bacterium				c2 = 2
+      	                r3:  [ signal3OC6 ]_bacterium -c3-> [ ]_bacterium				c3 = 2
+	           endRuleSet
+	      endRuleSets
+	    
+	endSPsystem
+
