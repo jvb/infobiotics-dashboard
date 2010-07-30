@@ -109,8 +109,8 @@ An example target timeseries file with 2 objects should look like:
             'EDA_psize',
             'EDA_maxgeno',
             'CMAES_maxgeno',
-            'show_progress',
-            'debug_mode',
+#            'show_progress',
+#            'debug_mode',
         ]
     
     def _maxgeno_default(self):

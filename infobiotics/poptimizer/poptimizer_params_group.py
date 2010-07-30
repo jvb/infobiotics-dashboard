@@ -1,4 +1,4 @@
-from enthought.traits.ui.api import Group, VGroup, Item, Spring
+from enthought.traits.ui.api import Group, VGroup, Item, Spring, HGroup
 
 poptimizer_params_group = Group(
     VGroup(
@@ -14,8 +14,12 @@ poptimizer_params_group = Group(
             label='Input parameters',
         ),
         VGroup(
-            Item('fitness_func_type', label='Fitness function'),
+            HGroup(
+                Item('maxtime', label='Simulation length'),
+                Item('interval', label='Sampling interval'),
+            ),
             Item('simu_runs', label='Ensemble size (simulation runs)'),
+            Item('fitness_func_type', label='Fitness function'),
             Group(
                 VGroup(
                     Item('maxmodulesno', label='Maximum number of modules in a model'),
