@@ -1,15 +1,23 @@
-* model checking temporal_formulas only saves when name changed!
+====
+TODO
+====
+
+README, etc.
+
+Tidy root.
+
+Delete temporary files: NamedTemporaryFile(delete=False) means I have to do this manually. 
+
+temporal_formulas file only saved when 'temporal_formulas' changed, always save.
 
 
-* Matplotlib toolbar not rendering properly in Mac and Windows
+* Matplotlib and Mayavi2 toolbar icons not rendering properly in frozen builds, where are the images in these?
 
 * Stacked plots should have only one molecules label, grid lines and only one time axis.
 
-* Grid lines and legends should be switchable
+* Grid lines and legends should be switchable: add to matplotlib_.py? (and rename that to something more explicit)
 
-* SimulatorResults not plotting modules but is plotting NAR?
-
-
+* Plots in PlotsPreviewDialog of SimulatorResults for 'NAR' but not 'modules'.
 
 * make maximum number of modules in a model EMPTY - use TextEditor(evaluate)
 
