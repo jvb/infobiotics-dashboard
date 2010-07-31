@@ -1,5 +1,5 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
-from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Event
+from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property
 from infobiotics.commons.traits.api import LongGreaterThanZero
 from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
 import tempfile
@@ -42,16 +42,19 @@ class PModelCheckerParams(Params):
 
     # MC2
     simulations_generatedHDF5 = Bool(False, desc='a flag to determine if the simulations needed to run MC2 are available in HDF5 format')
-    simulations_file_hdf5 = ParamsRelativeFile(exists_name='simulations_generatedHDF5', writable=True, filter=['*.h5','*'], desc='the filename(.h5) of the simulation')
+    simulations_file_hdf5 = ParamsRelativeFile(empty_ok_name='_empty_ok', enter_set=True, auto_set=False, exists_name='simulations_generatedHDF5', writable=True, filter=['*.h5','*'], desc='the filename(.h5) of the simulation')
+    
+    mcss_params_file = ParamsRelativeFile(empty_ok_name='_empty_ok', enter_set=True, auto_set=False, filters=['*.params'], desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
+
+    _empty_ok = Property(Bool, depends_on='simulations_generatedHDF5, simulations_generatedMC2')
+    def _get__empty_ok(self):
+        return self.simulations_generatedHDF5 or self.simulations_generatedMC2
     
     simulations_generatedMC2 = Bool(False, desc='a flag to determine if the simulations needed to run MC2 are available in MC2 format')
     simulations_file_MC2 = ParamsRelativeFile(exists_name='simulations_generatedMC2', writable=True, filter=['*.mc2','*'], desc='the filename(.mc2) of the simulation converted to MC2 format')
     
-    mcss_params_file = ParamsRelativeFile(filters=['*.params'], desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
-    
     _model_specification_changed = Bool(False)
     _translated = Bool(False)
-    
     
     @on_trait_change('model_specification, PRISM_model')
     def translate_model_specification(self, object, name, old, new):
@@ -64,20 +67,21 @@ class PModelCheckerParams(Params):
         if self.model_specification == '':
             return
         
-        if hasattr(self, '_PRISM_model_tempfile') and self.PRISM_model_ != self._PRISM_model_tempfile.name:
-            # delete old temporary file
-            del self._PRISM_model_tempfile #TODO may not be enough now that 'delete=False' below
-        
-        if self.PRISM_model == '':
-            # create temporary file
-            self._PRISM_model_tempfile = tempfile.NamedTemporaryFile(suffix='.sm', dir=self.directory, delete=False)
-            self._PRISM_model_tempfile.close()
-            # trigger translation with temporary file
-            if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6): 
-                self.trait_set(PRISM_model=os.path.relpath(self._PRISM_model_tempfile.name, self.directory))
-            else:
-                self.trait_set(PRISM_model=self._PRISM_model_tempfile.name)
-            return
+#        # can't get here that empty RelativeFiles are erroneous 
+#        if hasattr(self, '_PRISM_model_tempfile') and self.PRISM_model_ != self._PRISM_model_tempfile.name:
+#            # delete old temporary file
+#            del self._PRISM_model_tempfile #TODO may not be enough now that 'delete=False' below
+#        
+#        if self.PRISM_model == '':
+#            # create temporary file
+#            self._PRISM_model_tempfile = tempfile.NamedTemporaryFile(suffix='.sm', dir=self.directory, delete=False)
+#            self._PRISM_model_tempfile.close()
+#            # trigger translation with temporary file
+#            if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6): 
+#                self.trait_set(PRISM_model=os.path.relpath(self._PRISM_model_tempfile.name, self.directory))
+#            else:
+#                self.trait_set(PRISM_model=self._PRISM_model_tempfile.name)
+#            return
             
         from infobiotics.pmodelchecker.prism.api import PRISMExperiment # avoids circular import    
         translate = PRISMExperiment(directory=self.directory)

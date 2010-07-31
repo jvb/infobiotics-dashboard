@@ -20,6 +20,7 @@ class RelativeFile(BaseStr):
         directory='', directory_name='',
         absolute=False,
         readable=None, writable=None, executable=None,
+        empty_ok=False, empty_ok_name='',
         **metadata
     ):
         """ Creates a RelativeFile trait.
@@ -70,6 +71,7 @@ class RelativeFile(BaseStr):
                 validate will return an error if the file cannot be executed.
             elif executable is False: 
                 validate will return an error if the file can be executed.
+        TODO empty_ok, empty_ok_name,
                 
         Default Value
         -------------
@@ -81,10 +83,8 @@ class RelativeFile(BaseStr):
         
         if directory != '' and directory_name != '':
             raise ValueError, "Please specify only 'directory' or 'directory_name', the value of '%s' named in the attribute directory_name will override '%s' in the attribute directory of the %s trait." % (directory_name, directory, self.__class__.__name__)
-        
 #        self.directory = directory if directory != '' else os.getcwd() # can't set this in class definition: it will always be the location of the module  
         self.directory = directory  
-
         self.directory_name = directory_name
 
         self.exists_name = exists_name
@@ -97,6 +97,9 @@ class RelativeFile(BaseStr):
         self.writable = writable
         self.executable = executable
 
+        self.empty_ok = empty_ok
+        self.empty_ok_name = empty_ok_name
+
         super(RelativeFile, self).__init__(
 #            value, filter, auto_set, entries, exists, **metadata
             value, **metadata
@@ -107,7 +110,7 @@ class RelativeFile(BaseStr):
         self.filter = filter
         self.auto_set = auto_set
         self.entries = entries
-        self.exists = exists
+        self.exists = exists # why are these set here rather than in super?
         
 #        self.editor = self.create_editor() # problem with circular imports - try not subclassing BaseFile instead.
 
@@ -172,10 +175,20 @@ class RelativeFile(BaseStr):
             return
         self.exists = getattr(object, self.exists_name)
 
-    def validate(self, object, name, value):
-        ''' Calls _validate so that we can reuse _validate for Directory traits. ''' 
+    def _set_empty_ok_from_empty_ok_name(self, object):
+        if self.empty_ok_name == '':
+            return
+        self.empty_ok = getattr(object, self.empty_ok_name)
 
-#        if value == '': self.error(object, name, value) #TODO probably needs an empty_ok and empty_ok_name parameters
+    def validate(self, object, name, value):
+        ''' Calls _validate so that we can call 
+        _validate(function=os.path.isdir) for Directory traits.
+        Also enables separate evaluation of File traits.  
+        
+        ''' 
+        self._set_empty_ok_from_empty_ok_name(object)
+        if not self.empty_ok and value == '': 
+            self.error(object, name, value)
         
         return self._validate(object, name, value)
 
@@ -231,7 +244,7 @@ class RelativeFile(BaseStr):
             else: # we don't care whether it can be written
                 return value
         
-        elif function(abspath): # we care whether it exists
+        elif function(abspath): # we care whether it exists (isfile implies exists)
             if self.readable is not None: # we care whether it can be read
                 # validate whether it is readable failing fast 
                 if self.readable: # we care that it can be read
@@ -281,6 +294,8 @@ class RelativeFile(BaseStr):
             entries=self.entries,
             exists=self.exists,
             exists_name=self.exists_name,
+            empty_ok=self.empty_ok,
+            empty_ok_name=self.empty_ok_name,
             filter=self.filter or [],
         )
         return editor

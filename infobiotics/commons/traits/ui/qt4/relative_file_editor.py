@@ -2,7 +2,7 @@
 Adapted from qt4/extras/bounds_editor.py, qt4/file_editor.py, and qt4/html_editor.py
 '''
 
-from enthought.traits.ui.qt4.text_editor import SimpleEditor as SimpleTextEditor
+from enthought.traits.ui.qt4.text_editor import SimpleEditor as SimpleTextEditor, ReadonlyEditor
 from enthought.traits.ui.api import FileEditor
 from enthought.traits.api import Str, Bool, TraitError, on_trait_change
 from infobiotics.commons.traits.relative_directory import RelativeDirectory
@@ -14,12 +14,14 @@ class SimpleEditor(SimpleTextEditor):
 
     directory = RelativeDirectory(exists=True)
     exists = Bool(False)
+    empty_ok = Bool(False)
     
     def init(self, parent):
         factory = self.factory # RelativeFileEditor below
         self.directory = factory.directory
         self.sync_value(factory.directory_name, 'directory', 'from')
         self.sync_value(factory.exists_name, 'exists', 'from')
+        self.sync_value(factory.empty_ok_name, 'empty_ok', 'from')
             
         # same as file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
@@ -49,7 +51,7 @@ class SimpleEditor(SimpleTextEditor):
 #        if self.value is not None:
 #            self.update_editor(self.value) # which then calls self.update_object, which in turn calls self._update
 
-    @on_trait_change('exists, directory')
+    @on_trait_change('directory, exists, empty_ok')
     def update_object(self):
         ''' Handles the user changing the contents of the edit control. '''
         if self.control is not None:
@@ -60,7 +62,6 @@ class SimpleEditor(SimpleTextEditor):
         if value is not None:
             self._file_name.setText(value)
         else: 
-#            self._file_name.setText(self.str_value)
             self._file_name.setText(self.value)
         self.update_object() 
         # needed to refresh invalid state when a valid value is set while the 
@@ -124,6 +125,8 @@ class RelativeFileEditor(FileEditor): # EditorFactory
     directory_name = Str
     exists = Bool(False)
     exists_name = Str
+    empty_ok = Bool(False)
+    empty_ok_name = Str
 
     def _directory_default(self):
         return os.getcwd()
@@ -132,7 +135,7 @@ class RelativeFileEditor(FileEditor): # EditorFactory
         return SimpleEditor
 
     def _get_readonly_editor_class(self):
-        return SimpleTextEditor
+        return ReadonlyEditor
 
     def _get_custom_editor_class(self):
         return SimpleEditor

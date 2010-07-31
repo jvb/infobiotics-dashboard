@@ -50,6 +50,14 @@ def can_execute(path):
 def can_read(path):
     return can_access(path, os.R_OK)
 
+def can_access_file(path):
+    ''' Return whether path is an existing file. '''
+    return can_access(path) if os.path.split(path)[1] != '' else False  
+
+def can_read_file(path):
+    ''' Return whether path is an existing readable file. '''
+    return can_access(path, os.R_OK) if can_access_file(path) else False 
+
 def read(file, mode='r'):
     if not can_read(file):
         raise IOError("Cannot read '%s'." % file)

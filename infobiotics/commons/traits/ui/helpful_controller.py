@@ -14,7 +14,7 @@ class HelpStr(HasTraits):
 
 class HelpfulController(Controller):
 
-    has_help = Property(Bool, depends_on='help_url, help_string_maybe_html')
+    has_help = Property(Bool, depends_on='help_urls, help_strs')
 
     def _get_has_help(self):
         return True if len(self.help_urls) + len(self.help_strs) > 0 else False
@@ -100,4 +100,25 @@ def test_get_help_actions():
     
 if __name__ == '__main__':
     test_get_help_actions()
+    
+    class Test(HasTraits):
+        
+    
+    
+    h.configure_traits(model=t)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     

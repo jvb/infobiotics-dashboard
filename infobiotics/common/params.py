@@ -84,6 +84,7 @@ class Params(HasTraits):
 #                    sys.stderr.write('\n')
                     infobiotics.preferences.preferences.set(preferences_path, '')
                     infobiotics.preferences.preferences.flush()
+            # this fails if preference trait is DelegatesTo
             bound_preference = bind_preference(self, preference, preferences_path, infobiotics.preferences.preferences)
             self.bound_preferences.append(bound_preference)
         
@@ -280,12 +281,12 @@ class Params(HasTraits):
 '''     
         return s
 
-    def __str__(self):
-#        return self.params_file_string()
-        return '%s(_params_file=%s)' % (self.__class__.__name__, os.path.basename(self._params_file))
-        
-    def __repr__(self):
-        return traits_repr(self, self.parameter_names())
+#    def __str__(self):
+##        return self.params_file_string()
+#        return '%s(_params_file=%s)' % (self.__class__.__name__, os.path.basename(self._params_file))
+#        
+#    def __repr__(self):
+#        return traits_repr(self, self.parameter_names())
 
     repr = Str # The "offical" string representation (scripting interface) of this params experiment, updated when any trait changes.
 

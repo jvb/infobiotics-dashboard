@@ -1,104 +1,136 @@
-====
-TODO
-====
+=================================================
+Things to do, bugs to fix, feature requests, etc.
+=================================================
+
+Unsorted
+--------
+
+RelativeFile validation should respect filters.
+
+RelativeDirectory should not descend from RelativeFile because this makes it harder to subclass RelativeFile and make Directory equivalent that works the same.
+
+Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging
+
+change CorePlugin to DashboardPlugin
+
+change infobiotics.common to infobiotics.core
+
+Project management (using Single Project plugin?)
+
+Results management using Sumatra
+
+Make size of Mayavi screenshots adjustable
+
+Make Mayavi videos on Debian using ffmpeg
+
+code coverage
+
+unit tests (before refactoring!)
+
+decouple writable, readable from RelativeFile
+
+decouple directory trait of file editors?
+
+FIXMEs
+
+TODOs
+
+
+
+
+General
+-------
+
+Help URLS
+
+Welcome perspective
+
+Splash screen
+
+Delete temporary files: NamedTemporaryFile(delete-False) means I have to do this manually. 
 
 Perform should *always* prompt to save parameters and only perform when saved.
 
-
-default prism model should have random name - tempfile
-
-disabled perform button should have helpful tooltip coming from has_invalid_parameters
-
-IBW should install shortcuts to All Users when 'Run as...' Administrator on University computers - alternative is to not install in Program Files (probably more natural) - maybe suggest this on running the installer - still can't add to path though!
-
-All temporal formula parameters change when on changes!
-
-Need poptimizer output for Windows video
-
-temporal_formulas file should have enter_set=True, auto_set=False
-
-
-
-
-
+Disabled 'Perform' button should have helpful tooltip populated by has_invalid_parameters()
 
 README, etc.
 
 Tidy root.
 
-Delete temporary files: NamedTemporaryFile(delete=False) means I have to do this manually. 
+Unified 'Open File...' service/action
+
+Parse command line arguments to Dashboard using argparse, file names to Unified file opener service 
+
+Adding Dashboard progress bars (with Experiment and Results buttons) to view list
+
+Introduce notion of sessions (interactive/unattended, GUI/non-GUI)
+
+
+
+
+Frozen
+------
+
+IBW should install shortcuts to All Users when 'Run as...' Administrator on University computers - alternative is to not install in Program Files (probably more natural) - maybe suggest this on running the installer - still can't add to path though!
+
+Matplotlib and Mayavi2 toolbar icons not rendering properly in frozen builds, where are the images in these?
+
+
+
+
+PModelChecker
+-------------
+
+All temporal formula parameters change when on changes!
+
+temporal_formulas file should have enter_set-True, auto_set-False
 
 temporal_formulas file only saved when 'temporal_formulas' changed, always save.
 
-
-* Matplotlib and Mayavi2 toolbar icons not rendering properly in frozen builds, where are the images in these?
-
-* Stacked plots should have only one molecules label, grid lines and only one time axis.
-
-* Grid lines and legends should be switchable: add to matplotlib_.py? (and rename that to something more explicit)
-
-* Plots in PlotsPreviewDialog of SimulatorResults for 'NAR' but not 'modules'.
-
-* make maximum number of modules in a model EMPTY - use TextEditor(evaluate)
-
-* maxgeno and popsize != GA_maxxo and GA_psize respectively; see poptimizer_params_group.py  
-
-* TODO change fitness_func_type and para_opti_algo to Enum and move Trait to handler
-
-* need to expect not just prefix1.txt but prefix?.txt where ? is num_initials
+BoundsEditor for PModelCheckerResults axes
 
 
 
-* Saving text files - rolling our own Envisage TextEditor plugin
 
-* lexing and autocompletion of P system files using QScintilla
+POptimizer
+----------
 
+Need poptimizer output for Windows video -> make tarball
 
+maxgeno and popsize !- GA_maxxo and GA_psize; see poptimizer_params_group.py  
 
-* Welcome perspective
+change fitness_func_type and para_opti_algo to Enum and move Trait to handler
 
-* splash screen
+need to expect not just prefix1.txt but prefix?.txt where ? is num_initials
 
-
-
-* argparse
-
-* unified 'Open File...' action
+make maximum number of modules in a model '' by default but erroneous using TextEditor(evaluate-evaluate_function)
 
 
 
-* Adding Dashboard progress bars to view list
 
-* introduce notion of sessions (interactive/unattended, GUI/non-GUI)
+SimulatorResults
+----------------
 
-* Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging
+Stacked plots should have only one molecules label, grid lines and only one time axis.
 
-* change CorePlugin to DashboardPlugin
+Grid lines and legends should be switchable: add to matplotlib_.py? (and rename that to something more explicit)
 
-* change infobiotics.common to infobiotics.core
+Plots in PlotsPreviewDialog of SimulatorResults for 'NAR' but not 'modules'.
+
+BoundsEditor for Simulation Results time start/stop
 
 
 
-* BoundsEditor for PModelCheckerResults axes
 
-* BoundsEditor for Simulation Results time start/stop
+Language
+--------
 
-* Project management (using Single Project plugin?)
+Saving text files - rolling our own Envisage TextEditor plugin
 
-* Results management using Sumatra
+Lexing of P system files
 
-* Make size of Mayavi screenshots adjustable
+Autocompletion from parsed data structure 
 
-* Make Mayavi videos on Debian using ffmpeg
 
-* code coverage
 
-* unit tests (before refactoring!)
 
-* decouple writable, readable from RelativeFile
-
-* decouple directory trait of file editors?
-
-* FIXMEs
-
-* TODOs
