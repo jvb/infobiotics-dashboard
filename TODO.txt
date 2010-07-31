@@ -2,6 +2,26 @@
 TODO
 ====
 
+Perform should *always* prompt to save parameters and only perform when saved.
+
+
+default prism model should have random name - tempfile
+
+disabled perform button should have helpful tooltip coming from has_invalid_parameters
+
+IBW should install shortcuts to All Users when 'Run as...' Administrator on University computers - alternative is to not install in Program Files (probably more natural) - maybe suggest this on running the installer - still can't add to path though!
+
+All temporal formula parameters change when on changes!
+
+Need poptimizer output for Windows video
+
+temporal_formulas file should have enter_set=True, auto_set=False
+
+
+
+
+
+
 README, etc.
 
 Tidy root.

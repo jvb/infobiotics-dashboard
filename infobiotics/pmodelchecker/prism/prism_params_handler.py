@@ -50,7 +50,10 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     view_prism_model = Button
     def _view_prism_model_fired(self):
-        self.edit_traits(
+        class ViewPRISMModelHandler(Controller):
+            _prism_model_str = Str
+            PRISM_model = Str
+        ViewPRISMModelHandler(model=self.model, _prism_model_str=self._prism_model_str).edit_traits(
             view=View(
                 Group(
                     HGroup(
