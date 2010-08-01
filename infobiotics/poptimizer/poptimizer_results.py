@@ -101,11 +101,13 @@ class POptimizerResults(HasTraits):
             for i in range(rows):
                 if i == 0:
                     shax = self.figure.add_subplot(rows, cols, 1)
-                    shax.set_xlabel("time")
                     ax = shax
                     ax.set_title(params_file)
+#                    shax.set_xlabel("time")
                 else:
                     ax = self.figure.add_subplot(rows, cols, i + 1, sharex=shax)                
+                if i == (rows - 1):
+                    ax.set_xlabel("time")
                 ax.grid(True)
                 ax.set_ylabel('molecules')
                 ax.plot(time, target[:,i+1], label='%s (target)' % species[i])
