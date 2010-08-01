@@ -10,6 +10,9 @@ class POptimizerParamsHandler(ParamsHandler):
     id = 'POptimizerParamsHandler'
 
     help_urls = [
+        ('Quick start', 'http://www.infobiotics.org/infobiotics-workbench/quickStart/optimization.html'),
+        ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/optimisation.html'),
+        ('Automatic Discovery of Pulse Generators example', 'http://www.infobiotics.org/infobiotics-workbench/models/IFFL/FFLpulse.html'),
         ('Documentation','http://www.infobiotics.org/infobiotics-workbench/optimisation/optimisation_Claudio.html'),
     ]
     

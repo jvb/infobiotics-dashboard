@@ -76,6 +76,8 @@ class PModelCheckerParamsHandler(ParamsHandler):
         temporal_formulas = self.temporal_formulas
         self.temporal_formulas = []
         self.temporal_formulas = temporal_formulas
+#        for temporal_formula in self.temporal_formulas:
+#            print '"' + temporal_formula.formula + '" {' + temporal_formula.parameters_string + '}'
     
     selected_temporal_formula = Instance(TemporalFormula)
 
@@ -87,6 +89,7 @@ class PModelCheckerParamsHandler(ParamsHandler):
         result = temporal_formula.edit_traits(kind='livemodal').result 
         if result:
             temporal_formula.formula = temporal_formula.formula.replace('\n', '')
+            temporal_formula.update_parameters_string()
         return result 
     
     def _add_temporal_formula_fired(self):
@@ -107,9 +110,13 @@ class PModelCheckerParamsHandler(ParamsHandler):
             self.selected_temporal_formula = None
 
     def save(self, info):
-        super(PModelCheckerParamsHandler, self).save(info)
         self.write_temporal_formulas_file()
-
+        super(PModelCheckerParamsHandler, self).save(info)
+    
+    def perform(self, info):
+        self.write_temporal_formulas_file() # in case Perform with unsaved parameters
+        super(PModelCheckerParamsHandler, self).perform(info)
+        
     def write_temporal_formulas_file(self):
         ''' Write temporal_formulas file, e.g.
             

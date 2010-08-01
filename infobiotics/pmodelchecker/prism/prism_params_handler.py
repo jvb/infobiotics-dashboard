@@ -23,6 +23,8 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     id = 'PRISMParamsHandler'
 
     help_urls = [
+        ('Quick start', 'http://www.infobiotics.org/infobiotics-workbench/quickStart/modelProperties.html'),
+        ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/modelChecking.html'),
         ('Introduction to PRISM','http://www.prismmodelchecker.org/manual/Main/Introduction'),
         ('The PRISM language','http://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction'),
         ('Property specifiation','http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction'),

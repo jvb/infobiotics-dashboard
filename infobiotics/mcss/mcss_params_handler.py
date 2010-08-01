@@ -16,6 +16,9 @@ class McssParamsHandler(ParamsHandler):
     id = 'McssParamsHandler'
     
     help_urls = [
+        ('Quick start', 'http://www.infobiotics.org/infobiotics-workbench/quickStart/quickStart.html'),
+        ('Tutorial','http://www.infobiotics.org/infobiotics-workbench/tutorial/modelSimulation.html'),
+        ('Tutorial using SBML model specification', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial_2.html'),
         ('Documentation','http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'),
     ]
     

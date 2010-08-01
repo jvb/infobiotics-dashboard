@@ -22,15 +22,22 @@ class MC2Params(PModelCheckerParams):
             'number_samples',
             'results_file',
             'simulations_generatedHDF5',
-            'simulations_file_hdf5',
             'simulations_generatedMC2',
-            'simulations_file_MC2',
         ]
+        if self.simulations_generatedMC2:
+            return parameter_names + [
+                'simulations_file_MC2',
+            ]
         if self.simulations_generatedHDF5:
-            return parameter_names
+            return parameter_names + [
+                'simulations_file_hdf5',
+                'simulations_file_MC2',                                      
+            ]
         else:
             return parameter_names + [
                 'mcss_params_file',
+                'simulations_file_hdf5',
+                'simulations_file_MC2',
             ]
         
 

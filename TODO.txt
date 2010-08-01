@@ -41,7 +41,7 @@ TODOs
 General
 -------
 
-Help URLS
+Help URLS for Dashboard main window - requires altered actions strategy to HelpController
 
 Welcome perspective
 
@@ -49,7 +49,7 @@ Splash screen
 
 Delete temporary files: NamedTemporaryFile(delete-False) means I have to do this manually. 
 
-Perform should *always* prompt to save parameters and only perform when saved.
+Perform should *always* prompt to save parameters and only perform when saved - only true of interactive mode?
 
 Disabled 'Perform' button should have helpful tooltip populated by has_invalid_parameters()
 
@@ -82,10 +82,6 @@ PModelChecker
 -------------
 
 All temporal formula parameters change when on changes!
-
-temporal_formulas file should have enter_set-True, auto_set-False
-
-temporal_formulas file only saved when 'temporal_formulas' changed, always save.
 
 BoundsEditor for PModelCheckerResults axes
 

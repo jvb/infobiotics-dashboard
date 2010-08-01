@@ -122,12 +122,13 @@ temporal_formula_view = View(
                 auto_set=True, 
                 line='line', 
                 column='column',
+                selected_text='selected_text',
             ), 
             tooltip='Multiple lines will be concatenated.'), 
         HGroup(
             Spring(),
             Item('model_parameter_name_to_insert', label='Model parameters:'), #FIXME descriptions (EnumEditor?)
-            Item('insert', show_label=False),
+            Item('insert', show_label=False, enabled_when='object.model_parameter_name_to_insert is not None'),
             Spring(),
         ),
         Item(label='Formula parameters:'),
@@ -181,6 +182,7 @@ class TemporalFormula(HasTraits):
     
     line = Int
     column = Int
+    selected_text = Str
     params_handler = Any#Instance(PModelCheckerParamsHandler)
     model_parameter_names = Property(List(Unicode), depends_on='params_handler.model_parameter_names')
     def _get_model_parameter_names(self):
@@ -188,16 +190,21 @@ class TemporalFormula(HasTraits):
     model_parameter_name_to_insert = Enum(values='model_parameter_names')
     insert = Button
     def _insert_fired(self):
+        if self.model_parameter_name_to_insert is None:
+            return
         lines = self.formula.split('\n')
         line = lines[self.line]
-        line = line[:self.column] + self.model_parameter_name_to_insert + ' ' + line[self.column:]
+        col = self.column-len(self.selected_text)
+        line = line[:col] + self.model_parameter_name_to_insert + line[self.column:]
         lines[self.line] = line
         self.formula = '\n'.join(lines)
-        self.column = self.column + len(self.model_parameter_name_to_insert) + 2
+        self.column = col + len(self.model_parameter_name_to_insert) + 1
         # focus given back to CodeEditor in TemporalFormulaHandler.object_insert_changed()
         
-    formula = Str('P = ? [ true U[A,A] (  >= X ) ]') #TODO better example? #TODO help?
-    parameters = List(TemporalFormulaParameter, [TemporalFormulaParameter(name='A'), TemporalFormulaParameter(name='X')])
+    formula = Str('P = ? [ true U[T,T] ( molecule >= constant ) ]') #TODO better example? #TODO help?
+    parameters = List(TemporalFormulaParameter)#, [TemporalFormulaParameter(name='T')]) was causing all first Parameters to be same instance!
+    def _parameters_default(self):
+        return [TemporalFormulaParameter(name='T')]
     
     add_new_parameter = Button
     remove_current_parameter = Button
@@ -216,4 +223,10 @@ class TemporalFormula(HasTraits):
     parameters_string = Str
     @on_trait_change('parameters, parameters.lower, parameters.step, parameters.upper')
     def update_parameters_string(self):
-        self.parameters_string = ','.join(['%s=%s:%s:%s' % (parameter.name, parameter.format(parameter.lower), parameter.format(parameter.step), parameter.format(parameter.upper)) for parameter in self.parameters])
+        self.parameters_string = ','.join(['%s=%s:%s:%s' % (parameter.name, parameter.format(parameter.lower), parameter.format(parameter.step), parameter.format(parameter.upper)) for parameter in self.parameters if parameter.name != ''])
+
+
+if __name__ == '__main__':
+    from mc2.mc2_experiment import MC2Experiment
+    MC2Experiment().configure()
+    
