@@ -84,23 +84,38 @@ class POptimizerResults(HasTraits):
             
             output = np.loadtxt(os.path.join(directory, 'outputdata.txt'), skiprows=1, usecols=range(1, 3 * len(species), 3))
             
-            fig = self.figure
-            ax = fig.add_subplot(111)
-            ax.set_title(params_file)
-            ax.set_xlabel('time')
-            ax.set_ylabel('molecules')
-            ax.grid(True)
-            
-            for i in range(len(species)):
+#            # combined plot
+#            ax = self.figure.add_subplot(111)
+#            ax.set_title(params_file)
+#            ax.set_xlabel('time')
+#            ax.set_ylabel('molecules')
+#            ax.grid(True)
+#            for i in range(len(species)):
+#                ax.plot(time, target[:,i+1], label='%s (target)' % species[i])
+#                ax.plot(time, output[:,i], label='%s (optimised)' % species[i])    
+#            ax.legend(loc='best')
+
+            # stacked plot
+            rows = len(species)
+            cols = 1
+            for i in range(rows):
+                if i == 0:
+                    shax = self.figure.add_subplot(rows, cols, 1)
+                    shax.set_xlabel("time")
+                    ax = shax
+                    ax.set_title(params_file)
+                else:
+                    ax = self.figure.add_subplot(rows, cols, i + 1, sharex=shax)                
+                ax.grid(True)
+                ax.set_ylabel('molecules')
                 ax.plot(time, target[:,i+1], label='%s (target)' % species[i])
                 ax.plot(time, output[:,i], label='%s (optimised)' % species[i])    
-        
-            ax.legend(loc='best')
+                ax.legend(loc='best')
             
         except Exception, e:
             logger.error(e)
             
 
 if __name__ == '__main__':
-    experiment = POptimizerExperiment('../../examples/NAR-poptimizer/NAR_optimization.params')
+    experiment = POptimizerExperiment('../../examples/NAR-poptimizer-working/NAR_optimization.params')
     POptimizerResults(experiment=experiment).configure_traits()
