@@ -81,8 +81,6 @@ Matplotlib and Mayavi2 toolbar icons not rendering properly in frozen builds, wh
 PModelChecker
 -------------
 
-All temporal formula parameters change when on changes!
-
 BoundsEditor for PModelCheckerResults axes
 
 
@@ -90,8 +88,6 @@ BoundsEditor for PModelCheckerResults axes
 
 POptimizer
 ----------
-
-Need poptimizer output for Windows video -> make tarball
 
 maxgeno and popsize !- GA_maxxo and GA_psize; see poptimizer_params_group.py  
 
@@ -107,7 +103,7 @@ make maximum number of modules in a model '' by default but erroneous using Text
 SimulatorResults
 ----------------
 
-Stacked plots should have only one molecules label, grid lines and only one time axis.
+Stacked plots should have only one molecules label, grid lines and only one time axis (see POptimizerResults)
 
 Grid lines and legends should be switchable: add to matplotlib_.py? (and rename that to something more explicit)
 

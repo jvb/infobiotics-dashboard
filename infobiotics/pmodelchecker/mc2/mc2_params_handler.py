@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from infobiotics.common.api import ParamsView
 from enthought.traits.api import (
-    Int, Range, Property, Instance, on_trait_change, Button, Bool,
+    Int, Range, Property, Instance, on_trait_change, Button, Bool
 )
 from infobiotics.pmodelchecker.api import (
     PModelCheckerParamsHandler, 
@@ -25,6 +25,8 @@ class MC2ParamsHandler(PModelCheckerParamsHandler):
         ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/modelCheckingMC2.html'),
         ('MC2 webpage','http://www.brc.dcs.gla.ac.uk/software/mc2/'),
     ]
+    
+    default_temporal_formula = 'P=?[ (Time=1000)U([molecule] >= T ^ [molecule] < T + constant)'
     
     _mc2_mcss_experiment = Instance(MC2McssExperiment)
     

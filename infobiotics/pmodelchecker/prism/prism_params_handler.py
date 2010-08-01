@@ -31,6 +31,8 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         ('Tutorial for systems biologists','http://www.prismmodelchecker.org/tutorial/circadian.php'),
     ]
 
+    default_temporal_formula = 'P = ? [ true U[T,T] ( molecule >= constant ) ]'
+
     _prism_model_str = Str
 
     @on_trait_change('model._translated')

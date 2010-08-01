@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from infobiotics.commons.api import read, write
 from infobiotics.common.api import ParamsHandler
-from enthought.traits.api import List, Unicode, Button, Instance, Int, Enum, on_trait_change, Bool
+from enthought.traits.api import List, Unicode, Button, Instance, Int, Enum, on_trait_change, Bool, Str
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 import os.path
@@ -92,8 +92,13 @@ class PModelCheckerParamsHandler(ParamsHandler):
             temporal_formula.update_parameters_string()
         return result 
     
+    default_temporal_formula = Str
+    
     def _add_temporal_formula_fired(self):
-        temporal_formula = TemporalFormula(params_handler=self, column=23)
+        temporal_formula = TemporalFormula(
+            params_handler=self, 
+            formula=self.default_temporal_formula,
+        )
         if self.__edit_temporal_formula(temporal_formula):
             self.temporal_formulas.append(temporal_formula)
             self.selected_temporal_formula = temporal_formula
@@ -126,7 +131,7 @@ Formulas:
             
         '''
         with write(self.model.temporal_formulas_) as f:
-            f.writelines(['Formulas:\n'] + ['"' + temporal_formula.formula + '" {' + temporal_formula.parameters_string + '}' for temporal_formula in self.temporal_formulas])
+            f.writelines(['Formulas:\n'] + ['"' + temporal_formula.formula + '" {' + temporal_formula.parameters_string + '}\n' for temporal_formula in self.temporal_formulas])
         
         
 if __name__ == '__main__':

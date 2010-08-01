@@ -201,7 +201,7 @@ class TemporalFormula(HasTraits):
         self.column = col + len(self.model_parameter_name_to_insert) + 1
         # focus given back to CodeEditor in TemporalFormulaHandler.object_insert_changed()
         
-    formula = Str('P = ? [ true U[T,T] ( molecule >= constant ) ]') #TODO better example? #TODO help?
+    formula = Str
     parameters = List(TemporalFormulaParameter)#, [TemporalFormulaParameter(name='T')]) was causing all first Parameters to be same instance!
     def _parameters_default(self):
         return [TemporalFormulaParameter(name='T')]
