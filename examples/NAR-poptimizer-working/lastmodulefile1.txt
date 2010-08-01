@@ -1,0 +1,43 @@
+<PSystem name="lastmodulefile1.txt">
+
+	<alphabetOfObjects>
+		<object name="protein1"/>
+		<object name="gene1"/>
+		<object name="protein1_gene1"/>
+		<object name="rna1"/>
+	</alphabetOfObjects>
+
+	<compartmentLabels>
+		<compartmentLabel label="bact"/>
+	</compartmentLabels>
+
+	<membraneStructure>
+		<compartment name="bact" label="bact"/>
+	</membraneStructure>
+
+	<initialMultisets>
+		<initialMultiset label="bact">
+			<object name="gene1" multiplicity="1"/>
+		</initialMultiset>
+	</initialMultisets>
+
+	<ruleSets>
+
+		<ruleSet label="bact">
+
+			<module name="NegReg" 
+					 objects="1,1"
+					 constants="3.0000000000,3.5000000000"
+					 labels="bact"
+					file="basicLibrary.plb" />
+			<module name="UnReg" 
+					 objects="1"
+					 constants="3.5000000000,0.0899999961,3.5000000000,0.0199999996"
+					 labels="bact"
+					file="basicLibrary.plb" />
+		</ruleSet>
+
+	</ruleSets>
+
+</PSystem>
+
