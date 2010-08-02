@@ -31,6 +31,20 @@ EXCLUDES=[
     '_tkinter', 
     'numpy.f2py',
     'wx',
+    '_gtkagg', 
+    '_tkagg', 
+    'wxagg',
+    'bsddb', 
+    'curses', 
+    'pywin.debugger',
+    'pywin.debugger.dbgcon', 
+    'pywin.dialogs', 
+    'pydoc', 
+#    'doctest', 
+    'test', 
+    'sqlite3'
+
+    'mayavi.html',
 ]
 
 import matplotlib
@@ -84,7 +98,7 @@ if sys.platform.startswith('darwin'):
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("enthought/pyface/images", glob.glob("/Library/Frameworks/.framework/Versions/Current/lib/python26/site-packages/enthought/pyface/images/*.png")), #FIXME
-        ],
+        ] + matplotlib.get_py2exe_datafiles(), # http://www.py2exe.org/index.cgi/MatPlotLib
 )
 elif sys.platform.startswith('win'):
     
@@ -159,7 +173,10 @@ manifestVersion="1.0">
             py2exe=dict(
                 includes=['py2imports'],
                 excludes=EXCLUDES,
-                dll_excludes=["mswsock.dll", "powrprof.dll", "MSVCP90.dll"], # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
+                dll_excludes=[
+                    "mswsock.dll", "powrprof.dll", "MSVCP90.dll", # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
+#                    'libgdk-win32-2.0-0.dll', 'libgobject-2.0-0.dll', 'tcl84.dll', 'tk84.dll', # http://www.py2exe.org/index.cgi/MatPlotLib
+                ], 
                 packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
                 unbuffered=True,
                 optimize=0,
