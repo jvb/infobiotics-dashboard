@@ -6,6 +6,12 @@ subclasses.
 from enthought.traits.ui.menu import Action
 from enthought.traits.ui.api import View, HGroup, VGroup, Item, StatusItem
 
+close_action = Action(
+    name='&Close', 
+#    action='_on_close', # doesn't terminate event loop if last window closed 
+    action='close_window', # in ParamsHandler; calls info.ui.control.close() 
+) 
+
 load_action = Action(
     name='&Load', 
     action='load', 
@@ -50,7 +56,7 @@ experiment_actions = [ # ExperimentView only
 from enthought.traits.ui.menu import Menu, MenuBar, ToolBar
 
 file_menu = Menu(
-    load_action, save_action,
+    load_action, save_action, close_action,
     name = '&File'
 )
 

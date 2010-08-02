@@ -119,7 +119,10 @@ class ParamsHandler(HelpfulController):
         self.status = "Please ensure the current working directory is correct."
         info.ui.title = self.title
 
-    def closed(self, info, is_ok): # must return True or else window is unscloseable!
+    def close_window(self, info):
+        info.ui.control.close()
+
+    def closed(self, info, is_ok): # must return True or else window is uncloseable!
         if is_ok:
             self.model.save_preferences()
         return True
