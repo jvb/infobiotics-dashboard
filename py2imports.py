@@ -14,6 +14,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import Qsci
 from PyQt4 import QtNetwork
+from PyQt4 import QtXml # supposed to fix matplotlib icons http://groups.google.com/group/pyinstaller/browse_thread/thread/834bea87c7afcdff
 
 import numpy
 

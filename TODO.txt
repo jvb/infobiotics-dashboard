@@ -75,7 +75,7 @@ IBW should install shortcuts to All Users when 'Run as...' Administrator on Univ
 
 Matplotlib and Mayavi2 toolbar icons not rendering properly in frozen builds, where are the images in these?
 
-
+py2exe log error dialog fix in root
 
 
 PModelChecker
