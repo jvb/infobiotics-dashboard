@@ -1,5 +1,5 @@
 from infobiotics.common.api import Params, ParamsRelativeFile
-from enthought.traits.api import Str, Int, Long, Bool, Range, on_trait_change, Trait #TODO remove Trait
+from enthought.traits.api import Str, Int, Long, Bool, Range, on_trait_change, Enum, Undefined
 from infobiotics.commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
 from infobiotics.poptimizer.poptimizer_preferences import POptimizerParamsPreferencesHelper
 
@@ -42,35 +42,17 @@ An example target timeseries file with 2 objects should look like:
     
     maxtime = FloatGreaterThanZero(desc='the total simulation time of the input data')
     interval = FloatGreaterThanZero(desc='the interval time between two sampling data points of input data')
-    maxmodulesno = IntGreaterThanZero(10, desc='the maximum number of modules contain in one model')
+    maxmodulesno = IntGreaterThanZero(Undefined, desc='the maximum number of modules contain in one model') #TODO
     simu_runs = IntGreaterThanZero(20, desc='the number of simulations when running the simulator to calculate the fitness of one individual')
 
-    #TODO change these to Enum and move Trait to handler
-#    fitness_func_type = Str(desc='the fitness function chosen to do the model quality evaluation')
-    fitness_func_type = Trait(
-        'Random-weighted sum',
-        {
-            'Random-weighted sum' : 'RandomWeightedSum',
-            'Equal-weighted sum' : 'EqualWeightedSum'
-        },
-        desc='the fitness function chosen to do the model quality evaluation'
-    )
-    
-    para_opti_algo = Trait(
-        'Genetic Algorithm',
-        {
-            'Differential Evolution' : 'DE',
-            'Genetic Algorithm' : 'GA',
-            'Estimation of Distribution Algorithm' : 'EDA',
-            'Covariance Matrix adaptation - Evolutionary Strategies' : 'CMA-ES',
-        },
-        desc='the algorithm chosen to do the model parameter optimization'
-    )
+    # structure optimisation
+    fitness_func_type = Enum(['RandomWeightedSum','EqualWeightedSum'], desc='the fitness function chosen to do the model quality evaluation')
+    para_opti_algo = Enum(['DE','GA','EDA','CMA-ES'], desc='the algorithm chosen to do the model parameter optimization')
     percent_paraopti = Range(0.0, 1.0, 0.1, desc='the percentage of the individuals in the model population on which to do the parameter optimization')
+    maxgeno = IntGreaterThanZero(50, desc='the maximum number of generations to evolve the best model')
+    popsize = IntGreaterThanZero(50, desc='the population size for a generation\n(recommend 10x the maximum number of modules)')
     
-    maxgeno = IntGreaterThanZero(50, desc='the maximum number of generations to evolve the best parameter set')
-    popsize = IntGreaterThanZero(50, desc='the population size for a generation')
-    # below not shown
+    # parameter optmisation
     DE_psize = IntGreaterThanZero(50, desc='the population size for DE parameter optimization')
     DE_maxgeno = IntGreaterThanZero(20, desc='the maximum number of generations to evolve the best parameter set with DE')
     GA_psize = IntGreaterThanZero(50, desc='the population size for GA parameter optimization')
@@ -78,13 +60,14 @@ An example target timeseries file with 2 objects should look like:
     EDA_psize = IntGreaterThanZero(50, desc='the population size for EDA parameter optimization')
     EDA_maxgeno = IntGreaterThanZero(20, desc='the maximum number of generations to evolve the best parameter set with EDA')
     CMAES_maxgeno = IntGreaterThanZero(20, desc='the maximum number of generations to evolve the best parameter set with CMA-ES')
+    # above not shown in favour of parameter_optmisation_generations and parameter_optmisation_population_size in handler
     
     # below not shown
     show_progress = Bool(False, desc='whether to show progress of the optimization procedure')
     debug_mode = Bool(False, desc='print information to stdout useful for code debug')
 
     def parameter_names(self):
-        return [
+        parameter_names = [
             'target_file',
             'target_obj_num',
             'initial_file',
@@ -100,62 +83,45 @@ An example target timeseries file with 2 objects should look like:
             'fitness_func_type',
             'para_opti_algo',
             'percent_paraopti',
-            'maxgeno',
-            'popsize',
-            'DE_psize',
-            'DE_maxgeno',
-            'GA_psize',
-            'GA_maxxo',
-            'EDA_psize',
-            'EDA_maxgeno',
-            'CMAES_maxgeno',
 #            'show_progress',
 #            'debug_mode',
+            'maxgeno',
+            'popsize',
+#            'DE_psize',
+#            'DE_maxgeno',
+#            'GA_psize',
+#            'GA_maxxo',
+#            'EDA_psize',
+#            'EDA_maxgeno',
+#            'CMAES_maxgeno',
         ]
-    
-    def _maxgeno_default(self):
-        if self.para_opti_algo_ == 'GA':
-            return 950
-        elif self.para_opti_algo_ == 'DE':
-            return 20
-        elif self.para_opti_algo_ == 'EDA':
-            return 20
-        elif self.para_opti_algo_ == 'CMA-ES':
-            return 20        
-    
-    def _para_opti_algo__changed(self, para_opti_algo_):
-        if para_opti_algo_ == 'GA':
-            self.popsize = self.GA_psize
-            self.maxgeno = self.GA_maxxo
-        elif para_opti_algo_ == 'DE':
-            self.popsize = self.DE_psize
-            self.maxgeno = self.DE_maxgeno
-        elif para_opti_algo_ == 'EDA':
-            self.popsize = self.EDA_psize
-            self.maxgeno = self.EDA_maxgeno
-        elif para_opti_algo_ == 'CMA-ES':
-            self.maxgeno = self.CMAES_maxgeno
-    
-    @on_trait_change('DE_maxgeno', 'GA_maxxo', 'EDA_maxgeno', 'CMAES_maxgeno')
-    def update_maxgeno(self, maxgeno):
-        self.maxgeno = maxgeno
+        if self.para_opti_algo == 'GA':
+            return parameter_names + [
+                'GA_psize',
+                'GA_maxxo',
+            ]
+        elif self.para_opti_algo == 'DE':
+            return parameter_names + [
+                'DE_psize',
+                'DE_maxgeno',
+            ]
+        elif self.para_opti_algo == 'EDA':
+            return parameter_names + [
+                'EDA_psize',
+                'EDA_maxgeno',
+            ]
+        elif self.para_opti_algo == 'CMA-ES':
+            return parameter_names + [
+#                'DE_psize',
+                'CMAES_maxgeno',
+            ]
+        else:
+            raise ValueError("para_opti_algo not in ('GA', 'DE', 'EDA', 'CMA-ES')")
         
-    def _maxgeno_changed(self, maxgeno):
-        self.DE_maxgeno = self.GA_maxxo = self.EDA_maxgeno = self.CMAES_maxgeno = maxgeno
+#    def _nonfix_module_lib_file_changed(self, library): pass #TODO update maxmodulesno, maxgeno, popsize
 
-    def _popsize_changed(self, population_size):
-        self.DE_psize = self.GA_psize = self.EDA_psize = population_size
-        
-    def _maxmodulesno_changed(self, num_modules):
-        self.popsize = 10 * num_modules
-        
-    def _nonfix_module_lib_file_changed(self, library): pass #TODO update maxmodulesno, maxgeno, popsize
-
-
+    
 if __name__ == '__main__':
     parameters = POptimizerParams()
-#    parameters.load('test/fourinitial/four_initial_inputpara.xml')
-#    parameters.load('test/promoter/all_para_promoter_inputpara.xml')
-#    parameters.load('test/threegene/threegene_inputpara.xml')
     parameters.configure()
     

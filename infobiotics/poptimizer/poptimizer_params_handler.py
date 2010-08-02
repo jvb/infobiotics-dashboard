@@ -1,6 +1,7 @@
 from infobiotics.common.api import ParamsHandler
 from poptimizer_params_group import poptimizer_params_group
-from enthought.traits.api import Trait, on_trait_change
+from enthought.traits.api import Trait, on_trait_change, Str
+from infobiotics.commons.traits.api import IntGreaterThanZero
 
 class POptimizerParamsHandler(ParamsHandler):
 
@@ -22,6 +23,8 @@ class POptimizerParamsHandler(ParamsHandler):
     ]
 
 
+    # 'initial_file' and 'target_file' parameters are prefixes for file names that end in <number>.txt, e.g. prefix1.txt.
+    
     @on_trait_change('model:initial_file, model:target_file')
     def warn_about_prefix(self, name, old, new):
         if '.' in new: 
@@ -31,57 +34,54 @@ class POptimizerParamsHandler(ParamsHandler):
                 time=5.0,
             )
 
+    
+    # pattern allowing full names for Enum items on model using Trait and dict
 
-#    model_format = Trait(
-#        'P system XML',
-#        {
-#            'P system XML'                 : 'xml',
-#            'SBML'                         : 'sbml',
-#        },
-#        desc='the model specification format',
-#    )
-#    
-#    model_format_reversed = {
-#        'xml'  : 'P system XML',
-#        'sbml' : 'SBML',
-#    }
-#
-#    simulation_algorithm = Trait(
-#        'Direct Method with queue',
-#        {
-#            'Direct Method with queue'               : 'dmq',
-#            'Direct Method (Gillespie68)'            : 'dm',
-#            'Logarithmic Direct Method (Cao2007)'    : 'ldm',
-#            'Direct Method with growth and division' : 'dmgd',
-#            'Direct Method (Cellular Potts)'         : 'dmcp',
-#        },
-#        desc='the stochastic simulation algorithm to use',
-#    )
-#
-#    simulation_algorithm_reversed = { # needed because we can't assign to simulation_algorithm_ #TODO this means traits_repr is probably wrong for Traits - but we use Enum in Params subclass so it doesn't matter
-#        'dmq'  : 'Direct Method with queue', 
-#        'dm'   : 'Direct Method (Gillespie68)',
-#        'ldm'  : 'Logarithmic Direct Method (Cao2007)',
-#        'dmgd' : 'Direct Method with growth and division',
-#        'dmcp' : 'Direct Method (Cellular Potts)',
-#    }
-#
-#    def init(self, info):
-#        self.sync_trait('model_format_', info.object, alias='model_format', mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
-#        self.sync_trait('simulation_algorithm_', info.object, alias='simulation_algorithm', mutual=False) # ditto
-#
-#    def object_model_file_changed(self, info):
-#        ext = os.path.splitext(info.object.model_file)[1].lower() 
-#        if ext == '.sbml':
-#            self.model_format = 'SBML'
-#        else:
-#            self.model_format = 'P system XML'
-#
-#    def object_model_format_changed(self, info):
-#        self.model_format = self.model_format_reversed[info.object.model_format]
-#
-#    def object_simulation_algorithm_changed(self, info):
-#        self.simulation_algorithm = self.simulation_algorithm_reversed[info.object.simulation_algorithm]
+    def init(self, info):
+        # sync Trait shadow values from handler to Enum in model
+        self.sync_trait('para_opti_algo_', info.object, alias='para_opti_algo', mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
+        self.sync_trait('fitness_func_type_', info.object, alias='fitness_func_type', mutual=False) # ditto
+
+    fitness_func_type = Trait(
+        'Random-weighted sum',
+        {
+            'Random-weighted sum' : 'RandomWeightedSum',
+            'Equal-weighted sum' : 'EqualWeightedSum'
+        },
+        desc='the fitness function chosen to do the model quality evaluation'
+    )
+
+    para_opti_algo = Trait(
+        'Genetic Algorithm',
+        {
+            'Differential Evolution' : 'DE',
+            'Genetic Algorithm' : 'GA',
+            'Estimation of Distribution Algorithm' : 'EDA',
+            'Covariance Matrix adaptation - Evolutionary Strategies' : 'CMA-ES',
+        },
+        desc='the algorithm chosen to do the model parameter optimization'
+    )
+
+    fitness_func_type_reversed = {
+        'RandomWeightedSum' : 'Random-weighted sum',
+        'EqualWeightedSum' : 'Equal-weighted sum',
+    }
+    
+    para_opti_algo_reversed = {
+        'DE' : 'Differential Evolution',
+        'GA' : 'Genetic Algorithm',
+        'EDA' : 'Estimation of Distribution Algorithm',
+        'CMA-ES' : 'Covariance Matrix adaptation - Evolutionary Strategies',
+    }
+
+    # set Trait in handler using full name from reversed dict 
+    # because we can't set shadow trait
+    
+    def object_para_opti_algo_changed(self, info):
+        self.para_opti_algo = self.para_opti_algo_reversed[info.object.para_opti_algo]
+
+    def object_fitness_func_type_changed(self, info):
+        self.fitness_func_type = self.fitness_func_type_reversed[info.object.fitness_func_type]
 
 
 if __name__ == '__main__':
