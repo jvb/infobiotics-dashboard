@@ -1,4 +1,4 @@
-from infobiotics.common.api import Experiment
+from infobiotics.core.experiment import Experiment
 
 class PModelCheckerExperiment(Experiment): 
 

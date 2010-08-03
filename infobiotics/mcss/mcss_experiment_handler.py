@@ -1,5 +1,5 @@
 from infobiotics.mcss.api import McssParamsHandler, McssExperimentProgressHandler
-from infobiotics.common.api import ExperimentHandler
+from infobiotics.core.experiment_handler import ExperimentHandler
 
 class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 

@@ -1,4 +1,4 @@
-from infobiotics.common.api import ParamsHandler
+from infobiotics.core.params_handler import ParamsHandler
 from poptimizer_params_group import poptimizer_params_group
 from enthought.traits.api import Trait, on_trait_change, Str
 from infobiotics.commons.traits.api import IntGreaterThanZero

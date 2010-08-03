@@ -22,13 +22,13 @@ if sys.platform.startswith('win'):
         # no build path setup, no worries.
         pass
     
-    import infobiotics.thirdparty.winpexpect as expect
+    import infobiotics.thirdparty.winpexpect.winpexpect as expect
 else:
     import pexpect as expect
 #    import infobiotics.thirdparty.pexpect as expect
 from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change
 from threading import Thread
-from infobiotics.common.api import Params, ParamsRelativeFile
+from infobiotics.core.params import Params
 
 class Experiment(Params):
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.

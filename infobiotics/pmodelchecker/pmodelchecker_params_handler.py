@@ -1,13 +1,13 @@
 from __future__ import with_statement
 from infobiotics.commons.api import read, write
-from infobiotics.common.api import ParamsHandler
+from infobiotics.core.params_handler import ParamsHandler
 from enthought.traits.api import List, Unicode, Button, Instance, Int, Enum, on_trait_change, Bool, Str
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 import os.path
 
 class PModelCheckerParamsHandler(ParamsHandler):
-    ''' Traits common to PRISMParamsHandler and MC2ParamsHandler. '''
+    ''' Traits shared by PRISMParamsHandler and MC2ParamsHandler. '''
 
     task = Enum(['Approximate', 'Build', 'Verify'], desc="the task to perform:\n'Approximate' or 'Verify' the input properties\n'Build' the corresponding Markov chain")
     

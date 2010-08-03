@@ -1,4 +1,4 @@
-from infobiotics.common.api import ParamsPreferencesHelper, ParamsPreferencesPage
+from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
 
 PREFERENCES_PATH = 'poptimizer' #TODO
 

@@ -1,6 +1,4 @@
-from enthought.traits.api import HasTraits, Instance
-from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
+from has_infobiotics_dashboard_workbench_application import HasInfobioticsDashboardWorkbenchApplication
 
-class DashboardExperiment(HasTraits):
-    
-    application = Instance(InfobioticsDashboardWorkbenchApplication)
+class DashboardExperiment(HasInfobioticsDashboardWorkbenchApplication):
+    pass    

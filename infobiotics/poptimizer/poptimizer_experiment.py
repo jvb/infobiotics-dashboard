@@ -1,5 +1,5 @@
 from poptimizer_params import POptimizerParams
-from infobiotics.common.api import Experiment
+from infobiotics.core.experiment import Experiment
 #from enthought.traits.api import HasTraits, Str, DictStrStr, List, Float, Instance, Constant, Int, Range, Property
 #from matplotlib.figure import Figure, SubplotParams
 #from enthought.traits.ui.api import View, VGroup, Item, HGroup, TabularEditor

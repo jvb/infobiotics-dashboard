@@ -60,7 +60,7 @@ class RelativeFile(BaseStr):
             elif readable is False: 
                 validate will return an error if the file can be read.
         writable : either True, False or None
-            Implies directory exists (see can_write in common).
+            Implies directory exists (see can_write).
             if writable is True:
                 validate will return an error if the file cannot be written.
             elif writable is False: 

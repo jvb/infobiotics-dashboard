@@ -1,5 +1,5 @@
 '''
-Views, Groups, Items, Actions and KeyBindings that are common to ParamsHandler
+Views, Groups, Items, Actions and KeyBindings that are shared by ParamsHandler
 subclasses.
 '''
 

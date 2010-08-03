@@ -1,4 +1,5 @@
-from infobiotics.common.api import Params, ParamsRelativeFile
+from infobiotics.core.params import Params
+from infobiotics.core.api import ParamsRelativeFile
 from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property
 from infobiotics.commons.traits.api import LongGreaterThanZero
 from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper

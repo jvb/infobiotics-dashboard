@@ -1,6 +1,6 @@
 from __future__ import division
 from mcss_params import McssParams
-from infobiotics.common.api import Experiment
+from infobiotics.core.experiment import Experiment
 from enthought.traits.api import Int, Float
 
 class McssExperiment(McssParams, Experiment):

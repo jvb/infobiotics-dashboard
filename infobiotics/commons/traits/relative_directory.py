@@ -55,7 +55,7 @@ class RelativeDirectory(RelativeFile):
             elif readable is False: 
                 validate will return an error if the directory can be read.
         writable : either True, False or None
-            Implies parent directory exists (see can_write in common).
+            Implies parent directory exists (see can_write).
             if writable is True:
                 validate will return an error if the directory cannot be 
                 written.

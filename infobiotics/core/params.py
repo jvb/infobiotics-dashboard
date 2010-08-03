@@ -1,12 +1,12 @@
 from __future__ import with_statement # from __future__ imports must come first
 import infobiotics # set up TraitsUI backend before traits imports
-from infobiotics.common.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, EXECUTABLE_TRAIT, DIRECTORY_TRAIT
+from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, EXECUTABLE_TRAIT, DIRECTORY_TRAIT
 from enthought.traits.api import (
     HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property,
 #    on_trait_change
 )
 from enthought.traits.ui.api import Controller
-from infobiotics.common.api import ParamsRelativeFile
+from infobiotics.core.traits.params_relative_file import ParamsRelativeFile
 from infobiotics.commons.api import key_from_value, can_access, read, write, logging, can_execute
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 import os, sys

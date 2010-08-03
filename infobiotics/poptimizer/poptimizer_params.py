@@ -1,4 +1,5 @@
-from infobiotics.common.api import Params, ParamsRelativeFile
+from infobiotics.core.params import Params
+from infobiotics.core.api import ParamsRelativeFile
 from enthought.traits.api import Str, Int, Long, Bool, Range, on_trait_change, Enum, Undefined
 from infobiotics.commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
 from infobiotics.poptimizer.poptimizer_preferences import POptimizerParamsPreferencesHelper

@@ -1,4 +1,5 @@
-from infobiotics.common.api import Params, ParamsRelativeFile
+from infobiotics.core.api import ParamsRelativeFile
+from infobiotics.core.params import Params
 from enthought.traits.api import Enum, Bool, Range, Long, Property, Float
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 from infobiotics.mcss.mcss_preferences import McssParamsPreferencesHelper

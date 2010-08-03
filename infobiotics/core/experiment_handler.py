@@ -1,6 +1,6 @@
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
-from infobiotics.common.api import ExperimentView
+from infobiotics.core.views import ExperimentView
 from enthought.traits.api import Instance, Property, Bool
 import os.path
 

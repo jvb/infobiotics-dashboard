@@ -1,4 +1,4 @@
-from infobiotics.common.api import ExperimentHandler
+from infobiotics.core.experiment_handler import ExperimentHandler
 import os.path
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 

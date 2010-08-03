@@ -1,4 +1,4 @@
-from infobiotics.common.api import ExperimentProgressHandler
+from infobiotics.core.experiment_progress_handler import ExperimentProgressHandler
 from enthought.traits.api import on_trait_change
 
 class MC2ExperimentProgressHandler(ExperimentProgressHandler):

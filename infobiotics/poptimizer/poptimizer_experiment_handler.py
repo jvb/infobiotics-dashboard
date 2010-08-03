@@ -1,5 +1,5 @@
 from poptimizer_params_handler import POptimizerParamsHandler
-from infobiotics.common.api import ExperimentHandler
+from infobiotics.core.experiment_handler import ExperimentHandler
 from poptimizer_experiment_progress_handler import POptimizerExperimentProgressHandler
 from poptimizer_results import POptimizerResults
 
