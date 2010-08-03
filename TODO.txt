@@ -42,6 +42,7 @@ General
 Use open lpp file for model parameter for each experiment. 
 
 Help URLS for Dashboard main window - requires altered actions strategy to HelpController
+    link to issue tracker http://bitbucket.org/jvb/infobiotics-dashboard/issues?status=new&status=open
 
 Welcome perspective
 
