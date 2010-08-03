@@ -17,7 +17,10 @@ from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
 
 #from enthought.envisage.developer.developer_plugin import DeveloperPlugin
 #from enthought.envisage.developer.ui.developer_ui_plugin import DeveloperUIPlugin
-from enthought.plugins.text_editor.text_editor_plugin import TextEditorPlugin
+
+#from enthought.plugins.text_editor.text_editor_plugin import TextEditorPlugin
+from infobiotics.dashboard.plugins.text_editor.text_editor_plugin import TextEditorPlugin
+
 from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
 #from enthought.plugins.ipython_shell.ipython_shell_plugin import IPythonShellPlugin # IPythonShellPlugin is not supported by Qt backend, yet.
 
