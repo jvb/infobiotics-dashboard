@@ -1,10 +1,6 @@
-
 from enthought.envisage.ui.action.api import Action, ActionSet, Group
 
-
 class TextEditorActionSet(ActionSet):
-    """ The default action set for the Text Editor plugin.
-    """
 
     groups = [
         Group(
@@ -17,19 +13,34 @@ class TextEditorActionSet(ActionSet):
     actions = [
         Action(
             id = "NewFileAction",
-            name = "New Text File",
-            class_name='enthought.plugins.text_editor.actions.NewFileAction',
+            name = "&New Text File",
+            class_name='infobiotics.dashboard.plugins.text_editor.actions.NewFileAction',
             group='TextFileGroup',
             path="MenuBar/File",
         ),
 
         Action(
             id = 'OpenFile',
-            name = "Open Text File...",
-            class_name='enthought.plugins.text_editor.actions.OpenFileAction',
+            name = "&Open Text File...",
+            class_name='infobiotics.dashboard.plugins.text_editor.actions.OpenFileAction',
             group='TextFileGroup',
             path="MenuBar/File",
         ),
+
+        Action(
+            id = 'SaveFile',
+            name = "&Save",
+            class_name='infobiotics.dashboard.plugins.text_editor.actions.SaveFileAction',
+            group='TextFileGroup',
+            path="MenuBar/File",
+        ),
+    
+        Action(
+            id = 'SaveAsFile',
+            name = "Save &As...",
+            class_name='infobiotics.dashboard.plugins.text_editor.actions.SaveAsFileAction',
+            group='TextFileGroup',
+            path="MenuBar/File",
+        ),
+    
     ]
-
-

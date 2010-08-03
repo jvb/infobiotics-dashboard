@@ -13,8 +13,6 @@ Test simpler pexpect example, especially for PRISM output, and see what gets pas
 
 change CorePlugin to DashboardPlugin
 
-change infobiotics.common to infobiotics.core
-
 Project management (using Single Project plugin?)
 
 Results management using Sumatra
@@ -54,8 +52,6 @@ Perform should *always* prompt to save parameters and only perform when saved - 
 Disabled 'Perform' button should have helpful tooltip populated by has_invalid_parameters()
 
 README, etc.
-
-Tidy root.
 
 Unified 'Open File...' service/action
 
@@ -114,8 +110,6 @@ BoundsEditor for Simulation Results time start/stop
 
 Language
 --------
-
-Saving text files - rolling our own Envisage TextEditor plugin
 
 Lexing of P system files
 
