@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+The file represents the list of patterns to use in the 
+property builder tool. There are two types of patterns:
+1. state patterns - used to define states in the tool
+2. property patterns - patterns which generate temporal
+logic formulae based on the states previously defined.
+
+Each pattern has a set of possible "translations", providing
+for multiple ways to generate a formula. This is most convenient
+when a special syntax is required by a model checker, thus, this 
+file gives the flexibility needed to create a temporal logic formula
+as required by the model checker of choice.
+Multiple translations also allow the definition of several temporal 
+logics. For instance, one may choose between the set {pctl, pctl2, ctl,
+csl}; notice that there may be more than one translation to the same 
+temporal logic - a property may be formulated in more than one way.
+-->
+
+<!-- NOTE:
+The symbols ">", "<", "&" have been encoded using "@gt@", "@lt@", "@amp@" 
+respectively. This is because XML will not allow these symbols specified
+directly. They will be interpreted properly by the application that uses 
+this file.
+-->
+
+<patterns>
+<listOfStatePatterns>
+
+<pattern id="sp001"> <!-- pattern which has a unique id -->
+<question value="A variable v is maximum x." /> <!-- the question acts as a label - will be displayed to describe what the pattern is about; the natural language version -->
+<template value="Variable #v is maximum #x" /> <!-- the template helps to generate a form with graphical user interface elements where the variables can be specified -->
+<var id="#v" type="string" /> <!-- each variable has an id and a type; the id should be the same one as used in the template; a variable always begins with # and each template should not use this symbol except to make a reference to a variable; the type is used to filter the allowed input in the GUI -->
+<var id="#x" type="numeric" />
+<translationList>
+	<translation to="PRISM acceptable form" value="(#v @lt@= #x)"/> <!-- the translation of this pattern -  the code that will be generated if the pattern is used. the variables will be replaced by values in the application. Here, #v will be replaced with a string (possibly identifying an object in a P system) and #x will be a numeric value -->
+</translationList>
+</pattern>
+
+<pattern id="sp002">
+<question value="A variable v is minimum x." />
+<template value="Variable #v is minimum #x" />
+<var id="#v" type="string" />
+<var id="#x" type="numeric" />
+<translationList>
+	<translation to="PRISM acceptable form" value="(#v @gt@= #x)"/>
+</translationList>
+</pattern>
+
+<pattern id="sp003">
+<question value="State conjuction." />
+<template value="Conjunction of #s1 and #s2" />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="PRISM acceptable form" value="(#s1 @amp@ #s2)" />
+</translationList>
+</pattern>
+
+<pattern id="sp004">
+<question value="State disjunction." />
+<template value="Disjunction of #s1 and #s2" />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="PRISM acceptable form" value="(#s1 | #s2)" />
+</translationList>
+</pattern>
+
+<pattern id="sp005">
+<question value="State negation." />
+<template value="Negation of #s1" />
+<var id="#s1" type="state" />
+<translationList>
+	<translation to="PRISM acceptable form" value="!#s1" />
+</translationList>
+</pattern>
+
+</listOfStatePatterns>
+
+<listOfPropertyPatterns>
+
+<pattern class="Occurrence/Exclusion" id="pp001"> <!-- property patterns have a mandatory class attribute. Having this, we can categorize patterns, to make shorter lists for selections -->
+<question value="It is possible for a state s to occur." />
+<template value="It is possible for state #s1 to occur." />
+<var id="#s1" type="state" /> <!-- a single variable of type state is needed in this pattern. This means that #s1 will be replaced by a defined state -->
+<translationList>
+	<translation to="pctl" value="P @gt@ 0 [true U #s1]" /> <!-- PCTL translation -->
+	<translation to="ctl" value="EF (#s1)" /> <!-- CTL translation -->
+	<translation to="csl" value="" /> <!-- CSL transltaion -->
+</translationList>
+</pattern>
+
+<pattern class="Occurrence/Exclusion" id="pp002">
+<question value="It is not possible for a state s to occur." />
+<template value="It is not possible for state #s1 to occur." />
+<var id="#s1" type="state" />
+<translationList>
+	<translation to="pctl" value="P = 0 [true U #s1]" />
+	<translation to="ctl" value="!EF (#s1)" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Consequence" id="pp003">
+<question value="If a state s1 occurs, then it is possibly followed by a state s2." />
+<template value="If state #s1 occurs, then it is possibly followed by state #s2." />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@ 0 [true U (#s1 -@gt@ (P @gt@= 0 [true U #s2]))]" />
+	<translation to="ctl" value="AG (#s1 -@gt@ EF (#s2))" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Consequence" id="pp004">
+<question value="If a state s1 occurs, then it is necessarily followed by a state s2." />
+<template value="If state #s1 occurs, then it is necessarily followed by state #s2." />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@ 0 [true U (#s1 -@gt@ (P @gt@= 1 [true U #s2]))]" />
+	<translation to="ctl" value="AG (#s1 -@gt@ AF (#s2))" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Sequence" id="pp005">
+<question value="A state s1 is reachable and is possibly preceded at some time by a state s2." />
+<template value="State #s1 is reachable and is possibly preceded at some time by state #s2." />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@= 1 [(P @gt@ 0 [true U #s2]) U #s1]" />
+	<translation to="ctl" value="EF(#s2 @amp@ EF(#s1))" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Sequence" id="pp006">
+<question value="A state s1 is reachable and is possibly preceded at all time by a state s2." />
+<template value="State #s1 is reachable and is possibly preceded at all time by state #s2." />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@ 0 [#s2 U #s1]" />
+	<translation to="ctl" value="E (#s2 U #s1)" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Sequence" id="pp007">
+<question value="A state s1 is reachable and is necessarily preceded at some time by state s2." />
+<template value="State #s1 is reachable and is necessarily preceded at some time by state #s2." />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@= 1 ((P @gt@= 1 (true U #s2)) U #s1)" />
+	<translation to="ctl" value="EF(#s2) @amp@ !E(!#s2 U #s1)" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Sequence" id="pp008">
+<question value="A state s1 is reachable and is necessarily preceded at all time by state s2." />
+<template value="State #s1 is reachable and is necessarily preceded at all time by state #s2." />
+<var id="#s1" type="state" />
+<var id="#s2" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@= 1 [#s2 U #s1]" />
+	<translation to="ctl" value="EF(#s2) @amp@ AG(!#s2 -@gt@ AG(!#s1))" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Invariance" id="pp009">
+<question value="A state s1 can persist indefinitely." />
+<template value="State #s1 can persist indefinitely." />
+<var id="#s1" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@ 0 [G #s1]" />
+	<translation to="ctl" value="EG (#s1)" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+<pattern class="Invariance" id="pp010">
+<question value="A state s1 must persist indefinitely." />
+<template value="State #s1 must persist indefinitely." />
+<var id="#s1" type="state" />
+<translationList>
+	<translation to="pctl" value="P @gt@= 1 (G #s1 )" />
+	<translation to="ctl" value="EG (#s1)" />
+	<translation to="csl" value="" />
+</translationList>
+</pattern>
+
+</listOfPropertyPatterns>
+
+</patterns>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<patterns>
+<listOfStatePatterns>
+<!--to add state patterns here -->
+</listOfStatePatterns>
+
+<listOfPropertyPatterns>
+<!--to add property patterns here -->
+</listOfPropertyPatterns>
+</patterns>
