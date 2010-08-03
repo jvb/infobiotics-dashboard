@@ -1,21 +1,19 @@
-from enthought.io.api import File
-from enthought.pyface.api import FileDialog, OK
 from enthought.pyface.action.api import Action
 from enthought.traits.api import Any, Property, Bool
+from enthought.io.api import File
 from editor.text_editor import TextEditor
+from enthought.pyface.api import FileDialog, OK
 
 import logging
 logger = logging.getLogger(__name__)
-#logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 class NewFileAction(Action):
-    """ Open a new file in the text editor.
-    """
+    ''' Open a new file in the text editor. '''
     tooltip = "Create a new file for editing"
     description = "Create a new file for editing"
 
-    # The WorkbenchWindow the action is attached to.
-    window = Any()
+    window = Any() # The WorkbenchWindow the action is attached to.
 
     def perform(self, event=None):
         logger.info('NewFileAction.perform()')
@@ -24,10 +22,11 @@ class NewFileAction(Action):
 
 
 class OpenFileAction(Action):
-    """ Open an existing file in the text editor.
-    """
-    tooltip = "Open a file for editing"
+    ''' Open an existing file in the text editor. '''
+#    tooltip = "Open a file for editing"
     description = "Open a file for editing"
+
+    #TODO why doesn't this action need a window trait? 
 
     def perform(self, event=None):
         logger.info('OpenFileAction.perform()')
@@ -38,11 +37,9 @@ class OpenFileAction(Action):
     
 
 class SaveFileAction(Action):
-    """ Save, overwriting, the current file in the text editor.
-    """
-    tooltip = "Save the current file"
+    ''' Save, overwriting, the current file in the text editor. '''
+#    tooltip = "Save the current file"
     description = "Save the current file"
-    
     window = Any()
     enabled = Property(Bool, depends_on='window.active_editor')
     def _get_enabled(self):
@@ -57,11 +54,9 @@ class SaveFileAction(Action):
 
 
 class SaveAsFileAction(Action):
-    """ Save the current file in the text editor.
-    """
-    tooltip = "Save the current file as another file"
+    ''' Save the current file in the text editor. '''
+#    tooltip = "Save the current file as another file"
     description = "Save the current file as another file"
-    
     window = Any()
     enabled = Property(Bool, depends_on='window.active_editor')
     def _get_enabled(self):
@@ -73,4 +68,3 @@ class SaveAsFileAction(Action):
     def perform(self, event=None):
         logger.info('SaveAsFileAction.perform()')
         self.window.active_editor.save_as()
-    

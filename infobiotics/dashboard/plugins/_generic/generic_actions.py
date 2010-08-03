@@ -3,18 +3,19 @@ from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
 from enthought.pyface.constant import * # OK, NO, CANCEL, YES
 
 class UndoAction(Action):
-    id = 'infobiotics.dashboard.plugins.mcss.actions.UndoAction'
+    id = 'enthought.envisage.plugins.generic.actions.UndoAction'
     name = '&Undo'
     tooltip = 'Undo the last change'
-    accelerator = 'Ctrl-z'
+    accelerator = 'Ctrl-z' # case sensitive
     def perform(self, event=None):
         active_editor = self.window.active_editor
         if active_editor is not None:
-            if hasattr(active_editor, 'ui'):
+            if hasattr(active_editor, 'ui'): # TraitsUIEditors
                 ui = active_editor.ui
                 if ui.history is not None and ui.history.can_undo:
                     ui.handler._on_undo(ui.info)
-            
+#                elif #TODO establish Undo pattern for non-TraitUIEditors
+                            
 class RedoAction(Action):
     id = 'infobiotics.dashboard.plugins.mcss.actions.RedoAction'
     name = '&Redo'
@@ -23,11 +24,11 @@ class RedoAction(Action):
     def perform(self, event=None):
         active_editor = self.window.active_editor
         if active_editor is not None:
-            if hasattr(active_editor, 'ui'):
+            if hasattr(active_editor, 'ui'): # TraitsUIEditors
                 ui = self.window.active_editor.ui
                 if ui.history is not None and ui.history.can_redo:
                     ui.handler._on_redo(ui.info)
-
+#                elif #TODO establish Redo pattern for non-TraitUIEditors, same as Undo pattern
             
 class SaveAction(PyFaceAction):
     ''' ...
