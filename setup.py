@@ -61,6 +61,7 @@ if sys.platform.startswith('darwin'):
                 excludes=EXCLUDES,         
                 frameworks=[
 #                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib', # done in py2app.sh as an arg to py2exe (which would override this...?)
+                    '/Library/Frameworks/Python.framework/Versions/Current/lib/libhdf5.6.dylib',
                 ],
                 plist=dict(
                     # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18

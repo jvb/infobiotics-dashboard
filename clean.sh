@@ -10,7 +10,7 @@ echo "removing debian packages"
 rm infobiotics-dashboard*.deb infobiotics-dashboard*.dsc infobiotics-dashboard*.tar.gz infobiotics-dashboard*.tar.gz.cdbs-config_list 2&>/dev/null
 
 echo "removing distribute eggs"
-bash rm_distribute.sh 2&>/dev/null
+bash rm distribute-* 2&>/dev/null
 
 echo "removing setup configuration"
 rm setup.cfg 2&>/dev/null

@@ -31,7 +31,7 @@ import sys
 if sys.platform.startswith('darwin'):
     extra_options = dict(
         setup_requires=['py2app'],
-        app=['tests/test_frozen_matplotlib_images'],
+        app=['tests/test_frozen_matplotlib_images.py'],
         options=dict(
             py2app=dict(
                 argv_emulation=True, # cross-platform applications generally expect sys.argv to be used for opening files

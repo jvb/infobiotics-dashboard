@@ -20,6 +20,7 @@ chmod +x bin/infobiotics-dashboard.py
 # freeze
 easy_install pip
 pip install py2app pexpect
+# is it really necessary to install pexpect?
 
 ${PYTHON} setup.py py2app $* &&
 #--no-strip
@@ -30,7 +31,7 @@ ${PYTHON} setup.py py2app $* &&
 #zip dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages.zip VERSION.txt &&
 
 echo "patching font_manager.py" &&
-patch dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/font_manager.py eintr.patch && 
+patch dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/font_manager.py py2app/eintr.patch && 
 
 echo "creating qt.conf" &&
 touch dist/InfobioticsDashboard.app/Contents/Resources/qt.conf &&
@@ -41,8 +42,9 @@ rm dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages.
 unzip -q dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages/enthought/tvtk/tvtk_classes.zip -d dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages/enthought/tvtk/tvtk_classes &&
 rm dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages/enthought/tvtk/tvtk_classes.zip &&
 
-echo "copying libhdf5.6.dylib (could do this using 'py2app --frameworks'?)" &&
-cp /Library/Frameworks/Python.framework/Versions/Current/lib/libhdf5.6.dylib dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libhdf5.6.dylib &&
+#echo "copying libhdf5.6.dylib (could do this using 'py2app --frameworks'?)" &&
+#cp /Library/Frameworks/Python.framework/Versions/Current/lib/libhdf5.6.dylib dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libhdf5.6.dylib &&
+# now done in setup.py #TODO remove
 
 # Tiger-specific
 #install_name_tool -change "@rpath/libfreetype.6.dylib" "@loader_path/../../../../Frameworks/libfreetype.6.dylib" dist/Infobiotics\ Dashboard.app/Contents/Resources/lib/python2.6/matplotlib/ft2font.so

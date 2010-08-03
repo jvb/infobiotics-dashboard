@@ -14,7 +14,10 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import Qsci
 from PyQt4 import QtNetwork
-from PyQt4 import QtXml # supposed to fix matplotlib icons http://groups.google.com/group/pyinstaller/browse_thread/thread/834bea87c7afcdff
+from PyQt4 import QtXml # supposed to fix matplotlib SVG icons http://groups.google.com/group/pyinstaller/browse_thread/thread/834bea87c7afcdff
+from PyQt4 import QtSvg
+import PyQt4.QtXml
+import PyQt4.QtSvg
 
 import numpy
 
@@ -264,7 +267,6 @@ import infobiotics.poptimizer.poptimizer_results
 import infobiotics.preferences
 #import infobiotics.tests.__init__
 import infobiotics.thirdparty.__init__
-#import infobiotics.thirdparty._py2deb
-import infobiotics.thirdparty.pexpect
+import infobiotics.thirdparty.winpexpect.pexpect
 import infobiotics.thirdparty.which
-import infobiotics.thirdparty.winpexpect
+import infobiotics.thirdparty.winpexpect.winpexpect

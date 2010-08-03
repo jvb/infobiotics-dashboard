@@ -14,8 +14,7 @@ current_drive=`python -c 'import os, sys; sys.stdout.write(os.getcwd()[0].lower(
 mkdir -p dist/enthought/tvtk/tvtk_classes
 unzip -q -d dist/enthought/tvtk/tvtk_classes /cygdrive/$current_drive/Python26/Lib/site-packages/enthought/tvtk/tvtk_classes.zip
 
-#TODO mv windows_xp_missing_dlls.txt HERE
-for i in $(cat windows_xp_missing_dlls.txt | cut -f 3 -d ' ' | sed 's/\.dll.* $/\.dll/g' | sed 's/\.DLL.*$/\.DLL/g' | sed 's/D:/C:/g') ; do cp $i dist/ ; done
+for i in $(cat py2exe/windows_xp_missing_dlls.txt | cut -f 3 -d ' ' | sed 's/\.dll.* $/\.dll/g' | sed 's/\.DLL.*$/\.DLL/g' | sed 's/D:/C:/g') ; do cp $i dist/ ; done
 
 cp -r /cygdrive/$current_drive/Python26/Scripts/*.dll dist/
 #ls dist/*.dll
