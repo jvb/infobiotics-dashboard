@@ -64,10 +64,10 @@ install_name_tool -change  @rpath/libfreetype.6.dylib /usr/X11/lib/libfreetype.6
 install_name_tool -change  @rpath/libfreetype.6.dylib /usr/X11/lib/libfreetype.6.dylib dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/ft2font.so 
 install_name_tool -change  @rpath/libpng12.0.dylib @executable_path/../Frameworks/libpng12.0.dylib dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/_png.so
 
-# testing
-
 echo "all built ok"
 
+
+## testing
 #echo &&
 #echo "To run use:" &&
 #echo "dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard" &&

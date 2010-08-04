@@ -202,7 +202,7 @@ else: # assume sys.platform.startswith('linux'):
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
             ('/usr/share/applications',['infobiotics-dashboard.desktop']),
-            ('/usr/share/pixmaps',['infobiotics-workbench.xpm','infobiotics-workbench.png']),
+            ('/usr/share/pixmaps',['images/infobiotics-workbench.xpm','images/infobiotics-workbench.png']),
         ],
     )
 
