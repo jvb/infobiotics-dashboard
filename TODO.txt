@@ -5,6 +5,11 @@ Things to do, bugs to fix, feature requests, etc.
 Unsorted
 --------
 
+test matplotlib images by 'got here'
+
+CLI progress bars for mcss, etc using pexpect as proof of concept
+
+
 RelativeFile validation should respect filters.
 
 RelativeDirectory should not descend from RelativeFile because this makes it harder to subclass RelativeFile and make Directory equivalent that works the same.
