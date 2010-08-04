@@ -1,0 +1,4 @@
+#from file_editors_action_set import FileEditorsActionSet
+from editors.abstract_file_editor import AbstractFileEditor
+from editors.text_file_editor import TextFileEditor
+from editors.python_module_editor import PythonModuleEditor
