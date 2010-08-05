@@ -8,20 +8,20 @@ import os.path
 class McssParamsHandler(ParamsHandler):
     ''' Reformulates a few of traits of McssParams. '''
 
-    preferences_page = McssParamsPreferencesPage() 
-    
+    preferences_page = McssParamsPreferencesPage()
+
     def _params_group_default(self):
         return mcss_params_group
-    
+
     id = 'McssParamsHandler'
-    
+
     help_urls = [
         ('Quick start', 'http://www.infobiotics.org/infobiotics-workbench/quickStart/quickStart.html'),
-        ('Tutorial','http://www.infobiotics.org/infobiotics-workbench/tutorial/modelSimulation.html'),
+        ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/modelSimulation.html'),
         ('Tutorial using SBML model specification', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/tutorial_2.html'),
-        ('Documentation','http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'),
+        ('Documentation', 'http://www.infobiotics.org/infobiotics-workbench/modelSimulation/modelSimulation.html'),
     ]
-    
+
     model_format = Trait(
         'P system XML',
         {
@@ -30,30 +30,38 @@ class McssParamsHandler(ParamsHandler):
         },
         desc='the model specification format',
     )
-    
+
     model_format_reversed = {
         'xml'  : 'P system XML',
         'sbml' : 'SBML',
     }
 
     simulation_algorithm = Trait(
-        'Direct Method with queue',
+        'Multicompartment Gillespie Enhanced Queue',
         {
-            'Direct Method with queue'               : 'dmq',
-            'Direct Method (Gillespie68)'            : 'dm',
-            'Logarithmic Direct Method (Cao2007)'    : 'ldm',
-            'Direct Method with growth and division' : 'dmgd',
-            'Direct Method (Cellular Potts)'         : 'dmcp',
+            'Multicompartment Gillespie Direct Method'                           : 'dm',
+#            'Multicompartment Gillespie Logarithmic Direct Method'               : 'ldm',
+            'Multicompartment Gillespie Queue'                                   : 'dmq',
+            'Multicompartment Gillespie Enhanced Queue'                          : 'dmq2',
+            'Multicompartment Gillespie Direct Method with growth and division'  : 'dmgd',
+            'Multicompartment Gillespie Direct Method Cellular Potts'            : 'dmcp',
+            'Multicompartment Gillespie Queue with growth'                       : 'dmqg',
+            'Multicompartment Gillespie Enhanced Queue with growth'              : 'dmq2g',
+            'Multicompartment Gillespie Enhanced Queue with growth and division' : 'dmq2gd',
         },
         desc='the stochastic simulation algorithm to use',
     )
 
     simulation_algorithm_reversed = { # needed because we can't assign to simulation_algorithm_ #TODO this means traits_repr is probably wrong for Traits - but we use Enum in Params subclass so it doesn't matter
-        'dmq'  : 'Direct Method with queue', 
-        'dm'   : 'Direct Method (Gillespie68)',
-        'ldm'  : 'Logarithmic Direct Method (Cao2007)',
-        'dmgd' : 'Direct Method with growth and division',
-        'dmcp' : 'Direct Method (Cellular Potts)',
+        'dm'     : 'Multicompartment Gillespie Direct Method',
+#        'ldm'    : 'Multicompartment Gillespie Logarithmic Direct Method',
+        'dmq'    : 'Multicompartment Gillespie Queue',
+        'dmq2'   : 'Multicompartment Gillespie Enhanced Queue',
+        'dmgq'   : 'Multicompartment Gillespie Direct Method with growth and division',
+        'dmcp'   : 'Multicompartment Gillespie Direct Method Cellular Potts',
+        'dmqg'   : 'Multicompartment Gillespie Queue with growth',
+        'dmq2g'  : 'Multicompartment Gillespie Enhanced Queue with growth',
+        'dmq2gd' : 'Multicompartment Gillespie Enhanced Queue with growth and division',
     }
 
     def init(self, info):
@@ -62,7 +70,7 @@ class McssParamsHandler(ParamsHandler):
         self.sync_trait('simulation_algorithm_', info.object, alias='simulation_algorithm', mutual=False) # ditto
 
     def object_model_file_changed(self, info):
-        ext = os.path.splitext(info.object.model_file)[1].lower() 
+        ext = os.path.splitext(info.object.model_file)[1].lower()
         if ext == '.sbml':
             self.model_format = 'SBML'
         else:
@@ -77,4 +85,3 @@ class McssParamsHandler(ParamsHandler):
 
 if __name__ == '__main__':
     execfile('mcss_params.py')
-    

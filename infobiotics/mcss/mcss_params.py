@@ -40,7 +40,7 @@ class McssParams(Params):
     seed = Long(0, desc='the random number seed (0=randomly generated)')
     compress = Bool(True, desc='whether to compress HDF5 output')
     compression_level = Range(low=0, high=9, value=9, desc='the HDF5 compression level (0-9; 9=best)')
-    simulation_algorithm = Enum(['dmq','dm','ldm','dmgd','dmcp'], desc='the stochastic simulation algorithm to use')
+    simulation_algorithm = Enum(['dmq2','dmq','dm','ldm','dmgd','dmcp','dmqg','dmq2g','dmq2gd'], desc='the stochastic simulation algorithm to use')
 
     log_type = Enum(['levels','reactions'], desc='the type of data logging to perform')
     log_memory = Bool(desc='whether to log output to memory')

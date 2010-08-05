@@ -392,7 +392,14 @@ def trait_value_from_parameter_value(self, name, value): # change name to 'trait
 #        #FIXME should go in 'set_trait_value_from_parameter_value'
 #        return value
     if type == 'Bool': # convert from lowercase truth values
-        return True if value == 'true' else False
+#        return True if value == 'true' else False
+        if value in ('true', 'True', '1'):
+            return True
+        elif value in ('false', 'False', '0'):
+            return False
+        else:
+            print "'%s' not specified correctly. '%s' should be in ('true', 'True', '1', 'false', 'False', '0'). Assuming False." % (name, value)
+            return False
     elif type in ('Int', 'IntGreaterThanZero'):
         return int(value) 
     elif type in ('Long', 'LongGreaterThanZero'):
