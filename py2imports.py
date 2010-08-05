@@ -288,5 +288,5 @@ import infobiotics.commons.__init__
 import infobiotics.__init__
 import infobiotics.mcss.__init__
 import infobiotics.mcss._mcss_experiment
-import infobiotics.tests.__init__
+#import infobiotics.tests.__init__
 import infobiotics.poptimizer.__init__
