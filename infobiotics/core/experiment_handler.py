@@ -19,7 +19,7 @@ class ExperimentHandler(ParamsHandler):
 ##            self._on_close(info)
         # if we do self._on_close(info) then subclasses can't catch events 
         # including 'finished'
-        info.ui.control.setVisible(False) 
+#        info.ui.control.setVisible(False) 
         if info.object.perform(thread=True):
             self._show_progress()
 
