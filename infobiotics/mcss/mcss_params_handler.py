@@ -57,9 +57,9 @@ class McssParamsHandler(ParamsHandler):
     }
 
     def init(self, info):
+        super(McssParamsHandler, self).init(info)
         self.sync_trait('model_format_', info.object, alias='model_format', mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
         self.sync_trait('simulation_algorithm_', info.object, alias='simulation_algorithm', mutual=False) # ditto
-        super(McssParamsHandler, self).init(info)
 
     def object_model_file_changed(self, info):
         ext = os.path.splitext(info.object.model_file)[1].lower() 

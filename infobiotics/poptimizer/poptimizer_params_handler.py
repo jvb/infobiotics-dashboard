@@ -38,6 +38,7 @@ class POptimizerParamsHandler(ParamsHandler):
     # pattern allowing full names for Enum items on model using Trait and dict
 
     def init(self, info):
+        super(POptimizerParamsHandler, self).init(info)
         # sync Trait shadow values from handler to Enum in model
         self.sync_trait('para_opti_algo_', info.object, alias='para_opti_algo', mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
         self.sync_trait('fitness_func_type_', info.object, alias='fitness_func_type', mutual=False) # ditto
