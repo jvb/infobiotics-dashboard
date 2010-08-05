@@ -20,8 +20,8 @@ class POptimizerParams(Params):
     _parameter_set_name = 'POptimizerParameters'
     
     num_initials = Int(1, desc='the number of initial models to use')
-    initial_file = ParamsRelativeFile(auto_set=False, enter_set=True, desc="the prefix for initial model file names, to which\ a number and '.txt' will be added, e.g. prefix1.txt")
-    target_file = ParamsRelativeFile(auto_set=False, enter_set=True, desc="the prefix for target timeseries files, to which\ a number and '.txt' will be added, e.g. prefix1.txt")
+    initial_file = ParamsRelativeFile(auto_set=False, enter_set=True, desc="the prefix for initial model file names, to which\na number and '.txt' will be added, e.g. prefix1.txt")
+    target_file = ParamsRelativeFile(auto_set=False, enter_set=True, desc="the prefix for target timeseries files, to which\na number and '.txt' will be added, e.g. prefix1.txt")
     target_obj_num = Int(1, #FIXME should be redundant, but isn't yet 
         desc="""the number of objects with target timeseries.
 An example target timeseries file with 2 objects should look like: 
