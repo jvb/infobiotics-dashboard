@@ -1,3 +1,5 @@
+# this is all horribly wrong, should revert to TextEditor (commented code)
+
 from enthought.pyface.workbench.api import TraitsUIEditor
 #from os.path import basename
 #from enthought.pyface.api import FileDialog, CANCEL
