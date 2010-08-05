@@ -694,7 +694,8 @@ class PModelCheckerResults(HasTraits):
             ),
             title='%s' % self.file_name,
             resizable=True,
-            id='view_%s' % self.file_name,
+#            id='view_%s' % self.file_name, # raises TypeError: String or Integer object expected for key, unicode found
+            id='view_%s' % str(self.file_name), # solved
         )    
 
     def configure(self, **args): # for consistency with Params subclasses

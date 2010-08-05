@@ -93,7 +93,7 @@ class TextEditor(TraitsUIEditor):
             self.id   = self._get_unique_id()
             self.name = self.id
         else:
-            self.id   = new.path
+            self.id   = str(new.path)
             self.name = os.path.basename(new.path)
 
             f = file(new.path, 'r')
