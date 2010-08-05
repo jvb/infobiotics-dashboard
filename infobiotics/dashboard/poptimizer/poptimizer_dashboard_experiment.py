@@ -1,11 +1,8 @@
 from infobiotics.api import POptimizerExperiment
-from enthought.traits.api import Instance
-from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
+from infobiotics.dashboard.core.api import DashboardExperiment 
 from infobiotics.dashboard.poptimizer.api import POptimizerDashboardExperimentHandler 
 
-class POptimizerDashboardExperiment(POptimizerExperiment):
-    
-    application = Instance(InfobioticsDashboardWorkbenchApplication)
+class POptimizerDashboardExperiment(POptimizerExperiment, DashboardExperiment):
     
     def _handler_default(self):
         return POptimizerDashboardExperimentHandler(model=self, application=self.application)

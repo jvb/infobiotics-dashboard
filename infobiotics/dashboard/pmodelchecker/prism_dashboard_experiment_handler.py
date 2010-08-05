@@ -1,8 +1,6 @@
 from infobiotics.pmodelchecker.prism.api import PRISMExperimentHandler
-from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperimentProgressHandler
-from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
-from infobiotics.dashboard.plugins.pmodelchecker.editor import PModelCheckerResultsEditor
 from infobiotics.dashboard.core.api import DashboardExperimentHandler
+from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperimentProgressHandler
 import commons
 
 class PRISMDashboardExperimentHandler(PRISMExperimentHandler, DashboardExperimentHandler):

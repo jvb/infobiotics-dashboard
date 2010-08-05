@@ -1,7 +1,5 @@
 from infobiotics.pmodelchecker.prism.api import PRISMExperimentProgressHandler    
-from enthought.traits.api import Instance
-from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
+from infobiotics.dashboard.core.api import DashboardExperimentProgressHandler
 
-class PRISMDashboardExperimentProgressHandler(PRISMExperimentProgressHandler):
-
-    application = Instance(InfobioticsDashboardWorkbenchApplication)
+class PRISMDashboardExperimentProgressHandler(PRISMExperimentProgressHandler, DashboardExperimentProgressHandler):
+    pass

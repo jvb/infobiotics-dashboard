@@ -1,7 +1,5 @@
 from infobiotics.poptimizer.api import POptimizerExperimentProgressHandler
-from enthought.traits.api import Instance
-from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
+from infobiotics.dashboard.core.api import DashboardExperimentProgressHandler
 
-class POptimizerDashboardExperimentProgressHandler(POptimizerExperimentProgressHandler):
-
-    application = Instance(InfobioticsDashboardWorkbenchApplication)
+class POptimizerDashboardExperimentProgressHandler(POptimizerExperimentProgressHandler, DashboardExperimentProgressHandler):
+    pass

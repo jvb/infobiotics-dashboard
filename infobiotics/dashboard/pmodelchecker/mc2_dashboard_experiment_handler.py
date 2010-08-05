@@ -1,6 +1,6 @@
 from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
-from infobiotics.dashboard.pmodelchecker.api import MC2DashboardExperimentProgressHandler
 from infobiotics.dashboard.core.api import DashboardExperimentHandler
+from infobiotics.dashboard.pmodelchecker.api import MC2DashboardExperimentProgressHandler
 import commons
 
 class MC2DashboardExperimentHandler(MC2ExperimentHandler, DashboardExperimentHandler):
