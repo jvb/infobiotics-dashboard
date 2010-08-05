@@ -17,8 +17,8 @@ poptimizer_params_group = Group(
         ),
         VGroup(
             HGroup(
-                Item('maxtime', label='Simulation length'),
-                Item('interval', label='Sampling interval'),
+                Item('maxtime', label='Max time'),
+                Item('interval', label='Log interval'),
             ),
             Item('simu_runs', label='Ensemble size (simulation runs)'),
             Item('handler.fitness_func_type', label='Fitness function'),
