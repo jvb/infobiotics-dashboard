@@ -11,7 +11,7 @@ mcss_params_group = Group(
                             label='XML type',
                             visible_when='object.model_file.endswith(".xml")',
                         ),
-                        Item('just_psystem', visible_when='handler.model_format_ != "sbml"', label='Just initialise P system'),
+#                        Item('just_psystem', visible_when='handler.model_format_ != "sbml"', label='Just initialise P system'),
                         Item('duplicate_initial_amounts', visible_when='handler.model_format_ == "sbml"'),
                     ),
                     label='P system model',

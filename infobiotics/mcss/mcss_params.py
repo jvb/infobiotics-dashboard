@@ -32,7 +32,7 @@ class McssParams(Params):
     )
     model_format = Enum(['xml','sbml','lpp'], desc='the model specification format')
     duplicate_initial_amounts = Bool(False, desc='whether to duplicate initial amounts for all templates in the SBML model')
-    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
+#    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
     max_time = FloatGreaterThanZero(desc='the maximum time to run simulation')
     log_interval = FloatGreaterThanZero(1.0, desc='the time interval between which to log data') 
     runs = LongGreaterThanZero(1, desc='the number of simulation runs to perform')
@@ -63,7 +63,8 @@ class McssParams(Params):
     def parameter_names(self):
         return [
             'model_file', 'model_format', 'duplicate_initial_amounts', 
-            'just_psystem', 'max_time', 'log_interval', 'runs', 'data_file', 
+#            'just_psystem', 
+            'max_time', 'log_interval', 'runs', 'data_file', 
             'seed', 'compress', 'compression_level', #'show_progress', 
             'simulation_algorithm', 'log_type', 'log_memory', 
             'log_propensities', 'log_volumes', 'log_steady_state', 
