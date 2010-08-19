@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<PSystem name="negativeAutoregulation">
+  <alphabetOfObjects>
+    <object name="gene1"/>
+    <object name="protein1"/>
+    <object name="protein1_gene1"/>
+    <object name="rna1"/>
+    <object name="signal1"/>
+  </alphabetOfObjects>
+  <compartmentLabels>
+    <compartmentLabel label="media"/>
+    <compartmentLabel label="bacterium"/>
+  </compartmentLabels>
+  <membraneStructure>
+    <compartment name="media" label="media"/>
+    <compartment name="bacterium" label="bacterium" father="media"/>
+  </membraneStructure>
+  <initialMultisets>
+    <initialMultiset label="bacterium">
+      <object name="gene1" multiplicity="1"/>
+    </initialMultiset>
+  </initialMultisets>
+  <ruleSets>
+    <ruleSet label="bacterium">
+      <module name="UnReg" objects="1" constants="3,0.07,3,0.01" labels="bacterium" file="basicLibrary.plb"/>
+      <module name="NegReg" objects="1,1" constants="1,0.8" labels="bacterium" file="basicLibrary.plb"/>
+      <rule name="r1" constant="c1" value="0.001">
+        <lhs>
+          <listOfInsideObjects label="bacterium">
+            <object name="protein1"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="bacterium">
+            <object name="protein1"/>
+            <object name="signal1"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r2" constant="c2" value="0.001">
+        <lhs>
+          <listOfInsideObjects label="bacterium">
+            <object name="signal1"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+            <object name="signal1"/>
+          </listOfOutsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r3" constant="c3" value="0.0001">
+        <lhs>
+          <listOfInsideObjects label="bacterium">
+            <object name="signal1"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs/>
+      </rule>
+    </ruleSet>
+    <ruleSet label="media">
+      <rule name="r1" constant="c1" value="0.001">
+        <lhs>
+          <listOfOutsideObjects>
+            <object name="signal1"/>
+          </listOfOutsideObjects>
+        </lhs>
+        <rhs>
+          <listOfInsideObjects label="bacterium">
+            <object name="signal1"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <rule name="r2" constant="c2" value="0.0001">
+        <lhs>
+          <listOfInsideObjects label="bacterium">
+            <object name="signal1"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs/>
+      </rule>
+      <rule name="r3" constant="c3" value="0.00025" vector="1,0">
+        <lhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </lhs>
+        <rhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </rhs>
+      </rule>
+      <rule name="r4" constant="c3" value="0.00025" vector="-1,0">
+        <lhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </lhs>
+        <rhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </rhs>
+      </rule>
+      <rule name="r5" constant="c3" value="0.00025" vector="0,1">
+        <lhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </lhs>
+        <rhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </rhs>
+      </rule>
+      <rule name="r6" constant="c3" value="0.00025" vector="0,-1">
+        <lhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </lhs>
+        <rhs>
+          <listOfTranslocatedObjects label="l">
+            <object name="signal1"/>
+          </listOfTranslocatedObjects>
+        </rhs>
+      </rule>
+    </ruleSet>
+  </ruleSets>
+</PSystem>

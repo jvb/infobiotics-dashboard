@@ -1,0 +1,204 @@
+stochastic
+
+const double c_r_bacterium_1_0_0_NARbacterium = 3;
+const double c_r_bacterium_1_1_0_PARbacterium = 0.0025;
+const double c_r_bacterium_1_2_0_UnRegbacterium = 0.025;
+const double c_r_bacterium_2_0_0_NARbacterium = 0.07;
+const double c_r_bacterium_2_1_0_PARbacterium = 1;
+const double c_r_bacterium_2_2_0_UnRegbacterium = 0.07;
+const double c_r_bacterium_3_0_0_NARbacterium = 3;
+const double c_r_bacterium_3_1_0_PARbacterium = 0.6022;
+const double c_r_bacterium_3_2_0_UnRegbacterium = 3;
+const double c_r_bacterium_4_0_0_NARbacterium = 0.01;
+const double c_r_bacterium_4_1_0_PARbacterium = 0.025;
+const double c_r_bacterium_4_2_0_UnRegbacterium = 0.01;
+const double c_r_bacterium_5_0_0_NARbacterium = 1;
+const double c_r_bacterium_5_1_0_PARbacterium = 0.07;
+const double c_r_bacterium_6_0_0_NARbacterium = 0.8;
+const double c_r_bacterium_6_1_0_PARbacterium = 3;
+const double c_r_bacterium_7_1_0_PARbacterium = 0.01;
+const int lb_gene1_0_0_NARbacterium;			//Lower bound for molecule gene1_0_0_NARbacterium
+const int ub_gene1_0_0_NARbacterium;			// Upper bound for molecule gene1_0_0_NARbacterium
+const int lb_protein1_0_0_NARbacterium;			//Lower bound for molecule protein1_0_0_NARbacterium
+const int ub_protein1_0_0_NARbacterium;			// Upper bound for molecule protein1_0_0_NARbacterium
+const int lb_protein1_gene1_0_0_NARbacterium;			//Lower bound for molecule protein1_gene1_0_0_NARbacterium
+const int ub_protein1_gene1_0_0_NARbacterium;			// Upper bound for molecule protein1_gene1_0_0_NARbacterium
+const int lb_rna1_0_0_NARbacterium;			//Lower bound for molecule rna1_0_0_NARbacterium
+const int ub_rna1_0_0_NARbacterium;			// Upper bound for molecule rna1_0_0_NARbacterium
+const int lb_gene1_1_0_PARbacterium;			//Lower bound for molecule gene1_1_0_PARbacterium
+const int ub_gene1_1_0_PARbacterium;			// Upper bound for molecule gene1_1_0_PARbacterium
+const int lb_protein1_1_0_PARbacterium;			//Lower bound for molecule protein1_1_0_PARbacterium
+const int ub_protein1_1_0_PARbacterium;			// Upper bound for molecule protein1_1_0_PARbacterium
+const int lb_protein1_gene1_1_0_PARbacterium;			//Lower bound for molecule protein1_gene1_1_0_PARbacterium
+const int ub_protein1_gene1_1_0_PARbacterium;			// Upper bound for molecule protein1_gene1_1_0_PARbacterium
+const int lb_rna1_1_0_PARbacterium;			//Lower bound for molecule rna1_1_0_PARbacterium
+const int ub_rna1_1_0_PARbacterium;			// Upper bound for molecule rna1_1_0_PARbacterium
+const int lb_gene1_2_0_UnRegbacterium;			//Lower bound for molecule gene1_2_0_UnRegbacterium
+const int ub_gene1_2_0_UnRegbacterium;			// Upper bound for molecule gene1_2_0_UnRegbacterium
+const int lb_protein1_2_0_UnRegbacterium;			//Lower bound for molecule protein1_2_0_UnRegbacterium
+const int ub_protein1_2_0_UnRegbacterium;			// Upper bound for molecule protein1_2_0_UnRegbacterium
+const int lb_rna1_2_0_UnRegbacterium;			//Lower bound for molecule rna1_2_0_UnRegbacterium
+const int ub_rna1_2_0_UnRegbacterium;			// Upper bound for molecule rna1_2_0_UnRegbacterium
+
+
+module m_0_0_NARbacterium
+
+	gene1_0_0_NARbacterium : [ lb_gene1_0_0_NARbacterium .. ub_gene1_0_0_NARbacterium ] init 1;
+	protein1_0_0_NARbacterium : [ lb_protein1_0_0_NARbacterium .. ub_protein1_0_0_NARbacterium ] init 0;
+	protein1_gene1_0_0_NARbacterium : [ lb_protein1_gene1_0_0_NARbacterium .. ub_protein1_gene1_0_0_NARbacterium ] init 0;
+	rna1_0_0_NARbacterium : [ lb_rna1_0_0_NARbacterium .. ub_rna1_0_0_NARbacterium ] init 0;
+
+
+	// [ gene1 ]_bacterium -c_1-> [ gene1 + rna1 ]_bacterium
+	[r_bacterium_1_0_0_NARbacterium] gene1_0_0_NARbacterium > 0 & rna1_0_0_NARbacterium < ub_rna1_0_0_NARbacterium -> 
+		c_r_bacterium_1_0_0_NARbacterium * gene1_0_0_NARbacterium : 
+			(rna1_0_0_NARbacterium' = rna1_0_0_NARbacterium + 1) ;
+
+	// [ rna1 ]_bacterium -c_2-> [  ]_bacterium
+	[r_bacterium_2_0_0_NARbacterium] rna1_0_0_NARbacterium > 0 -> 
+		c_r_bacterium_2_0_0_NARbacterium * rna1_0_0_NARbacterium : 
+			(rna1_0_0_NARbacterium' = rna1_0_0_NARbacterium-1) ;
+
+	// [ rna1 ]_bacterium -c_3-> [ rna1 + protein1 ]_bacterium
+	[r_bacterium_3_0_0_NARbacterium] rna1_0_0_NARbacterium > 0 & protein1_0_0_NARbacterium < ub_protein1_0_0_NARbacterium -> 
+		c_r_bacterium_3_0_0_NARbacterium * rna1_0_0_NARbacterium : 
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium + 1) ;
+
+	// [ protein1 ]_bacterium -c_4-> [  ]_bacterium
+	[r_bacterium_4_0_0_NARbacterium] protein1_0_0_NARbacterium > 0 -> 
+		c_r_bacterium_4_0_0_NARbacterium * protein1_0_0_NARbacterium : 
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium-1) ;
+
+	// [ protein1 + gene1 ]_bacterium -c_1-> [ protein1_gene1 ]_bacterium
+	[r_bacterium_5_0_0_NARbacterium] protein1_0_0_NARbacterium > 0 & gene1_0_0_NARbacterium > 0 & protein1_gene1_0_0_NARbacterium < ub_protein1_gene1_0_0_NARbacterium -> 
+		c_r_bacterium_5_0_0_NARbacterium * protein1_0_0_NARbacterium * gene1_0_0_NARbacterium : 
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium-1) &
+			(gene1_0_0_NARbacterium' = gene1_0_0_NARbacterium-1) &
+			(protein1_gene1_0_0_NARbacterium' = protein1_gene1_0_0_NARbacterium + 1) ;
+
+	// [ protein1_gene1 ]_bacterium -c_2-> [ protein1 + gene1 ]_bacterium
+	[r_bacterium_6_0_0_NARbacterium] protein1_gene1_0_0_NARbacterium > 0 & protein1_0_0_NARbacterium < ub_protein1_0_0_NARbacterium & gene1_0_0_NARbacterium < ub_gene1_0_0_NARbacterium -> 
+		c_r_bacterium_6_0_0_NARbacterium * protein1_gene1_0_0_NARbacterium : 
+			(protein1_gene1_0_0_NARbacterium' = protein1_gene1_0_0_NARbacterium-1) &
+			(protein1_0_0_NARbacterium' = protein1_0_0_NARbacterium + 1) &
+			(gene1_0_0_NARbacterium' = gene1_0_0_NARbacterium + 1) ;
+
+
+endmodule
+
+module m_1_0_PARbacterium
+
+	gene1_1_0_PARbacterium : [ lb_gene1_1_0_PARbacterium .. ub_gene1_1_0_PARbacterium ] init 1;
+	protein1_1_0_PARbacterium : [ lb_protein1_1_0_PARbacterium .. ub_protein1_1_0_PARbacterium ] init 0;
+	protein1_gene1_1_0_PARbacterium : [ lb_protein1_gene1_1_0_PARbacterium .. ub_protein1_gene1_1_0_PARbacterium ] init 0;
+	rna1_1_0_PARbacterium : [ lb_rna1_1_0_PARbacterium .. ub_rna1_1_0_PARbacterium ] init 0;
+
+
+	// [ gene1 ]_bacterium -c_1-> [ gene1 + rna1 ]_bacterium
+	[r_bacterium_1_1_0_PARbacterium] gene1_1_0_PARbacterium > 0 & rna1_1_0_PARbacterium < ub_rna1_1_0_PARbacterium -> 
+		c_r_bacterium_1_1_0_PARbacterium * gene1_1_0_PARbacterium : 
+			(rna1_1_0_PARbacterium' = rna1_1_0_PARbacterium + 1) ;
+
+	// [ protein1 + gene1 ]_bacterium -c_1-> [ protein1_gene1 ]_bacterium
+	[r_bacterium_2_1_0_PARbacterium] protein1_1_0_PARbacterium > 0 & gene1_1_0_PARbacterium > 0 & protein1_gene1_1_0_PARbacterium < ub_protein1_gene1_1_0_PARbacterium -> 
+		c_r_bacterium_2_1_0_PARbacterium * protein1_1_0_PARbacterium * gene1_1_0_PARbacterium : 
+			(protein1_1_0_PARbacterium' = protein1_1_0_PARbacterium-1) &
+			(gene1_1_0_PARbacterium' = gene1_1_0_PARbacterium-1) &
+			(protein1_gene1_1_0_PARbacterium' = protein1_gene1_1_0_PARbacterium + 1) ;
+
+	// [ protein1_gene1 ]_bacterium -c_2-> [ protein1 + gene1 ]_bacterium
+	[r_bacterium_3_1_0_PARbacterium] protein1_gene1_1_0_PARbacterium > 0 & protein1_1_0_PARbacterium < ub_protein1_1_0_PARbacterium & gene1_1_0_PARbacterium < ub_gene1_1_0_PARbacterium -> 
+		c_r_bacterium_3_1_0_PARbacterium * protein1_gene1_1_0_PARbacterium : 
+			(protein1_gene1_1_0_PARbacterium' = protein1_gene1_1_0_PARbacterium-1) &
+			(protein1_1_0_PARbacterium' = protein1_1_0_PARbacterium + 1) &
+			(gene1_1_0_PARbacterium' = gene1_1_0_PARbacterium + 1) ;
+
+	// [ protein1_gene1 ]_bacterium -c_3-> [ protein1_gene1 + rna1 ]_bacterium
+	[r_bacterium_4_1_0_PARbacterium] protein1_gene1_1_0_PARbacterium > 0 & rna1_1_0_PARbacterium < ub_rna1_1_0_PARbacterium -> 
+		c_r_bacterium_4_1_0_PARbacterium * protein1_gene1_1_0_PARbacterium : 
+			(rna1_1_0_PARbacterium' = rna1_1_0_PARbacterium + 1) ;
+
+	// [ rna1 ]_bacterium -c_4-> [  ]_bacterium
+	[r_bacterium_5_1_0_PARbacterium] rna1_1_0_PARbacterium > 0 -> 
+		c_r_bacterium_5_1_0_PARbacterium * rna1_1_0_PARbacterium : 
+			(rna1_1_0_PARbacterium' = rna1_1_0_PARbacterium-1) ;
+
+	// [ rna1 ]_bacterium -c_5-> [ rna1 + protein1 ]_bacterium
+	[r_bacterium_6_1_0_PARbacterium] rna1_1_0_PARbacterium > 0 & protein1_1_0_PARbacterium < ub_protein1_1_0_PARbacterium -> 
+		c_r_bacterium_6_1_0_PARbacterium * rna1_1_0_PARbacterium : 
+			(protein1_1_0_PARbacterium' = protein1_1_0_PARbacterium + 1) ;
+
+	// [ protein1 ]_bacterium -c_6-> [  ]_bacterium
+	[r_bacterium_7_1_0_PARbacterium] protein1_1_0_PARbacterium > 0 -> 
+		c_r_bacterium_7_1_0_PARbacterium * protein1_1_0_PARbacterium : 
+			(protein1_1_0_PARbacterium' = protein1_1_0_PARbacterium-1) ;
+
+
+endmodule
+
+module m_2_0_UnRegbacterium
+
+	gene1_2_0_UnRegbacterium : [ lb_gene1_2_0_UnRegbacterium .. ub_gene1_2_0_UnRegbacterium ] init 1;
+	protein1_2_0_UnRegbacterium : [ lb_protein1_2_0_UnRegbacterium .. ub_protein1_2_0_UnRegbacterium ] init 0;
+	rna1_2_0_UnRegbacterium : [ lb_rna1_2_0_UnRegbacterium .. ub_rna1_2_0_UnRegbacterium ] init 0;
+
+
+	// [ gene1 ]_bacterium -c_1-> [ gene1 + rna1 ]_bacterium
+	[r_bacterium_1_2_0_UnRegbacterium] gene1_2_0_UnRegbacterium > 0 & rna1_2_0_UnRegbacterium < ub_rna1_2_0_UnRegbacterium -> 
+		c_r_bacterium_1_2_0_UnRegbacterium * gene1_2_0_UnRegbacterium : 
+			(rna1_2_0_UnRegbacterium' = rna1_2_0_UnRegbacterium + 1) ;
+
+	// [ rna1 ]_bacterium -c_2-> [  ]_bacterium
+	[r_bacterium_2_2_0_UnRegbacterium] rna1_2_0_UnRegbacterium > 0 -> 
+		c_r_bacterium_2_2_0_UnRegbacterium * rna1_2_0_UnRegbacterium : 
+			(rna1_2_0_UnRegbacterium' = rna1_2_0_UnRegbacterium-1) ;
+
+	// [ rna1 ]_bacterium -c_3-> [ rna1 + protein1 ]_bacterium
+	[r_bacterium_3_2_0_UnRegbacterium] rna1_2_0_UnRegbacterium > 0 & protein1_2_0_UnRegbacterium < ub_protein1_2_0_UnRegbacterium -> 
+		c_r_bacterium_3_2_0_UnRegbacterium * rna1_2_0_UnRegbacterium : 
+			(protein1_2_0_UnRegbacterium' = protein1_2_0_UnRegbacterium + 1) ;
+
+	// [ protein1 ]_bacterium -c_4-> [  ]_bacterium
+	[r_bacterium_4_2_0_UnRegbacterium] protein1_2_0_UnRegbacterium > 0 -> 
+		c_r_bacterium_4_2_0_UnRegbacterium * protein1_2_0_UnRegbacterium : 
+			(protein1_2_0_UnRegbacterium' = protein1_2_0_UnRegbacterium-1) ;
+
+
+endmodule
+
+
+const int molecule = 0;
+const int rule = 0;
+rewards "molecules"
+	molecule = 0 : 1;
+	molecule = 1 : gene1_0_0_NARbacterium;
+	molecule = 2 : protein1_0_0_NARbacterium;
+	molecule = 3 : protein1_gene1_0_0_NARbacterium;
+	molecule = 4 : rna1_0_0_NARbacterium;
+	molecule = 5 : gene1_1_0_PARbacterium;
+	molecule = 6 : protein1_1_0_PARbacterium;
+	molecule = 7 : protein1_gene1_1_0_PARbacterium;
+	molecule = 8 : rna1_1_0_PARbacterium;
+	molecule = 9 : gene1_2_0_UnRegbacterium;
+	molecule = 10 : protein1_2_0_UnRegbacterium;
+	molecule = 11 : rna1_2_0_UnRegbacterium;
+endrewards
+rewards "rules"
+	[ r_bacterium_1_0_0_NARbacterium ] rule = 1: 1;
+	[ r_bacterium_2_0_0_NARbacterium ] rule = 2: 1;
+	[ r_bacterium_3_0_0_NARbacterium ] rule = 3: 1;
+	[ r_bacterium_4_0_0_NARbacterium ] rule = 4: 1;
+	[ r_bacterium_5_0_0_NARbacterium ] rule = 5: 1;
+	[ r_bacterium_6_0_0_NARbacterium ] rule = 6: 1;
+	[ r_bacterium_1_1_0_PARbacterium ] rule = 7: 1;
+	[ r_bacterium_2_1_0_PARbacterium ] rule = 8: 1;
+	[ r_bacterium_3_1_0_PARbacterium ] rule = 9: 1;
+	[ r_bacterium_4_1_0_PARbacterium ] rule = 10: 1;
+	[ r_bacterium_5_1_0_PARbacterium ] rule = 11: 1;
+	[ r_bacterium_6_1_0_PARbacterium ] rule = 12: 1;
+	[ r_bacterium_7_1_0_PARbacterium ] rule = 13: 1;
+	[ r_bacterium_1_2_0_UnRegbacterium ] rule = 14: 1;
+	[ r_bacterium_2_2_0_UnRegbacterium ] rule = 15: 1;
+	[ r_bacterium_3_2_0_UnRegbacterium ] rule = 16: 1;
+	[ r_bacterium_4_2_0_UnRegbacterium ] rule = 17: 1;
+endrewards

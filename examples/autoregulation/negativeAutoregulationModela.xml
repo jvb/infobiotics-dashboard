@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<LPPsystem name="negativeAutoregulationModela">
+  <listOfPSystems>
+    <PSystem name="UnReg" file="UnReg.sps"/>
+    <PSystem name="PAR" file="PAR.sps"/>
+    <PSystem name="NAR" file="NAR.sps"/>
+  </listOfPSystems>
+  <lattice name="rectangular" file="rectangular.lat"/>
+  <spatialDistribution>
+    <position pSystem="UnReg">
+      <parameter name="i" lowerBound="0" step="1" upperBound="9"/>
+      <parameter name="j" lowerBound="0" step="1" upperBound="9"/>
+      <Xcoordinate value="i"/>
+      <Ycoordinate value="j"/>
+    </position>
+    <position pSystem="PAR">
+      <parameter name="i" lowerBound="15" step="1" upperBound="24"/>
+      <parameter name="j" lowerBound="0" step="1" upperBound="10"/>
+      <Xcoordinate value="i"/>
+      <Ycoordinate value="j"/>
+    </position>
+    <position pSystem="NAR">
+      <parameter name="i" lowerBound="30" step="1" upperBound="39"/>
+      <parameter name="j" lowerBound="0" step="1" upperBound="10"/>
+      <Xcoordinate value="i"/>
+      <Ycoordinate value="j"/>
+    </position>
+  </spatialDistribution>
+</LPPsystem>

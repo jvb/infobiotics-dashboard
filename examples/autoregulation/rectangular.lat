@@ -1,0 +1,49 @@
+# Author: Francisco J. Romero-Campero              #
+# Date: July 2010                                  #
+# Description: A rectangular lattice of size 40x10 #
+
+lattice rectangularLattice
+
+	# Dimension of the lattice and lower/upper bounds #
+	dimension	2
+	xmin      0
+	xmax      39
+	ymin      0
+	ymax      9
+
+	# Parameters used in the definition of the rest of components defining the lattice #
+	parameters
+		parameter b1 value = 2
+		parameter b2 value = 1
+	endParameters
+
+	# Basis vector determining the points in the lattice #
+	# in this case we have a rectangular lattice         #
+	basis
+		(b1,0)
+		(0,b2)
+	endBasis
+
+	# Vertices used to determine the shape of the outmost membrane #
+	# of the SP systems located on each point of the lattice       #
+	vertices
+		(b1/2,b2/2)
+		(-b1/2,b2/2)
+		(-b1/2,-b2/2)
+		(b1/2,-b2/2)
+	endVertices
+
+	# Vectors pointing at the neighbours of each point of the lattice #
+	neighbours
+		(1,0)   
+		(1,1)
+		(0,1)
+		(-1,1)
+		(-1,0)
+		(-1,-1)
+		(0,-1)
+		(1,-1)	
+	endNeighbours
+
+endLattice
+
