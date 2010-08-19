@@ -1,3 +1,4 @@
-from abstract_file_editor import AbstractFileEditor, FileEditorHandler, save_key_binding
+from abstract_file_editor import AbstractFileEditor, FileEditorHandler, KeyBindings, KeyBinding, save_key_binding, close_key_binding, edit_key_bindings_key_binding, default_key_bindings, View
 from text_file_editor import TextFileEditor
+from code_file_editor import CodeFileEditor
 from python_module_editor import PythonModuleEditor, PythonModuleEditorHandler

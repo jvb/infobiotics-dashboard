@@ -1,16 +1,16 @@
-from api import FileEditorHandler, TextFileEditor
-from enthought.traits.api import Code
+from api import FileEditorHandler, CodeFileEditor, KeyBindings, KeyBinding, default_key_bindings
+import os.path
 
 class PythonModuleEditorHandler(FileEditorHandler):
     def run(self, info):
         ''' Run the text as Python code. '''
         info.object.run()
 
-class PythonModuleEditor(TextFileEditor):
+class PythonModuleEditor(CodeFileEditor):
     ''' A Python code editor. '''
     
-    content = Code
-
+    lexer = 'python'
+    
     def _wildcards_default(self):
         ext = ['*.py']
         import sys
@@ -19,14 +19,13 @@ class PythonModuleEditor(TextFileEditor):
         return [('Python modules',ext)]
     
     def _key_bindings_default(self): # can't do key_bindings = KeyBindings(... as all editors end up sharing same key_bindings
-        from enthought.traits.ui.key_bindings import KeyBindings, KeyBinding
-        from api import save_key_binding
         return KeyBindings(
-            save_key_binding,
-            KeyBinding(
-                binding1    = 'Ctrl-r',
-                description = 'Run the file',
-                method_name = 'run'),
+            default_key_bindings + [
+                KeyBinding(
+                    binding1    = 'Ctrl-r',
+                    description = 'Run the file',
+                    method_name = 'run'),
+            ]
         )
     
     def _handler_default(self): # can't do: handler = PythonModuleEditorHandler() as all editors end up sharing same handler
@@ -51,8 +50,4 @@ class PythonModuleEditor(TextFileEditor):
                     'execfile(r"%s")' % self.obj.path, 
                     hidden=False
                 )
-
-    def select_line(self, lineno):
-        ''' Selects the specified line. '''
-        self.ui.info.content.selected_line = lineno
     

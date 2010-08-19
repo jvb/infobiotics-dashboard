@@ -12,9 +12,11 @@ class NullHandler(logging.Handler): # http://docs.python.org/library/logging.htm
 logging.getLogger('enthought.envisage.plugin').addHandler(NullHandler())
 logging.getLogger('enthought.pyface.workbench.workbench_window').addHandler(NullHandler())
 logging.getLogger('enthought.pyface.workbench.i_view').addHandler(NullHandler())
+logging.getLogger('enthought.pyface.ui.qt4.workbench.workbench_window_layout').addHandler(logging.StreamHandler())#NullHandler())
 
 from enthought.envisage.ui.workbench.api import WorkbenchApplication
 from enthought.pyface.api import ImageResource, AboutDialog, SplashScreen
+from enthought.traits.api import on_trait_change
 
 class Application(WorkbenchApplication):
     # implements IApplication and WorkbenchApplication interfaces
@@ -54,6 +56,18 @@ class Application(WorkbenchApplication):
 #            image             = ImageResource('images/logo'),
 ##            show_log_messages = True,
 #        )
+
+    @on_trait_change('workbench.active_window')
+    def _workbench_active_window_changed(self):
+        window = self.workbench.active_window
+        if window is not None: 
+#            for i in range(10):
+#                from actions.untitled_text_file_action import perform as new_untitled_text_file
+#                new_untitled_text_file(window)
+#                from actions.python_module_action import perform as new_python_module
+#                new_python_module(window)
+            from actions.untitled_text_file_action import perform as new_untitled_text_file
+            new_untitled_text_file(window)
 
 
 def main():
@@ -104,9 +118,8 @@ def main():
 #    application.workbench._preferences.prompt_on_exit = False
     application.workbench._preferences.preferences.set('default/prompt_on_exit', False) #TODO test
     
-#    window = application.active_window
 #    window.active_perspective = window.get_perspective_by_id('infobiotics.dashboard.plugins.experiments.ui_plugin.ExperimentsPerspective') 
-    
+        
     application.run()
     # This starts the application, starts the GUI event loop, and when that 
     # terminates, stops the application.
