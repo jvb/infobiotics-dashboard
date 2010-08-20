@@ -39,25 +39,29 @@ SELECTED_MARKER = 2 # Marks the currently selected line
 
 class LPPLexer(SourceLexer):
 
+    Default = 0
+
+    MultiLinesComment_Start = 1
+    MultiLinesComment = 2
+    MultiLinesComment_End = 3
+    SingleLineComment = 4
+    __comment = (
+        MultiLinesComment_Start,
+        MultiLinesComment,
+        MultiLinesComment_End,
+        SingleLineComment,
+    )
+
+    Digits = 5
+
+    spatialDistribution_Start = 6
+    spatialDistribution = 7
+    spatialDistribution_End = 8
+
+
     def __init__(self, editor):
         super(LPPLexer, self).__init__(editor)
-
-        self._styles = {
-            0: 'Default',
-            1: 'MultiLinesComment_Start',
-            2: 'MultiLinesComment',
-            3: 'MultiLinesComment_End',
-            4: 'SingleLineComment'
-        }
-        for key, value in self._styles.iteritems():
-            setattr(self, value, key)
         self._foldcompact = True
-        self.__comment = [
-            self.MultiLinesComment,
-            self.MultiLinesComment_End,
-            self.MultiLinesComment_Start,
-            self.SingleLineComment,
-        ]
 
     def foldCompact(self):
         return self._foldcompact
@@ -66,10 +70,10 @@ class LPPLexer(SourceLexer):
         self._foldcompact = bool(enable)
 
     def language(self):
-        return 'Config Files'
+        return 'Lattice Population P systems'
 
     def description(self, style):
-        return self._styles.get(style, '')
+        return ''
 
     def defaultColor(self, style):
         if style == self.Default:
@@ -79,11 +83,12 @@ class LPPLexer(SourceLexer):
         return QsciLexerCustom.defaultColor(self, style)
 
     def defaultFont(self, style):
-        if style in self.__comment:
-            if sys.platform in ('win32', 'cygwin'):
-                return QFont('Comic Sans MS', 9, QFont.Bold)
-            return QFont('Bitstream Vera Serif', 9, QFont.Bold)
-        return QsciLexerCustom.defaultFont(self, style)
+#        if style in self.__comment:
+#            if sys.platform in ('win32', 'cygwin'):
+#                return QFont('Comic Sans MS', 9, QFont.Bold)
+#            return QFont('Bitstream Vera Serif', 9, QFont.Bold)
+#        return QsciLexerCustom.defaultFont(self, style)
+        return QFont('Monospace', 10)
 
     def defaultPaper(self, style):
         # Here we change the color of the background.
@@ -119,21 +124,26 @@ class LPPLexer(SourceLexer):
         if end > editor.length():
             end = editor.length()
         if end > start:
-            source = bytearray(end - start)
-            SCI(QsciScintilla.SCI_GETTEXTRANGE, start, end, source)
+#            source = bytearray(end - start)
+            source = bytearray(end)
+#            SCI(QsciScintilla.SCI_GETTEXTRANGE, start, end, source)
+            SCI(QsciScintilla.SCI_GETTEXTRANGE, 0, end, source)
         if not source:
             return
 
         compact = self.foldCompact()
 
-        index = SCI(QsciScintilla.SCI_LINEFROMPOSITION, start)
+#        index = SCI(QsciScintilla.SCI_LINEFROMPOSITION, start)
+        index = SCI(QsciScintilla.SCI_LINEFROMPOSITION, 0)
         if index > 0:
             pos = SCI(QsciScintilla.SCI_GETLINEENDPOSITION, index - 1)
             prevState = SCI(QsciScintilla.SCI_GETSTYLEAT, pos)
         else:
             prevState = self.Default
 
-        self.startStyling(start, 0x1f)
+#        self.startStyling(start, 0x1f)
+#        self.startStyling(0, 0x1f)
+        self.startStyling(0)
 
         for line in source.splitlines(True):
             # Try to uncomment the following line to see in the console
@@ -151,14 +161,14 @@ class LPPLexer(SourceLexer):
                     newState = self.Default
             # We work with a non empty line.
             else:
-                if line.startswith('/*'):
+                if line.lstrip().startswith('/*'):
                     newState = self.MultiLinesComment_Start
-                elif line.startswith('*/'):
+                elif line.lstrip().startswith('*/'):
                     if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
                         newState = self.MultiLinesComment_End
                     else:
                         newState = self.Default
-                elif line.startswith('//'):
+                elif line.lstrip().startswith('#') and line.rstrip().endswith('#'):
                     if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
                         newState = self.MultiLinesComment
                     else:
@@ -671,13 +681,13 @@ class _LPPEditor(SourceEditor):
         lexer = LPPLexer(self)
         control.setLexer(lexer)
 
-        # Set a monspaced font. Use the (supposedly) same font and size as the #TODO
-        # wx version.
-        for style in xrange(128):
-            f = lexer.font(style)
-            f.setFamily('courier new')
-            f.setPointSize(10)
-            lexer.setFont(f, style)
+#        # Set a monspaced font. Use the (supposedly) same font and size as the #TODO
+#        # wx version.
+#        for style in xrange(128):
+#            f = lexer.font(style)
+#            f.setFamily('courier new')
+#            f.setPointSize(10)
+#            lexer.setFont(f, style)
 
         # Mark the maximum line size.
         control.setEdgeMode(Qsci.QsciScintilla.EdgeLine)

@@ -4,9 +4,9 @@ from enthought.traits.ui.api import Group, Item, CodeEditor
 
 class CodeFileEditor(TextFileEditor):
     ''' A generic code editor. '''
-    
+
     content = Code
-    
+
     # CodeEditor traits http://www.cs.nott.ac.uk/~jvb/ETS34_API/enthought.traits.ui.editors.code_editor.ToolkitEditorFactory.html
     auto_scroll = True
     auto_set = True
@@ -17,7 +17,7 @@ class CodeFileEditor(TextFileEditor):
     _key_bindings = None # overrides self.key_bindings inherited from AbstractFileEditor?
     lexer = 'null'
     line = Int
-    mark_color = Color(15526360)
+    mark_color = Color(0xE8F2FE)
     mark_lines = List(Int)
     search = Enum('bottom', 'top', 'none')
     search_color = Color(16777108)
@@ -60,6 +60,6 @@ class CodeFileEditor(TextFileEditor):
                 ),
             ),
             *self.items,
-            show_labels = False
+            show_labels=False
         )
-    
+
