@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="filenameLayout">
      <item>
-      <widget class="QPushButton" name="loadButton">
+      <widget class="QPushButton" name="load_button">
        <property name="text">
         <string>Load</string>
        </property>
@@ -339,6 +339,22 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="save_data_button">
+       <property name="toolTip">
+        <string>Individual</string>
+       </property>
+       <property name="text">
+        <string>Data</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>64</width>
+         <height>64</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="plotButton">
        <property name="toolTip">
         <string>Individual</string>
@@ -347,7 +363,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
+        <iconset>
          <normaloff>:/images/plot_2d.png</normaloff>:/images/plot_2d.png</iconset>
        </property>
        <property name="iconSize">
@@ -367,7 +383,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
+        <iconset>
          <normaloff>:/images/plot_3d.png</normaloff>:/images/plot_3d.png</iconset>
        </property>
        <property name="iconSize">
@@ -390,7 +406,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>loadButton</tabstop>
+  <tabstop>load_button</tabstop>
   <tabstop>filenameLineEdit</tabstop>
   <tabstop>selectAllRunsCheckBox</tabstop>
   <tabstop>randomRunsSpinBox</tabstop>

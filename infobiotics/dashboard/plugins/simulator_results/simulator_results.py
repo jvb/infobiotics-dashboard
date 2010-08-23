@@ -259,7 +259,7 @@ class SimulationResultsDialog(QWidget):
 
         self.ui.filenameLineEdit.setReadOnly(True)
 
-        self.connect(self.ui.load, SIGNAL("clicked()"), self.load)
+        self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
 
         self.connect(self.ui.selectAllRunsCheckBox, SIGNAL("clicked(bool)"), self.selectAllRunsClicked)
         self.connect(self.ui.selectAllSpeciesCheckBox, SIGNAL("clicked(bool)"), self.selectAllSpeciesClicked)
@@ -312,7 +312,7 @@ class SimulationResultsDialog(QWidget):
                      SIGNAL("currentIndexChanged(QString)"), self.setUnits)
         self.setUnits("seconds")
 
-#        self.connect(self.ui.saveButton, SIGNAL("clicked()"), self.save)
+        self.connect(self.ui.save_data_button, SIGNAL("clicked()"), self.save_data)
         self.connect(self.ui.plotButton, SIGNAL("clicked()"), self.plot)
         self.connect(self.ui.surfacePlotButton, SIGNAL("clicked()"), self.surfacePlot)
 
@@ -366,7 +366,6 @@ class SimulationResultsDialog(QWidget):
         results = SimulatorResults(self.filename,
                                    beginning=from_,
                                    end=to,
-                                   #type=decimal,
                                    every=self.every,
                                    run_indices=run_indices,
                                    species_indices=species_indices,
@@ -486,7 +485,7 @@ class SimulationResultsDialog(QWidget):
         self.ui.averageSelectedRunsCheckBox.setEnabled(False)
 #        self.ui.saveButton.setEnabled(False)
         self.ui.plotButton.setEnabled(False)
-        self.ui.load.setFocus(Qt.OtherFocusReason)
+        self.ui.load_button.setFocus(Qt.OtherFocusReason)
         return False
 
     def loadSucceeded(self):
@@ -580,6 +579,8 @@ class SimulationResultsDialog(QWidget):
             for i, s in enumerate(selected):
                 list.setCurrentItem(selected[i], QItemSelectionModel.Select)
 
+    #TODO additive select all of a particular compartment type combobox
+
     def updateUi(self):
         num_selected_runs = len(self.ui.runsListWidget.selectedItems())
         num_selected_species = len(self.ui.speciesListWidget.selectedItems())
@@ -617,13 +618,78 @@ class SimulationResultsDialog(QWidget):
 
     # actions slots
 
-    def save(self):
+    def save_data(self, filename='', precision=3, delimiter = ','):
         """Extract chosen timeseries according to options and write to file, maybe averaging"""
-        filename = QFileDialog.getSaveFileName(self,
-            self.tr("Save timeseries"),
-            ".",
-            self.tr("Comma-separated values (*.csv);;All files (*)"))
-        #TODO implement save results as csv functionality
+        if filename == '':
+            filename = QFileDialog.getSaveFileName(self,
+                self.tr("Save timeseries"),
+                ".",
+                self.tr("Comma-separated values (*.csv);;Excel spreadsheets (*.xls);;All files (*)"))
+            #TODO implement save results as csv functionality
+            if filename == '':
+                return
+            else:
+                filename = unicode(filename)
+
+        self.setCursor(Qt.WaitCursor)
+         
+        # get items
+        runs = self.ui.runsListWidget.selectedItems()
+        species = self.ui.speciesListWidget.selectedItems()
+        compartments = self.ui.compartmentsListWidget.selectedItems()
+
+        # get amounts indices
+        run_indices = [item.amounts_index for item in runs]
+        species_indices = [item.amounts_index for item in species]
+        compartment_indices = [item.amounts_index for item in compartments]       
+        
+        # get options
+        from_ = self.ui.fromSpinBox.value()
+        to = self.ui.toSpinBox.value()
+        units = unicode(self.ui.unitsComboBox.currentText())
+        averaging = self.ui.averageSelectedRunsCheckBox.isChecked()
+        
+        results = SimulatorResults(self.filename,
+                           beginning=from_,
+                           end=to,
+                           type=decimal.Decimal,
+                           every=self.every,
+                           run_indices=run_indices,
+                           species_indices=species_indices,
+                           compartment_indices=compartment_indices,
+                           parent=self)
+        
+        self.setCursor(Qt.ArrowCursor)
+        
+        # write data
+        if averaging:
+            fmt = '%%.%sf' % precision
+#            timepoints, (means, errors) = \
+            timepoints, (means,) = \
+                results.get_averages()
+            indices = [(ci,si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+            levels = tuple((means[si,ci] for ci, si in indices))
+        else:
+            timepoints, levels = results.get_amounts()
+            indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+            levels = tuple((levels[ri][si,ci,:] for ri, ci, si in indices))
+            fmt = '%d'
+        timepoints_and_levels = (timepoints, ) + levels
+        numpy.savetxt(filename, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=delimiter) # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+        # write header
+        if averaging:
+            pass
+#            f = open(filename, 'a')
+#            f.write()
+#            # species=s.data, compartment=c.data, run=r.data)
+#            # units=units?
+#            f.close()
+        else:
+            pass
+
+        from infobiotics.commons.sequences import k_common_subsequence
+        print k_common_subsequence([compartment.data.name for compartment in compartments])
+        
 
     def plot(self):
         """Extract chosen timeseries according to options and plot, maybe averaging"""
@@ -1123,7 +1189,7 @@ class SimulatorResults(object):
         log_interval = simulation.log_interval
 #        max_time = simulation.max_time
         max_time = number_of_timepoints * log_interval
-        timepoints = numpy.linspace(0, max_time, number_of_timepoints)
+        timepoints = numpy.linspace(0, max_time, number_of_timepoints + 1)
 
         #FIXME hack to correct axes of Fig2c model
         #timepoints = timepoints / 15
@@ -1402,7 +1468,7 @@ class SimulatorResults(object):
             if zmax == 0: # not
                 print "%s never amounts to anything." % s.name
 
-            warp_scale = (1 / zmax) * 10 #FIXME magic number! # necessary?
+            warp_scale = (1 / zmax) * 10 #FIXME magic number! # necessary? #TODO 'auto'
 
             surface = Surface(array, warp_scale, extent, s.name, self.timepoints)
             surfaces.append(surface)
@@ -1819,38 +1885,45 @@ class Surface(HasTraits):
 
 def test():
     app, argv = main.begin_traits()
-    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR_output.h5')
+#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
+#    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
+    w = SimulationResultsDialog(filename='/home/jvb/Desktop/autoregulation/autoregulation_simulation.h5')
+
     if w.loaded:
 #        w.ui.averageSelectedRunsCheckBox.setChecked(True)
         w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
 #        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
-        w.ui.speciesListWidget.selectAll()
+#        w.ui.speciesListWidget.selectAll()
+#        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("protein1", Qt.MatchExactly)[0])
+        for item in w.ui.speciesListWidget.findItems("protein1*", Qt.MatchWildcard): 
+            item.setSelected(True)
+
 #        w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
         w.ui.compartmentsListWidget.selectAll()
-#        w.ui.surfacePlotButton.click()
-        w.plot()
-        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
-        w.plotsPreviewDialog.combine()
+##        w.ui.surfacePlotButton.click()
+#        w.plot()
+#        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
+#        w.plotsPreviewDialog.combine()
     centre_window(w)
     w.show()
     main.end_with_qt_event_loop()
          
 
 if __name__ == "__main__":
-#    test()
+    test()
 
-#    import sys
-#    argv = sys.argv
-    app, argv = main.begin_traits()
-    if len(argv) > 2:
-        print "usage: mcss_results.sh {h5file}"
-        main.end(1)
-    if len(argv) == 1:
-#        shared.settings.register_infobiotics_settings()
-        w = SimulationResultsDialog()
-    elif len(argv) == 2:
-        w = SimulationResultsDialog(filename=argv[1])
-    centre_window(w)
-    w.show()
-#    shared.settings.restore_window_size_and_position(w)
-    main.end_with_qt_event_loop()
+##    import sys
+##    argv = sys.argv
+#    app, argv = main.begin_traits()
+#    if len(argv) > 2:
+#        print "usage: mcss_results.sh {h5file}"
+#        main.end(1)
+#    if len(argv) == 1:
+##        shared.settings.register_infobiotics_settings()
+#        w = SimulationResultsDialog()
+#    elif len(argv) == 2:
+#        w = SimulationResultsDialog(filename=argv[1])
+#    centre_window(w)
+#    w.show()
+##    shared.settings.restore_window_size_and_position(w)
+#    main.end_with_qt_event_loop()

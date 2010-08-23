@@ -1,5 +1,5 @@
 #http://en.wikipedia.org/wiki/X11_color_names
-colours = ['blue', 'red', 'green', 'gold', 'darkorchid', 'darkorange',
+colours = ['blue', 'red', 'gold', 'green', 'darkorchid', 'darkorange',
            'mediumturquoise', 'deeppink', 'chartreuse', 'brown', 'teal',
            'tomato', 'goldenrod', 'indigo', 'cornflowerblue', 'darkseagreen',
            'bisque', 'blueviolet',

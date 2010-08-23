@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'simulation_results_dialog.ui'
 #
-# Created: Wed Aug 26 17:18:53 2009
-#      by: PyQt4 UI code generator 4.4.4
+# Created: Mon Aug 23 12:09:21 2010
+#      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -17,9 +17,9 @@ class Ui_SimulationResultsDialog(object):
         self.verticalLayout_5.setObjectName("verticalLayout_5")
         self.filenameLayout = QtGui.QHBoxLayout()
         self.filenameLayout.setObjectName("filenameLayout")
-        self.load = QtGui.QPushButton(SimulationResultsDialog)
-        self.load.setObjectName("loadButton")
-        self.filenameLayout.addWidget(self.load)
+        self.load_button = QtGui.QPushButton(SimulationResultsDialog)
+        self.load_button.setObjectName("load_button")
+        self.filenameLayout.addWidget(self.load_button)
         self.filenameLineEdit = QtGui.QLineEdit(SimulationResultsDialog)
         self.filenameLineEdit.setEnabled(True)
         self.filenameLineEdit.setReadOnly(True)
@@ -56,7 +56,7 @@ class Ui_SimulationResultsDialog(object):
         self.randomRunsSpinBox.setMinimum(0)
         self.randomRunsSpinBox.setMaximum(1000)
         self.randomRunsSpinBox.setSingleStep(1)
-        self.randomRunsSpinBox.setProperty("value", QtCore.QVariant(1))
+        self.randomRunsSpinBox.setProperty("value", 1)
         self.randomRunsSpinBox.setObjectName("randomRunsSpinBox")
         self.randomRunsLayout.addWidget(self.randomRunsSpinBox)
         self.randomRunsLabel = QtGui.QLabel(self.runsGroupBox)
@@ -131,9 +131,9 @@ class Ui_SimulationResultsDialog(object):
         self.unitsComboBox = QtGui.QComboBox(self.optionsGroupBox)
         self.unitsComboBox.setEnabled(True)
         self.unitsComboBox.setObjectName("unitsComboBox")
-        self.unitsComboBox.addItem(QtCore.QString())
-        self.unitsComboBox.addItem(QtCore.QString())
-        self.unitsComboBox.addItem(QtCore.QString())
+        self.unitsComboBox.addItem("")
+        self.unitsComboBox.addItem("")
+        self.unitsComboBox.addItem("")
         self.timeLayout.addWidget(self.unitsComboBox)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.timeLayout.addItem(spacerItem)
@@ -152,6 +152,10 @@ class Ui_SimulationResultsDialog(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem2)
+        self.save_data_button = QtGui.QPushButton(SimulationResultsDialog)
+        self.save_data_button.setIconSize(QtCore.QSize(64, 64))
+        self.save_data_button.setObjectName("save_data_button")
+        self.horizontalLayout.addWidget(self.save_data_button)
         self.plotButton = QtGui.QPushButton(SimulationResultsDialog)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/images/plot_2d.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -171,7 +175,7 @@ class Ui_SimulationResultsDialog(object):
 
         self.retranslateUi(SimulationResultsDialog)
         QtCore.QMetaObject.connectSlotsByName(SimulationResultsDialog)
-        SimulationResultsDialog.setTabOrder(self.load, self.filenameLineEdit)
+        SimulationResultsDialog.setTabOrder(self.load_button, self.filenameLineEdit)
         SimulationResultsDialog.setTabOrder(self.filenameLineEdit, self.selectAllRunsCheckBox)
         SimulationResultsDialog.setTabOrder(self.selectAllRunsCheckBox, self.randomRunsSpinBox)
         SimulationResultsDialog.setTabOrder(self.randomRunsSpinBox, self.runsListWidget)
@@ -183,7 +187,7 @@ class Ui_SimulationResultsDialog(object):
 
     def retranslateUi(self, SimulationResultsDialog):
         SimulationResultsDialog.setWindowTitle(QtGui.QApplication.translate("SimulationResultsDialog", "Simulator Results", None, QtGui.QApplication.UnicodeUTF8))
-        self.load.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Load", None, QtGui.QApplication.UnicodeUTF8))
+        self.load_button.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Load", None, QtGui.QApplication.UnicodeUTF8))
         self.runsGroupBox.setTitle(QtGui.QApplication.translate("SimulationResultsDialog", "Runs", None, QtGui.QApplication.UnicodeUTF8))
         self.selectAllRunsCheckBox.setText(QtGui.QApplication.translate("SimulationResultsDialog", "All", None, QtGui.QApplication.UnicodeUTF8))
         self.randomRunsLabel.setText(QtGui.QApplication.translate("SimulationResultsDialog", "random runs", None, QtGui.QApplication.UnicodeUTF8))
@@ -203,6 +207,8 @@ class Ui_SimulationResultsDialog(object):
         self.unitsComboBox.setItemText(2, QtGui.QApplication.translate("SimulationResultsDialog", "hours", None, QtGui.QApplication.UnicodeUTF8))
         self.averageSelectedRunsCheckBox.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Not appropriate for oscillatory behaviours", None, QtGui.QApplication.UnicodeUTF8))
         self.averageSelectedRunsCheckBox.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Average selected runs", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_data_button.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Individual", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_data_button.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Data", None, QtGui.QApplication.UnicodeUTF8))
         self.plotButton.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Individual", None, QtGui.QApplication.UnicodeUTF8))
         self.surfacePlotButton.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Colony", None, QtGui.QApplication.UnicodeUTF8))
 
