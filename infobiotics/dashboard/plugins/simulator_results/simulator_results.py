@@ -81,7 +81,7 @@ def load_h5(h5_file):
             cols = node.compartment_information.cols # table columns accessor
 
             # create compartment objects
-            
+
             compartment_indices = cols.compartment_index[:]
             compartment_ids = cols.compartment_id[:]
             compartment_names = cols.compartment_name[:]
@@ -581,6 +581,11 @@ class SimulationResultsDialog(QWidget):
 
     #TODO additive select all of a particular compartment type combobox
 
+#    def filterComparments(self):
+#        from infobiotics.commons.sequences import k_common_subsequence
+#        print k_common_subsequence([compartment.data.name for compartment in compartments])
+
+
     def updateUi(self):
         num_selected_runs = len(self.ui.runsListWidget.selectedItems())
         num_selected_species = len(self.ui.speciesListWidget.selectedItems())
@@ -618,21 +623,21 @@ class SimulationResultsDialog(QWidget):
 
     # actions slots
 
-    def save_data(self, filename='', precision=3, delimiter = ','):
+    def save_data(self, file_name='', precision=3, delimiter=','):
         """Extract chosen timeseries according to options and write to file, maybe averaging"""
-        if filename == '':
-            filename = QFileDialog.getSaveFileName(self,
+        if file_name == '':
+            file_name = QFileDialog.getSaveFileName(self,
                 self.tr("Save timeseries"),
                 ".",
                 self.tr("Comma-separated values (*.csv);;Excel spreadsheets (*.xls);;All files (*)"))
             #TODO implement save results as csv functionality
-            if filename == '':
+            if file_name == '':
                 return
             else:
-                filename = unicode(filename)
+                file_name = unicode(file_name)
 
         self.setCursor(Qt.WaitCursor)
-         
+
         # get items
         runs = self.ui.runsListWidget.selectedItems()
         species = self.ui.speciesListWidget.selectedItems()
@@ -641,14 +646,14 @@ class SimulationResultsDialog(QWidget):
         # get amounts indices
         run_indices = [item.amounts_index for item in runs]
         species_indices = [item.amounts_index for item in species]
-        compartment_indices = [item.amounts_index for item in compartments]       
-        
+        compartment_indices = [item.amounts_index for item in compartments]
+
         # get options
         from_ = self.ui.fromSpinBox.value()
         to = self.ui.toSpinBox.value()
         units = unicode(self.ui.unitsComboBox.currentText())
         averaging = self.ui.averageSelectedRunsCheckBox.isChecked()
-        
+
         results = SimulatorResults(self.filename,
                            beginning=from_,
                            end=to,
@@ -658,38 +663,44 @@ class SimulationResultsDialog(QWidget):
                            species_indices=species_indices,
                            compartment_indices=compartment_indices,
                            parent=self)
-        
-        self.setCursor(Qt.ArrowCursor)
-        
-        # write data
-        if averaging:
-            fmt = '%%.%sf' % precision
-#            timepoints, (means, errors) = \
-            timepoints, (means,) = \
-                results.get_averages()
-            indices = [(ci,si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
-            levels = tuple((means[si,ci] for ci, si in indices))
-        else:
-            timepoints, levels = results.get_amounts()
-            indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
-            levels = tuple((levels[ri][si,ci,:] for ri, ci, si in indices))
-            fmt = '%d'
-        timepoints_and_levels = (timepoints, ) + levels
-        numpy.savetxt(filename, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=delimiter) # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
-        # write header
-        if averaging:
-            pass
-#            f = open(filename, 'a')
-#            f.write()
-#            # species=s.data, compartment=c.data, run=r.data)
-#            # units=units?
-#            f.close()
-        else:
-            pass
 
-        from infobiotics.commons.sequences import k_common_subsequence
-        print k_common_subsequence([compartment.data.name for compartment in compartments])
-        
+        self.setCursor(Qt.ArrowCursor)
+
+        def save_data_as_csv():
+            # write data
+            if averaging:
+                fmt = '%%.%sf' % precision
+    #            timepoints, (means, errors) = \
+                timepoints, (means,) = \
+                    results.get_averages()
+                indices = [(ci, si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+                levels = tuple((means[si, ci] for ci, si in indices))
+            else:
+                timepoints, levels = results.get_amounts()
+                indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+                levels = tuple((levels[ri][si, ci, :] for ri, ci, si in indices))
+                fmt = '%d' #TODO timepoints as floats and levels as ints
+            timepoints_and_levels = (timepoints,) + levels
+            # the transpose converts the tuple of 1D arrays to columns
+            numpy.savetxt(file_name, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=delimiter) # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+
+            # write header
+            header = ['time (%s)' % units]
+            if averaging:
+                for c in compartments:
+                    for s in species:
+                        header.append('%s in %s - mean of %s runs' % (s.text(), c.text(), len(runs)))
+            else:
+                for r in runs:
+                    for c in compartments:
+                        for s in species:
+                            header.append('%s in %s of run %s' % (s.text(), c.text(), r.text()))
+            from infobiotics.commons.files import pre_append
+            pre_append(','.join(header), file_name)
+
+        save_data_as_csv()
+
+        #TODO save_data_as_xls() # https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html
 
     def plot(self):
         """Extract chosen timeseries according to options and plot, maybe averaging"""
@@ -891,7 +902,7 @@ from infobiotics.commons.matplotlib_ import resize_and_save_matplotlib_figure
 class TraitsPlot(HasTraits):
     figure = Instance(Figure, ())
     title = Str('title')
-    
+
     def traits_view(self):
         return View(
             VGroup(
@@ -911,7 +922,7 @@ class TraitsPlot(HasTraits):
             resizable=True,
             title=self.title
         )
-            
+
     save_resized = Button
     def _save_resized_fired(self):
         resize_and_save_matplotlib_figure(self.figure)
@@ -1481,12 +1492,12 @@ sum_compartments_at_same_xy_lattice_position = True
 class SpatialPlotsWindow(QWidget):
     def __init__(self, surfaces, parent=None):
         QWidget.__init__(self)
-        
+
         self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.connect(parent, SIGNAL("destroyed(QObject*)"), self.close)
         self.filename = parent.filename
-        
+
         self.setWindowTitle('Surface plots for %s' % self.filename)
 
         self.surfaces = surfaces
@@ -1508,12 +1519,12 @@ class SpatialPlotsWindow(QWidget):
         v.setSpacing(0)
 #        v.addLayout(h)
         v.addLayout(gridLayout)
-        
+
         compareButton = QPushButton('Compare')
         self.connect(compareButton, SIGNAL('clicked()'), self.createSurfacesListWidget)
-        
-        self.controls = SpatialPlotsControlsWidget(surfaces) 
-        
+
+        self.controls = SpatialPlotsControlsWidget(surfaces)
+
         h2 = QHBoxLayout()
         h2.addWidget(self.controls)
         h2.addWidget(compareButton)
@@ -1535,31 +1546,31 @@ class SurfacesListWidget(QWidget):
     def __init__(self, surfaces, position, parent):
         QWidget.__init__(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
-        
+
         self.parent = parent
 
         self.surfaces = surfaces
         self.position = position
         #TODO position to time
-        
+
         self.setWindowTitle('Surfaces at position %s' % self.position)
 
         self.setupUi()
 
         self.updateUi()
-        
-        
+
+
     def setupUi(self):
-        
+
         self.listWidget = QListWidget(self)
         self.listWidget.setViewMode(QListWidget.IconMode)
         self.listWidget.setSelectionMode(QListWidget.ExtendedSelection)
         self.listWidget.setSelectionBehavior(QListWidget.SelectItems)
-        self.listWidget.setIconSize(QSize(200,200))
+        self.listWidget.setIconSize(QSize(200, 200))
 #        self.listWidget.setDragDropMode(QListWidget.InternalMove)
 #        self.listWidget.setDragEnabled(True)
         self.listWidget.setUniformItemSizes(True)
-        
+
         for surface in self.surfaces:
             array = surface.arrayAtPosition(self.position)
             fileLikeObject = StringIO.StringIO()
@@ -1572,13 +1583,13 @@ class SurfacesListWidget(QWidget):
                 item = QListWidgetItem(surface.species_name, self.listWidget)
                 item.setIcon(QIcon(pixmap))
                 item.surface = surface
-        
+
         self.connect(self.listWidget, SIGNAL('itemSelectionChanged()'), self.updateUi)
         self.connect(self.listWidget, SIGNAL('itemDoubleClicked(QListWidgetItem *)'), self.showItem)
-        
+
         self.overlapPairwiseButton = QPushButton('Overlap pairwise', self)
         self.connect(self.overlapPairwiseButton, SIGNAL('clicked()'), self.overlapPairwise)
-        
+
         self.v = QVBoxLayout(self)
         self.v.addWidget(self.listWidget)
         self.v.addWidget(self.overlapPairwiseButton)
@@ -1588,27 +1599,27 @@ class SurfacesListWidget(QWidget):
         self.secondListWidget.setViewMode(QListWidget.IconMode)
         self.secondListWidget.setSelectionMode(QListWidget.ExtendedSelection)
         self.secondListWidget.setSelectionBehavior(QListWidget.SelectItems)
-        self.secondListWidget.setIconSize(QSize(200,200))
+        self.secondListWidget.setIconSize(QSize(200, 200))
 #        self.secondListWidget.setDragDropMode(QListWidget.InternalMove)
 #        self.secondListWidget.setDragEnabled(True)
         self.secondListWidget.setUniformItemSizes(True)
-        
+
         self.connect(self.secondListWidget, SIGNAL('itemSelectionChanged()'), self.updateUi)
         self.connect(self.secondListWidget, SIGNAL('itemDoubleClicked(QListWidgetItem *)'), self.showItem)
         self.saveSelectedButton = QPushButton('Save selected', self)
         self.connect(self.saveSelectedButton, SIGNAL('clicked()'), self.saveSelected)
         self.saveAllSelectedButton = QPushButton('Save all selected', self)
         self.connect(self.saveAllSelectedButton, SIGNAL('clicked()'), self.saveAllSelected)
-        
+
         self.v.addWidget(self.secondListWidget)
         h = QHBoxLayout()
         h.addWidget(self.saveSelectedButton)
         h.addWidget(self.saveAllSelectedButton)
         self.v.addLayout(h)
-        
+
         self.setLayout(self.v)
-        
-        self.resize(640,480)
+
+        self.resize(640, 480)
         centre_window(self)
 
 
@@ -1616,7 +1627,7 @@ class SurfacesListWidget(QWidget):
         self.label = QLabel(self, Qt.Window)
         self.label.setWindowTitle(item.text())
         icon = item.icon()
-        self.label.setPixmap(icon.pixmap(400,400))
+        self.label.setPixmap(icon.pixmap(400, 400))
         self.label.setScaledContents(True)
         self.label.setToolTip('Drag to resize image, right-click to save.')
         pixmap = self.label.pixmap()
@@ -1625,27 +1636,27 @@ class SurfacesListWidget(QWidget):
         self.label.show()
         self.label.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self.label, SIGNAL('customContextMenuRequested(const QPoint &)'), self.saveLabel)
-    
+
     def saveLabel(self):
         filename = self.getSaveFilename(self.label.windowTitle())
         if filename != '':
             if not filename.endsWith(QString('.png'), Qt.CaseInsensitive):
-                filename = QString('%s.png' % filename) 
+                filename = QString('%s.png' % filename)
             pixmap = self.label.pixmap().scaled(self.label.size())
             pixmap.save(filename, 'png')
             self.lastDirectory = QFileInfo(filename).absolutePath()
-            
+
     def getSaveFilename(self, filename):
-        if hasattr(self, 'lastDirectory'): 
+        if hasattr(self, 'lastDirectory'):
             filename = '%s/%s' % (self.lastDirectory, filename)
         filename = QFileDialog.getSaveFileName(self, 'Specify a filename to save image to', filename, 'PNG files (*.png)')
         if filename != '':
             if not filename.endsWith(QString('.png'), Qt.CaseInsensitive):
-                filename = QString('%s.png' % filename) 
+                filename = QString('%s.png' % filename)
             self.lastDirectory = QFileInfo(filename).absolutePath()
         return filename
-        
-        
+
+
     def updateUi(self):
         self.overlapPairwiseButton.setEnabled(len(self.listWidget.selectedItems()) > 1)
         self.saveSelectedButton.setEnabled(len(self.secondListWidget.selectedItems()) == 1)
@@ -1661,7 +1672,7 @@ class SurfacesListWidget(QWidget):
         self.secondListWidget.clear()
 
         surfaces = [item.surface for item in self.listWidget.selectedItems()]
-        
+
         import itertools
         for pair in itertools.combinations(surfaces, 2):
             s1 = pair[0]
@@ -1669,7 +1680,7 @@ class SurfacesListWidget(QWidget):
             array1 = s1.arrayAtPosition(self.position)
             array2 = s2.arrayAtPosition(self.position) * -1
             array = array1 + array2
-            
+
             fileLikeObject = StringIO.StringIO()
             save_array_as_image(fileLikeObject, array, format='PNG')
             pixmap = QPixmap()
@@ -1682,7 +1693,7 @@ class SurfacesListWidget(QWidget):
                 info = QFileInfo(self.parent.filename)
                 item.filename = '%s+%s_%s_%s.png' % (s1.species_name, s2.species_name, self.position, info.fileName())
                 item.array = array
-        
+
     def saveSelected(self):
         item = self.secondListWidget.selectedItems()[0]
         filename = self.getSaveFilename(item.text())
@@ -1695,7 +1706,7 @@ class SurfacesListWidget(QWidget):
             items = self.secondListWidget.selectedItems()
             for item in items:
                 save_array_as_image('%s/%s' % (directory, item.filename), item.array)
-        
+
 
 def save_array_as_image(filename, array, colourmap=None, vmin=None, vmax=None, format=None, origin=None):
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -1786,7 +1797,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
 
     def getPosition(self):
         return self.ui.positionSlider.value()
-    
+
 
 #os.environ['ETS_TOOLKIT'] = 'qt4' # must be before any traits imports AND must use qApp not QApplication(sys.argv)
 
@@ -1887,15 +1898,14 @@ def test():
     app, argv = main.begin_traits()
 #    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
 #    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
-    w = SimulationResultsDialog(filename='/home/jvb/Desktop/autoregulation/autoregulation_simulation.h5')
-
+    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
     if w.loaded:
 #        w.ui.averageSelectedRunsCheckBox.setChecked(True)
         w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
 #        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
 #        w.ui.speciesListWidget.selectAll()
 #        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("protein1", Qt.MatchExactly)[0])
-        for item in w.ui.speciesListWidget.findItems("protein1*", Qt.MatchWildcard): 
+        for item in w.ui.speciesListWidget.findItems("protein1*", Qt.MatchWildcard):
             item.setSelected(True)
 
 #        w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
@@ -1907,7 +1917,7 @@ def test():
     centre_window(w)
     w.show()
     main.end_with_qt_event_loop()
-         
+
 
 if __name__ == "__main__":
     test()

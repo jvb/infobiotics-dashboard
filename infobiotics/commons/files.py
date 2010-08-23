@@ -52,11 +52,11 @@ def can_read(path):
 
 def can_access_file(path):
     ''' Return whether path is an existing file. '''
-    return can_access(path) if os.path.split(path)[1] != '' else False  
+    return can_access(path) if os.path.split(path)[1] != '' else False
 
 def can_read_file(path):
     ''' Return whether path is an existing readable file. '''
-    return can_access(path, os.R_OK) if can_access_file(path) else False 
+    return can_access(path, os.R_OK) if can_access_file(path) else False
 
 def read(file, mode='r'):
     if not can_read(file):
@@ -65,7 +65,7 @@ def read(file, mode='r'):
         return open(file, mode)
 
 def read_binary(file):
-    return read(file, mode='rb')        
+    return read(file, mode='rb')
 
 def can_write(path):
     ''' When testing whether a file can be written to the statement:
@@ -90,3 +90,18 @@ def append(file):
 
 def update(file):
     return write(file, mode='r+')
+
+
+import sys, fileinput
+def pre_append(line, file_name):
+    ''' Insert a line at the beginning of a file. 
+    
+    Lifted from: http://python-forum.com/pythonforum/viewtopic.php?f=3&t=9793#p44799
+    
+    '''
+    fobj = fileinput.FileInput(file_name, inplace=1)
+    first_line = fobj.readline()
+    sys.stdout.write("%s\n%s" % (line, first_line))
+    for line in fobj:
+        sys.stdout.write("%s" % line)
+    fobj.close()

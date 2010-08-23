@@ -2,6 +2,13 @@
 Some common, and not so common, sequence operations.
 '''
 
+def copy(l):
+    '''
+    Returns a copy of the list l. 
+    '''
+    return l[:]
+
+
 def unique(l):
     '''
     From http://stackoverflow.com/questions/89178/#91430
@@ -16,11 +23,35 @@ def unique(l):
     return l
 
 
-def copy(l):
+def overlapping(left, right):
+    for c in reversed(range(len(right))):
+        c += 1
+        r = right[0:c]
+        l = left[-c:]
+        if list(l) == list(r):
+            return r
+    t = type(left) or type(right)
+    return t()
+
+def join_overlapping(left, right):
+    o = overlapping(left, right)
+    t = type(o)
+    l = list(left[:])
+    l += right[len(o):]
+    return t(l)
+
+
+def padded_range(n, padding_char='0'):
+    ''' Returns a list of padded integers in the interval 0 < n. 
+    
+    >>> padded_range(10)
+    ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+    
+    >>> padded_range(5)
+    ['0', '1', '2', '3', '4']
+    
     '''
-    Returns a copy of the list l. 
-    '''
-    return l[:]
+    return [str(padding_char[0]) * (len(str(n)) - len(str(i))) + str(i) for i in range(n)]
 
 
 def flatten(a):
@@ -41,9 +72,9 @@ def flatten(a):
     
         The following code is not meant for human consumption.
         """
-        if not isinstance(a,(tuple,list)):
+        if not isinstance(a, (tuple, list)):
             return lambda: k([a])
-        if len(a)==0:
+        if len(a) == 0:
             return lambda: k([])
         def k1(v1):
             def k2(v2):
@@ -52,23 +83,33 @@ def flatten(a):
         return lambda: flatten_k(a[0], k1)
     return bounce(flatten_k(a, lambda x: x))
 
-def overlapping(left, right):
-    for c in reversed(range(len(right))):
-        c += 1
-        r = right[0:c]
-        l = left[-c:]
-        if list(l) == list(r):
-            return r
-    t = type(left) or type(right)
-    return t()
-        
-def join_overlapping(left, right):
-    o = overlapping(left, right)
-    t = type(o)
-    l = list(left[:])
-    l += right[len(o):]
-    return t(l)
+def k_common_subsequence(sequences):
+    ''' Returns the set of longest common subsequences in a collection of 
+    sequences.
 
+    See LCSubstr_set for longest common subsequence algorithm.
+
+    >>> a = (0,1,2)
+    >>> b = (0,2,4)
+    >>> c = (1,2,3,4,5,6)
+    >>> k_common_subsequence((a,b,c))
+    [(2,)]
+    
+    >>> strings = ['hello', 'fellow', 'mellowing', 'bellowing']
+    >>> k_common_subsequence(strings)
+    ['ello']
+    >>> def padded_range(n, padding_char='0'): return [str(padding_char[0]) * (len(str(n)) - len(str(i))) + str(i) for i in range(n)]
+    >>> k_common_subsequence(padded_range(10))
+    ['0']
+    >>> k_common_subsequence(padded_range(100)) 
+    ['0']
+    
+    '''
+    import itertools
+#    S = set(flatten([list(LCSubstr_set(s, t)) for s, t in itertools.combinations(sequences, 2)]))
+    S = set(itertools.chain.from_iterable([LCSubstr_set(s, t) for s, t in itertools.combinations(sequences, 2)])) # itertools.chain.from_iterable is a one-level flatten 
+#    S = sorted(S, key=len, reverse=True)
+    return [s for s in S if in_all_sequences(s, sequences)]
 
 def LCSubstr_set(S, T):
     ''' Returns the set of longest common subsequences in 2 sequences.
@@ -82,135 +123,63 @@ def LCSubstr_set(S, T):
     
     '''
     m = len(S); n = len(T)
-    L = [[0] * (n+1) for i in xrange(m+1)]
+    L = [[0] * (n + 1) for i in xrange(m + 1)]
     LCS = set()
     len_longest = 0
     for i in xrange(m):
         for j in xrange(n):
             if S[i] == T[j]:
                 v = L[i][j] + 1
-                L[i+1][j+1] = v
+                L[i + 1][j + 1] = v
                 if v > len_longest:
                     len_longest = v
                     LCS = set()
                 if v == len_longest:
-                    LCS.add(S[i-v+1:i+1])
+                    LCS.add(S[i - v + 1:i + 1])
     return LCS
 
+def findall(L, value, start=0):
+    ''' Lifted from: http://effbot.org/zone/python-list.htm '''
+    # generator version
+    i = start - 1
+    try:
+        i = L.index(value, i + 1)
+        yield i
+    except ValueError:
+        pass
 
-def k_common_subsequence(sequences):
-    ''' Returns the set of longest common subsequences in a collection of 
-    sequences.
-
-    See LCSubstr_set for longest common subsequence algorithm.
-
-    a = (0,1,2)
-    b = (0,2,4)
-    c = (1,2,3,4,5,6)
-    >>> k_common_subsequence((a,b,c))
-    set([(1, 2)])
+def in_sequence(sub, sequence):
+    ''' 
     
-    >>> strings = [
-    >>>     'hello',
-    >>>     'fellow',
-    >>>     'mellowing',
-    >>>     'bellowing',
-    >>> ]
-    >>> k_common_subsequence(strings)
-    set(['ellowing'])
+    >>> a = (1,2,3)
+    >>> b = (1,2,4)
+    >>> c = (1,2,3,4,5,6)
+    >>> in_sequence(a,b)
+    False
+    >>> in_sequence(a,c)
+    True
+    >>> in_sequence(b,c)
+    False
 
-    >>> def padded_range(n, padding_char='0'):
-    >>>     return [str(padding_char[0]) * (len(str(n)) - len(str(i))) + str(i) for i in range(n)]
-    >>> k_common_subsequence(padded_range(10))
-    set(['0'])
-    >>> k_common_subsequence(padded_range(100)) 
-    set(['02', '03', '00', '01', '06', '07', '04', '05', '08', '09'])
-    
+    >>> in_sequence('ello', 'hello')
+    True
+    >>> in_sequence('elo', 'hello')
+    False
+
     '''
-    import itertools
-    len_longest = 0
-    list_longest = []
-#        # wrong!
-#    for p in itertools.combinations(sequences, 2):
-#        s = LCSubstr_set(p[0], p[1])
-#        for i in s:
-#            if len(i) == len_longest:
-#                list_longest.append(i)
-#            elif len(i) > len_longest:
-#                list_longest = [i]
-#            if len(i) >= len_longest:
-#                len_longest = len(i)
-        
-    # get set of all longest subsequences
-#    s = set(flatten([list(LCSubstr_set(s, t)) for s, t in itertools.combinations(sequences, 2)]))
-    s = set(itertools.chain.from_iterable([LCSubstr_set(s, t) for s, t in itertools.combinations(sequences, 2)]))
-    
-    # sort set, longest subsequences first
-    s = sorted(s, key=len, reverse=True)
-    
-    # test, in sorted order, that subsequence is in all sequences, adding subsequence to new list
-    return [sub for sub in s if present_in_all(sub, sequences)] 
+    l = len(sub)
+    for i in findall(sequence, sub[0]):
+        if sequence[i:l + i] == sub:
+            return True
+    return False
+
+def in_all_sequences(sub, S):
+    for s in S:
+        if not in_sequence(sub, s):
+            return False
+    return True
 
 
-def present_in_all(subsequence, sequences):
-    
-    return True #TODO
-#    if instanceof(subsequence, str):
-
-        
-
-
-strings = [
-    'hello',
-    'fellow',
-    'mellowing',
-    'bellowing',
-    'el',
-]
-print k_common_subsequence(strings)
-
-def k_common_subsequence_present_in_all(sequences):
-    s = list(k_common_subsequence(sequences))
-    if len(s) == 0:
-        # fail fast
-        return s
-    # if i is not a subsequence of every sequences in sequence then pop it and continue 
-    o = []
-    broken = False
-    for i in s:
-        for j in sequences:
-            t = LCSubstr_set(i, j)
-            if len(t) == 0:
-                broken = True
-                break
-            for k in t:
-                if len(k) < len(i):
-                    broken = True
-                    break
-        if broken:
-            broken = False
-            continue
-        else:
-            o.append(i)
-    return o
-
-#sequences = [
-#    'ello',
-#    'hello',
-#    'el',
-#]
-#print k_common_subsequence(sequences)
-#print k_common_subsequence_present_in_all(sequences)
-
-def padded_range(n, padding_char='0'):
-    ''' Returns a list of padded integers in the interval 0 < n. 
-    
-    >>> padded_range(10)
-    ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
-    
-    >>> padded_range(5)
-    ['0', '1', '2', '3', '4']
-    
-    '''
-    return [str(padding_char[0]) * (len(str(n)) - len(str(i))) + str(i) for i in range(n)]
-
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
