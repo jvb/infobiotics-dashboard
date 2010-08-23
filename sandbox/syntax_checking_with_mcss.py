@@ -113,6 +113,11 @@ class LPPEditor(HasTraits):
                 os.remove(path)
             assert not os.path.exists(path)
 
+        #TODO duplicate symbols
+
+        #TODO illegal letters in words
+
+
     def _error_changed(self, error):
         if error != '':
             if 'according to BNF failed in line: ' in error:

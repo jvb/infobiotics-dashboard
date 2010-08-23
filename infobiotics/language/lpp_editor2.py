@@ -39,33 +39,87 @@ SELECTED_MARKER = 2 # Marks the currently selected line
 
 class LPPLexer(SourceLexer):
 
-    Default = 0
+    Digits = 100
 
+    Default = 0
     MultiLinesComment_Start = 1
     MultiLinesComment = 2
     MultiLinesComment_End = 3
     SingleLineComment = 4
-    __comment = (
-        MultiLinesComment_Start,
-        MultiLinesComment,
-        MultiLinesComment_End,
-        SingleLineComment,
-    )
 
-    Digits = 5
+    from_and_for = 5
 
-    SpatialDistribution_Start = 6
-    SpatialDistribution = 7
-    SpatialDistribution_End = 8
-    _in_spatialDistribution = False
-
-    positions = ''# 'start', 'inside', 'end'
-
-    spatialDistribution = ''# 'start', 'inside', 'end'
+    LPPsystem = 6
+    SPsystems = 7
+    SPsystem = 8
+    lattice = 9
+    spatialDistribution = 10
+    positions = 11
+    for_ = 12
+    parameters = 13
+    parameter = 14
+    coordinates = 15
+    x = 16
+    y = 17
 
 
     def __init__(self, editor):
+        '''
+        #comment#
+        LPPsystem
+        SPsystems
+        SPsystem
+        from
+        endSPsystem
+        endSPsystems
+        lattice
+        spatialDistribution
+        positions
+        for
+        parameters
+        parameter
+        endParameters
+        coordinates
+        x
+        y
+        endCoordinates
+        endPositions
+        endSpatialDistribution
+        endLPPsystem
+        '''
         super(LPPLexer, self).__init__(editor)
+
+#        self._styles = {
+#            0: 'Default',
+#            1: 'MultiLinesComment_Start',
+#            2: 'MultiLinesComment',
+#            3: 'MultiLinesComment_End',
+#            4: 'SingleLineComment',
+#
+#            5: 'LPPsystem', #endLPPsystem
+#            6: 'SPsystems', #endSPsystems
+#            7: 'SPsystem', #endSPsystem
+#            8: 'from_',
+#            9: 'lattice',
+#            10: 'spatialDistribution', #endSpatialDistribution
+#            11: 'positions', #endPositions
+#            12: 'for_',
+#            13: 'parameters', #endParameters
+#            14: 'parameter',
+#            15: 'coordinates', #endCoordinates
+#            16: 'x',
+#            17: 'y',
+#        }
+#        for key, value in self._styles.iteritems():
+#            setattr(self, value, key) # self.Default = 0, etc.
+
+        self.__comment = [
+            self.MultiLinesComment,
+            self.MultiLinesComment_End,
+            self.MultiLinesComment_Start,
+            self.SingleLineComment,
+        ]
+
         self._foldcompact = True
 
     def foldCompact(self):
@@ -78,13 +132,20 @@ class LPPLexer(SourceLexer):
         return 'Lattice Population P systems'
 
     def description(self, style):
-        return ''
+#        return self._styles.get(style, '')
+        return QtCore.QString()
 
     def defaultColor(self, style):
+#        print 'defaultColor', style
         if style == self.Default:
             return QColor('#000000')
         elif style in self.__comment:
-            return QColor('#A0A0A0')
+            return QColor('#E5E5E5')
+        elif style == self.Digits:
+            print 'digit'
+            return QColor('#A52A2A')
+        elif style == self.from_and_for:
+            return QColor('#0000FF')
         return QsciLexerCustom.defaultColor(self, style)
 
     def defaultFont(self, style):
@@ -93,7 +154,11 @@ class LPPLexer(SourceLexer):
 #                return QFont('Comic Sans MS', 9, QFont.Bold)
 #            return QFont('Bitstream Vera Serif', 9, QFont.Bold)
 #        return QsciLexerCustom.defaultFont(self, style)
-        return QFont('Monospace', 10)
+        font = QsciLexerCustom.defaultFont(self, style)
+        if style == self.Digits:
+            font.setBold(True)
+#        print 'defaultFont', style
+        return font
 
     def defaultPaper(self, style):
         # Here we change the color of the background.
@@ -109,8 +174,6 @@ class LPPLexer(SourceLexer):
             return True
         return QsciLexerCustom.defaultEolFill(self, style)
 
-    i = 1
-
     def styleText(self, start, end):
         super(LPPLexer, self).styleText(start, end)
 
@@ -119,89 +182,101 @@ class LPPLexer(SourceLexer):
             return
 
         SCI = editor.SendScintilla
+
+        # folding
         GETFOLDLEVEL = QsciScintilla.SCI_GETFOLDLEVEL
         SETFOLDLEVEL = QsciScintilla.SCI_SETFOLDLEVEL
         HEADERFLAG = QsciScintilla.SC_FOLDLEVELHEADERFLAG
         LEVELBASE = QsciScintilla.SC_FOLDLEVELBASE
         NUMBERMASK = QsciScintilla.SC_FOLDLEVELNUMBERMASK
         WHITEFLAG = QsciScintilla.SC_FOLDLEVELWHITEFLAG
-        set_style = self.setStyling
+        compact = self.foldCompact()
 
+        # style from the edit position rather than the whole document
         source = ''
         if end > editor.length():
             end = editor.length()
         if end > start:
-#            source = bytearray(end - start)
-            source = bytearray(end)
-#            SCI(QsciScintilla.SCI_GETTEXTRANGE, start, end, source)
-            SCI(QsciScintilla.SCI_GETTEXTRANGE, 0, end, source)
+            source = bytearray(end - start)
+            SCI(QsciScintilla.SCI_GETTEXTRANGE, start, end, source)
         if not source:
             return
-        print len(source), self.i
-        self.i += 1
 
-        compact = self.foldCompact()
-
-#        index = SCI(QsciScintilla.SCI_LINEFROMPOSITION, start)
-        index = SCI(QsciScintilla.SCI_LINEFROMPOSITION, 0)
+        index = SCI(QsciScintilla.SCI_LINEFROMPOSITION, start)
+        #folding
         if index > 0:
             pos = SCI(QsciScintilla.SCI_GETLINEENDPOSITION, index - 1)
             prevState = SCI(QsciScintilla.SCI_GETSTYLEAT, pos)
         else:
             prevState = self.Default
 
-#        self.startStyling(start, 0x1f)
-        self.startStyling(0, 0x1f)
+        self.startStyling(start, 0x1f)
 
         for line in source.splitlines(True):
             # Try to uncomment the following line to see in the console
-            # how Scintiallla works. You have to think in terms of isolated
+            # how Scintilla works. You have to think in terms of isolated
             # lines rather than globally on the whole text.
-#            if '# Bacteria carrying' in line:
-#                print self._in_spatialDistribution
+#            print line
 
             length = len(line)
-            # We must take care of empty lines.
-            # This is done here.
-            if length == 1:
-                if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
-                    newState = self.MultiLinesComment
+            if length == 1: # empty line
+##                if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
+##                    newState = self.MultiLinesComment
+#                if prevState in (self.SPsystems, self.SPsystem):
+#                    newState = self.SPsystems
+#                elif prevState in (self.spatialDistribution, self.positions, self.parameters, self.coordinates, self.x, self.y):
+#                    newState = self.spatialDistribution
+#                else:
+                newState = self.Default
+            else: # non-empty line
+                if line.lstrip().startswith('#') and line.rstrip().endswith('#'):
+                    newState = self.SingleLineComment
+#                elif line.lstrip().startswith('LPPsystem'):
+#                    newState = self.LPPsystem
+#                elif line.lstrip().startswith('SPsystems'):
+#                    newState = self.SPsystems
+#                elif line.lstrip().startswith('SPsystem'):
+#                    newState = self.SPsystem
+
+#                if line.startswith('/*'):
+#                    newState = self.MultiLinesComment_Start
+#                elif line.startswith('*/'):
+#                    if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
+#                        newState = self.MultiLinesComment_End
+#                    else:
+#                        newState = self.Default
+#                elif line.startswith('//'):
+#                    if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
+#                        newState = self.MultiLinesComment
+#                    else:
+#                        newState = self.SingleLineComment
+#                elif prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
+#                    newState = self.MultiLinesComment
                 else:
-                    newState = self.Default
-            # We work with a non empty line.
-            else:
+                    pos = SCI(QsciScintilla.SCI_GETLINEENDPOSITION, index) - length + 1
+                    i = 0
+                    while i < length:
+                        wordLength = 1
 
-                # multi line comments
-                if line.lstrip().startswith('/*'):
-                    newState = self.MultiLinesComment_Start
-                elif line.lstrip().startswith('*/'):
-                    if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
-                        newState = self.MultiLinesComment_End
-                    else:
-                        newState = self.Default
+                        self.startStyling(i + pos, 0x1f)
+                        if chr(line[i]) in '0123456789':
+                            newState = self.Digits
+                        else:
+                            if line[i:].startswith('from'):
+                                newState = self.from_and_for
+                                wordLength = len('from')
+                            elif line[i:].startswith('for'):
+                                print 'got here'
+                                newState = self.from_and_for
+                                wordLength = len('for')
+                            else:
+                                newState = self.Default
+                        i += wordLength
+                        self.setStyling(wordLength, newState)
+                    newState = None
 
-                # single line comments
-                elif line.lstrip().startswith('#') and line.rstrip().endswith('#'):
-                    if prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
-                        newState = self.MultiLinesComment
-                    elif prevState == self.SpatialDistribution or prevState == self.SpatialDistribution_Start:
-                        newState = self.SpatialDistribution
-                    else:
-                        newState = self.SingleLineComment
-
-                # more multi line comments
-                elif prevState == self.MultiLinesComment or prevState == self.MultiLinesComment_Start:
-                    newState = self.MultiLinesComment
-
-                # everything else
-                else:
-                    newState = self.Default
-
-
-            set_style(length, newState)
-
-
-            # folding
+#            if newState:
+#                self.setStyling(length, newState)
 
 #            # Definition of the folding.
 #            # Documentation : http://scintilla.sourceforge.net/ScintillaDoc.html#Folding
@@ -214,86 +289,12 @@ class LPPLexer(SourceLexer):
 #                level = LEVELBASE + 1
 #            else:
 #                level = LEVELBASE
-
-            # spatialDistribution
-            # works:
-            if line.lstrip().startswith('spatialDistribution'):
-#                newState = self.SpatialDistribution_Start
-#                self._in_spatialDistribution = True
-                self.spatialDistribution = 'start'
-            elif line.lstrip().startswith('endSpatialDistribution'):
-#                self._in_spatialDistribution = False
-                self.spatialDistribution = 'end'
-            else:
-                if self.spatialDistribution in ('start', 'inside'):
-                    self.spatialDistribution == 'inside'
-                else:
-                    self.spatialDistribution == 'outside'
-            #
-#            if self._in_spatialDistribution:
-            if self._in_spatialDistribution:
-#                if newState == self.SpatialDistribution_Start:
-                if self.spatialDistribution == 'start':
-                    level = LEVELBASE | HEADERFLAG
-                else:
-                    level = LEVELBASE + 1
-            else:
-#                if newState == self.SpatialDistribution_End:
-                if self.spatialDistribution = 'end':
-                    level = LEVELBASE + 1
-                else:
-                    level = LEVELBASE
-            # doesn't:
-#            if line.lstrip().startswith('spatialDistribution'):
-#                self.spatialDistribution = 'start'
-#            elif line.lstrip().startswith('endSpatialDistribution'):
-##                if self.spatialDistribution in ('start', 'inside'):
-##                    self.spatialDistribution = 'end'
-##                else:
-##                    self.spatialDistribution = ''
-#                self.spatialDistribution = 'end'
-#            elif self.spatialDistribution in ('start', 'inside'):
-#                self.spatialDistribution = 'inside'
-#            else:
-#                self.spatialDistribution = ''
-##            print self.spatialDistribution
-#            if self.spatialDistribution == 'start':
-#                level = LEVELBASE + 1 | HEADERFLAG
-#            elif self.spatialDistribution in ('inside', 'end'):
-#                level = LEVELBASE + 1
-#            else:
-#                level = LEVELBASE
-
-#            if line.lstrip().startswith('positions'):
-#                self.positions = 'start'
-#            elif line.lstrip().startswith('endPositions'):
-#                if self.positions in ('start', 'inside'):
-#                    self.positions = 'end'
-#                else:
-#                    self.positions = 'outside'
-#            elif self.positions == 'start':
-#                self.positions = 'inside'
-#            elif self.positions == 'inside':
-#                self.positions = 'inside'
-#            elif self.positions == 'end':
-#                self.positions = ''
-#            else:
-#                self.positions = ''
-##            print self.positions
-#            if self.positions == 'start':
-#                level = LEVELBASE + 2 | HEADERFLAG
-#            elif self.positions in ('inside', 'end'):
-#                level = LEVELBASE + 2
-#            else:
-#                level = LEVELBASE
-
-            SCI(SETFOLDLEVEL, index, level)
-
-            pos = SCI(QsciScintilla.SCI_GETLINEENDPOSITION, index)
-            prevState = SCI(QsciScintilla.SCI_GETSTYLEAT, pos)
+#            SCI(SETFOLDLEVEL, index, level)
+#            pos = SCI(QsciScintilla.SCI_GETLINEENDPOSITION, index)
+#            prevState = SCI(QsciScintilla.SCI_GETSTYLEAT, pos)
 
             index += 1
-        pass
+
 
 #class SourceEditor (Editor):
 #    """ Editor for source code which uses the QScintilla widget.
@@ -776,13 +777,13 @@ class _LPPEditor(SourceEditor):
         lexer = LPPLexer(self)
         control.setLexer(lexer)
 
-#        # Set a monspaced font. Use the (supposedly) same font and size as the #TODO
-#        # wx version.
-#        for style in xrange(128):
-#            f = lexer.font(style)
-#            f.setFamily('courier new')
-#            f.setPointSize(10)
-#            lexer.setFont(f, style)
+#        # Set a monspaced font. 
+        for style in xrange(128):
+##            f = lexer.font(style)
+##            f.setFamily('courier new') # Use the (supposedly) same font and size as the wx version.
+##            f.setPointSize(10)
+##            lexer.setFont(f, style)
+            lexer.setFont(QFont('Monospace', 10), style)
 
         # Mark the maximum line size.
         control.setEdgeMode(Qsci.QsciScintilla.EdgeLine)
@@ -857,7 +858,7 @@ class LPPEditor(BasicEditorFactory):
     mark_lines = Str
 
     # Background color for marking lines
-    mark_color = Color(0xECE9D8)
+    mark_color = Color(0xE8F2FE)
 
     # Object trait containing the currently selected line (optional)
     selected_line = Str
@@ -866,13 +867,13 @@ class LPPEditor(BasicEditorFactory):
     selected_text = Str
 
     # Background color for selected lines
-    selected_color = Color(0xA4FFFF)
+    selected_color = Color(0xE5E5E5)
 
     # Where should the search toolbar be placed?
     search = Enum('top', 'bottom', 'none')
 
     # Background color for lines that match the current search
-    search_color = Color(0xFFFF94)
+    search_color = Color(0xFFFFBB)
 
     # Current line
     line = Str
@@ -916,7 +917,13 @@ class LPPEditor(BasicEditorFactory):
     squiggle_color = Str
 
 
-test = """
+test = """123 45 6
+
+for he's from here
+
+#comment#
+"""
+"""
 # Author: Francisco J. Romero-Campero                                      #
 # Date: July 2010                                                           #
 # Description: A multicelluar system consisting of a bacterial colony   #
@@ -999,9 +1006,9 @@ from enthought.traits.api import HasTraits, Str, List, Int
 from enthought.traits.ui.api import View, Item
 class Test(HasTraits):
     model = Str(test)
-    squiggle_lines = List(Int, [10, 13])
-    mark_lines = List(Int, [1, 7])
-    dim_lines = List(Int, [9, 13])
+    squiggle_lines = List(Int)#, [10, 13])
+    mark_lines = List(Int)#, [1, 7])
+    dim_lines = List(Int)#, [9, 13])
 
     view = View(
         Item('model',
@@ -1011,6 +1018,7 @@ class Test(HasTraits):
                 squiggle_lines='squiggle_lines',
                 mark_lines='mark_lines',
                 dim_lines='dim_lines',
+                foldable=False,
             ),
         ),
         width=640,
