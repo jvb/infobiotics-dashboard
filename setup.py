@@ -24,24 +24,24 @@ from distribute_setup import use_setuptools
 use_setuptools()
 
 # packages that might get bundled by modulefinder by aren't ever used
-EXCLUDES=[
-    'Tkinter', 
-    'Tkconstants', 
-    'tcl', 
-    '_tkinter', 
+EXCLUDES = [
+    'Tkinter',
+    'Tkconstants',
+    'tcl',
+    '_tkinter',
     'numpy.f2py',
     'wx',
-    '_gtkagg', 
-    '_tkagg', 
+    '_gtkagg',
+    '_tkagg',
     'wxagg',
-    'bsddb', 
-    'curses', 
+    'bsddb',
+    'curses',
     'pywin.debugger',
-    'pywin.debugger.dbgcon', 
-    'pywin.dialogs', 
-    'pydoc', 
+    'pywin.debugger.dbgcon',
+    'pywin.dialogs',
+    'pydoc',
 #    'doctest', 
-    'test', 
+    'test',
     'sqlite3'
 
     'mayavi.html',
@@ -58,7 +58,7 @@ if sys.platform.startswith('darwin'):
             py2app=dict(
                 argv_emulation=True, # cross-platform applications generally expect sys.argv to be used for opening files
                 includes=['py2imports'], # better than INCLUDES?
-                excludes=EXCLUDES,         
+                excludes=EXCLUDES,
                 frameworks=[
 #                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib', # done in py2app.sh as an arg to py2exe (which would override this...?)
 #                    '/Library/Frameworks/Python.framework/Versions/Current/lib/libhdf5.6.dylib', # doesn't work from here, done in py2app.sh instead
@@ -80,29 +80,29 @@ if sys.platform.startswith('darwin'):
 #                            'CFBundleTypeIconFile': 'Icon.icns',
 #                        },
                         {
-                            'CFBundleTypeExtensions' : ['h5'], 
+                            'CFBundleTypeExtensions' : ['h5'],
                             'CFBundleTypeName': 'mcss simulation',
                             'CFBundleTypeRole': 'Viewer',
                             'CFBundleTypeIconFile': 'mcss_simulation.icns',
                         },
-                        { 
-                            'CFBundleTypeExtensions' : ['lpp','sps','plb','lat'],
+                        {
+                            'CFBundleTypeExtensions' : ['lpp', 'sps', 'plb', 'lat'],
                             'CFBundleTypeName': 'Lattice Population P System model file',
                             'CFBundleTypeRole': 'Viewer',
                             'CFBundleTypeIconFile': 'lattice_population_p_system_model_file.icns',
-                        },    
+                        },
                     ],
-                    
+
                 ),
             ),
-        ), 
+        ),
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("enthought/pyface/images", glob.glob("/Library/Frameworks/.framework/Versions/Current/lib/python26/site-packages/enthought/pyface/images/*.png")), #FIXME
         ] + matplotlib.get_py2exe_datafiles(), # http://www.py2exe.org/index.cgi/MatPlotLib
 )
 elif sys.platform.startswith('win'):
-    
+
     # http://markmail.org/thread/qkdwu7gbwrmop6so
     try:
         import py2exe
@@ -120,18 +120,18 @@ elif sys.platform.startswith('win'):
             __import__(extra)
             m = sys.modules[extra]
             for p in m.__path__[1:]:
-                modulefinder.AddPackagePath(extra, p)        
+                modulefinder.AddPackagePath(extra, p)
     except ImportError, e:
         sys.stderr.write('%s\n' % e)
 
     import sys # needed for sys.prefix in mayavi_preferences and data_files below
-    
+
     # touch mayavi preferences.ini #TODO should probably be in py2exe.sh but since this only happens if we call 'python setup.py py2exe' it is probably ok here.
     import os
-    mayavi_preferences=os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')
-    if not os.path.exists(mayavi_preferences): 
+    mayavi_preferences = os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')
+    if not os.path.exists(mayavi_preferences):
         open(mayavi_preferences, 'w').close()
-    
+
     # contents of manifest file that allow py2exe frozen apps to use the XP look and feel
     manifest = """
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -158,7 +158,7 @@ manifestVersion="1.0">
 </dependency>
 </assembly>
 """
-    
+
     extra_options = dict(
         setup_requires=['py2exe'],
         windows=[
@@ -177,7 +177,7 @@ manifestVersion="1.0">
                 dll_excludes=[
                     "mswsock.dll", "powrprof.dll", "MSVCP90.dll", # http://stackoverflow.com/questions/1979486/py2exe-win32api-pyc-importerror-dll-load-failed
 #                    'libgdk-win32-2.0-0.dll', 'libgobject-2.0-0.dll', 'tcl84.dll', 'tk84.dll', # http://www.py2exe.org/index.cgi/MatPlotLib
-                ], 
+                ],
                 packages=["win32api", 'matplotlib', 'pytz'], # http://www.py2exe.org/index.cgi/MatPlotLib               
                 unbuffered=True,
                 optimize=0,
@@ -185,7 +185,7 @@ manifestVersion="1.0">
                 skip_archive=True, # required so that it is easier to unzip tvtk_classes.zip
             )
         ),
-        data_files=[        
+        data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("Microsoft.VC90.CRT",glob.glob("Microsoft.VC90.CRT/*")),
 #            ("",glob.glob("Microsoft.VC90.CRT/*")), # removed from MANIFEST.in
@@ -201,8 +201,8 @@ else: # assume sys.platform.startswith('linux'):
         scripts=['bin/infobiotics-dashboard'],
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
-            ('/usr/share/applications',['infobiotics-dashboard.desktop']),
-            ('/usr/share/pixmaps',['images/infobiotics-workbench.xpm','images/infobiotics-workbench.png']),
+            ('/usr/share/applications', ['infobiotics-dashboard.desktop']),
+            ('/usr/share/pixmaps', ['images/infobiotics-workbench.xpm', 'images/infobiotics-workbench.png']),
         ],
     )
 
@@ -215,16 +215,17 @@ INSTALL_REQUIRES = [
     'TraitsGUI>=3.3.0',
     'EnvisagePlugins>=3.1.2',
     'TraitsBackendQt>=3.3.0',
-    'Mayavi',#TODO >=3.4.0',
+    'Mayavi', #TODO >=3.4.0',
     'configobj', # for enthought.preferences
-    'numpy',#>=1.3.0', 
+    'numpy', #>=1.3.0', 
     'matplotlib'#,==0.99.1', 
-#    'which==1.1.0', # in infobiotics.thirdparty
+#    'which==1.1.0', # in infobiotics.thirdparty - is that the same as this? http://code.google.com/p/which/
+    'xlwt',
 ]
 INSTALL_REQUIRES += ['winpexpect>=1.3'] if sys.platform.startswith('win') else ['pexpect'] # winpexpect is preferred over wexpect on Windows
 INSTALL_REQUIRES += ['pytables>=2.1.2'] if sys.platform.startswith('darwin') else ['tables>=2.1.2'] # tables is called 'pytables' on Mac (at least it is in EPD)
 
-CLASSIFIERS=[ # http://pypi.python.org/pypi?%3Aaction=list_classifiers
+CLASSIFIERS = [ # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     'Development Status :: 4 - Beta',
     'Environment :: X11 Applications :: Qt',
     'Intended Audience :: Education',
@@ -235,14 +236,14 @@ CLASSIFIERS=[ # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     'Programming Language :: Python :: 2.5',
     'Topic :: Scientific/Engineering :: Bio-Informatics',
     'Topic :: Scientific/Engineering :: Visualization',
-    'Topic :: Text Editors :: Integrated Development Environments (IDE)',          
+    'Topic :: Text Editors :: Integrated Development Environments (IDE)',
 ]
 
 # get version from VERSION.txt just like other Infobiotics Workbench components
-VERSION=open('VERSION.txt').read().strip('\n')
+VERSION = open('VERSION.txt').read().strip('\n')
 
 # write infobiotics/__version__.py with VERSION hard-coded into it
-__version__py ="""'''
+__version__py = """'''
 This file is automatically generated by setup.py, any changes must be made 
 there or they will be lost.
 
@@ -297,6 +298,6 @@ setup(
 #    obseletes=[
 #        ('InfobioticsDashboard','') #TODO
 #    ],
-    
+
     **extra_options
 )

@@ -19,7 +19,7 @@ from infobiotics.commons.qt4 import centre_window
 from enthought.mayavi.core.pipeline_base import PipelineBase
 from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
 from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.traits.api import Instance, HasTraits, Range, on_trait_change
+from enthought.traits.api import Instance, HasTraits, Range, on_trait_change, String, Bool
 from enthought.traits.ui.api import View, Item, HGroup, VGroup
 from enthought.tvtk.pyface.scene_editor import SceneEditor
 from matplotlib import font_manager
@@ -620,21 +620,44 @@ class SimulationResultsDialog(QWidget):
         self.units = unicode(units)
         #TODO proper set units
 
-
     # actions slots
 
-    def save_data(self, file_name='', precision=3, delimiter=','):
+
+    class SaveDataOptions(HasTraits):
+        precision = Range(0, 18)
+        delimiter = String(minlen=1, maxlen=1)
+        csv = Bool(False)
+        view = View(
+            Item('precision'),
+            Item('delimiter', visible_when='object.csv'),
+            buttons=['OK'],
+        )
+
+    precision = 3
+    delimiter = ','
+
+    def save_data(self, file_name='', precision=None, delimiter=None):
         """Extract chosen timeseries according to options and write to file, maybe averaging"""
+        if precision is None:
+            precision = self.precision
+        if delimiter is None:
+            delimiter = self.delimiter
+
         if file_name == '':
             file_name = QFileDialog.getSaveFileName(self,
                 self.tr("Save timeseries"),
                 ".",
                 self.tr("Comma-separated values (*.csv);;Excel spreadsheets (*.xls);;All files (*)"))
-            #TODO implement save results as csv functionality
             if file_name == '':
                 return
             else:
                 file_name = unicode(file_name)
+            options = self.__class__.SaveDataOptions(precision=precision, delimiter=delimiter, csv=file_name.endswith('.csv'))
+            ui = options.edit_traits(kind='modal')
+            if not ui.result:
+                return
+            self.precision = options.precision
+            self.delimiter = options.delimiter
 
         self.setCursor(Qt.WaitCursor)
 
@@ -664,12 +687,27 @@ class SimulationResultsDialog(QWidget):
                            compartment_indices=compartment_indices,
                            parent=self)
 
+
+        header = ['time (%s)' % units]
+        averaging_header_item = '%s in %s - mean of %s runs'
+        header_item = '%s in %s of run %s'
+
+        float_fmt = '%%.%sf' % self.precision
+        int_fmt = '%d'
+
+        if averaging:
+#            timepoints, (means, errors) = \
+            timepoints, (means,) = \
+                results.get_averages()
+        else:
+            timepoints, levels = results.get_amounts()
+
         self.setCursor(Qt.ArrowCursor)
 
         def save_data_as_csv():
             # write data
             if averaging:
-                fmt = '%%.%sf' % precision
+                fmt = float_fmt
     #            timepoints, (means, errors) = \
                 timepoints, (means,) = \
                     results.get_averages()
@@ -679,26 +717,61 @@ class SimulationResultsDialog(QWidget):
                 timepoints, levels = results.get_amounts()
                 indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
                 levels = tuple((levels[ri][si, ci, :] for ri, ci, si in indices))
-                fmt = '%d' #TODO timepoints as floats and levels as ints
+                fmt = int_fmt #TODO timepoints as floats and levels as ints
             timepoints_and_levels = (timepoints,) + levels
             # the transpose converts the tuple of 1D arrays to columns
-            numpy.savetxt(file_name, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=delimiter) # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+            numpy.savetxt(file_name, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=self.delimiter) # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
 
             # write header
-            header = ['time (%s)' % units]
             if averaging:
                 for c in compartments:
                     for s in species:
-                        header.append('%s in %s - mean of %s runs' % (s.text(), c.text(), len(runs)))
+                        header.append(averaging_header_item % (s.text(), c.text(), len(runs)))
             else:
                 for r in runs:
                     for c in compartments:
                         for s in species:
-                            header.append('%s in %s of run %s' % (s.text(), c.text(), r.text()))
+                            header.append(header_item % (s.text(), c.text(), r.text()))
             from infobiotics.commons.files import pre_append
             pre_append(','.join(header), file_name)
 
-        save_data_as_csv()
+        def save_data_as_excel():
+            import xlwt
+            wb = xlwt.Workbook()
+            try:
+                ws = wb.add_sheet(self.simulation.model_input_file[:31])
+            except:
+                ws = wb.add_sheet('SimulatorResults')
+
+            ws.write(0, 0, header[0])
+            for ti in range(len(timepoints)):
+                ws.write(1 + ti, 0, timepoints[ti])
+
+            if averaging:
+                for ci, c in enumerate(compartments):
+                    for si, s in enumerate(species):
+                        y = 1 + si + (ci * len(compartments))
+                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
+                        for ti in range(len(timepoints)):
+                            ws.write(1 + ti, y, means[si, ci, ti])
+            else:
+                for ri, r in enumerate(runs):
+                    for ci, c in enumerate(compartments):
+                        for si, s in enumerate(species):
+                            y = 1 + si + (ci * len(compartments) + (ri * len(runs)))
+                            ws.write(0, y, header_item % (s.text(), c.text(), r.text()))
+                            for ti in range(len(timepoints)):
+#                                levels = tuple((levels[ri][si, ci, :] for ri, ci, si in indices))
+                                ws.write(1 + ti, y, levels[si, ci, ti, ri])
+
+            wb.save(file_name)
+
+        if file_name.endswith('.csv'):
+            save_data_as_csv()
+        elif file_name.endswith('.xls'):
+            save_data_as_excel()
+        else:
+            save_data_as_numpy()
 
         #TODO save_data_as_xls() # https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html
 
@@ -1896,24 +1969,34 @@ class Surface(HasTraits):
 
 def test():
     app, argv = main.begin_traits()
+
 #    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
 #    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
     w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
+
     if w.loaded:
 #        w.ui.averageSelectedRunsCheckBox.setChecked(True)
-        w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
-#        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
-#        w.ui.speciesListWidget.selectAll()
-#        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("protein1", Qt.MatchExactly)[0])
-        for item in w.ui.speciesListWidget.findItems("protein1*", Qt.MatchWildcard):
-            item.setSelected(True)
 
+        w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
+        for widget in (w.ui.speciesListWidget, w.ui.compartmentsListWidget, w.ui.runsListWidget):
+            widget.item(0).setSelected(True)
+            widget.item(widget.count() - 1).setSelected(True)
+
+#        w.ui.speciesListWidget.selectAll()
+#        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
+#        for item in w.ui.speciesListWidget.findItems("protein1*", Qt.MatchWildcard): item.setSelected(True)
+
+#        w.ui.compartmentsListWidget.selectAll()
 #        w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
-        w.ui.compartmentsListWidget.selectAll()
-##        w.ui.surfacePlotButton.click()
+
+#        w.ui.surfacePlotButton.click()
+
 #        w.plot()
 #        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
 #        w.plotsPreviewDialog.combine()
+
+        w.save_data('test.xls', 2, ';')
+
     centre_window(w)
     w.show()
     main.end_with_qt_event_loop()
