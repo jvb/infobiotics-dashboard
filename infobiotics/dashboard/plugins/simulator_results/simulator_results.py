@@ -737,6 +737,7 @@ class SimulationResultsDialog(QWidget):
 
         def save_data_as_excel():
             import xlwt
+            # https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html
             wb = xlwt.Workbook()
             try:
                 ws = wb.add_sheet(self.simulation.model_input_file[:31])
@@ -766,6 +767,12 @@ class SimulationResultsDialog(QWidget):
 
             wb.save(file_name)
 
+        def save_data_as_numpy():
+            if averaging:
+                numpy.savez(file_name, timepoints=timepoints, means=means)
+            else:
+                numpy.savez(file_name, timepoints=timepoints, levels=levels)
+
         if file_name.endswith('.csv'):
             save_data_as_csv()
         elif file_name.endswith('.xls'):
@@ -773,7 +780,15 @@ class SimulationResultsDialog(QWidget):
         else:
             save_data_as_numpy()
 
-        #TODO save_data_as_xls() # https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html
+        # copy file_name to system clipboard
+        # http://www.mail-archive.com/pyqt@riverbankcomputing.com/msg17328.html
+        from PyQt4 import QtCore, QtGui
+        clipboard = QtGui.QApplication.clipboard()
+        clipboard.setText(file_name)
+        event = QtCore.QEvent(QtCore.QEvent.Clipboard)
+        QtGui.QApplication.sendEvent(clipboard, event)
+
+        return file_name
 
     def plot(self):
         """Extract chosen timeseries according to options and plot, maybe averaging"""
@@ -1995,7 +2010,7 @@ def test():
 #        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
 #        w.plotsPreviewDialog.combine()
 
-        w.save_data('test.xls', 2, ';')
+        w.save_data('test.test', 2, ';')
 
     centre_window(w)
     w.show()
