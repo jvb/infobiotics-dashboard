@@ -312,7 +312,7 @@ class SimulationResultsDialog(QWidget):
                      SIGNAL("currentIndexChanged(QString)"), self.setUnits)
         self.setUnits("seconds")
 
-        self.connect(self.ui.save_data_button, SIGNAL("clicked()"), self.save_data)
+        self.connect(self.ui.save_data_button, SIGNAL("clicked()"), self.save_selected_data)
         self.connect(self.ui.plotButton, SIGNAL("clicked()"), self.plot)
         self.connect(self.ui.surfacePlotButton, SIGNAL("clicked()"), self.surfacePlot)
 
@@ -591,18 +591,20 @@ class SimulationResultsDialog(QWidget):
         num_selected_species = len(self.ui.speciesListWidget.selectedItems())
         num_selected_compartments = len(self.ui.compartmentsListWidget.selectedItems())
         if num_selected_runs == 0 or num_selected_species == 0 or num_selected_compartments == 0:
+            self.ui.save_data_button.setEnabled(False)
             self.ui.plotButton.setEnabled(False)
-#            self.ui.saveButton.setEnabled(False)
             self.ui.surfacePlotButton.setEnabled(False)
         else:
+            self.ui.save_data_button.setEnabled(True)
             self.ui.plotButton.setEnabled(True)
 #            self.ui.saveButton.setEnabled(True)
             if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
                 self.ui.surfacePlotButton.setEnabled(True)
             else:
-                self.ui.surfacePlotButton.setDisabled(True)
+                self.ui.surfacePlotButton.setEnabled(False)
             if num_selected_runs > 1:
                 self.ui.averageSelectedRunsCheckBox.setEnabled(True)
+
 
     # options slots
 
@@ -620,80 +622,102 @@ class SimulationResultsDialog(QWidget):
         self.units = unicode(units)
         #TODO proper set units
 
-    # actions slots
 
+    # compound accessors
 
-    class SaveDataOptions(HasTraits):
-        precision = Range(0, 18)
-        delimiter = String(minlen=1, maxlen=1)
-        csv = Bool(False)
-        view = View(
-            Item('precision'),
-            Item('delimiter', visible_when='object.csv'),
-            buttons=['OK'],
-        )
-
-    precision = 3
-    delimiter = ','
-
-    def save_data(self, file_name='', precision=None, delimiter=None):
-        """Extract chosen timeseries according to options and write to file, maybe averaging"""
-        if precision is None:
-            precision = self.precision
-        if delimiter is None:
-            delimiter = self.delimiter
-
-        if file_name == '':
-            file_name = QFileDialog.getSaveFileName(self,
-                self.tr("Save timeseries"),
-                ".",
-                self.tr("Comma-separated values (*.csv);;Excel spreadsheets (*.xls);;All files (*)"))
-            if file_name == '':
-                return
-            else:
-                file_name = unicode(file_name)
-            options = self.__class__.SaveDataOptions(precision=precision, delimiter=delimiter, csv=file_name.endswith('.csv'))
-            ui = options.edit_traits(kind='modal')
-            if not ui.result:
-                return
-            self.precision = options.precision
-            self.delimiter = options.delimiter
-
-        self.setCursor(Qt.WaitCursor)
-
-        # get items
+    def selected_items(self):
+        ''' Usage: 
+            runs, species, compartments = selected_items() 
+        '''
         runs = self.ui.runsListWidget.selectedItems()
         species = self.ui.speciesListWidget.selectedItems()
         compartments = self.ui.compartmentsListWidget.selectedItems()
+        return runs, species, compartments
 
-        # get amounts indices
+    def selected_items_amount_indices(self):
+        ''' Usage: 
+            run_indices, species_indices, compartment_indices = self.selected_items_amount_indices() 
+            
+        Use for ri, r in enumerate(run_indices): for selected results 
+        '''
+        runs, species, compartments = self.selected_items()
         run_indices = [item.amounts_index for item in runs]
         species_indices = [item.amounts_index for item in species]
         compartment_indices = [item.amounts_index for item in compartments]
+        return run_indices, species_indices, compartment_indices
 
-        # get options
+    def options(self):
+        ''' Usage: 
+            from_, to, units, every, averaging = self.options() 
+        '''
         from_ = self.ui.fromSpinBox.value()
         to = self.ui.toSpinBox.value()
+        every = self.every
         units = unicode(self.ui.unitsComboBox.currentText())
         averaging = self.ui.averageSelectedRunsCheckBox.isChecked()
+        return from_, to, every, units, averaging
 
-        results = SimulatorResults(self.filename,
-                           beginning=from_,
-                           end=to,
-                           type=decimal.Decimal,
-                           every=self.every,
-                           run_indices=run_indices,
-                           species_indices=species_indices,
-                           compartment_indices=compartment_indices,
-                           parent=self)
+    def selected_items_results(self, type=float):
+        ''' Usage:
+            results = self.selected_items_results()
+        '''
+        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
+        from_, to, every, _, _ = self.options()
+        return SimulatorResults(
+            self.filename,
+            type=type,
+            beginning=from_,
+            end=to,
+            every=every,
+            run_indices=run_indices,
+            species_indices=species_indices,
+            compartment_indices=compartment_indices,
+            parent=self,
+        )
 
 
-        header = ['time (%s)' % units]
-        averaging_header_item = '%s in %s - mean of %s runs'
-        header_item = '%s in %s of run %s'
+    # actions slots
 
-        float_fmt = '%%.%sf' % self.precision
-        int_fmt = '%d'
+
+    # remember these within this instance
+    csv_precision = 3
+    csv_delimiter = ','
+
+    from infobiotics.commons.qt4 import wait_cursor
+    @wait_cursor
+    def save_selected_data(self, file_name='',
+        open_after_save=True, copy_file_name_to_clipboard=True,
+        csv_precision=None, csv_delimiter=None,
+        #TODO custom titles here?
+    ):
+        """ Extract chosen timeseries according to options and write to file, maybe averaging.
+        
+        (Over?)use of inner functions here can result in crytic exceptions, e.g.
+            "UnboundLocalError: local variable 'x' referenced before assignment"
+        The actual reason for these errors is that variables inside inner 
+        functions are immutable, see:           
+            http://stackoverflow.com/questions/1414304/local-functions-in-python/1414320#1414320
+        The correct solution is, in this instance, to pass these variables as
+        arguments to the inner functions, and the neatest way to do that is as
+        default arguments, see write_csv, fix_delimited_string and write_npz. 
+        
+        """
+        interactive = True if file_name == '' else False
+        if interactive:
+            file_name = QFileDialog.getSaveFileName(self,
+                self.tr("Save selected timeseries data"),
+                ".",
+                self.tr("Comma-separated values (*.csv *.txt);;Excel spreadsheets (*.xls);;Numpy compressed (*.npz)"))
+            if file_name == '':
+                return # user cancelled
+            file_name = unicode(file_name)
+
+#        self.setCursor(Qt.WaitCursor)
+
+        runs, species, compartments = self.selected_items()
+        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
+        _, _, _, units, averaging = self.options()
+        results = self.selected_items_results()
 
         if averaging:
 #            timepoints, (means, errors) = \
@@ -702,93 +726,187 @@ class SimulationResultsDialog(QWidget):
         else:
             timepoints, levels = results.get_amounts()
 
-        self.setCursor(Qt.ArrowCursor)
+        #TODO move to method signature?
 
-        def save_data_as_csv():
-            # write data
+#        header = ['time (%s)' % units]
+        header = ['time']
+
+#        averaging_header_item = '%s in %s mean of %s runs'
+        def averaging_header_item(s, c, r):
+            return '%s in %s mean of %s runs' % (s, c, r) if r != 1 else '%s in %s mean of %s run' % (s, c, r)
+
+        header_item = '%s in %s of run %s'
+#        def header_item(s, c, r):
+#            return '%s in %s of run %s' % (s, c, r)
+
+        def write_csv(csv_precision=csv_precision, csv_delimiter=csv_delimiter, levels=levels):
+            # load default or remembered values
+            if csv_precision is None:
+                csv_precision = self.csv_precision
+            if csv_delimiter is None:
+                csv_delimiter = self.csv_delimiter
+
+            if interactive:
+                from enthought.traits.api import HasTraits, Range, String
+                from enthought.traits.ui.api import View, VGroup, HGroup
+                class CSVConfig(HasTraits):
+                    precision = Range(0, 18, desc='the number of decimal places to use for floating point values')
+                    delimiter = String(minlen=1, maxlen=1, desc="a single character used to delimit fields, e.g. ',', '|', ' ', ';' or '\t' (tab)")
+                    view = View(
+                        VGroup(
+                            HGroup(
+                               Item('precision'),
+                               Item(label='decimal places'),
+                            ),
+                            Item('delimiter'),
+                            show_border=False,
+                        ),
+                        buttons=['OK'],
+                    )
+                csv_config = CSVConfig(precision=csv_precision, delimiter=csv_delimiter)
+                ui = csv_config.edit_traits(kind='modal')
+                if ui.result:
+                    # use and remember option values
+                    csv_precision = self.csv_precision = csv_config.precision
+                    csv_delimiter = self.csv_delimiter = csv_config.delimiter
+
+            # data
             if averaging:
-                fmt = float_fmt
-    #            timepoints, (means, errors) = \
-                timepoints, (means,) = \
-                    results.get_averages()
                 indices = [(ci, si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
                 levels = tuple((means[si, ci] for ci, si in indices))
+                fmt = '%%.%sf' % csv_precision
             else:
-                timepoints, levels = results.get_amounts()
                 indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
                 levels = tuple((levels[ri][si, ci, :] for ri, ci, si in indices))
-                fmt = int_fmt #TODO timepoints as floats and levels as ints
+                d = '%d,' * len(levels); fmt = ['%.3f'] + d.split(',')[:-1] # timepoints must be float, levels are int
             timepoints_and_levels = (timepoints,) + levels
-            # the transpose converts the tuple of 1D arrays to columns
-            numpy.savetxt(file_name, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=self.delimiter) # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+            # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+            numpy.savetxt(file_name, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=csv_delimiter)
+            # transpose converts the tuple of 1D arrays to columns
 
-            # write header
+            # header
+
+            # try for similar non-delimiter
+            if csv_delimiter == ',':
+                non_delimiter = ';'
+            elif csv_delimiter == ' ':
+                non_delimiter = '_'
+            else:
+                non_delimiter = ' '
+
+            # ordered list of other potential non-delimiters
+            delimiters = list(' _-,;:+&|/?!#\t')
+
+            def fix_delimited_string(s, non_delimiter=non_delimiter):
+                ''' Usage: fix_delimited_string(header_item(s.text(), c.text(), r.text()))) '''
+                if str(csv_delimiter) in s:
+                    i = 0
+                    while str(non_delimiter) in s:
+                        try:
+                            if str(delimiters[i]) not in s:
+                                non_delimiter = delimiters[i]
+                                break
+                        except IndexError:
+                            raise ValueError('All potential non-delimiters (%s) found in string "%s"' % (delimiters, s))
+                        i += 1
+                    return s.replace(csv_delimiter, non_delimiter)
+                return s
+
+            header[0] = fix_delimited_string(header[0])
             if averaging:
                 for c in compartments:
                     for s in species:
-                        header.append(averaging_header_item % (s.text(), c.text(), len(runs)))
+#                        header.append(fix_delimited_string(averaging_header_item % (s.text(), c.text(), len(runs))))
+                        header.append(fix_delimited_string(averaging_header_item(s.text(), c.text(), len(runs))))
             else:
                 for r in runs:
                     for c in compartments:
                         for s in species:
-                            header.append(header_item % (s.text(), c.text(), r.text()))
-            from infobiotics.commons.files import pre_append
-            pre_append(','.join(header), file_name)
+                            header.append(fix_delimited_string(header_item % (s.text(), c.text(), r.text())))
+#                            header.append(fix_delimited_string(header_item(s.text(), c.text(), r.text())))
+            # write header at beginning of file
+            from infobiotics.commons.files import prepend_line_to_file
+            prepend_line_to_file(csv_delimiter.join(header), file_name)
 
-        def save_data_as_excel():
+        def write_xls():
+            ''' https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html '''
             import xlwt
-            # https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html
             wb = xlwt.Workbook()
             try:
                 ws = wb.add_sheet(self.simulation.model_input_file[:31])
             except:
                 ws = wb.add_sheet('SimulatorResults')
-
             ws.write(0, 0, header[0])
             for ti in range(len(timepoints)):
                 ws.write(1 + ti, 0, timepoints[ti])
-
             if averaging:
                 for ci, c in enumerate(compartments):
                     for si, s in enumerate(species):
                         y = 1 + si + (ci * len(compartments))
-                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
+#                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
+                        ws.write(0, y, averaging_header_item(s.text(), c.text(), len(runs)))
                         for ti in range(len(timepoints)):
                             ws.write(1 + ti, y, means[si, ci, ti])
             else:
                 for ri, r in enumerate(runs):
                     for ci, c in enumerate(compartments):
                         for si, s in enumerate(species):
-                            y = 1 + si + (ci * len(compartments) + (ri * len(runs)))
+                            y = 1 + si + (ci * len(compartments) + ((ri * len(runs) * len(compartments))))
                             ws.write(0, y, header_item % (s.text(), c.text(), r.text()))
                             for ti in range(len(timepoints)):
-#                                levels = tuple((levels[ri][si, ci, :] for ri, ci, si in indices))
-                                ws.write(1 + ti, y, levels[si, ci, ti, ri])
-
+                                ws.write(1 + ti, y, levels[ri][si, ci, ti])
             wb.save(file_name)
 
-        def save_data_as_numpy():
+        def write_npz(species_indices=species_indices, compartment_indices=compartment_indices):
+            species_indices = numpy.array(species_indices)
+            compartment_indices = numpy.array(compartment_indices)
+            species_names = numpy.array([str(s.text()) for s in species])
+            compartment_labels_and_positions = numpy.array([str(c.text()) for c in compartments])
+            run_numbers = numpy.array([str(r.text()) for r in runs])
             if averaging:
-                numpy.savez(file_name, timepoints=timepoints, means=means)
+                numpy.savez(file_name,
+                    timepoints=timepoints,
+                    mean_levels=means,
+                    shape=numpy.array(['species', 'compartment', 'timepoint']),
+                    species_indices=numpy.array(species_indices),
+                    compartment_indices=numpy.array(compartment_indices),
+                    species_names=species_names,
+                    compartment_labels_and_positions=compartment_labels_and_positions,
+                    run_numbers=run_numbers,
+                )
             else:
-                numpy.savez(file_name, timepoints=timepoints, levels=levels)
+                numpy.savez(file_name,
+                    timepoints=timepoints,
+                    levels=levels,
+                    shape=numpy.array(['run', 'species', 'compartment', 'timepoint']),
+                    species_indices=species_indices,
+                    compartment_indices=compartment_indices,
+                    run_indices=numpy.array(run_indices),
+                    species_names=species_names,
+                    compartment_labels_and_positions=compartment_labels_and_positions,
+                    run_numbers=run_numbers,
+                )
 
-        if file_name.endswith('.csv'):
-            save_data_as_csv()
+        if file_name.endswith('.npz'):
+            write_npz()
         elif file_name.endswith('.xls'):
-            save_data_as_excel()
+            write_xls()
         else:
-            save_data_as_numpy()
+            write_csv()#csv_precision, csv_delimiter) # done using default values
 
-        # copy file_name to system clipboard
-        # http://www.mail-archive.com/pyqt@riverbankcomputing.com/msg17328.html
-        from PyQt4 import QtCore, QtGui
-        clipboard = QtGui.QApplication.clipboard()
-        clipboard.setText(file_name)
-        event = QtCore.QEvent(QtCore.QEvent.Clipboard)
-        QtGui.QApplication.sendEvent(clipboard, event)
+        if copy_file_name_to_clipboard:
+            from infobiotics.commons.qt4 import copy_to_clipboard
+            copy_to_clipboard(file_name)
+
+        if open_after_save:
+#            if file_name.endswith('.csv') or file_name.endswith('.xls'):
+            from infobiotics.commons.qt4 import open_file
+            open_file(file_name)
+
+#        self.setCursor(Qt.ArrowCursor)
 
         return file_name
+
 
     def plot(self):
         """Extract chosen timeseries according to options and plot, maybe averaging"""
@@ -807,6 +925,18 @@ class SimulationResultsDialog(QWidget):
         units = unicode(self.ui.unitsComboBox.currentText())
 
         averaging = self.ui.averageSelectedRunsCheckBox.isChecked()
+
+#        runs, species, compartments = selected_items()
+#        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
+#        _, _, _, units, averaging = self.options()
+#        results = self.selected_items_results()
+#
+#        if averaging:
+##            timepoints, (means, errors) = \
+#            timepoints, (means,) = \
+#                results.get_averages()
+#        else:
+#            timepoints, levels = results.get_amounts()
 
         try:
             self.setCursor(Qt.WaitCursor)
@@ -859,8 +989,7 @@ class SimulationResultsDialog(QWidget):
                 self.plotsPreviewDialog.raise_()
                 self.plotsPreviewDialog.activateWindow()
 
-
-
+        #TODO remove - this is (probably) not necessary as Jamie's Ctrl-C signal handling fixes it        
         except ZeroDivisionError, e:
             QMessageBox.warning(self, QString(u"Error"),
                                 QString(u"There was a problem processing \
@@ -1274,7 +1403,7 @@ class SimulatorResults(object):
                  end= -1,
                  every=1,
                  chunk_size=2 ** 20,
-                 type=float,
+                 type=float, #decimal.Decimal
                  species_indices=None,
                  compartment_indices=None,
                  run_indices=None,
@@ -1349,7 +1478,7 @@ class SimulatorResults(object):
     def get_amounts(self):
         results = []
         try:
-            for i in self.run_indices:
+            for _ in self.run_indices:
                 # create empty arrays for our results
                 run = numpy.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type)
                 # this might raise an exception if too many listOfRuns are selected
@@ -1983,20 +2112,13 @@ class Surface(HasTraits):
 
 
 def test():
-    app, argv = main.begin_traits()
+    main.begin_traits()
 
 #    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
 #    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
     w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
 
     if w.loaded:
-#        w.ui.averageSelectedRunsCheckBox.setChecked(True)
-
-        w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
-        for widget in (w.ui.speciesListWidget, w.ui.compartmentsListWidget, w.ui.runsListWidget):
-            widget.item(0).setSelected(True)
-            widget.item(widget.count() - 1).setSelected(True)
-
 #        w.ui.speciesListWidget.selectAll()
 #        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
 #        for item in w.ui.speciesListWidget.findItems("protein1*", Qt.MatchWildcard): item.setSelected(True)
@@ -2004,17 +2126,41 @@ def test():
 #        w.ui.compartmentsListWidget.selectAll()
 #        w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
 
-#        w.ui.surfacePlotButton.click()
+#        w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
 
-#        w.plot()
-#        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
-#        w.plotsPreviewDialog.combine()
+        for widget in (w.ui.speciesListWidget, w.ui.compartmentsListWidget, w.ui.runsListWidget):
+            widget.item(0).setSelected(True)
+            widget.item(widget.count() - 1).setSelected(True)
 
-        w.save_data('test.test', 2, ';')
+        w.ui.averageSelectedRunsCheckBox.setChecked(False)
 
-    centre_window(w)
-    w.show()
-    main.end_with_qt_event_loop()
+###        w.ui.surfacePlotButton.click()
+
+##        w.plot()
+##        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
+##        w.plotsPreviewDialog.combine()
+
+#        w.save_selected_data('test.csv')    # write_csv
+#        w.save_selected_data('test.txt')   # write_csv
+#        w.save_selected_data('test', open_after_save=False)        # write_csv
+#        w.save_selected_data('test.xls')    # write_xls
+        w.save_selected_data('test.npz')    # write_npz
+
+#    centre_window(w)
+#    w.show()
+#    main.end_with_qt_event_loop()
+
+
+def test_SimulatorResults_save_selected_data():
+    main.begin_traits()
+    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
+    for widget in (w.ui.speciesListWidget, w.ui.compartmentsListWidget, w.ui.runsListWidget):
+        widget.item(0).setSelected(True)
+        widget.item(widget.count() - 1).setSelected(True)
+    w.ui.averageSelectedRunsCheckBox.setChecked(False)
+    w.save_selected_data('test.csv')    # write_csv
+    w.save_selected_data('test.xls')    # write_xls
+    w.save_selected_data('test.npz')    # write_npz
 
 
 if __name__ == "__main__":
@@ -2024,7 +2170,8 @@ if __name__ == "__main__":
 ##    argv = sys.argv
 #    app, argv = main.begin_traits()
 #    if len(argv) > 2:
-#        print "usage: mcss_results.sh {h5file}"
+##        print "usage: mcss_results.sh {h5file}"
+#        print "usage: python simulator_results.py {h5file}"
 #        main.end(1)
 #    if len(argv) == 1:
 ##        shared.settings.register_infobiotics_settings()

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'simulation_results_dialog.ui'
 #
-# Created: Mon Aug 23 12:09:21 2010
-#      by: PyQt4 UI code generator 4.7
+# Created: Tue Aug 24 13:04:08 2010
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -53,6 +53,7 @@ class Ui_SimulationResultsDialog(object):
         self.randomRunsLayout.setObjectName("randomRunsLayout")
         self.randomRunsSpinBox = QtGui.QSpinBox(self.runsGroupBox)
         self.randomRunsSpinBox.setEnabled(True)
+        self.randomRunsSpinBox.setSuffix("")
         self.randomRunsSpinBox.setMinimum(0)
         self.randomRunsSpinBox.setMaximum(1000)
         self.randomRunsSpinBox.setSingleStep(1)
@@ -126,6 +127,7 @@ class Ui_SimulationResultsDialog(object):
         self.xLabel.setObjectName("xLabel")
         self.timeLayout.addWidget(self.xLabel)
         self.intervalLabel = QtGui.QLabel(self.optionsGroupBox)
+        self.intervalLabel.setText("")
         self.intervalLabel.setObjectName("intervalLabel")
         self.timeLayout.addWidget(self.intervalLabel)
         self.unitsComboBox = QtGui.QComboBox(self.optionsGroupBox)
@@ -153,20 +155,26 @@ class Ui_SimulationResultsDialog(object):
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem2)
         self.save_data_button = QtGui.QPushButton(SimulationResultsDialog)
+        self.save_data_button.setText("")
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("../../../../../../../../dashboard/infobiotics/dashboard/plugins/simulator_results/data.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.save_data_button.setIcon(icon)
         self.save_data_button.setIconSize(QtCore.QSize(64, 64))
         self.save_data_button.setObjectName("save_data_button")
         self.horizontalLayout.addWidget(self.save_data_button)
         self.plotButton = QtGui.QPushButton(SimulationResultsDialog)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/images/plot_2d.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.plotButton.setIcon(icon)
+        self.plotButton.setText("")
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/images/plot_2d.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.plotButton.setIcon(icon1)
         self.plotButton.setIconSize(QtCore.QSize(64, 64))
         self.plotButton.setObjectName("plotButton")
         self.horizontalLayout.addWidget(self.plotButton)
         self.surfacePlotButton = QtGui.QPushButton(SimulationResultsDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/images/plot_3d.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.surfacePlotButton.setIcon(icon1)
+        self.surfacePlotButton.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/images/plot_3d.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.surfacePlotButton.setIcon(icon2)
         self.surfacePlotButton.setIconSize(QtCore.QSize(64, 64))
         self.surfacePlotButton.setObjectName("surfacePlotButton")
         self.horizontalLayout.addWidget(self.surfacePlotButton)
@@ -207,8 +215,7 @@ class Ui_SimulationResultsDialog(object):
         self.unitsComboBox.setItemText(2, QtGui.QApplication.translate("SimulationResultsDialog", "hours", None, QtGui.QApplication.UnicodeUTF8))
         self.averageSelectedRunsCheckBox.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Not appropriate for oscillatory behaviours", None, QtGui.QApplication.UnicodeUTF8))
         self.averageSelectedRunsCheckBox.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Average selected runs", None, QtGui.QApplication.UnicodeUTF8))
-        self.save_data_button.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Individual", None, QtGui.QApplication.UnicodeUTF8))
-        self.save_data_button.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Data", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_data_button.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Data", None, QtGui.QApplication.UnicodeUTF8))
         self.plotButton.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Individual", None, QtGui.QApplication.UnicodeUTF8))
         self.surfacePlotButton.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Colony", None, QtGui.QApplication.UnicodeUTF8))
 

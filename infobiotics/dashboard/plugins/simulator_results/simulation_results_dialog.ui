@@ -341,10 +341,14 @@
      <item>
       <widget class="QPushButton" name="save_data_button">
        <property name="toolTip">
-        <string>Individual</string>
+        <string>Data</string>
        </property>
        <property name="text">
-        <string>Data</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../../../../../../dashboard/infobiotics/dashboard/plugins/simulator_results/data.png</normaloff>../../../../../../../../dashboard/infobiotics/dashboard/plugins/simulator_results/data.png</iconset>
        </property>
        <property name="iconSize">
         <size>

@@ -93,7 +93,7 @@ def update(file):
 
 
 import sys, fileinput
-def pre_append(line, file_name):
+def prepend_line_to_file(line, file_name):
     ''' Insert a line at the beginning of a file. 
     
     Lifted from: http://python-forum.com/pythonforum/viewtopic.php?f=3&t=9793#p44799
