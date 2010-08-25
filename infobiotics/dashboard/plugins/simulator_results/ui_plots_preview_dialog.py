@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'plots_preview_dialog.ui'
 #
-# Created: Wed Aug 26 17:15:55 2009
-#      by: PyQt4 UI code generator 4.4.4
+# Created: Wed Aug 25 18:33:59 2010
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ class Ui_PlotsPreviewDialog(object):
         self.verticalLayout_2.addWidget(self.hideInvariantsCheckBox)
         self.plotsListWidget = PlotsListWidget(PlotsPreviewDialog)
         self.plotsListWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.plotsListWidget.setProperty("showDropIndicator", QtCore.QVariant(False))
+        self.plotsListWidget.setProperty("showDropIndicator", False)
         self.plotsListWidget.setDragEnabled(True)
         self.plotsListWidget.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
         self.plotsListWidget.setAlternatingRowColors(False)
@@ -37,7 +37,7 @@ class Ui_PlotsPreviewDialog(object):
         self.plotsListWidget.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerItem)
         self.plotsListWidget.setMovement(QtGui.QListView.Snap)
         self.plotsListWidget.setFlow(QtGui.QListView.LeftToRight)
-        self.plotsListWidget.setProperty("isWrapping", QtCore.QVariant(True))
+        self.plotsListWidget.setProperty("isWrapping", True)
         self.plotsListWidget.setResizeMode(QtGui.QListView.Adjust)
         self.plotsListWidget.setLayoutMode(QtGui.QListView.SinglePass)
         self.plotsListWidget.setGridSize(QtCore.QSize(200, 200))
@@ -46,6 +46,11 @@ class Ui_PlotsPreviewDialog(object):
         self.plotsListWidget.setWordWrap(False)
         self.plotsListWidget.setObjectName("plotsListWidget")
         self.verticalLayout_2.addWidget(self.plotsListWidget)
+        self.line = QtGui.QFrame(PlotsPreviewDialog)
+        self.line.setFrameShape(QtGui.QFrame.HLine)
+        self.line.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.verticalLayout_2.addWidget(self.line)
         self.actionLayout = QtGui.QHBoxLayout()
         self.actionLayout.setObjectName("actionLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -75,3 +80,13 @@ class Ui_PlotsPreviewDialog(object):
         self.tileButton.setText(QtGui.QApplication.translate("PlotsPreviewDialog", "Tile", None, QtGui.QApplication.UnicodeUTF8))
 
 from PlotsListWidget import PlotsListWidget
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    PlotsPreviewDialog = QtGui.QWidget()
+    ui = Ui_PlotsPreviewDialog()
+    ui.setupUi(PlotsPreviewDialog)
+    PlotsPreviewDialog.show()
+    sys.exit(app.exec_())
+

@@ -316,10 +316,12 @@ class SimulationResultsDialog(QWidget):
         self.connect(self.ui.plotButton, SIGNAL("clicked()"), self.plot)
         self.connect(self.ui.surfacePlotButton, SIGNAL("clicked()"), self.surfacePlot)
 
+        self.connect(self.ui.speciesListWidget_filter, SIGNAL('textEdited(QString)'), self.filter_species)
+        self.connect(self.ui.compartmentsListWidget_filter, SIGNAL('textEdited(QString)'), self.filter_compartments)
+
         self.selectedRuns = []
         self.selectedSpecies = []
         self.selectedCompartments = []
-
 
         self.loaded = False
         self.current_directory = QDir.currentPath()
@@ -328,6 +330,34 @@ class SimulationResultsDialog(QWidget):
         if not self.loaded:
             self.close()
         self.updateUi()
+
+    filter_species_locked = False
+    def filter_species(self, text):
+        if self.filter_species_locked == True:
+            return
+        self.filter_species_locked = True
+        w = self.ui.speciesListWidget
+        for c in self.all_species:
+            c.setHidden(False)
+        filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
+        unfiltered = self.all_species.symmetric_difference(filtered)
+        for c in unfiltered:
+            c.setHidden(True)
+        self.filter_species_locked = False
+        
+    filter_compartments_locked = False
+    def filter_compartments(self, text):
+        if self.filter_compartments_locked == True:
+            return
+        self.filter_compartments_locked = True
+        w = self.ui.compartmentsListWidget
+        for c in self.all_compartments:
+            c.setHidden(False)
+        filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
+        unfiltered = self.all_compartments.symmetric_difference(filtered)
+        for c in unfiltered:
+            c.setHidden(True)
+        self.filter_compartments_locked = False
 
 #    def load_settings(self):
 #        settings = QSettings() # see shared.functions
@@ -438,18 +468,28 @@ class SimulationResultsDialog(QWidget):
         self.ui.toSpinBox.set_interval(interval)
 
         self.ui.runsListWidget.clear()
+        self.all_runs = []
         for i in simulation.listOfRuns:
-            self.ui.runsListWidget.addItem(SimulationListWidgetItem(i))
+            item = SimulationListWidgetItem(i)
+            self.ui.runsListWidget.addItem(item)
+            self.all_runs.append(item)
+        self.all_runs = frozenset(self.all_runs)
 
         self.ui.speciesListWidget.clear()
+        self.all_species = []
         for i in simulation.listOfSpecies:
             item = SimulationListWidgetItem(i)
             self.ui.speciesListWidget.addItem(item)
-
+            self.all_species.append(item)
+        self.all_species = frozenset(self.all_species)
+        
         self.ui.compartmentsListWidget.clear()
-        #TODO can't rely on run1 alone if subcompartments divide
-        for i in simulation.listOfRuns[0].subcompartments:
-            self.ui.compartmentsListWidget.addItem(SimulationListWidgetItem(i))
+        self.all_compartments = []
+        for i in simulation.listOfRuns[0].subcompartments: #TODO can't rely on run1 alone if subcompartments divide
+            item = SimulationListWidgetItem(i)
+            self.ui.compartmentsListWidget.addItem(item)
+            self.all_compartments.append(item)
+        self.all_compartments = frozenset(self.all_compartments)
 
         self.simulation = simulation
 
@@ -590,6 +630,7 @@ class SimulationResultsDialog(QWidget):
         num_selected_runs = len(self.ui.runsListWidget.selectedItems())
         num_selected_species = len(self.ui.speciesListWidget.selectedItems())
         num_selected_compartments = len(self.ui.compartmentsListWidget.selectedItems())
+        self.ui.no_compartments_selected.setText('%s/%s' % (num_selected_compartments, self.ui.compartmentsListWidget.count())) 
         if num_selected_runs == 0 or num_selected_species == 0 or num_selected_compartments == 0:
             self.ui.save_data_button.setEnabled(False)
             self.ui.plotButton.setEnabled(False)
@@ -2164,21 +2205,22 @@ def test_SimulatorResults_save_selected_data():
 
 
 if __name__ == "__main__":
-    test()
+#    test()
 
-##    import sys
-##    argv = sys.argv
-#    app, argv = main.begin_traits()
-#    if len(argv) > 2:
-##        print "usage: mcss_results.sh {h5file}"
-#        print "usage: python simulator_results.py {h5file}"
-#        main.end(1)
-#    if len(argv) == 1:
-##        shared.settings.register_infobiotics_settings()
-#        w = SimulationResultsDialog()
-#    elif len(argv) == 2:
-#        w = SimulationResultsDialog(filename=argv[1])
-#    centre_window(w)
-#    w.show()
-##    shared.settings.restore_window_size_and_position(w)
-#    main.end_with_qt_event_loop()
+#    import sys
+#    argv = sys.argv
+    app, argv = main.begin_traits()
+    argv.insert(1, '/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
+    if len(argv) > 2:
+#        print "usage: mcss_results.sh {h5file}"
+        print "usage: python simulator_results.py {h5file}"
+        main.end(1)
+    if len(argv) == 1:
+#        shared.settings.register_infobiotics_settings()
+        w = SimulationResultsDialog()
+    elif len(argv) == 2:
+        w = SimulationResultsDialog(filename=argv[1])
+    centre_window(w)
+    w.show()
+#    shared.settings.restore_window_size_and_position(w)
+    main.end_with_qt_event_loop()

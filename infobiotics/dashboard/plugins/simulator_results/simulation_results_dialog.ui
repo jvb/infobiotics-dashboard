@@ -46,12 +46,33 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+     <property name="opaqueResize">
+      <bool>true</bool>
+     </property>
+     <property name="handleWidth">
+      <number>6</number>
+     </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
      <widget class="QGroupBox" name="runsGroupBox">
       <property name="title">
        <string>Runs</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
        <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -121,9 +142,18 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
-        <number>3</number>
+        <number>6</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
        </property>
        <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -149,20 +179,45 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QLineEdit" name="speciesListWidget_filter">
+         <property name="toolTip">
+          <string>Filter Species</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QGroupBox" name="compartmentsGroupBox">
       <property name="title">
        <string>Compartments</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="spacing">
-        <number>3</number>
-       </property>
-       <property name="topMargin">
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="leftMargin">
         <number>0</number>
        </property>
-       <item>
+       <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <property name="horizontalSpacing">
+        <number>0</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>6</number>
+       </property>
+       <item row="0" column="0">
         <widget class="QCheckBox" name="selectAllCompartmentsCheckBox">
          <property name="enabled">
           <bool>true</bool>
@@ -175,7 +230,7 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item row="2" column="0" colspan="2">
         <widget class="QListWidget" name="compartmentsListWidget">
          <property name="enabled">
           <bool>true</bool>
@@ -188,6 +243,29 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QLineEdit" name="compartmentsListWidget_filter">
+         <property name="toolTip">
+          <string>Filter Compartments</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="no_compartments_selected">
+         <property name="toolTip">
+          <string>compartments selected / total</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -197,7 +275,22 @@
      <property name="title">
       <string>Options</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="timeLayout">
         <item>
@@ -341,7 +434,7 @@
      <item>
       <widget class="QPushButton" name="save_data_button">
        <property name="toolTip">
-        <string>Data</string>
+        <string>Save timeseries data for selected runs, species and compartments</string>
        </property>
        <property name="text">
         <string/>
@@ -361,7 +454,7 @@
      <item>
       <widget class="QPushButton" name="plotButton">
        <property name="toolTip">
-        <string>Individual</string>
+        <string>Plot timeseries for selected runs, species and compartments</string>
        </property>
        <property name="text">
         <string/>
@@ -381,7 +474,7 @@
      <item>
       <widget class="QPushButton" name="surfacePlotButton">
        <property name="toolTip">
-        <string>Colony</string>
+        <string>Animate levels of selected species on lattice</string>
        </property>
        <property name="text">
         <string/>
