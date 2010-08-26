@@ -1,21 +1,14 @@
-from colours import colour, colours
+from colours import *
 
-from dicts import key_from_value
+from dicts import *
 
-from files import (
-    mkdir_p, 
-    path_join_overlapping, split_directories, 
-    can_access, can_read, can_write, can_execute, 
-    read, write, append, update,
-)
+from files import *
 
-from lists import copy, unique
+from md5sum import *
 
-#from md5sum import md5sum
+from sequences import *
 
-from sequences import flatten, overlapping, join_overlapping
-
-from strings import wrap
+from strings import *
 
 import unified_logging as logging 
 

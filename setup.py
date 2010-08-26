@@ -218,7 +218,7 @@ INSTALL_REQUIRES = [
     'Mayavi', #TODO >=3.4.0',
     'configobj', # for enthought.preferences
     'numpy', #>=1.3.0', 
-    'matplotlib'#,==0.99.1', 
+#    'matplotlib',#,==0.99.1', 
 #    'which==1.1.0', # in infobiotics.thirdparty - is that the same as this? http://code.google.com/p/which/
     'xlwt',
 ]

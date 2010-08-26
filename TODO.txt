@@ -5,6 +5,12 @@ Things to do, bugs to fix, feature requests, etc.
 Unsorted
 --------
 
+rename simulation results to mcss results
+
+test mcss results with some very large models
+
+disable legend in plots
+
 test matplotlib images by 'got here'
 
 CLI progress bars for mcss, etc using pexpect as proof of concept
@@ -14,9 +20,9 @@ RelativeFile validation should respect filters.
 
 RelativeDirectory should not descend from RelativeFile because this makes it harder to subclass RelativeFile and make Directory equivalent that works the same.
 
-Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging
+Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging (try Popen.communicate)
 
-change CorePlugin to DashboardPlugin
+change CorePlugin to DashboardPlugin *
 
 Project management (using Single Project plugin?)
 
@@ -25,6 +31,8 @@ Results management using Sumatra
 Make size of Mayavi screenshots adjustable
 
 Make Mayavi videos on Debian using ffmpeg
+
+Sync Mayavi cameras http://code.enthought.com/projects/mayavi/docs/development/html/mayavi/auto/mlab_figure.html?highlight=sync#sync-camera
 
 code coverage
 
@@ -44,16 +52,16 @@ TODOs
 General
 -------
 
-Use open lpp file for model parameter for each experiment. 
+Use open lpp file for model parameter for each experiment. * 
 
 Help URLS for Dashboard main window - requires altered actions strategy to HelpController
     link to issue tracker http://bitbucket.org/jvb/infobiotics-dashboard/issues?status=new&status=open
 
-Welcome perspective
+Welcome perspective *
 
 Splash screen
 
-Delete temporary files: NamedTemporaryFile(delete-False) means I have to do this manually. 
+Delete temporary files: NamedTemporaryFile(delete-False) means I have to do this manually. *
 
 Perform should *always* prompt to save parameters and only perform when saved - only true of interactive mode?
 
@@ -119,7 +127,7 @@ BoundsEditor for Simulation Results time start/stop
 Language
 --------
 
-Lexing of P system files
+Lexing of P system files *
 
 Autocompletion from parsed data structure 
 

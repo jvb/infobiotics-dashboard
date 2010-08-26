@@ -6,36 +6,43 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
+    <width>541</width>
     <height>542</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Simulator Results</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_5">
-   <item>
-    <layout class="QHBoxLayout" name="filenameLayout">
-     <item>
-      <widget class="QPushButton" name="load_button">
-       <property name="text">
-        <string>Load</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="filenameLineEdit">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+  <layout class="QGridLayout" name="gridLayout_5">
+   <property name="leftMargin">
+    <number>9</number>
+   </property>
+   <item row="0" column="0" colspan="3">
+    <widget class="QLineEdit" name="filenameLineEdit">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
-   <item>
+   <item row="1" column="0" colspan="4">
     <widget class="QSplitter" name="splitter">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -62,7 +69,7 @@
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QGridLayout" name="gridLayout_3">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -75,10 +82,13 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
+       <item row="0" column="0">
         <widget class="QCheckBox" name="selectAllRunsCheckBox">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string>Select all runs</string>
          </property>
          <property name="text">
           <string>All</string>
@@ -88,51 +98,56 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item row="1" column="0" colspan="2">
         <widget class="QListWidget" name="runsListWidget">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string>Select multiple runs using Ctrl-click, Shift-click or by clicking and dragging.</string>
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
         </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="randomRunsLayout">
-         <item>
-          <widget class="QSpinBox" name="randomRunsSpinBox">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="suffix">
-            <string/>
-           </property>
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>1000</number>
-           </property>
-           <property name="singleStep">
-            <number>1</number>
-           </property>
-           <property name="value">
-            <number>1</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="randomRunsLabel">
-           <property name="text">
-            <string>random runs</string>
-           </property>
-           <property name="buddy">
-            <cstring>randomRunsSpinBox</cstring>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       <item row="2" column="0">
+        <widget class="QSpinBox" name="randomRunsSpinBox">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string>Select &lt;I&gt;n&lt;/I&gt; random runs</string>
+         </property>
+         <property name="suffix">
+          <string/>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="randomRunsLabel">
+         <property name="toolTip">
+          <string>Select &lt;I&gt;n&lt;/I&gt; random runs</string>
+         </property>
+         <property name="text">
+          <string>random runs</string>
+         </property>
+         <property name="buddy">
+          <cstring>randomRunsSpinBox</cstring>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -140,10 +155,7 @@
       <property name="title">
        <string>Species</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>6</number>
-       </property>
+      <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -156,10 +168,16 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
+       <property name="horizontalSpacing">
+        <number>6</number>
+       </property>
+       <item row="0" column="0">
         <widget class="QCheckBox" name="selectAllSpeciesCheckBox">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string>Select all (filtered) species</string>
          </property>
          <property name="text">
           <string>All</string>
@@ -169,17 +187,33 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="species_selected_and_total_label">
+         <property name="toolTip">
+          <string>selected / total</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
         <widget class="QListWidget" name="speciesListWidget">
          <property name="toolTip">
-          <string>Select multiple species using ctrl-click, shift-click or click-drag.</string>
+          <string>Select multiple species using Ctrl-click, Shift-click or by clicking and dragging.</string>
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="2" column="0" colspan="2">
         <widget class="QLineEdit" name="speciesListWidget_filter">
          <property name="toolTip">
           <string>Filter Species</string>
@@ -211,16 +245,16 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <property name="horizontalSpacing">
-        <number>0</number>
-       </property>
-       <property name="verticalSpacing">
+       <property name="spacing">
         <number>6</number>
        </property>
        <item row="0" column="0">
         <widget class="QCheckBox" name="selectAllCompartmentsCheckBox">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string>Select all (filter) compartments</string>
          </property>
          <property name="text">
           <string>All</string>
@@ -230,13 +264,29 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="compartments_selected_and_total_label">
+         <property name="toolTip">
+          <string>selected / total</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
        <item row="2" column="0" colspan="2">
         <widget class="QListWidget" name="compartmentsListWidget">
          <property name="enabled">
           <bool>true</bool>
          </property>
          <property name="toolTip">
-          <string>Select multiple compartments using ctrl-click, shift-click or click-drag.</string>
+          <string>Select multiple compartments using Ctrl-click, Shift-click or by clicking and dragging.</string>
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -250,27 +300,11 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="no_compartments_selected">
-         <property name="toolTip">
-          <string>compartments selected / total</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="scaledContents">
-          <bool>false</bool>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </widget>
    </item>
-   <item>
+   <item row="2" column="0" colspan="4">
     <widget class="QGroupBox" name="optionsGroupBox">
      <property name="title">
       <string>Options</string>
@@ -278,7 +312,7 @@
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
+     <layout class="QGridLayout" name="gridLayout_4">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -291,207 +325,281 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
-       <layout class="QHBoxLayout" name="timeLayout">
-        <item>
-         <widget class="QLabel" name="fromLabel">
-          <property name="text">
-           <string>From</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="FromToDoubleSpinBox" name="fromSpinBox"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="toLabel">
-          <property name="text">
-           <string>to</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="FromToDoubleSpinBox" name="toSpinBox"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="everyLabel">
-          <property name="text">
-           <string>every</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="everySpinBox"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="xLabel">
-          <property name="text">
-           <string>x</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="intervalLabel">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="unitsComboBox">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <item>
-           <property name="text">
-            <string>seconds</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>minutes</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>hours</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+      <item row="0" column="0">
+       <widget class="QLabel" name="fromLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select timepoints starting from &lt;I&gt;n&lt;/I&gt;</string>
+        </property>
+        <property name="text">
+         <string>From</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item row="0" column="1">
+       <widget class="FromToDoubleSpinBox" name="fromSpinBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select timepoints starting from &lt;I&gt;n&lt;/I&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="toLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select timepoints up to and including &lt;I&gt;n&lt;/I&gt;</string>
+        </property>
+        <property name="text">
+         <string>to</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3" colspan="2">
+       <widget class="FromToDoubleSpinBox" name="toSpinBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select timepoints up to and including &lt;I&gt;n&lt;/I&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="everyLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select every &lt;I&gt;n&lt;/I&gt; timepoints from start to finish</string>
+        </property>
+        <property name="text">
+         <string>every</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QSpinBox" name="everySpinBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select every &lt;I&gt;n&lt;/I&gt; timepoints from start to finish</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QLabel" name="xLabel">
+        <property name="text">
+         <string>x</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8">
+       <widget class="QLabel" name="intervalLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Log interval of simulation</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="9">
+       <widget class="QComboBox" name="unitsComboBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Set units for time axis</string>
+        </property>
         <item>
-         <widget class="QCheckBox" name="averageSelectedRunsCheckBox">
-          <property name="toolTip">
-           <string>Not appropriate for oscillatory behaviours</string>
-          </property>
-          <property name="text">
-           <string>Average selected runs</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <property name="text">
+          <string>seconds</string>
+         </property>
         </item>
         <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
+         <property name="text">
+          <string>minutes</string>
+         </property>
         </item>
-       </layout>
+        <item>
+         <property name="text">
+          <string>hours</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="10">
+       <spacer name="timepoints_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>57</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="0" colspan="4">
+       <widget class="QCheckBox" name="averageSelectedRunsCheckBox">
+        <property name="toolTip">
+         <string>Take the mean of species amounts over selected runs
+Potentially inappropriate for systems with oscillatory behaviour</string>
+        </property>
+        <property name="text">
+         <string>Average over selected runs</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4" colspan="7">
+       <spacer name="average_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>304</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="save_data_button">
-       <property name="toolTip">
-        <string>Save timeseries data for selected runs, species and compartments</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>../../../../../../../../dashboard/infobiotics/dashboard/plugins/simulator_results/data.png</normaloff>../../../../../../../../dashboard/infobiotics/dashboard/plugins/simulator_results/data.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>64</width>
-         <height>64</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="plotButton">
-       <property name="toolTip">
-        <string>Plot timeseries for selected runs, species and compartments</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>:/images/plot_2d.png</normaloff>:/images/plot_2d.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>64</width>
-         <height>64</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="surfacePlotButton">
-       <property name="toolTip">
-        <string>Animate levels of selected species on lattice</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>:/images/plot_3d.png</normaloff>:/images/plot_3d.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>64</width>
-         <height>64</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-    </layout>
+   <item row="3" column="0">
+    <spacer name="actions_spacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>244</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="save_data_button">
+     <property name="toolTip">
+      <string>Save timeseries data for selected runs, species and compartments</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/data.png</normaloff>:/data.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QPushButton" name="plotButton">
+     <property name="toolTip">
+      <string>Plot timeseries for selected runs, species and compartments</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/plot_2d.png</normaloff>:/plot_2d.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QPushButton" name="surfacePlotButton">
+     <property name="toolTip">
+      <string>Animate levels of selected species on lattice</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/plot_3d.png</normaloff>:/plot_3d.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QPushButton" name="load_button">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Select a different H5 file</string>
+     </property>
+     <property name="text">
+      <string>Browse...</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -503,7 +611,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>load_button</tabstop>
   <tabstop>filenameLineEdit</tabstop>
   <tabstop>selectAllRunsCheckBox</tabstop>
   <tabstop>randomRunsSpinBox</tabstop>
