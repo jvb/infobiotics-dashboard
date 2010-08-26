@@ -1487,10 +1487,17 @@ class SimulatorResults(object):
         h5.close()
         return (self.timepoints, results)
 
+    
+    sum  = lambda array: numpy.sum( array, axis=2)
+    
+    def get_function_over_all_compartments(self):
+        pass
+    
 
     mean = lambda array: numpy.mean(array, axis=3)
-    std = lambda array: numpy.std(array, ddof=1, axis=3)
+    std  = lambda array: numpy.std( array, ddof=1, axis=3)
 
+    #   get_stats_over_all_runs
     def get_stats(self, functions=(mean,)):#(mean,std)
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
         array of floats and results is a list of 3-D arrays of floats with the 
