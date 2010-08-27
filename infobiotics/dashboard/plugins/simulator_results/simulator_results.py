@@ -489,7 +489,7 @@ class SimulationResultsDialog(QWidget):
         else:
             self.ui.selectAllCompartmentsCheckBox.setEnabled(True)
 
-        self.ui.compartmentsListWidget.sortItems()
+#        self.ui.compartmentsListWidget.sortItems()
 
         self.ui.toSpinBox.setEnabled(True)
         self.ui.fromSpinBox.setEnabled(True)
@@ -1530,7 +1530,7 @@ class SimulatorResults(object):
 #        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
     
     # these methods should apply a function along the over_x axis
-    def get_function_over_runs_(self): # (species, compartments, timepoints)
+    def get_function_over_runs(self): # (species, compartments, timepoints)
         'of levels for each species in each compartment at each timepoint for all runs'
         shape = (100, 10000, 10000)
         return np.zeros(shape)
@@ -1592,12 +1592,27 @@ class SimulatorResults(object):
         'of levels for all species in each compartment at all timepoints for all runs':get_function_over_runs_and_species_and_timepoints,
         'of levels of each species in all compartments at all timepoints for all runs':get_function_over_runs_and_compartments_and_timepoints,
         'of levels for all species in all compartments at all timepoints of each run' :get_function_over_species_and_compartments_and_timepoints,
-        '':get_function_over_runs_,
+        '':get_function_over_runs,
         '':get_function_over_species,
         '':get_function_over_compartments,
         '':get_function_over_timepoints,
 #        '':,
     }
+
+    levels_axes = ('runs', 'species', 'compartments', 'timepoints') 
+    def get_results_for_functions_over_axes(self, functions, axes):
+        ''' 
+        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.mean, np.sum, np.mean), ('species', 'timepoints', 'runs'))
+        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.std, np.mean, np.product), ('compartments', 'runs', 'species'))
+        '''
+        results = levels # start with 4-dimensional (runs, species, compartments, timepoints) array
+        ax = list(levels_axes) # make a mutable copy of levels_axes (runs, species, compartments, timepoints)
+        for fi, f in enumerate(functions):
+            axis = axes[fi]
+            results = f(results, axis=ax.index(axis))
+            ax.remove(axis)
+    #        print ax
+        return results
 
     string_to_function_map = {
 #        'median':,
@@ -1682,7 +1697,7 @@ code up a couple and see if/where/how they overlap
                 amounts = h5.getNode(where, 'amounts')[:, :, amounts_chunk_start:self.amounts_chunk_end:self.every]
                 for si, s in enumerate(self.species_indices):
                     for ci, c in enumerate(self.compartment_indices):
-                        buffer[si, ci, :, ri] = amounts[s, c, :]
+                        buffer[si, ci, :, ri] = amounts[s, c, :] #FIXME works but surely buffer[:, :, :, ri] = amounts[self.species_indices, self.compartment_indices, :] could work too, no?
             self.statChunkEnd = stat_chunk_start + chunk_size
 #            print results[1][:,:,stat_chunk_start:self.statChunkEnd]
 #            print "amounts.shape: ", amounts.shape, "buffer.shape: ", buffer.shape
