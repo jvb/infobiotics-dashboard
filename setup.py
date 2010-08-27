@@ -198,7 +198,10 @@ manifestVersion="1.0">
     )
 else: # assume sys.platform.startswith('linux'):
     extra_options = dict(
-        scripts=['bin/infobiotics-dashboard'],
+        scripts=[
+            'bin/infobiotics-dashboard',
+            'bin/npz_info', #TODO add for Windows and Mac also
+        ],
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
             ('/usr/share/applications', ['infobiotics-dashboard.desktop']),

@@ -1,43 +1,44 @@
-from random import randint
-import bisect
-import cStringIO as StringIO
-import decimal
-import math
-import numpy
-import tables
-import os
-
+from FromToDoubleSpinBox import FromToDoubleSpinBox
+from PlotsListWidget import PlotsListWidget
+from PyQt4.QtCore import QSettings, QVariant, QDir, QSettings, QObject, QString, \
+    QSize, QFileInfo, SIGNAL, SLOT, QTimer, Qt
+from PyQt4.QtGui import QWidget, QApplication, QHBoxLayout, QVBoxLayout, QWidget, \
+    QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QItemSelectionModel, \
+    QPushButton, QBrush, QColor, QFileDialog, QMessageBox, QSpinBox, QPixmap, \
+    QSizePolicy, QAbstractItemView, QListView, QIcon, QDoubleSpinBox, qApp, \
+    QGridLayout, QLabel, QSlider, qApp, \
+    QApplication # must use qApp not QApplication(sys.argv) when mixing with TraitsUI
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.mayavi.core.pipeline_base import PipelineBase
 from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
 from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.traits.api import Instance, HasTraits, Range, on_trait_change, String, Bool
-from enthought.traits.ui.api import View, Item, HGroup, VGroup
+from enthought.traits.api import HasTraits, Instance, Str, Button, Instance, \
+    HasTraits, Range, on_trait_change, String, Bool
+from enthought.traits.ui.api import View, Item, HGroup, View, VGroup, Spring
 from enthought.tvtk.pyface.scene_editor import SceneEditor
-
+from infobiotics.commons import colours
+from infobiotics.commons.matplotlib_ import resize_and_save_matplotlib_figure
+from infobiotics.commons.qt4 import centre_window
+from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import \
+    MPLFigureEditor
 from matplotlib import font_manager
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-
-from FromToDoubleSpinBox import FromToDoubleSpinBox
-from PlotsListWidget import PlotsListWidget
-from PyQt4.QtCore import (QSettings, QVariant, QDir, Qt, Qt, SIGNAL, SLOT,
-    QCoreApplication, QSettings, QObject, QString, QSize, QFileInfo, SIGNAL, SLOT,
-    QTimer)
-from PyQt4.QtGui import (QWidget, QApplication, QHBoxLayout, QVBoxLayout, QWidget,
-    QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QItemSelectionModel,
-    QPushButton, QBrush, QColor, QFileDialog, QMessageBox, QSpinBox, QPixmap,
-    QSizePolicy, QAbstractItemView, QListView, QIcon, QDoubleSpinBox, qApp,
-    QGridLayout)
-
-from infobiotics.commons.qt4 import centre_window
-from infobiotics.commons import colours
-
+from random import randint
 from ui_player_control_widget import Ui_ControlsWidget
 from ui_plots_preview_dialog import Ui_PlotsPreviewDialog
 from ui_simulation_results_dialog import Ui_SimulationResultsDialog
+import bisect
+import cStringIO as StringIO
+import decimal
+import infobiotics
+import math
+import numpy as np
+import os
+import tables
+import xlwt
 
 
 # for QSettings
@@ -47,7 +48,6 @@ if qApp is None:
 qApp.setOrganizationDomain('www.infobiotics.org')
 qApp.setOrganizationName('Infobiotics')
 qApp.setApplicationName('Infobiotics Dashboard')
-import infobiotics
 qApp.setApplicationVersion(infobiotics.version)
 
 
@@ -73,8 +73,8 @@ def load_h5(h5_file):
     species_names = h5.root.species_information.cols.species_name[:]
     simulation.listOfSpecies = [
         Species(
-            species_indices[i], 
-            species_names[i], 
+            species_indices[i],
+            species_names[i],
             simulation,
         ) for i in range(simulation.number_of_species)
     ]
@@ -117,7 +117,7 @@ def load_h5(h5_file):
 #                compartment_creation_time[i],
 #                compartment_destruction_time[i],
                 run,
-                run.simulation,                        
+                run.simulation,
             ) for i in range(0, len(compartment_indices))
         ]
         simulation.listOfRuns.append(run)
@@ -717,7 +717,7 @@ class SimulationResultsDialog(QWidget):
         results = self.selected_items_results()
 
         if averaging:
-            timepoints, results = results.get_stats()
+            timepoints, results = results.get_mean_over_runs()
             mean_index = 0
         else:
             timepoints, results = results.get_amounts()
@@ -776,7 +776,7 @@ class SimulationResultsDialog(QWidget):
                 d = '%d,' * len(results); fmt = ['%.3f'] + d.split(',')[:-1] # timepoints must be floats, levels are ints
             timepoints_and_levels = (timepoints,) + results
             # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
-            numpy.savetxt(file_name, numpy.transpose(timepoints_and_levels), fmt=fmt, delimiter=csv_delimiter)
+            np.savetxt(file_name, np.transpose(timepoints_and_levels), fmt=fmt, delimiter=csv_delimiter)
             # transpose converts the tuple of 1D arrays to columns
 
             # header
@@ -825,7 +825,6 @@ class SimulationResultsDialog(QWidget):
 
         def write_xls():
             ''' https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html '''
-            import xlwt
             wb = xlwt.Workbook()
             try:
                 ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
@@ -853,34 +852,28 @@ class SimulationResultsDialog(QWidget):
             wb.save(file_name)
 
         def write_npz(species_indices=species_indices, compartment_indices=compartment_indices):
-            species_indices = numpy.array(species_indices)
-            compartment_indices = numpy.array(compartment_indices)
-            species_names = numpy.array([str(s.text()) for s in species])
-            compartment_labels_and_positions = numpy.array([str(c.text()) for c in compartments])
-            run_numbers = numpy.array([str(r.text()) for r in runs])
+            # convert QString to str
+            species_names = [str(s.text()) for s in species]
+            compartment_labels_and_positions = [str(c.text()) for c in compartments]
+            run_numbers = [str(r.text()) for r in runs]
+            kwargs = dict(
+                run_indices=np.array(run_indices),
+                run_numbers=run_numbers,
+                species_indices=species_indices,
+                species_names=species_names,
+                compartment_indices=compartment_indices,
+                compartment_labels_and_positions=compartment_labels_and_positions,
+                timepoints=timepoints,
+                model_file_name=os.path.basename(self.simulation.model_input_file),
+                data_file_name=os.path.basename(self.simulation.data_file),
+            )
             if averaging:
-                numpy.savez(file_name,
-                    timepoints=timepoints,
-                    means=results[mean_index],
-                    shape=numpy.array(['species', 'compartment', 'timepoint']),
-                    species_indices=numpy.array(species_indices),
-                    compartment_indices=numpy.array(compartment_indices),
-                    species_names=species_names,
-                    compartment_labels_and_positions=compartment_labels_and_positions,
-                    run_numbers=run_numbers,
-                )
+                kwargs['means'] = results[mean_index]
+                kwargs['shape'] = ('species', 'compartment', 'timepoint')
             else:
-                numpy.savez(file_name,
-                    timepoints=timepoints,
-                    levels=levels,
-                    shape=numpy.array(['run', 'species', 'compartment', 'timepoint']),
-                    species_indices=species_indices,
-                    compartment_indices=compartment_indices,
-                    run_indices=numpy.array(run_indices),
-                    species_names=species_names,
-                    compartment_labels_and_positions=compartment_labels_and_positions,
-                    run_numbers=run_numbers,
-                )
+                kwargs['levels'] = results
+                kwargs['shape'] = ('run', 'species', 'compartment', 'timepoint')
+            np.savez(file_name, **kwargs)                
 
         if file_name.endswith('.npz'):
             write_npz()
@@ -911,7 +904,7 @@ class SimulationResultsDialog(QWidget):
         species = self.ui.speciesListWidget.selectedItems()
         for si, s in enumerate(species):
             surface = results[si]
-            zmax = numpy.max(surface) 
+            zmax = np.max(surface) 
 #            if zmax == 0: print "%s never amounts to anything." % s.name
             extent = [xmin, xmax, ymin, ymax, 0, zmax]
 #            warp_scale = 'auto' # doesn't work
@@ -932,7 +925,7 @@ class SimulationResultsDialog(QWidget):
         results = self.selected_items_results()
 
         if averaging:
-            timepoints, results = results.get_stats()
+            timepoints, results = results.get_mean_over_runs()
             mean_index = 0
         else:
             timepoints, results = results.get_amounts()
@@ -944,12 +937,12 @@ class SimulationResultsDialog(QWidget):
             for ci, c in enumerate(compartments):
                 for si, s in enumerate(species):
                     plot = Plot(
-                        timepoints=timepoints, 
+                        timepoints=timepoints,
                         levels=results[mean_index][si, ci],
 #                        yerr=errors[si,ci],
-                        species=s.data, 
+                        species=s.data,
                         compartment=c.data,
-                        colour=colours.colour(si),#+(len(listOfSpecies)*ci)), 
+                        colour=colours.colour(si), #+(len(listOfSpecies)*ci)), 
                         units=units,
                     )
                     plots.append(plot)
@@ -962,16 +955,16 @@ class SimulationResultsDialog(QWidget):
                             timepoints=timepoints,
                             levels=results[ri][si, ci, :],
                             run=r.data,
-                            species=s.data, 
-                            compartment=c.data, 
-                            colour=colour, 
+                            species=s.data,
+                            compartment=c.data,
+                            colour=colour,
                             units=units,
                         )
                         plots.append(plot)
 
         if len(plots) > 0:
             self.plotsPreviewDialog = PlotsPreviewDialog(
-                runs=len(runs), 
+                runs=len(runs),
                 averaging=averaging,
                 windowTitle=os.path.basename(self.simulation.model_input_file),
             )
@@ -1052,13 +1045,11 @@ class Plot(FigureCanvasAgg):
 #    colour = property(get_colour)
 #    yerr = property(get_yerr)
 
-    from numpy import max, min
-
     def least(self):
-        return numpy.min(self.levels)
+        return np.min(self.levels)
 
     def most(self):
-        return numpy.max(self.levels)
+        return np.max(self.levels)
 
     def invariant(self):
         return (True if self.least() == self.most() else False)
@@ -1106,11 +1097,6 @@ def arrange(number):
 
 
 
-from enthought.traits.api import HasTraits, Instance, Str, Button
-from matplotlib.figure import Figure
-from enthought.traits.ui.api import View, VGroup, Item, HGroup, Spring
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
-from infobiotics.commons.matplotlib_ import resize_and_save_matplotlib_figure
 
 class TraitsPlot(HasTraits):
     figure = Instance(Figure, ())
@@ -1329,40 +1315,40 @@ class PlotsPreviewDialog(QWidget):
             if self.averaging:
                 if single_species:
                     if single_compartment:
-                        title = "%s in %s (mean of %s listOfRuns)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s in %s (mean of %s runs)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
                         for item in self.items:
                             item.label = None
                             self.no_labels = True
                     else:
-                        title = "%s (mean of %s listOfRuns)" % (item.plot.listOfSpecies.name, self.listOfRuns)
+                        title = "%s (mean of %s runs)" % (item.plot.listOfSpecies.name, self.listOfRuns)
                         for item in self.items:
                             item.label = "%s" % (item.plot.compartment.compartment_name_and_xy_coords())
                 else:
                     if single_compartment:
-                        title = "%s (mean of %s listOfRuns)" % (item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s (mean of %s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
                         for item in self.items:
                             item.label = "%s" % (item.plot.listOfSpecies.name)
                     else:
-                        title = "Mean of %s listOfRuns" % (self.listOfRuns)
+                        title = "Mean of %s runs" % (self.listOfRuns)
                         for item in self.items:
                             item.label = "%s in %s" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords())
             else:
                 if single_species:
                     if single_compartment:
-                        title = "%s in %s  (%s listOfRuns)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s in %s  (%s runs)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
                         for item in self.items:
                             item.label = "Run %s" % item.plot.run.run_number
                     else:
-                        title = "%s (%s listOfRuns)" % (item.plot.listOfSpecies.name, self.listOfRuns)
+                        title = "%s (%s runs)" % (item.plot.listOfSpecies.name, self.listOfRuns)
                         for item in self.items:
                             item.label = "%s (run %s)" % (item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run.run_number)
                 else:
                     if single_compartment:
-                        title = "%s (%s listOfRuns)" % (item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s (%s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
                         for item in self.items:
                             item.label = "%s (run %s)" % (item.plot.listOfSpecies.name, item.plot.run.run_number)
                     else:
-                        title = "%s listOfRuns" % (self.listOfRuns)
+                        title = "%s runs" % (self.listOfRuns)
                         for item in self.items:
                             item.label = "%s in %s (run %s)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run.run_number)
         # set main title
@@ -1411,7 +1397,7 @@ class SimulatorResults(object):
         number_of_timepoints = self.simulation.listOfRuns[0].number_of_timepoints
         log_interval = self.simulation.log_interval
         max_time = number_of_timepoints * log_interval#= self.simulation.max_time
-        timepoints = numpy.linspace(0, max_time, number_of_timepoints + 1)
+        timepoints = np.linspace(0, max_time, number_of_timepoints + 1)
 
         if 0 < beginning < timepoints[-1]:
             # make start the index of the timepoint closest to, and including, beginning
@@ -1460,7 +1446,7 @@ class SimulatorResults(object):
         else:
             self.compartment_indices = compartment_indices
         if run_indices is None:
-            self.run_indices = range(1, self.simulation.number_of_runs + 1)
+            self.run_indices = range(0, self.simulation.number_of_runs)
         else:
             self.run_indices = run_indices
 
@@ -1470,10 +1456,10 @@ class SimulatorResults(object):
         array of floats and results is a list of 3-D arrays of ints with the 
         shape (species, compartments, timepoint) for each run. '''
         try:
-            results = [numpy.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
+            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
         except MemoryError, e:
             if parent is not None:
-                QMessageBox.warning('Out of memory','Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.')
+                QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.')
             else:
                 print e
             return (self.timepoints, [])
@@ -1488,26 +1474,176 @@ class SimulatorResults(object):
         return (self.timepoints, results)
 
     
-    sum  = lambda array: numpy.sum( array, axis=2)
-    
-    def get_function_over_all_compartments(self):
-        pass
-    
+#import itertools
+#axes = ('runs', 'species', 'compartments', 'timepoints')
+#for i in range(2, len(axes)):
+#    for combo in itertools.combinations(axes, i):
+#        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
 
-    mean = lambda array: numpy.mean(array, axis=3)
-    std  = lambda array: numpy.std( array, ddof=1, axis=3)
+    def get_function_over_runs_and_species(self, f): # (compartments, timepoints)
+        'of levels for all species in each compartment at each timepoint for all runs'
+        shape = (10000, 100000)
+        return np.zeros(shape)
+    def get_function_over_runs_and_compartments(self, f): # (species, timepoints)
+        'of levels of each species in all compartments at each timepoint for all runs'
+        shape = (100, 100000)
+        return np.zeros(shape)
+    def get_function_over_runs_and_timepoints(self, f): # (species, compartments)
+        'of levels of each species in each compartment at all timepoints for all runs'
+        shape = (100, 10000)
+        return np.zeros(shape)
+    def get_function_over_species_and_compartments(self, f): # (runs, timepoints)
+        'of levels for all species in all compartments at each timepoint in each run'
+        shape = (1000, 100000)
+        return np.zeros(shape)
+    def get_function_over_species_and_timepoints(self, f): # (runs, compartments)
+        'of levels for all species in each compartment at all timepoints in each run'
+        shape = (1000, 10000)
+        return np.zeros(shape)
+    def get_function_over_compartments_and_timepoints(self, f): # (runs, species)
+        'of levels of each species in all compartments at all timepoints in each run'
+        shape = (1000, 100)
+        return np.zeros(shape)
+    
+    def get_function_over_runs_and_species_and_compartments(self, f): # (timepoints)
+        'of levels for all species in all compartments at each timepoint for all runs'
+        shape = (100000,)
+        return np.zeros(shape)
+    def get_function_over_runs_and_species_and_timepoints(self, f): # (compartments)
+        'of levels for all species in each compartment at all timepoints for all runs'
+        shape = (10000,)
+        return np.zeros(shape)
+    def get_function_over_runs_and_compartments_and_timepoints(self, f): # (species)
+        'of levels of each species in all compartments at all timepoints for all runs'
+        shape = (100,)
+        return np.zeros(shape)
+    def get_function_over_species_and_compartments_and_timepoints(self, f): # (runs)
+        'of levels for all species in all compartments at all timepoints of each run'
+        shape = (1000,)
+        return np.zeros(shape)
 
-    #   get_stats_over_all_runs
-    def get_stats(self, functions=(mean,)):#(mean,std)
+
+#import itertools
+#axes = ('runs', 'species', 'compartments', 'timepoints')
+#for i in (1,):
+#    for combo in itertools.combinations(axes, i):
+#        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
+    
+    # these methods should apply a function along the over_x axis
+    def get_function_over_runs_(self): # (species, compartments, timepoints)
+        'of levels for each species in each compartment at each timepoint for all runs'
+        shape = (100, 10000, 10000)
+        return np.zeros(shape)
+    def get_function_over_species(self): # (runs, compartments, timepoints)
+        'of levels for all species in each compartment at each timepoint for each run'
+        shape = (1000, 10000, 100000)
+        return np.zeros(shape)
+    def get_function_over_compartments(self): # (runs, species, timepoints)
+        'of levels for each species in all compartments at each timepoint for each run'
+        shape = (1000, 100, 100000)
+        return np.zeros(shape)
+    def get_function_over_timepoints(self): # (runs, species, compartments)
+        'of levels for each species in each compartment at all timepoints for each run'
+        shape = (1000, 100, 10000)
+        return np.zeros(shape)
+
+#FIXME some of these are equivalent to some of the ones below, the arrays just have an extra dimension for runs where below would return a list of arrays of len(runs) 
+
+#axes = ('species', 'compartments', 'timepoints')
+#for i in range(1, len(axes)):
+#    for combo in itertools.combinations(axes, i):
+#        print '\tdef get_levels_over_' + '_and_'.join(combo) + '(self):', '#', '[(' + ', '.join([axis for axis in axes if axis not in combo]) + ')]\n\t\tpass'  
+
+    def get_levels_over_species(self): # [(compartments, timepoints)]
+        'levels for all species in each compartment at each timepoint of each run'
+        shape = (10000, 100000)
+        return [np.zeros(shape) for _ in range(1000)]
+    def get_levels_over_compartments(self): # [(species, timepoints)]
+        'levels of each species in all compartments at each timepoint of each run'
+        shape = (100, 100000)
+        return [np.zeros(shape) for _ in range(1000)]
+    def get_levels_over_timepoints(self): # [(species, compartments)]
+        'levels of each species in each compartment at all timepoints of each run'
+        shape = (100, 10000)
+        return [np.zeros(shape) for _ in range(1000)]
+    
+    def get_levels_over_species_and_compartments(self): # [(timepoints)]
+        'levels for all species in all compartments at each timepoint of each run'
+        shape = (100000,)
+        return [np.zeros(shape) for _ in range(1000)]
+    def get_levels_over_species_and_timepoints(self): # [(compartments)]
+        'levels for all species in each compartment at all timepoints of each run'
+        shape = (10000,)
+        return [np.zeros(shape) for _ in range(1000)]
+    def get_levels_over_compartments_and_timepoints(self): # [(species)]
+        'levels of each species in all compartments for all timepoints of each run'
+        shape = (100)
+        return [np.zeros(shape) for _ in range(1000)]
+
+
+    string_to_method_map = {
+        'of levels for all species in each compartment at each timepoint for all runs':get_function_over_runs_and_species,
+        'of levels of each species in all compartments at each timepoint for all runs':get_function_over_runs_and_compartments,
+        'of levels of each species in each compartment at all timepoints for all runs':get_function_over_runs_and_timepoints,
+        'of levels for all species in all compartments at each timepoint in each run' :get_function_over_species_and_compartments,
+        'of levels for all species in each compartment at all timepoints in each run' :get_function_over_species_and_timepoints,
+        'of levels of each species in all compartments at all timepoints in each run' :get_function_over_compartments_and_timepoints,
+        'of levels for all species in all compartments at each timepoint for all runs':get_function_over_runs_and_species_and_compartments,
+        'of levels for all species in each compartment at all timepoints for all runs':get_function_over_runs_and_species_and_timepoints,
+        'of levels of each species in all compartments at all timepoints for all runs':get_function_over_runs_and_compartments_and_timepoints,
+        'of levels for all species in all compartments at all timepoints of each run' :get_function_over_species_and_compartments_and_timepoints,
+        '':get_function_over_runs_,
+        '':get_function_over_species,
+        '':get_function_over_compartments,
+        '':get_function_over_timepoints,
+#        '':,
+    }
+
+    string_to_function_map = {
+#        'median':,
+        'mean':lambda array: np.mean(array, axis=3),
+        'standard deviation':lambda array: np.std(array, ddof=1, axis=3),
+#        'variance':,
+#        'sum':lambda array: np.sum(array, axis=2), #TODO 2?
+    }
+
+    '''
+chunked method used from get_functions_over_runs: 
+1. create results array of correct dimensions, handling MemoryError
+2. create 4-dimensional buffer that fits into memory
+3. repeatedly fill and do stats on buffer filling results
+4. do stats on remainder to finish filling results
+5. return results
+
+idea: seperate chunking from stats calculations
+1. for any stats function from string_to_function dict
+2. pass in results array creation function
+3. pass in do stats function
+
+problem: chunked method always chunks on timepoints dimension
+solution1: change to chunk on whatever dimension 
+solution2: don't chunk
+
+code up a couple and see if/where/how they overlap
+    '''
+
+
+    mean = lambda array: np.mean(array, axis=3)
+    std = lambda array: np.std(array, ddof=1, axis=3)
+
+    def get_mean_over_runs(self):
+        return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),)) #TODO use get_function_over_runs
+
+    def get_functions_over_runs(self, functions):
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
         array of floats and results is a list of 3-D arrays of floats with the 
         shape (species, compartments, timepoint) for each function in 
         functions. '''
         try:
-            results = [numpy.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in functions]
+            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in functions]
         except MemoryError, e:
             if parent is not None:
-                QMessageBox.warning('Out of memory','Could not allocate memory for amounts.\nTry selecting fewer species/compartments, a shorter time window or a bigger time interval multipler.')
+                QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer species/compartments, a shorter time window or a bigger time interval multipler.')
             else:
                 print e
             return (self.timepoints, [])
@@ -1517,7 +1653,7 @@ class SimulatorResults(object):
         while buffer == None:
             # allocate buffer (4-dimensional array)
             try:
-                buffer = numpy.zeros((len(self.species_indices),
+                buffer = np.zeros((len(self.species_indices),
                                       len(self.compartment_indices),
                                       self.chunkSize,
                                       len(self.run_indices)),
@@ -1571,7 +1707,7 @@ class SimulatorResults(object):
         # and the remaining timepoints           
         remainder = len(self.timepoints) % self.chunkSize
         if remainder > 0:
-            buffer = numpy.zeros((len(self.species_indices),
+            buffer = np.zeros((len(self.species_indices),
                                len(self.compartment_indices),
                                remainder,
                                len(self.run_indices)),
@@ -1588,7 +1724,7 @@ class SimulatorResults(object):
         shape (x_position, y_position, timepoint) for each species. '''
         
         selected_compartments = [compartment for compartment in self.simulation.listOfRuns[self.run_indices[0]].listOfCompartments]
-        selected_species      = [self.simulation.listOfSpecies[i] for i in self.species_indices]
+        selected_species = [self.simulation.listOfSpecies[i] for i in self.species_indices]
         
         # create 3D array [x,y,t] for amounts data, x and y dimensions should represent total space
         all_compartments = selected_compartments[0].run.listOfCompartments
@@ -1600,7 +1736,7 @@ class SimulatorResults(object):
         h5 = tables.openFile(self.filename)
         results = []
         for si, s in enumerate(selected_species):
-            surface = numpy.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self.timepoints)), self.type)
+            surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self.timepoints)), self.type)
 
             # fill surface with amounts
             for ri, r in enumerate(self.run_indices): # only one for now, see SimulationResultsDialog.updateUi()
@@ -1609,7 +1745,7 @@ class SimulatorResults(object):
                     amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.finish:self.every]
                 except MemoryError, e:
                     if parent is not None:
-                        QMessageBox.warning('Out of memory','Could not allocate memory for amounts.\nTry selecting fewer species, a shorter time window or a bigger time interval multipler.')
+                        QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer species, a shorter time window or a bigger time interval multipler.')
                     else:
                         print e
                     return (self.timepoints, [], None, None, None, None)
@@ -1675,8 +1811,6 @@ class SpatialPlotsWindow(QWidget):
         self.surfacesListWidget.show()
 
 
-from PyQt4.QtGui import QLabel
-from PyQt4.QtCore import Qt
 
 
 class SurfacesListWidget(QWidget):
@@ -1916,7 +2050,6 @@ class ControlsWidget(QWidget):
             self.play() if self.paused else self.pause()
 
 
-from PyQt4.QtGui import QSlider
 class SpatialPlotsControlsWidget(ControlsWidget):
 
     def __init__(self, surfaces):
@@ -2073,7 +2206,6 @@ def test_SimulatorResults_save_selected_data():
 #    w.save_selected_data('test.npz')    # write_npz
 
 
-from PyQt4.QtGui import qApp, QApplication # must use qApp not QApplication(sys.argv) when mixing with TraitsUI
 
 def main():
     argv = qApp.arguments()
