@@ -1474,177 +1474,175 @@ class SimulatorResults(object):
         return (self.timepoints, results)
 
     
-#import itertools
-#axes = ('runs', 'species', 'compartments', 'timepoints')
-#for i in range(2, len(axes)):
-#    for combo in itertools.combinations(axes, i):
-#        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
-
-    def get_function_over_runs_and_species(self, f): # (compartments, timepoints)
-        'of levels for all species in each compartment at each timepoint for all runs'
-        shape = (10000, 100000)
-        return np.zeros(shape)
-    def get_function_over_runs_and_compartments(self, f): # (species, timepoints)
-        'of levels of each species in all compartments at each timepoint for all runs'
-        shape = (100, 100000)
-        return np.zeros(shape)
-    def get_function_over_runs_and_timepoints(self, f): # (species, compartments)
-        'of levels of each species in each compartment at all timepoints for all runs'
-        shape = (100, 10000)
-        return np.zeros(shape)
-    def get_function_over_species_and_compartments(self, f): # (runs, timepoints)
-        'of levels for all species in all compartments at each timepoint in each run'
-        shape = (1000, 100000)
-        return np.zeros(shape)
-    def get_function_over_species_and_timepoints(self, f): # (runs, compartments)
-        'of levels for all species in each compartment at all timepoints in each run'
-        shape = (1000, 10000)
-        return np.zeros(shape)
-    def get_function_over_compartments_and_timepoints(self, f): # (runs, species)
-        'of levels of each species in all compartments at all timepoints in each run'
-        shape = (1000, 100)
-        return np.zeros(shape)
-    
-    def get_function_over_runs_and_species_and_compartments(self, f): # (timepoints)
-        'of levels for all species in all compartments at each timepoint for all runs'
-        shape = (100000,)
-        return np.zeros(shape)
-    def get_function_over_runs_and_species_and_timepoints(self, f): # (compartments)
-        'of levels for all species in each compartment at all timepoints for all runs'
-        shape = (10000,)
-        return np.zeros(shape)
-    def get_function_over_runs_and_compartments_and_timepoints(self, f): # (species)
-        'of levels of each species in all compartments at all timepoints for all runs'
-        shape = (100,)
-        return np.zeros(shape)
-    def get_function_over_species_and_compartments_and_timepoints(self, f): # (runs)
-        'of levels for all species in all compartments at all timepoints of each run'
-        shape = (1000,)
-        return np.zeros(shape)
-
-
-#import itertools
-#axes = ('runs', 'species', 'compartments', 'timepoints')
-#for i in (1,):
-#    for combo in itertools.combinations(axes, i):
-#        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
-    
-    # these methods should apply a function along the over_x axis
-    def get_function_over_runs(self): # (species, compartments, timepoints)
-        'of levels for each species in each compartment at each timepoint for all runs'
-        shape = (100, 10000, 10000)
-        return np.zeros(shape)
-    def get_function_over_species(self): # (runs, compartments, timepoints)
-        'of levels for all species in each compartment at each timepoint for each run'
-        shape = (1000, 10000, 100000)
-        return np.zeros(shape)
-    def get_function_over_compartments(self): # (runs, species, timepoints)
-        'of levels for each species in all compartments at each timepoint for each run'
-        shape = (1000, 100, 100000)
-        return np.zeros(shape)
-    def get_function_over_timepoints(self): # (runs, species, compartments)
-        'of levels for each species in each compartment at all timepoints for each run'
-        shape = (1000, 100, 10000)
-        return np.zeros(shape)
-
-#FIXME some of these are equivalent to some of the ones below, the arrays just have an extra dimension for runs where below would return a list of arrays of len(runs) 
-
-#axes = ('species', 'compartments', 'timepoints')
-#for i in range(1, len(axes)):
-#    for combo in itertools.combinations(axes, i):
-#        print '\tdef get_levels_over_' + '_and_'.join(combo) + '(self):', '#', '[(' + ', '.join([axis for axis in axes if axis not in combo]) + ')]\n\t\tpass'  
-
-    def get_levels_over_species(self): # [(compartments, timepoints)]
-        'levels for all species in each compartment at each timepoint of each run'
-        shape = (10000, 100000)
-        return [np.zeros(shape) for _ in range(1000)]
-    def get_levels_over_compartments(self): # [(species, timepoints)]
-        'levels of each species in all compartments at each timepoint of each run'
-        shape = (100, 100000)
-        return [np.zeros(shape) for _ in range(1000)]
-    def get_levels_over_timepoints(self): # [(species, compartments)]
-        'levels of each species in each compartment at all timepoints of each run'
-        shape = (100, 10000)
-        return [np.zeros(shape) for _ in range(1000)]
-    
-    def get_levels_over_species_and_compartments(self): # [(timepoints)]
-        'levels for all species in all compartments at each timepoint of each run'
-        shape = (100000,)
-        return [np.zeros(shape) for _ in range(1000)]
-    def get_levels_over_species_and_timepoints(self): # [(compartments)]
-        'levels for all species in each compartment at all timepoints of each run'
-        shape = (10000,)
-        return [np.zeros(shape) for _ in range(1000)]
-    def get_levels_over_compartments_and_timepoints(self): # [(species)]
-        'levels of each species in all compartments for all timepoints of each run'
-        shape = (100)
-        return [np.zeros(shape) for _ in range(1000)]
-
-
-    string_to_method_map = {
-        'of levels for all species in each compartment at each timepoint for all runs':get_function_over_runs_and_species,
-        'of levels of each species in all compartments at each timepoint for all runs':get_function_over_runs_and_compartments,
-        'of levels of each species in each compartment at all timepoints for all runs':get_function_over_runs_and_timepoints,
-        'of levels for all species in all compartments at each timepoint in each run' :get_function_over_species_and_compartments,
-        'of levels for all species in each compartment at all timepoints in each run' :get_function_over_species_and_timepoints,
-        'of levels of each species in all compartments at all timepoints in each run' :get_function_over_compartments_and_timepoints,
-        'of levels for all species in all compartments at each timepoint for all runs':get_function_over_runs_and_species_and_compartments,
-        'of levels for all species in each compartment at all timepoints for all runs':get_function_over_runs_and_species_and_timepoints,
-        'of levels of each species in all compartments at all timepoints for all runs':get_function_over_runs_and_compartments_and_timepoints,
-        'of levels for all species in all compartments at all timepoints of each run' :get_function_over_species_and_compartments_and_timepoints,
-        '':get_function_over_runs,
-        '':get_function_over_species,
-        '':get_function_over_compartments,
-        '':get_function_over_timepoints,
-#        '':,
-    }
-
-    levels_axes = ('runs', 'species', 'compartments', 'timepoints') 
-    def get_results_for_functions_over_axes(self, functions, axes):
-        ''' 
-        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.mean, np.sum, np.mean), ('species', 'timepoints', 'runs'))
-        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.std, np.mean, np.product), ('compartments', 'runs', 'species'))
-        '''
-        results = levels # start with 4-dimensional (runs, species, compartments, timepoints) array
-        ax = list(levels_axes) # make a mutable copy of levels_axes (runs, species, compartments, timepoints)
-        for fi, f in enumerate(functions):
-            axis = axes[fi]
-            results = f(results, axis=ax.index(axis))
-            ax.remove(axis)
-    #        print ax
-        return results
-
-    string_to_function_map = {
-#        'median':,
-        'mean':lambda array: np.mean(array, axis=3),
-        'standard deviation':lambda array: np.std(array, ddof=1, axis=3),
-#        'variance':,
-#        'sum':lambda array: np.sum(array, axis=2), #TODO 2?
-    }
-
-    '''
-chunked method used from get_functions_over_runs: 
-1. create results array of correct dimensions, handling MemoryError
-2. create 4-dimensional buffer that fits into memory
-3. repeatedly fill and do stats on buffer filling results
-4. do stats on remainder to finish filling results
-5. return results
-
-idea: seperate chunking from stats calculations
-1. for any stats function from string_to_function dict
-2. pass in results array creation function
-3. pass in do stats function
-
-problem: chunked method always chunks on timepoints dimension
-solution1: change to chunk on whatever dimension 
-solution2: don't chunk
-
-code up a couple and see if/where/how they overlap
-    '''
-
-
-    mean = lambda array: np.mean(array, axis=3)
-    std = lambda array: np.std(array, ddof=1, axis=3)
+##import itertools
+##axes = ('runs', 'species', 'compartments', 'timepoints')
+##for i in range(2, len(axes)):
+##    for combo in itertools.combinations(axes, i):
+##        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
+#
+#    def get_function_over_runs_and_species(self, f): # (compartments, timepoints)
+#        'of levels for all species in each compartment at each timepoint for all runs'
+#        shape = (10000, 100000)
+#        return np.zeros(shape)
+#    def get_function_over_runs_and_compartments(self, f): # (species, timepoints)
+#        'of levels of each species in all compartments at each timepoint for all runs'
+#        shape = (100, 100000)
+#        return np.zeros(shape)
+#    def get_function_over_runs_and_timepoints(self, f): # (species, compartments)
+#        'of levels of each species in each compartment at all timepoints for all runs'
+#        shape = (100, 10000)
+#        return np.zeros(shape)
+#    def get_function_over_species_and_compartments(self, f): # (runs, timepoints)
+#        'of levels for all species in all compartments at each timepoint in each run'
+#        shape = (1000, 100000)
+#        return np.zeros(shape)
+#    def get_function_over_species_and_timepoints(self, f): # (runs, compartments)
+#        'of levels for all species in each compartment at all timepoints in each run'
+#        shape = (1000, 10000)
+#        return np.zeros(shape)
+#    def get_function_over_compartments_and_timepoints(self, f): # (runs, species)
+#        'of levels of each species in all compartments at all timepoints in each run'
+#        shape = (1000, 100)
+#        return np.zeros(shape)
+#    
+#    def get_function_over_runs_and_species_and_compartments(self, f): # (timepoints)
+#        'of levels for all species in all compartments at each timepoint for all runs'
+#        shape = (100000,)
+#        return np.zeros(shape)
+#    def get_function_over_runs_and_species_and_timepoints(self, f): # (compartments)
+#        'of levels for all species in each compartment at all timepoints for all runs'
+#        shape = (10000,)
+#        return np.zeros(shape)
+#    def get_function_over_runs_and_compartments_and_timepoints(self, f): # (species)
+#        'of levels of each species in all compartments at all timepoints for all runs'
+#        shape = (100,)
+#        return np.zeros(shape)
+#    def get_function_over_species_and_compartments_and_timepoints(self, f): # (runs)
+#        'of levels for all species in all compartments at all timepoints of each run'
+#        shape = (1000,)
+#        return np.zeros(shape)
+#
+#
+##import itertools
+##axes = ('runs', 'species', 'compartments', 'timepoints')
+##for i in (1,):
+##    for combo in itertools.combinations(axes, i):
+##        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
+#    
+#    # these methods should apply a function along the over_x axis
+#    def get_function_over_runs(self): # (species, compartments, timepoints)
+#        'of levels for each species in each compartment at each timepoint for all runs'
+#        shape = (100, 10000, 10000)
+#        return np.zeros(shape)
+#    def get_function_over_species(self): # (runs, compartments, timepoints)
+#        'of levels for all species in each compartment at each timepoint for each run'
+#        shape = (1000, 10000, 100000)
+#        return np.zeros(shape)
+#    def get_function_over_compartments(self): # (runs, species, timepoints)
+#        'of levels for each species in all compartments at each timepoint for each run'
+#        shape = (1000, 100, 100000)
+#        return np.zeros(shape)
+#    def get_function_over_timepoints(self): # (runs, species, compartments)
+#        'of levels for each species in each compartment at all timepoints for each run'
+#        shape = (1000, 100, 10000)
+#        return np.zeros(shape)
+#
+##FIXME some of these are equivalent to some of the ones below, the arrays just have an extra dimension for runs where below would return a list of arrays of len(runs) 
+#
+##axes = ('species', 'compartments', 'timepoints')
+##for i in range(1, len(axes)):
+##    for combo in itertools.combinations(axes, i):
+##        print '\tdef get_levels_over_' + '_and_'.join(combo) + '(self):', '#', '[(' + ', '.join([axis for axis in axes if axis not in combo]) + ')]\n\t\tpass'  
+#
+#    def get_levels_over_species(self): # [(compartments, timepoints)]
+#        'levels for all species in each compartment at each timepoint of each run'
+#        shape = (10000, 100000)
+#        return [np.zeros(shape) for _ in range(1000)]
+#    def get_levels_over_compartments(self): # [(species, timepoints)]
+#        'levels of each species in all compartments at each timepoint of each run'
+#        shape = (100, 100000)
+#        return [np.zeros(shape) for _ in range(1000)]
+#    def get_levels_over_timepoints(self): # [(species, compartments)]
+#        'levels of each species in each compartment at all timepoints of each run'
+#        shape = (100, 10000)
+#        return [np.zeros(shape) for _ in range(1000)]
+#    
+#    def get_levels_over_species_and_compartments(self): # [(timepoints)]
+#        'levels for all species in all compartments at each timepoint of each run'
+#        shape = (100000,)
+#        return [np.zeros(shape) for _ in range(1000)]
+#    def get_levels_over_species_and_timepoints(self): # [(compartments)]
+#        'levels for all species in each compartment at all timepoints of each run'
+#        shape = (10000,)
+#        return [np.zeros(shape) for _ in range(1000)]
+#    def get_levels_over_compartments_and_timepoints(self): # [(species)]
+#        'levels of each species in all compartments for all timepoints of each run'
+#        shape = (100)
+#        return [np.zeros(shape) for _ in range(1000)]
+#
+#
+#    string_to_method_map = {
+#        'of levels for all species in each compartment at each timepoint for all runs':get_function_over_runs_and_species,
+#        'of levels of each species in all compartments at each timepoint for all runs':get_function_over_runs_and_compartments,
+#        'of levels of each species in each compartment at all timepoints for all runs':get_function_over_runs_and_timepoints,
+#        'of levels for all species in all compartments at each timepoint in each run' :get_function_over_species_and_compartments,
+#        'of levels for all species in each compartment at all timepoints in each run' :get_function_over_species_and_timepoints,
+#        'of levels of each species in all compartments at all timepoints in each run' :get_function_over_compartments_and_timepoints,
+#        'of levels for all species in all compartments at each timepoint for all runs':get_function_over_runs_and_species_and_compartments,
+#        'of levels for all species in each compartment at all timepoints for all runs':get_function_over_runs_and_species_and_timepoints,
+#        'of levels of each species in all compartments at all timepoints for all runs':get_function_over_runs_and_compartments_and_timepoints,
+#        'of levels for all species in all compartments at all timepoints of each run' :get_function_over_species_and_compartments_and_timepoints,
+#        '':get_function_over_runs,
+#        '':get_function_over_species,
+#        '':get_function_over_compartments,
+#        '':get_function_over_timepoints,
+##        '':,
+#    }
+#
+#    def get_results_for_functions_over_axes(self, functions, axes):
+#        ''' 
+#        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.mean, np.sum, np.mean), ('species', 'timepoints', 'runs'))
+#        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.std, np.mean, np.product), ('compartments', 'runs', 'species'))
+#        '''
+#        results = levels # start with 4-dimensional (runs, species, compartments, timepoints) array
+#        results_axes = ['runs', 'species', 'compartments', 'timepoints'] 
+#        for fi, f in enumerate(functions):
+#            axis = axes[fi]
+#            results = f(results, axis=results_axes.index(axis))
+#            results_axes.remove(axis)
+#        return results
+#
+#    string_to_function_map = {
+##        'median':,
+#        'mean':lambda array: np.mean(array, axis=3),
+#        'standard deviation':lambda array: np.std(array, ddof=1, axis=3),
+##        'variance':,
+##        'sum':lambda array: np.sum(array, axis=2), #TODO 2?
+#    }
+#
+#    '''
+#chunked method used from get_functions_over_runs: 
+#1. create results array of correct dimensions, handling MemoryError
+#2. create 4-dimensional buffer that fits into memory
+#3. repeatedly fill and do stats on buffer filling results
+#4. do stats on remainder to finish filling results
+#5. return results
+#
+#idea: seperate chunking from stats calculations
+#1. for any stats function from string_to_function dict
+#2. pass in results array creation function
+#3. pass in do stats function
+#
+#problem: chunked method always chunks on timepoints dimension
+#solution1: change to chunk on whatever dimension 
+#solution2: don't chunk
+#
+#code up a couple and see if/where/how they overlap
+#    '''
+#
+#
+#    mean = lambda array: np.mean(array, axis=3)
+#    std = lambda array: np.std(array, ddof=1, axis=3)
 
     def get_mean_over_runs(self):
         return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),)) #TODO use get_function_over_runs
