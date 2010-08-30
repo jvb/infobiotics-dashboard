@@ -452,7 +452,7 @@ class SimulationResultsDialog(QWidget):
         self.ui.fromSpinBox.setEnabled(False)
         self.ui.everySpinBox.setEnabled(False)
         self.ui.unitsComboBox.setEnabled(False)
-        self.ui.averageSelectedRunsCheckBox.setEnabled(False)
+        self.ui.calculate_check_box.setEnabled(False)
         self.ui.save_data_button.setEnabled(False)
         self.ui.plotButton.setEnabled(False)
         self.ui.load_button.setFocus(Qt.OtherFocusReason)
@@ -496,7 +496,7 @@ class SimulationResultsDialog(QWidget):
         self.ui.everySpinBox.setEnabled(True)
         self.ui.unitsComboBox.setEnabled(True)
 
-        self.ui.averageSelectedRunsCheckBox.setEnabled(True)#?False)
+        self.ui.calculate_check_box.setEnabled(True)#?False)
 
         self.ui.save_data_button.setEnabled(True)
         self.ui.plotButton.setEnabled(True)
@@ -602,7 +602,7 @@ class SimulationResultsDialog(QWidget):
             else:
                 self.ui.surfacePlotButton.setEnabled(False)
             if num_selected_runs > 1:
-                self.ui.averageSelectedRunsCheckBox.setEnabled(True)
+                self.ui.calculate_check_box.setEnabled(True)
 
 
     # options slots
@@ -653,7 +653,7 @@ class SimulationResultsDialog(QWidget):
         to = self.ui.toSpinBox.value()
         every = self.every
         units = unicode(self.ui.unitsComboBox.currentText())
-        averaging = self.ui.averageSelectedRunsCheckBox.isChecked()
+        averaging = self.ui.calculate_check_box.isChecked()
         return from_, to, every, units, averaging
 
     def selected_items_results(self, type=float):
@@ -2189,7 +2189,7 @@ def test():
             widget.item(0).setSelected(True)
             widget.item(widget.count() - 1).setSelected(True)
 
-        w.ui.averageSelectedRunsCheckBox.setChecked(False)
+        w.ui.calculate_check_box.setChecked(False)
 
 ###        w.ui.surfacePlotButton.click()
 
@@ -2213,7 +2213,7 @@ def test_SimulatorResults_save_selected_data():
     for widget in (w.ui.speciesListWidget, w.ui.compartmentsListWidget, w.ui.runsListWidget):
         widget.item(0).setSelected(True)
         widget.item(widget.count() - 1).setSelected(True)
-    w.ui.averageSelectedRunsCheckBox.setChecked(False)
+    w.ui.calculate_check_box.setChecked(False)
 #    w.save_selected_data('test.csv')    # write_csv
     w.save_selected_data('test.xls')    # write_xls
 #    w.save_selected_data('test.npz')    # write_npz
