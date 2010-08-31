@@ -5,6 +5,10 @@ Things to do, bugs to fix, feature requests, etc.
 Unsorted
 --------
 
+histograms
+
+volumes
+
 get_surfaces to multiple runs
 
 plots preview dialog hide invariants check box does nothing and is permanently disabled

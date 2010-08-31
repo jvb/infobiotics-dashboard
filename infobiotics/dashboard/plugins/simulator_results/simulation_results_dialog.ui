@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>864</width>
+    <width>900</width>
     <height>562</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0" colspan="6">
-    <widget class="QLineEdit" name="filenameLineEdit">
+    <widget class="QLineEdit" name="file_name_line_edit">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -59,7 +59,7 @@
     </widget>
    </item>
    <item row="2" column="0" colspan="7">
-    <widget class="QGroupBox" name="timepoints_group_box">
+    <widget class="QGroupBox" name="_timepoints_group_box">
      <property name="title">
       <string>Timepoints</string>
      </property>
@@ -80,7 +80,7 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="QLabel" name="from_label">
+       <widget class="QLabel" name="_from_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -112,7 +112,7 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="to_label">
+       <widget class="QLabel" name="_to_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -144,7 +144,7 @@
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QLabel" name="every_label">
+       <widget class="QLabel" name="_every_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -176,7 +176,7 @@
        </widget>
       </item>
       <item row="0" column="6">
-       <widget class="QLabel" name="multiplied_by_label">
+       <widget class="QLabel" name="_multiplied_by_label">
         <property name="toolTip">
          <string>multiplied by</string>
         </property>
@@ -202,7 +202,7 @@
        </widget>
       </item>
       <item row="0" column="8">
-       <spacer name="timepoints_spacer">
+       <spacer name="_timepoints_spacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -248,9 +248,9 @@
        <number>0</number>
       </property>
       <item row="0" column="1">
-       <widget class="QComboBox" name="runs_calculation_combo_box_2">
+       <widget class="QComboBox" name="__runs_calculation_combo_box">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <item>
          <property name="text">
@@ -282,10 +282,20 @@
           <string>sum</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>minimum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>maximum</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QComboBox" name="species_calculation_combo_box">
+       <widget class="QComboBox" name="__species_calculation_combo_box">
         <item>
          <property name="text">
           <string/>
@@ -314,12 +324,22 @@
         <item>
          <property name="text">
           <string>sum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>minimum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>maximum</string>
          </property>
         </item>
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QComboBox" name="compartments_calculation_combo_box">
+       <widget class="QComboBox" name="__compartments_calculation_combo_box">
         <item>
          <property name="text">
           <string/>
@@ -348,12 +368,22 @@
         <item>
          <property name="text">
           <string>sum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>minimum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>maximum</string>
          </property>
         </item>
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QComboBox" name="timepoints_calculation_combo_box_2">
+       <widget class="QComboBox" name="__timepoints_calculation_combo_box">
         <item>
          <property name="text">
           <string/>
@@ -384,12 +414,22 @@
           <string>sum</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>minimum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>maximum</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLabel" name="runs_calculation_label">
+       <widget class="QLabel" name="_runs_calculation_label">
         <property name="text">
-         <string>&lt;I&gt;of selected&lt;/I&gt; runs</string>
+         <string>runs</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -397,7 +437,7 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLabel" name="species_calculation_label">
+       <widget class="QLabel" name="_species_calculation_label">
         <property name="text">
          <string>species</string>
         </property>
@@ -407,7 +447,7 @@
        </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QLabel" name="compartments_calculation_label">
+       <widget class="QLabel" name="_compartments_calculation_label">
         <property name="text">
          <string>compartments</string>
         </property>
@@ -417,7 +457,7 @@
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QLabel" name="timepoints_calculation_label">
+       <widget class="QLabel" name="_timepoints_calculation_label">
         <property name="text">
          <string>timepoints</string>
         </property>
@@ -427,7 +467,7 @@
        </widget>
       </item>
       <item row="0" column="5" rowspan="2">
-       <spacer name="calculate_spacer">
+       <spacer name="_calculate_spacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -443,7 +483,7 @@
     </widget>
    </item>
    <item row="5" column="0">
-    <spacer name="actions_spacer">
+    <spacer name="_actions_spacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -465,6 +505,10 @@
      </property>
      <property name="text">
       <string>Histogram</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/hist.png</normaloff>:/hist.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -561,7 +605,7 @@ NumPy (.npz)</string>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QGroupBox" name="data_group_box">
+    <widget class="QGroupBox" name="_data_group_box">
      <property name="title">
       <string>Data</string>
      </property>
@@ -582,7 +626,7 @@ NumPy (.npz)</string>
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="QComboBox" name="data_combo_box">
+       <widget class="QComboBox" name="__data_combo_box">
         <item>
          <property name="text">
           <string>Amounts</string>
@@ -596,23 +640,20 @@ NumPy (.npz)</string>
        </widget>
       </item>
       <item row="1" column="0">
-       <spacer name="data_spacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QLabel" name="_of_selected_data_label">
+        <property name="text">
+         <string>&lt;I&gt;of selected&lt;/I&gt;</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
-       </spacer>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
    <item row="1" column="0" colspan="7">
-    <widget class="QSplitter" name="runs_species_compartments_splitter">
+    <widget class="QSplitter" name="_runs_species_compartments_splitter">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -634,7 +675,7 @@ NumPy (.npz)</string>
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QGroupBox" name="runs_group_box">
+     <widget class="QGroupBox" name="_runs_group_box">
       <property name="title">
        <string>Runs</string>
       </property>
@@ -725,7 +766,7 @@ NumPy (.npz)</string>
         </widget>
        </item>
        <item row="2" column="2">
-        <spacer name="random_runs_spacer">
+        <spacer name="_random_runs_spacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -755,7 +796,7 @@ NumPy (.npz)</string>
        </item>
       </layout>
      </widget>
-     <widget class="QGroupBox" name="speciesGroupBox">
+     <widget class="QGroupBox" name="_species_group_box">
       <property name="title">
        <string>Species</string>
       </property>
@@ -829,7 +870,7 @@ NumPy (.npz)</string>
        </item>
       </layout>
      </widget>
-     <widget class="QGroupBox" name="compartments_group_box">
+     <widget class="QGroupBox" name="_compartments_group_box">
       <property name="title">
        <string>Compartments</string>
       </property>
@@ -921,7 +962,7 @@ NumPy (.npz)</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>filenameLineEdit</tabstop>
+  <tabstop>file_name_line_edit</tabstop>
   <tabstop>select_all_runs_widget</tabstop>
   <tabstop>random_runs_spinbox</tabstop>
   <tabstop>runs_list_widget</tabstop>

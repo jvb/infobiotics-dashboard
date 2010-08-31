@@ -10,15 +10,29 @@ class McssExperimentAction(Action):
     tooltip = 'Multi-compartmental stochastic simulation of a model.'
     
     def perform(self, event=None):
-#        obj=McssExperimentEditor...
-        obj=McssDashboardExperiment(application=self.window.workbench.application)
+        obj = McssDashboardExperiment(application=self.window.workbench.application)
 #        self.window.workbench.edit(
 #            obj=obj,
-#            kind=ParamsExperimentEditor,
+#            kind=ParamsExperimentEditor, #TODO
 #            use_existing=False
 #        )
         obj.edit()
 
+from simulator_results import SimulationResultsDialog #TODO
+from editor import SimulatorResultsEditor
+
+class SimulatorResultsAction(Action):
+    name = 'mcss'
+    tooltip = 'Visualise mcss simulations.' #TODO
+    
+    def perform(self, event=None):
+        obj = SimulationResultsDialog()
+        if not obj.loaded: return # user cancelled load
+        self.window.workbench.edit(
+            obj=obj,
+            kind=SimulatorResultsEditor,
+            use_existing=False
+        )
 
 #class LoadMcssParametersAction(PyFaceAction): #TODO
 #    ''' ... 

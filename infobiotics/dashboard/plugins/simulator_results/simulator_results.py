@@ -60,18 +60,19 @@ def load_h5(h5_file):
 
     simulation = Simulation(h5.root._v_attrs) # create simulation objects
 
-    #TODO rule objects
-    #TODO ruleset objects
-    #TODO propensities
-    #TODO reactions
+    # rule objects in Simulation._rules_list
+    # ruleset objects Simulation._ruleset_list
+    # propensities in Simulation._propensities_list
+    # reactions in Simulation._reactions_list
+    
     #TODO volumes
 
-    #TODO if simulation.log_type == "levels":
+    #TODO if simulation.log_type == "levels": pass; else: pass
 
     # when reading from disk to memory taking the whole slice of each column is very fast
     species_indices = h5.root.species_information.cols.species_index[:]
     species_names = h5.root.species_information.cols.species_name[:]
-    simulation.listOfSpecies = [
+    simulation._species_list = [
         Species(
             species_indices[i],
             species_names[i],
@@ -79,10 +80,8 @@ def load_h5(h5_file):
         ) for i in range(simulation.number_of_species)
     ]
 
-    # create run objects
+    # create run objects and compartment objects within runs
     for i in range(1, int(simulation.number_of_runs) + 1):
-#    for i in range(1, simulation.number_of_runs + 1):
-
         try:
             node = h5.root._f_getChild('run%s' % i)
             run = Run(node._v_attrs, i, simulation)
@@ -93,34 +92,38 @@ def load_h5(h5_file):
             h5.root._v_attrs.number_of_runs = i - 1
             simulation.number_of_runs = h5.root._v_attrs.number_of_runs
             break
-            
-        cols = node.compartment_information.cols # table columns accessor
-        compartment_indices = cols.compartment_index[:]
-        compartment_ids = cols.compartment_id[:]
-        compartment_names = cols.compartment_name[:]
-        compartment_x_positions = cols.compartment_x_position[:]
-        compartment_y_positions = cols.compartment_y_position[:]
-#        compartment_z_positions = cols.compartment_z_position[:]
-        compartment_template_indices = cols.compartment_template_index[:]
-#        compartment_creation_time = cols.compartment_creation_time[:]
-#        compartment_destruction_time = cols.compartment_destruction_time[:]
 
-        run.listOfCompartments = [
-            Compartment(
-                compartment_indices[i],
-                compartment_ids[i],
-                compartment_names[i],
-                compartment_x_positions[i],
-                compartment_y_positions[i],
-#                compartment_z_positions[i],
-                compartment_template_indices[i],
-#                compartment_creation_time[i],
-#                compartment_destruction_time[i],
-                run,
-                run.simulation,
-            ) for i in range(0, len(compartment_indices))
-        ]
-        simulation.listOfRuns.append(run)
+        # just create compartments once on the first run #TODO maybe change this when dealing with volumes 
+        if i == 1:
+            cols = node.compartment_information.cols # table columns accessor
+            compartment_indices = cols.compartment_index[:]
+            compartment_ids = cols.compartment_id[:]
+            compartment_names = cols.compartment_name[:]
+            compartment_x_positions = cols.compartment_x_position[:]
+            compartment_y_positions = cols.compartment_y_position[:]
+#            compartment_z_positions = cols.compartment_z_position[:] # not written
+            compartment_template_indices = cols.compartment_template_index[:]
+#            compartment_creation_time = cols.compartment_creation_time[:] # not used
+#            compartment_destruction_time = cols.compartment_destruction_time[:] # not used
+
+            compartments_list = [ # doesn't need to be global
+                Compartment(
+                    compartment_indices[i],
+                    compartment_ids[i],
+                    compartment_names[i],
+                    compartment_x_positions[i],
+                    compartment_y_positions[i],
+#                    compartment_z_positions[i], # not written
+                    compartment_template_indices[i],
+#                    compartment_creation_time[i], # not used
+#                    compartment_destruction_time[i], # not used
+                    run,
+                    run._simulation,
+                ) for i in range(0, len(compartment_indices))
+            ]
+        run._compartments_list = compartments_list
+        
+        simulation._runs_list.append(run)
 
     h5.close()
     return simulation
@@ -130,12 +133,15 @@ class Simulation(object):
     """An mcss simulation dataset as a Python object."""
 
     def __init__(self, attributes):
-        self.propensities = []
-        self.reactions = []
-        self.rules = []
-        self.rulesets = []
-        self.listOfRuns = []
-        self.listOfSpecies = []
+#        self._propensities_list = []
+#        self._reactions_list = []
+#        self._rules_list = []
+#        self._rulesets_list = []
+        self._runs_list = []
+        self._species_list = []
+        
+#        for key, value in attributes.iteritems():
+#            setattr(self, key, value)
         self.data_file = attributes.data_file
         self.duplicate_initial_amounts = attributes.duplicate_initial_amounts
         self.lattice_x_dimension = attributes.lattice_x_dimension
@@ -168,9 +174,9 @@ class Run(object):
     """An mcss run dataset as a Python object."""
 
     def __init__(self, attributes, run_number, simulation):
-        self.run_number = run_number
-        self.simulation = simulation
-        self.listOfCompartments = []
+        self._run_number = run_number
+        self._simulation = simulation
+        self._compartments_list = []
         self.main_loop_end_time = attributes.main_loop_end_time
         self.main_loop_start_time = attributes.main_loop_start_time
         self.number_of_timepoints = attributes.number_of_timepoints
@@ -184,12 +190,12 @@ class Run(object):
 
 
 class Species(object):
-    """An mcss listOfSpecies dataset as a Python object."""
+    """An mcss _species_list dataset as a Python object."""
 
     def __init__(self, index, name, simulation):
         self.index = index
         self.name = name
-        self.simulation = simulation
+        self._simulation = simulation
 
 
 class Compartment(object):
@@ -199,7 +205,7 @@ class Compartment(object):
     def __init__(self, index, id, name, x_position, y_position, template_index, run, simulation):
 #        z_position, 
         self.run = run
-        self.simulation = simulation
+        self._simulation = simulation
         self.index = index
         self.id = id
         self.name = name
@@ -221,24 +227,35 @@ class SimulationListWidgetItem(QListWidgetItem):
 
     def __init__(self, data, parent=None):
         QListWidgetItem.__init__(self, parent)
+        
         self.data = data
+        
         if isinstance(data, Species):
             text = data.name
             self.amounts_index = data.index
+        
         elif isinstance(data, Compartment):
             text = data.compartment_name_and_xy_coords() #TODO fudge
             self.amounts_index = data.index
+        
         elif isinstance(data, Run):
-            text = "%s" % (data.run_number)
-            self.amounts_index = data.run_number - 1
-            self.setToolTip(unicode(data.number_of_timepoints))
-#            print self.toolTip()
+            text = "%s" % (data._run_number)
+            self.amounts_index = data._run_number - 1
+            # recolour item if run is truncated #TODO useful?
+#            if data._run_number == data._simulation_number_of_runs: # last run only
+            if data.simulated_time < data._simulation.max_time:
+                brush = self.foreground() 
+                brush.setColor(Qt.red)
+                self.setForeground(brush)
+                self.setToolTip('Run truncated at %s' % data.simulated_time) 
+        
         elif isinstance(data, Simulation):
             text = "%s %s" % (data.model_input_file, data.simulation_start_time)
             self.amounts_index = None
+        
         else:
-            text = None
             raise TypeError("type of data is not recognised")
+        
         QListWidgetItem.__init__(self, text, parent)
 
 
@@ -256,70 +273,64 @@ class SimulationResultsDialog(QWidget):
         self.ui = Ui_SimulationResultsDialog()
         self.ui.setupUi(self)
 
-#        self.ui.filenameLineEdit.setReadOnly(True) # done in simulation_results_dialog.ui
-
         self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
 
-        self.selectedRuns = []
-        self.selectedSpecies = []
-        self.selectedCompartments = []
-        self.connect(self.ui.selectAllRunsCheckBox, SIGNAL("clicked(bool)"), self.selectAllRunsClicked)
-        self.connect(self.ui.selectAllSpeciesCheckBox, SIGNAL("clicked(bool)"), self.selectAllSpeciesClicked)
-        self.connect(self.ui.selectAllCompartmentsCheckBox, SIGNAL("clicked(bool)"), self.selectAllCompartmentsClicked)
+        self.selected_runs = []
+        self.selected_species = []
+        self.selected_compartments = []
+        self.connect(self.ui.select_all_runs_check_box, SIGNAL("clicked(bool)"), self.select_all_runs_check_box_clicked)
+        self.connect(self.ui.select_all_species_check_box, SIGNAL("clicked(bool)"), self.select_all_species_check_box_clicked)
+        self.connect(self.ui.select_all_compartments_check_box, SIGNAL("clicked(bool)"), self.select_all_compartments_check_box_clicked)
 
-        self.connect(self.ui.runsListWidget, SIGNAL("itemSelectionChanged()"),
+        self.connect(self.ui.runs_list_widget, SIGNAL("itemSelectionChanged()"),
             lambda: (
-                self.ui.selectAllRunsCheckBox.setChecked(False)
-                if
-                    len(self.ui.runsListWidget.selectedItems()) != self.ui.runsListWidget.count()
-                else
-                    self.ui.selectAllRunsCheckBox.setChecked(True)
+                self.ui.select_all_runs_check_box.setChecked(False)
+                    if len(self.ui.runs_list_widget.selectedItems()) != self.ui.runs_list_widget.count()
+                        else self.ui.select_all_runs_check_box.setChecked(True)
             )
         )
-        self.connect(self.ui.speciesListWidget, SIGNAL("itemSelectionChanged()"),
+        self.connect(self.ui.species_list_widget, SIGNAL("itemSelectionChanged()"),
             lambda: (
-                self.ui.selectAllSpeciesCheckBox.setChecked(False)
-                if len(self.ui.speciesListWidget.selectedItems()) != self.ui.speciesListWidget.count()
-                else self.ui.selectAllSpeciesCheckBox.setChecked(True)
+                self.ui.select_all_species_check_box.setChecked(False)
+                    if len(self.ui.species_list_widget.selectedItems()) != self.ui.species_list_widget.count()
+                        else self.ui.select_all_species_check_box.setChecked(True)
             )
         )
-        self.connect(self.ui.compartmentsListWidget, SIGNAL("itemSelectionChanged()"),
+        self.connect(self.ui.compartments_list_widget, SIGNAL("itemSelectionChanged()"),
             lambda: (
-                self.ui.selectAllCompartmentsCheckBox.setChecked(False)
-                if len(self.ui.compartmentsListWidget.selectedItems()) != self.ui.compartmentsListWidget.count()
-                else self.ui.selectAllCompartmentsCheckBox.setChecked(True)
+                self.ui.select_all_compartments_check_box.setChecked(False)
+                    if len(self.ui.compartments_list_widget.selectedItems()) != self.ui.compartments_list_widget.count()
+                        else self.ui.select_all_compartments_check_box.setChecked(True)
             )
         )
-        self.connect(self.ui.runsListWidget, SIGNAL("itemSelectionChanged()"), self.updateUi)
-        self.connect(self.ui.speciesListWidget, SIGNAL("itemSelectionChanged()"), self.updateUi)
-        self.connect(self.ui.compartmentsListWidget, SIGNAL("itemSelectionChanged()"), self.updateUi)
+        self.connect(self.ui.runs_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
+        self.connect(self.ui.species_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
+        self.connect(self.ui.compartments_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
 
-        self.connect(self.ui.randomRunsSpinBox, SIGNAL("valueChanged(int)"), self.selectRandomRuns)
-        self.connect(self.ui.randomRunsSpinBox, SIGNAL("valueChanged(int)"),
+        self.connect(self.ui.random_runs_spin_box, SIGNAL("valueChanged(int)"), self.select_random_runs)
+        self.connect(self.ui.random_runs_spin_box, SIGNAL("valueChanged(int)"),
             lambda: (
-                self.ui.selectAllRunsCheckBox.setChecked(False)
-                if self.ui.randomRunsSpinBox.value() < self.ui.randomRunsSpinBox.maximum()
-                else self.ui.selectAllRunsCheckBox.setChecked(True)
+                self.ui.select_all_runs_check_box.setChecked(False)
+                    if self.ui.random_runs_spin_box.value() < self.ui.random_runs_spin_box.maximum()
+                        else self.ui.select_all_runs_check_box.setChecked(True)
             )
         )
 
         self.filter_species_locked = False
         self.filter_compartments_locked = False
-        self.connect(self.ui.speciesListWidget_filter, SIGNAL('textEdited(QString)'), self.filter_species)
-        self.connect(self.ui.compartmentsListWidget_filter, SIGNAL('textEdited(QString)'), self.filter_compartments)
+        self.connect(self.ui.species_list_widget_filter, SIGNAL('textEdited(QString)'), self.filter_species)
+        self.connect(self.ui.compartments_list_widget_filter, SIGNAL('textEdited(QString)'), self.filter_compartments)
 
         # make sure from is always less than to and that to is always more than from
-        self.connect(self.ui.fromSpinBox, SIGNAL("valueChanged(double)"), self.ui.toSpinBox.set_minimum)
-        self.connect(self.ui.toSpinBox, SIGNAL("valueChanged(double)"), self.ui.fromSpinBox.set_maximum)
+        self.connect(self.ui.from_spin_box, SIGNAL("valueChanged(double)"), self.ui.to_spin_box.set_minimum)
+        self.connect(self.ui.to_spin_box, SIGNAL("valueChanged(double)"), self.ui.from_spin_box.set_maximum)
         
-        self.connect(self.ui.everySpinBox, SIGNAL("valueChanged(int)"), self.setEvery)
+        self.connect(self.ui.every_spin_box, SIGNAL("valueChanged(int)"), self.setEvery)
         
-        self.connect(self.ui.unitsComboBox, SIGNAL("currentIndexChanged(QString)"), self.setUnits)
-        self.setUnits("seconds")
-
-        self.connect(self.ui.save_data_button, SIGNAL("clicked()"), self.save_selected_data)
-        self.connect(self.ui.plotButton, SIGNAL("clicked()"), self.plot)
-        self.connect(self.ui.surfacePlotButton, SIGNAL("clicked()"), self.surfacePlot)
+        self.connect(self.ui.histogram_button, SIGNAL("clicked()"), self.histogram)
+        self.connect(self.ui.export_data_as_button, SIGNAL("clicked()"), self.export_data_as)
+        self.connect(self.ui.plot_timeseries_button, SIGNAL("clicked()"), self.plot)
+        self.connect(self.ui.visualise_population_button, SIGNAL("clicked()"), self.surfacePlot)
 
         self.load_settings()
 
@@ -328,7 +339,7 @@ class SimulationResultsDialog(QWidget):
         if not self.loaded:
             self.close()
 
-        self.updateUi()
+        self.update_ui()
 
     def closeEvent(self, event):
 #        shared.settings.save_window_size_and_position(self, self.settings_group)
@@ -359,7 +370,8 @@ class SimulationResultsDialog(QWidget):
                 if self.loaded:
                     return
                 else:
-                    return self.loadFailed()
+                    self.loadFailed()
+                    return False
 
         self.current_directory = QFileInfo(filename).absolutePath()
         filename = unicode(filename) # must convert QString into unicode
@@ -375,192 +387,213 @@ class SimulationResultsDialog(QWidget):
             if self.loaded:
                 return # continue with previously loaded file
             else:
-                return self.loadFailed()
+                self.loadFailed()
+                return False
 
         # set spinbox defaults
         from_ = int(0)
         to = int(simulation.max_time)
-        self.ui.fromSpinBox.setRange(from_, to)
-        self.ui.toSpinBox.setRange(from_, to)
-        self.ui.fromSpinBox.setValue(from_)
-        self.ui.toSpinBox.setValue(to)
+        self.ui.from_spin_box.setRange(from_, to)
+        self.ui.to_spin_box.setRange(from_, to)
+        self.ui.from_spin_box.setValue(from_)
+        self.ui.to_spin_box.setValue(to)
 
-        number_of_timepoints = simulation.listOfRuns[0].number_of_timepoints
-        self.ui.everySpinBox.setRange(1, number_of_timepoints)
-        self.ui.everySpinBox.setValue(self.ui.everySpinBox.minimum())
+        number_of_timepoints = simulation._runs_list[0].number_of_timepoints
+        self.ui.every_spin_box.setRange(1, number_of_timepoints)
+        self.ui.every_spin_box.setValue(self.ui.every_spin_box.minimum())
 
         interval = simulation.log_interval
-        self.ui.intervalLabel.setText(str(interval))
-        self.ui.fromSpinBox.set_interval(interval)
-        self.ui.toSpinBox.set_interval(interval)
+        self.ui.log_interval_label.setText(str(interval))
+        self.ui.from_spin_box.set_interval(interval)
+        self.ui.to_spin_box.set_interval(interval)
 
-        self.ui.runsListWidget.clear()
-        self.all_runs = []
-        for i in simulation.listOfRuns:
+        self.ui.runs_list_widget.clear()
+#        all_runs_list = []
+        for i in simulation._runs_list:
             item = SimulationListWidgetItem(i)
-            self.ui.runsListWidget.addItem(item)
-            self.all_runs.append(item)
-        self.all_runs = frozenset(self.all_runs)
+            self.ui.runs_list_widget.addItem(item)
+#            all_runs_list.append(item)
+#        self.all_runs_frozenset = frozenset(all_runs_list)
 
-        self.ui.speciesListWidget.clear()
-        self.all_species = []
-        for i in simulation.listOfSpecies:
+        self.ui.species_list_widget.clear()
+        all_species_list = []
+        for i in simulation._species_list:
             item = SimulationListWidgetItem(i)
-            self.ui.speciesListWidget.addItem(item)
-            self.all_species.append(item)
-        self.all_species = frozenset(self.all_species)
+            self.ui.species_list_widget.addItem(item)
+            all_species_list.append(item)
+        self.all_species_frozenset = frozenset(all_species_list)
         
-        self.ui.compartmentsListWidget.clear()
-        self.all_compartments = []
-        for i in simulation.listOfRuns[0].listOfCompartments: #TODO can't rely on run1 alone if listOfCompartments divide
+        self.ui.compartments_list_widget.clear()
+        all_compartments_list = []
+        for i in simulation._runs_list[0]._compartments_list: #TODO can't rely on run1 alone if _compartments_list divide
             item = SimulationListWidgetItem(i)
-            self.ui.compartmentsListWidget.addItem(item)
-            self.all_compartments.append(item)
-        self.all_compartments = frozenset(self.all_compartments)
+            self.ui.compartments_list_widget.addItem(item)
+            all_compartments_list.append(item)
+        self.all_compartments_frozenset = frozenset(all_compartments_list)
 
         self.simulation = simulation
 
         fileinfo = QFileInfo(filename)
-        self.ui.filenameLineEdit.setText(fileinfo.absoluteFilePath())
+        self.ui.file_name_line_edit.setText(fileinfo.absoluteFilePath())
 
         self.filename = filename # for stats
         self.emit(SIGNAL('filename_changed'), self.filename)
 
-        return self.loadSucceeded()
+        self.loadSucceeded()
+        return True 
 
     def loadFailed(self):
         """ disable widgets and return false """
-        self.ui.filenameLineEdit.clear()
-        self.ui.filenameLineEdit.setEnabled(False)
-        self.ui.runsListWidget.clear()
-        self.ui.runsListWidget.setEnabled(False)
-        self.ui.selectAllRunsCheckBox.setEnabled(False)
-        self.ui.selectAllRunsCheckBox.setChecked(False)
-        self.ui.randomRunsSpinBox.setEnabled(False)
-        self.ui.randomRunsLabel.setEnabled(False)
-        self.ui.speciesListWidget.clear()
-        self.ui.speciesListWidget.setEnabled(False)
-        self.ui.selectAllSpeciesCheckBox.setEnabled(False)
-        self.ui.selectAllSpeciesCheckBox.setChecked(False)
+        self.ui.file_name_line_edit.clear()
+        self.ui.file_name_line_edit.setEnabled(False)
+        self.ui.runs_list_widget.clear()
+        self.ui.runs_list_widget.setEnabled(False)
+        self.ui.select_all_runs_check_box.setEnabled(False)
+        self.ui.select_all_runs_check_box.setChecked(False)
+        self.ui.random_runs_spin_box.setEnabled(False)
+        self.ui.random_runs_label.setEnabled(False)
+        self.ui.species_list_widget.clear()
+        self.ui.species_list_widget.setEnabled(False)
+        self.ui.select_all_species_check_box.setEnabled(False)
+        self.ui.select_all_species_check_box.setChecked(False)
         self.ui.species_selected_and_total_label.setVisible(False)
-        self.ui.compartmentsListWidget.clear()
-        self.ui.compartmentsListWidget.setEnabled(False)
-        self.ui.selectAllCompartmentsCheckBox.setEnabled(False)
-        self.ui.selectAllCompartmentsCheckBox.setChecked(False)
+        self.ui.compartments_list_widget.clear()
+        self.ui.compartments_list_widget.setEnabled(False)
+        self.ui.select_all_compartments_check_box.setEnabled(False)
+        self.ui.select_all_compartments_check_box.setChecked(False)
         self.ui.compartments_selected_and_total_label.setVisible(False)
-        self.ui.toSpinBox.setEnabled(False)
-        self.ui.fromSpinBox.setEnabled(False)
-        self.ui.everySpinBox.setEnabled(False)
-        self.ui.unitsComboBox.setEnabled(False)
-        self.ui.calculate_check_box.setEnabled(False)
-        self.ui.save_data_button.setEnabled(False)
-        self.ui.plotButton.setEnabled(False)
+        self.ui.to_spin_box.setEnabled(False)
+        self.ui.from_spin_box.setEnabled(False)
+        self.ui.every_spin_box.setEnabled(False)
+        self.ui.calculate_group_box.setEnabled(False)
+        self.ui.export_data_as_button.setEnabled(False)
+        self.ui.plot_timeseries_button.setEnabled(False)
         self.ui.load_button.setFocus(Qt.OtherFocusReason)
-        return False
 
     def loadSucceeded(self):
         """ enable widgets, select lone items and return true """
-        self.ui.filenameLineEdit.setEnabled(True)
+        self.ui.file_name_line_edit.setEnabled(True)
 
-        self.ui.runsListWidget.setEnabled(True)
-        runs = self.ui.runsListWidget.count()
+        self.ui.runs_list_widget.setEnabled(True)
+        runs = self.ui.runs_list_widget.count()
         if runs > 1:
-            self.ui.randomRunsSpinBox.setRange(1, runs)
-            self.ui.randomRunsSpinBox.setEnabled(True)
-            self.ui.randomRunsLabel.setEnabled(True)
+            self.ui.random_runs_spin_box.setRange(1, runs)
+            self.ui.random_runs_spin_box.setEnabled(True)
+            self.ui.random_runs_label.setEnabled(True)
         if runs == 1:
-            self.ui.runsListWidget.selectAll()
+            self.ui.runs_list_widget.selectAll()
         else:
-            self.ui.selectAllRunsCheckBox.setEnabled(True)
+            self.ui.select_all_runs_check_box.setEnabled(True)
 
         self.ui.species_selected_and_total_label.setVisible(True)
-        self.ui.speciesListWidget.setEnabled(True)
-        species = self.ui.speciesListWidget.count()
+        self.ui.species_list_widget.setEnabled(True)
+        species = self.ui.species_list_widget.count()
         if species == 1:
-            self.ui.speciesListWidget.selectAll()
+            self.ui.species_list_widget.selectAll()
         else:
-            self.ui.selectAllSpeciesCheckBox.setEnabled(True)
+            self.ui.select_all_species_check_box.setEnabled(True)
 
         self.ui.compartments_selected_and_total_label.setVisible(True)
-        self.ui.compartmentsListWidget.setEnabled(True)
-        compartments = self.ui.compartmentsListWidget.count()
+        self.ui.compartments_list_widget.setEnabled(True)
+        compartments = self.ui.compartments_list_widget.count()
         if compartments == 1:
-            self.ui.compartmentsListWidget.selectAll()
+            self.ui.compartments_list_widget.selectAll()
         else:
-            self.ui.selectAllCompartmentsCheckBox.setEnabled(True)
+            self.ui.select_all_compartments_check_box.setEnabled(True)
 
-#        self.ui.compartmentsListWidget.sortItems()
+#        self.ui.compartments_list_widget.sortItems()
 
-        self.ui.toSpinBox.setEnabled(True)
-        self.ui.fromSpinBox.setEnabled(True)
-        self.ui.everySpinBox.setEnabled(True)
-        self.ui.unitsComboBox.setEnabled(True)
+        self.ui.to_spin_box.setEnabled(True)
+        self.ui.from_spin_box.setEnabled(True)
+        self.ui.every_spin_box.setEnabled(True)
 
-        self.ui.calculate_check_box.setEnabled(True)#?False)
+        self.ui.calculate_group_box.setEnabled(True)#?False)
 
-        self.ui.save_data_button.setEnabled(True)
-        self.ui.plotButton.setEnabled(True)
-        self.ui.plotButton.setFocus(Qt.OtherFocusReason)
-
-        return True
+        self.ui.export_data_as_button.setEnabled(True)
+        self.ui.plot_timeseries_button.setEnabled(True)
+        self.ui.plot_timeseries_button.setFocus(Qt.OtherFocusReason)
 
 
-    # selection methods
+    def update_ui(self):
+        num_selected_runs = len(self.ui.runs_list_widget.selectedItems())
+        if self.ui.runs_list_widget.count() < 2:
+            self.ui.random_runs_label.setEnabled(False)
+            self.ui.random_runs_spin_box.setEnabled(False)
+        else: 
+            self.ui.random_runs_label.setEnabled(True)
+            self.ui.random_runs_spin_box.setEnabled(True)
+        num_selected_species = len(self.ui.species_list_widget.selectedItems())
+        self.ui.species_selected_and_total_label.setText('%s/%s' % (num_selected_species, self.ui.species_list_widget.count())) 
+        num_selected_compartments = len(self.ui.compartments_list_widget.selectedItems())
+        self.ui.compartments_selected_and_total_label.setText('%s/%s' % (num_selected_compartments, self.ui.compartments_list_widget.count())) 
+        if num_selected_runs == 0 or num_selected_species == 0 or num_selected_compartments == 0:
+            self.ui.export_data_as_button.setEnabled(False)
+            self.ui.plot_timeseries_button.setEnabled(False)
+            self.ui.visualise_population_button.setEnabled(False)
+        else:
+            self.ui.export_data_as_button.setEnabled(True)
+            self.ui.plot_timeseries_button.setEnabled(True)
+            if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
+                self.ui.visualise_population_button.setEnabled(True)
+            else:
+                self.ui.visualise_population_button.setEnabled(False)
+            if num_selected_runs > 1:
+                self.ui.calculate_group_box.setEnabled(True)
 
-    def selectRandomRuns(self, runs):
-        list = self.ui.runsListWidget
+
+    # slots
+
+    def select_random_runs(self, runs):
+        list = self.ui.runs_list_widget
         list.clearSelection()
-        t = list.count()
         randoms = set()
         while len(randoms) < runs:
-            r = randint(0, t)
-            if 0 <= r < t:
-                randoms.add(list.item(r))
+            randoms.add(list.item(randint(0, list.count())))
         for i in randoms:
             list.setCurrentItem(i, QItemSelectionModel.Select)
 
-    def selectAllRunsClicked(self, checked):
-        list = self.ui.runsListWidget
+    def select_all_runs_check_box_clicked(self, checked):
+        list = self.ui.runs_list_widget
         if checked:
-            self.selectedRuns = list.selectedItems()
+            self.selected_runs = list.selectedItems()
             list.selectAll()
         else:
-            selected = self.selectedRuns
+            selected = self.selected_runs
             list.clearSelection()
-            for i, s in enumerate(selected):
+            for i, _ in enumerate(selected):
                 list.setCurrentItem(selected[i], QItemSelectionModel.Select)
 
-    def selectAllSpeciesClicked(self, checked):
-        list = self.ui.speciesListWidget
+    def select_all_species_check_box_clicked(self, checked):
+        list = self.ui.species_list_widget
         if checked:
-            self.selectedSpecies = list.selectedItems()
+            self.selected_species = list.selectedItems()
             list.selectAll()
         else:
-            selected = self.selectedSpecies
+            selected = self.selected_species
             list.clearSelection()
-            for i, s in enumerate(selected):
+            for i, _ in enumerate(selected):
                 list.setCurrentItem(selected[i], QItemSelectionModel.Select)
 
-    def selectAllCompartmentsClicked(self, checked):
-        list = self.ui.compartmentsListWidget
+    def select_all_compartments_check_box_clicked(self, checked):
+        list = self.ui.compartments_list_widget
         if checked:
-            self.selectedCompartments = list.selectedItems()
+            self.selected_compartments = list.selectedItems()
             list.selectAll()
-        elif self.selectedCompartments != None:
-            selected = self.selectedCompartments
+        elif self.selected_compartments != None:
+            selected = self.selected_compartments
             list.clearSelection()
-            for i, s in enumerate(selected):
+            for i, _ in enumerate(selected):
                 list.setCurrentItem(selected[i], QItemSelectionModel.Select)
 
     def filter_species(self, text):
         if self.filter_species_locked == True:
             return
         self.filter_species_locked = True
-        w = self.ui.speciesListWidget
-        for c in self.all_species:
+        w = self.ui.species_list_widget
+        for c in self.all_species_frozenset:
             c.setHidden(False)
         filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
-        unfiltered = self.all_species.symmetric_difference(filtered)
+        unfiltered = self.all_species_frozenset.symmetric_difference(filtered)
         for c in unfiltered:
             c.setHidden(True)
         self.filter_species_locked = False
@@ -569,57 +602,18 @@ class SimulationResultsDialog(QWidget):
         if self.filter_compartments_locked == True:
             return
         self.filter_compartments_locked = True
-        w = self.ui.compartmentsListWidget
-        for c in self.all_compartments:
+        w = self.ui.compartments_list_widget
+        for c in self.all_compartments_frozenset:
             c.setHidden(False)
         filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
-        unfiltered = self.all_compartments.symmetric_difference(filtered)
+        unfiltered = self.all_compartments_frozenset.symmetric_difference(filtered)
         for c in unfiltered:
             c.setHidden(True)
         self.filter_compartments_locked = False
 
-    def updateUi(self):
-        num_selected_runs = len(self.ui.runsListWidget.selectedItems())
-        if self.ui.runsListWidget.count() < 2:
-            self.ui.randomRunsLabel.setEnabled(False)
-            self.ui.randomRunsSpinBox.setEnabled(False)
-        else: 
-            self.ui.randomRunsLabel.setEnabled(True)
-            self.ui.randomRunsSpinBox.setEnabled(True)
-        num_selected_species = len(self.ui.speciesListWidget.selectedItems())
-        self.ui.species_selected_and_total_label.setText('%s/%s' % (num_selected_species, self.ui.speciesListWidget.count())) 
-        num_selected_compartments = len(self.ui.compartmentsListWidget.selectedItems())
-        self.ui.compartments_selected_and_total_label.setText('%s/%s' % (num_selected_compartments, self.ui.compartmentsListWidget.count())) 
-        if num_selected_runs == 0 or num_selected_species == 0 or num_selected_compartments == 0:
-            self.ui.save_data_button.setEnabled(False)
-            self.ui.plotButton.setEnabled(False)
-            self.ui.surfacePlotButton.setEnabled(False)
-        else:
-            self.ui.save_data_button.setEnabled(True)
-            self.ui.plotButton.setEnabled(True)
-            if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
-                self.ui.surfacePlotButton.setEnabled(True)
-            else:
-                self.ui.surfacePlotButton.setEnabled(False)
-            if num_selected_runs > 1:
-                self.ui.calculate_check_box.setEnabled(True)
-
-
-    # options slots
-
-    def setFrom(self, from_):
-        self.from_ = from_
-
-    def setTo(self, to):
-        self.to = to
-
-    def setEvery(self, every):
+    def setEvery(self, every): #TODO rename/remove
         self.every = every
-        self.ui.everySpinBox.setValue(self.every)
-
-    def setUnits(self, units):
-        self.units = unicode(units)
-        #TODO proper set units
+        self.ui.every_spin_box.setValue(self.every)
 
 
     # compound accessors
@@ -628,9 +622,9 @@ class SimulationResultsDialog(QWidget):
         ''' Usage: 
             runs, species, compartments = selected_items() 
         '''
-        runs = self.ui.runsListWidget.selectedItems()
-        species = self.ui.speciesListWidget.selectedItems()
-        compartments = self.ui.compartmentsListWidget.selectedItems()
+        runs = self.ui.runs_list_widget.selectedItems()
+        species = self.ui.species_list_widget.selectedItems()
+        compartments = self.ui.compartments_list_widget.selectedItems()
         return runs, species, compartments
 
     def selected_items_amount_indices(self):
@@ -647,23 +641,23 @@ class SimulationResultsDialog(QWidget):
 
     def options(self):
         ''' Usage: 
-            from_, to, units, every, averaging = self.options() 
+            from_, to, every, averaging = self.options() 
         '''
-        from_ = self.ui.fromSpinBox.value()
-        to = self.ui.toSpinBox.value()
+        from_ = self.ui.from_spin_box.value()
+        to = self.ui.to_spin_box.value()
         every = self.every
-        units = unicode(self.ui.unitsComboBox.currentText())
-        averaging = self.ui.calculate_check_box.isChecked()
-        return from_, to, every, units, averaging
+        averaging = self.ui.calculate_group_box.isChecked() #FIXME doesn't mean average now
+        return from_, to, every, averaging
 
     def selected_items_results(self, type=float):
         ''' Usage:
             results = self.selected_items_results()
         '''
         run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
-        from_, to, every, _, _ = self.options()
+        from_, to, every, _ = self.options()
         return SimulatorResults(
-            self.filename,
+#            self.filename,
+            self.simulation,
             type=type,
             beginning=from_,
             end=to,
@@ -677,6 +671,9 @@ class SimulationResultsDialog(QWidget):
 
     # actions slots
 
+    def histogram(self):
+        raise NotImplementedError
+
 
     # remember these within this instance
     csv_precision = 3
@@ -684,7 +681,7 @@ class SimulationResultsDialog(QWidget):
 
     from infobiotics.commons.qt4 import wait_cursor
     @wait_cursor
-    def save_selected_data(self, file_name='',
+    def export_data_as(self, file_name='',
         open_after_save=True, copy_file_name_to_clipboard=True,
         csv_precision=None, csv_delimiter=None,
         #TODO custom titles here?
@@ -713,7 +710,7 @@ class SimulationResultsDialog(QWidget):
 
         runs, species, compartments = self.selected_items()
         run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
-        _, _, _, units, averaging = self.options()
+        _, _, _, averaging = self.options()
         results = self.selected_items_results()
 
         if averaging:
@@ -724,8 +721,7 @@ class SimulationResultsDialog(QWidget):
         if len(results) == 0:
             return
 
-#        header = ['time (%s)' % units]
-        header = ['time']
+        header = ['time']# (%s)' % units]
         #TODO move these to method signature?
 #        averaging_header_item = '%s in %s mean of %s runs'
         def averaging_header_item(s, c, r):
@@ -901,7 +897,7 @@ class SimulationResultsDialog(QWidget):
         if len(results) == 0:
             return
         surfaces = []
-        species = self.ui.speciesListWidget.selectedItems()
+        species = self.ui.species_list_widget.selectedItems()
         for si, s in enumerate(species):
             surface = results[si]
             zmax = np.max(surface) 
@@ -920,8 +916,8 @@ class SimulationResultsDialog(QWidget):
         '''Plot selected data. '''
 
         runs, species, compartments = self.selected_items()
-        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
-        _, _, _, units, averaging = self.options()
+#        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
+        _, _, _, averaging = self.options()
         results = self.selected_items_results()
 
         if averaging:
@@ -942,15 +938,14 @@ class SimulationResultsDialog(QWidget):
 #                        yerr=errors[si,ci],
                         species=s.data,
                         compartment=c.data,
-                        colour=colours.colour(si), #+(len(listOfSpecies)*ci)), 
-                        units=units,
+                        colour=colours.colour(si), #+(len(_species_list)*ci)), 
                     )
                     plots.append(plot)
         else:
             for ri, r in enumerate(runs):
                 for ci, c in enumerate(compartments):
                     for si, s in enumerate(species):
-                        colour = colours.colour(si)#+(len(listOfSpecies)*ci))
+                        colour = colours.colour(si)#+(len(_species_list)*ci))
                         plot = Plot(
                             timepoints=timepoints,
                             levels=results[ri][si, ci, :],
@@ -958,7 +953,6 @@ class SimulationResultsDialog(QWidget):
                             species=s.data,
                             compartment=c.data,
                             colour=colour,
-                            units=units,
                         )
                         plots.append(plot)
 
@@ -990,7 +984,7 @@ class SimulationResultsDialog(QWidget):
 
 
 class Plot(FigureCanvasAgg):
-    def __init__(self, timepoints, levels, colour, units, species, compartment, run=None, yerr=None, width=5, height=5, dpi=100):
+    def __init__(self, timepoints, levels, colour, species, compartment, run=None, yerr=None, width=5, height=5, dpi=100):
         self.figure = Figure(figsize=(width, height), dpi=dpi)
         self.canvas = FigureCanvasAgg.__init__(self, self.figure)
 #        self.__timepoints = timepoints
@@ -1002,8 +996,7 @@ class Plot(FigureCanvasAgg):
         self.yerr = yerr
         self.run = run
         self.colour = colour
-        self.units = units
-        self.listOfSpecies = species
+        self._species_list = species
         self.compartment = compartment
         self.set_label(species, compartment, run)
         self.setup()
@@ -1012,7 +1005,7 @@ class Plot(FigureCanvasAgg):
         #self.axes.hold(False) clear every time plot() is called
         self.axes = self.figure.add_subplot(111)
         self.axes.plot(self.timepoints, self.levels, color=self.colour, label=self.label)
-        self.axes.set_xlabel('time %s' % self.units)
+        self.axes.set_xlabel('time')# %s' % self.units)
         self.axes.set_ylabel('molecules')
         self.axes.set_title(self.label)
         #self.axes.legend()
@@ -1034,7 +1027,7 @@ class Plot(FigureCanvasAgg):
         if run == None:
             self.__label = "%s in %s" % (species.name, compartment_name_and_xy_coords)
         else:
-            self.__label = "%s in %s of run %s" % (species.name, compartment_name_and_xy_coords, run.run_number)
+            self.__label = "%s in %s of run %s" % (species.name, compartment_name_and_xy_coords, run._run_number)
 
     def get_colour(self):
         return self.__colour
@@ -1133,22 +1126,22 @@ class PlotsPreviewDialog(QWidget):
         if parent != None:
             QObject.setParent(parent)
         QWidget.__init__(self)
-        self.listOfRuns = runs
+        self._runs_list = runs
         self.averaging = averaging
         self.fontManager = font_manager.FontProperties(size='medium')#'small')
         self.windowTitle = windowTitle
         self.ui = Ui_PlotsPreviewDialog()
         self.ui.setupUi(self)
         self.connect(self.ui.plotsListWidget, SIGNAL("itemSelectionChanged()"),
-                     self.updateUi)
+                     self.update_ui)
         self.connect(self.ui.combineButton, SIGNAL("clicked()"), self.combine)
         self.connect(self.ui.stackButton, SIGNAL("clicked()"), self.stack)
         self.connect(self.ui.tileButton, SIGNAL("clicked()"), self.tile)
         # disable buttons and create handle lists
-        self.updateUi()
+        self.update_ui()
 #        self.traits_plot_list = []
 
-    def updateUi(self):
+    def update_ui(self):
         self.items = self.ui.plotsListWidget.selectedItems()
         if len(self.items) == 0:
             self.ui.combineButton.setEnabled(False)
@@ -1182,12 +1175,12 @@ class PlotsPreviewDialog(QWidget):
 
     def errorbar(self, item, colour=None):
         timepoints = item.plot.timepoints
-        levels = item.plot.levels
+#        levels = item.plot.levels
         label = item.plot.label
         if colour == None:
             colour = item.plot.colour
         step = int(len(timepoints) / 10)
-#        errorbar = pyplot.errorbar(timepoints[::step],
+#        errorbar = pyplot.errorbar(timepoints[::step], #TODO
 #                                   levels[::step],
 #                                   yerr=item.plot.yerr[::step],
 #                                   label=None,
@@ -1207,7 +1200,7 @@ class PlotsPreviewDialog(QWidget):
 #            pyplot.xlabel("time (%s)" % item.plot.units)
 #            pyplot.ylabel("molecules")
             self.axes = self.figure.add_subplot(111)
-            self.axes.set_xlabel("time (%s)" % item.plot.units)
+            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
             self.axes.set_ylabel("molecules")
             timepoints = item.plot.timepoints
             levels = item.plot.levels
@@ -1220,18 +1213,17 @@ class PlotsPreviewDialog(QWidget):
         self.finalise()
 
     def stack(self):
-        """same colour for each listOfSpecies (legend), listOfCompartments title"""
-        #TODO make sure everything is in the same units, or can matplotlib do this.
+        """same colour for each _species_list (legend), _compartments_list title"""
         self.reset()
         rows = len(self.items)
         cols = 1
         for i, item in enumerate(self.items):
             if i == 0:
 #                self.sharedAxis = pyplot.subplot(rows, cols, rows - i)
-#                pyplot.xlabel("time (%s)" % item.plot.units)
+#                pyplot.xlabel("time (%s)" % item.plot.units) # make sure everything is in the same units, or can matplotlib do this?
                 self.sharedAxis = self.figure.add_subplot(rows, cols, rows - i)
                 self.axes = self.sharedAxis
-                self.sharedAxis.set_xlabel("time (%s)" % item.plot.units)
+                self.sharedAxis.set_xlabel("time")# (%s)" % item.plot.units)
                 self.line(item)
                 if self.averaging:
                     self.errorbar(item)
@@ -1250,7 +1242,7 @@ class PlotsPreviewDialog(QWidget):
         self.finalise()
 
     def tile(self):
-        """same colours for each listOfSpecies (legend), listOfCompartments title"""
+        """same colours for each _species_list (legend), _compartments_list title"""
         self.reset()
         rows, cols = arrange(len(self.items))
         for i, item in enumerate(self.items):
@@ -1258,7 +1250,7 @@ class PlotsPreviewDialog(QWidget):
 #            pyplot.xlabel("time (%s)" % item.plot.units)
 #            pyplot.ylabel("molecules")
             self.axes = self.figure.add_subplot(rows, cols, i + 1)
-            self.axes.set_xlabel("time (%s)" % item.plot.units)
+            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
             self.axes.set_ylabel("molecules")
             self.line(item)
             if self.averaging:
@@ -1283,74 +1275,74 @@ class PlotsPreviewDialog(QWidget):
         self.labels_and_title()
 
     def labels_and_title(self):
-        species = [item.plot.listOfSpecies for item in self.items]
+        species = [item.plot._species_list for item in self.items]
         compartments = [item.plot.compartment for item in self.items]
         single_species = True if len(set(species)) == 1 else False
         single_compartment = True if len(set(compartments)) == 1 else False
-        # check if only 1 listOfSpecies
-        single_run = True if self.listOfRuns == 1 else False
+        # check if only 1 _species_list
+        single_run = True if self._runs_list == 1 else False
         title = ""
         if single_run:
             if single_species:
                 # check if only 1 compartment
                 if single_compartment:
-                    title = "%s in %s (1 run)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords())
+                    title = "%s in %s (1 run)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords())
                     for item in self.items:
                         item.label = None
                         self.no_labels = True
                 else:
-                    title = "%s (1 run)" % (item.plot.listOfSpecies.name)
+                    title = "%s (1 run)" % (item.plot._species_list.name)
                     for item in self.items:
                         item.label = item.plot.compartment.compartment_name_and_xy_coords()
             else:
                 if single_compartment:
                     title = "%s (1 run)" % (item.plot.compartment.compartment_name_and_xy_coords())
                     for item in self.items:
-                        item.label = item.plot.listOfSpecies.name
+                        item.label = item.plot._species_list.name
                 else:
                     title = "1 run"
                     for item in self.items:
-                        item.label = "%s in %s" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords())
+                        item.label = "%s in %s" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords())
         else:
             if self.averaging:
                 if single_species:
                     if single_compartment:
-                        title = "%s in %s (mean of %s runs)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s in %s (mean of %s runs)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
                             item.label = None
                             self.no_labels = True
                     else:
-                        title = "%s (mean of %s runs)" % (item.plot.listOfSpecies.name, self.listOfRuns)
+                        title = "%s (mean of %s runs)" % (item.plot._species_list.name, self._runs_list)
                         for item in self.items:
                             item.label = "%s" % (item.plot.compartment.compartment_name_and_xy_coords())
                 else:
                     if single_compartment:
-                        title = "%s (mean of %s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s (mean of %s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
-                            item.label = "%s" % (item.plot.listOfSpecies.name)
+                            item.label = "%s" % (item.plot._species_list.name)
                     else:
-                        title = "Mean of %s runs" % (self.listOfRuns)
+                        title = "Mean of %s runs" % (self._runs_list)
                         for item in self.items:
-                            item.label = "%s in %s" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords())
+                            item.label = "%s in %s" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords())
             else:
                 if single_species:
                     if single_compartment:
-                        title = "%s in %s  (%s runs)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s in %s  (%s runs)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
-                            item.label = "Run %s" % item.plot.run.run_number
+                            item.label = "Run %s" % item.plot.run._run_number
                     else:
-                        title = "%s (%s runs)" % (item.plot.listOfSpecies.name, self.listOfRuns)
+                        title = "%s (%s runs)" % (item.plot._species_list.name, self._runs_list)
                         for item in self.items:
-                            item.label = "%s (run %s)" % (item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run.run_number)
+                            item.label = "%s (run %s)" % (item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run._run_number)
                 else:
                     if single_compartment:
-                        title = "%s (%s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self.listOfRuns)
+                        title = "%s (%s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
-                            item.label = "%s (run %s)" % (item.plot.listOfSpecies.name, item.plot.run.run_number)
+                            item.label = "%s (run %s)" % (item.plot._species_list.name, item.plot.run._run_number)
                     else:
-                        title = "%s runs" % (self.listOfRuns)
+                        title = "%s runs" % (self._runs_list)
                         for item in self.items:
-                            item.label = "%s in %s (run %s)" % (item.plot.listOfSpecies.name, item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run.run_number)
+                            item.label = "%s in %s (run %s)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run._run_number)
         # set main title
 #        pyplot.suptitle(title)
         self.figure.suptitle(title)
@@ -1379,22 +1371,23 @@ class PlotsPreviewDialog(QWidget):
 class SimulatorResults(object):
     """Shared initialisation for all concrete SimulatorResults classes."""
     def __init__(self,
-                 filename,
-                 beginning=0,
-                 end= -1,
-                 every=1,
-                 chunk_size=2 ** 20,
-                 type=float, #decimal.Decimal
-                 species_indices=None,
-                 compartment_indices=None,
-                 run_indices=None,
-                 parent=None):
+#        filename,
+        simulation,
+        beginning=0,
+        end= -1,
+        every=1,
+        chunk_size=2 ** 20,
+        type=float, #decimal.Decimal
+        species_indices=None,
+        compartment_indices=None,
+        run_indices=None,
+        parent=None):
         """Check arguments and create variables to be used in calculate()."""
         self.parent = parent
         self.type = type
-        self.simulation = load_h5(filename)
+        self.simulation = simulation#load_h5(filename) # why do all that object creation again?
         self.filename = filename
-        number_of_timepoints = self.simulation.listOfRuns[0].number_of_timepoints
+        number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
         log_interval = self.simulation.log_interval
         max_time = number_of_timepoints * log_interval#= self.simulation.max_time
         timepoints = np.linspace(0, max_time, number_of_timepoints + 1)
@@ -1442,7 +1435,7 @@ class SimulatorResults(object):
         else:
             self.species_indices = species_indices
         if compartment_indices is None:
-            self.compartment_indices = range(self.simulation.listOfRuns[0].number_of_compartments)
+            self.compartment_indices = range(self.simulation._runs_list[0].number_of_compartments)
         else:
             self.compartment_indices = compartment_indices
         if run_indices is None:
@@ -1640,12 +1633,14 @@ class SimulatorResults(object):
 #code up a couple and see if/where/how they overlap
 #    '''
 #
-#
-#    mean = lambda array: np.mean(array, axis=3)
-#    std = lambda array: np.std(array, ddof=1, axis=3)
+
+    mean = lambda array: np.mean(array, axis=3)
+    std = lambda array: np.std(array, ddof=1, axis=3)
 
     def get_mean_over_runs(self):
-        return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),)) #TODO use get_function_over_runs
+#        return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),))
+        return self.get_functions_over_runs((SimulatorResults.mean,))
+#        return self.get_functions_over_runs((self.mean,))
 
     def get_functions_over_runs(self, functions):
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
@@ -1736,11 +1731,11 @@ class SimulatorResults(object):
         array of floats and results is a list of 3-D arrays of floats with the 
         shape (x_position, y_position, timepoint) for each species. '''
         
-        selected_compartments = [compartment for compartment in self.simulation.listOfRuns[self.run_indices[0]].listOfCompartments]
-        selected_species = [self.simulation.listOfSpecies[i] for i in self.species_indices]
+        selected_compartments = [compartment for compartment in self.simulation._runs_list[self.run_indices[0]]._compartments_list]
+        selected_species = [self.simulation._species_list[i] for i in self.species_indices]
         
         # create 3D array [x,y,t] for amounts data, x and y dimensions should represent total space
-        all_compartments = selected_compartments[0].run.listOfCompartments
+        all_compartments = selected_compartments[0].run._compartments_list
         xmax = max([compartment.x_position for compartment in all_compartments])
         xmin = min([compartment.x_position for compartment in all_compartments])
         ymax = max([compartment.y_position for compartment in all_compartments])
@@ -1752,7 +1747,7 @@ class SimulatorResults(object):
             surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self.timepoints)), self.type)
 
             # fill surface with amounts
-            for ri, r in enumerate(self.run_indices): # only one for now, see SimulationResultsDialog.updateUi()
+            for ri, r in enumerate(self.run_indices): # only one for now, see SimulationResultsDialog.update_ui()
                 where = '/run%s' % (r + 1)
                 try:
                     amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.finish:self.every]
@@ -1841,7 +1836,7 @@ class SurfacesListWidget(QWidget):
 
         self.setupUi()
 
-        self.updateUi()
+        self.update_ui()
 
 
     def setupUi(self):
@@ -1868,7 +1863,7 @@ class SurfacesListWidget(QWidget):
                 item.setIcon(QIcon(pixmap))
                 item.surface = surface
 
-        self.connect(self.listWidget, SIGNAL('itemSelectionChanged()'), self.updateUi)
+        self.connect(self.listWidget, SIGNAL('itemSelectionChanged()'), self.update_ui)
         self.connect(self.listWidget, SIGNAL('itemDoubleClicked(QListWidgetItem *)'), self.showItem)
 
         self.overlapPairwiseButton = QPushButton('Overlap pairwise', self)
@@ -1888,7 +1883,7 @@ class SurfacesListWidget(QWidget):
 #        self.secondListWidget.setDragEnabled(True)
         self.secondListWidget.setUniformItemSizes(True)
 
-        self.connect(self.secondListWidget, SIGNAL('itemSelectionChanged()'), self.updateUi)
+        self.connect(self.secondListWidget, SIGNAL('itemSelectionChanged()'), self.update_ui)
         self.connect(self.secondListWidget, SIGNAL('itemDoubleClicked(QListWidgetItem *)'), self.showItem)
         self.saveSelectedButton = QPushButton('Save selected', self)
         self.connect(self.saveSelectedButton, SIGNAL('clicked()'), self.saveSelected)
@@ -1941,7 +1936,7 @@ class SurfacesListWidget(QWidget):
         return filename
 
 
-    def updateUi(self):
+    def update_ui(self):
         self.overlapPairwiseButton.setEnabled(len(self.listWidget.selectedItems()) > 1)
         self.saveSelectedButton.setEnabled(len(self.secondListWidget.selectedItems()) == 1)
         self.saveAllSelectedButton.setEnabled(len(self.secondListWidget.selectedItems()) > 0)
@@ -2027,12 +2022,12 @@ class ControlsWidget(QWidget):
 
     def pause(self):
         self.paused = True
-        self.updateUi()
+        self.update_ui()
         self.timer.stop()
 
     def play(self):
         self.paused = False
-        self.updateUi()
+        self.update_ui()
         self.timer.start(0) # <-- change this to make steps longer
 
     def set_position(self, position):
@@ -2045,12 +2040,12 @@ class ControlsWidget(QWidget):
                 self.pause()
             else:
                 self.finished = False
-            self.updateUi()
+            self.update_ui()
 
     def next_position(self):
         self.set_position(self.position + 1)
 
-    def updateUi(self):
+    def update_ui(self):
         if self.ui.positionSlider.value() == self.maximum:
             self.ui.playPauseButton.setText("Reset")
         else:
@@ -2176,47 +2171,47 @@ def test():
     w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
 
     if w.loaded:
-#        w.ui.speciesListWidget.selectAll()
-#        w.ui.speciesListWidget.setCurrentItem(w.ui.speciesListWidget.findItems("proteinGFP", Qt.MatchExactly)[0])
-#        for item in w.ui.speciesListWidget.findItems("protein1*", Qt.MatchWildcard): item.setSelected(True)
+#        w.ui.species_list_widget.selectAll()
+#        w.ui.species_list_widget.setCurrentItem(w.ui.species_list_widget.findItems("proteinGFP", Qt.MatchExactly)[0])
+#        for item in w.ui.species_list_widget.findItems("protein1*", Qt.MatchWildcard): item.setSelected(True)
 
-#        w.ui.compartmentsListWidget.selectAll()
-#        w.ui.compartmentsListWidget.setCurrentItem(w.ui.compartmentsListWidget.item(0))
+#        w.ui.compartments_list_widget.selectAll()
+#        w.ui.compartments_list_widget.setCurrentItem(w.ui.compartments_list_widget.item(0))
 
-#        w.ui.runsListWidget.setCurrentItem(w.ui.runsListWidget.item(0))
+#        w.ui.runs_list_widget.setCurrentItem(w.ui.runs_list_widget.item(0))
 
-        for widget in (w.ui.speciesListWidget, w.ui.compartmentsListWidget, w.ui.runsListWidget):
+        for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
             widget.item(0).setSelected(True)
             widget.item(widget.count() - 1).setSelected(True)
 
-        w.ui.calculate_check_box.setChecked(False)
+        w.ui.calculate_group_box.setChecked(False)
 
-###        w.ui.surfacePlotButton.click()
+###        w.ui.visualise_population_button.click()
 
 ##        w.plot()
-##        w.plotsPreviewDialog.ui.plotsListWidget.selectAll()
+##        w.plotsPreviewDialog.ui.plotsListWidget.selectAll() #TODO rename
 ##        w.plotsPreviewDialog.combine()
 
-#        w.save_selected_data('test.csv')    # write_csv
-#        w.save_selected_data('test.txt')   # write_csv
-#        w.save_selected_data('test', open_after_save=False)        # write_csv
-#        w.save_selected_data('test.xls')    # write_xls
-        w.save_selected_data('test.npz')    # write_npz
+#        w.export_data_as('test.csv')    # write_csv
+#        w.export_data_as('test.txt')   # write_csv
+#        w.export_data_as('test', open_after_save=False)        # write_csv
+#        w.export_data_as('test.xls')    # write_xls
+        w.export_data_as('test.npz')    # write_npz
 
 #    centre_window(w)
 #    w.show()
 
 
-def test_SimulatorResults_save_selected_data():
+def test_SimulatorResults_export_data_as():
 #    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/modules/module1.h5')
     w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
-    for widget in (w.ui.speciesListWidget, w.ui.compartmentsListWidget, w.ui.runsListWidget):
+    for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
         widget.item(0).setSelected(True)
         widget.item(widget.count() - 1).setSelected(True)
-    w.ui.calculate_check_box.setChecked(False)
-#    w.save_selected_data('test.csv')    # write_csv
-    w.save_selected_data('test.xls')    # write_xls
-#    w.save_selected_data('test.npz')    # write_npz
+    w.ui.calculate_group_box.setChecked(False)
+#    w.export_data_as('test.csv')    # write_csv
+    w.export_data_as('test.xls')    # write_xls
+#    w.export_data_as('test.npz')    # write_npz
 
 
 
@@ -2239,6 +2234,6 @@ def main():
 if __name__ == "__main__":
     main()
 #    test()
-#    test_SimulatorResults_save_selected_data()
+#    test_SimulatorResults_export_data_as()
     exit(qApp.exec_())
 

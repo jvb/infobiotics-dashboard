@@ -1,5 +1,6 @@
 <RCC>
-  <qresource prefix="/" >
+  <qresource prefix="/">
+    <file>hist.png</file>
     <file>data.png</file>
     <file>plot_2d.png</file>
     <file>plot_3d.png</file>
