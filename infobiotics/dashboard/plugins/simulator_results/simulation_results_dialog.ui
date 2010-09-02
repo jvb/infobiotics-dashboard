@@ -250,7 +250,7 @@
       <item row="0" column="1">
        <widget class="QComboBox" name="__runs_calculation_combo_box">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <item>
          <property name="text">
@@ -604,7 +604,7 @@ NumPy (.npz)</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="3" column="0" colspan="2">
     <widget class="QGroupBox" name="_data_group_box">
      <property name="title">
       <string>Data</string>
@@ -699,7 +699,7 @@ NumPy (.npz)</string>
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QCheckBox" name="select_all_runs_widget">
+        <widget class="QCheckBox" name="select_all_runs_check_box">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -728,7 +728,7 @@ NumPy (.npz)</string>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QSpinBox" name="random_runs_spinbox">
+        <widget class="QSpinBox" name="random_runs_spin_box">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -761,7 +761,7 @@ NumPy (.npz)</string>
           <string>random runs</string>
          </property>
          <property name="buddy">
-          <cstring>random_runs_spinbox</cstring>
+          <cstring>random_runs_spin_box</cstring>
          </property>
         </widget>
        </item>
@@ -942,7 +942,7 @@ NumPy (.npz)</string>
         </widget>
        </item>
        <item row="3" column="0" colspan="2">
-        <widget class="QLineEdit" name="compartments_list_widget_filter">
+        <widget class="QLineEdit" name="filter_compartments_line_edit">
          <property name="toolTip">
           <string>Filter Compartments</string>
          </property>
@@ -963,8 +963,8 @@ NumPy (.npz)</string>
  </customwidgets>
  <tabstops>
   <tabstop>file_name_line_edit</tabstop>
-  <tabstop>select_all_runs_widget</tabstop>
-  <tabstop>random_runs_spinbox</tabstop>
+  <tabstop>select_all_runs_check_box</tabstop>
+  <tabstop>random_runs_spin_box</tabstop>
   <tabstop>runs_list_widget</tabstop>
   <tabstop>select_all_species_check_box</tabstop>
   <tabstop>species_list_widget</tabstop>

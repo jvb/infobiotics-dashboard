@@ -318,8 +318,8 @@ class SimulationResultsDialog(QWidget):
 
         self.filter_species_locked = False
         self.filter_compartments_locked = False
-        self.connect(self.ui.species_list_widget_filter, SIGNAL('textEdited(QString)'), self.filter_species)
-        self.connect(self.ui.compartments_list_widget_filter, SIGNAL('textEdited(QString)'), self.filter_compartments)
+        self.connect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'), self.filter_species)
+        self.connect(self.ui.filter_compartments_line_edit, SIGNAL('textEdited(QString)'), self.filter_compartments)
 
         # make sure from is always less than to and that to is always more than from
         self.connect(self.ui.from_spin_box, SIGNAL("valueChanged(double)"), self.ui.to_spin_box.set_minimum)
@@ -437,7 +437,7 @@ class SimulationResultsDialog(QWidget):
         self.ui.file_name_line_edit.setText(fileinfo.absoluteFilePath())
 
         self.filename = filename # for stats
-        self.emit(SIGNAL('filename_changed'), self.filename)
+        self.emit(SIGNAL('filename_changed'), self.filename) #TODO connect to this to invalid cached SimulatorResults
 
         self.loadSucceeded()
         return True 
@@ -656,8 +656,8 @@ class SimulationResultsDialog(QWidget):
         run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
         from_, to, every, _ = self.options()
         return SimulatorResults(
-#            self.filename,
-            self.simulation,
+            filename=self.filename,
+            simulation=self.simulation,
             type=type,
             beginning=from_,
             end=to,
@@ -1371,7 +1371,7 @@ class PlotsPreviewDialog(QWidget):
 class SimulatorResults(object):
     """Shared initialisation for all concrete SimulatorResults classes."""
     def __init__(self,
-#        filename,
+        filename,
         simulation,
         beginning=0,
         end= -1,
@@ -1638,8 +1638,8 @@ class SimulatorResults(object):
     std = lambda array: np.std(array, ddof=1, axis=3)
 
     def get_mean_over_runs(self):
-#        return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),))
-        return self.get_functions_over_runs((SimulatorResults.mean,))
+        return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),))
+#        return self.get_functions_over_runs((SimulatorResults.mean,))
 #        return self.get_functions_over_runs((self.mean,))
 
     def get_functions_over_runs(self, functions):
