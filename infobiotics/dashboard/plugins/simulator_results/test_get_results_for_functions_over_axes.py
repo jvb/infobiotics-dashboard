@@ -50,6 +50,9 @@ assert levels.shape == original_shape
 #print all_axes
 
 
+#from collections import deque
+import itertools
+
 def test_get_results_for_functions_over_axes_works_for_any_axes_for_any_functions_in_any_order(all_axes, all_functions):
     '''
     Checks that all products of functions for all combinations of axes give the 
@@ -65,8 +68,6 @@ def test_get_results_for_functions_over_axes_works_for_any_axes_for_any_function
     o is a permuted order of application of f[i] to a[i]
     
     '''
-    import itertools
-    from collections import deque
     count = 0
     comb = []
     for n in range(2, len(all_axes) + 1): # 2 <= n <= len(all_axes)
@@ -104,8 +105,65 @@ def test_get_results_for_functions_over_axes_works_for_any_axes_for_any_function
     assert len(comb) == len(set(comb))
     return True
 
-print test_get_results_for_functions_over_axes_works_for_any_axes_for_any_functions_in_any_order(all_axes, all_functions)
 
+
+
+def test_get_results_for_functions_over_axes_works_for_any_axes_for_any_functions_in_any_order(all_axes, all_functions):
+    '''
+    Checks that all products of functions for all combinations of axes give the 
+    same result no matter what order they are given in (rotation), providing the 
+    same function is used for the same axis in a given iteration.
+    
+    all_axes is the set of axes
+    all_functions is the set of functions
+    
+    n is the number of axes (greater than or equal to 2)
+    a is a list containing a combination of n axes
+    f is a list of functions, each corresponding to an axis in a
+    o is a permuted order of application of f[i] to a[i]
+    
+    count = 66473 when len(all_axes) = 4 and len(all_functions) = 7
+    
+    '''
+    count = 0
+    comb = []
+#    for n in range(2, len(all_axes) + 1): # 2 <= n <= len(all_axes)
+#        for a in itertools.combinations(all_axes, n):
+#            for f in itertools.product(all_functions, repeat=n):
+#                for o in itertools.permutations(range(n)):
+#                    count += 1
+#                    da = [a[i] for i in o]
+#                    df = [f[i] for i in o]
+#                    comb.append('%s %s' % (da, df))
+
+    for n in range(len(all_axes) + 1):
+        for f in itertools.product(all_functions, repeat=n):
+            for a in itertools.permutations(all_axes, n):
+                count += 1
+                comb.append('%s %s' % (a, f))
+    print count
+    assert count == len(comb)
+    assert len(comb) == len(set(comb))
+    # all single axis and function pairings
+    for i in range(66473 - 66444):
+        print comb[i]
+    print comb[66473 - 66444] # first pair of axes and function pairing
+    return True
+
+test_get_results_for_functions_over_axes_works_for_any_axes_for_any_functions_in_any_order(all_axes, all_functions)
+
+#assert mean([get_results_for_functions_over_axes(f, a)[0] for a in itertools.permutations(all_axes, n) for f in itertools.product(all_functions, repeat=n) or n in range(len(all_axes) + 1)], axis=0) == 0
+
+
+
+
+for n in range(len(all_axes) + 1):
+    for f in itertools.product(all_functions, repeat=n):
+        for a in itertools.permutations(all_axes, n):
+
+
+
+exit()
 
 ## test if order of function application matters when axes are also changed
 #print get_results_for_functions_over_axes((np.mean, np.sum), ('compartments', 'runs'))
