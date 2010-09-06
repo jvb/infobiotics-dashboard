@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
+    <width>960</width>
     <height>562</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
    <string>Simulator Results</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
-   <item row="0" column="0" colspan="6">
+   <item row="0" column="0" colspan="7">
     <widget class="QLineEdit" name="file_name_line_edit">
      <property name="enabled">
       <bool>true</bool>
@@ -42,7 +42,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="6">
+   <item row="0" column="7">
     <widget class="QPushButton" name="load_button">
      <property name="maximumSize">
       <size>
@@ -217,272 +217,7 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="2" colspan="5">
-    <widget class="QGroupBox" name="calculate_group_box">
-     <property name="title">
-      <string>Calculate</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_6">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>9</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="__runs_calculation_combo_box">
-        <property name="currentIndex">
-         <number>1</number>
-        </property>
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>mean</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>standard deviation</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>variance</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>median</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>sum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>minimum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>maximum</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QComboBox" name="__species_calculation_combo_box">
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>mean</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>standard deviation</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>variance</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>median</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>sum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>minimum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>maximum</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QComboBox" name="__compartments_calculation_combo_box">
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>mean</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>standard deviation</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>variance</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>median</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>sum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>minimum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>maximum</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QComboBox" name="__timepoints_calculation_combo_box">
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>mean</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>standard deviation</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>variance</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>median</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>sum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>minimum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>maximum</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="_runs_calculation_label">
-        <property name="text">
-         <string>runs</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="_species_calculation_label">
-        <property name="text">
-         <string>species</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="_compartments_calculation_label">
-        <property name="text">
-         <string>compartments</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="_timepoints_calculation_label">
-        <property name="text">
-         <string>timepoints</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="5" rowspan="2">
-       <spacer name="_calculate_spacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>183</width>
-          <height>28</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="5" column="0">
+   <item row="5" column="0" colspan="2">
     <spacer name="_actions_spacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -495,70 +230,7 @@
      </property>
     </spacer>
    </item>
-   <item row="5" column="1">
-    <widget class="QCommandLinkButton" name="histogram_button">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string>Save timeseries data for selected runs, species and compartments</string>
-     </property>
-     <property name="text">
-      <string>Histogram</string>
-     </property>
-     <property name="icon">
-      <iconset resource="icons.qrc">
-       <normaloff>:/hist.png</normaloff>:/hist.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>64</width>
-       <height>64</height>
-      </size>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
-     <property name="autoExclusive">
-      <bool>false</bool>
-     </property>
-     <property name="description">
-      <string>Plot distribution for runs/compartments over time</string>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="3">
-    <widget class="QCommandLinkButton" name="export_data_as_button">
-     <property name="toolTip">
-      <string>Save timeseries data for selected runs, species and compartments</string>
-     </property>
-     <property name="text">
-      <string>Export data as...</string>
-     </property>
-     <property name="icon">
-      <iconset resource="icons.qrc">
-       <normaloff>:/data.png</normaloff>:/data.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>64</width>
-       <height>64</height>
-      </size>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
-     <property name="autoExclusive">
-      <bool>false</bool>
-     </property>
-     <property name="description">
-      <string>text (.csv)
-Excel (.xls)
-NumPy (.npz)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="4">
     <widget class="QCommandLinkButton" name="plot_timeseries_button">
      <property name="toolTip">
       <string>Plot timeseries for selected runs, species and compartments</string>
@@ -581,78 +253,7 @@ NumPy (.npz)</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="5" colspan="2">
-    <widget class="QCommandLinkButton" name="visualise_population_button">
-     <property name="toolTip">
-      <string>Animate levels of selected species on the lattice</string>
-     </property>
-     <property name="text">
-      <string>Visualise population</string>
-     </property>
-     <property name="icon">
-      <iconset resource="icons.qrc">
-       <normaloff>:/plot_3d.png</normaloff>:/plot_3d.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>64</width>
-       <height>64</height>
-      </size>
-     </property>
-     <property name="description">
-      <string>Animate species levels as a surface over the lattice</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QGroupBox" name="_data_group_box">
-     <property name="title">
-      <string>Data</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_8">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>9</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QComboBox" name="__data_combo_box">
-        <item>
-         <property name="text">
-          <string>Amounts</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Volumes</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="_of_selected_data_label">
-        <property name="text">
-         <string>&lt;I&gt;of selected&lt;/I&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="7">
+   <item row="1" column="0" colspan="8">
     <widget class="QSplitter" name="_runs_species_compartments_splitter">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -859,12 +460,27 @@ NumPy (.npz)</string>
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
+         <property name="sortingEnabled">
+          <bool>false</bool>
+         </property>
+         <item>
+          <property name="text">
+           <string>Volumes</string>
+          </property>
+         </item>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
+       <item row="2" column="0">
         <widget class="QLineEdit" name="filter_species_line_edit">
          <property name="toolTip">
           <string>Filter Species</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QCheckBox" name="sort_species_check_box">
+         <property name="text">
+          <string>Sort</string>
          </property>
         </widget>
        </item>
@@ -939,17 +555,207 @@ NumPy (.npz)</string>
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
+         <property name="sortingEnabled">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="3" column="0">
         <widget class="QLineEdit" name="filter_compartments_line_edit">
          <property name="toolTip">
           <string>Filter Compartments</string>
          </property>
         </widget>
        </item>
+       <item row="3" column="1">
+        <widget class="QCheckBox" name="sort_compartments_check_box">
+         <property name="text">
+          <string>Sort</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QCommandLinkButton" name="export_data_as_button">
+     <property name="toolTip">
+      <string>Save timeseries data for selected runs, species and compartments</string>
+     </property>
+     <property name="text">
+      <string>Export data as...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/data.png</normaloff>:/data.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>false</bool>
+     </property>
+     <property name="description">
+      <string>text (.csv)
+Excel (.xls)
+NumPy (.npz)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="8">
+    <widget class="QGroupBox" name="_data_group_box">
+     <property name="title">
+      <string>Data</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_8">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="quantities_label">
+        <property name="text">
+         <string>Quantities as</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QCheckBox" name="average_over_selected_runs_check_box">
+        <property name="text">
+         <string>Average over selected runs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="quantities_combo_box">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>molecules</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>concentrations</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QCommandLinkButton" name="calculate_button">
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Calculate other functions...</string>
+        </property>
+        <property name="description">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="3">
+       <spacer name="_quantities_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="3">
+       <spacer name="_calculate_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="5" colspan="3">
+    <widget class="QCommandLinkButton" name="plot_histograms_button">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Save timeseries data for selected runs, species and compartments</string>
+     </property>
+     <property name="text">
+      <string>Plot histograms</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/hist.png</normaloff>:/hist.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>false</bool>
+     </property>
+     <property name="description">
+      <string>Plot distribution of species in runs or compartments</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="4">
+    <widget class="QCommandLinkButton" name="visualise_population_button">
+     <property name="toolTip">
+      <string>Animate levels of selected species on the lattice</string>
+     </property>
+     <property name="text">
+      <string>Visualise population</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/plot_3d.png</normaloff>:/plot_3d.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+     <property name="description">
+      <string>Animate species levels as a surface over the lattice</string>
+     </property>
     </widget>
    </item>
   </layout>

@@ -12,7 +12,7 @@ levels = f['levels']
 def get_results_for_functions_over_axes(functions=(), axes=()):
     assert len(functions) == len(axes)
     results = levels # start with 4-dimensional (runs, species, compartments, timepoints) array
-    results_axes = ['runs', 'species', 'compartments', 'timepoints'] 
+    results_axes = ['runs', 'species', 'compartments', 'timepoints']
     for fi, f in enumerate(functions):
         axis = axes[fi]
         results = f(results, axis=results_axes.index(axis))
@@ -36,7 +36,7 @@ max = np.amax
 min = np.amin
 sum = np.sum
 
-all_functions = [mean, std, var, median, max, min, sum] 
+all_functions = [mean, std, var, median, max, min, sum]
 
 #functions = [np.std]
 #axes = ['runs']
@@ -156,13 +156,12 @@ test_get_results_for_functions_over_axes_works_for_any_axes_for_any_functions_in
 
 
 
-
+i = 0
 for n in range(len(all_axes) + 1):
     for f in itertools.product(all_functions, repeat=n):
         for a in itertools.permutations(all_axes, n):
-
-
-
+            i += 1
+print i
 exit()
 
 ## test if order of function application matters when axes are also changed
