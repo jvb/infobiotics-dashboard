@@ -11,6 +11,8 @@ class FromToDoubleSpinBox(QDoubleSpinBox):
         self.setSingleStep(self.step)
 
     def set_maximum(self, max):
+        if max - self.step < 0:
+            self.set_maximum(0)
         self.setMaximum(max - self.step)
 
     def set_minimum(self, min):
