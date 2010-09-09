@@ -1,5 +1,4 @@
-from FromToDoubleSpinBox import FromToDoubleSpinBox
-from PlotsListWidget import PlotsListWidget
+#from PlotsListWidget import PlotsListWidget
 from PyQt4.QtCore import QSettings, QVariant, QDir, QSettings, QObject, QString, \
     QSize, QFileInfo, SIGNAL, SLOT, QTimer, Qt
 from PyQt4.QtGui import QWidget, QApplication, QHBoxLayout, QVBoxLayout, QWidget, \
@@ -238,7 +237,7 @@ class SimulationListWidgetItem(QListWidgetItem):
         if isinstance(data, Species):
             text = data.name
             self.amounts_index = data.index
-
+            
         elif isinstance(data, Compartment):
             text = data.compartment_name_and_xy_coords() #TODO fudge
             self.amounts_index = data.index
@@ -262,9 +261,9 @@ class SimulationListWidgetItem(QListWidgetItem):
             raise TypeError("type of data is not recognised")
 
         QListWidgetItem.__init__(self, text, parent, QListWidgetItem.UserType)
-
-
-
+        
+        if isinstance(self.amounts_index, int):
+            self.setToolTip('%d' % self.amounts_index)
 
 
 class SimulationResultsDialog(QWidget):
@@ -278,36 +277,20 @@ class SimulationResultsDialog(QWidget):
         self.ui = Ui_SimulationResultsDialog()
         self.ui.setupUi(self)
 
+        self.ui.compartments_list_widget.setToolTip('')
+
         self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
 
-        self.previously_selected_runs = []
-        self.previously_selected_species = []
-        self.previously_selected_compartments = []
-        self.connect(self.ui.select_all_runs_check_box, SIGNAL("clicked(bool)"), self.select_all_runs_check_box_toggled)
-        self.connect(self.ui.select_all_species_check_box, SIGNAL("clicked(bool)"), self.select_all_species_check_box_toggled)
-        self.connect(self.ui.select_all_compartments_check_box, SIGNAL("clicked(bool)"), self.select_all_compartments_check_box_toggled)
+        self.ui.runs_list_widget.connect_all_selected_check_box(self.ui.select_all_runs_check_box)
+        self.ui.species_list_widget.connect_all_selected_check_box(self.ui.select_all_species_check_box)
+        self.ui.compartments_list_widget.connect_all_selected_check_box(self.ui.select_all_compartments_check_box)
 
-        self.connect(self.ui.runs_list_widget, SIGNAL("itemSelectionChanged()"),
-            lambda: (
-                self.ui.select_all_runs_check_box.setChecked(False)
-                    if len(self.ui.runs_list_widget.selectedItems()) != self.ui.runs_list_widget.count()
-                        else self.ui.select_all_runs_check_box.setChecked(True)
-            )
-        )
-        self.connect(self.ui.species_list_widget, SIGNAL("itemSelectionChanged()"),
-            lambda: (
-                self.ui.select_all_species_check_box.setChecked(False)
-                    if len(self.ui.species_list_widget.selectedItems()) != self.ui.species_list_widget.count()
-                        else self.ui.select_all_species_check_box.setChecked(True)
-            )
-        )
-        self.connect(self.ui.compartments_list_widget, SIGNAL("itemSelectionChanged()"),
-            lambda: (
-                self.ui.select_all_compartments_check_box.setChecked(False)
-                    if len(self.ui.compartments_list_widget.selectedItems()) != self.ui.compartments_list_widget.count()
-                        else self.ui.select_all_compartments_check_box.setChecked(True)
-            )
-        )
+        self.ui.species_list_widget.connect_sort_check_box(self.ui.sort_species_check_box)
+        self.ui.compartments_list_widget.connect_sort_check_box(self.ui.sort_compartments_check_box)
+
+        self.ui.species_list_widget.connect_filter_line_edit(self.ui.filter_species_line_edit)
+        self.ui.compartments_list_widget.connect_filter_line_edit(self.ui.filter_compartments_line_edit)
+
         self.connect(self.ui.runs_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
         self.connect(self.ui.species_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
         self.connect(self.ui.compartments_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
@@ -321,18 +304,6 @@ class SimulationResultsDialog(QWidget):
             )
         )
 
-#        self.filter_species_locked = False
-        class Lock(object):
-            locked = False
-        self.filter_species_lock = Lock()
-#        self.connect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'), self.filter_species) #REMOVE see load_succeeded
-
-        self.filter_compartments_locked = False
-        self.connect(self.ui.filter_compartments_line_edit, SIGNAL('textEdited(QString)'), self.filter_compartments)
-        
-        self.connect(self.ui.sort_species_check_box, SIGNAL('toggled(bool)'), self.sort_species_toggled)
-        self.connect(self.ui.sort_compartments_check_box, SIGNAL('toggled(bool)'), self.sort_compartments_toggled)
-        
         # make sure from is always less than to and that to is always more than from
         self.connect(self.ui.from_spin_box, SIGNAL("valueChanged(double)"), self.ui.to_spin_box.set_minimum)
         self.connect(self.ui.to_spin_box, SIGNAL("valueChanged(double)"), self.ui.from_spin_box.set_maximum)
@@ -359,7 +330,7 @@ class SimulationResultsDialog(QWidget):
         event.accept()
 
     def load_settings(self):
-        settings = QSettings() # see shared.functions
+        settings = QSettings()
         settings.beginGroup(self.settings_group)
         self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
         settings.endGroup()
@@ -380,7 +351,7 @@ class SimulationResultsDialog(QWidget):
                 if self.loaded:
                     return
                 else:
-                    self.loadFailed()
+                    self.load_failed()
                     return False
 
         self.current_directory = QFileInfo(filename).absolutePath()
@@ -397,7 +368,7 @@ class SimulationResultsDialog(QWidget):
             if self.loaded:
                 return # continue with previously loaded file
             else:
-                self.loadFailed()
+                self.load_failed()
                 return False
 
         # set spinbox defaults
@@ -453,10 +424,10 @@ class SimulationResultsDialog(QWidget):
         self.filename = filename # for stats
         self.emit(SIGNAL('filename_changed'), self.filename) #TODO connect to this to invalid cached SimulatorResults
 
-        self.loadSucceeded()
+        self.load_succeeded()
         return True
 
-    def loadFailed(self):
+    def load_failed(self):
         ''' Disables widgets once. '''
         self.ui.file_name_line_edit.clear()
         self.ui.file_name_line_edit.setEnabled(False)
@@ -498,7 +469,7 @@ class SimulationResultsDialog(QWidget):
         self.unsorted_compartments = []
         
 
-    def loadSucceeded(self):
+    def load_succeeded(self):
         ''' Enable widgets once, selecting lone runs, species and compartments.  '''
         self.ui.file_name_line_edit.setEnabled(True)
 
@@ -549,9 +520,37 @@ class SimulationResultsDialog(QWidget):
         self.unsorted_species = [self.ui.species_list_widget.item(i) for i in range(self.ui.species_list_widget.count())]
         self.unsorted_compartments = [self.ui.compartments_list_widget.item(i) for i in range(self.ui.compartments_list_widget.count())]
 
-        self.disconnect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'))
-        self.connect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'), lambda text: self.filter_(text, lock=self.filter_species_lock, list_widget=self.ui.species_list_widget, all_items_frozenset=self.all_species_frozenset))
-        
+#        # setup select_all_*_check_box_toggled methods
+#        self.previously_selected_runs = []
+#        self.previously_selected_species = []
+#        self.previously_selected_compartments = []
+#        #TODO
+#
+#        # setup filter_*_list_widget methods
+#        class Lock(object):
+#            def __init__(self):
+#                self.locked = False
+#        self.filter_species_list_widget_lock = Lock()
+#        self.filter_compartments_list_widget_lock = Lock()
+#        if hasattr(self, 'filter_species_list_widget'):
+#            self.disconnect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'), self.filter_species_list_widget) #TODO test
+#        if hasattr(self, 'filter_compartments_list_widget'):
+#            self.disconnect(self.ui.filter_compartments_line_edit, SIGNAL('textEdited(QString)'), self.filter_compartments_list_widget)
+#        import functools
+#        self.filter_species_list_widget = functools.partial(self.filter_list_widget, list_widget=self.ui.species_list_widget, all_items_frozenset=self.all_species_frozenset, lock=self.filter_species_list_widget_lock) 
+#        self.filter_compartments_list_widget = functools.partial(self.filter_list_widget, list_widget=self.ui.compartments_list_widget, all_items_frozenset=self.all_compartments_frozenset, lock=self.filter_compartments_list_widget_lock)
+#        self.connect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'), self.filter_species_list_widget)
+#        self.connect(self.ui.filter_compartments_line_edit, SIGNAL('textEdited(QString)'), self.filter_compartments_list_widget)
+#
+#        # setup sort_*_toggled methods
+#        if hasattr(self, 'sort_species_list_widget'):
+#            self.disconnect(self.ui.sort_species_check_box, SIGNAL('textEdited(QString)'), self.sort_species_list_widget) #TODO test
+#        if hasattr(self, 'sort_compartments_list_widget'):
+#            self.disconnect(self.ui.sort_compartments_check_box, SIGNAL('textEdited(QString)'), self.sort_compartments_list_widget) #TODO test
+#        self.sort_species_list_widget = functools.partial(self.sort_check_box_toggled, list_widget=self.ui.species_list_widget, previously_selected_items=self.previously_selected_species, unsorted_items=self.unsorted_species)
+#        self.sort_compartments_list_widget = functools.partial(self.sort_check_box_toggled, list_widget=self.ui.compartments_list_widget, previously_selected_items=self.previously_selected_compartments, unsorted_items=self.unsorted_compartments)
+#        self.connect(self.ui.sort_species_check_box, SIGNAL('textEdited(QString)'), self.sort_species_list_widget)
+#        self.connect(self.ui.sort_compartments_check_box, SIGNAL('textEdited(QString)'), self.sort_compartments_list_widget)
 
     def update_ui(self):
         
@@ -602,105 +601,139 @@ class SimulationResultsDialog(QWidget):
         for i in randoms:
             list.setCurrentItem(i, QItemSelectionModel.Select)
 
-    def select_all_runs_check_box_toggled(self, checked):
-        list = self.ui.runs_list_widget
-        if checked:
-            self.previously_selected_runs = list.selectedItems()
-            list.selectAll()
-        else:
-            list.clearSelection()
-            for selected in self.previously_selected_runs:
-                list.setCurrentItem(selected, QItemSelectionModel.Select)
-
-    def select_all_species_check_box_toggled(self, checked):
-        list = self.ui.species_list_widget
-        if checked:
-            self.previously_selected_species = list.selectedItems()
-            list.selectAll()
-        else:
-            list.clearSelection()
-            for selected in self.previously_selected_species:
-                list.setCurrentItem(selected, QItemSelectionModel.Select)
-
-    def select_all_compartments_check_box_toggled(self, checked):
-        list = self.ui.compartments_list_widget
-        if checked:
-            self.previously_selected_compartments = list.selectedItems()
-            list.selectAll()
-        else:
-            list.clearSelection()
-            for selected in self.previously_selected_compartments:
-                list.setCurrentItem(selected, QItemSelectionModel.Select)
-
-#    def filter_species(self, text):
-#        if self.filter_species_locked == True:
-#            return
-#        self.filter_species_locked = True
-#        w = self.ui.species_list_widget
-#        for c in self.all_species_frozenset:
-#            c.setHidden(False)
-#        filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
-#        unfiltered = self.all_species_frozenset.symmetric_difference(filtered)
-#        for c in unfiltered:
-#            c.setHidden(True)
-#        self.filter_species_locked = False
-
-#    class Lock(object):
-#        locked = False
+#    def select_all_check_box_toggled(self, checked, list_widget, previously_selected_items):
+#        if checked:
+#            previously_selected_items = list_widget.selectedItems()
+#            list_widget.selectAll()
+#        else:
+#            list_widget.clearSelection()
+#            for selected in previously_selected_items:
+#                list_widget.setCurrentItem(selected, QItemSelectionModel.Select)
+##
+##    def select_all_runs_check_box_toggled(self, checked):
+##        list = self.ui.runs_list_widget
+##        if checked:
+##            self.previously_selected_runs = list.selectedItems()
+##            list.selectAll()
+##        else:
+##            list.clearSelection()
+##            for selected in self.previously_selected_runs:
+##                list.setCurrentItem(selected, QItemSelectionModel.Select)
+##
+##    def select_all_species_check_box_toggled(self, checked):
+##        list = self.ui.species_list_widget
+##        if checked:
+##            self.previously_selected_species = list.selectedItems()
+##            list.selectAll()
+##        else:
+##            list.clearSelection()
+##            for selected in self.previously_selected_species:
+##                list.setCurrentItem(selected, QItemSelectionModel.Select)
+##
+##    def select_all_compartments_check_box_toggled(self, checked):
+##        list = self.ui.compartments_list_widget
+##        if checked:
+##            self.previously_selected_compartments = list.selectedItems()
+##            list.selectAll()
+##        else:
+##            list.clearSelection()
+##            for selected in self.previously_selected_compartments:
+##                list.setCurrentItem(selected, QItemSelectionModel.Select)
 #
-#        lambda text: self.filter_(text, lock=filter_species_lock, list_widget=species_list_widget, all_items_frozenset=all_species_frozenset)
-    
-    def filter_list_widget(self, text, lock, list_widget, all_items_frozenset):
-        if lock.locked == True:
-            return
-        lock.locked = True
-        for item in all_items_frozenset:
-            item.setHidden(False)
-        filtered = set([item for item in list_widget.findItems(text, Qt.MatchContains)])
-        unfiltered = all_items_frozenset.symmetric_difference(filtered)
-        for item in unfiltered:
-            item.setHidden(True)
-        lock.locked = False
-
-    def filter_compartments(self, text):
-        if self.filter_compartments_locked == True:
-            return
-        self.filter_compartments_locked = True
-        w = self.ui.compartments_list_widget
-        for c in self.all_compartments_frozenset:
-            c.setHidden(False)
-        filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
-        unfiltered = self.all_compartments_frozenset.symmetric_difference(filtered)
-        for c in unfiltered:
-            c.setHidden(True)
-        self.filter_compartments_locked = False
-
-
-    def sort_species_toggled(self, checked):
-        list = self.ui.species_list_widget
-        if checked:
-            list.sortItems()
-        else:
-            self.previously_selected_species = list.selectedItems()
-            for i in range(list.count()):
-                list.takeItem(i)
-            for item in self.unsorted_species:
-                list.addItem(item)
-            for selected in self.previously_selected_species:
-                list.setCurrentItem(selected, QItemSelectionModel.Select)
-
-    def sort_compartments_toggled(self, checked):
-        list = self.ui.compartments_list_widget
-        if checked:
-            list.sortItems()
-        else:
-            self.previously_selected_compartments = list.selectedItems()
-            for i in range(list.count()):
-                list.takeItem(i)
-            for item in self.unsorted_compartments:
-                list.addItem(item)
-            for selected in self.previously_selected_compartments:
-                list.setCurrentItem(selected, QItemSelectionModel.Select)
+##    def filter_species(self, text):
+##        if self.filter_species_locked == True:
+##            return
+##        self.filter_species_locked = True
+##        w = self.ui.species_list_widget
+##        for c in self.all_species_frozenset:
+##            c.setHidden(False)
+##        filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
+##        unfiltered = self.all_species_frozenset.symmetric_difference(filtered)
+##        for c in unfiltered:
+##            c.setHidden(True)
+##        self.filter_species_locked = False
+##
+##    def filter_compartments(self, text):
+##        if self.filter_compartments_locked == True:
+##            return
+##        self.filter_compartments_locked = True
+##        w = self.ui.compartments_list_widget
+##        for c in self.all_compartments_frozenset:
+##            c.setHidden(False)
+##        filtered = set([c for c in w.findItems(text, Qt.MatchContains)])#Qt.MatchWildcard)])
+##        unfiltered = self.all_compartments_frozenset.symmetric_difference(filtered)
+##        for c in unfiltered:
+##            c.setHidden(True)
+##        self.filter_compartments_locked = False
+##
+#    def filter_list_widget(self, text, list_widget, all_items_frozenset, lock):
+#        ''' Generic method for filtering list widgets.
+#        
+#        Uses the symmetric difference of two sets, one containing the filtered
+#        items (an item is instance of QListWidgetItem) and the other, a 
+#        frozenset, containing all possible items, to hide the unfiltered items.  
+#        
+#        lock is any object with a boolean 'locked' attribute.
+#        
+#        Example usage:
+#            class Lock(object):
+#                def __init__(self):
+#                    self.locked = False
+#            self.filter_species_list_widget_lock = Lock()
+#            if hasattr(self, 'filter_species_list_widget'):
+#                self.disconnect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'), self.filter_species_list_widget)
+#            import functools
+#            self.filter_species_list_widget = functools.partial(self.filter_list_widget, list_widget=self.ui.species_list_widget, all_items_frozenset=self.all_species_frozenset, lock=self.filter_species_list_widget_lock) 
+#            self.connect(self.ui.filter_species_line_edit, SIGNAL('textEdited(QString)'), self.filter_species_list_widget)
+#        
+#        '''
+#        if lock.locked == True:
+#            return
+#        lock.locked = True
+#        for item in all_items_frozenset:
+#            item.setHidden(False)
+#        filtered = set([item for item in list_widget.findItems(text, Qt.MatchContains)])
+#        unfiltered = all_items_frozenset.symmetric_difference(filtered)
+#        for item in unfiltered:
+#            item.setHidden(True)
+#        lock.locked = False
+#
+#    def sort_check_box_toggled(self, checked, list_widget, previously_selected_items, unsorted_items):
+#        ''' Sort/unsort preserving selection. '''
+#        if checked:
+#            list_widget.setSortingEnabled(True)
+#            list_widget.sortItems()
+#        else:
+#            list_widget.setSortingEnabled(False)
+#            previously_selected_items = list_widget.selectedItems()
+#            for i in range(list_widget.count()): list_widget.takeItem(i) # remove all items without deleting them (takeItem vs removeItemWidget)
+#            for item in unsorted_items: list_widget.addItem(item) # add them back in the original order
+#            for selected in previously_selected_items: list_widget.setCurrentItem(selected, QItemSelectionModel.Select) # reselect previously selected items
+##
+##    def sort_species_toggled(self, checked):
+##        list = self.ui.species_list_widget
+##        if checked:
+##            list.sortItems()
+##        else:
+##            self.previously_selected_species = list.selectedItems()
+##            for i in range(list.count()):
+##                list.takeItem(i)
+##            for item in self.unsorted_species:
+##                list.addItem(item)
+##            for selected in self.previously_selected_species:
+##                list.setCurrentItem(selected, QItemSelectionModel.Select)
+##    def sort_compartments_toggled(self, checked):
+##        list = self.ui.compartments_list_widget
+##        if checked:
+##            list.sortItems()
+##        else:
+##            self.previously_selected_compartments = list.selectedItems()
+##            for i in range(list.count()):
+##                list.takeItem(i)
+##            for item in self.unsorted_compartments:
+##                list.addItem(item)
+##            for selected in self.previously_selected_compartments:
+##                list.setCurrentItem(selected, QItemSelectionModel.Select)
 
 
     def setEvery(self, every): #TODO rename/remove
@@ -2327,7 +2360,7 @@ def test_SimulatorResults_export_data_as():
 
 def main():
     argv = qApp.arguments()
-#    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
+    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
     if len(argv) > 2:
         print 'usage: python simulator_results.py {h5file}'#mcss_results.sh {h5file}'
         sys.exit(2)

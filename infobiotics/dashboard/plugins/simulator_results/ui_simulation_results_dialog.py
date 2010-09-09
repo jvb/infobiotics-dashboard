@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'simulation_results_dialog.ui'
 #
-# Created: Mon Sep  6 16:29:05 2010
-#      by: PyQt4 UI code generator 4.7
+# Created: Wed Sep  8 16:47:13 2010
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -24,6 +24,7 @@ class Ui_SimulationResultsDialog(object):
         self.gridLayout_5.setObjectName("gridLayout_5")
         self.file_name_line_edit = QtGui.QLineEdit(SimulationResultsDialog)
         self.file_name_line_edit.setEnabled(True)
+        self.file_name_line_edit.setToolTip("")
         self.file_name_line_edit.setReadOnly(True)
         self.file_name_line_edit.setObjectName("file_name_line_edit")
         self.gridLayout_5.addWidget(self.file_name_line_edit, 0, 0, 1, 7)
@@ -97,6 +98,7 @@ class Ui_SimulationResultsDialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.log_interval_label.sizePolicy().hasHeightForWidth())
         self.log_interval_label.setSizePolicy(sizePolicy)
+        self.log_interval_label.setText("")
         self.log_interval_label.setObjectName("log_interval_label")
         self.gridLayout_4.addWidget(self.log_interval_label, 0, 7, 1, 1)
         spacerItem = QtGui.QSpacerItem(57, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -135,13 +137,14 @@ class Ui_SimulationResultsDialog(object):
         self.select_all_runs_check_box.setChecked(False)
         self.select_all_runs_check_box.setObjectName("select_all_runs_check_box")
         self.gridLayout_3.addWidget(self.select_all_runs_check_box, 0, 0, 1, 1)
-        self.runs_list_widget = QtGui.QListWidget(self._runs_group_box)
+        self.runs_list_widget = ListWidget(self._runs_group_box)
         self.runs_list_widget.setEnabled(True)
         self.runs_list_widget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.runs_list_widget.setObjectName("runs_list_widget")
         self.gridLayout_3.addWidget(self.runs_list_widget, 1, 0, 1, 3)
         self.random_runs_spin_box = QtGui.QSpinBox(self._runs_group_box)
         self.random_runs_spin_box.setEnabled(True)
+        self.random_runs_spin_box.setSuffix("")
         self.random_runs_spin_box.setMinimum(0)
         self.random_runs_spin_box.setMaximum(1000)
         self.random_runs_spin_box.setSingleStep(1)
@@ -154,6 +157,7 @@ class Ui_SimulationResultsDialog(object):
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_3.addItem(spacerItem2, 2, 2, 1, 1)
         self.runs_selected_and_total_label = QtGui.QLabel(self._runs_group_box)
+        self.runs_selected_and_total_label.setText("")
         self.runs_selected_and_total_label.setScaledContents(False)
         self.runs_selected_and_total_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.runs_selected_and_total_label.setObjectName("runs_selected_and_total_label")
@@ -171,11 +175,12 @@ class Ui_SimulationResultsDialog(object):
         self.select_all_species_check_box.setObjectName("select_all_species_check_box")
         self.gridLayout_2.addWidget(self.select_all_species_check_box, 0, 0, 1, 1)
         self.species_selected_and_total_label = QtGui.QLabel(self._species_group_box)
+        self.species_selected_and_total_label.setText("")
         self.species_selected_and_total_label.setScaledContents(False)
         self.species_selected_and_total_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.species_selected_and_total_label.setObjectName("species_selected_and_total_label")
         self.gridLayout_2.addWidget(self.species_selected_and_total_label, 0, 1, 1, 1)
-        self.species_list_widget = QtGui.QListWidget(self._species_group_box)
+        self.species_list_widget = ListWidget(self._species_group_box)
         self.species_list_widget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.species_list_widget.setObjectName("species_list_widget")
         QtGui.QListWidgetItem(self.species_list_widget)
@@ -200,11 +205,12 @@ class Ui_SimulationResultsDialog(object):
         self.select_all_compartments_check_box.setObjectName("select_all_compartments_check_box")
         self.gridLayout.addWidget(self.select_all_compartments_check_box, 0, 0, 1, 1)
         self.compartments_selected_and_total_label = QtGui.QLabel(self._compartments_group_box)
+        self.compartments_selected_and_total_label.setText("")
         self.compartments_selected_and_total_label.setScaledContents(False)
         self.compartments_selected_and_total_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.compartments_selected_and_total_label.setObjectName("compartments_selected_and_total_label")
         self.gridLayout.addWidget(self.compartments_selected_and_total_label, 0, 1, 1, 1)
-        self.compartments_list_widget = QtGui.QListWidget(self._compartments_group_box)
+        self.compartments_list_widget = ListWidget(self._compartments_group_box)
         self.compartments_list_widget.setEnabled(True)
         self.compartments_list_widget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.compartments_list_widget.setObjectName("compartments_list_widget")
@@ -245,6 +251,7 @@ class Ui_SimulationResultsDialog(object):
         self.gridLayout_8.addWidget(self.quantities_combo_box, 1, 1, 1, 1)
         self.calculate_button = QtGui.QCommandLinkButton(self._data_group_box)
         self.calculate_button.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.calculate_button.setDescription("")
         self.calculate_button.setObjectName("calculate_button")
         self.gridLayout_8.addWidget(self.calculate_button, 0, 4, 1, 1)
         spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -347,7 +354,8 @@ class Ui_SimulationResultsDialog(object):
         self.visualise_population_button.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Visualise population", None, QtGui.QApplication.UnicodeUTF8))
         self.visualise_population_button.setDescription(QtGui.QApplication.translate("SimulationResultsDialog", "Animate species levels as a surface over the lattice", None, QtGui.QApplication.UnicodeUTF8))
 
-from simulator_results import FromToDoubleSpinBox
+from FromToDoubleSpinBox import FromToDoubleSpinBox
+from infobiotics.commons.pyqt4.list_widget import ListWidget
 import icons_rc
 
 if __name__ == "__main__":

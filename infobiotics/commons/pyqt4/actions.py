@@ -1,9 +1,12 @@
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QAction, QIcon
 
-def addActions(target, actions):
+def add_actions(target, actions):
     ''' Helper function that adds actions to a QObject target, often a QMenu, or
     possibly a widget for use with setContextMenuPolicy(Qt.ActionsContextMenu).
+    
+    If an item in actions is None then a separator is added.
+    
     '''
     for action in actions:
         if action is None:
@@ -13,7 +16,7 @@ def addActions(target, actions):
         else:
             target.addAction(action)
 
-def createAction(parent, text, slot=None, shortcut=None, icon=None, tip=None,
+def create_action(parent, text, slot=None, shortcut=None, icon=None, tip=None,
     checkable=False, signal="triggered()"):
     ''' Helper function that creates QActions with a given QObject parent. '''
     action = QAction(text, parent)
