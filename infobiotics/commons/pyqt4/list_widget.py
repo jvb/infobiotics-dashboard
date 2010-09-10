@@ -33,28 +33,6 @@ class ListWidget(QListWidget):
 
         if use_built_in_context_menu:
 
-            #TODO move to CompartmentsListWidget
-
-            def name_then_x_then_y(match, item):
-                return item.text().replace(',', '.')
-#            ('.*\(\d+,\d+\)$', name_then_x_then_y)
-
-            def name_then_y_then_x(match, item):
-                x_and_y = match.group().split('(')[1].split(')')[0]
-                x, y = x_and_y.split(',')
-                return '%s%s.%s' % (match.group().split(':')[0], y, x)
-#            ('.*\(\d+,\d+\)$', name_then_y_then_x)
-
-            def x_then_y(match, item):
-                return float(match.group().split('(')[1].split(')')[0].replace(',', '.'))
-#            ('.*\(\d+,\d+\)$', x_then_y)
-            
-            def y_then_x(match, item):
-                x_and_y = match.group().split('(')[1].split(')')[0]
-                x, y = x_and_y.split(',')
-                return float('%s.%s' % (y, x))
-#            ('.*\(\d+,\d+\)$', y_then_x)
-
             add_actions(
                 self,
                 [
@@ -63,19 +41,6 @@ class ListWidget(QListWidget):
                     None,
                     create_action(self, '&Sort Ascending', lambda: self.sortItems(order=Qt.AscendingOrder)),
                     create_action(self, 'Sort &Descending', lambda: self.sortItems(order=Qt.DescendingOrder)),
-                    #TODO move to CompartmentsListWidget
-                    None,
-                    create_action(self, 'Sort by name then x then y ascending', lambda: self.sortItems(regex_functions=[('.*\(\d+,\d+\)$', name_then_x_then_y)])),
-                    create_action(self, 'Sort by name then x then y descending', lambda: self.sortItems(order=Qt.DescendingOrder, regex_functions=[('.*\(\d+,\d+\)$', name_then_x_then_y)])),
-                    None,
-                    create_action(self, 'Sort by name then y then x ascending', lambda: self.sortItems(regex_functions=[('.*\(\d+,\d+\)$', name_then_y_then_x)])),
-                    create_action(self, 'Sort by name then y then x descending', lambda: self.sortItems(order=Qt.DescendingOrder, regex_functions=[('.*\(\d+,\d+\)$', name_then_y_then_x)])),
-                    None,
-                    create_action(self, 'Sort by x then y ascending', lambda: self.sortItems(regex_functions=[('.*\(\d+,\d+\)$', x_then_y)])),
-                    create_action(self, 'Sort by x then y descending', lambda: self.sortItems(order=Qt.DescendingOrder, regex_functions=[('.*\(\d+,\d+\)$', x_then_y)])),
-                    None,
-                    create_action(self, 'Sort by y then x ascending', lambda: self.sortItems(regex_functions=[('.*\(\d+,\d+\)$', y_then_x)])),
-                    create_action(self, 'Sort by y then x descending', lambda: self.sortItems(order=Qt.DescendingOrder, regex_functions=[('.*\(\d+,\d+\)$', y_then_x)])),
                 ]
             )
             self.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -92,9 +57,13 @@ class ListWidget(QListWidget):
 #                createAction(self, 'Invert selection', self.invertSelection),
 #                createAction(self, 'Select all', self.selectAll)])
 #            contextMenu.exec_(self.mapToGlobal(pos))
-            
+
     def remember_selection(self):
         self.selected = self.selectedItems()
+
+    def select(self, row):
+        self.item(row).setSelected(True)
+        print 'got here'
 
     def selectAll(self, checked=True): #TODO only_visible (True is same as QListWidget.selectAll!)
         self.disconnect(self, SIGNAL('itemSelectionChanged()'), self.remember_selection)
@@ -327,6 +296,11 @@ class ListWidget(QListWidget):
         ''' Enables functionality to be add to line edit outside of factory. '''
         self.connect(filter_line_edit, SIGNAL('textChanged(QString)'), self.filter)
 
+        #TODO move to filter_line_edit_factory?
+        from infobiotics.commons.qt4 import version
+        split = version.split('.')
+        if int(split[0]) > 4 or (int(split[0]) == 4 and int(split[1]) >= 7):
+            filter_line_edit.setPlaceholderText('Filter')
 
 class CheckBoxListWidget(ListWidget):
     

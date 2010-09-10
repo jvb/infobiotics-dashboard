@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_results_dialog.ui'
 #
-# Created: Wed Sep  8 16:47:13 2010
+# Created: Fri Sep 10 12:42:30 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -187,10 +187,7 @@ class Ui_SimulationResultsDialog(object):
         self.gridLayout_2.addWidget(self.species_list_widget, 1, 0, 1, 2)
         self.filter_species_line_edit = QtGui.QLineEdit(self._species_group_box)
         self.filter_species_line_edit.setObjectName("filter_species_line_edit")
-        self.gridLayout_2.addWidget(self.filter_species_line_edit, 2, 0, 1, 1)
-        self.sort_species_check_box = QtGui.QCheckBox(self._species_group_box)
-        self.sort_species_check_box.setObjectName("sort_species_check_box")
-        self.gridLayout_2.addWidget(self.sort_species_check_box, 2, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.filter_species_line_edit, 2, 0, 1, 2)
         self._compartments_group_box = QtGui.QGroupBox(self._runs_species_compartments_splitter)
         self._compartments_group_box.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self._compartments_group_box.setFlat(True)
@@ -210,17 +207,14 @@ class Ui_SimulationResultsDialog(object):
         self.compartments_selected_and_total_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.compartments_selected_and_total_label.setObjectName("compartments_selected_and_total_label")
         self.gridLayout.addWidget(self.compartments_selected_and_total_label, 0, 1, 1, 1)
-        self.compartments_list_widget = ListWidget(self._compartments_group_box)
+        self.compartments_list_widget = CompartmentsListWidget(self._compartments_group_box)
         self.compartments_list_widget.setEnabled(True)
         self.compartments_list_widget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.compartments_list_widget.setObjectName("compartments_list_widget")
         self.gridLayout.addWidget(self.compartments_list_widget, 2, 0, 1, 2)
         self.filter_compartments_line_edit = QtGui.QLineEdit(self._compartments_group_box)
         self.filter_compartments_line_edit.setObjectName("filter_compartments_line_edit")
-        self.gridLayout.addWidget(self.filter_compartments_line_edit, 3, 0, 1, 1)
-        self.sort_compartments_check_box = QtGui.QCheckBox(self._compartments_group_box)
-        self.sort_compartments_check_box.setObjectName("sort_compartments_check_box")
-        self.gridLayout.addWidget(self.sort_compartments_check_box, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.filter_compartments_line_edit, 3, 0, 1, 2)
         self.gridLayout_5.addWidget(self._runs_species_compartments_splitter, 1, 0, 1, 8)
         self.export_data_as_button = QtGui.QCommandLinkButton(SimulationResultsDialog)
         icon1 = QtGui.QIcon()
@@ -327,7 +321,6 @@ class Ui_SimulationResultsDialog(object):
         self.species_list_widget.item(0).setText(QtGui.QApplication.translate("SimulationResultsDialog", "Volumes", None, QtGui.QApplication.UnicodeUTF8))
         self.species_list_widget.setSortingEnabled(__sortingEnabled)
         self.filter_species_line_edit.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Filter Species", None, QtGui.QApplication.UnicodeUTF8))
-        self.sort_species_check_box.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Sort", None, QtGui.QApplication.UnicodeUTF8))
         self._compartments_group_box.setTitle(QtGui.QApplication.translate("SimulationResultsDialog", "Compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.select_all_compartments_check_box.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Select all (filter) compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.select_all_compartments_check_box.setText(QtGui.QApplication.translate("SimulationResultsDialog", "All", None, QtGui.QApplication.UnicodeUTF8))
@@ -335,7 +328,6 @@ class Ui_SimulationResultsDialog(object):
         self.compartments_list_widget.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Select multiple compartments using Ctrl-click, Shift-click or by clicking and dragging.", None, QtGui.QApplication.UnicodeUTF8))
         self.compartments_list_widget.setSortingEnabled(False)
         self.filter_compartments_line_edit.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Filter Compartments", None, QtGui.QApplication.UnicodeUTF8))
-        self.sort_compartments_check_box.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Sort", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Save timeseries data for selected runs, species and compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Export data as...", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setDescription(QtGui.QApplication.translate("SimulationResultsDialog", "text (.csv)\n"
@@ -354,6 +346,7 @@ class Ui_SimulationResultsDialog(object):
         self.visualise_population_button.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Visualise population", None, QtGui.QApplication.UnicodeUTF8))
         self.visualise_population_button.setDescription(QtGui.QApplication.translate("SimulationResultsDialog", "Animate species levels as a surface over the lattice", None, QtGui.QApplication.UnicodeUTF8))
 
+from compartments_list_widget import CompartmentsListWidget
 from FromToDoubleSpinBox import FromToDoubleSpinBox
 from infobiotics.commons.pyqt4.list_widget import ListWidget
 import icons_rc

@@ -13,7 +13,7 @@ class PlotsListWidget(QListWidget):
 #        self.setResizeMode(QListView.Adjust)
 #        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         #self.setIconSize(QSize(200,200))
-        self.hideInvariants = True
+#        self.hideInvariants = True
         #TODO implement/connect hide invariants checkbox in PlotsPreviewDialog
         self.addPlots(plots)
 
@@ -26,5 +26,5 @@ class PlotsListWidget(QListWidget):
         item = QListWidgetItem(self)
         item.plot = plot
         item.setIcon(QIcon(plot.pixmap()))
-        if plot.invariant():
-            item.setHidden(True) #TODO is this ideal?
+#        if plot.invariant():
+#            item.setHidden(True) #TODO is this ideal?

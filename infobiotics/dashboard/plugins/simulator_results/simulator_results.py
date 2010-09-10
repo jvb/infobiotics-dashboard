@@ -196,7 +196,7 @@ class Run(object):
 
 
 class Species(object):
-    """An mcss _species_list dataset as a Python object."""
+    """An mcss species dataset as a Python object."""
 
     def __init__(self, index, name, simulation):
         self.index = index
@@ -285,8 +285,8 @@ class SimulationResultsDialog(QWidget):
         self.ui.species_list_widget.connect_all_selected_check_box(self.ui.select_all_species_check_box)
         self.ui.compartments_list_widget.connect_all_selected_check_box(self.ui.select_all_compartments_check_box)
 
-        self.ui.species_list_widget.connect_sort_check_box(self.ui.sort_species_check_box)
-        self.ui.compartments_list_widget.connect_sort_check_box(self.ui.sort_compartments_check_box)
+#        self.ui.species_list_widget.connect_sort_check_box(self.ui.sort_species_check_box)
+#        self.ui.compartments_list_widget.connect_sort_check_box(self.ui.sort_compartments_check_box)
 
         self.ui.species_list_widget.connect_filter_line_edit(self.ui.filter_species_line_edit)
         self.ui.compartments_list_widget.connect_filter_line_edit(self.ui.filter_compartments_line_edit)
@@ -477,7 +477,7 @@ class SimulationResultsDialog(QWidget):
         else:
             self.ui.select_all_species_check_box.setEnabled(True)
         self.ui.filter_species_line_edit.setEnabled(True)
-        self.ui.sort_species_check_box.setEnabled(True)
+#        self.ui.sort_species_check_box.setEnabled(True)
 
         self.ui.compartments_selected_and_total_label.setVisible(True)
         self.ui.compartments_list_widget.setEnabled(True)
@@ -487,7 +487,7 @@ class SimulationResultsDialog(QWidget):
         else:
             self.ui.select_all_compartments_check_box.setEnabled(True)
         self.ui.filter_compartments_line_edit.setEnabled(True)
-        self.ui.sort_compartments_check_box.setEnabled(True)
+#        self.ui.sort_compartments_check_box.setEnabled(True)
 
         self.ui.to_spin_box.setEnabled(True)
         self.ui.from_spin_box.setEnabled(True)
@@ -510,9 +510,13 @@ class SimulationResultsDialog(QWidget):
         if self.ui.runs_list_widget.count() < 2:
             self.ui.random_runs_label.setEnabled(False)
             self.ui.random_runs_spin_box.setEnabled(False)
+            self.ui.average_over_selected_runs_check_box.setChecked(False)
+            self.ui.average_over_selected_runs_check_box.setEnabled(False)
         else:
             self.ui.random_runs_label.setEnabled(True)
             self.ui.random_runs_spin_box.setEnabled(True)
+#            self.ui.average_over_selected_runs_check_box.setChecked(True)
+#            self.ui.average_over_selected_runs_check_box.setEnabled(True)
         
         num_selected_species = len(self.ui.species_list_widget.selectedItems())
         self.ui.species_selected_and_total_label.setText('%s/%s' % (num_selected_species, self.ui.species_list_widget.count()))
@@ -658,7 +662,7 @@ class SimulationResultsDialog(QWidget):
         results = self.selected_items_results()
 
         if averaging:
-            timepoints, results = results.get_mean_over_runs()
+            timepoints, results = results.get_amounts_mean_over_runs()
             mean_index = 0
         else:
             timepoints, results = results.get_amounts()
@@ -865,11 +869,15 @@ class SimulationResultsDialog(QWidget):
         results = self.selected_items_results()
 
         if averaging:
-            timepoints, results = results.get_mean_over_runs()
+            timepoints, amounts = results.get_amounts_mean_over_runs()
             mean_index = 0
+            if self.volumes_selected:
+                timepoints, volumes = results.get_volumes_mean_over_runs()
         else:
-            timepoints, results = results.get_amounts()
-        if len(results) == 0:
+            timepoints, amounts = results.get_amounts()
+            if self.volumes_selected:
+                timepoints, volumes = results.get_volumes()
+        if len(amounts) == 0 and len(volumes) == 0:
             return
 
         plots = []
@@ -878,23 +886,34 @@ class SimulationResultsDialog(QWidget):
                 for si, s in enumerate(species):
                     plot = Plot(
                         timepoints=timepoints,
-                        levels=results[mean_index][si, ci],
+                        levels=amounts[mean_index][si, ci],
 #                        yerr=errors[si,ci],
                         species=s.data,
                         compartment=c.data,
-                        colour=colours.colour(si), #+(len(_species_list)*ci)), 
+                        colour=colours.colour(si),
                     )
                     plots.append(plot)
+
         else:
             for ri, r in enumerate(runs):
                 for ci, c in enumerate(compartments):
                     for si, s in enumerate(species):
-                        colour = colours.colour(si)#+(len(_species_list)*ci))
+                        colour = colours.colour(si)
                         plot = Plot(
                             timepoints=timepoints,
-                            levels=results[ri][si, ci, :],
+                            levels=amounts[ri][si, ci, :],
                             run=r.data,
                             species=s.data,
+                            compartment=c.data,
+                            colour=colour,
+                        )
+                        plots.append(plot)
+                    if self.volumes_selected:
+                        colour = colours.colour(len(species) + 1)
+                        plot = VolumePlot(
+                            timepoints=timepoints,
+                            levels=volumes[ri][ci, :],
+                            run=r.data,
                             compartment=c.data,
                             colour=colour,
                         )
@@ -906,15 +925,18 @@ class SimulationResultsDialog(QWidget):
                 averaging=averaging,
                 windowTitle=os.path.basename(self.simulation.model_input_file),
             )
-            self.plotsPreviewDialog.addPlots(plots)
-#            if len(plots) > 8:
-#                self.plotsPreviewDialog.showMaximized()
-#            else:
-            centre_window(self.plotsPreviewDialog)
-            self.plotsPreviewDialog.show()
-            # bring to fore (needed in this order)
-            self.plotsPreviewDialog.raise_()
-            self.plotsPreviewDialog.activateWindow()
+            if self.plotsPreviewDialog.addPlots(plots):
+    #            if len(plots) > 8:
+    #                self.plotsPreviewDialog.showMaximized()
+    #            else:
+                centre_window(self.plotsPreviewDialog)
+                self.plotsPreviewDialog.show()
+                # bring to fore (needed in this order)
+                self.plotsPreviewDialog.raise_()
+                self.plotsPreviewDialog.activateWindow()
+            else:
+                self.plotsPreviewDialog.combine()
+                self.plotsPreviewDialog.close()
 
 #        # deprecated because Jamie's Ctrl-C signal handling fixes it. But what about crashes?        
 #        try:
@@ -927,22 +949,22 @@ class SimulationResultsDialog(QWidget):
 #            self.setCursor(Qt.ArrowCursor)
 
 
-class Plot(FigureCanvasAgg):
+class Plot(object): #rename to timeseries
     def __init__(self, timepoints, levels, colour, species, compartment, run=None, yerr=None, width=5, height=5, dpi=100):
+        '''
+        
+        run == None when averaging over runs
+        
+        '''
         self.figure = Figure(figsize=(width, height), dpi=dpi)
-        self.canvas = FigureCanvasAgg.__init__(self, self.figure)
-#        self.__timepoints = timepoints
-#        self.__levels = levels
-#        self.__yerr = yerr
-#        self.__colour = colour
+        self.canvas = FigureCanvasAgg(self.figure)
         self.timepoints = timepoints
         self.levels = levels
         self.yerr = yerr
         self.run = run
         self.colour = colour
-        self._species_list = species
+        self.species = species
         self.compartment = compartment
-        self.set_label(species, compartment, run)
         self.setup()
 
     def setup(self):
@@ -954,33 +976,14 @@ class Plot(FigureCanvasAgg):
         self.axes.set_title(self.label)
         #self.axes.legend()
 
-#    def get_timepoints(self):
-#        return self.__timepoints
-#        
-#    def get_levels(self):
-#        return self.__levels
-#        
-#    def get_yerr(self):
-#        return self.__yerr
-
     def get_label(self):
-        return self.__label
-
-    def set_label(self, species, compartment, run=None):
-        compartment_name_and_xy_coords = compartment.compartment_name_and_xy_coords()
-        if run == None:
-            self.__label = "%s in %s" % (species.name, compartment_name_and_xy_coords)
+        compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
+        if self.run == None:
+            return "%s in %s" % (self.species.name, compartment_name_and_xy_coords)
         else:
-            self.__label = "%s in %s of run %s" % (species.name, compartment_name_and_xy_coords, run._run_number)
+            return "%s in %s of run %s" % (self.species.name, compartment_name_and_xy_coords, self.run._run_number)
 
-    def get_colour(self):
-        return self.__colour
-
-#    timepoints = property(get_timepoints)
-#    levels = property(get_levels)
-    label = property(get_label, set_label)
-#    colour = property(get_colour)
-#    yerr = property(get_yerr)
+    label = property(get_label)
 
     def least(self):
         return np.min(self.levels)
@@ -1013,7 +1016,29 @@ class Plot(FigureCanvasAgg):
         self.figure.savefig(filename, format='eps')
 
 
-
+class VolumePlot(Plot):
+    def __init__(self, timepoints, levels, colour, compartment, run=None, yerr=None, width=5, height=5, dpi=100):
+        class Species(object):
+            def __init__(self, name):
+                self.name = name
+        super(VolumePlot, self).__init__(timepoints, levels, colour, Species(name='Volumes'), compartment, run, yerr, width, height, dpi)
+        
+    def setup(self):
+        self.axes = self.figure.add_subplot(111)
+        self.axes.plot(self.timepoints, self.levels, color=self.colour, label=self.label)
+        self.axes.set_xlabel('Time')
+        self.axes.set_ylabel('Volume')
+        self.axes.set_title(self.label)
+        
+    def get_label(self):
+        compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
+        if self.run == None:
+            return "Volume of %s" % compartment_name_and_xy_coords
+        else:
+            return "Volume of %s in run %s" % (compartment_name_and_xy_coords, self.run._run_number)
+    
+    label = property(get_label)        
+        
 
 # adapted from Pawel's tiling code
 def arrange(number):
@@ -1092,7 +1117,7 @@ class PlotsPreviewDialog(QWidget):
             self.ui.stackButton.setEnabled(False)
             self.ui.tileButton.setEnabled(False)
         else:
-            self.ui.combineButton.setEnabled(True)
+            self.ui.combineButton.setEnabled(True) #TODO singles?
             self.ui.stackButton.setEnabled(True)
             self.ui.tileButton.setEnabled(True)
         # lists of handles for figurelegend()
@@ -1104,17 +1129,19 @@ class PlotsPreviewDialog(QWidget):
         # select lone plot
         if self.ui.plotsListWidget.count() == 1:
             self.ui.plotsListWidget.selectAll()
+            return False
         else:
             self.ui.plotsListWidget.clearSelection()
+            return True
 
-    def line(self, item, colour=None):
+    def line(self, axes, item, colour=None):
         timepoints = item.plot.timepoints
         levels = item.plot.levels
         label = item.label
         if colour == None:
             colour = item.plot.colour
 #        line = pyplot.plot(timepoints, levels, label=label, color=colour)
-        line = self.axes.plot(timepoints, levels, label=label, color=colour)
+        line = axes.plot(timepoints, levels, label=label, color=colour)
         self.lines.append(line)
 
     def errorbar(self, item, colour=None):
@@ -1140,24 +1167,59 @@ class PlotsPreviewDialog(QWidget):
     def combine(self):
         """different colours for all lines"""
         self.reset()
-        for i, item in enumerate(self.items):
-#            pyplot.xlabel("time (%s)" % item.plot.units)
-#            pyplot.ylabel("molecules")
-            self.axes = self.figure.add_subplot(111)
-            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
-            self.axes.set_ylabel("molecules")
-            timepoints = item.plot.timepoints
-            levels = item.plot.levels
-            label = item.plot.label
-            colour = colours.colour(i)
-            self.line(item, colour)
-            if self.averaging:
-                self.errorbar(item, colour)
+
+        # determine if some volumes but not (no volumes or all volumes)
+        volumes = 0
+        for item in self.items:
+            if item.plot.species.name == 'Volumes':
+                volumes += 0
+        if 0 < volumes < len(self.items):
+            some_volumes = True
+        else:
+            some_volumes = False
+
+        if not some_volumes: # either all volumes or no volumes
+            # plot all on 1st y-axis
+            for i, item in enumerate(self.items):
+#                pyplot.xlabel("time (%s)" % item.plot.units)
+#                pyplot.ylabel("molecules")
+                self.axes = self.figure.add_subplot(111)
+                self.axes.set_xlabel("time")# (%s)" % item.plot.units)
+                self.axes.set_ylabel("molecules") #TODO concentration
+                colour = colours.colour(i)
+                self.line(self.axes, item, colour)
+                if self.averaging:
+                    self.errorbar(item, colour)
+        else:
+            # mix, plot species on 1st y-axis and volumes on 2nd y-axis
+            not_volumes = [item for item in self.items if item.plot.species.name != 'Volumes']
+            volumes = [item for item in self.items if item.plot.species.name == 'Volumes']
+            for i, item in enumerate(not_volumes):
+#                pyplot.xlabel("time (%s)" % item.plot.units)
+#                pyplot.ylabel("molecules")
+                self.axes = self.figure.add_subplot(111)
+                self.axes.set_xlabel("time")# (%s)" % item.plot.units)
+                self.axes.set_ylabel("molecules")
+                colour = colours.colour(i)
+                self.line(self.axes, item, colour)
+                if self.averaging:
+                    self.errorbar(item, colour)
+            for i, item in enumerate(volumes):
+                i += len(not_volumes)
+                axes = self.axes.twiny()
+#                axes.set_xlabel("time")# (%s)" % item.plot.units)
+                axes.set_ylabel("Volumes")
+                colour = colours.colour(i)
+                self.line(axes, item, colour)
+                if self.averaging:
+                    self.errorbar(item, colour)
+                
+            
         if not self.no_labels: self.legend()
         self.finalise()
 
     def stack(self):
-        """same colour for each _species_list (legend), _compartments_list title"""
+        """same colour for each species (legend), _compartments_list title"""
         self.reset()
         rows = len(self.items)
         cols = 1
@@ -1168,7 +1230,7 @@ class PlotsPreviewDialog(QWidget):
                 self.sharedAxis = self.figure.add_subplot(rows, cols, rows - i)
                 self.axes = self.sharedAxis
                 self.sharedAxis.set_xlabel("time")# (%s)" % item.plot.units)
-                self.line(item)
+                self.line(self.axes, item)
                 if self.averaging:
                     self.errorbar(item)
             else:
@@ -1176,7 +1238,7 @@ class PlotsPreviewDialog(QWidget):
 #                pyplot.setp(axes.get_xticklabels(), visible=False)
                 self.axes = self.figure.add_subplot(rows, cols, rows - i, sharex=self.sharedAxis)
 #                pyplot.setp(self.axes.get_xticklabels(), visible=False) #TODO
-                self.line(item)
+                self.line(self.axes, item)
                 if self.averaging:
                     self.errorbar(item)
             if len(self.items) < 6: #TODO 6 is a bit arbitary  
@@ -1186,7 +1248,7 @@ class PlotsPreviewDialog(QWidget):
         self.finalise()
 
     def tile(self):
-        """same colours for each _species_list (legend), _compartments_list title"""
+        """same colours for each species (legend), _compartments_list title"""
         self.reset()
         rows, cols = arrange(len(self.items))
         for i, item in enumerate(self.items):
@@ -1196,7 +1258,7 @@ class PlotsPreviewDialog(QWidget):
             self.axes = self.figure.add_subplot(rows, cols, i + 1)
             self.axes.set_xlabel("time")# (%s)" % item.plot.units)
             self.axes.set_ylabel("molecules")
-            self.line(item)
+            self.line(self.axes, item)
             if self.averaging:
                 self.errorbar(item)
             if not self.no_labels: self.legend()
@@ -1219,74 +1281,74 @@ class PlotsPreviewDialog(QWidget):
         self.labels_and_title()
 
     def labels_and_title(self):
-        species = [item.plot._species_list for item in self.items]
+        species = [item.plot.species for item in self.items]
         compartments = [item.plot.compartment for item in self.items]
         single_species = True if len(set(species)) == 1 else False
         single_compartment = True if len(set(compartments)) == 1 else False
-        # check if only 1 _species_list
+        # check if only 1 species
         single_run = True if self._runs_list == 1 else False
         title = ""
         if single_run:
             if single_species:
                 # check if only 1 compartment
                 if single_compartment:
-                    title = "%s in %s (1 run)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords())
+                    title = "%s in %s (1 run)" % (item.plot.species.name, item.plot.compartment.compartment_name_and_xy_coords())
                     for item in self.items:
                         item.label = None
                         self.no_labels = True
                 else:
-                    title = "%s (1 run)" % (item.plot._species_list.name)
+                    title = "%s (1 run)" % (item.plot.species.name)
                     for item in self.items:
                         item.label = item.plot.compartment.compartment_name_and_xy_coords()
             else:
                 if single_compartment:
                     title = "%s (1 run)" % (item.plot.compartment.compartment_name_and_xy_coords())
                     for item in self.items:
-                        item.label = item.plot._species_list.name
+                        item.label = item.plot.species.name
                 else:
                     title = "1 run"
                     for item in self.items:
-                        item.label = "%s in %s" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords())
+                        item.label = "%s in %s" % (item.plot.species.name, item.plot.compartment.compartment_name_and_xy_coords())
         else:
             if self.averaging:
                 if single_species:
                     if single_compartment:
-                        title = "%s in %s (mean of %s runs)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
+                        title = "%s in %s (mean of %s runs)" % (item.plot.species.name, item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
                             item.label = None
                             self.no_labels = True
                     else:
-                        title = "%s (mean of %s runs)" % (item.plot._species_list.name, self._runs_list)
+                        title = "%s (mean of %s runs)" % (item.plot.species.name, self._runs_list)
                         for item in self.items:
                             item.label = "%s" % (item.plot.compartment.compartment_name_and_xy_coords())
                 else:
                     if single_compartment:
                         title = "%s (mean of %s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
-                            item.label = "%s" % (item.plot._species_list.name)
+                            item.label = "%s" % (item.plot.species.name)
                     else:
                         title = "Mean of %s runs" % (self._runs_list)
                         for item in self.items:
-                            item.label = "%s in %s" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords())
+                            item.label = "%s in %s" % (item.plot.species.name, item.plot.compartment.compartment_name_and_xy_coords())
             else:
                 if single_species:
                     if single_compartment:
-                        title = "%s in %s  (%s runs)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
+                        title = "%s in %s  (%s runs)" % (item.plot.species.name, item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
                             item.label = "Run %s" % item.plot.run._run_number
                     else:
-                        title = "%s (%s runs)" % (item.plot._species_list.name, self._runs_list)
+                        title = "%s (%s runs)" % (item.plot.species.name, self._runs_list)
                         for item in self.items:
                             item.label = "%s (run %s)" % (item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run._run_number)
                 else:
                     if single_compartment:
                         title = "%s (%s runs)" % (item.plot.compartment.compartment_name_and_xy_coords(), self._runs_list)
                         for item in self.items:
-                            item.label = "%s (run %s)" % (item.plot._species_list.name, item.plot.run._run_number)
+                            item.label = "%s (run %s)" % (item.plot.species.name, item.plot.run._run_number)
                     else:
                         title = "%s runs" % (self._runs_list)
                         for item in self.items:
-                            item.label = "%s in %s (run %s)" % (item.plot._species_list.name, item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run._run_number)
+                            item.label = "%s in %s (run %s)" % (item.plot.species.name, item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run._run_number)
         # set main title
 #        pyplot.suptitle(title)
         self.figure.suptitle(title)
@@ -1409,6 +1471,30 @@ class SimulatorResults(object):
                     results[ri][si, ci, :] = amounts[s, c, :]
         h5.close()
         return (self.timepoints, results)
+
+
+    def get_volumes(self):
+        try:
+            results = [np.zeros((len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
+        except MemoryError, e:
+            if parent is not None:
+                QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.')
+            else:
+                print e
+            return (self.timepoints, [])
+        h5 = tables.openFile(self.filename)
+        for ri, r in enumerate(self.run_indices):
+            where = '/run%s' % (r + 1)
+            volumes = h5.getNode(where, 'volumes')[:, self.start:self.finish:self.every]
+            for ci, c in enumerate(self.compartment_indices):
+                results[ri][ci, :] = volumes[c, :]
+        h5.close()
+        return (self.timepoints, results)
+        
+    def get_volumes_mean_over_runs(self):
+        raise NotImplementedError
+        
+        
 
 
 ##import itertools
@@ -1581,7 +1667,7 @@ class SimulatorResults(object):
     mean = lambda array: np.mean(array, axis=3)
     std = lambda array: np.std(array, ddof=1, axis=3)
 
-    def get_mean_over_runs(self):
+    def get_amounts_mean_over_runs(self):
         return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),))
 #        return self.get_functions_over_runs((SimulatorResults.mean,))
 #        return self.get_functions_over_runs((self.mean,))
@@ -2167,10 +2253,16 @@ def test_SimulatorResults_export_data_as():
 #    w.export_data_as('test.npz')    # write_npz
 
 
+def test_volumes():
+    self.main()
+    w.ui.runs_list_widget.select(0)
+#    w.ui. #TODO
+
 
 def main():
     argv = qApp.arguments()
-    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
+#    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
+    argv.insert(1, '/home/jvb/dashboard/examples/germination_09.h5')
     if len(argv) > 2:
         print 'usage: python simulator_results.py {h5file}'#mcss_results.sh {h5file}'
         sys.exit(2)
@@ -2188,5 +2280,6 @@ if __name__ == "__main__":
     main()
 #    test()
 #    test_SimulatorResults_export_data_as()
+#    test_volumes()
     exit(qApp.exec_())
 

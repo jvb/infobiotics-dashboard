@@ -27,7 +27,7 @@
    <item>
     <widget class="QCheckBox" name="hideInvariantsCheckBox">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="text">
       <string>Hide invariants (using Ctrl-A to select all always selects invariants)</string>

@@ -470,17 +470,10 @@
          </item>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="2" column="0" colspan="2">
         <widget class="QLineEdit" name="filter_species_line_edit">
          <property name="toolTip">
           <string>Filter Species</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QCheckBox" name="sort_species_check_box">
-         <property name="text">
-          <string>Sort</string>
          </property>
         </widget>
        </item>
@@ -545,7 +538,7 @@
         </widget>
        </item>
        <item row="2" column="0" colspan="2">
-        <widget class="ListWidget" name="compartments_list_widget">
+        <widget class="CompartmentsListWidget" name="compartments_list_widget">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -560,17 +553,10 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="3" column="0" colspan="2">
         <widget class="QLineEdit" name="filter_compartments_line_edit">
          <property name="toolTip">
           <string>Filter Compartments</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QCheckBox" name="sort_compartments_check_box">
-         <property name="text">
-          <string>Sort</string>
          </property>
         </widget>
        </item>
@@ -770,6 +756,11 @@ NumPy (.npz)</string>
    <class>FromToDoubleSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>FromToDoubleSpinBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CompartmentsListWidget</class>
+   <extends>QListWidget</extends>
+   <header>compartments_list_widget.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

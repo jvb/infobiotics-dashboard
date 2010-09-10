@@ -1,3 +1,6 @@
+import PyQt4.QtCore
+version = PyQt4.QtCore.QT_VERSION_STR
+
 from PyQt4.QtGui import QApplication
 
 def centre_window(window):
