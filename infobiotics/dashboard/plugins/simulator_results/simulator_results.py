@@ -958,7 +958,7 @@ class Plot(object): #rename to timeseries
         
         '''
         self.figure = Figure(figsize=(width, height), dpi=dpi)
-        self.canvas = FigureCanvasAgg(self.figure)
+        self.canvas = FigureCanvasAgg(self.figure) #TODO remove?
         self.timepoints = timepoints
         self.levels = levels
         self.yerr = yerr
@@ -986,17 +986,17 @@ class Plot(object): #rename to timeseries
 
     label = property(get_label)
 
-    def least(self):
-        return np.min(self.levels)
-
-    def most(self):
-        return np.max(self.levels)
-
-    def invariant(self):
-        return (True if self.least() == self.most() else False)
-
-    def zeros(self):
-        return (True if self.least() == 0 and self.most() == 0 else False)
+#    def least(self):
+#        return np.min(self.levels)
+#
+#    def most(self):
+#        return np.max(self.levels)
+#
+#    def invariant(self):
+#        return (True if self.least() == self.most() else False)
+#
+#    def zeros(self):
+#        return (True if self.least() == 0 and self.most() == 0 else False)
 
     def pixmap(self):
         fileLikeObject = StringIO.StringIO()
@@ -1059,11 +1059,19 @@ def arrange(number):
     return (rows, cols)
 
 
-
+from enthought.traits.api import Bool
 
 class TraitsPlot(HasTraits):
     figure = Instance(Figure, ())
     title = Str('title')
+    show_individual_legends = Bool
+    show_figure_legend = Bool
+
+    def _show_figure_legend_changed(self, value):
+        if value:
+            pass#self.figure.legend()
+        else:
+            self.figure.legend_ = None
 
     def traits_view(self):
         return View(
@@ -1075,6 +1083,8 @@ class TraitsPlot(HasTraits):
                     ),
                 ),
                 HGroup(
+                    'show_individual_legends',
+                    'show_figure_legend',
                     Spring(),
                     Item('save_resized', show_label=False),
                 ),
@@ -1094,7 +1104,7 @@ class PlotsPreviewDialog(QWidget):
 
     def __init__(self, runs=1, averaging=False, windowTitle=None, parent=None):
         if parent != None:
-            QObject.setParent(parent)
+            QObject.setParent(self, parent)
         QWidget.__init__(self)
         self._runs_list = runs
         self.averaging = averaging
@@ -1102,16 +1112,15 @@ class PlotsPreviewDialog(QWidget):
         self.windowTitle = windowTitle
         self.ui = Ui_PlotsPreviewDialog()
         self.ui.setupUi(self)
-        self.connect(self.ui.plotsListWidget, SIGNAL("itemSelectionChanged()"),
-                     self.update_ui)
         self.connect(self.ui.combineButton, SIGNAL("clicked()"), self.combine)
         self.connect(self.ui.stackButton, SIGNAL("clicked()"), self.stack)
         self.connect(self.ui.tileButton, SIGNAL("clicked()"), self.tile)
-        # disable buttons and create handle lists
+        self.connect(self.ui.plotsListWidget, SIGNAL("itemSelectionChanged()"), self.update_ui)
         self.update_ui()
-#        self.traits_plot_list = []
+#        self.traits_plot_list = [] #TODO remove
 
     def update_ui(self):
+        # disable buttons and create handle lists
         self.items = self.ui.plotsListWidget.selectedItems()
         if len(self.items) == 0:
             self.ui.combineButton.setEnabled(False)
@@ -1135,147 +1144,11 @@ class PlotsPreviewDialog(QWidget):
             self.ui.plotsListWidget.clearSelection()
             return True
 
-    def line(self, axes, item, colour=None):
-        timepoints = item.plot.timepoints
-        levels = item.plot.levels
-        label = item.label
-        if colour == None:
-            colour = item.plot.colour
-#        line = pyplot.plot(timepoints, levels, label=label, color=colour)
-        line = axes.plot(timepoints, levels, label=label, color=colour)
-        self.lines.append(line)
-
-    def errorbar(self, item, colour=None):
-        timepoints = item.plot.timepoints
-#        levels = item.plot.levels
-        label = item.plot.label
-        if colour == None:
-            colour = item.plot.colour
-        step = int(len(timepoints) / 10)
-#        errorbar = pyplot.errorbar(timepoints[::step], #TODO
-#                                   levels[::step],
-#                                   yerr=item.plot.yerr[::step],
-#                                   label=None,
-#                                   color=colour,
-#                                   fmt=None, 
-#                                   linestyle=None, 
-#                                   capsize=0)
-#        self.errorbars.append(errorbar)
-
-    def legend(self):
-        self.axes.legend(loc=0, prop=self.fontManager)
-
-    def combine(self):
-        """different colours for all lines"""
-        self.reset()
-
-        # determine if some volumes but not (no volumes or all volumes)
-        volumes = 0
-        for item in self.items:
-            if item.plot.species.name == 'Volumes':
-                volumes += 1
-        if 0 < volumes < len(self.items):
-            some_volumes = True
-        else:
-            some_volumes = False
-
-        if not some_volumes: # either all volumes or no volumes
-            # plot all on 1st y-axis
-            for i, item in enumerate(self.items):
-#                pyplot.xlabel("time (%s)" % item.plot.units)
-#                pyplot.ylabel("molecules")
-                self.axes = self.figure.add_subplot(111)
-                self.axes.set_xlabel("time")# (%s)" % item.plot.units)
-                self.axes.set_ylabel("molecules") #TODO concentration
-                colour = colours.colour(i)
-                self.line(self.axes, item, colour)
-                if self.averaging:
-                    self.errorbar(item, colour)
-        else:
-            # mix, plot species on 1st y-axis and volumes on 2nd y-axis
-            not_volumes = [item for item in self.items if item.plot.species.name != 'Volumes']
-            volumes = [item for item in self.items if item.plot.species.name == 'Volumes']
-            self.axes = self.figure.add_subplot(111)
-            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
-            self.axes.set_ylabel("molecules")
-            for i, item in enumerate(not_volumes):
-#                pyplot.xlabel("time (%s)" % item.plot.units)
-#                pyplot.ylabel("molecules")
-                colour = colours.colour(i)
-                self.line(self.axes, item, colour)
-                if self.averaging:
-                    self.errorbar(item, colour)
-            axes = self.axes.twinx()
-            for i, item in enumerate(volumes):
-                i += len(not_volumes)
-#                axes.set_xlabel("time")# (%s)" % item.plot.units)
-                axes.set_ylabel("Volumes")
-                colour = colours.colour(i)
-                self.line(axes, item, colour)
-                if self.averaging:
-                    self.errorbar(item, colour)
-                
-            
-        if not self.no_labels: self.legend()
-        self.finalise()
-
-    def stack(self):
-        """same colour for each species (legend), _compartments_list title"""
-        self.reset()
-        rows = len(self.items)
-        cols = 1
-        for i, item in enumerate(self.items):
-            if i == 0:
-#                self.sharedAxis = pyplot.subplot(rows, cols, rows - i)
-#                pyplot.xlabel("time (%s)" % item.plot.units) # make sure everything is in the same units, or can matplotlib do this?
-                self.sharedAxis = self.figure.add_subplot(rows, cols, rows - i)
-                self.axes = self.sharedAxis
-                self.sharedAxis.set_xlabel("time")# (%s)" % item.plot.units)
-                self.line(self.axes, item)
-                if self.averaging:
-                    self.errorbar(item)
-            else:
-#                axes = pyplot.subplot(rows, cols, rows - i, sharex=self.sharedAxis)
-#                pyplot.setp(axes.get_xticklabels(), visible=False)
-                self.axes = self.figure.add_subplot(rows, cols, rows - i, sharex=self.sharedAxis)
-#                pyplot.setp(self.axes.get_xticklabels(), visible=False) #TODO
-                self.line(self.axes, item)
-                if self.averaging:
-                    self.errorbar(item)
-            if len(self.items) < 6: #TODO 6 is a bit arbitary  
-#                pyplot.ylabel("molecules")
-                self.axes.set_ylabel("molecules")
-            if not self.no_labels: self.legend()
-        self.finalise()
-
-    def tile(self):
-        """same colours for each species (legend), _compartments_list title"""
-        self.reset()
-        rows, cols = arrange(len(self.items))
-        for i, item in enumerate(self.items):
-#            pyplot.subplot(rows, cols, i + 1)
-#            pyplot.xlabel("time (%s)" % item.plot.units)
-#            pyplot.ylabel("molecules")
-            self.axes = self.figure.add_subplot(rows, cols, i + 1)
-            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
-            self.axes.set_ylabel("molecules")
-            self.line(self.axes, item)
-            if self.averaging:
-                self.errorbar(item)
-            if not self.no_labels: self.legend()
-        self.finalise()
-
-    def figurelegend(self):
-        """Create a legend for all subplots."""
-        labels = [line.label for line in self.lines]
-#        pyplot.figlegend(self.lines, labels, loc='bottom')
-        self.figure.figlegend(self.lines, labels, loc='bottom')
-
     def reset(self):
 #        pyplot.close()
         self.traits_plot = TraitsPlot()
 #        self.traits_plot_list.append(self.traits_plot) #FIXME keeping a reference seems to cause a Qt crash, but not keeping it will lead to GC, wtf?
-#        print self.traits_plot_list
+#        print self.traits_plot_list #TODO remove and above
         self.figure = self.traits_plot.figure
 #        self.axes = None
         self.no_labels = False
@@ -1352,7 +1225,140 @@ class PlotsPreviewDialog(QWidget):
                             item.label = "%s in %s (run %s)" % (item.plot.species.name, item.plot.compartment.compartment_name_and_xy_coords(), item.plot.run._run_number)
         # set main title
 #        pyplot.suptitle(title)
-        self.figure.suptitle(title)
+        self.figure.suptitle(title)        
+
+
+    def combine(self):
+        """different colours for all lines"""
+        self.reset()
+
+        # determine if some volumes but not (no volumes or all volumes)
+        volumes = 0
+        for item in self.items:
+            if item.plot.species.name == 'Volumes':
+                volumes += 1
+        if 0 < volumes < len(self.items):
+            some_volumes = True
+        else:
+            some_volumes = False
+
+        if not some_volumes: # either all volumes or no volumes
+            # plot all on 1st y-axis
+            for i, item in enumerate(self.items):
+#                pyplot.xlabel("time (%s)" % item.plot.units)
+#                pyplot.ylabel("molecules")
+                self.axes = self.figure.add_subplot(111)
+                self.axes.set_xlabel("time")# (%s)" % item.plot.units)
+                self.axes.set_ylabel("molecules") #TODO concentration
+                colour = colours.colour(i)
+                self.line(self.axes, item, colour)
+                if self.averaging:
+                    self.errorbar(item, colour)
+        else:
+            # mix, plot species on 1st y-axis and volumes on 2nd y-axis
+            not_volumes = [item for item in self.items if item.plot.species.name != 'Volumes']
+            volumes = [item for item in self.items if item.plot.species.name == 'Volumes']
+            self.axes = self.figure.add_subplot(111)
+            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
+            self.axes.set_ylabel("molecules")
+            for i, item in enumerate(not_volumes):
+#                pyplot.xlabel("time (%s)" % item.plot.units)
+#                pyplot.ylabel("molecules")
+                colour = colours.colour(i)
+                self.line(self.axes, item, colour)
+                if self.averaging:
+                    self.errorbar(item, colour)
+            axes = self.axes.twinx()
+            for i, item in enumerate(volumes):
+                i += len(not_volumes)
+#                axes.set_xlabel("time")# (%s)" % item.plot.units)
+                axes.set_ylabel("Volumes")
+                colour = colours.colour(i)
+                self.line(axes, item, colour)
+                if self.averaging:
+                    self.errorbar(item, colour)
+            
+        if not self.no_labels: self.legend() #TODO
+
+        self.finalise()
+
+
+    def stack(self):
+        """same colour for each species (legend), _compartments_list title"""
+        self.reset()
+        rows = len(self.items)
+        cols = 1
+        for i, item in enumerate(self.items):
+            if i == 0:
+                self.sharedAxis = self.figure.add_subplot(rows, cols, rows - i)
+                self.axes = self.sharedAxis
+                self.sharedAxis.set_xlabel("time")# (%s)" % item.plot.units)
+                self.line(self.axes, item)
+                if self.averaging:
+                    self.errorbar(item)
+            else:
+                self.axes = self.figure.add_subplot(rows, cols, rows - i, sharex=self.sharedAxis)
+#                pyplot.setp(self.axes.get_xticklabels(), visible=False) #TODO
+                self.line(self.axes, item)
+                if self.averaging:
+                    self.errorbar(item)
+            if len(self.items) < 6: #TODO 6 is a bit arbitary  
+                self.axes.set_ylabel("molecules") #TODO change for volumes/concentration
+            
+            if not self.no_labels: self.legend() #TODO
+        
+        self.finalise()
+
+
+    def tile(self):
+        """same colours for each species (legend), _compartments_list title"""
+        self.reset()
+        rows, cols = arrange(len(self.items))
+        for i, item in enumerate(self.items):
+            self.axes = self.figure.add_subplot(rows, cols, i + 1)
+            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
+            self.axes.set_ylabel("molecules")
+            self.line(self.axes, item)
+            if self.averaging:
+                self.errorbar(item)
+
+            if not self.no_labels: self.legend() #TODO
+        
+        self.finalise()
+
+    def line(self, axes, item, colour=None):
+        lines = axes.plot(
+            item.plot.timepoints,
+            item.plot.levels,
+            label=item.label,
+            color=colour if colour is not None else item.plot.colour,
+        )
+        self.lines.append((lines[0], item.label))
+
+    def errorbar(self, item, colour=None):
+        return #TODO
+#        step = int(len(timepoints) / 10)
+#        errorbar = pyplot.errorbar( #TODO
+#            item.plot.timepoints[::step], 
+#            item.plot.levels[::step],
+#            yerr=item.plot.yerr[::step],
+#            label=None,#item.plot.label
+#            color=colour if colour is not None else item.plot.colour,
+#            fmt=None, 
+#            linestyle=None, 
+#            capsize=0
+#        )
+#        self.errorbars.append(errorbar)
+
+    def legend(self):
+        self.axes.legend(loc=0, prop=self.fontManager)
+
+    def figurelegend(self): #FIXME use this
+        """Create a legend for all subplots."""
+        lines = [line for line, label in self.lines]
+        labels = [label for line, label in self.lines]
+        legend = self.figure.legend(lines, labels, loc='right')
+#        legend.draggable() #TODO test for new matplotlib version before setting
 
     def background(self):
         """Change figure background."""
@@ -1360,18 +1366,25 @@ class PlotsPreviewDialog(QWidget):
         self.figure.set_facecolor("whitesmoke")
 
     def finalise(self):
-#        self.figlegend()
-        self.background()
-        # reset lists
+
+        self.figurelegend()
+
         self.lines = []
         self.errorbars = []
-        # display
+
+        self.background()
+
         if self.windowTitle is not None:
-#            pyplot.gcf().canvas.set_window_title(self.windowTitle)
-#        pyplot.show()
             self.traits_plot.title = self.windowTitle
-        self.traits_plot.edit_traits()
-#        self.traits_plot.configure_traits()
+
+        # http://www.mail-archive.com/pyqt@riverbankcomputing.com/msg16645.html
+        from PyQt4.QtCore import QAbstractEventDispatcher 
+        if QAbstractEventDispatcher.instance() != 0:
+            self.traits_plot.edit_traits()
+        else:
+            self.traits_plot.configure_traits()
+            
+            
 
 
 
