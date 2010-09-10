@@ -4,7 +4,6 @@ from infobiotics.commons.pyqt4.actions import add_actions, create_action
 class CompartmentsListWidget(ListWidget):
 
     def __init__(self, parent=None, use_built_in_context_menu=True):
-        print 'got here'
         super(CompartmentsListWidget, self).__init__(parent, use_built_in_context_menu)
         
         if use_built_in_context_menu:
@@ -45,5 +44,3 @@ class CompartmentsListWidget(ListWidget):
                     create_action(self, 'Sort by y then x descending', lambda: self.sortItems(order=Qt.DescendingOrder, regex_functions=[('.*\(\d+,\d+\)$', y_then_x)])),
                 ]
             )
-
-            print 'got here'

@@ -61,9 +61,15 @@ class ListWidget(QListWidget):
     def remember_selection(self):
         self.selected = self.selectedItems()
 
-    def select(self, row):
+    def select(self, row): #TODO override __getitem__ for indexing and slicing
+        len_all_items = len(self.all_items()) 
+        if row > len_all_items - 1:
+            import sys
+            sys.stderr.write('ListWidget.select(row=%s): row > %s, nothing selected.\n' % (row, len_all_items))
+            return
+        if row < 0:
+            row = len_all_items + row
         self.item(row).setSelected(True)
-        print 'got here'
 
     def selectAll(self, checked=True): #TODO only_visible (True is same as QListWidget.selectAll!)
         self.disconnect(self, SIGNAL('itemSelectionChanged()'), self.remember_selection)
@@ -357,4 +363,8 @@ if __name__ == '__main__':
     widget.setLayout(layout)
     widget.setGeometry(600, 300, 200, 480)
     widget.show()
+    
+    list_widget.select(-2)
+    list_widget.select(9)
+    
     exit(app.exec_())

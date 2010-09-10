@@ -934,6 +934,7 @@ class SimulationResultsDialog(QWidget):
                 # bring to fore (needed in this order)
                 self.plotsPreviewDialog.raise_()
                 self.plotsPreviewDialog.activateWindow()
+                return self.plotsPreviewDialog
             else:
                 self.plotsPreviewDialog.combine()
                 self.plotsPreviewDialog.close()
@@ -1172,7 +1173,7 @@ class PlotsPreviewDialog(QWidget):
         volumes = 0
         for item in self.items:
             if item.plot.species.name == 'Volumes':
-                volumes += 0
+                volumes += 1
         if 0 < volumes < len(self.items):
             some_volumes = True
         else:
@@ -1194,19 +1195,19 @@ class PlotsPreviewDialog(QWidget):
             # mix, plot species on 1st y-axis and volumes on 2nd y-axis
             not_volumes = [item for item in self.items if item.plot.species.name != 'Volumes']
             volumes = [item for item in self.items if item.plot.species.name == 'Volumes']
+            self.axes = self.figure.add_subplot(111)
+            self.axes.set_xlabel("time")# (%s)" % item.plot.units)
+            self.axes.set_ylabel("molecules")
             for i, item in enumerate(not_volumes):
 #                pyplot.xlabel("time (%s)" % item.plot.units)
 #                pyplot.ylabel("molecules")
-                self.axes = self.figure.add_subplot(111)
-                self.axes.set_xlabel("time")# (%s)" % item.plot.units)
-                self.axes.set_ylabel("molecules")
                 colour = colours.colour(i)
                 self.line(self.axes, item, colour)
                 if self.averaging:
                     self.errorbar(item, colour)
+            axes = self.axes.twinx()
             for i, item in enumerate(volumes):
                 i += len(not_volumes)
-                axes = self.axes.twiny()
 #                axes.set_xlabel("time")# (%s)" % item.plot.units)
                 axes.set_ylabel("Volumes")
                 colour = colours.colour(i)
@@ -2254,9 +2255,18 @@ def test_SimulatorResults_export_data_as():
 
 
 def test_volumes():
-    self.main()
+    w = main()
     w.ui.runs_list_widget.select(0)
-#    w.ui. #TODO
+    w.ui.species_list_widget.select(-1)
+    w.ui.species_list_widget.select(-2)
+    w.ui.compartments_list_widget.select(-1)
+    w.ui.compartments_list_widget.select(-2)
+    w.every = 100
+    p = w.plot()
+#    p.ui.plotsListWidget.selectAll()
+#    p.combine()
+    
+    
 
 
 def main():
@@ -2273,13 +2283,14 @@ def main():
         w = SimulationResultsDialog(filename=argv[1])
     centre_window(w)
     w.show()
+    return w
 #    shared.settings.restore_window_size_and_position(w)
 
 
 if __name__ == "__main__":
-    main()
+#    main()
 #    test()
 #    test_SimulatorResults_export_data_as()
-#    test_volumes()
+    test_volumes()
     exit(qApp.exec_())
 
