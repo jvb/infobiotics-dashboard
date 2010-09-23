@@ -13,5 +13,7 @@ colours = ['blue', 'red', 'gold', 'green', 'darkorchid', 'darkorange',
            'royalblue', 'yellowgreen', 'darkblue',
            'darkgreen', 'darkred']
 
+#TODO http://www.omatrix.com/manual/gcolor.htm Unless specified by gcolor, O-Matrix uses the following sequence of colors for plotting: "black", "maroon", "green", "olive", "navy", "purple", "teal", "gray", "silver", "red", "lime", "yellow", "blue", "fuschia", and "aqua". That is, the first line plotted with gplot will be black, the second will be maroon, and so on. The sequence starts over after an aqua plot.
+
 def colour(i):
     return colours[int(i) % len(colours)]

@@ -339,7 +339,7 @@ if __name__ == '__main__':
     from PyQt4.QtGui import QApplication, QWidget, QVBoxLayout, QLineEdit, QCheckBox, QPushButton
     app = QApplication([])
     
-    list_widget = CheckBoxListWidget()
+    list_widget = ListWidget()#CheckBoxListWidget()
 #    list_widget.addItems([str(i) for i in reversed(range(0, 15, 2))])
 #    list_widget.addItems(['1.1', '1.0a', '1.0b', '2', '12'])
 #    list_widget.addItems(['a', '1', '2', 'a(1,2)', 'a(1.2)', 'a(2,1)', '2,1'])

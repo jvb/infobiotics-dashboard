@@ -1,6 +1,14 @@
 '''
 Draggable legend for matplotlib figures from http://stackoverflow.com/q/2539477
 
+Usage:
+
+    def draw(self):     
+        ax = self.figure.add_subplot(111)
+        scatter = ax.scatter(np.random.randn(100), np.random.randn(100))
+
+    legend = DraggableLegend(ax.legend())
+
 Apparently included in upstream version of matplotlib, not in ETS yet though
 (20100923). Usage then would be:
 
@@ -8,16 +16,8 @@ Apparently included in upstream version of matplotlib, not in ETS yet though
 
 '''
 
-class DraggableLegend:
-    ''' Usage:
-    
-        def draw(self): 
-            ax = self.figure.add_subplot(111)
-            scatter = ax.scatter(np.random.randn(100), np.random.randn(100))
+class DraggableLegend(object):
 
-        legend = DraggableLegend(ax.legend())
-    
-    '''
     def __init__(self, legend):
         self.legend = legend
         self.gotLegend = False

@@ -1,3 +1,5 @@
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4' 
 from enthought.traits.api import Property, Str, Bool, List, Tuple, HasTraits
 from enthought.traits.ui.api import Controller, View, Item
 from enthought.traits.ui.menu import Action, Menu, MenuBar
@@ -30,7 +32,7 @@ class HelpfulController(Controller):
                         scrollable=True,
                         resizable=True,
                         title=name,
-                        id = '%s.help' % self.__class__.__name__
+                        id='%s.help' % self.__class__.__name__
                     )
                 )
         elif len(self.help_urls) > 0:
@@ -64,7 +66,7 @@ class HelpfulController(Controller):
                     scrollable=True,
                     resizable=True,
                     title=name,
-                    id = '%s.help' % self.__class__.__name__,
+                    id='%s.help' % self.__class__.__name__,
 #                    parent = self.info.ui.control,
                 )
             )
@@ -104,15 +106,15 @@ if __name__ == '__main__':
     class Handler(HelpfulController):
         help_urls = [
             ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/modelCheckingMC2.html'),
-            ('MC2 webpage','http://www.brc.dcs.gla.ac.uk/software/mc2/'),
+            ('MC2 webpage', 'http://www.brc.dcs.gla.ac.uk/software/mc2/'),
         ]
         
-        help_strs = [('Test','testing'),('Test2','testing again')]
+        help_strs = [('Test', 'testing'), ('Test2', 'testing again')]
         
         def traits_view(self):
             return View(
                 's',
-                menubar = MenuBar(
+                menubar=MenuBar(
                     self.get_help_menu(),
                 ),
             )

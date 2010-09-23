@@ -434,7 +434,7 @@ class SimulationResultsDialog(QWidget):
         self.ui.species_selected_and_total_label.setVisible(False)
         
         self.ui.filter_species_line_edit.setEnabled(False)
-        self.ui.sort_species_check_box.setEnabled(False)
+#        self.ui.sort_species_check_box.setEnabled(False)
 
         self.ui.compartments_list_widget.clear()
         self.ui.compartments_list_widget.setEnabled(False)
@@ -444,7 +444,7 @@ class SimulationResultsDialog(QWidget):
         self.ui.compartments_selected_and_total_label.setVisible(False)
         
         self.ui.filter_compartments_line_edit.setEnabled(False)
-        self.ui.sort_compartments_check_box.setEnabled(False)
+#        self.ui.sort_compartments_check_box.setEnabled(False)
 
         self.ui.to_spin_box.setEnabled(False)
         self.ui.from_spin_box.setEnabled(False)
@@ -1247,7 +1247,7 @@ class PlotsPreviewDialog(QWidget):
             for i, item in enumerate(self.items):
 #                pyplot.xlabel("time (%s)" % item.plot.units)
 #                pyplot.ylabel("molecules")
-                self.axes = self.figure.add_subplot(111)
+                self.axes = self.figure.add_subplot(111) #FIXME move this out of loop?
                 self.axes.set_xlabel("time")# (%s)" % item.plot.units)
                 self.axes.set_ylabel("molecules") #TODO concentration
                 colour = colours.colour(i)
@@ -1351,14 +1351,22 @@ class PlotsPreviewDialog(QWidget):
 #        self.errorbars.append(errorbar)
 
     def legend(self):
-        self.axes.legend(loc=0, prop=self.fontManager)
+#        self.axes.legend(loc=0, prop=self.fontManager)
+        pass
+#        from infobiotics.commons.matplotlib.draggable_legend import DraggableLegend
+##        legend = DraggableLegend(ax.legend())
+#        legend = self.axes.legend(loc=0, prop=self.fontManager)
+#        print self.traits_plot.figure.canvas
+#        legend.canvas = self.traits_plot.figure.canvas
+#        DraggableLegend(legend) # fails because legend.figure.canvas is None
+        
 
     def figurelegend(self): #FIXME use this
         """Create a legend for all subplots."""
         lines = [line for line, label in self.lines]
         labels = [label for line, label in self.lines]
-        legend = self.figure.legend(lines, labels, loc='right')
-#        legend.draggable() #TODO test for new matplotlib version before setting
+        legend = self.figure.legend(lines, labels, loc='right', prop=self.fontManager)
+#        legend.draggable(True) #TODO test for new matplotlib version before setting
 
     def background(self):
         """Change figure background."""

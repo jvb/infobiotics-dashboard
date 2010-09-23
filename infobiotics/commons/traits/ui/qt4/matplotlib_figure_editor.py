@@ -26,8 +26,8 @@ class _MatplotlibFigureEditor(Editor):
 #        self.set_tooltip('')
     
     def update_editor(self):
-        pass
-#        self.control.update()
+#        pass
+        self.control.update()
 
 #    def update(self, value):
 #        self.control.figure.canvas.draw()
