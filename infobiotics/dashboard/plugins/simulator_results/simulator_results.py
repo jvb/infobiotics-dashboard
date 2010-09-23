@@ -17,10 +17,10 @@ from enthought.traits.api import HasTraits, Instance, Str, Button, Instance, \
 from enthought.traits.ui.api import View, Item, HGroup, View, VGroup, Spring
 from enthought.tvtk.pyface.scene_editor import SceneEditor
 from infobiotics.commons import colours
-from infobiotics.commons.matplotlib_ import resize_and_save_matplotlib_figure
+from infobiotics.commons.matplotlib.matplotlib_figure_size import resize_and_save_matplotlib_figure
 from infobiotics.commons.qt4 import centre_window
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import \
-    MPLFigureEditor
+    MatplotlibFigureEditor
 from matplotlib import font_manager
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
@@ -1078,7 +1078,7 @@ class TraitsPlot(HasTraits):
             VGroup(
                 Item('figure',
                     show_label=False,
-                    editor=MPLFigureEditor(
+                    editor=MatplotlibFigureEditor(
                         toolbar=True
                     ),
                 ),

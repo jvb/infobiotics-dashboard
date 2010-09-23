@@ -55,7 +55,7 @@ class MatplotlibFigureSize(HasTraits):
             ),
             show_border=True,
         ),
-        buttons=['OK','Cancel'],
+        buttons=['OK', 'Cancel'],
         title='Adjust figure size',
     )
 
@@ -81,7 +81,7 @@ def resize_and_save_matplotlib_figure(figure):
     # get file name with (correct choice of formats)
     fd = FileDialog(
         action='save as',
-        wildcard=FileDialog.create_wildcard('All available formats', ['*.eps','*.png', '*.pdf', '*.ps', '*.svg']),
+        wildcard=FileDialog.create_wildcard('All available formats', ['*.eps', '*.png', '*.pdf', '*.ps', '*.svg']),
     )
     if fd.open() != OK:
         return
@@ -99,7 +99,7 @@ def test_resize_and_save_matplotlib_figure():
     from enthought.traits.api import HasTraits, Instance, Button
     from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring
     from matplotlib.figure import Figure
-    from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
+    from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
     
     class Example(HasTraits):
         figure = Instance(Figure, ())
@@ -109,7 +109,7 @@ def test_resize_and_save_matplotlib_figure():
                 VGroup(
                     Item('figure',
                         show_label=False,
-                        editor=MPLFigureEditor(
+                        editor=MatplotlibFigureEditor(
 #                            toolbar=True
                         ),
                     ),
@@ -129,6 +129,7 @@ def test_resize_and_save_matplotlib_figure():
     fig = example.figure
     ax = fig.add_subplot(111)
     ax.plot(range(10))
+#    resize_and_save_matplotlib_figure(fig)
     example.configure_traits()
     
 

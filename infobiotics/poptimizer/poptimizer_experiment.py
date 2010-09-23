@@ -3,7 +3,7 @@ from infobiotics.core.experiment import Experiment
 #from enthought.traits.api import HasTraits, Str, DictStrStr, List, Float, Instance, Constant, Int, Range, Property
 #from matplotlib.figure import Figure, SubplotParams
 #from enthought.traits.ui.api import View, VGroup, Item, HGroup, TabularEditor
-#from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
+#from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
 #from enthought.traits.ui.tabular_adapter import TabularAdapter
 #
 #class Module(HasTraits):
@@ -113,7 +113,7 @@ class POptimizerExperiment(POptimizerParams, Experiment):
 #            VGroup(
 #                Item('figure',
 #                    show_label=False, 
-#                    editor=MPLFigureEditor(),
+#                    editor=MatplotlibFigureEditor(),
 #                ),
 #                label='Population Fitness',
 #            ),

@@ -1,12 +1,12 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
 from enthought.traits.api import (
-    HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum, 
-    Property, Button, on_trait_change, Tuple, cached_property, Bool, 
+    HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum,
+    Property, Button, on_trait_change, Tuple, cached_property, Bool,
     DelegatesTo,
 )
 from enthought.traits.ui.api import (
-    View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring, 
-    TextEditor, InstanceEditor, CodeEditor, 
+    View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring,
+    TextEditor, InstanceEditor, CodeEditor,
 #    CheckListEditor,
 )
 
@@ -50,9 +50,9 @@ from infobiotics.commons.mayavi import extent
 
 from matplotlib.figure import Figure
 
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor 
+from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor 
 
-from infobiotics.commons.matplotlib_ import resize_and_save_matplotlib_figure
+from infobiotics.commons.matplotlib.matplotlib_figure_size import resize_and_save_matplotlib_figure
 
 class PModelCheckerResultsPropertyVariable(HasTraits):
     name = Str
@@ -96,11 +96,11 @@ class PModelCheckerResultsPropertyVariable(HasTraits):
                 Item('value', show_label=False,
                     editor=RangeEditor(
                         evaluate=self.evaluate_value, # evaluate_name works
-                        format=self.format,          # but format_name doesn't, so we need a traits_view method (as opposed to view = View...) to be able to access self
-                        mode='slider', 
-                        low_name='start', 
+                        format=self.format, # but format_name doesn't, so we need a traits_view method (as opposed to view = View...) to be able to access self
+                        mode='slider',
+                        low_name='start',
                         high_name='stop',
-                    ),                    
+                    ),
                     visible_when='len(object.values) > 1',
                     tooltip='Warning: the value shown in the box may not be the same as the actual value of this variable (shown to the right)',
                 ),
@@ -231,7 +231,7 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
                     if i < len(self.variables) - 1:
                         s += ','
                 scalars = eval('self.result_array[%s]' % s)
-                label='%s=%s' % (self.yAxis, v)
+                label = '%s=%s' % (self.yAxis, v)
                 for variable in self.variables:
                     if variable not in (self.xAxisVariable, self.yAxisVariable):
                         label += ', %s=%s' % (variable.name, variable.value)
@@ -268,24 +268,24 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
                     Label('at all'),
                     Item('xAxis', show_label=False),
                     Label('when', defined_when='len(object.notAxes) > 0'),
-                    defined_when='len(object.notXAxisVariablesNames) > 0', 
+                    defined_when='len(object.notXAxisVariablesNames) > 0',
                 ),
-                Item('notAxes', 
-                    show_label=False, 
-                    editor=ListEditor(style='custom'), 
-                    resizable=False, 
+                Item('notAxes',
+                    show_label=False,
+                    editor=ListEditor(style='custom'),
+                    resizable=False,
                     style='readonly',
-                    defined_when='len(object.notAxes) > 0', 
+                    defined_when='len(object.notAxes) > 0',
                 ),
                 Item(
-                    'figure', 
+                    'figure',
                     show_label=False,
-                    editor=MPLFigureEditor(toolbar=True), #TODO save with Figure.set_figsize_inches( (w,h) ) # http://www.scipy.org/Cookbook/Matplotlib/AdjustingImageSize
+                    editor=MatplotlibFigureEditor(toolbar=True), #TODO save with Figure.set_figsize_inches( (w,h) ) # http://www.scipy.org/Cookbook/Matplotlib/AdjustingImageSize
                     resizable=True
                 ),
                 HGroup(
                     Item('detach', show_label=False),
-                    Spring(), 
+                    Spring(),
                     Item('save_resized', show_label=False),
                 ),
                 show_border=True,
@@ -336,8 +336,8 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
         max = np.max(self.result_array)
 #        fake_scalars = np.random.random_integers(min, high=max, size=self.scalars.shape) # not necessarily ints
         fake_scalars = np.random.random_sample(size=self.scalars.shape) * (max - min) + min # floats using element-wise multiplication and addition
-        fake_scalars[0,0] = min # ensure min in array
-        fake_scalars[-1,-1] = max # ensure max in array
+        fake_scalars[0, 0] = min # ensure min in array
+        fake_scalars[-1, -1] = max # ensure max in array
         return fake_scalars
 
 #    @on_trait_change('variables:value') # ':' means call when 'value' attribute of items in variables change but not the object assigned to 'variables' changes 
@@ -361,7 +361,7 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
         self.add_actors_and_update_scalars()
 
     def create_surface(self):
-        return self.scene.mlab.surf(self.fake_scalars, colormap='jet', extent=[0,1,0,1,0,1], figure=self.scene.mayavi_scene)
+        return self.scene.mlab.surf(self.fake_scalars, colormap='jet', extent=[0, 1, 0, 1, 0, 1], figure=self.scene.mayavi_scene)
 
     surface = Instance(PipelineBase)
     def _surface_default(self):
@@ -384,14 +384,14 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
         
         self.title = mlab.title(self.title_text, size=0.4, height=0.88)
         
-        mlab.outline(extent=[0,1,0,1,0,1])
+        mlab.outline(extent=[0, 1, 0, 1, 0, 1])
         
-        scalarbar = mlab.scalarbar(title ='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
+        scalarbar = mlab.scalarbar(title='Result', orientation='vertical', label_fmt='%.f', nb_labels=5)
         scalarbar.title_text_property.set(font_size=4)
         scalarbar.label_text_property.set(font_size=4)#, italic=0, bold=0)#, line_spacing=0.5)
         # since VTK-5.2 the actual widget is accessed through its representation property (see https://mail.enthought.com/pipermail/enthought-dev/2009-May/021342.html) - we using at least VTK-5.4
         scalar_bar_widget = self.surface.module_manager.scalar_lut_manager.scalar_bar_widget
-        scalar_bar_widget.representation.set(position=[0.9,0.08], position2=[0.09,0.42])
+        scalar_bar_widget.representation.set(position=[0.9, 0.08], position2=[0.09, 0.42])
 
 #        # set scene's foreground and background colours
 #        self.scene.scene_editor.background = (0,0,0) # black background
@@ -419,21 +419,21 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
                     defined_when='object.surface is not None',
                 ),
                 VGroup(
-                    Item('notAxes', 
-                        show_label=False, 
-                        editor=ListEditor(style='custom'), 
+                    Item('notAxes',
+                        show_label=False,
+                        editor=ListEditor(style='custom'),
                         style='readonly',
                         visible_when='len(object.notAxes) > 0',
                         resizable=False, springy=False, height=20, # must set these enable scene to fill all available space
                     ),
                     Item(
-                        'scene', 
+                        'scene',
                         show_label=False,
-                        editor=SceneEditor(scene_class=MayaviScene),#Scene),
+                        editor=SceneEditor(scene_class=MayaviScene), #Scene),
                     ),
                 ),
                 HGroup(
-                    Spring(), 
+                    Spring(),
                     Item('reset_view', show_label=False),
                 ),
                 show_border=True,
@@ -506,10 +506,10 @@ class PModelCheckerResultsProperty(HasTraits):
     traits_view = View(
         VGroup(
             Item('visualisations',
-                show_label=False, 
-                style='custom', 
+                show_label=False,
+                style='custom',
                 editor=ListEditor(
-                    use_notebook=True, 
+                    use_notebook=True,
                     page_name='.type',
                 ),
 #                defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
@@ -605,7 +605,7 @@ class PModelCheckerResults(HasTraits):
             listOfPModelCheckerResultsPropertyVariableInstances = []
             for i in range(len(variableNames)):
                 # extract this variables column, remove duplicates and sort
-                sortedSet = sorted(set(variableValues[:,i]))
+                sortedSet = sorted(set(variableValues[:, i]))
 
                 # change format to integer if only trailing zeros after decimal point
                 onlyTrailingZero = True
@@ -641,10 +641,10 @@ class PModelCheckerResults(HasTraits):
             
             # create PModelCheckerResultsProperty instance and append it
             instance = PModelCheckerResultsProperty(
-                property_string=property_string, 
-                variables=listOfPModelCheckerResultsPropertyVariableInstances, 
+                property_string=property_string,
+                variables=listOfPModelCheckerResultsPropertyVariableInstances,
                 result_array=result_array,
-                raw_data = '\n'.join(lines),
+                raw_data='\n'.join(lines),
                 file_name=file_name,
                 md5sum=md5sum,
             )
@@ -678,11 +678,11 @@ class PModelCheckerResults(HasTraits):
 #                    visible_when='len(object.properties) > 1',
 #                ),
                 VGroup(
-                    Item('properties', 
-                        show_label=False, 
-                        style='custom', 
+                    Item('properties',
+                        show_label=False,
+                        style='custom',
                         editor=ListEditor(
-                            use_notebook=True, 
+                            use_notebook=True,
                             page_name='.property_string',
                             selected='object.selected',
                         ),

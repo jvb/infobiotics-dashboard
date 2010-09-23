@@ -3,8 +3,8 @@ import os; os.environ['ETS_TOOLKIT'] = 'qt4'
 from enthought.traits.api import HasTraits, Instance, Str, Button, Any 
 from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring, HSplit, CodeEditor
 from matplotlib.figure import Figure
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MPLFigureEditor
-from infobiotics.commons.matplotlib_ import MatplotlibFigureSize, resize_and_save_matplotlib_figure
+from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
+from infobiotics.commons.matplotlib.matplotlib_figure_size import MatplotlibFigureSize, resize_and_save_matplotlib_figure
 from poptimizer_experiment import POptimizerExperiment
 
 import logging
@@ -39,14 +39,14 @@ class POptimizerResults(HasTraits):
                         Spring(),
                         Item('save_resized', show_label=False),
                     ),
-                    Item('best_model', 
-                        show_label=False, 
-                        style='custom', 
+                    Item('best_model',
+                        show_label=False,
+                        style='custom',
                         editor=CodeEditor(show_line_numbers=False)),
                 ),
                 Item('figure',
                     show_label=False,
-                    editor=MPLFigureEditor(
+                    editor=MatplotlibFigureEditor(
 #                            toolbar=True
                     ),
                 ),
@@ -70,7 +70,7 @@ class POptimizerResults(HasTraits):
             with open(os.path.join(directory, 'bestPsystem_Run0.txt')) as f:
                 best_model = f.read() 
             
-            self.best_model=best_model
+            self.best_model = best_model
 
             target_file = os.path.join(directory, self.experiment.target_file) + '1.txt'
         
@@ -80,7 +80,7 @@ class POptimizerResults(HasTraits):
 
             import numpy as np
             target = np.loadtxt(target_file, skiprows=1)
-            time = target[:,0] # x_axis
+            time = target[:, 0] # x_axis
             
             output = np.loadtxt(os.path.join(directory, 'outputdata.txt'), skiprows=1, usecols=range(1, 3 * len(species), 3))
             
@@ -110,8 +110,8 @@ class POptimizerResults(HasTraits):
                     ax.set_xlabel("time")
                 ax.grid(True)
                 ax.set_ylabel('molecules')
-                ax.plot(time, target[:,i+1], label='%s (target)' % species[i])
-                ax.plot(time, output[:,i], label='%s (optimised)' % species[i])    
+                ax.plot(time, target[:, i + 1], label='%s (target)' % species[i])
+                ax.plot(time, output[:, i], label='%s (optimised)' % species[i])    
                 ax.legend(loc='best')
             
         except Exception, e:
