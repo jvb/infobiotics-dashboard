@@ -29,7 +29,7 @@ class TimeseriesPlot(HasTraits):
 
     some_volumes = Property(Bool, depends_on='timeseries')
     volumes = Property(List(Timeseries), depends_on='timeseries')
-    not_volumes = Property(List(Timeseries), depends_on='timeseries')
+    amounts = Property(List(Timeseries), depends_on='timeseries')
 
 #    style = Enum(['Combined', 'Stacked', 'Tiled'])
 #    style = Enum(['Stacked', 'Combined', 'Tiled'])
@@ -57,7 +57,7 @@ class TimeseriesPlot(HasTraits):
         return [timeseries for timeseries in self.timeseries if timeseries.species.name == 'Volumes']
     
     @cached_property
-    def _get_not_volumes(self):
+    def _get_amounts(self):
         return [timeseries for timeseries in self.timeseries if timeseries.species.name != 'Volumes']
     
     @cached_property
@@ -73,7 +73,7 @@ class TimeseriesPlot(HasTraits):
 #            some_volumes = False
 #        if some_volumes:
 #            self.volumes = [timeseries for timeseries in self.timeseries if timeseries.species.name == 'Volumes']
-#            self.not_volumes = [timeseries for timeseries in self.timeseries if timeseries.species.name != 'Volumes']
+#            self.amounts = [timeseries for timeseries in self.timeseries if timeseries.species.name != 'Volumes']
 #        return some_volumes
         if 0 < len(self.volumes) < len(self.timeseries):
             return True
@@ -130,7 +130,14 @@ class TimeseriesPlot(HasTraits):
         ) 
     
     
-    @on_trait_change('style, timeseries, timeseries:_colour, show_gridlines, show_volumes_separately')
+    @on_trait_change('style, \
+        timeseries, \
+        timeseries:_colour, \
+        show_gridlines, \
+        show_volumes_separately, \
+        show_individual_volume_labels, \
+        show_individual_amounts_labels, \
+        show_individual_time_labels')
     def _update_figure(self):
 
 #        self.timeseries_to_line_map.clear()
@@ -139,6 +146,25 @@ class TimeseriesPlot(HasTraits):
         
 #        adjustprops = dict(left=0.125, right=0.9, bottom=0.1, top=0.9, wspace=0.2, hspace=0.2)
 #        self.figure.subplots_adjust(**adjustprops)
+        
+        if not self.show_individual_volume_labels and self.some_volumes:
+            self.figure.text(0.98, 0.5, self.volumes[0].ylabel, rotation=270, ha='center', va='center')
+        
+        if not self.show_individual_amounts_labels:
+            self.figure.text(0.02, 0.5, self.amounts[0].ylabel if self.some_volumes else self.timeseries[0].ylabel, rotation=90, ha='center', va='center')
+        
+        if not self.show_individual_time_labels:
+            self.figure.text(0.5, 0.02, self.timeseries[0].xlabel, ha='center')#, va='center')
+
+#        if not self.some_volumes:
+#            self.figure.text(0.02, 0.5, self.timeseries[0].ylabel, rotation=90, ha='center', va='center')
+#            adjustprops = dict(left=0.1, bottom=0.2, right=0.97, top=0.85, wspace=0.2, hspace=0.30)
+#            self.figure.subplots_adjust(**adjustprops)
+#        else:
+#            self.figure.text(0.02, 0.5, self.amounts[0].ylabel, rotation=90, ha='center', va='center')
+#            self.figure.text(0.98, 0.5, self.volumes[0].ylabel, rotation=270, ha='center', va='center')
+#            adjustprops = dict(left=0.15, bottom=0.15, right=0.92, top=0.85, wspace=0.35, hspace=0.25)
+#            self.figure.subplots_adjust(**adjustprops)
         
         if self.style == 'Combined':
             self.combine()
@@ -210,16 +236,43 @@ class TimeseriesPlot(HasTraits):
 
     def combine(self):
         if self.some_volumes: # plot species on left y-axis and volumes on right y-axis
-            axes = self._create_axes(self.not_volumes[0].xlabel, self.not_volumes[0].ylabel, 111)
-            for timeseries in self.not_volumes:
+
+#            axes = self._create_axes(self.amounts[0].xlabel, self.amounts[0].ylabel, 111)
+#            axes = self._create_axes('', '', 111)
+            axes = self.figure.add_subplot(111)
+            for timeseries in self.amounts:
                 self._plot_timeseries(axes, timeseries)
-            axes = self._create_axes_twinx(axes, self.volumes[0].ylabel)
+#            if not self.show_individual_amounts_labels:
+#                axes.set_ylabel('')       
+#            if not self.show_individual_time_labels:
+#                axes.set_xlabel('')
+            if self.show_individual_time_labels:
+                axes.set_xlabel(timeseries.xlabel)
+            if self.show_individual_amounts_labels:
+                axes.set_ylabel(timeseries.ylabel)
+            
+#            axes = self._create_axes_twinx(axes, self.volumes[0].ylabel)
+#            axes = self._create_axes_twinx(axes, '')
+            axes = axes.twinx()
             for timeseries in self.volumes:
                 self._plot_timeseries(axes, timeseries)
+#            if not self.show_individual_amounts_labels:
+#                axes.set_ylabel('')
+            if self.show_individual_volume_labels:
+                axes.set_ylabel(timeseries.ylabel)
+                                
         else:
-            axes = self._create_axes(self.timeseries[0].xlabel, self.timeseries[0].ylabel, 111)
+#            axes = self._create_axes(self.timeseries[0].xlabel, self.timeseries[0].ylabel, 111)
+            axes = self.figure.add_subplot(111)
             for timeseries in self.timeseries:
                 self._plot_timeseries(axes, timeseries)
+#            if not self.show_individual_amounts_labels:
+#                axes.set_ylabel('')
+            if self.show_individual_time_labels:
+                axes.set_xlabel(timeseries.xlabel)
+            if self.show_individual_amounts_labels or self.show_individual_volume_labels:
+                axes.set_ylabel(timeseries.ylabel)
+        
         adjustprops = dict(left=0.1, bottom=0.15, right=0.9, top=0.85, wspace=0.2, hspace=0.2)
         self.figure.subplots_adjust(**adjustprops)
     
@@ -227,6 +280,7 @@ class TimeseriesPlot(HasTraits):
         if len(self.timeseries) == 1:
             self.combine()
             return
+        
         rows = len(self.timeseries)
         cols = 1
         for i, timeseries in enumerate(reversed(self.timeseries)):
@@ -285,32 +339,32 @@ class TimeseriesPlot(HasTraits):
         
         else:
             
-            if len(self.not_volumes) == 1:
+            if len(self.amounts) == 1:
                 self.combine()
                 return
-            elif len(self.not_volumes) == 2:
+            elif len(self.amounts) == 2:
                 self.stack()
                 return
             
             rows, cols = arrange(self.timeseries)
             
             # each non-volume timeseries should have a corresponding volume timeseries (which will be shared between non-volume timeseries) 
-            not_volumes_to_volumes_map = {}
-            for not_volumes_timeseries in self.not_volumes:
-                compartment_index = not_volumes_timeseries.compartment.index
+            amounts_to_volumes_map = {}
+            for amounts_timeseries in self.amounts:
+                compartment_index = amounts_timeseries.compartment.index
                 for volumes_timeseries in self.volumes:
                     if volumes_timeseries.compartment.index == compartment_index:
-                        not_volumes_to_volumes_map[not_volumes_timeseries] = volumes_timeseries
+                        amounts_to_volumes_map[amounts_timeseries] = volumes_timeseries
                         break
-#            print not_volumes_to_volumes_map
+#            print amounts_to_volumes_map
             
             # tile showing single xlabel for all plots 
             self.figure.text(0.5, 0.02, self.timeseries[0].xlabel, ha='center')#, va='center') #TODO factor this out so it is the same for each plot style and can be switched (independently for time, amounts and volumes)
-            for i, timeseries in enumerate(self.not_volumes):
+            for i, timeseries in enumerate(self.amounts):
                 axes = self._create_axes('', '', rows, cols, i + 1)#timeseries.ylabel
                 self._plot_line(axes, timeseries)
                 try:
-                    not_volume_timeseries = not_volumes_to_volumes_map[timeseries]
+                    not_volume_timeseries = amounts_to_volumes_map[timeseries]
                     axes = self._create_axes_twinx(axes, '')#self.volumes[0].ylabel)
                     self._plot_timeseries(axes, not_volume_timeseries)
                     
@@ -329,7 +383,7 @@ class TimeseriesPlot(HasTraits):
             adjustprops = dict(left=0.1, bottom=0.2, right=0.97, top=0.85, wspace=0.2, hspace=0.30)
             self.figure.subplots_adjust(**adjustprops)
         else:
-            self.figure.text(0.02, 0.5, self.not_volumes[0].ylabel, rotation=90, ha='center', va='center')
+            self.figure.text(0.02, 0.5, self.amounts[0].ylabel, rotation=90, ha='center', va='center')
             self.figure.text(0.98, 0.5, self.volumes[0].ylabel, rotation=270, ha='center', va='center')
             adjustprops = dict(left=0.15, bottom=0.15, right=0.92, top=0.85, wspace=0.35, hspace=0.25)
             self.figure.subplots_adjust(**adjustprops)
@@ -356,11 +410,16 @@ class TimeseriesPlot(HasTraits):
                     ),
                 ),
                 HGroup(
-                    Item('show_volumes_separately', visible_when='object.some_volumes'),
+                    Item('show_volumes_separately', visible_when='object.some_volumes and not object.style=="Combined"'),
                     'show_gridlines',
                     'show_individual_legends',
                     'show_figure_legend',
-                    Spring(),
+#                    Spring(),
+                ),
+                HGroup(
+                    Item('show_individual_volume_labels', visible_when='len(object.volumes) > 0'),
+                    Item('show_individual_amounts_labels', visible_when='len(object.amounts) > 0'),
+                    'show_individual_time_labels',
                 ),
                 HGroup(
                     Item('save_resized'),
@@ -478,10 +537,12 @@ def main():
         _colour=colours.colour(2),
     )
     timeseries = [
-        molecules,
-        concentration, # concentration and molecules will never be shown together
+#        molecules, # if len(timeseries) < 3 tile will defer to stack or combine
+#        molecules,
+#        concentration, # concentration and molecules will never be shown together
         volume,
-        molecules, # if len(timeseries) < 3 tile will defer to stack or combine
+        volume,
+        volume,
     ]
 #    volume.colour = (0.2, 0, 0.7)
     TimeseriesPlot(
