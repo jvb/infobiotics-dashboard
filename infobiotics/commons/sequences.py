@@ -180,6 +180,28 @@ def in_all_sequences(sub, S):
     return True
 
 
+def arrange(sequence):
+    ''' Returns the smallest rows x columns tuple for a given number of items.
+    
+    Adapted from Pawel's tiling code.
+    
+    '''
+    number = len(sequence)
+    import math
+    rows = math.sqrt(number / math.sqrt(2))
+    cols = rows * math.sqrt(2)
+    if number <= math.ceil(rows) * math.floor(cols):
+        rows = int(math.ceil(rows))
+        cols = int(math.floor(cols))
+    elif number <= math.floor(rows) * math.ceil(cols):
+        rows = int(math.floor(rows))
+        cols = int(math.ceil(cols))
+    else:
+        rows = int(math.ceil(rows))
+        cols = int(math.ceil(cols))
+    return (rows, cols)
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
