@@ -16,6 +16,9 @@ Apparently included in upstream version of matplotlib, not in ETS yet though
 
 '''
 
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+
 class DraggableLegend(object):
 
     def __init__(self, legend):
@@ -31,7 +34,11 @@ class DraggableLegend(object):
             dx = evt.x - self.mouse_x
             dy = evt.y - self.mouse_y
             loc_in_canvas = self.legend_x + dx, self.legend_y + dy
-            loc_in_norm_axes = self.legend.parent.transAxes.inverted().transform_point(loc_in_canvas)
+#            loc_in_norm_axes = self.legend.parent.transAxes.inverted().transform_point(loc_in_canvas)
+            if isinstance(self.legend.parent, Figure):
+                loc_in_norm_axes = self.legend.parent.transFigure.inverted().transform_point(loc_in_canvas)
+            elif isinstance(self.legend.parent, Axes):
+                loc_in_norm_axes = self.legend.parent.transAxes.inverted().transform_point(loc_in_canvas)
             self.legend._loc = tuple(loc_in_norm_axes)
             self.legend.figure.canvas.draw()
 
@@ -50,3 +57,9 @@ class DraggableLegend(object):
     def on_release(self, event):
         if self.gotLegend:
             self.gotLegend = False
+
+    def remove(self):
+        self.legend.remove()
+        
+    def set_visible(self, visible):
+        self.legend.set_visible(visible)
