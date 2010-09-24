@@ -1,99 +1,13 @@
 from __future__ import division
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import HasTraits, Instance, Str, List, Float, Bool, Button, on_trait_change, Tuple
-from enthought.traits.ui.api import View, VGroup, Item, HGroup, Spring, ListEditor, InstanceEditor
+from enthought.traits.api import HasTraits, Instance, Str, List, Float, Bool, Button, on_trait_change, Tuple, Dict, Array, Enum
+from timeseries import Timeseries 
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
-
-from enthought.traits.api import HasTraits, List, Float, Str, Color, Enum, Property, cached_property, Array
-from simulator_results import Run, Species, Compartment
-from infobiotics.commons.traits.int_greater_than_zero import IntGreaterThanZero
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-import StringIO
-from PyQt4.QtGui import QPixmap
-
 from infobiotics.commons import colours
-
-class Timeseries(HasTraits):
-
-    species = Instance(Species) # None == Volume?
-    compartment = Instance(Compartment)
-    run = Instance(Run)
-    
-    timepoints = Array
-    timepoints_units = Str
-    
-    values = Array
-    values_type = Enum(['Molecules', 'Concentration', 'Volume'])
-    values_units = Str
-
-    label = Property(Str)
-    
-    @cached_property
-    def _get_label(self, depends_on='values_type, run, species, compartment'):
-        compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
-        if self.values_type == 'Volume':
-            if self.run == None:
-                return 'Volume of %s' % (compartment_name_and_xy_coords)
-            else:
-                return 'Volume of %s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
-        else:
-            if self.run == None:
-                return '%s of %s in %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords)
-            else:
-                return '%s of %s in %s of run %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords, self.run._run_number)
-
-    xlabel = Property(Str, depends_on='timepoints_units')
-    
-    @cached_property
-    def _get_xlabel(self):
-        label = 'Time'
-        if self.timepoints_units != '':
-            label += ' (%s)' % self.timepoints_units
-        return label
-
-    ylabel = Property(Str, depends_on='values_type, values_units')
-    
-    @cached_property
-    def _get_ylabel(self):
-        label = self.values_type
-        if self.values_units != '':
-            label += ' (%s)' % self.values_units
-        return label
-
-    _colour = Color
-    
-    colour = Property(Tuple(Float, Float, Float), depends_on='_colour')
-
-    @cached_property
-    def _get_colour(self):
-        return (self._colour.red() / 255, self._colour.green() / 255, self._colour.blue() / 255)
-
-    def pixmap(self, width=4, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        canvas = FigureCanvasAgg(fig) # needed for savefig below
-        ax = fig.add_subplot(111)
-        ax.plot(self.timepoints, self.values, color=self.colour, label=self.label)
-        ax.set_xlabel(self.xlabel)
-        ax.set_ylabel(self.ylabel)
-        ax.set_title(self.label)
-        file_like_object = StringIO.StringIO()
-        fig.savefig(file_like_object, format='png')
-        pixmap = QPixmap()
-        pixmap.loadFromData(file_like_object.getvalue(), 'PNG')
-        file_like_object.close()
-        return pixmap
-
-    view = View(
-        HGroup(
-            Item('label', style='readonly'),
-            Item('_colour'),
-            show_labels=False,
-        ),
-    )
+from enthought.traits.ui.api import View, VGroup, Item, HGroup, Spring, ListEditor, InstanceEditor
 
 class TimeseriesPlot(HasTraits):
     figure = Instance(Figure, ())
@@ -101,34 +15,33 @@ class TimeseriesPlot(HasTraits):
     timepoints = Array
     timeseries = List(Timeseries)
 
-#    list_widget = Button
-#    def _list_widget_fired(self):
-#        from PyQt4.QtGui import QListWidget, QListView, QAbstractItemView, QListWidgetItem, QIcon
-#        from PyQt4.QtCore import QSize
-#        list_widget = QListWidget()
-#        list_widget.setViewMode(QListView.IconMode)
-#        list_widget.setAcceptDrops(False)
-#        list_widget.setFlow(QListWidget.LeftToRight)
-#        list_widget.setWrapping(True)
-#        list_widget.setResizeMode(QListView.Adjust)
-#        list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
-#        size = 150
-#        list_widget.setWordWrap(False)
-#        list_widget.setUniformItemSizes(True)
-#        list_widget.setIconSize(QSize(size, size))
-#        list_widget.setGridSize(QSize(size, size)) # hides label
-##        list_widget.hideInvariants = True #TODO
-#        for timeseries in self.timeseries:
-#            QListWidgetItem(QIcon(timeseries.pixmap()), timeseries.label, list_widget)
-##            QListWidgetItem(QIcon(timeseries.pixmap()), '', list_widget)
-#        self._list_widget = list_widget # must keep reference to list_widget or it gets destroyed when method returns 
-#        self._list_widget.show()
+    list_widget = Button
+    def _list_widget_fired(self):
+        from PyQt4.QtGui import QListWidget, QListView, QAbstractItemView, QListWidgetItem, QIcon
+        from PyQt4.QtCore import QSize
+        list_widget = QListWidget()
+        list_widget.setViewMode(QListView.IconMode)
+        list_widget.setAcceptDrops(False)
+        list_widget.setFlow(QListWidget.LeftToRight)
+        list_widget.setWrapping(True)
+        list_widget.setResizeMode(QListView.Adjust)
+        list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        size = 150
+        list_widget.setWordWrap(False)
+        list_widget.setUniformItemSizes(True)
+        list_widget.setIconSize(QSize(size, size))
+        list_widget.setGridSize(QSize(size, size)) # hides label
+#        list_widget.hideInvariants = True #TODO
+        for timeseries in self.timeseries:
+            QListWidgetItem(QIcon(timeseries.pixmap()), timeseries.label, list_widget)
+        self._list_widget = list_widget # must keep reference to list_widget or it gets destroyed when method returns 
+        self._list_widget.show()
     
     save_resized = Button
 
     def _save_resized_fired(self):
-#        resize_and_save_matplotlib_figure(self.figure)
-        self.figure.clear()
+        resize_and_save_matplotlib_figure(self.figure)
+        
 
     show_individual_legends = Bool
     show_figure_legend = Bool
@@ -143,31 +56,22 @@ class TimeseriesPlot(HasTraits):
 
     style = Enum(['Combined', 'Stacked', 'Tiled'])
     
-    @on_trait_change('style, timeseries._colour')
+    @on_trait_change('style, timeseries')
     def update_figure(self):
         self.figure.clear()
-#        return
         if self.style == 'Combined':
             self.combine()
         elif self.style == 'Stacked':
             self.stack()
         elif self.style == 'Tiled':
             self.tile()
-
-    lines = List(Tuple(Line2D, Str))
-
-    def line(self, axes, timeseries, colour=None):
-        print timeseries.colour
-        lines = axes.plot(
-            timeseries.timepoints, #self.timepoints, #TODO change range here?
-            timeseries.values,
-            label=timeseries.label,
-            color=colour if colour is not None else timeseries.colour,
-        )
-        self.lines.append((lines[0], timeseries.label))
-    
+        self.figure.set_facecolor('white')
+#        self.axes.grid(True, which='major') #TODO
+#        self.axes.grid(True, which='minor')
+        self.redraw_figure()
+        
     def combine(self):
-        print 'combine'
+#        print 'combine'
         
         # determine if some volumes but not (no volumes or all volumes)
         volumes = 0
@@ -210,16 +114,36 @@ class TimeseriesPlot(HasTraits):
 #                if self.averaging:
 #                    self.errorbar(item, colour)
             
-        self.finalise()        
-    
-    def finalise(self):
-        self.figure.set_facecolor('white')
-    
     def stack(self):
         print 'stack'
     
     def tile(self):
         print 'tile'
+
+#    lines = List(Tuple(Line2D, Str))
+    timeseries_to_line_map = Dict(Timeseries, Line2D)
+
+    def line(self, axes, timeseries, colour=None):
+        lines = axes.plot(
+            timeseries.timepoints, #self.timepoints, #TODO change range here?
+            timeseries.values,
+            label=timeseries.label,
+            color=colour if colour is not None else timeseries.colour,
+        )
+        line = lines[0]
+#        self.lines.append((line, timeseries.label))
+        self.timeseries_to_line_map[timeseries] = line
+
+    @on_trait_change('timeseries:_colour')
+    def update_line_color(self, timeseries, _, old, new):
+        line = self.timeseries_to_line_map[timeseries]
+        line.set_color(timeseries.colour)
+        self.redraw_figure()
+
+    def redraw_figure(self):
+        if self.figure.canvas is not None:
+            self.figure.canvas.draw()
+
     
     def traits_view(self):
         return View(
@@ -268,6 +192,7 @@ def main():
     attributes.number_of_compartments = 1
     attributes.number_of_timepoints = number_of_timepoints
     attributes.simulated_time = 100
+    from simulator_results import Run, Species, Compartment
     run = Run(
         attributes=attributes,
         run_number=1,

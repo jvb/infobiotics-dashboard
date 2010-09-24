@@ -12,27 +12,33 @@ class _MatplotlibFigureEditor(Editor):
     
     def init(self, parent):
         ''' self.value is the trait being edited. '''
+
+        figure = self.value
+        canvas = FigureCanvas(figure)
         
         widget = QWidget()
         widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        
         layout = QGridLayout(widget)
-        canvas = FigureCanvas(self.value)
-        toolbar = NavigationToolbar(canvas, widget)
+        
         if self.factory.toolbar:
-            layout.addWidget(toolbar)
-        layout.addWidget(canvas)
+            toolbar = NavigationToolbar(canvas, widget, coordinates=True)
+            if self.factory.toolbar_above:
+                layout.addWidget(toolbar)
+                layout.addWidget(canvas)
+            else:
+                layout.addWidget(canvas)
+                layout.addWidget(toolbar)
+        else:
+            layout.addWidget(canvas)
+        
         self.control = widget
-
-#        self.set_tooltip('')
     
     def update_editor(self):
-#        pass
-        self.control.update()
-
-#    def update(self, value):
-#        self.control.figure.canvas.draw()
-    
+        pass
+        
 
 class MatplotlibFigureEditor(BasicEditorFactory):
     klass = _MatplotlibFigureEditor
     toolbar = Bool
+    toolbar_above = Bool(True)
