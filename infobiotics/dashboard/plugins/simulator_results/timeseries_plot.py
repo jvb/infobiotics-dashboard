@@ -1,4 +1,3 @@
-from __future__ import division
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import HasTraits, Instance, Str, List, Float, Bool, Button, on_trait_change, Tuple, Dict, Array, Enum
@@ -70,15 +69,16 @@ class TimeseriesPlot(HasTraits):
     def _show_figure_legend_changed(self):
         if self.show_figure_legend:
             if hasattr(self, 'figure_legend'):
-                del self.figure_legend
-#                self.figure_legend.set_visible(True)
-#            else:
-            if self.figure.canvas is not None:
-                self.figure_legend = DraggableLegend(self._create_figure_legend())
+                self.figure_legend.set_visible(True)
             else:
-                self.figure_legend = self._create_figure_legend()
+                if self.figure.canvas is not None:
+                    self.figure_legend = DraggableLegend(self._create_figure_legend())
+                else:
+                    self.figure_legend = self._create_figure_legend()
         else:
-            self.figure_legend.set_visible(False)
+            if hasattr(self, 'figure_legend'):
+                self.figure_legend.set_visible(False)
+                del self.figure_legend
 #            self.figure_legend.remove() # planned but not implemented in 0.99.0
         self._redraw_figure()
 
@@ -100,15 +100,19 @@ class TimeseriesPlot(HasTraits):
 
 
 #    style = Enum(['Combined', 'Stacked', 'Tiled'])
-    style = Enum(['Stacked', 'Combined', 'Tiled'])
+#    style = Enum(['Stacked', 'Combined', 'Tiled'])
+    style = Enum(['Tiled', 'Stacked', 'Combined'])
     
     show_gridlines = Bool(True)
+
+    show_volumes_separately = Bool
     
-    @on_trait_change('style, timeseries, show_gridlines')
+    @on_trait_change('style, timeseries, show_gridlines, show_volumes_separately')
     def _update_figure(self):
-        
-        self.figure.clear()
 #        self.timeseries_to_line_map.clear()
+        self.figure.clear()
+#        adjustprops = dict(left=0.125, right=0.9, bottom=0.1, top=0.9, wspace=0.2, hspace=0.2)
+#        self.figure.subplots_adjust(**adjustprops)
         
         if self.style == 'Combined':
             self.combine()
@@ -116,7 +120,11 @@ class TimeseriesPlot(HasTraits):
             self.stack()
         elif self.style == 'Tiled':
             self.tile()
+
         self.figure.set_facecolor('white')
+        
+        self._show_figure_legend_changed()
+        self._show_individual_legends_changed()
         
         self._redraw_figure()
 
@@ -148,11 +156,11 @@ class TimeseriesPlot(HasTraits):
             axes = self._create_axes(self.timeseries[0].xlabel, self.timeseries[0].ylabel, 111)
             for timeseries in self.timeseries:
                 self._plot_timeseries(axes, timeseries)
+        adjustprops = dict(left=0.1, bottom=0.15, right=0.9, top=0.85, wspace=0.2, hspace=0.2)
+        self.figure.subplots_adjust(**adjustprops)
              
 
     def _create_axes(self, xlabel, ylabel, *args, **kwargs):
-#        print args
-#        print kwargs
         axes = self.figure.add_subplot(*args, **kwargs) # works for 111, (1, 1, 1) and sharex=axes
         axes.set_xlabel(xlabel)
         axes.set_ylabel(ylabel)
@@ -175,25 +183,11 @@ class TimeseriesPlot(HasTraits):
 #            self._plot_errorbars(axes, timeseries)
 
     def stack(self):
+        if len(self.timeseries) == 1:
+            self.combine()
+            return
         rows = len(self.timeseries)
         cols = 1
-#        for i, timeseries in enumerate(self.timeseries):
-#            if i == 0:
-#                self.sharedAxis = self.figure.add_subplot(rows, cols, rows)
-#                self.axes = self.sharedAxis
-#                self.sharedAxis.set_xlabel("time")# (%s)" % timeseries.plot.units)
-#                self._plot_line(self.axes, timeseries)
-#                if self.averaging:
-#                    self._plot_errorbars(timeseries)
-#            else:
-#                self.axes = self.figure.add_subplot(rows, cols, rows - i, sharex=self.sharedAxis)
-##                pyplot.setp(self.axes.get_xticklabels(), visible=False) #TODO
-#                self._plot_line(self.axes, timeseries)
-#                if self.averaging:
-#                    self._plot_errorbars(timeseries)
-#            if len(self.timeseries) < 6: #TODO 6 is a bit arbitary  
-#                self.axes.set_ylabel("molecules") #TODO change for volumes/concentration
-#        for i, timeseries in enumerate(self.timeseries):
         for i, timeseries in enumerate(reversed(self.timeseries)):
             if i == 0:
                 axes = self._create_axes(timeseries.xlabel, timeseries.ylabel, rows, cols, rows)
@@ -207,30 +201,44 @@ class TimeseriesPlot(HasTraits):
                 axes.set_ylabel('')
         if not self.some_volumes:
             self.figure.text(0.02, 0.5, self.timeseries[0].ylabel, rotation=90, ha='center', va='center')
-
-        adjustprops = dict(left=0.1, bottom=0.15, right=0.97, top=0.85, wspace=0, hspace=0.2)
+        adjustprops = dict(left=0.1, bottom=0.15, right=0.97, top=0.85, wspace=0.2, hspace=0.2)
         self.figure.subplots_adjust(**adjustprops)
     
-            
     def tile(self):
+        if len(self.timeseries) == 1:
+            self.combine()
+            return
+        elif len(self.timeseries) == 2:
+            self.stack()
+            return
         rows, cols = arrange(len(self.timeseries))
         for i, timeseries in enumerate(self.timeseries):
-            self.axes = self.figure.add_subplot(rows, cols, i + 1)
-            self.axes.set_xlabel(self.timeseries[0].xlabel)
-            self.axes.set_ylabel(self.timeseries[0].ylabel)
-            
-            self._plot_line(self.axes, timeseries)
-            if self.averaging:
-                self._plot_errorbars(timeseries)
+#            axes = self._create_axes(timeseries.xlabel, timeseries.ylabel, rows, cols, i + 1)
+#            self._plot_line(axes, timeseries)
+#            if i + 1 < len(self.timeseries) - (cols - 1):
+#                for label in axes.get_xticklabels():
+#                    label.set_visible(False)
+#                axes.set_xlabel('')
+            axes = self._create_axes('', timeseries.ylabel, rows, cols, i + 1)
+            self._plot_line(axes, timeseries)
+            if i + 1 < len(self.timeseries) - (cols - 1):
+                for label in axes.get_xticklabels():
+                    label.set_visible(False)
+            if not self.some_volumes:
+                axes.set_ylabel('')
+        self.figure.text(0.5, 0.02, self.timeseries[0].xlabel, ha='center')#, va='center')
+        if not self.some_volumes:
+            self.figure.text(0.02, 0.5, self.timeseries[0].ylabel, rotation=90, ha='center', va='center')
+        adjustprops = dict(left=0.1, bottom=0.15, right=0.97, top=0.85, wspace=0.35, hspace=0.25)
+        self.figure.subplots_adjust(**adjustprops)
 
-            if not self.no_labels: self.legend() #TODO
 
 
 #    lines = List(Tuple(Line2D, Str))
     timeseries_to_line_map = Dict(Timeseries, Line2D)
 
     def _plot_line(self, axes, timeseries):
-#        print timeseries.colour
+        print timeseries.colour
         lines = axes.plot(
             timeseries.timepoints, #self.timepoints, #TODO change range here?
             timeseries.values,
@@ -277,12 +285,16 @@ class TimeseriesPlot(HasTraits):
                     ),
                 ),
                 HGroup(
+                    Item('show_volumes_separately', visible_when='object.some_volumes'),
                     'show_gridlines',
                     'show_individual_legends',
                     'show_figure_legend',
-                    Item('list_widget'),
                     Spring(),
-#                    Item('save_resized'),
+                ),
+                HGroup(
+                    Item('save_resized'),
+                    Item('list_widget', label='Edit timeseries...'),
+                    show_labels=False,
                 ),
                 show_border=True,
                 show_labels=False,
@@ -357,35 +369,40 @@ def main():
     )
     import numpy as np
     timepoints = np.arange(number_of_timepoints)
+    molecules = Timeseries(
+        run=run,
+        species=species,
+        compartment=compartment,
+        timepoints=timepoints,
+        values=np.sin(np.arange(number_of_timepoints)),
+        values_type='Molecules',
+        _colour=colours.colour(0),
+    )
+    concentration = Timeseries(
+        run=run,
+        species=species,
+        compartment=compartment,
+        timepoints=timepoints,
+        values=np.cos(np.arange(number_of_timepoints)),
+        values_type='Concentration',
+        _colour=colours.colour(1),
+    )
+    volume = Timeseries(
+        run=run,
+        species=volumes_species,
+        compartment=compartment,
+        timepoints=timepoints,
+        values=np.tan(np.arange(number_of_timepoints)),
+        values_type='Volume',
+        _colour=colours.colour(2),
+    )
     timeseries = [
-        Timeseries(
-            run=run,
-            species=species,
-            compartment=compartment,
-            timepoints=timepoints,
-            values=np.sin(np.arange(number_of_timepoints)),
-            values_type='Molecules',
-            _colour=colours.colour(0),
-        ),
-        Timeseries(
-            run=run,
-            species=species,
-            compartment=compartment,
-            timepoints=timepoints,
-            values=np.cos(np.arange(number_of_timepoints)),
-            values_type='Concentration',
-            _colour=colours.colour(1),
-        ),
-#        Timeseries(
-#            run=run,
-#            species=volumes_species,
-#            compartment=compartment,
-#            timepoints=timepoints,
-#            values=np.tan(np.arange(number_of_timepoints)),
-#            values_type='Volume',
-#            _colour=colours.colour(2),
-#        ),
+        molecules,
+        concentration,
+        volume,
+        molecules,
     ]
+#    volume.colour = (0.2, 0, 0.7)
     TimeseriesPlot(
         timepoints=timepoints,
         timeseries=timeseries,

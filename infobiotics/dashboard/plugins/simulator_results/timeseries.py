@@ -1,10 +1,11 @@
+from __future__ import division # essential for _get_colour
 from enthought.traits.api import HasTraits, List, Float, Str, Color, Enum, Property, cached_property, Array, Instance, Tuple
 from simulator_results import Run, Species, Compartment
 from infobiotics.commons.traits.int_greater_than_zero import IntGreaterThanZero
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 import StringIO
-from PyQt4.QtGui import QPixmap
+from PyQt4.QtGui import QPixmap, QColor
 from enthought.traits.ui.api import View, HGroup, Item
 
 class Timeseries(HasTraits):
@@ -72,6 +73,11 @@ class Timeseries(HasTraits):
     @cached_property
     def _get_colour(self):
         return (self._colour.red() / 255, self._colour.green() / 255, self._colour.blue() / 255)
+
+#    def _set_colour(self, value):
+#        ''' value is a tuple (red, green, blue) where red/green/blue must be 0 <= float <= 1. '''
+#        red, green, blue = value
+#        return QColor(int(red * 256), int(green * 255), int(blue * 255))
 
     def pixmap(self, width=4, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
