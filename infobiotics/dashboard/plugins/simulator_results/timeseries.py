@@ -24,11 +24,11 @@ class Timeseries(HasTraits):
 #    title = Property(Str, depends_on='values_type, run, species, compartment')
     title = Str
 
-#    xlabel = Property(Str, depends_on='timepoints_units')
-    xlabel = Str
+    xlabel = Property(Str, depends_on='timepoints_units')
+#    xlabel = Str
 
-#    ylabel = Property(Str, depends_on='values_type, values_units')
-    ylabel = Str
+    ylabel = Property(Str, depends_on='values_type, values_units')
+#    ylabel = Str
 
     _colour = Color
     colour = Property(Tuple(Float, Float, Float), depends_on='_colour')    
@@ -36,11 +36,11 @@ class Timeseries(HasTraits):
     def _title_default(self):
         return self._get_title()
     
-    def _xlabel_default(self):
-        return self._get_xlabel()
-    
-    def _ylabel_default(self):
-        return self._get_ylabel()
+#    def _xlabel_default(self):
+#        return self._get_xlabel()
+#    
+#    def _ylabel_default(self):
+#        return self._get_ylabel()
     
 #    @cached_property
     def _get_title(self):
@@ -56,14 +56,14 @@ class Timeseries(HasTraits):
             else:
                 return '%s of %s in %s of run %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords, self.run._run_number)
     
-#    @cached_property
+    @cached_property
     def _get_xlabel(self):
         label = 'Time'
         if self.timepoints_units != '':
             label += ' (%s)' % self.timepoints_units
         return label
     
-#    @cached_property
+    @cached_property
     def _get_ylabel(self):
         label = self.values_type
         if self.values_units != '':
@@ -98,8 +98,8 @@ class Timeseries(HasTraits):
         HGroup(
             Item('title'),
             Item('_colour'),
-            Item('xlabel'),
-            Item('ylabel'),
+            Item('timepoints_units'),
+            Item('values_units'),
             show_labels=False,
         ),
     )
