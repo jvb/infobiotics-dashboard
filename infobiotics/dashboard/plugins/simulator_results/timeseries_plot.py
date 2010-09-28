@@ -42,10 +42,9 @@ class HiddenOffsetScalarFormatter(ScalarFormatter):
     
     def get_offset(self):
         s = ScalarFormatter.get_offset(self)
+        self.hidden_offset = s
         if self.hide_offset:
-            self.hidden_offset = s
             return ''
-        self.hidden_offset = None
         return s
 
 
@@ -85,6 +84,20 @@ class TimeseriesPlot(HasTraits):
 
 
     # traits
+    
+    time_units = Trait(
+        's',
+        {
+            'seconds':1,
+            'minutes':60,
+            'hours':3600,
+            'microseconds':0.0000001,
+            'milliseconds':0.0001,
+            'days':86400,
+            's':1,
+        }
+    )
+    
     
     amounts_type = Enum(['Molecules', 'Concentration']) #TODO use with concentration_formatter
     
@@ -354,9 +367,15 @@ class TimeseriesPlot(HasTraits):
 
 #        axes.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
         if self.scientific_time_ticklabels: 
-            axes.xaxis.set_major_formatter(self.molecules_formatter)
-        if self.scientific_amounts_ticklabels: 
-            axes.yaxis.set_major_formatter(self.molecules_formatter)
+            axes.xaxis.set_major_formatter(self.time_formatter)
+        if self.scientific_amounts_ticklabels:
+            if timeseries.values_type == 'Molecules':
+                axes.yaxis.set_major_formatter(self.molecules_formatter)
+            elif timeseries.values_type == 'Concentration':
+                axes.yaxis.set_major_formatter(self.concentrations_formatter)
+        if self.scientific_volume_ticklabels: 
+            if timeseries.values_type == 'Volume':
+                axes.yaxis.set_major_formatter(self.volumes_formatter)
         
         if self.gridlines:
             axes.grid(True, which='major')
@@ -364,7 +383,7 @@ class TimeseriesPlot(HasTraits):
         
         return axes
 
-    def _create_axes_twinx(self, axes, timeseries):
+    def _create_axes_twinx(self, axes, timeseries): 
         axes = axes.twinx()
         self.axes.append(axes)
 
@@ -374,7 +393,7 @@ class TimeseriesPlot(HasTraits):
 
 #        axes.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
         if self.scientific_time_ticklabels: 
-            axes.xaxis.set_major_formatter(self.molecules_formatter)
+            axes.xaxis.set_major_formatter(self.time_formatter)
         if self.scientific_volume_ticklabels: 
             axes.yaxis.set_major_formatter(self.volume_formatter)
 
