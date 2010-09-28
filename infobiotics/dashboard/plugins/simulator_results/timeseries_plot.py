@@ -1,10 +1,10 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
-    Button, on_trait_change, Tuple, Dict, Array, Enum, Property,
+    Button, on_trait_change, Tuple, Dict, Array, Enum, Property, Trait,
     cached_property)
 from enthought.traits.ui.api import (View, VGroup, Item, HGroup, Spring,
-    ListEditor, InstanceEditor)
+    ListEditor, InstanceEditor, EnumEditor)
 from infobiotics.commons import colours
 from infobiotics.commons.matplotlib.draggable_legend import DraggableLegend
 from infobiotics.commons.matplotlib.matplotlib_figure_size import (
@@ -16,7 +16,55 @@ from matplotlib.figure import Figure
 from matplotlib.font_manager import FontProperties
 from matplotlib.lines import Line2D
 from matplotlib.axes import Axes, Subplot as AxesSubplot
+from matplotlib.ticker import ScalarFormatter, NullFormatter
 from timeseries import Timeseries
+from infobiotics.commons.ordereddict import OrderedDict
+
+concentrations_ordered_dict = OrderedDict(
+    [
+        ('M', 0),
+        ('mM', -3),
+        ('uM', -6),
+        ('nM', -9),
+        ('pM', -12),
+        ('fM', -5),
+    ]
+)
+
+class HiddenOffsetScalarFormatter(ScalarFormatter): 
+    ''' Use hide_offset=True to remove scientific notation label and set
+    self.hidden_offset instead.
+    
+    '''
+    def __init__(self, hide_offset=False, useOffset=True, useMathText=False):
+        self.hide_offset = hide_offset
+        ScalarFormatter.__init__(self, useOffset=useOffset, useMathText=useMathText)
+    
+    def get_offset(self):
+        s = ScalarFormatter.get_offset(self)
+        if self.hide_offset:
+            self.hidden_offset = s
+            return ''
+        self.hidden_offset = None
+        return s
+
+
+class FixedOrderFormatter(HiddenOffsetScalarFormatter):
+    ''' Formats axis ticks using scientific notation with a constant order of 
+    magnitude.
+    
+    Adapted from http://stackoverflow.com/questions/3677368/matplotlib-format-axis-offset-values-to-whole-numbers-or-specific-number/3679918#3679918
+    to use HiddenOffsetScalarFormatter.
+    
+    '''
+    def __init__(self, order_of_mag=0, hide_offset=False, useOffset=True, useMathText=False):
+        self._order_of_mag = order_of_mag
+        HiddenOffsetScalarFormatter.__init__(self, hide_offset, useOffset=useOffset, useMathText=useMathText)
+
+    def _set_orderOfMagnitude(self, range):
+        """Over-riding this to avoid having orderOfMagnitude reset elsewhere"""
+        self.orderOfMagnitude = self._order_of_mag
+
 
 class TimeseriesPlot(HasTraits):
 
@@ -25,11 +73,58 @@ class TimeseriesPlot(HasTraits):
     font_properties = FontProperties(size='medium')#'small'
 
 
-    #traits
+#    null_formatter = NullFormatter()
     
+    time_formatter = ScalarFormatter(useOffset=True, useMathText=True)
+    time_formatter.set_scientific(True) # unnecessary?
+    time_formatter.set_powerlimits((-3, 4))
+
+    molecules_formatter = ScalarFormatter(useOffset=True, useMathText=True)
+    molecules_formatter.set_scientific(True) # unnecessary?
+    molecules_formatter.set_powerlimits((-3, 4))
+
+
+    # traits
+    
+    amounts_type = Enum(['Molecules', 'Concentration']) #TODO use with concentration_formatter
+    
+    concentration_units = Trait(
+        'uM',
+        {
+            'M'  : 0,
+            'mM' :-3,
+            'uM' :-6,
+            'nM' :-9,
+            'pM' :-12,
+            'fM' :-15,
+        }
+    )
+    
+    volume_units = Trait(
+        'uL',
+        {
+            'L'  : 0,
+            'mL' :-3,
+            'uL' :-6,
+            'nL' :-9,
+            'pL' :-12,
+            'fL' :-15,
+        }
+    )
+
+#    # testing EnumEditor values order and shadow_values - works
+#    @on_trait_change('concentration_units, volume_units')
+#    def units_changed(self, name, units):
+#        print units, getattr(self, name + '_')
+
+    concentration_formatter = Property(Instance(FixedOrderFormatter), depends_on='concentration_units')
+    
+    volume_formatter = Property(Instance(FixedOrderFormatter), depends_on='volume_units')
+
+
     figure = Instance(Figure, ())
 
-    figure_title = Str
+    figure_title = Str #TODO get from SimulatorResultsDialog
     
 #    def _figure_title_default(self):
 #        return 'figure title'
@@ -44,15 +139,15 @@ class TimeseriesPlot(HasTraits):
     volumes = Property(List(Timeseries), depends_on='timeseries')
     amounts_to_volumes_map = Property(Dict(Timeseries, Timeseries), depends_on='timeseries') # each non-volume timeseries should have a corresponding volume timeseries (if volumes is selected in the species list widget) [which will be shared between non-volume timeseries]
 
-#    style = Enum(['Combined', 'Stacked', 'Tiled'])
+    style = Enum(['Combined', 'Stacked', 'Tiled'])
 #    style = Enum(['Stacked', 'Combined', 'Tiled'])
-    style = Enum(['Tiled', 'Stacked', 'Combined'])
+#    style = Enum(['Tiled', 'Stacked', 'Combined'])
     
     separate_volumes = Bool
 
-    gridlines = Bool
+    gridlines = Bool(True)
 
-    figure_legend = Bool
+    figure_legend = Bool(True)
     individual_legends = Bool    
     
     individual_volume_labels = Bool
@@ -60,6 +155,15 @@ class TimeseriesPlot(HasTraits):
     individual_time_labels = Bool
 
     window_title = Str('window title') #TODO necessary/used?
+    
+
+    @cached_property
+    def _get_concentration_formatter(self):
+        return FixedOrderFormatter(order_of_mag=self.concentration_units_, hide_offset=True, useOffset=True, useMathText=True)
+    
+    @cached_property
+    def _get_volume_formatter(self):
+        return FixedOrderFormatter(order_of_mag=self.volume_units_, hide_offset=True, useOffset=True, useMathText=True)
     
     
     @cached_property
@@ -69,17 +173,13 @@ class TimeseriesPlot(HasTraits):
         else:
             return False
 
-#    def _some_volumes_changed(self):
-#        if not self.some_volumes:
-#            self.separate_volumes = False
-    
     @cached_property
     def _get_amounts(self):
-        return [timeseries for timeseries in self.timeseries if timeseries.species.name != 'Volumes']
+        return [timeseries for timeseries in self.timeseries if timeseries.values_type != 'Volume']
     
     @cached_property
     def _get_volumes(self):
-        return [timeseries for timeseries in self.timeseries if timeseries.species.name == 'Volumes']
+        return [timeseries for timeseries in self.timeseries if timeseries.values_type == 'Volume']
     
     @cached_property
     def _get_amounts_to_volumes_map(self):
@@ -91,12 +191,6 @@ class TimeseriesPlot(HasTraits):
                     amounts_to_volumes_map[amounts] = volumes
                     break
         return amounts_to_volumes_map
-#    def _get_corresponding_volumes(self, amounts):
-#        amounts_compartment_id = amounts.compartment.id
-#        for volumes in self.volumes:
-#            if volumes.compartment.id == amounts_compartment_id:
-#                return volumes
-#        raise ValueError('Class should be coded in such a way that this method is never called if amounts timeseries does not have a corresponding volumes timeseries.')
     
 
     @on_trait_change('style, individual_legends')
@@ -133,31 +227,38 @@ class TimeseriesPlot(HasTraits):
         self._redraw_figure()
 
     def _create_figure_legend(self):
-#        lines = [line for line, label in self.lines]
-#        labels = [label for line, label in self.lines]
         lines = []
         labels = []
-#        print len(self.timeseries_to_line_map)
         for timeseries, line in self.timeseries_to_line_map.iteritems():
             lines.append(line)
             labels.append(timeseries.title)
         return self.figure.legend(
             lines,
             labels,
-            loc='lower center', # http://matplotlib.sourceforge.net/api/figure_api.html#matplotlib.figure.Figure.legend 
+            loc='upper center', # http://matplotlib.sourceforge.net/api/figure_api.html#matplotlib.figure.Figure.legend 
             prop=self.font_properties
         ) 
     
 
-    @on_trait_change('style, \
+#    @on_trait_change('+') # dangerous
+    @on_trait_change('\
+        style, \
         timeseries, \
         timeseries:_colour, \
         gridlines, \
         separate_volumes, \
         individual_volume_labels, \
         individual_amounts_labels, \
-        individual_time_labels')
+        individual_time_labels, \
+        scientific_time_ticklabels, \
+        scientific_amounts_ticklabels, \
+        scientific_volume_ticklabels, \
+        concentration_units, \
+        volume_units \
+        ')
     def _update_figure(self):
+#        if len(self.timeseries) == 0:
+#            return
 
         self.figure.clear()
         if not hasattr(self, 'axes'):
@@ -173,7 +274,7 @@ class TimeseriesPlot(HasTraits):
             self.tile()
             
         if not self.individual_time_labels:
-            self.figure.text(0.5, 0.02, self.timeseries[0].xlabel, ha='center', va='center')
+            self.figure.text(0.5, 0.02, self.timeseries[0].xlabel, ha='center', va='bottom')
             # remove individual time labels
             for axes in self.axes:
                 axes.set_xlabel('')
@@ -181,7 +282,7 @@ class TimeseriesPlot(HasTraits):
         if not self.separate_volumes:
             if not self.individual_amounts_labels:
                 if len(self.amounts) > 0:
-                    self.figure.text(0.02, 0.5, self.amounts[0].ylabel, rotation=90, ha='center', va='center')
+                    self.figure.text(0.02, 0.5, self.amounts[0].ylabel, rotation=90, ha='left', va='center')
                     for axes in self.axes:
                         if isinstance(axes, AxesSubplot):
                             axes.set_ylabel('')
@@ -189,17 +290,17 @@ class TimeseriesPlot(HasTraits):
             if not self.individual_volume_labels:
                 if not self.some_volumes and len(self.volumes) > 0:
                     # only volumes - label on left
-                    self.figure.text(0.02, 0.5, self.volumes[0].ylabel, rotation=90, ha='center', va='center')
+                    self.figure.text(0.02, 0.5, self.volumes[0].ylabel, rotation=90, ha='right', va='center')
                     for axes in self.axes:
                         axes.set_ylabel('')
                 else:
                     # mixed - label on right
                     self.figure.text(0.98, 0.5, self.volumes[0].ylabel, rotation=90, ha='center', va='center')
                     for axes in self.axes:
-                        if type(axes) == Axes: # can't use isinstance here because AxesSubplot is a subclass of Axes!
+                        if type(axes) == Axes: # can't use isinstance here because AxesSubplot is a subclass of Axes ! 
                             axes.set_ylabel('')
 
-        adjustprops = dict(bottom=0.125, top=0.925, wspace=0.3, hspace=0.2)
+        adjustprops = dict(bottom=0.1, top=0.925, wspace=0.3, hspace=0.2)
         if len(self.figure_title) > 0:
             adjustprops.update(top=0.85)
             self.figure.suptitle(self.figure_title)
@@ -235,6 +336,9 @@ class TimeseriesPlot(HasTraits):
         if self.figure.canvas is not None:
             self.figure.canvas.draw()
 
+    scientific_time_ticklabels = Bool(True)
+    scientific_amounts_ticklabels = Bool(True)
+    scientific_volume_ticklabels = Bool(True)
 
     def _create_axes(self, timeseries, *args, **kwargs):
         ''' Create a subplot (labelled depending on traits) returning axes. 
@@ -247,10 +351,16 @@ class TimeseriesPlot(HasTraits):
 
         axes.set_xlabel(timeseries.xlabel)
         axes.set_ylabel(timeseries.ylabel)
+
+#        axes.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
+        if self.scientific_time_ticklabels: 
+            axes.xaxis.set_major_formatter(self.molecules_formatter)
+        if self.scientific_amounts_ticklabels: 
+            axes.yaxis.set_major_formatter(self.molecules_formatter)
         
         if self.gridlines:
             axes.grid(True, which='major')
-            axes.grid(True, which='minor')
+            axes.grid(True, which='minor') # doesn't do anything
         
         return axes
 
@@ -258,8 +368,15 @@ class TimeseriesPlot(HasTraits):
         axes = axes.twinx()
         self.axes.append(axes)
 
-        axes.set_xlabel(timeseries.xlabel)
-        axes.set_ylabel(timeseries.ylabel)
+##        axes.set_xlabel(timeseries.xlabel) # not needed
+#        axes.set_ylabel(timeseries.ylabel) # use Volume (order_of_mag M)
+        axes.set_ylabel('Volume (%s)' % self.volume_units)
+
+#        axes.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
+        if self.scientific_time_ticklabels: 
+            axes.xaxis.set_major_formatter(self.molecules_formatter)
+        if self.scientific_volume_ticklabels: 
+            axes.yaxis.set_major_formatter(self.volume_formatter)
 
         # don't show gridlines for secondary y-axis.
 #        if self.gridlines:
@@ -343,7 +460,7 @@ class TimeseriesPlot(HasTraits):
                     volumes = self.amounts_to_volumes_map[amounts]
                     axes = self._create_axes_twinx(axes, volumes)
                     self._plot_timeseries(axes, volumes)
-                except KeyError: pass # clever way of making this work regardless of some_volumes?
+                except KeyError: pass # clever way of making this work regardless of some_volumes
 
     def tile(self):
         if self.separate_volumes:
@@ -388,62 +505,93 @@ class TimeseriesPlot(HasTraits):
                         axes.set_ylabel('')
                         for label in axes.get_yticklabels():
                             label.set_visible(False)
-                except KeyError: pass # clever way of making this work regardless of some_volumes?
+#                        axes.yaxis.set_major_formatter(self.null_formatter)
+#                        axes.yaxis.get_major_formatter().set_scientific(False)
+                except KeyError: pass # clever way of making this work regardless of some_volumes
 
-    def _options_fired(self):
-        self.edit_traits(
-            view=View(
-                VGroup(
-                    HGroup(
-                        Item('style', style='custom'),
-                    ),
-                    HGroup(
-                        Item('separate_volumes', visible_when='object.some_volumes and not object.style=="Combined"'),
-                    ),
-                    HGroup(
-                        'gridlines',
-                    ),
-                    HGroup(
-                        'figure_legend',
-                        Item('individual_legends', visible_when='not object.style=="Combined"'),
-                    ),
-                    HGroup(
-                        Item('individual_volume_labels', visible_when='len(object.volumes) > 0) and not object.style=="Combined"'),
-                        Item('individual_amounts_labels', visible_when='len(object.amounts) > 0 and not object.style=="Combined"'),
-                        Item('individual_time_labels', visible_when='not object.style=="Combined"'),
-                    ),
-                    Item('timeseries',
-                        show_label=False,
-#                        style='readonly',
-#                        editor=ListEditor(
-#                            style='custom',
-#                            editor=InstanceEditor(),
-#                        ),
-                        style='custom',
-                        editor=timeseries_table_editor,
-                    ),
-                    show_border=True,
-                ),
-                title='Configure timeseries plot',
-            )
-        )
-
-    options = Button
+#    def _options_fired(self):
+#        self.edit_traits(
+#            view=View(
+#                VGroup(
+#                    HGroup(
+#                        Item('style', style='custom'),
+#                    ),
+#                    HGroup(
+#                        Item('separate_volumes', visible_when='object.some_volumes and not object.style=="Combined"'),
+#                    ),
+#                    HGroup(
+#                        'gridlines',
+#                    ),
+#                    HGroup(
+#                        'figure_legend',
+#                        Item('individual_legends', visible_when='not object.style=="Combined"'),
+#                    ),
+#                    HGroup(
+#                        Item('individual_volume_labels', visible_when='len(object.volumes) > 0) and not object.style=="Combined"'),
+#                        Item('individual_amounts_labels', visible_when='len(object.amounts) > 0 and not object.style=="Combined"'),
+#                        Item('individual_time_labels', visible_when='not object.style=="Combined"'),
+#                    ),
+#                    Item('timeseries',
+#                        show_label=False,
+##                        style='readonly',
+##                        editor=ListEditor(
+##                            style='custom',
+##                            editor=InstanceEditor(),
+##                        ),
+#                        style='custom',
+#                        editor=timeseries_table_editor,
+#                    ),
+#                    show_border=True,
+#                ),
+#                title='Configure timeseries plot',
+#            )
+#        )
+#
+#    options = Button
 
     def traits_view(self):
         return View(
             VGroup(
                 HGroup(
+                       'amounts_type', #TODO remove
+                       Item('concentration_units',
+                           editor=EnumEditor(values={'M':'1:M', 'mM':'2:mM', 'uM':'3:uM', 'pM':'4:pM', 'fM':'5:fM'}),
+                           visible_when='object.amounts_type=="Concentration"'),
+                       Item('volume_units',
+                           editor=EnumEditor(values={'L':'1:L', 'mL':'2:mL', 'uL':'3:uL', 'pL':'4:pL', 'fL':'5:fL'}),
+                           visible_when='len(object.volumes) > 0'),
+                ),
+                HGroup(
+                    Item('style', style='custom'),
+                    Item('separate_volumes', visible_when='object.some_volumes and not object.style=="Combined"'),
+                ),
+                HGroup(
+                    'gridlines',
+                    'figure_legend',
+                    Item('individual_legends', visible_when='not object.style=="Combined"'),
+                ),
+                HGroup(
+                    Item(label='Show individual axis labels'),
+                    Item('individual_time_labels', label='time', visible_when='not object.style=="Combined"'),
+                    Item('individual_amounts_labels', label='amounts', visible_when='len(object.amounts) > 0 and not object.style=="Combined"'),
+                    Item('individual_volume_labels', label='volume', visible_when='len(object.volumes) > 0 and not object.style=="Combined"'),
+                ),
+                HGroup(
+                    'scientific_time_ticklabels',
+                    'scientific_amounts_ticklabels',
+                    'scientific_volume_ticklabels',
+                ),
+                HGroup(
                     Item('figure',
                         editor=MatplotlibFigureEditor(
                             toolbar=True,
-                            toolbar_above=False,
+#                            toolbar_above=False,
                         ),
                         show_label=False,
                     ),
                 ),
                 HGroup(
-                    Item('options', show_label=False),
+#                    Item('options', show_label=False),
                     Spring(),
                     Item('save_resized'),
                     Item('list_widget', label='Edit timeseries...'),
@@ -503,7 +651,7 @@ timeseries_table_editor = TableEditor(
 #                evaluate_name='evaluate', # see MoleculeConstant.evaluate(value)
 #            )
         ),
-        ObjectColumn(name='value_units',
+        ObjectColumn(name='values_units',
 #            width=0.4,
 #            editable=False,
         ),
@@ -559,7 +707,7 @@ def main():
         compartment=compartment,
         timepoints=timepoints,
 #        values=np.sin(np.arange(number_of_timepoints)),
-        values=np.linspace(0, 1000000, number_of_timepoints),
+        values=np.linspace(0, 100000, number_of_timepoints),
         values_type='Molecules',
         _colour=colours.colour(0),
     )
@@ -569,7 +717,7 @@ def main():
         compartment=compartment,
         timepoints=timepoints,
 #        values=np.cos(np.arange(number_of_timepoints)),
-        values=np.linspace(0, 1000000, number_of_timepoints),
+        values=np.linspace(0, 0.003, number_of_timepoints),
         values_type='Concentration',
         _colour=colours.colour(1),
     )
@@ -579,7 +727,7 @@ def main():
         compartment=compartment,
         timepoints=timepoints,
 #        values=np.tan(np.arange(number_of_timepoints)),
-        values=np.linspace(0, 1000000, number_of_timepoints),
+        values=np.linspace(0, 0.000002, number_of_timepoints),
         values_type='Volume',
         _colour=colours.colour(2),
     )
