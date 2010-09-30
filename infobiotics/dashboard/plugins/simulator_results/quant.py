@@ -1,102 +1,138 @@
-import quantities as pq
-
 import numpy as np
 
-time = np.linspace(0, 60, 7) * pq.sec
-print time
-time.units = pq.min
-print time
+#molecules = np.arange(1000 * 1000).reshape((100, 100, 100)) # pretend amounts that might come from an mcss simulation
+#moles = molecules / N_A * mole # convert molecules to moles by dividing the number of molecules by Avogadro's constant
+#molecules = np.array(moles * N_A, dtype=int) # recover molecules by multiplying the number of moles by Avogadro's constant, as integers without possible float-representation rounding errors 
+#concentrations = moles / (volume * volume_unit) # convert moles to concentrations by dividing by volume with units
 
-time_in_minutes = time.rescale('minutes')
-print time_in_minutes
+from quantities import UnitQuantity, liter, milli, micro, nano, pico, femto, atto
+milliliter = UnitQuantity('milliliter', liter * milli, symbol='mL')
+microliter = UnitQuantity('microliter', liter * micro, symbol='uL')
+nanoliter = UnitQuantity('nanoliter', liter * nano, symbol='nL')
+picoliter = UnitQuantity('picoliter', liter * pico, symbol='pL')
+femtoliter = UnitQuantity('femtoliter', liter * femto, symbol='fL')
+attoliter = UnitQuantity('attoliter', liter * atto, symbol='aL')
+
+from quantities import mole
+molar = UnitQuantity('molar', mole / liter, symbol='M')
+millimolar = UnitQuantity('millimolar', mole / liter * milli, symbol='mM')
+micromolar = UnitQuantity('micromolar', mole / liter * micro, symbol='uM')
+nanomolar = UnitQuantity('nanomolar', mole / liter * nano, symbol='nM')
+picomolar = UnitQuantity('picomolar', mole / liter * pico, symbol='pM')
+femtomolar = UnitQuantity('femtomolar', mole / liter * femto, symbol='fM')
+attomolar = UnitQuantity('attomolar', mole / liter * atto, symbol='aM')
+
+from scipy.constants import N_A # Avogadro's constant 6.0221415e+23
+def concentration(molecules, volume, volume_unit, concentration_units=molar):
+    moles = molecules / N_A * mole
+    return (moles / (volume * volume_unit)).rescale(concentration_units)
+#print concentration(N_A, 1, liter) 
+##cell_volume = 0.65 * micro * liter # an example cell volume (0.65 ul) ~ the size of an E.coli (Wikipedia: Bacterial_cell_structure)
+#print concentration(np.arange(1, 1000 * 1000 + 1, 1000), 0.65, microliter, picomolar) 
+#exit()
 
 
-molecules = 100
-print molecules
-
-volume = 1 * pq.liter * pq.milli
-print volume
-
-concentration = molecules / volume 
-print concentration
-
-print dir(pq)
-
-concentration = 10 * pq.micro * pq.mole / pq.liter
-print concentration
-
-molecules = volume * concentration
-print molecules
+from quantities import picosecond, nanosecond, microsecond, millisecond, second, minute, hour, day, week, month, year
 
 
-microliter = pq.liter * pq.micro
-nanoliter = pq.liter * pq.nano
-attoliter = pq.liter * pq.nano
-picoliter = pq.liter * pq.pico
-femtoliter = pq.liter * pq.femto
-
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import *
 from enthought.traits.ui.api import *
+from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_EnumEditor
+from quantities import Quantity
 
-volume_units = {
-    'liters':pq.liter,
-    'milliliters (10^-3 liters)':pq.milliliter,
-    'microliters (10^-6 liters)':microliter,
-    'nanoliters (10^-9 liters)':nanoliter,
-    'attoliters (10^-10 liters)':attoliter,
-    'picoliters (10^-12 liters)':picoliter,
-    'femtoliters (10^-15 liters)':femtoliter,
-}
+class Converter(HasTraits):
 
-volume_units_editor = EnumEditor(
-    values={
-        'liters':'1:liters',
-        'milliliters (10^-3 liters)':'2:milliliters (10^-3 liters)',
-        'microliters (10^-6 liters)':'3:microliters (10^-6 liters)',
-        'nanoliters (10^-9 liters)':'4:nanoliters (10^-9 liters)',
-        'attoliters (10^-10 liters)':'5:attoliters (10^-10 liters)',
-        'picoliters (10^-12 liters)':'6:picoliters (1e-12 liters)',
-        'femtoliters (10^-15 liters)':'7:femtoliters (1e-15 liters)',
-    }
-)
-
-class Test(HasTraits):
-    
     data = Array
     
-    data_quantity = Instance(pq.Quantity)
-    
-    data_volume_units = Trait(
-        'milliliters (10^-3 liters)',
-        volume_units
-    )
-    
-    def _data_changed(self):
-        self._data_volume_units_changed()
-    
-    def _data_volume_units_changed(self):
-        self.data_quantity = pq.Quantity(self.data, self.data_volume_units_)
-    
-    display_volume_units = Trait(
-        'milliliters (10^-3 liters)',
-        volume_units
-    )
+    _data_quantity = Instance(Quantity)
 
-    def _display_volume_units_changed(self):
-        print self.display_volume_units, self.display_volume_units_
-        self.data_quantity.units = self.display_volume_units_
-        print self.data_quantity 
+    data_units = Any
+    def _data_units_default(self):
+        raise NotImplementedError
+    
+    display_units = Any
+    def _display_units_default(self):
+        raise NotImplementedError
 
-    view = View(
-        Item('data_volume_units',
-            editor=volume_units_editor,
-        ),
-        Item('display_volume_units',
-            editor=volume_units_editor,
-        ),
-    )
+    units_editor = Instance(EnumEditor) 
+
+    @on_trait_change('data, data_units')
+    def update_data_quantity(self):
+        self._data_quantity = Quantity(self.data, self.data_units_)
+    
+    @on_trait_change('_data_quantity, display_units')
+    def print_rescaled__data_quantity(self):
+        print self._data_quantity.rescale(self.display_units_)
+
+    def traits_view(self):
+        return View(
+            Item('data_units',
+                editor=self.units_editor,
+            ),
+            Item('display_units',
+                editor=self.units_editor,
+            ),
+        )
+
+
+liters = 'liters'
+milliliters = 'milli%s (10^-3 %s)' % (liters, liters)
+microliters = 'micro%s (10^-6 %s)' % (liters, liters)
+nanoliters = 'nano%s (10^-9 %s)' % (liters, liters)
+picoliters = 'pico%s (10^-12 %s)' % (liters, liters)
+femtoliters = 'femto%s (10^-15 %s)' % (liters, liters)
+attoliters = 'atto%s (10^-18 %s)' % (liters, liters)
+
+volume_units = {
+    liters:liter,
+    milliliters:milliliter,
+    microliters:microliter,
+    nanoliters:nanoliter,
+    picoliters:picoliter,
+    femtoliters:femtoliter,
+    attoliters:attoliter,
+}
+
+VolumeUnit = Trait(milliliters, volume_units)
+
+volume_units_editor = EnumEditor(
+    values=values_for_EnumEditor((liters, milliliters, microliters, nanoliters, picoliters, femtoliters, attoliters)),
+)
+
+class VolumeConverter(Converter):
+    data_units = VolumeUnit
+    display_units = VolumeUnit
+    units_editor = volume_units_editor
+
+
+time_units = {
+    'picoseconds':picosecond,
+    'nanoseconds':nanosecond,
+    'microseconds':microsecond,
+    'milliseconds':millisecond,
+    'seconds':second,
+    'minutes':minute,
+    'hours':hour,
+    'days':day,
+    'weeks':week,
+    'years':year,
+}
+
+TimeUnit = Trait('seconds', time_units)
+
+time_units_editor = EnumEditor(
+    values=values_for_EnumEditor(('picoseconds', 'nanoseconds', 'microseconds', 'milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years')),
+)
+
+class TimeConverter(Converter):
+    data_units = TimeUnit
+    display_units = TimeUnit
+    units_editor = time_units_editor
 
 
 if __name__ == '__main__':
-    Test(data=np.arange(100)).configure_traits()
-
+#    VolumeConverter(data=np.arange(100)).configure_traits()
+    print (1 * year).rescale('days')
+    TimeConverter(data=np.arange(0, 365, 1)).configure_traits()
