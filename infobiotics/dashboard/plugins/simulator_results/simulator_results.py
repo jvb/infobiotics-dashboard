@@ -18,7 +18,7 @@ from enthought.traits.ui.api import View, Item, HGroup, View, VGroup, Spring
 from enthought.tvtk.pyface.scene_editor import SceneEditor
 from infobiotics.commons import colours
 from infobiotics.commons.matplotlib.matplotlib_figure_size import resize_and_save_matplotlib_figure
-from infobiotics.commons.qt4 import centre_window
+from infobiotics.commons.qt4 import centre_window, disable_widgets, enable_widgets, hide_widgets, show_widgets, uncheck_widgets, check_widgets, clear_widgets
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import \
     MatplotlibFigureEditor
 from matplotlib import font_manager
@@ -308,7 +308,10 @@ class SimulationResultsDialog(QWidget):
         self.connect(self.ui.from_spin_box, SIGNAL("valueChanged(double)"), self.ui.to_spin_box.set_minimum)
         self.connect(self.ui.to_spin_box, SIGNAL("valueChanged(double)"), self.ui.from_spin_box.set_maximum)
 
-        self.connect(self.ui.plot_histograms_button, SIGNAL("clicked()"), self.histogram)
+        self.quantities_display_type_changed(self.ui.quantities_display_type_combo_box.currentText())
+        self.connect(self.ui.quantities_display_type_combo_box, SIGNAL('currentIndexChanged(QString)'), self.quantities_display_type_changed)
+
+        self.connect(self.ui.plot_histogram_button, SIGNAL("clicked()"), self.histogram)
         self.connect(self.ui.export_data_as_button, SIGNAL("clicked()"), self.export_data_as)
         self.connect(self.ui.plot_timeseries_button, SIGNAL("clicked()"), self.plot)
         self.connect(self.ui.visualise_population_button, SIGNAL("clicked()"), self.surfacePlot)
@@ -331,12 +334,14 @@ class SimulationResultsDialog(QWidget):
         settings = QSettings()
         settings.beginGroup(self.settings_group)
         self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+        #TODO load options
         settings.endGroup()
 
     def save_settings(self):
         settings = QSettings()
         settings.beginGroup(self.settings_group)
         settings.setValue("current_directory", QVariant(unicode(self.current_directory)))
+        #TODO save options
         settings.endGroup()
 
     def load(self, filename=None):
@@ -369,154 +374,256 @@ class SimulationResultsDialog(QWidget):
                 self.load_failed()
                 return False
 
-        # set spinbox defaults
-        from_ = int(0)
-        to = int(simulation.max_time)
-        self.ui.from_spin_box.setRange(from_, to)
-        self.ui.to_spin_box.setRange(from_, to)
-        self.ui.from_spin_box.setValue(from_)
-        self.ui.to_spin_box.setValue(to)
-
-        number_of_timepoints = simulation._runs_list[0].number_of_timepoints
-        self.ui.every_spin_box.setRange(1, number_of_timepoints)
-        self.ui.every_spin_box.setValue(self.ui.every_spin_box.minimum())
-
-        interval = simulation.log_interval
-        self.ui.log_interval_label.setText(str(interval))
-        self.ui.from_spin_box.set_interval(interval)
-        self.ui.to_spin_box.set_interval(interval)
-
-        self.ui.runs_list_widget.clear()
-        for i in simulation._runs_list:
-            item = SimulationListWidgetItem(i)
-            self.ui.runs_list_widget.addItem(item)
-
-        self.ui.species_list_widget.clear()
-        for i in simulation._species_list:
-            item = SimulationListWidgetItem(i)
-            self.ui.species_list_widget.addItem(item)
-        
-        if simulation.log_volumes == 1:
-            self.volumes_list_widget_item = QListWidgetItem('Volumes', self.ui.species_list_widget) #TODO use some other mechanism?
-
-        self.ui.compartments_list_widget.clear()
-        for i in simulation._runs_list[0]._compartments_list: #TODO can't rely on run1 alone if _compartments_list divide
-#            item = SimulationListWidgetItem(i)
-#            self.ui.compartments_list_widget.addItem(item)
-            item = SimulationListWidgetItem(i, self.ui.compartments_list_widget) #TODO better than above? with list_widget? same for species?
-        
         self.simulation = simulation
-
-        fileinfo = QFileInfo(filename)
-        self.ui.file_name_line_edit.setText(fileinfo.absoluteFilePath())
-
-        self.filename = filename # for stats
-        self.emit(SIGNAL('filename_changed'), self.filename) #TODO connect to this to invalid cached SimulatorResults
+        self.filename = filename
 
         self.load_succeeded()
         return True
 
+        
+    
+
+
     def load_failed(self):
-        ''' Disables widgets once. '''
-        self.ui.file_name_line_edit.clear()
-        self.ui.file_name_line_edit.setEnabled(False)
-        self.ui.runs_list_widget.clear()
-        self.ui.runs_list_widget.setEnabled(False)
-        self.ui.select_all_runs_check_box.setEnabled(False)
-        self.ui.select_all_runs_check_box.setChecked(False)
-        self.ui.random_runs_spin_box.setEnabled(False)
-        self.ui.random_runs_label.setEnabled(False)
-
-        self.ui.species_list_widget.clear()
-        self.ui.species_list_widget.setEnabled(False)
-        self.ui.select_all_species_check_box.setEnabled(False)
-        self.ui.select_all_species_check_box.setChecked(False)
-        self.ui.species_selected_and_total_label.setVisible(False)
+        ''' Hides, clears, unchecks and disables relevant widgets. '''
         
-        self.ui.filter_species_line_edit.setEnabled(False)
-#        self.ui.sort_species_check_box.setEnabled(False)
+        ui = self.ui
 
-        self.ui.compartments_list_widget.clear()
-        self.ui.compartments_list_widget.setEnabled(False)
+        hide_widgets(
+            ui.runs_selected_and_total_label,
+            ui.species_selected_and_total_label,
+            ui.compartments_selected_and_total_label,
+            
+            ui.timepoints_data_units_combo_box,
+            ui.timepoints_display_units_combo_box,
+            
+            ui.quantities_data_units_combo_box,
+            ui.quantities_display_type_combo_box,
+            ui.molecules_display_units_label,
+            ui.moles_display_units_combo_box,
+            ui.concentrations_display_units_combo_box,
+            
+#            ui.volumes_data_units_combo_box,
+#            ui.volumes_display_units_combo_box,
+            ui.volumes_widget,
+        )
 
-        self.ui.select_all_compartments_check_box.setEnabled(False)
-        self.ui.select_all_compartments_check_box.setChecked(False)
-        self.ui.compartments_selected_and_total_label.setVisible(False)
+        clear_widgets(
+            ui.file_name_line_edit,
+            ui.runs_list_widget,
+            ui.species_list_widget,
+            ui.compartments_list_widget,
+        )
+
+        uncheck_widgets(
+            ui.select_all_runs_check_box,
+            ui.select_all_species_check_box,
+            ui.select_all_compartments_check_box,
+        )
+                
+        disable_widgets(
+            ui.file_name_line_edit,
+            
+            ui.select_all_runs_check_box,
+            ui.runs_list_widget,
+            ui.random_runs_spin_box,
+            ui.random_runs_label,
+
+            ui.select_all_species_check_box,
+            ui.species_list_widget,
+            ui.filter_species_line_edit,
+#            ui.sort_species_check_box,
+            
+            ui.compartments_list_widget,
+            ui.select_all_compartments_check_box,
+            ui.filter_compartments_line_edit,
+#            ui.sort_compartments_check_box,
+            
+            ui.to_spin_box,
+            ui.from_spin_box,
+            ui.every_spin_box,
+            
+            ui.average_over_selected_runs_check_box,
+            ui.calculate_button,
+            
+            ui.export_data_as_button,
+            ui.plot_timeseries_button,
+            ui.plot_histogram_button,
+            ui.visualise_population_button,
+        )
         
-        self.ui.filter_compartments_line_edit.setEnabled(False)
-#        self.ui.sort_compartments_check_box.setEnabled(False)
+        ui.load_button.setFocus(Qt.OtherFocusReason)
 
-        self.ui.to_spin_box.setEnabled(False)
-        self.ui.from_spin_box.setEnabled(False)
-        self.ui.every_spin_box.setEnabled(False)
-        self.ui.average_over_selected_runs_check_box.setEnabled(False)
-        self.ui.export_data_as_button.setEnabled(False)
-        self.ui.plot_timeseries_button.setEnabled(False)
-        self.ui.load_button.setFocus(Qt.OtherFocusReason)
 
+    def quantities_display_type_changed(self, text):
+        if text == 'molecules':
+            hide_widgets(self.ui.concentrations_display_units_combo_box, self.ui.moles_display_units_combo_box)
+            show_widgets(self.ui.molecules_display_units_label)
+        elif text == 'concentrations':
+            hide_widgets(self.ui.molecules_display_units_label, self.ui.moles_display_units_combo_box)
+            show_widgets(self.ui.concentrations_display_units_combo_box)
+        elif text == 'moles':
+            hide_widgets(self.ui.molecules_display_units_label, self.ui.concentrations_display_units_combo_box)
+            show_widgets(self.ui.moles_display_units_combo_box)
+        
+        
     def load_succeeded(self):
-        ''' Enable widgets once, selecting lone runs, species and compartments.  '''
-        self.ui.file_name_line_edit.setEnabled(True)
+        ''' Configures, populates, enables, checks and shows relevant widgets. '''
 
-        self.ui.runs_list_widget.setEnabled(True)
-        runs = self.ui.runs_list_widget.count()
+        simulation = self.simulation
+        filename = self.filename
+        ui = self.ui
+
+        fileinfo = QFileInfo(filename)
+        ui.file_name_line_edit.setText(fileinfo.absoluteFilePath())
+        
+        from_ = int(0)
+        to = int(simulation.max_time)
+        interval = simulation.log_interval
+        
+        ui.from_spin_box.setRange(from_, to)
+        ui.from_spin_box.setValue(from_)
+        ui.from_spin_box.set_interval(interval)
+
+        ui.to_spin_box.setRange(from_, to)
+        ui.to_spin_box.setValue(to)
+        ui.to_spin_box.set_interval(interval)
+
+        ui.every_spin_box.setRange(1, simulation._runs_list[0].number_of_timepoints)
+        ui.every_spin_box.setValue(ui.every_spin_box.minimum()) #TODO make this so if gives roughly one-thousand timepoints
+
+        ui.log_interval_label.setText(str(interval))
+
+
+        # list widgets
+
+        clear_widgets(
+            ui.runs_list_widget,
+            ui.species_list_widget,
+            ui.compartments_list_widget,
+        )
+
+        for i in simulation._runs_list:
+            SimulationListWidgetItem(i, ui.runs_list_widget)
+
+        for i in simulation._species_list:
+            SimulationListWidgetItem(i, ui.species_list_widget)
+            
+        for i in simulation._runs_list[0]._compartments_list: #TODO can't rely on run1 alone if _compartments_list divide
+            SimulationListWidgetItem(i, ui.compartments_list_widget)
+
+        
+        # runs
+
+        runs = ui.runs_list_widget.count()
+        ui.random_runs_spin_box.setRange(1, runs)
         if runs > 1:
-            self.ui.random_runs_spin_box.setRange(1, runs)
-            self.ui.random_runs_spin_box.setEnabled(True)
-            self.ui.random_runs_label.setEnabled(True)
+            enable_widgets(
+                ui.random_runs_spin_box,
+                ui.random_runs_label,
+                ui.average_over_selected_runs_check_box,
+            )
         if runs == 1:
-            self.ui.runs_list_widget.selectAll()
+            ui.runs_list_widget.selectAll() # should check select_all_runs_check_box automatically
         else:
-            self.ui.select_all_runs_check_box.setEnabled(True)
+            enable_widgets(ui.select_all_runs_check_box)
 
-        self.ui.species_selected_and_total_label.setVisible(True)
-        self.ui.species_list_widget.setEnabled(True)
+
+        # species
+        
         species = self.ui.species_list_widget.count()
         if species == 1:
             self.ui.species_list_widget.selectAll()
         else:
-            self.ui.select_all_species_check_box.setEnabled(True)
-        self.ui.filter_species_line_edit.setEnabled(True)
-#        self.ui.sort_species_check_box.setEnabled(True)
+            enable_widgets(ui.select_all_species_check_box)
 
-        self.ui.compartments_selected_and_total_label.setVisible(True)
-        self.ui.compartments_list_widget.setEnabled(True)
+
+        # compartments
+
         compartments = self.ui.compartments_list_widget.count()
         if compartments == 1:
             self.ui.compartments_list_widget.selectAll()
         else:
-            self.ui.select_all_compartments_check_box.setEnabled(True)
-        self.ui.filter_compartments_line_edit.setEnabled(True)
-#        self.ui.sort_compartments_check_box.setEnabled(True)
+            enable_widgets(ui.select_all_compartments_check_box)
 
-        self.ui.to_spin_box.setEnabled(True)
-        self.ui.from_spin_box.setEnabled(True)
-        self.ui.every_spin_box.setEnabled(True)
 
-        self.ui.average_over_selected_runs_check_box.setEnabled(True)
-
-        self.ui.export_data_as_button.setEnabled(True)
-        self.ui.plot_timeseries_button.setEnabled(True)
-        self.ui.visualise_population_button.setEnabled(True)
-        self.ui.plot_histograms_button.setEnabled(True)
+        # volumes
         
-        self.ui.plot_timeseries_button.setFocus(Qt.OtherFocusReason)
+        i = self.ui.quantities_display_type_combo_box.findText('concentrations')
+        if i != -1:
+            self.ui.quantities_display_type_combo_box.removeItem(i)
+        if self.simulation.log_volumes == 1:
+            self.ui.quantities_display_type_combo_box.insertItem(1, 'concentrations')
+            QListWidgetItem('Volumes', ui.species_list_widget)
+            show_widgets(ui.volumes_widget)
+        else:
+            hide_widgets(ui.volumes_widget)            
+        
+#        check_widgets(
+#            ui.select_all_runs_check_box,
+#            ui.select_all_species_check_box,
+#            ui.select_all_compartments_check_box,
+#        )
+                
+        enable_widgets(
+            ui.file_name_line_edit,
+            
+#            ui.select_all_runs_check_box,
+            ui.runs_list_widget,
+#            ui.random_runs_spin_box,
+#            ui.random_runs_label,
+
+            ui.select_all_species_check_box,
+            ui.species_list_widget,
+            ui.filter_species_line_edit,
+#            ui.sort_species_check_box,
+            
+            ui.compartments_list_widget,
+            ui.select_all_compartments_check_box,
+            ui.filter_compartments_line_edit,
+#            ui.sort_compartments_check_box,
+            
+            ui.to_spin_box,
+            ui.from_spin_box,
+            ui.every_spin_box,
+            
+#            ui.average_over_selected_runs_check_box,
+#            ui.calculate_button,
+            
+#            ui.export_data_as_button,
+#            ui.plot_timeseries_button,
+#            ui.plot_histogram_button,
+#            ui.visualise_population_button,
+        )
+
+        show_widgets(
+            ui.runs_selected_and_total_label,
+            ui.species_selected_and_total_label,
+            ui.compartments_selected_and_total_label,
+            
+            ui.timepoints_data_units_combo_box,
+            ui.timepoints_display_units_combo_box,
+            
+            ui.quantities_data_units_combo_box,
+            ui.quantities_display_type_combo_box,
+#            ui.molecules_display_units_label,
+#            ui.moles_display_units_combo_box,
+#            ui.concentrations_display_units_combo_box,
+            
+#            ui.volumes_data_units_combo_box,
+#            ui.volumes_display_units_combo_box,
+#            ui.volumes_widget,
+        )
+
+        self.ui.species_list_widget.setFocus(Qt.OtherFocusReason)
 
 
     def update_ui(self):
+        ''' Called at the end of __init__ and whenever runs/species/compartments
+        list_widget's item selection changes in order to disable/enable actions. '''
         
         num_selected_runs = len(self.ui.runs_list_widget.selectedItems())
-        
-        if self.ui.runs_list_widget.count() < 2:
-            self.ui.random_runs_label.setEnabled(False)
-            self.ui.random_runs_spin_box.setEnabled(False)
-            self.ui.average_over_selected_runs_check_box.setChecked(False)
-            self.ui.average_over_selected_runs_check_box.setEnabled(False)
-        else:
-            self.ui.random_runs_label.setEnabled(True)
-            self.ui.random_runs_spin_box.setEnabled(True)
-#            self.ui.average_over_selected_runs_check_box.setChecked(True)
-#            self.ui.average_over_selected_runs_check_box.setEnabled(True)
+        self.ui.runs_selected_and_total_label.setText('%s/%s' % (num_selected_runs, self.ui.runs_list_widget.count()))
         
         num_selected_species = len(self.ui.species_list_widget.selectedItems())
         self.ui.species_selected_and_total_label.setText('%s/%s' % (num_selected_species, self.ui.species_list_widget.count()))
@@ -526,18 +633,25 @@ class SimulationResultsDialog(QWidget):
 
         # enable/disable actions
         if num_selected_runs == 0 or num_selected_species == 0 or num_selected_compartments == 0:
-            self.ui.export_data_as_button.setEnabled(False)
-            self.ui.plot_timeseries_button.setEnabled(False)
-            self.ui.visualise_population_button.setEnabled(False)
+            disable_widgets(
+                self.ui.calculate_button,
+                self.ui.export_data_as_button,
+                self.ui.plot_timeseries_button,
+                self.ui.visualise_population_button,
+                self.ui.plot_histogram_button,
+            )
         else:
-            self.ui.export_data_as_button.setEnabled(True)
-            self.ui.plot_timeseries_button.setEnabled(True)
+            enable_widgets(
+                self.ui.export_data_as_button,
+                self.ui.plot_timeseries_button,
+                self.ui.plot_histogram_button,
+            )
             if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
-                self.ui.visualise_population_button.setEnabled(True)
+                enable_widgets(self.ui.visualise_population_button)
             else:
-                self.ui.visualise_population_button.setEnabled(False)
+                disable_widgets(self.ui.visualise_population_button)
             if num_selected_runs > 1:
-                self.ui.calculate_group_box.setEnabled(True)
+                enable_widgets(self.ui.calculate_button)
 
 
     # slots
@@ -2309,9 +2423,9 @@ def main():
 
 
 if __name__ == "__main__":
-#    main()
+    main()
 #    test()
 #    test_SimulatorResults_export_data_as()
-    test_volumes()
+#    test_volumes()
     exit(qApp.exec_())
 

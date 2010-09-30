@@ -1,6 +1,36 @@
 import PyQt4.QtCore
 version = PyQt4.QtCore.QT_VERSION_STR
 
+
+def hide_widgets(*widgets):
+    for widget in widgets:
+        widget.setVisible(False)
+        
+def show_widgets(*widgets):
+    for widget in widgets:
+        widget.setVisible(True)
+
+def disable_widgets(*widgets):
+    for widget in widgets:
+        widget.setEnabled(False)
+
+def enable_widgets(*widgets):
+    for widget in widgets:
+        widget.setEnabled(True)
+
+def uncheck_widgets(*widgets):
+    for widget in widgets:
+        widget.setChecked(False)
+        
+def check_widgets(*widgets):
+    for widget in widgets:
+        widget.setChecked(True)
+        
+def clear_widgets(*widgets):
+    for widget in widgets:
+        widget.clear()
+        
+
 from PyQt4.QtGui import QApplication
 
 def centre_window(window):

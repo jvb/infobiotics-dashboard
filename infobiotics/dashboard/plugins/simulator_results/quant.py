@@ -132,7 +132,17 @@ class TimeConverter(Converter):
     units_editor = time_units_editor
 
 
+#mu, sigma = 100, 10 # mean and standard deviation
+#s = np.random.normal(mu, sigma, 1000)
+#import matplotlib.pyplot as plt
+#count, bins, ignored = plt.hist(s, 30, normed=True)
+#plt.plot(bins, 1 / (sigma * np.sqrt(2 * np.pi)) * 
+#               np.exp(-(bins - mu) ** 2 / (2 * sigma ** 2)),
+#         linewidth=2, color='r')
+#plt.show()
+#exit()
+
+
 if __name__ == '__main__':
-#    VolumeConverter(data=np.arange(100)).configure_traits()
-    print (1 * year).rescale('days')
-    TimeConverter(data=np.arange(0, 365, 1)).configure_traits()
+    VolumeConverter(data=np.arange(100)).configure_traits()
+#    TimeConverter(data=np.arange(0, 84601, 1)).configure_traits()
