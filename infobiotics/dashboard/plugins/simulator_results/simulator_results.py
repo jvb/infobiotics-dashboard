@@ -775,6 +775,7 @@ class SimulationResultsDialog(QWidget):
         _, _, _, averaging = self.options()
         results = self.selected_items_results()
 
+        #TODO volumes like plot()
         if averaging:
             timepoints, results = results.get_amounts_mean_over_runs()
             mean_index = 0
@@ -985,13 +986,13 @@ class SimulationResultsDialog(QWidget):
         if averaging:
             timepoints, amounts = results.get_amounts_mean_over_runs()
             mean_index = 0
-            if self.volumes_selected:
-                timepoints, volumes = results.get_volumes_mean_over_runs()
+#            if self.volumes_selected:
+#                timepoints, volumes = results.get_volumes_mean_over_runs() #TODO
         else:
             timepoints, amounts = results.get_amounts()
             if self.volumes_selected:
                 timepoints, volumes = results.get_volumes()
-        if len(amounts) == 0 and len(volumes) == 0:
+        if len(amounts) == 0 and (self.volumes_selected and len(volumes) == 0):
             return
 
         plots = []
@@ -2432,10 +2433,10 @@ def main():
 
 
 if __name__ == "__main__":
-#    main()
+    main()
 #    test()
 #    test_SimulatorResults_export_data_as()
 #    test_volumes()
-    profile_SimulatorResults_get_amounts()
+#    profile_SimulatorResults_get_amounts()
     exit(qApp.exec_())
 

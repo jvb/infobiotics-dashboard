@@ -1,46 +1,12 @@
-import numpy as np
-
-#molecules = np.arange(1000 * 1000).reshape((100, 100, 100)) # pretend amounts that might come from an mcss simulation
-#moles = molecules / N_A * mole # convert molecules to moles by dividing the number of molecules by Avogadro's constant
-#molecules = np.array(moles * N_A, dtype=int) # recover molecules by multiplying the number of moles by Avogadro's constant, as integers without possible float-representation rounding errors 
-#concentrations = moles / (volume * volume_unit) # convert moles to concentrations by dividing by volume with units
-
-from quantities import UnitQuantity, liter, milli, micro, nano, pico, femto, atto
-milliliter = UnitQuantity('milliliter', liter * milli, symbol='mL')
-microliter = UnitQuantity('microliter', liter * micro, symbol='uL')
-nanoliter = UnitQuantity('nanoliter', liter * nano, symbol='nL')
-picoliter = UnitQuantity('picoliter', liter * pico, symbol='pL')
-femtoliter = UnitQuantity('femtoliter', liter * femto, symbol='fL')
-attoliter = UnitQuantity('attoliter', liter * atto, symbol='aL')
-
-from quantities import mole
-molar = UnitQuantity('molar', mole / liter, symbol='M')
-millimolar = UnitQuantity('millimolar', mole / liter * milli, symbol='mM')
-micromolar = UnitQuantity('micromolar', mole / liter * micro, symbol='uM')
-nanomolar = UnitQuantity('nanomolar', mole / liter * nano, symbol='nM')
-picomolar = UnitQuantity('picomolar', mole / liter * pico, symbol='pM')
-femtomolar = UnitQuantity('femtomolar', mole / liter * femto, symbol='fM')
-attomolar = UnitQuantity('attomolar', mole / liter * atto, symbol='aM')
-
-from scipy.constants import N_A # Avogadro's constant 6.0221415e+23
-def concentration(molecules, volume, volume_unit, concentration_units=molar):
-    moles = molecules / N_A * mole
-    return (moles / (volume * volume_unit)).rescale(concentration_units)
-#print concentration(N_A, 1, liter) 
-##cell_volume = 0.65 * micro * liter # an example cell volume (0.65 ul) ~ the size of an E.coli (Wikipedia: Bacterial_cell_structure)
-#print concentration(np.arange(1, 1000 * 1000 + 1, 1000), 0.65, microliter, picomolar) 
-#exit()
-
-
-from quantities import attosecond, femtosecond, picosecond, nanosecond, microsecond, millisecond, second, minute, hour, day, week, month, year
-
-
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import *
-from enthought.traits.ui.api import *
-from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_EnumEditor
+from enthought.traits.api import HasTraits, Array, Instance, on_trait_change, Trait
 from quantities import Quantity
+from enthought.traits.ui.api import EnumEditor, View, Item
+from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_EnumEditor
+from volume import *
+from infobiotics.commons.quantities.time import * # avoids clash with compiled module 'time'
+from concentration import *
 
 class Converter(HasTraits):
 
@@ -48,11 +14,9 @@ class Converter(HasTraits):
     
     _data_quantity = Instance(Quantity)
 
-    data_units = Any
     def _data_units_default(self):
         raise NotImplementedError
     
-    display_units = Any
     def _display_units_default(self):
         raise NotImplementedError
 
@@ -157,18 +121,8 @@ class ConcentrationConverter(Converter):
     units_editor = concentration_units_editor
 
 
-#mu, sigma = 100, 10 # mean and standard deviation
-#s = np.random.normal(mu, sigma, 1000)
-#import matplotlib.pyplot as plt
-#count, bins, ignored = plt.hist(s, 30, normed=True)
-#plt.plot(bins, 1 / (sigma * np.sqrt(2 * np.pi)) * 
-#               np.exp(-(bins - mu) ** 2 / (2 * sigma ** 2)),
-#         linewidth=2, color='r')
-#plt.show()
-#exit()
-
-
 if __name__ == '__main__':
+    import numpy as np
 #    VolumeConverter(data=np.arange(100)).configure_traits()
 #    TimeConverter(data=np.arange(0, 84601, 1)).configure_traits()
     ConcentrationConverter(data=np.arange(100)).configure_traits()
