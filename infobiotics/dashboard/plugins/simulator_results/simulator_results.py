@@ -728,6 +728,7 @@ class SimulationResultsDialog(QWidget):
             species_indices=species_indices,
             compartment_indices=compartment_indices,
             parent=self,
+            #TODO pass in units here, with sensible defaults 
         )
 
 
@@ -1586,18 +1587,31 @@ class SimulatorResults(object):
         else:
             self.run_indices = run_indices
 
-#    @profile
+#    quantities_data_units = 'molecules'
+#    quantities_data_units = self.ui.quantities_data_units_combo_box.text()
+
+    time_data_units = 'seconds'
+
+    def get_amounts(self, time_display_units=time_data_units, quantities_data_units, quantities_display_type, quantities_display_units, volume_display_units): pass
+        timepoints, amounts = self._get_amounts()
+        
+        
+        
+
+#    @profile # use profile(results.get_amounts) instead - won't raise error
     def get_amounts(self):
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
         array of floats and results is a list of 3-D arrays of ints with the 
         shape (species, compartments, timepoint) for each run. '''
         try:
+#            results = np.zeros((1000000, 1000000, 1000000)) # should raise a MemoryError
             results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
-        except MemoryError, e:
-            if parent is not None:
-                QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.')
+        except MemoryError:
+            message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+            if self.parent is not None:
+                QMessageBox.warning('Out of memory', message)
             else:
-                print e
+                print message
             return (self.timepoints, [])
         h5 = tables.openFile(self.filename)
         for ri, r in enumerate(self.run_indices):
@@ -1614,12 +1628,14 @@ class SimulatorResults(object):
     def get_volumes(self):
         try:
             results = [np.zeros((len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
-        except MemoryError, e:
-            if parent is not None:
-                QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.')
+        except MemoryError:
+            message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+            if self.parent is not None:
+                QMessageBox.warning('Out of memory', message)
             else:
-                print e
+                print message
             return (self.timepoints, [])
+        
         h5 = tables.openFile(self.filename)
         for ri, r in enumerate(self.run_indices):
             where = '/run%s' % (r + 1)
@@ -1820,11 +1836,12 @@ class SimulatorResults(object):
         functions. '''
         try:
             results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in functions]
-        except MemoryError, e:
-            if parent is not None:
-                QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer species/compartments, a shorter time window or a bigger time interval multipler.')
+        except MemoryError:
+            message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+            if self.parent is not None:
+                QMessageBox.warning('Out of memory', message)
             else:
-                print e
+                print message
             return (self.timepoints, [])
 
         # create large arrays handling failure
@@ -1839,10 +1856,11 @@ class SimulatorResults(object):
                                       type)
             except MemoryError:
                 if self.chunkSize == 0:
-                    if parent is not None:
-                        QMessageBox.warning('Out of memory.')
+                    if self.parent is not None:
+                        message = 'Could not allocate memory for chunk.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+                        QMessageBox.warning('Out of memory', message)
                     else:
-                        print e
+                        print message
                         return
                 # progressively halve chunkSize until buffer fits into memory
                 self.chunkSize = self.chunkSize // 2
@@ -1853,7 +1871,7 @@ class SimulatorResults(object):
 #            try:
 #                for fi, f in enumerate(functions):
 #                    f(buffer)
-#            except MemoryError, e:
+#            except MemoryError:
 #                # progressively halve chunk_size until statistics can be done
 #                self.chunk_size = self.chunk_size // 2
 #                buffer = None
@@ -1928,11 +1946,12 @@ class SimulatorResults(object):
                 where = '/run%s' % (r + 1)
                 try:
                     amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.finish:self.every]
-                except MemoryError, e:
-                    if parent is not None:
-                        QMessageBox.warning('Out of memory', 'Could not allocate memory for amounts.\nTry selecting fewer species, a shorter time window or a bigger time interval multipler.')
+                except MemoryError:
+                    message = 'Could not allocate memory for amounts.\nTry selecting fewer species, a shorter time window or a bigger time interval multipler.'
+                    if self.parent is not None:
+                        QMessageBox.warning('Out of memory', message)
                     else:
-                        print e
+                        print message
                     return (self.timepoints, [], None, None, None, None)
                 if sum_compartments_at_same_xy_lattice_position:
                     for ci, c in enumerate(selected_compartments):
