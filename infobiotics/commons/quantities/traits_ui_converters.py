@@ -13,6 +13,8 @@ class Converter(HasTraits):
     data = Array
     
     _data_quantity = Instance(Quantity)
+    
+    display_quantity = Instance(Quantity)
 
     def _data_units_default(self):
         raise NotImplementedError
@@ -27,8 +29,12 @@ class Converter(HasTraits):
         self._data_quantity = Quantity(self.data, self.data_units_)
     
     @on_trait_change('_data_quantity, display_units')
-    def print_rescaled__data_quantity(self):
-        print self._data_quantity.rescale(self.display_units_)
+    def update_display_quantity(self):
+        self.display_quantity = self._data_quantity.rescale(self.display_units_)
+
+#    @on_trait_change('display_quantity')
+#    def print_display_quantity(self):
+#        print self.display_quantity
 
     def traits_view(self):
         return View(
@@ -40,24 +46,6 @@ class Converter(HasTraits):
             ),
         )
 
-
-liters = 'liters'
-milliliters = 'milli%s (10^-3 %s)' % (liters, liters)
-microliters = 'micro%s (10^-6 %s)' % (liters, liters)
-nanoliters = 'nano%s (10^-9 %s)' % (liters, liters)
-picoliters = 'pico%s (10^-12 %s)' % (liters, liters)
-femtoliters = 'femto%s (10^-15 %s)' % (liters, liters)
-attoliters = 'atto%s (10^-18 %s)' % (liters, liters)
-
-volume_units = {
-    liters:liter,
-    milliliters:milliliter,
-    microliters:microliter,
-    nanoliters:nanoliter,
-    picoliters:picoliter,
-    femtoliters:femtoliter,
-    attoliters:attoliter,
-}
 
 VolumeUnit = Trait(milliliters, volume_units)
 
@@ -71,22 +59,6 @@ class VolumeConverter(Converter):
     units_editor = volume_units_editor
 
 
-time_units = {
-    'years':year,
-    'months':month,
-    'weeks':week,
-    'days':day,
-    'hours':hour,
-    'minutes':minute,
-    'seconds':second,
-    'milliseconds':millisecond,
-    'microseconds':microsecond,
-    'nanoseconds':nanosecond,
-    'picoseconds':picosecond,
-    'femtoseconds':femtosecond,
-    'attoseconds':attosecond,
-}
-
 TimeUnit = Trait('seconds', time_units)
 
 time_units_editor = EnumEditor(
@@ -98,16 +70,6 @@ class TimeConverter(Converter):
     display_units = TimeUnit
     units_editor = time_units_editor
 
-
-concentration_units = {
-    'molar':molar,
-    'millimolar':millimolar,
-    'micromolar':micromolar,
-    'nanomolar':nanomolar,
-    'picomolar':picomolar,
-    'femtomolar':femtomolar,
-    'attomolar':attomolar,
-}
 
 ConcentrationUnit = Trait('molar', concentration_units)
 

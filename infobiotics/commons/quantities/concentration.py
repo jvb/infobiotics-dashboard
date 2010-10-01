@@ -12,6 +12,16 @@ picomolar = UnitQuantity('picomolar', mole / liter * pico, symbol='pM')
 femtomolar = UnitQuantity('femtomolar', mole / liter * femto, symbol='fM')
 attomolar = UnitQuantity('attomolar', mole / liter * atto, symbol='aM')
 
+concentration_units = {
+    'molar':molar,
+    'millimolar':millimolar,
+    'micromolar':micromolar,
+    'nanomolar':nanomolar,
+    'picomolar':picomolar,
+    'femtomolar':femtomolar,
+    'attomolar':attomolar,
+}
+
 def concentration(molecules, volume, volume_units, concentration_units=molar):
     moles = molecules / N_A * mole
     return (moles / (volume * volume_units)).rescale(concentration_units)
