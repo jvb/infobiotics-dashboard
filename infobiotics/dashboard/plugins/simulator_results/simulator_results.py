@@ -1507,9 +1507,6 @@ class PlotsPreviewDialog(QWidget):
             self.traits_plot.configure_traits()
             
             
-
-
-
 class SimulatorResults(object):
     """Shared initialisation for all concrete SimulatorResults classes."""
     def __init__(self,
@@ -1527,7 +1524,10 @@ class SimulatorResults(object):
         """Check arguments and create variables to be used in calculate()."""
         self.parent = parent
         self.type = type
-        self.simulation = simulation#load_h5(filename) # why do all that object creation again?
+        if simulation is None:
+            self.simulation = load_h5(filename)
+        else:
+            self.simulation = simulation#load_h5(filename) # why do all that object creation again?
         self.filename = filename
         number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
         log_interval = self.simulation.log_interval
@@ -1585,7 +1585,7 @@ class SimulatorResults(object):
         else:
             self.run_indices = run_indices
 
-
+#    @profile
     def get_amounts(self):
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
         array of floats and results is a list of 3-D arrays of ints with the 
@@ -1605,6 +1605,7 @@ class SimulatorResults(object):
             for si, s in enumerate(self.species_indices):
                 for ci, c in enumerate(self.compartment_indices):
                     results[ri][si, ci, :] = amounts[s, c, :]
+#                    results[ri][si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every]
         h5.close()
         return (self.timepoints, results)
 
@@ -2401,8 +2402,16 @@ def test_volumes():
 #    p.ui.plotsListWidget.selectAll()
 #    p.combine()
     
-    
 
+def profile_SimulatorResults_get_amounts():
+    results = SimulatorResults(
+        '/home/jvb/dashboard/examples/germination_09.h5',
+        None,
+    )
+    get_amounts = profile(results.get_amounts)
+    amounts = get_amounts()
+    print amounts
+    exit()
 
 def main():
     argv = qApp.arguments()
@@ -2423,9 +2432,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+#    main()
 #    test()
 #    test_SimulatorResults_export_data_as()
 #    test_volumes()
+    profile_SimulatorResults_get_amounts()
     exit(qApp.exec_())
 
