@@ -32,7 +32,7 @@ def concentration(molecules, volume, volume_unit, concentration_units=molar):
 #exit()
 
 
-from quantities import picosecond, nanosecond, microsecond, millisecond, second, minute, hour, day, week, month, year
+from quantities import attosecond, femtosecond, picosecond, nanosecond, microsecond, millisecond, second, minute, hour, day, week, month, year
 
 
 from enthought.etsconfig.api import ETSConfig
@@ -108,28 +108,53 @@ class VolumeConverter(Converter):
 
 
 time_units = {
-    'picoseconds':picosecond,
-    'nanoseconds':nanosecond,
-    'microseconds':microsecond,
-    'milliseconds':millisecond,
-    'seconds':second,
-    'minutes':minute,
-    'hours':hour,
-    'days':day,
-    'weeks':week,
     'years':year,
+    'months':month,
+    'weeks':week,
+    'days':day,
+    'hours':hour,
+    'minutes':minute,
+    'seconds':second,
+    'milliseconds':millisecond,
+    'microseconds':microsecond,
+    'nanoseconds':nanosecond,
+    'picoseconds':picosecond,
+    'femtoseconds':femtosecond,
+    'attoseconds':attosecond,
 }
 
 TimeUnit = Trait('seconds', time_units)
 
 time_units_editor = EnumEditor(
-    values=values_for_EnumEditor(('picoseconds', 'nanoseconds', 'microseconds', 'milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years')),
+    values=values_for_EnumEditor(('years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds', 'picoseconds', 'femtoseconds', 'attoseconds')),
 )
 
 class TimeConverter(Converter):
     data_units = TimeUnit
     display_units = TimeUnit
     units_editor = time_units_editor
+
+
+concentration_units = {
+    'molar':molar,
+    'millimolar':millimolar,
+    'micromolar':micromolar,
+    'nanomolar':nanomolar,
+    'picomolar':picomolar,
+    'femtomolar':femtomolar,
+    'attomolar':attomolar,
+}
+
+ConcentrationUnit = Trait('molar', concentration_units)
+
+concentration_units_editor = EnumEditor(
+    values=values_for_EnumEditor(('molar', 'millimolar', 'micromolar', 'nanomolar', 'picomolar', 'femtomolar', 'attomolar')),
+)
+
+class ConcentrationConverter(Converter):
+    data_units = ConcentrationUnit
+    display_units = ConcentrationUnit
+    units_editor = concentration_units_editor
 
 
 #mu, sigma = 100, 10 # mean and standard deviation
@@ -144,5 +169,6 @@ class TimeConverter(Converter):
 
 
 if __name__ == '__main__':
-    VolumeConverter(data=np.arange(100)).configure_traits()
+#    VolumeConverter(data=np.arange(100)).configure_traits()
 #    TimeConverter(data=np.arange(0, 84601, 1)).configure_traits()
+    ConcentrationConverter(data=np.arange(100)).configure_traits()
