@@ -38,6 +38,10 @@ import numpy as np
 import os
 import tables
 import xlwt
+from infobiotics.commons.quantities.traits_ui_converters import \
+    TimeConverter, MolesConverter, VolumeConverter, ConcentrationConverter, \
+    N_A, mole, Quantity, concentration_units, volume_units, time_units
+#TODO a set of functions for converting rather than classes    
 
 
 # for QSettings
@@ -760,13 +764,10 @@ class SimulationResultsDialog(QWidget):
                 timepoints_display_units=self.ui.timepoints_display_units_combo_box.currentText(),
                 quantities_display_type=quantities_display_type,
                 quantities_display_units=quantities_display_units,
-                volumes_display_units=self.ui.volumes_display_units_combo_box.currentText(),
+#                volumes_display_units=self.ui.volumes_display_units_combo_box.currentText(),
             )
         if len(results) == 0:
             return
-        
-        print timepoints
-
 
     # remember these within this instance
     csv_precision = 3
@@ -1540,7 +1541,7 @@ class PlotsPreviewDialog(QWidget):
             
             
 class SimulatorResults(object):
-#    """Shared initialisation for all concrete SimulatorResults classes."""
+    
     def __init__(self,
         filename,
         simulation,
@@ -1557,7 +1558,6 @@ class SimulatorResults(object):
         quantities_data_units='molecules',
         volumes_data_units='litres',
     ):
-#        """Check arguments and create variables to be used in calculate()."""
         
         self.parent = parent
         
@@ -1605,7 +1605,8 @@ class SimulatorResults(object):
         if every > self.finish:
             self.every = self.finish - self.start
 
-        self.timepoints = all_timepoints[self.start:self.finish:self.every]
+#        self.timepoints = all_timepoints[self.start:self.finish:self.every]
+        self.timepoints = Quantity(all_timepoints[self.start:self.finish:self.every], time_units[timepoints_data_units])
 
         if chunk_size is not int:
             self.chunkSize = int(chunk_size)
@@ -1629,13 +1630,18 @@ class SimulatorResults(object):
         else:
             self.run_indices = run_indices
 
-        self.timepoints_data_units = timepoints_data_units
-        self.quantities_data_units = quantities_data_units
-        self.volumes_data_units = volumes_data_units
+        self.timepoints_data_units = str(timepoints_data_units)
+        self.quantities_data_units = str(quantities_data_units)
+        self.volumes_data_units = str(volumes_data_units)
 
+    # shared class variables used for default arguments, they should not be referenced using self.timepoints_display_units, for instance.
+    timepoints_display_units = 'seconds'
+    quantities_display_type = 'molecules'
+    quantities_display_units = 'molecules'
+    volumes_display_units = 'litres'
 
 #    @profile # use profile(results.get_amounts) instead - won't raise error
-    def get_amounts(self, timepoints_display_units='seconds', quantities_display_type='molecules', quantities_display_units='molecules', volumes_display_units='litres'): 
+    def get_amounts(self, timepoints_display_units=timepoints_display_units, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units):#, volumes_display_units='litres'): 
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
         array of floats and results is a list of 3-D arrays of ints with the 
         shape (species, compartments, timepoint) for each run. '''
@@ -1646,10 +1652,10 @@ class SimulatorResults(object):
                 QMessageBox.warning('Error', message) #TODO test
             else:
                 print message
-            return (self.timepoints, [])
+            return (self.get_timepoints(timepoints_display_units), [])
         
         try:
-#            results = np.zeros((1000000, 1000000, 1000000)) # should raise a MemoryError
+#            million = 1000 * 1000; results = np.zeros((million, million, million)) # should raise a MemoryError
             results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
         except MemoryError:
             message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
@@ -1668,47 +1674,116 @@ class SimulatorResults(object):
 #                    results[ri][si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every]
         h5.close()
 
-        from infobiotics.commons.quantities.traits_ui_converters import TimeConverter, MolesConverter, VolumeConverter, ConcentrationConverter
-#        print self.quantities_data_units, quantities_display_units, quantities_display_type
+        results = np.array(results) # convert from list of 3D arrays to 4D array #TODO test
+        results = Quantity(results, substance_units)
+
+#        timepoints_display_units = str(timepoints_display_units)
+#        quantities_display_type = str(quantities_display_type)
+#        quantities_display_units = str(quantities_display_units)
+#        volumes_display_units = str(volumes_display_units)
+
         if self.quantities_data_units != quantities_display_units:
-            pass #TODO convert from molescules to moles or vice versa
-
-#        print self.volumes_data_units, volumes_display_units
-        if quantities_display_type == 'concentrations':
-            _, volumes = self.get_volumes()
-            pass #TODO convert to moles then concentration
-
-
             
-#        print self.timepoints_data_units, timepoints_display_units
-        if self.timepoints_data_units != timepoints_display_units:
-            timepoints = TimeConverter(data=self.timepoints, data_units=self.timepoints_data_units, display_units=timepoints_display_units).display_quantity
-            print timepoints
-        else:
-            timepoints = self.timepoints    
+            # convert to moles
+            if self.quantities_data_units == 'moles':
+                results = Quantity(results, mole)
+            elif self.quantities_data_units.endswith('moles'):
+                converter = MolesConverter(
+                    data=results,
+                    data_units=self.quantities_data_units,
+                    display_units='moles',
+                )
+                results = converter.display_quantity
+            else: # molecules
+                results = Quantity(results / N_A, mole)
 
-        return (timepoints, results)
+            # convert from moles to whatever
+            if quantities_display_type == 'concentrations':
+                
+                _, volumes = self.get_volumes(timepoints_display_units)
+                volume_units = volume_units[self.volumes_data_units]
+                concentration_units = concentration_units[quantities_display_units]
+
+                concentrations = np.zeros(results.shape)
+                for ri, r in enumerate(self.run_indices):
+                    for ci, c in enumerate(self.compartment_indices):
+                        for ti, t in enumerate(self.timepoints):
+                            # can't replace results in-place as it raises a dimensionality error
+                            volume = volumes[ri][ci, ti]
+                            if volume <= 0:
+                                concentrations[ri, :, ci, ti] = np.zeros(results[ri, :, ci, ti].shape) 
+                            else:
+                                concentrations[ri, :, ci, ti] = (results[ri, :, ci, ti] / (volume * volume_units)).rescale(concentration_units)
+                results = concentrations
+
+            elif quantities_display_units.endswith('moles'):
+                converter = MolesConverter(
+                    data=results,
+                    data_units='moles',
+                    display_units=quantities_display_units,
+                )
+                results = converter.display_quantity
+            else: # molecules
+                results = results * N_A
+
+        return (self.get_timepoints(timepoints_display_units), results)
 
 
-    def get_volumes(self):
+    def get_timepoints(self, timepoints_display_units):
+#        if self.timepoints_data_units != timepoints_display_units:
+#            converter = TimeConverter(
+#                data=self.timepoints,
+#                data_units=self.timepoints_data_units,
+#                display_units=timepoints_display_units
+#            )
+#            timepoints = converter.display_quantity
+#        else:
+#            timepoints = Quantity(self.timepoints, time_units[timepoints_display_units])
+        timepoints = Quantity(self.timepoints, time_units[self.timepoints_data_units])
+        timepoints.units = time_units[timepoints_display_units]    
+        return timepoints
+        
+
+    def get_volumes(self, volumes_display_units=volumes_display_units, timepoints_display_units=timepoints_display_units):
+        
+        # create array for extracted 'results', printing error if too big for memory
         try:
-            results = [np.zeros((len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
+#            results = [np.zeros((len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
+            results = np.zeros((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)), self.type)
         except MemoryError:
-            message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+            message = 'Could not allocate memory for volumes.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
             if self.parent is not None:
                 QMessageBox.warning('Out of memory', message)
             else:
                 print message
             return (self.timepoints, [])
         
+        # extract results into array
         h5 = tables.openFile(self.filename)
         for ri, r in enumerate(self.run_indices):
             where = '/run%s' % (r + 1)
             volumes = h5.getNode(where, 'volumes')[:, self.start:self.finish:self.every]
             for ci, c in enumerate(self.compartment_indices):
-                results[ri][ci, :] = volumes[c, :]
+#                results[ri][ci, :] = volumes[c, :]
+                results[ri, ci, :] = volumes[c, :]
         h5.close()
-        return (self.timepoints, results)
+    
+#        results = np.array(results) # convert from list of 2D arrays to 3D array 
+    
+        # convert volumes in data units to volumes in display units 
+#        if self.volumes_data_units != volumes_display_units:
+#            converter = VolumeConverter(
+#                data=results,
+#                data_units=self.volumes_data_units,
+#                display_units=volumes_display_units
+#            )
+#            results = converter.display_quantity
+#        else:
+#            results = Quantity(results, volume_units[volumes_display_units])
+        results = Quantity(results, volume_units[self.volumes_data_units])
+        results.units = volume_units[volumes_display_units]
+        
+        return (self.get_timepoints(timepoints_display_units), results)
         
     def get_volumes_mean_over_runs(self):
         raise NotImplementedError
