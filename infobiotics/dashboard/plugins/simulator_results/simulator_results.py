@@ -554,7 +554,7 @@ class SimulationResultsDialog(QWidget):
             self.ui.quantities_display_type_combo_box.removeItem(i)
         if self.simulation.log_volumes == 1:
             self.ui.quantities_display_type_combo_box.insertItem(1, 'concentrations')
-            QListWidgetItem('Volumes', ui.species_list_widget)
+            self.volumes_list_widget_item = QListWidgetItem('Volumes', ui.species_list_widget)
             show_widgets(ui.volumes_widget)
         else:
             hide_widgets(ui.volumes_widget)            
@@ -671,7 +671,7 @@ class SimulationResultsDialog(QWidget):
     def selected_species(self):
         ''' Return selected species after removing volumes. '''
         selected_species = self.ui.species_list_widget.selectedItems()
-        if self.volumes_list_widget_item in selected_species:
+        if self.simulation.log_volumes and self.volumes_list_widget_item in selected_species:
             selected_species.remove(self.volumes_list_widget_item)
             self.volumes_selected = True
         else:
@@ -728,14 +728,44 @@ class SimulationResultsDialog(QWidget):
             species_indices=species_indices,
             compartment_indices=compartment_indices,
             parent=self,
-            #TODO pass in units here, with sensible defaults 
+            timepoints_data_units=self.ui.timepoints_data_units_combo_box.currentText(),
+            quantities_data_units=self.ui.quantities_data_units_combo_box.currentText(),
+            volumes_data_units=self.ui.volumes_data_units_combo_box.currentText(),
         )
 
 
     # actions slots
 
     def histogram(self):
-        raise NotImplementedError
+#        raise NotImplementedError
+
+#        runs, species, compartments = self.selected_items()
+#        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
+        _, _, _, averaging = self.options()
+        results = self.selected_items_results()
+
+        #TODO volumes like plot()
+        if averaging:
+            timepoints, results = results.get_amounts_mean_over_runs()
+            mean_index = 0
+        else:
+            quantities_display_type = self.ui.quantities_display_type_combo_box.currentText()
+            if quantities_display_type == 'molecules':
+                quantities_display_units = 'molecules'
+            elif quantities_display_type == 'concentrations':
+                quantities_display_units = self.ui.concentrations_display_units_combo_box.currentText()
+            elif quantities_display_type == 'moles':
+                quantities_display_units = self.ui.moles_display_units_combo_box.currentText()
+            timepoints, results = results.get_amounts(
+                timepoints_display_units=self.ui.timepoints_display_units_combo_box.currentText(),
+                quantities_display_type=quantities_display_type,
+                quantities_display_units=quantities_display_units,
+                volumes_display_units=self.ui.volumes_display_units_combo_box.currentText(),
+            )
+        if len(results) == 0:
+            return
+        
+        print timepoints
 
 
     # remember these within this instance
@@ -1510,7 +1540,7 @@ class PlotsPreviewDialog(QWidget):
             
             
 class SimulatorResults(object):
-    """Shared initialisation for all concrete SimulatorResults classes."""
+#    """Shared initialisation for all concrete SimulatorResults classes."""
     def __init__(self,
         filename,
         simulation,
@@ -1522,23 +1552,35 @@ class SimulatorResults(object):
         species_indices=None,
         compartment_indices=None,
         run_indices=None,
-        parent=None):
-        """Check arguments and create variables to be used in calculate()."""
+        parent=None,
+        timepoints_data_units='seconds',
+        quantities_data_units='molecules',
+        volumes_data_units='litres',
+    ):
+#        """Check arguments and create variables to be used in calculate()."""
+        
         self.parent = parent
+        
         self.type = type
+        
         if simulation is None:
             self.simulation = load_h5(filename)
         else:
             self.simulation = simulation#load_h5(filename) # why do all that object creation again?
+        
         self.filename = filename
+        
         number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
+        
         log_interval = self.simulation.log_interval
+        
         max_time = number_of_timepoints * log_interval#= self.simulation.max_time
-        timepoints = np.linspace(0, max_time, number_of_timepoints + 1)
+        
+        all_timepoints = np.linspace(0, max_time, number_of_timepoints + 1)
 
-        if 0 < beginning < timepoints[-1]:
+        if 0 < beginning < all_timepoints[-1]:
             # make start the index of the timepoint closest to, and including, beginning
-            self.start = bisect.bisect_left(timepoints, math.floor(beginning))
+            self.start = bisect.bisect_left(all_timepoints, math.floor(beginning))
         else:
             # make start the index of the first timepoint
             self.start = 0
@@ -1547,12 +1589,12 @@ class SimulatorResults(object):
             # shouldn't have to happen because of spinboxes synchronised min/max
             end = -1
 
-        if 0 < end < timepoints[-1]:
+        if 0 < end < all_timepoints[-1]:
             # make finish the index of the timepoint closest to, and including, end
-            self.finish = bisect.bisect_right(timepoints, math.ceil(end))
+            self.finish = bisect.bisect_right(all_timepoints, math.ceil(end))
         else:
             # make finish the index of the final timepoint + 1
-            self.finish = len(timepoints) #- 1
+            self.finish = len(all_timepoints) #- 1
 
         if every is not int:
             self.every = int(every)
@@ -1563,7 +1605,7 @@ class SimulatorResults(object):
         if every > self.finish:
             self.every = self.finish - self.start
 
-        self.timepoints = timepoints[self.start:self.finish:self.every]
+        self.timepoints = all_timepoints[self.start:self.finish:self.every]
 
         if chunk_size is not int:
             self.chunkSize = int(chunk_size)
@@ -1587,22 +1629,25 @@ class SimulatorResults(object):
         else:
             self.run_indices = run_indices
 
-#    quantities_data_units = 'molecules'
-#    quantities_data_units = self.ui.quantities_data_units_combo_box.text()
+        self.timepoints_data_units = timepoints_data_units
+        self.quantities_data_units = quantities_data_units
+        self.volumes_data_units = volumes_data_units
 
-    time_data_units = 'seconds'
-
-    def get_amounts(self, time_display_units=time_data_units, quantities_data_units, quantities_display_type, quantities_display_units, volume_display_units): pass
-        timepoints, amounts = self._get_amounts()
-        
-        
-        
 
 #    @profile # use profile(results.get_amounts) instead - won't raise error
-    def get_amounts(self):
+    def get_amounts(self, timepoints_display_units='seconds', quantities_display_type='molecules', quantities_display_units='molecules', volumes_display_units='litres'): 
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
         array of floats and results is a list of 3-D arrays of ints with the 
         shape (species, compartments, timepoint) for each run. '''
+        
+        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1:
+            message = 'Cannot calculate concentrations without volumes dataset, rerun simulation with log_volumes=1' 
+            if self.parent is not None:
+                QMessageBox.warning('Error', message) #TODO test
+            else:
+                print message
+            return (self.timepoints, [])
+        
         try:
 #            results = np.zeros((1000000, 1000000, 1000000)) # should raise a MemoryError
             results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
@@ -1622,7 +1667,27 @@ class SimulatorResults(object):
                     results[ri][si, ci, :] = amounts[s, c, :]
 #                    results[ri][si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every]
         h5.close()
-        return (self.timepoints, results)
+
+        from infobiotics.commons.quantities.traits_ui_converters import TimeConverter, MolesConverter, VolumeConverter, ConcentrationConverter
+#        print self.quantities_data_units, quantities_display_units, quantities_display_type
+        if self.quantities_data_units != quantities_display_units:
+            pass #TODO convert from molescules to moles or vice versa
+
+#        print self.volumes_data_units, volumes_display_units
+        if quantities_display_type == 'concentrations':
+            _, volumes = self.get_volumes()
+            pass #TODO convert to moles then concentration
+
+
+            
+#        print self.timepoints_data_units, timepoints_display_units
+        if self.timepoints_data_units != timepoints_display_units:
+            timepoints = TimeConverter(data=self.timepoints, data_units=self.timepoints_data_units, display_units=timepoints_display_units).display_quantity
+            print timepoints
+        else:
+            timepoints = self.timepoints    
+
+        return (timepoints, results)
 
 
     def get_volumes(self):

@@ -7,6 +7,7 @@ from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_Enum
 from volume import *
 from infobiotics.commons.quantities.time import * # avoids clash with compiled module 'time'
 from concentration import *
+from moles import *
 
 class Converter(HasTraits):
 
@@ -47,6 +48,18 @@ class Converter(HasTraits):
         )
 
 
+TimeUnit = Trait('seconds', time_units)
+
+time_units_editor = EnumEditor(
+    values=values_for_EnumEditor(('years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds', 'picoseconds', 'femtoseconds', 'attoseconds')),
+)
+
+class TimeConverter(Converter):
+    data_units = TimeUnit
+    display_units = TimeUnit
+    units_editor = time_units_editor
+
+
 VolumeUnit = Trait(milliliters, volume_units)
 
 volume_units_editor = EnumEditor(
@@ -59,16 +72,16 @@ class VolumeConverter(Converter):
     units_editor = volume_units_editor
 
 
-TimeUnit = Trait('seconds', time_units)
+MolesUnit = Trait('moles', moles_units)
 
-time_units_editor = EnumEditor(
-    values=values_for_EnumEditor(('years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds', 'picoseconds', 'femtoseconds', 'attoseconds')),
+moles_units_editor = EnumEditor(
+    values=values_for_EnumEditor(('moles', 'millimoles', 'micromoles', 'nanomoles', 'picomoles', 'femtomoles', 'attomoles')),
 )
 
-class TimeConverter(Converter):
-    data_units = TimeUnit
-    display_units = TimeUnit
-    units_editor = time_units_editor
+class MolesConverter(Converter):
+    data_units = MolesUnit
+    display_units = MolesUnit
+    units_editor = moles_units_editor
 
 
 ConcentrationUnit = Trait('molar', concentration_units)
@@ -85,6 +98,7 @@ class ConcentrationConverter(Converter):
 
 if __name__ == '__main__':
     import numpy as np
-#    VolumeConverter(data=np.arange(100)).configure_traits()
 #    TimeConverter(data=np.arange(0, 84601, 1)).configure_traits()
-    ConcentrationConverter(data=np.arange(100)).configure_traits()
+#    VolumeConverter(data=np.arange(100)).configure_traits()
+    MolesConverter(data=np.arange(100)).configure_traits()
+#    ConcentrationConverter(data=np.arange(100)).configure_traits()
