@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_results_dialog.ui'
 #
-# Created: Fri Oct  1 12:14:25 2010
+# Created: Tue Oct  5 10:17:48 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -360,6 +360,14 @@ class Ui_SimulationResultsDialog(object):
         self._volumes_label_1 = QtGui.QLabel(self.volumes_widget)
         self._volumes_label_1.setObjectName("_volumes_label_1")
         self._volumes_layout.addWidget(self._volumes_label_1)
+        self.in_label = QtGui.QLabel(self.volumes_widget)
+        self.in_label.setObjectName("in_label")
+        self._volumes_layout.addWidget(self.in_label)
+        self.volume_spin_box = QtGui.QDoubleSpinBox(self.volumes_widget)
+        self.volume_spin_box.setMaximum(100.0)
+        self.volume_spin_box.setProperty("value", 0.01)
+        self.volume_spin_box.setObjectName("volume_spin_box")
+        self._volumes_layout.addWidget(self.volume_spin_box)
         self.volumes_data_units_combo_box = QtGui.QComboBox(self.volumes_widget)
         self.volumes_data_units_combo_box.setObjectName("volumes_data_units_combo_box")
         self.volumes_data_units_combo_box.addItem("")
@@ -567,7 +575,8 @@ class Ui_SimulationResultsDialog(object):
         self.concentrations_display_units_combo_box.setItemText(4, QtGui.QApplication.translate("SimulationResultsDialog", "picomolar", None, QtGui.QApplication.UnicodeUTF8))
         self.concentrations_display_units_combo_box.setItemText(5, QtGui.QApplication.translate("SimulationResultsDialog", "femtomolar", None, QtGui.QApplication.UnicodeUTF8))
         self.concentrations_display_units_combo_box.setItemText(6, QtGui.QApplication.translate("SimulationResultsDialog", "attomolar", None, QtGui.QApplication.UnicodeUTF8))
-        self._volumes_label_1.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Volumes are in", None, QtGui.QApplication.UnicodeUTF8))
+        self._volumes_label_1.setText(QtGui.QApplication.translate("SimulationResultsDialog", "Volumes are", None, QtGui.QApplication.UnicodeUTF8))
+        self.in_label.setText(QtGui.QApplication.translate("SimulationResultsDialog", "in", None, QtGui.QApplication.UnicodeUTF8))
         self.volumes_data_units_combo_box.setToolTip(QtGui.QApplication.translate("SimulationResultsDialog", "Specifies the units of volume used in the simulated model.", None, QtGui.QApplication.UnicodeUTF8))
         self.volumes_data_units_combo_box.setItemText(0, QtGui.QApplication.translate("SimulationResultsDialog", "litres", None, QtGui.QApplication.UnicodeUTF8))
         self.volumes_data_units_combo_box.setItemText(1, QtGui.QApplication.translate("SimulationResultsDialog", "millilitres", None, QtGui.QApplication.UnicodeUTF8))

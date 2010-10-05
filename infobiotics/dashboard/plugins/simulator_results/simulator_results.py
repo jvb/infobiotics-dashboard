@@ -39,8 +39,7 @@ import os
 import tables
 import xlwt
 from infobiotics.commons.quantities.traits_ui_converters import \
-    TimeConverter, MolesConverter, VolumeConverter, ConcentrationConverter, \
-    N_A, mole, Quantity, concentration_units, volume_units, time_units
+    Quantity, time_units, substance_units, concentration_units, volume_units 
 #TODO a set of functions for converting rather than classes    
 
 
@@ -460,7 +459,7 @@ class SimulationResultsDialog(QWidget):
 
 
     def quantities_display_type_changed(self, text):
-        if text == 'molecules':
+        if text == 'molecules': #FIXME replace with substance_display units?
             hide_widgets(self.ui.concentrations_display_units_combo_box, self.ui.moles_display_units_combo_box)
             show_widgets(self.ui.molecules_display_units_label)
         elif text == 'concentrations':
@@ -553,15 +552,20 @@ class SimulationResultsDialog(QWidget):
 
         # volumes
         
-        i = self.ui.quantities_display_type_combo_box.findText('concentrations')
-        if i != -1:
-            self.ui.quantities_display_type_combo_box.removeItem(i)
+#        i = self.ui.quantities_display_type_combo_box.findText('concentrations')
+#        if i != -1:
+#            self.ui.quantities_display_type_combo_box.removeItem(i)
+        show_widgets(ui.volumes_widget)
         if self.simulation.log_volumes == 1:
-            self.ui.quantities_display_type_combo_box.insertItem(1, 'concentrations')
+#            self.ui.quantities_display_type_combo_box.insertItem(1, 'concentrations')
             self.volumes_list_widget_item = QListWidgetItem('Volumes', ui.species_list_widget)
-            show_widgets(ui.volumes_widget)
+#            show_widgets(ui.volumes_widget)
+            hide_widgets(ui.volume_spin_box)
+            show_widgets(ui.in_label)
         else:
-            hide_widgets(ui.volumes_widget)            
+#            hide_widgets(ui.volumes_widget)
+            hide_widgets(ui.in_label)
+            show_widgets(ui.volume_spin_box)
         
 #        check_widgets(
 #            ui.select_all_runs_check_box,
@@ -685,19 +689,17 @@ class SimulationResultsDialog(QWidget):
     # compound accessors
 
     def selected_items(self):
-        ''' Usage: 
-            runs, species, compartments = selected_items() 
-        '''
+        ''' Usage: runs, species, compartments = selected_items() '''
         runs = self.ui.runs_list_widget.selectedItems()
         species = self.selected_species()
         compartments = self.ui.compartments_list_widget.selectedItems()
         return runs, species, compartments
 
     def selected_items_amount_indices(self):
-        ''' Usage: 
-            run_indices, species_indices, compartment_indices = self.selected_items_amount_indices() 
+        ''' Usage: run_indices, species_indices, compartment_indices = self.selected_items_amount_indices() 
             
-        Use for ri, r in enumerate(run_indices): for selected results 
+        Use for ri, r in enumerate(run_indices): for selected results
+         
         '''
         runs, species, compartments = self.selected_items()
         run_indices = [item.amounts_index for item in runs]
@@ -706,14 +708,36 @@ class SimulationResultsDialog(QWidget):
         return run_indices, species_indices, compartment_indices
 
     def options(self):
-        ''' Usage: 
-            from_, to, every, averaging = self.options() 
-        '''
+        ''' Usage: from_, to, every, averaging = self.options() '''
         from_ = self.ui.from_spin_box.value()
         to = self.ui.to_spin_box.value()
         every = self.ui.every_spin_box.value()
         averaging = self.ui.average_over_selected_runs_check_box.isChecked()
         return from_, to, every, averaging
+
+    def units(self):
+        ''' Usage: timepoints_data_units, timepoints_display_units, 
+        quantities_data_units, quantities_display_type, 
+        quantities_display_units, volume, volumes_data_units, 
+        volumes_display_units = self.units() 
+        
+        '''
+        timepoints_data_units = str(self.ui.timepoints_data_units_combo_box.currentText())
+        timepoints_display_units = str(self.ui.timepoints_display_units_combo_box.currentText())
+        quantities_data_units = str(self.ui.quantities_data_units_combo_box.currentText())
+        quantities_display_type = str(self.ui.quantities_display_type_combo_box.currentText())
+        if quantities_display_type == 'molecules':
+            quantities_display_units = 'molecules'
+        elif quantities_display_type == 'concentrations':
+            quantities_display_units = str(self.ui.concentrations_display_units_combo_box.currentText())
+        elif quantities_display_type == 'moles':
+            quantities_display_units = str(self.ui.moles_display_units_combo_box.currentText())
+        volume = self.ui.volume_spin_box.value()
+        volumes_data_units = str(self.ui.volumes_data_units_combo_box.currentText()) 
+        volumes_display_units = str(self.ui.volumes_display_units_combo_box.currentText())
+        return timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units 
+#        timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units = self.units()
+        
 
     def selected_items_results(self, type=float):
         ''' Usage:
@@ -721,6 +745,7 @@ class SimulationResultsDialog(QWidget):
         '''
         run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
         from_, to, every, _ = self.options()
+        timepoints_data_units, _, quantities_data_units, _, _, _, volumes_data_units, _ = self.units()
         return SimulatorResults(
             filename=self.filename,
             simulation=self.simulation,
@@ -732,9 +757,9 @@ class SimulationResultsDialog(QWidget):
             species_indices=species_indices,
             compartment_indices=compartment_indices,
             parent=self,
-            timepoints_data_units=self.ui.timepoints_data_units_combo_box.currentText(),
-            quantities_data_units=self.ui.quantities_data_units_combo_box.currentText(),
-            volumes_data_units=self.ui.volumes_data_units_combo_box.currentText(),
+            timepoints_data_units=timepoints_data_units,
+            quantities_data_units=quantities_data_units,
+            volumes_data_units=volumes_data_units,
         )
 
 
@@ -747,27 +772,25 @@ class SimulationResultsDialog(QWidget):
 #        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
         _, _, _, averaging = self.options()
         results = self.selected_items_results()
+        _, timepoints_display_units, _, quantities_display_type, quantities_display_units, volume, _, _ = self.units()
 
         #TODO volumes like plot()
         if averaging:
             timepoints, results = results.get_amounts_mean_over_runs()
             mean_index = 0
         else:
-            quantities_display_type = self.ui.quantities_display_type_combo_box.currentText()
-            if quantities_display_type == 'molecules':
-                quantities_display_units = 'molecules'
-            elif quantities_display_type == 'concentrations':
-                quantities_display_units = self.ui.concentrations_display_units_combo_box.currentText()
-            elif quantities_display_type == 'moles':
-                quantities_display_units = self.ui.moles_display_units_combo_box.currentText()
             timepoints, results = results.get_amounts(
-                timepoints_display_units=self.ui.timepoints_display_units_combo_box.currentText(),
+                timepoints_display_units=timepoints_display_units,
                 quantities_display_type=quantities_display_type,
                 quantities_display_units=quantities_display_units,
-#                volumes_display_units=self.ui.volumes_display_units_combo_box.currentText(),
+                volume=volume if self.simulation.log_volumes != 1 else None,
             )
         if len(results) == 0:
             return
+    
+        print timepoints
+        print results
+
 
     # remember these within this instance
     csv_precision = 3
@@ -786,7 +809,7 @@ class SimulationResultsDialog(QWidget):
             "UnboundLocalError: local variable 'x' referenced before assignment"
         The actual reason for these errors is that variables inside inner 
         functions are immutable, see:           
-            http://stackoverflow.com/questions/1414304/local-functions-in-python/1414320#1414320
+            http: // stackoverflow.com / questions / 1414304 / local - functions - in - python / 1414320#1414320
         The correct solution is, in this instance, to pass these variables as
         arguments to the inner functions, and the neatest way to do that is as
         default arguments, see write_csv, fix_delimited_string and write_npz. 
@@ -915,7 +938,7 @@ class SimulationResultsDialog(QWidget):
             prepend_line_to_file(csv_delimiter.join(header), file_name)
 
         def write_xls():
-            ''' https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html '''
+            ''' https: // secure.simplistix.co.uk / svn / xlwt / trunk / README.html '''
             wb = xlwt.Workbook()
             try:
                 ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
@@ -1640,13 +1663,19 @@ class SimulatorResults(object):
     quantities_display_units = 'molecules'
     volumes_display_units = 'litres'
 
-#    @profile # use profile(results.get_amounts) instead - won't raise error
-    def get_amounts(self, timepoints_display_units=timepoints_display_units, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units):#, volumes_display_units='litres'): 
-        ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
-        array of floats and results is a list of 3-D arrays of ints with the 
-        shape (species, compartments, timepoint) for each run. '''
+#    @profile # use profile(results.get_amounts) instead - won't raise "'profile' not found" error
+    def get_amounts(self, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units, volume=None, timepoints_display_units=timepoints_display_units):#, volumes_display_units='litres'): 
+#        ''' Returns a tuple of (timepoints, results) where timepoints is an 1 - D
+#        array of floats and results is a list of 3-D arrays of ints with the 
+#        shape (species, compartments, timepoint) for each run. '''
+        '''
         
-        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1:
+        'volume' is used when self.simulation.log_volumes != 1 to fill an array 
+        that is the same shape as volumes would be, allowing concentrations to
+        be calculated for models without volumes information. 
+        
+        '''
+        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1 and volume is None:
             message = 'Cannot calculate concentrations without volumes dataset, rerun simulation with log_volumes=1' 
             if self.parent is not None:
                 QMessageBox.warning('Error', message) #TODO test
@@ -1671,62 +1700,66 @@ class SimulatorResults(object):
             for si, s in enumerate(self.species_indices):
                 for ci, c in enumerate(self.compartment_indices):
                     results[ri][si, ci, :] = amounts[s, c, :]
-#                    results[ri][si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every]
+#                    results[ri][si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every] # about 10 times slower!
         h5.close()
 
         results = np.array(results) # convert from list of 3D arrays to 4D array #TODO test
-        results = Quantity(results, substance_units)
-
-#        timepoints_display_units = str(timepoints_display_units)
-#        quantities_display_type = str(quantities_display_type)
-#        quantities_display_units = str(quantities_display_units)
-#        volumes_display_units = str(volumes_display_units)
+        results = Quantity(results, substance_units[self.quantities_data_units])
 
         if self.quantities_data_units != quantities_display_units:
             
             # convert to moles
-            if self.quantities_data_units == 'moles':
-                results = Quantity(results, mole)
-            elif self.quantities_data_units.endswith('moles'):
-                converter = MolesConverter(
-                    data=results,
-                    data_units=self.quantities_data_units,
-                    display_units='moles',
-                )
-                results = converter.display_quantity
-            else: # molecules
-                results = Quantity(results / N_A, mole)
+#            if self.quantities_data_units == 'moles':
+#                results = Quantity(results, mole)
+#            elif self.quantities_data_units.endswith('moles'):
+#                converter = SubstanceConverter(
+#                    data=results,
+#                    data_units=self.quantities_data_units,
+#                    display_units='moles',
+#                )
+#                results = converter.display_quantity
+#            else: # molecules
+#                results = Quantity(results / N_A, mole)
+            results.units = substance_units['moles']
 
             # convert from moles to whatever
             if quantities_display_type == 'concentrations':
                 
-                _, volumes = self.get_volumes(timepoints_display_units)
-                volume_units = volume_units[self.volumes_data_units]
-                concentration_units = concentration_units[quantities_display_units]
+                if self.simulation.log_volumes == 1:
+                    _, volumes = self.get_volumes(self.volumes_data_units)
+                else:
+                    assert volume is not None
+                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
+                    volumes.fill(volume)
+                _volume_units = volume_units[self.volumes_data_units]
+                _concentration_units = concentration_units[quantities_display_units]
 
                 concentrations = np.zeros(results.shape)
                 for ri, r in enumerate(self.run_indices):
                     for ci, c in enumerate(self.compartment_indices):
                         for ti, t in enumerate(self.timepoints):
                             # can't replace results in-place as it raises a dimensionality error
-                            volume = volumes[ri][ci, ti]
+                            volume = volumes[ri, ci, ti]
                             if volume <= 0:
                                 concentrations[ri, :, ci, ti] = np.zeros(results[ri, :, ci, ti].shape) 
                             else:
-                                concentrations[ri, :, ci, ti] = (results[ri, :, ci, ti] / (volume * volume_units)).rescale(concentration_units)
+                                concentrations[ri, :, ci, ti] = (results[ri, :, ci, ti] / (volume * _volume_units)).rescale(_concentration_units)
                 results = concentrations
 
-            elif quantities_display_units.endswith('moles'):
-                converter = MolesConverter(
-                    data=results,
-                    data_units='moles',
-                    display_units=quantities_display_units,
-                )
-                results = converter.display_quantity
-            else: # molecules
-                results = results * N_A
+#            elif quantities_display_units.endswith('moles'):
+#                converter = SubstanceConverter(
+#                    data=results,
+#                    data_units='moles',
+#                    display_units=quantities_display_units,
+#                )
+#                results = converter.display_quantity
+#            else: # molecules
+#                results = results * N_A
+            else:
+                results = Quantity(results, substance_units[self.quantities_data_units])
+                results.units = substance_units[quantities_display_units]
 
-        return (self.get_timepoints(timepoints_display_units), results)
+        return self.get_timepoints(timepoints_display_units), results
 
 
     def get_timepoints(self, timepoints_display_units):
@@ -1783,7 +1816,7 @@ class SimulatorResults(object):
         results = Quantity(results, volume_units[self.volumes_data_units])
         results.units = volume_units[volumes_display_units]
         
-        return (self.get_timepoints(timepoints_display_units), results)
+        return self.get_timepoints(timepoints_display_units), results
         
     def get_volumes_mean_over_runs(self):
         raise NotImplementedError

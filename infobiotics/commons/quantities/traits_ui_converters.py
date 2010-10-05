@@ -1,13 +1,13 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import HasTraits, Array, Instance, on_trait_change, Trait
-from quantities import Quantity
+from quantities.quantity import Quantity
 from enthought.traits.ui.api import EnumEditor, View, Item
 from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_EnumEditor
-from volume import *
-from infobiotics.commons.quantities.time import * # avoids clash with compiled module 'time'
-from concentration import *
-from moles import *
+from units.volume import volume_units
+from units.time import time_units # avoids clash with compiled module 'time'
+from units.concentration import concentration_units
+from units.substance import substance_units
 
 class Converter(HasTraits):
 
@@ -60,10 +60,10 @@ class TimeConverter(Converter):
     units_editor = time_units_editor
 
 
-VolumeUnit = Trait(milliliters, volume_units)
+VolumeUnit = Trait('millilitres', volume_units)
 
 volume_units_editor = EnumEditor(
-    values=values_for_EnumEditor((liters, milliliters, microliters, nanoliters, picoliters, femtoliters, attoliters)),
+    values=values_for_EnumEditor(('litres', 'milliliters', 'microlitres', 'nanoliters', 'picolitres', 'femtolitres', 'attolitres')),
 )
 
 class VolumeConverter(Converter):
@@ -72,16 +72,16 @@ class VolumeConverter(Converter):
     units_editor = volume_units_editor
 
 
-MolesUnit = Trait('moles', moles_units)
+SubstanceUnit = Trait('molecules', substance_units)
 
-moles_units_editor = EnumEditor(
-    values=values_for_EnumEditor(('moles', 'millimoles', 'micromoles', 'nanomoles', 'picomoles', 'femtomoles', 'attomoles')),
+substance_units_editor = EnumEditor(
+    values=values_for_EnumEditor(('molecules', 'moles', 'millimoles', 'micromoles', 'nanomoles', 'picomoles', 'femtomoles', 'attomoles')),
 )
 
-class MolesConverter(Converter):
-    data_units = MolesUnit
-    display_units = MolesUnit
-    units_editor = moles_units_editor
+class SubstanceConverter(Converter):
+    data_units = SubstanceUnit
+    display_units = SubstanceUnit
+    units_editor = substance_units_editor
 
 
 ConcentrationUnit = Trait('molar', concentration_units)
@@ -100,5 +100,5 @@ if __name__ == '__main__':
     import numpy as np
 #    TimeConverter(data=np.arange(0, 84601, 1)).configure_traits()
 #    VolumeConverter(data=np.arange(100)).configure_traits()
-    MolesConverter(data=np.arange(100)).configure_traits()
+    SubstanceConverter(data=np.arange(100)).configure_traits()
 #    ConcentrationConverter(data=np.arange(100)).configure_traits()

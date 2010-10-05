@@ -1009,16 +1009,16 @@
          <item>
           <layout class="QHBoxLayout" name="_volumes_layout">
            <item>
-            <widget class="QLabel" name="volumes_label_1">
+            <widget class="QLabel" name="_volumes_label_1">
              <property name="text">
-              <string>Volumes are in</string>
+              <string>Volumes are</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="volumes_label_1_alternative">
+            <widget class="QLabel" name="in_label">
              <property name="text">
-              <string>Volume is</string>
+              <string>in</string>
              </property>
             </widget>
            </item>
@@ -1026,6 +1026,9 @@
             <widget class="QDoubleSpinBox" name="volume_spin_box">
              <property name="maximum">
               <double>100.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.010000000000000</double>
              </property>
             </widget>
            </item>

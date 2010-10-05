@@ -19,7 +19,16 @@ substance_units = {
     'picomoles':picomole,
     'femtomoles':femtomole,
     'attomoles':attomole,
+    
     'molecules':molecule,
+    
+    'mole':mole,
+    'millimole':millimole,
+    'micromole':micromole,
+    'nanomole':nanomole,
+    'picomole':picomole,
+    'femtomole':femtomole,
+    'attomole':attomole,
 }
 
 from quantities.quantity import Quantity
