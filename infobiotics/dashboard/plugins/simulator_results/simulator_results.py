@@ -11,8 +11,72 @@ import tables
 #import decimal
 
 sum_compartments_at_same_xy_lattice_position = True
-            
+
+mean = lambda array, axis: np.mean(array, axis, dtype=np.float64)
+std = lambda array, axis: np.std(array, axis, ddof=1, dtype=np.float64)
+
+
+def functions_of_values_over_axis(array, array_axes, axis, functions): 
+    ''' Returns an array similar in shape to 'array' but with the dimension 
+    associated with 'axis' removed and a dimension of length len(functions)
+    prepended. 
+
+    >>> functions_of_values_over_axis(
+    ...     np.zeros((1, 2, 3, 4)),
+    ...     ('runs', 'species', 'compartments', 'timepoints'), 
+    ...     'runs', 
+    ...     (
+    ...         lambda array, axis: np.mean(array, axis), 
+    ...         lambda array, axis: np.std(array, axis, ddof=1)
+    ...     )
+    ... ).shape()
+    (2,2,3,4)
+
+    '''
+    assert axis in array_axes
+    assert len(functions) > 0
+    for function in functions: assert callable(function) # each item in functions must be a callable, preferably a NumPy ufunc
+    axis_index = array_axes.index(axis)
+    out_shape = list(array.shape) # make a mutable copy of array.shape
+    out_shape.pop(axis_index) # remove the axis functions will be applied along
+    out_shape.insert(0, len(functions)) # prepend with functions axis
+    out = np.empty(out_shape) # create output array
+    for index, function in enumerate(functions): # iterate over functions
+        out[index] = function(array, axis=axis_index) # apply function along axis
+    return out
+
+#def function_of_values_over_axis(array, array_axes, axis, function):
+#    return functions_of_values_over_axis(array, array_axes, axis, [function])
+
+
+def functions_of_values_over_successive_axes(array, array_axes, axes, functions):
+    ''' Returns a tuple of the dimensionally reduced array and a tuple of remaining
+    axes names.
+     
+    Applies each function in the 'functions' to the axis of 'array' indexed
+    in 'array axes' from 'axes'. Each application reduces the dimensionality of
+    'array' by one dimensional until either axes is exhausted or array has been
+    reduced to a single value. 
+    
+    '''
+    assert len(set(axes)) == len(axes) # no axis can be named more than once
+    for axis in axes: assert axis in array_axes # each axis must be in array_axes 
+    assert len(functions) == len(axes) # each axis must have a corresponding function
+    for function in functions: assert callable(function) # each item in functions must be a callable, preferably a NumPy ufunc
+    array_axes = list(array_axes[:]) # make a mutable copy of array_axes
+    for index, function in enumerate(functions):
+        axis = axes[index]
+        array = function(array, axis=array_axes.index(axis)) # apply function
+        array_axes.remove(axis)
+    return array, tuple(array_axes)
+
+
 class SimulatorResults(object):
+    
+    amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
+    
+    volumes_axes = ['runs', 'compartments', 'timepoints']    
+    
     
     def __init__(self,
         filename,
@@ -29,9 +93,12 @@ class SimulatorResults(object):
         timepoints_data_units='seconds',
         quantities_data_units='molecules',
         volumes_data_units='litres',
+        timepoints_display_units='seconds',
+        quantities_display_type='molecules',
+        quantities_display_units='molecules',
+        volumes_display_units='litres',
     ):
-        
-        self.parent = parent
+        self.parent = parent # used by SimulatorResultsDialog for QMessageBox
         
         self.type = type
         
@@ -77,8 +144,7 @@ class SimulatorResults(object):
         if every > self.finish:
             self.every = self.finish - self.start
 
-#        self.timepoints = all_timepoints[self.start:self.finish:self.every]
-        self.timepoints = Quantity(all_timepoints[self.start:self.finish:self.every], time_units[timepoints_data_units])
+        self._timepoints = Quantity(all_timepoints[self.start:self.finish:self.every], time_units[timepoints_data_units])
 
         if chunk_size is not int:
             self.chunkSize = int(chunk_size)
@@ -105,15 +171,94 @@ class SimulatorResults(object):
         self.timepoints_data_units = str(timepoints_data_units)
         self.quantities_data_units = str(quantities_data_units)
         self.volumes_data_units = str(volumes_data_units)
+        self.timepoints_display_units = str(timepoints_display_units)
+        self.quantities_display_type = str(quantities_display_type)
+        self.quantities_display_units = str(quantities_display_units)
+        self.volumes_display_units = str(volumes_display_units)
 
-    # shared class variables used for default arguments, they should not be referenced using self.timepoints_display_units, for instance.
-    timepoints_display_units = 'seconds'
-    quantities_display_type = 'molecules'
-    quantities_display_units = 'molecules'
-    volumes_display_units = 'litres'
+
+    def timepoints(self, timepoints_display_units=None):
+        if timepoints_display_units is None:
+            timepoints_display_units = self.timepoints_display_units
+        timepoints = Quantity(self._timepoints, time_units[self.timepoints_data_units])
+        timepoints.units = time_units[timepoints_display_units]    
+        return timepoints
+    
+    
+    def allocate_array(self, shape, failed_message):
+        try:
+            array = np.zeros(shape, self.type)
+        except MemoryError:
+            if self.parent is not None:
+                QMessageBox.warning('Out of memory', failed_message)
+            else:
+                print message
+
+
+    def volumes(self, volumes_display_units=None):
+        # create array for extracted 'results', printing error if too big for memory
+        volumes = self.allocate_array(
+            (
+                len(self.run_indices),
+                len(self.compartment_indices),
+                len(self._timepoints)
+            ),
+            'Could not allocate memory for volumes.\nTry selecting fewer ' \
+            'runs, a shorter time window or a bigger time interval multipler.'
+        )
+        
+        # extract results into array
+        h5 = tables.openFile(self.filename)
+        for ri, r in enumerate(self.run_indices):
+            where = '/run%s' % (r + 1)
+            volumes_for_one_run = h5.getNode(where, 'volumes')[:, self.start:self.finish:self.every]
+            for ci, c in enumerate(self.compartment_indices):
+                volumes[ri, ci, :] = volumes_for_one_run[c, :]
+        h5.close()
+    
+        # adjust scale of volumes to match volumes_display_units
+        volumes = Quantity(volumes, volume_units[self.volumes_data_units])
+        if volumes_display_units is None:
+            volumes_display_units = self.volumes_display_units
+        volumes.units = volume_units[volumes_display_units]
+
+        return volumes
+    
+    
+    def functions_of_amounts_over_axis(self, axis, functions):
+        ''' Narrow by amounts array. '''
+        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, axis, functions)
+
+    def functions_of_volumes_over_axis(self, axis, functions):
+        ''' Narrow by volumes array. '''
+        return functions_of_values_over_axis(self.volumes(), self.volumes_axes, axis, functions)
+    
+    def functions_of_amounts_over_runs(self, functions):
+        ''' Narrow by amounts array and runs axis. '''
+        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, 'runs', (functions))
+    
+    def mean_and_standard_deviation_of_amounts_over_runs(self):
+        ''' Narrow by amounts array, runs axis and mean and std functions. '''
+#        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, 'runs', (mean, std))
+        return self.functions_of_amounts_over_runs(mean, std)
+
+
+    def functions_of_amounts_over_successive_axes(self, axes, functions):
+        ''' Narrow by amounts array. '''
+        return functions_of_values_over_successive_axes(self.amounts(), self.amounts_axes, axes, functions)
+    
+    def functions_of_volumes_over_successive_axes(self, axes, functions):
+        ''' Narrow by volumes array. '''
+        return functions_of_values_over_successive_axes(self.volumes(), self.volumes_axes, axes, functions)
+
+    
+#    def chunk_generator(self, h5file): #TODO depends on array dimensions (a function for each) and order of dimensions to calculate functions over
+#        pass
+
+
 
 #    @profile # use profile(results.get_amounts) instead - won't raise "'profile' not found" error
-    def get_amounts(self, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units, volume=None, timepoints_display_units=timepoints_display_units):#, volumes_display_units='litres'): 
+    def amounts(self, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units, volume=None, timepoints_display_units=timepoints_display_units):#, volumes_display_units='litres'): 
 #        ''' Returns a tuple of (timepoints, results) where timepoints is an 1 - D
 #        array of floats and results is a list of 3-D arrays of ints with the 
 #        shape (species, compartments, timepoint) for each run. '''
@@ -134,14 +279,14 @@ class SimulatorResults(object):
         
         try:
 #            million = 1000 * 1000; results = np.zeros((million, million, million)) # should raise a MemoryError
-            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in self.run_indices]
+            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in self.run_indices]
         except MemoryError:
             message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
             if self.parent is not None:
                 QMessageBox.warning('Out of memory', message)
             else:
                 print message
-            return (self.timepoints, [])
+            return (self._timepoints, [])
         h5 = tables.openFile(self.filename)
         for ri, r in enumerate(self.run_indices):
             where = '/run%s' % (r + 1)
@@ -178,7 +323,7 @@ class SimulatorResults(object):
                     _, volumes = self.get_volumes(self.volumes_data_units)
                 else:
                     assert volume is not None
-                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
+                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self._timepoints)))
                     volumes.fill(volume)
                 _volume_units = volume_units[self.volumes_data_units]
                 _concentration_units = concentration_units[quantities_display_units]
@@ -186,7 +331,7 @@ class SimulatorResults(object):
                 concentrations = np.zeros(results.shape)
                 for ri, r in enumerate(self.run_indices):
                     for ci, c in enumerate(self.compartment_indices):
-                        for ti, t in enumerate(self.timepoints):
+                        for ti, t in enumerate(self._timepoints):
                             # can't replace results in-place as it raises a dimensionality error
                             volume = volumes[ri, ci, ti]
                             if volume <= 0:
@@ -208,234 +353,11 @@ class SimulatorResults(object):
                 results = Quantity(results, substance_units[self.quantities_data_units])
                 results.units = substance_units[quantities_display_units]
 
-        return self.get_timepoints(timepoints_display_units), results
+        return results
 
 
-    def get_timepoints(self, timepoints_display_units):
-#        if self.timepoints_data_units != timepoints_display_units:
-#            converter = TimeConverter(
-#                data=self.timepoints,
-#                data_units=self.timepoints_data_units,
-#                display_units=timepoints_display_units
-#            )
-#            timepoints = converter.display_quantity
-#        else:
-#            timepoints = Quantity(self.timepoints, time_units[timepoints_display_units])
-        timepoints = Quantity(self.timepoints, time_units[self.timepoints_data_units])
-        timepoints.units = time_units[timepoints_display_units]    
-        return timepoints
+
         
-
-    def get_volumes(self, volumes_display_units=volumes_display_units, timepoints_display_units=timepoints_display_units):
-        
-        # create array for extracted 'results', printing error if too big for memory
-        try:
-            results = np.zeros((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)), self.type)
-        except MemoryError:
-            message = 'Could not allocate memory for volumes.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
-            if self.parent is not None:
-                QMessageBox.warning('Out of memory', message)
-            else:
-                print message
-            return (self.timepoints, [])
-        
-        # extract results into array
-        h5 = tables.openFile(self.filename)
-        for ri, r in enumerate(self.run_indices):
-            where = '/run%s' % (r + 1)
-            volumes = h5.getNode(where, 'volumes')[:, self.start:self.finish:self.every]
-            for ci, c in enumerate(self.compartment_indices):
-                results[ri, ci, :] = volumes[c, :]
-        h5.close()
-    
-        # adjust scale of volumes to match volumes_display_units
-        results = Quantity(results, volume_units[self.volumes_data_units])
-        results.units = volume_units[volumes_display_units]
-        return self.get_timepoints(timepoints_display_units), results
-        
-    def get_volumes_mean_over_runs(self):
-        raise NotImplementedError
-        
-        
-
-
-##import itertools
-##axes = ('runs', 'species', 'compartments', 'timepoints')
-##for i in range(2, len(axes)):
-##    for combo in itertools.combinations(axes, i):
-##        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
-#
-#    def get_function_over_runs_and_species(self, f): # (compartments, timepoints)
-#        'of levels for all species in each compartment at each timepoint for all runs'
-#        shape = (10000, 100000)
-#        return np.zeros(shape)
-#    def get_function_over_runs_and_compartments(self, f): # (species, timepoints)
-#        'of levels of each species in all compartments at each timepoint for all runs'
-#        shape = (100, 100000)
-#        return np.zeros(shape)
-#    def get_function_over_runs_and_timepoints(self, f): # (species, compartments)
-#        'of levels of each species in each compartment at all timepoints for all runs'
-#        shape = (100, 10000)
-#        return np.zeros(shape)
-#    def get_function_over_species_and_compartments(self, f): # (runs, timepoints)
-#        'of levels for all species in all compartments at each timepoint in each run'
-#        shape = (1000, 100000)
-#        return np.zeros(shape)
-#    def get_function_over_species_and_timepoints(self, f): # (runs, compartments)
-#        'of levels for all species in each compartment at all timepoints in each run'
-#        shape = (1000, 10000)
-#        return np.zeros(shape)
-#    def get_function_over_compartments_and_timepoints(self, f): # (runs, species)
-#        'of levels of each species in all compartments at all timepoints in each run'
-#        shape = (1000, 100)
-#        return np.zeros(shape)
-#    
-#    def get_function_over_runs_and_species_and_compartments(self, f): # (timepoints)
-#        'of levels for all species in all compartments at each timepoint for all runs'
-#        shape = (100000,)
-#        return np.zeros(shape)
-#    def get_function_over_runs_and_species_and_timepoints(self, f): # (compartments)
-#        'of levels for all species in each compartment at all timepoints for all runs'
-#        shape = (10000,)
-#        return np.zeros(shape)
-#    def get_function_over_runs_and_compartments_and_timepoints(self, f): # (species)
-#        'of levels of each species in all compartments at all timepoints for all runs'
-#        shape = (100,)
-#        return np.zeros(shape)
-#    def get_function_over_species_and_compartments_and_timepoints(self, f): # (runs)
-#        'of levels for all species in all compartments at all timepoints of each run'
-#        shape = (1000,)
-#        return np.zeros(shape)
-#
-#
-##import itertools
-##axes = ('runs', 'species', 'compartments', 'timepoints')
-##for i in (1,):
-##    for combo in itertools.combinations(axes, i):
-##        print '\tdef get_function_over_' + '_and_'.join(combo) + '(self):', '#', '(' + ', '.join([axis for axis in axes if axis not in combo]) + ')\n\t\tpass'  
-#    
-#    # these methods should apply a function along the over_x axis
-#    def get_function_over_runs(self): # (species, compartments, timepoints)
-#        'of levels for each species in each compartment at each timepoint for all runs'
-#        shape = (100, 10000, 10000)
-#        return np.zeros(shape)
-#    def get_function_over_species(self): # (runs, compartments, timepoints)
-#        'of levels for all species in each compartment at each timepoint for each run'
-#        shape = (1000, 10000, 100000)
-#        return np.zeros(shape)
-#    def get_function_over_compartments(self): # (runs, species, timepoints)
-#        'of levels for each species in all compartments at each timepoint for each run'
-#        shape = (1000, 100, 100000)
-#        return np.zeros(shape)
-#    def get_function_over_timepoints(self): # (runs, species, compartments)
-#        'of levels for each species in each compartment at all timepoints for each run'
-#        shape = (1000, 100, 10000)
-#        return np.zeros(shape)
-#
-##FIXME some of these are equivalent to some of the ones below, the arrays just have an extra dimension for runs where below would return a list of arrays of len(runs) 
-#
-##axes = ('species', 'compartments', 'timepoints')
-##for i in range(1, len(axes)):
-##    for combo in itertools.combinations(axes, i):
-##        print '\tdef get_levels_over_' + '_and_'.join(combo) + '(self):', '#', '[(' + ', '.join([axis for axis in axes if axis not in combo]) + ')]\n\t\tpass'  
-#
-#    def get_levels_over_species(self): # [(compartments, timepoints)]
-#        'levels for all species in each compartment at each timepoint of each run'
-#        shape = (10000, 100000)
-#        return [np.zeros(shape) for _ in range(1000)]
-#    def get_levels_over_compartments(self): # [(species, timepoints)]
-#        'levels of each species in all compartments at each timepoint of each run'
-#        shape = (100, 100000)
-#        return [np.zeros(shape) for _ in range(1000)]
-#    def get_levels_over_timepoints(self): # [(species, compartments)]
-#        'levels of each species in each compartment at all timepoints of each run'
-#        shape = (100, 10000)
-#        return [np.zeros(shape) for _ in range(1000)]
-#    
-#    def get_levels_over_species_and_compartments(self): # [(timepoints)]
-#        'levels for all species in all compartments at each timepoint of each run'
-#        shape = (100000,)
-#        return [np.zeros(shape) for _ in range(1000)]
-#    def get_levels_over_species_and_timepoints(self): # [(compartments)]
-#        'levels for all species in each compartment at all timepoints of each run'
-#        shape = (10000,)
-#        return [np.zeros(shape) for _ in range(1000)]
-#    def get_levels_over_compartments_and_timepoints(self): # [(species)]
-#        'levels of each species in all compartments for all timepoints of each run'
-#        shape = (100)
-#        return [np.zeros(shape) for _ in range(1000)]
-#
-#
-#    string_to_method_map = {
-#        'of levels for all species in each compartment at each timepoint for all runs':get_function_over_runs_and_species,
-#        'of levels of each species in all compartments at each timepoint for all runs':get_function_over_runs_and_compartments,
-#        'of levels of each species in each compartment at all timepoints for all runs':get_function_over_runs_and_timepoints,
-#        'of levels for all species in all compartments at each timepoint in each run' :get_function_over_species_and_compartments,
-#        'of levels for all species in each compartment at all timepoints in each run' :get_function_over_species_and_timepoints,
-#        'of levels of each species in all compartments at all timepoints in each run' :get_function_over_compartments_and_timepoints,
-#        'of levels for all species in all compartments at each timepoint for all runs':get_function_over_runs_and_species_and_compartments,
-#        'of levels for all species in each compartment at all timepoints for all runs':get_function_over_runs_and_species_and_timepoints,
-#        'of levels of each species in all compartments at all timepoints for all runs':get_function_over_runs_and_compartments_and_timepoints,
-#        'of levels for all species in all compartments at all timepoints of each run' :get_function_over_species_and_compartments_and_timepoints,
-#        '':get_function_over_runs,
-#        '':get_function_over_species,
-#        '':get_function_over_compartments,
-#        '':get_function_over_timepoints,
-##        '':,
-#    }
-#
-#    def get_results_for_functions_over_axes(self, functions, axes):
-#        ''' 
-#        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.mean, np.sum, np.mean), ('species', 'timepoints', 'runs'))
-#        results = SimulatorResults.get_results_for_functions_over_axes(SimulatorResults(...), (np.std, np.mean, np.product), ('compartments', 'runs', 'species'))
-#        '''
-#        results = levels # start with 4-dimensional (runs, species, compartments, timepoints) array
-#        results_axes = ['runs', 'species', 'compartments', 'timepoints'] 
-#        for fi, f in enumerate(functions):
-#            axis = axes[fi]
-#            results = f(results, axis=results_axes.index(axis))
-#            results_axes.remove(axis)
-#        return results
-#
-#    string_to_function_map = {
-##        'median':,
-#        'mean':lambda array: np.mean(array, axis=3),
-#        'standard deviation':lambda array: np.std(array, ddof=1, axis=3),
-##        'variance':,
-##        'sum':lambda array: np.sum(array, axis=2), #TODO 2?
-#    }
-#
-#    '''
-#chunked method used from get_functions_over_runs: 
-#1. create results array of correct dimensions, handling MemoryError
-#2. create 4-dimensional buffer that fits into memory
-#3. repeatedly fill and do stats on buffer filling results
-#4. do stats on remainder to finish filling results
-#5. return results
-#
-#idea: seperate chunking from stats calculations
-#1. for any stats function from string_to_function dict
-#2. pass in results array creation function
-#3. pass in do stats function
-#
-#problem: chunked method always chunks on timepoints dimension
-#solution1: change to chunk on whatever dimension 
-#solution2: don't chunk
-#
-#code up a couple and see if/where/how they overlap
-#    '''
-#
-
-    mean = lambda array: np.mean(array, axis=3)
-    std = lambda array: np.std(array, ddof=1, axis=3)
-
-    def get_amounts_mean_over_runs(self):
-        return self.get_functions_over_runs((lambda array: np.mean(array, axis=3),))
-#        return self.get_functions_over_runs((SimulatorResults.mean,))
-#        return self.get_functions_over_runs((self.mean,))
-
-    def chunk_generator(self, h5file):
-        pass
 
     def get_functions_over_runs(self, functions):
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
@@ -443,14 +365,14 @@ class SimulatorResults(object):
         shape (species, compartments, timepoint) for each function in 
         functions. '''
         try:
-            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in functions]
+            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in functions]
         except MemoryError:
-            message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+            message = 'Could not allocate memory for functions.\nTry selecting fewer functions, a shorter time window or a bigger time interval multipler.'
             if self.parent is not None:
                 QMessageBox.warning('Out of memory', message)
             else:
                 print message
-            return (self.timepoints, [])
+            return (self._timepoints, [])
 
         # create large arrays handling failure
         buffer = None
@@ -509,14 +431,14 @@ class SimulatorResults(object):
         amounts_chunk_start = self.start
         stat_chunk_start = 0
         # for each whole chunk
-        quotient = len(self.timepoints) // self.chunkSize
+        quotient = len(self._timepoints) // self.chunkSize
         for i in range(quotient):
             iteration(self.chunkSize)
             amounts_chunk_start = self.amounts_chunk_end
             stat_chunk_start = self.statChunkEnd
 
         # and the remaining timepoints           
-        remainder = len(self.timepoints) % self.chunkSize
+        remainder = len(self._timepoints) % self.chunkSize
         if remainder > 0:
             buffer = np.zeros((len(self.species_indices),
                                len(self.compartment_indices),
@@ -526,7 +448,7 @@ class SimulatorResults(object):
             iteration(remainder)
 
         h5.close()
-        return (self.timepoints, results)
+        return (self._timepoints, results)
 
 
     def get_surfaces(self):
@@ -547,7 +469,7 @@ class SimulatorResults(object):
         h5 = tables.openFile(self.filename)
         results = []
         for si, s in enumerate(selected_species):
-            surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self.timepoints)), self.type)
+            surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self._timepoints)), self.type)
 
             # fill surface with amounts
             for ri, r in enumerate(self.run_indices): # only one for now, see SimulationResultsDialog.update_ui()
@@ -560,7 +482,7 @@ class SimulatorResults(object):
                         QMessageBox.warning('Out of memory', message)
                     else:
                         print message
-                    return (self.timepoints, [], None, None, None, None)
+                    return (self._timepoints, [], None, None, None, None)
                 if sum_compartments_at_same_xy_lattice_position:
                     for ci, c in enumerate(selected_compartments):
                         surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :] + surface[c.x_position, c.y_position, :]
@@ -569,7 +491,7 @@ class SimulatorResults(object):
                         surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :]
             results.append(surface)
         h5.close()
-        return (self.timepoints, results, xmin, xmax, ymin, ymax)
+        return (self._timepoints, results, xmin, xmax, ymin, ymax)
 
 
 

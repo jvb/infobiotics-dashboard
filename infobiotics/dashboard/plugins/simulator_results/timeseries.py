@@ -1,5 +1,5 @@
 from __future__ import division # essential for _get_colour
-from enthought.traits.api import HasTraits, Float, Str, Color, Enum, Property, cached_property, Array, Instance, Tuple, Bool
+from enthought.traits.api import HasTraits, Float, Str, Color, Enum, Property, cached_property, Array, Instance, Tuple, Bool, List
 from run import Run
 from species import Species
 from compartment import Compartment
@@ -11,6 +11,7 @@ from enthought.traits.ui.api import View, HGroup, Item
 
 class Timeseries(HasTraits):
 
+    runs = List(Run)
     run = Instance(Run)
     species = Instance(Species) # None == Volume?
     compartment = Instance(Compartment)

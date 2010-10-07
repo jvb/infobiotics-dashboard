@@ -71,6 +71,8 @@ class SimulatorResultsDialog(QWidget):
         self.quantities_display_type_changed(self.ui.quantities_display_type_combo_box.currentText())
         self.connect(self.ui.quantities_display_type_combo_box, SIGNAL('currentIndexChanged(QString)'), self.quantities_display_type_changed)
 
+        self.connect(self.ui.calculate_button, SIGNAL('clicked()'), self.calculate)
+
         self.connect(self.ui.plot_histogram_button, SIGNAL("clicked()"), self.histogram)
         self.connect(self.ui.export_data_as_button, SIGNAL("clicked()"), self.export_data_as)
         self.connect(self.ui.plot_timeseries_button, SIGNAL("clicked()"), self.plot)
@@ -509,6 +511,16 @@ class SimulatorResultsDialog(QWidget):
 
 
     # actions slots
+    
+    def calculate(self):
+        from axes_order_traits import AxesOrder
+        ao = AxesOrder()
+        result = ao.edit_traits(kind='modal')
+        if result:
+            axes = [axis.name.lower() for axis in ao.order]
+            functions = [axis.function for axis in ao.order]
+        results = self.selected_items_results()
+        array, axes = results.functions_over_successive_axes(axes, functions) 
 
     def histogram(self):
         raise NotImplementedError
@@ -783,8 +795,10 @@ class SimulatorResultsDialog(QWidget):
         results = self.selected_items_results()
 
         if averaging:
-            timepoints, amounts = results.get_amounts_mean_over_runs()
+#            timepoints, amounts = results.get_amounts_mean_over_runs()
+            timepoints, amounts = results.get_functions_over_runs((SimulatorResults.mean, SimulatorResults.std))
             mean_index = 0
+            std_index = 1
 #            if self.volumes_selected:
 #                timepoints, volumes = results.get_volumes_mean_over_runs() #TODO
         else:
@@ -806,18 +820,42 @@ class SimulatorResultsDialog(QWidget):
         timeseries = []
 
         volumes_species = Species(
-            index=None, #TODO
+            index=None, #TODO hack
             name='Volumes',
             simulation=self.simulation,
         )
 
         if averaging:
-            raise NotImplementedError
-#            for ci, c in enumerate(compartments):
-#                for si, s in enumerate(species):
-#                    timeseries.append(
-#                        pass
-#                    )
+#            raise NotImplementedError
+            for ci, c in enumerate(compartments):
+                for si, s in enumerate(species):
+                    timeseries.append(
+                        Timeseries(
+                            runs=[run.data for run in runs],
+                            species=s.data,
+                            compartment=c.data,
+                            timepoints=timepoints,
+                            timepoints_units=timepoints_display_units,
+                            values_type='Concentration' if quantities_display_type == 'concentrations' else 'Amount',
+                            values=amounts[ri, si, ci, :],
+                            values_units=quantities_display_units,
+                            _colour=colours.colour(si),
+                        )                                          
+                    )
+                if self.volumes_selected:
+                    timeseries.append(
+                        Timeseries(
+                            runs=[run.data for run in runs],
+                            species=volumes_species,
+                            compartment=c.data,
+                            timepoints=timepoints,
+                            timepoints_units=timepoints_display_units,
+                            values_type='Volume',
+                            values=volumes[ri, ci, :],
+                            values_units=volumes_display_units,
+                            _colour=colours.colour(len(species) + ci),
+                        )                                          
+                    )
         else:
             for ri, r in enumerate(runs):
                 for ci, c in enumerate(compartments):

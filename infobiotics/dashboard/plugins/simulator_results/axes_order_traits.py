@@ -67,12 +67,20 @@ class AxesOrder(HasTraits):
     )
 
 
-if __name__ == '__main__':
+def main(): 
     ao = AxesOrder(
 #        axes=['Runs', 'Species', 'Compartments', 'Timepoints'],
 #        axes=['Runs', 'Species', 'Compartments'],
     )
     result = ao.edit_traits(kind='modal')
     if result:
-        for axis in ao.order:
-            print (axis.name.lower(), axis.function)
+#        for axis in ao.order: print (axis.name.lower(), axis.function) # more like an ordered dictionary
+        axes = [axis.name.lower() for axis in ao.order]
+        functions = [axis.function for axis in ao.order]
+        return axes, functions
+            
+
+if __name__ == '__main__':
+    functions, axes = main()
+    print functions
+    print axes
