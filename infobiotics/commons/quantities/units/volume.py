@@ -2,12 +2,13 @@ from quantities.unitquantity import UnitQuantity
 from quantities.units.volume import liter
 from quantities.units.prefixes import milli, micro, nano, pico, femto, atto
 
-milliliter = UnitQuantity('milliliter', milli * liter, symbol='mL')
-microliter = UnitQuantity('microliter', micro * liter, symbol='uL')
-nanoliter = UnitQuantity('nanoliter', nano * liter, symbol='nL')
-picoliter = UnitQuantity('picoliter', pico * liter, symbol='pL')
-femtoliter = UnitQuantity('femtoliter', femto * liter, symbol='fL')
-attoliter = UnitQuantity('attoliter', atto * liter, symbol='aL')
+litre = liter
+millilitre = milliliter = UnitQuantity('milliliter', milli * liter, symbol='mL')
+microlitre = microliter = UnitQuantity('microliter', micro * liter, symbol='uL')
+nanolitre = nanoliter = UnitQuantity('nanoliter', nano * liter, symbol='nL')
+picolitre = picoliter = UnitQuantity('picoliter', pico * liter, symbol='pL')
+femtolitre = femtoliter = UnitQuantity('femtoliter', femto * liter, symbol='fL')
+attolitre = attoliter = UnitQuantity('attoliter', atto * liter, symbol='aL')
 
 #liters = 'liters'
 #milliliters = 'milli%s (10^-3 %s)' % (liters, liters)
