@@ -6,10 +6,10 @@ from quantities.units.prefixes import milli, micro, nano, pico, femto, atto
 M = molar = UnitQuantity('molar', mole / liter, symbol='M')
 mM = millimolar = UnitQuantity('millimolar', (milli * mole) / liter , symbol='mM')
 uM = micromolar = UnitQuantity('micromolar', (micro * mole) / liter, symbol='uM')
-nanomolar = UnitQuantity('nanomolar', (nano * mole) / liter, symbol='nM')
-picomolar = UnitQuantity('picomolar', (pico * mole) / liter, symbol='pM')
-femtomolar = UnitQuantity('femtomolar', (femto * mole) / liter, symbol='fM')
-attomolar = UnitQuantity('attomolar', (atto * mole) / liter, symbol='aM')
+nM = nanomolar = UnitQuantity('nanomolar', (nano * mole) / liter, symbol='nM')
+pM = picomolar = UnitQuantity('picomolar', (pico * mole) / liter, symbol='pM')
+fM = femtomolar = UnitQuantity('femtomolar', (femto * mole) / liter, symbol='fM')
+aM = attomolar = UnitQuantity('attomolar', (atto * mole) / liter, symbol='aM')
 
 concentration_units = {
     'molar':molar,

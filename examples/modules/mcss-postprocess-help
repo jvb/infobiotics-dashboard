@@ -1,0 +1,33 @@
+mcss-postprocess version 0.0.40
+usage: mcss-postprocess [OPTIONS] INFILE
+	-a - sum levels for species
+	-A ATTRIBUTE - output attribute value
+	-b CHAR - output column separator
+	-c [x1,y1],[x2,y2];... - compartments to output
+	-C c1,c2;... - compartments to output (use compartment indices)
+	-d - sum species over compartments
+	-e CHUNK_SIZE - set chunk size
+	-f DEGREE - confidence interval degree
+	-g LEVEL - output time taken to reach level
+	-h - display this usage message
+	-i - output information on dataset
+	-j - output propensities data
+	-k - output information on rules
+	-l - output levels data
+	-m - output information on compartments
+	-n - output information on species
+	-o FILENAME - save output to file
+	-p - don't output header with data
+	-q - output upper and lower bounds for means
+	-r [x1,y1],...:[x2,y2],... - output ratio of levels data
+	-R c1,...:c2,... - output ratio of levels data (use compartment indices)
+	-s s1,s2,... - species to output
+	-S s1,s2,... - species to output (use species indices)
+	-t RUN - run to output
+	-u TIME - time at which to start output
+	-v TIME - time at which to end output
+	-w - output compartment volumes
+	-x - output concentrations
+	-y - use compartment indices in output
+	-z TIME - output time step
+

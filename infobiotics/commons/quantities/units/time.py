@@ -1,8 +1,16 @@
 from quantities.units.time import attosecond, femtosecond, picosecond, nanosecond, microsecond, millisecond, second, minute, hour, day, week, month, year
 
+y = year
+d = day
+M = month
 h = hour
 m = minute
 s = second
+ms = millisecond
+us = microsecond
+ns = nanosecond
+ps = picosecond
+fs = femtosecond
 
 time_units = {
     'years':year,

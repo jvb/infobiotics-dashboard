@@ -3,12 +3,12 @@ from quantities.units.substance import mole
 from quantities.units.prefixes import milli, micro, nano, pico, femto, atto
 from scipy.constants import N_A # Avogadro's constant 6.0221415e+23
 
-millimoles = millimole = UnitQuantity('millimoles', milli * mole)#, symbol='mM')
-micromoles = micromole = UnitQuantity('micromoles', micro * mole)#, symbol='uM')
-nanomoles = nanomole = UnitQuantity('nanomoles', nano * mole)#, symbol='nM')
-picomoles = picomole = UnitQuantity('picomoles', pico * mole)#, symbol='pM')
-femtomoles = femtomole = UnitQuantity('femtomoles', femto * mole)#, symbol='fM')
-attomoles = attomole = UnitQuantity('attomoles', atto * mole)#, symbol='aM')
+mmoles = millimoles = millimole = UnitQuantity('millimoles', milli * mole)
+umoles = micromoles = micromole = UnitQuantity('micromoles', micro * mole)
+nmoles = nanomoles = nanomole = UnitQuantity('nanomoles', nano * mole)
+pmoles = picomoles = picomole = UnitQuantity('picomoles', pico * mole)
+fmoles = femtomoles = femtomole = UnitQuantity('femtomoles', femto * mole)
+amoles = attomoles = attomole = UnitQuantity('attomoles', atto * mole)
 molecules = molecule = UnitQuantity('molecule', (1 / N_A) * mole, symbol='molecules')
 
 substance_units = {

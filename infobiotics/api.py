@@ -1,4 +1,4 @@
-from preferences import preferences
+from preferences import preferences #TODO use config.py singleton instead?
 
 from mcss.api import McssExperiment
 
