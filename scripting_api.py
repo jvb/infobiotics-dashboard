@@ -132,6 +132,12 @@ class Compartment(HasTraits):
 class McssResults(HasTraits):
     ''' Loaded from an H5 file, returned by McssExperiment().perform()
     
+    IMPORTANT: Assumes that all runs are the same, ignores runs stopped 
+        midway with Ctrl-C if other runs have completed.
+        
+    IMPORTANT: Assumes that all compartments are the same (neither created,
+        destroyed or moved), although volume information changes for each run.
+    
     Selection is stateful - reused between methods like timeseries() or 
         histogram(), but can be overridden in those method calls:
         timeseries(**selection). This means that the same McssResults object

@@ -66,14 +66,12 @@ def second_hetero(k, time_unit=default_time_unit):
     ''' k has units molarity**-1 time**-1 '''
     return (k.rescale(molar ** -1 * second ** -1) / (N * V)).rescale(time_unit ** -1)
 
-def k_on_to_k_off_ratio(K_D):
-    if K_D < 1:
-        return 'k_on 1 : %s k_off' % float(1 / K_D) 
-    else:
-        return 'k_on %s : 1 k_off' % float(K_D / 1)
-#print k_on_to_k_off_ratio(2)
-#print k_on_to_k_off_ratio(0.5)
-
+k_on = 2 * 10 ** 6 * M ** -1 * s ** -1
+c_on = second_hetero(k_on)
+def dissociation(K_D):
+    k_off = K_D * k_on
+    return 'c_off = %s' % first(k_off)
+    
 def conversion_function_from_units(q):
     ''' *Cannot* distinguish between hetero and homo second order reactions and
     assumes hetero. For homo multiply c by 2. '''
@@ -95,7 +93,7 @@ def conversion_function_from_units(q):
     elif molarity < 0 and time < 0:
         return second_hetero
     elif molarity > 0 and time == 0:
-        return k_on_to_k_off_ratio 
+        return dissociation 
 
 
 if __name__ == '__main__':
@@ -162,4 +160,5 @@ if __name__ == '__main__':
                 
     print 'parameter'.ljust(10), 'stochastic constant (c)'.rjust(35), 'deterministic constant (k)'.rjust(35)
     for name, k in parameters.iteritems():
-        print name.ljust(10), str(conversion_function_from_units(k)(k)).rjust(35), str(k).rjust(35)    
+        print name.ljust(10), str(conversion_function_from_units(k)(k)).rjust(35), str(k).rjust(35)
+    print 'c_on'.ljust(10), str(c_on).rjust(35), str(k_on).rjust(35)

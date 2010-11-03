@@ -2,7 +2,7 @@ from quantities.units.time import attosecond, femtosecond, picosecond, nanosecon
 
 y = year
 d = day
-M = month
+MM = month
 h = hour
 m = minute
 s = second
