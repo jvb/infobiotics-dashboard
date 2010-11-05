@@ -107,7 +107,7 @@ if __name__ == '__main__':
         ('k_+S', 100 / hour),
         ('h_Q', 2),
         ('K_S', 0.008 * micromolar),
-        ('K_+p', 200 / micromolar / hour),
+        ('K_+p', 250 / micromolar / hour),
         ('k_-p', 200 / micromolar / hour),
         ('k_D', 90 / hour),
         ('m_s', 1.5 / hour),

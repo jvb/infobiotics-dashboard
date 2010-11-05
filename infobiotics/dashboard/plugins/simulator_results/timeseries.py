@@ -59,18 +59,18 @@ class Timeseries(HasTraits):
         compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
         if self.values_type == 'Volume':
             if self.run == None:
-#                return 'Volume of %s' % (compartment_name_and_xy_coords)
-                return '%s' % (compartment_name_and_xy_coords)
+                return 'Volume of %s' % (compartment_name_and_xy_coords)
+#                return '%s' % (compartment_name_and_xy_coords)
             else:
-#                return 'Volume of %s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
-                return '%s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
+                return 'Volume of %s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
+#                return '%s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
         else:
             if self.run == None:
-#                return '%s of %s in %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords)
-                return '%s in %s' % (self.species.name, compartment_name_and_xy_coords)
+                return '%s of %s in %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords)
+#                return '%s in %s' % (self.species.name, compartment_name_and_xy_coords)
             else:
-#                return '%s of %s in %s of run %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords, self.run._run_number)
-                return '%s in %s of run %s' % (self.species.name, compartment_name_and_xy_coords, self.run._run_number)
+                return '%s of %s in %s of run %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords, self.run._run_number)
+#                return '%s in %s of run %s' % (self.species.name, compartment_name_and_xy_coords, self.run._run_number)
     
     
     _colour = Color
