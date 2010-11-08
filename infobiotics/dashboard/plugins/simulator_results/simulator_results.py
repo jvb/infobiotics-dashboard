@@ -44,10 +44,56 @@ def functions_of_values_over_axis(array, array_axes, axis, functions):
     for index, function in enumerate(functions): # iterate over functions
         out[index] = function(array, axis=axis_index) # apply function along axis
     return out
+#print functions_of_values_over_axis(
+#    np.zeros((1, 2, 3, 4)),
+#    ('runs', 'species', 'compartments', 'timepoints'),
+#    'runs',
+#    (
+#        lambda array, axis: np.mean(array, axis),
+#        lambda array, axis: np.std(array, axis, ddof=1)
+#    )
+#).shape
+#exit()
 
 #def function_of_values_over_axis(array, array_axes, axis, function):
 #    return functions_of_values_over_axis(array, array_axes, axis, [function])
 
+def functions_of_values_over_axis_generator(array, array_axes, axis, functions): 
+    ''' Returns a generator that yields arrays similar in shape to 'array' but 
+    with the dimension associated with 'axis' removed, each containing the 
+    result of applying a function along the index of the 'axis' in 'array_axes'. 
+
+    >>> mean, std = functions_of_values_over_axis_generator(
+    ...     np.zeros((1, 2, 3, 4)),
+    ...     ('runs', 'species', 'compartments', 'timepoints'), 
+    ...     'runs', 
+    ...     (
+    ...         lambda array, axis: np.mean(array, axis), 
+    ...         lambda array, axis: np.std(array, axis, ddof=1)
+    ...     )
+    ... )
+    >>> print mean.shape, std.shape
+    (2,3,4) (2,3,4)
+
+    '''
+    assert axis in array_axes
+    assert len(functions) > 0
+    for function in functions: assert callable(function) # each item in functions must be a callable, preferably a NumPy ufunc
+    axis_index = array_axes.index(axis)
+    for function in functions: # iterate over functions
+        yield function(array, axis=axis_index) # yield result of applying function along axis
+#mean, std = functions_of_values_over_axis_generator(
+#    np.zeros((1, 2, 3, 4)),
+#    ('runs', 'species', 'compartments', 'timepoints'),
+#    'runs',
+#    (
+#        lambda array, axis: np.mean(array, axis),
+#        lambda array, axis: np.std(array, axis, ddof=1)
+#    )
+#)
+#print mean.shape, std.shape
+#exit()
+exit()
 
 def functions_of_values_over_successive_axes(array, array_axes, axes, functions):
     ''' Returns a tuple of the dimensionally reduced array and a tuple of remaining
@@ -84,7 +130,7 @@ class SimulatorResults(object):
         beginning=0,
         end= -1,
         every=1,
-        chunk_size=2 ** 20,
+#        chunk_size=2 ** 20,
         type=float, #decimal.Decimal
         species_indices=None,
         compartment_indices=None,
@@ -93,10 +139,10 @@ class SimulatorResults(object):
         timepoints_data_units='seconds',
         quantities_data_units='molecules',
         volumes_data_units='litres',
-        timepoints_display_units='seconds',
-        quantities_display_type='molecules',
-        quantities_display_units='molecules',
-        volumes_display_units='litres',
+        timepoints_display_units='seconds', #TODO use timepoints_data_units if None
+        quantities_display_type='molecules', #TODO determine from quantities data units if None
+        quantities_display_units='molecules', #TODO use quantities_data_units if None
+        volumes_display_units='litres', #TODO use volumes_data_units if None
     ):
         self.parent = parent # used by SimulatorResultsDialog for QMessageBox
         
@@ -136,24 +182,24 @@ class SimulatorResults(object):
             self.finish = len(all_timepoints) #- 1
 
         if every is not int:
-            self.every = int(every)
-        else:
-            self.every = every
-        if every < 1:
-            self.every = 1
+            every = int(every)
         if every > self.finish:
-            self.every = self.finish - self.start
+            every = self.finish - self.start
+        if every < 1:
+            every = 1
+        self.every = every
 
         self._timepoints = Quantity(all_timepoints[self.start:self.finish:self.every], time_units[timepoints_data_units])
 
-        if chunk_size is not int:
-            self.chunkSize = int(chunk_size)
-        else:
-            self.chunkSize = chunk_size
-        if chunk_size < 1:
-            self.chunkSize = 1
-        if chunk_size > self.finish:
-            self.chunkSize = self.finish - self.start
+#        if chunk_size is not int:
+#            chunk_size = int(chunk_size)
+#        if chunk_size < 1:
+#            self.chunk_size = 1
+#        elif chunk_size > self.finish - self.start:
+#            self.chunk_size = self.finish - self.start
+#        else:
+#            self.chunk_size = chunk_size
+        self.max_chunk_size = self.finish - self.start #TODO determine based on any axis not just timepoints
 
         if species_indices is None:
             self.species_indices = range(self.simulation.number_of_species)
@@ -193,7 +239,8 @@ class SimulatorResults(object):
                 QMessageBox.warning('Out of memory', failed_message)
             else:
                 print message
-
+            return
+        return array
 
     def volumes(self, volumes_display_units=None):
         # create array for extracted 'results', printing error if too big for memory
@@ -206,6 +253,8 @@ class SimulatorResults(object):
             'Could not allocate memory for volumes.\nTry selecting fewer ' \
             'runs, a shorter time window or a bigger time interval multipler.'
         )
+        if volumes is None:
+            return
         
         # extract results into array
         h5 = tables.openFile(self.filename)
@@ -240,7 +289,7 @@ class SimulatorResults(object):
     def mean_and_standard_deviation_of_amounts_over_runs(self):
         ''' Narrow by amounts array, runs axis and mean and std functions. '''
 #        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, 'runs', (mean, std))
-        return self.functions_of_amounts_over_runs(mean, std)
+        return self.functions_of_amounts_over_runs((mean, std))
 
 
     def functions_of_amounts_over_successive_axes(self, axes, functions):
@@ -374,6 +423,8 @@ class SimulatorResults(object):
                 print message
             return (self._timepoints, [])
 
+        chunk_size = self.max_chunk_size
+
         # create large arrays handling failure
         buffer = None
         while buffer == None:
@@ -381,11 +432,11 @@ class SimulatorResults(object):
             try:
                 buffer = np.zeros((len(self.species_indices),
                                       len(self.compartment_indices),
-                                      self.chunkSize,
+                                      chunk_size,
                                       len(self.run_indices)),
-                                      type)
+                                      self.type)
             except MemoryError:
-                if self.chunkSize == 0:
+                if chunk_size == 0:
                     if self.parent is not None:
                         message = 'Could not allocate memory for chunk.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
                         QMessageBox.warning('Out of memory', message)
@@ -393,7 +444,7 @@ class SimulatorResults(object):
                         print message
                         return
                 # progressively halve chunkSize until buffer fits into memory
-                self.chunkSize = self.chunkSize // 2
+                chunk_size = chunk_size // 2
                 buffer = None
                 continue
 
@@ -407,7 +458,7 @@ class SimulatorResults(object):
 #                buffer = None
 #                continue
 
-        def iteration(chunk_size):
+        def iteration():#chunk_size):
             """One iteration reads amounts into buffer and applies statistical functions to those amounts."""
             self.amounts_chunk_end = amounts_chunk_start + (chunk_size * self.every)
             for ri, r in enumerate(self.run_indices):
@@ -431,14 +482,14 @@ class SimulatorResults(object):
         amounts_chunk_start = self.start
         stat_chunk_start = 0
         # for each whole chunk
-        quotient = len(self._timepoints) // self.chunkSize
-        for i in range(quotient):
-            iteration(self.chunkSize)
+        quotient = len(self._timepoints) // chunk_size
+        for _ in range(quotient):
+            iteration()#chunk_size)
             amounts_chunk_start = self.amounts_chunk_end
             stat_chunk_start = self.statChunkEnd
 
         # and the remaining timepoints           
-        remainder = len(self._timepoints) % self.chunkSize
+        remainder = len(self._timepoints) % chunk_size
         if remainder > 0:
             buffer = np.zeros((len(self.species_indices),
                                len(self.compartment_indices),

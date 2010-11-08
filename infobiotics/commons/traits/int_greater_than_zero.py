@@ -1,4 +1,5 @@
 from enthought.traits.api import BaseInt
+from numpy import uint, uint0, uint8, uint16, uint32, uint64, uintc, uintp
 
 class IntGreaterThanZero(BaseInt):
     
@@ -7,6 +8,8 @@ class IntGreaterThanZero(BaseInt):
     default_value = 1
 
     def validate(self, object, name, value):
+        if type(value) in (uint, uint0, uint8, uint16, uint32, uint64, uintc, uintp):
+            value = int(value)
         value = super(IntGreaterThanZero, self).validate(object, name, value)
         if value > 0:
             return value

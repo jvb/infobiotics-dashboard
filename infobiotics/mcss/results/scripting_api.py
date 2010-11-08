@@ -1,3 +1,8 @@
+#from enthought.mayavi import mlab
+#mlab.options.offscreen = True
+#mlab.test_contour3d()
+#mlab.savefig('example.png')
+
 ''' Attempt to define scripting API that can also be used by 
 SimulatorResultsDialog.
 
@@ -6,8 +11,9 @@ SimulatorResultsDialog.
 2 perform experiment, get results
 3 select subset of results
 4 get timeseries/histograms/surfaces
-5 plot/edit timeseries/histograms/surfaces
-6 save timeseries/histograms/surfaces
+~ get more timeseries/histograms/surfaces
+5 plot/edit some timeseries/histograms/surfaces
+6 save plots
 
 '''
 
@@ -159,7 +165,7 @@ class McssResults(HasTraits):
     compartments = Property(List(Compartment), selectable=True) # selectable metadata 
     selected_compartments = List(Compartment, selected=True) # selected metadata
     compartments_indices = Property(List(Int), selectable=True) # selectable metadata
-    selected_compartments_indices = List(Int, selected=True) # selected metadata
+    selected_compartments_indices = Property(List(Int), selected=True) # selected metadata
     
     def _get_compartments(self): # repeat for species, runs, etc.
         ''' Return list/generator of compartment objects '''
