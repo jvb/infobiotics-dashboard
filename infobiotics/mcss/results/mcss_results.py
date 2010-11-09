@@ -7,8 +7,8 @@ import math
 import numpy as np
 
 from enthought.traits.api import Enum, Trait
-#from enthought.traits.api import Property, Long  
-from enthought.traits.api import HasTraits, Int, Str, List, ReadOnly, Array
+#from enthought.traits.api import Long  
+from enthought.traits.api import HasTraits, Int, Str, Property, cached_property, List, ReadOnly, Array
 from infobiotics.commons.traits.api import RelativeFile
 #from infobiotics.commons.traits.api import FloatGreaterThanZero, IntGreaterThanZero
 from enthought.traits.ui.api import View, Item, VGroup, HGroup
@@ -113,10 +113,14 @@ class Compartment(HasTraits):
 #    creation_time = Float # not used
 #    destruction_time = Float # not used
 
-    def coordinates(self):
+    coordinates = Property(Tuple(Int, Int), depends_on='x_position, y_position')
+    @cached_property
+    def _get_coordinates(self):
         return (self.x_position, self.y_position)
 
-    def compartment_name_and_xy_coords(self):
+    compartment_name_and_xy_coords = Property(Str, depends_on='name, x_position, y_position')
+    @cached_property
+    def _get_compartment_name_and_xy_coords(self):
         return "%s (%s,%s)" % (self.name, self.x_position, self.y_position)
 
 
@@ -509,7 +513,7 @@ class Compartment(HasTraits):
 class McssResultsAttributesReadOnly(HasTraits):
     ''' Exposes root._v_attrs as ReadOnly traits '''
 
-    parameters = List(Str, 
+    parameters = List(Str,
         [
             'model_input_file',
             'model_format',
@@ -571,7 +575,7 @@ class McssResultsAttributesReadOnly(HasTraits):
         return View(
             VGroup(
                 Item('mcss_version', style='readonly', label='mcss version'),
-                VGroup(                
+                VGroup(
                     Item('log_type', style='readonly', label='log_type'),
                     Item('runs', style='readonly', label='runs'),
                     Item('max_time', style='readonly', label='max_time'),
@@ -596,15 +600,15 @@ class McssResultsAttributesReadOnly(HasTraits):
                     Item('division_direction', style='readonly', label='division_direction'),
                     label='Parameters',
                 ),
-                VGroup(                    
+                VGroup(
                     Item('number_of_species', style='readonly'),
                     Item('number_of_rule_templates', style='readonly'),
                     Item('number_of_rules_in_templates', style='readonly'),
                     Item('total_number_of_rules', style='readonly'),
                     HGroup(
                         Item(label='Lattice dimensions'),
-                        Item('lattice_x_dimension', style='readonly', label='x'),#, label='lattice_x_dimension'), 
-                        Item('lattice_y_dimension', style='readonly', label='y'),#, label='lattice_y_dimension'), 
+                        Item('lattice_x_dimension', style='readonly', label='x'), #, label='lattice_x_dimension'), 
+                        Item('lattice_y_dimension', style='readonly', label='y'), #, label='lattice_y_dimension'), 
 #                        Item('lattice_z_dimension', style='readonly', label='z'),#, label='lattice_z_dimension'), 
                     ),
 #                    Item('simulation_end_time', style='readonly'),
@@ -766,7 +770,7 @@ class McssResults(McssResultsAttributesReadOnly):
 
     _timepoints = Array
 
-    def timepoints(self, start, stop=-1, step=1):
+    def timepoints(self, start, stop= -1, step=1):
         '''  Returns a list of (inclusive) timepoints given start and stop indices and a step/stride '''
         
         if isinstance(start, SliceType):
@@ -785,13 +789,13 @@ class McssResults(McssResultsAttributesReadOnly):
         if step < 1:
             step = 1
         
-        return self._timepoints[start:stop+1:step] 
+        return self._timepoints[start:stop + 1:step] 
 
-    def timepoint_indices(self, beginning, end, every=-1):
+    def timepoint_indices(self, beginning, end, every= -1):
         slice = self.timepoint_slice(beginning, end, every)
         return np.arange(slice.start, slice.stop, slice.step)
         
-    def timepoint_slice(self, beginning, end, every=-1):
+    def timepoint_slice(self, beginning, end, every= -1):
         ''' beginning, end and every are times,  start, stop and step are indices '''
 
         if beginning < 0:
