@@ -17,10 +17,10 @@ Products = Either(
 class Constant(HasTraits):
     id = Str
     value = Float
-    def __init__(self, id, value, **traits):
-        super(Constant, self).__init__(**traits)
-        self.id = id
-        self.value = value
+#    def __init__(self, id, value, **traits):
+#        super(Constant, self).__init__(**traits)
+#        self.id = id
+#        self.value = value
 
 class Rule(HasTraits):
     reactants_outside = Reactants
@@ -36,7 +36,7 @@ class Rule(HasTraits):
             if isinstance(value, tuple):
                 self.constant = Constant(value[0], value[1])
             else:
-                self.constant = Constant(constant_id_generator.next(), value)
+                self.constant = Constant(value=value)
 
 
 #    def __init__(self, **traits):
@@ -133,6 +133,7 @@ def id_generator(prefix=''):
 compartment_id_generator = id_generator('c')
 species_id_generator = id_generator('s')
 constant_id_generator = id_generator('k')
+reaction_id_generator = id_generator('r')
 
 
 def recursively_create_compartments(compartment, outside_sbml_compartment):
@@ -163,19 +164,22 @@ def recursively_create_species(compartment):
         recursively_create_species(compartment)
 
 
-def recursively_create_rules(compartment):
+def recursively_create_reactions(compartment):
     for rule in flatten(compartment.rules):
 
         sbml_reaction = model.createReaction()
+        sbml_reaction.setId(reaction_id_generator.next())
         sbml_reaction.setReversible(False)
         sbml_reaction.setFast(False)
 
         if isinstance(rule.constant, Constant):
-            constant_id = rule.constant.id
             constant_value = rule.constant.value
         else:
-            constant_id = constant_id_generator.next()
             constant_value = rule.constant
+        if isinstance(rule.constant, Constant) and rule.constant.id != '':
+            constant_id = rule.constant.id
+        else:
+            constant_id = constant_id_generator.next()
 
         kinetic_law = sbml_reaction.createKineticLaw()
         kinetic_law.setFormula(constant_id)
@@ -199,6 +203,7 @@ def recursively_create_rules(compartment):
                 sbml_species.setCompartment(compartment.id)
                 sbml_species.setInitialAmount(0)
                 sbml_species_reference.setSpecies(compartment.species_ids[species])
+                sbml_species_reference.initDefaults() # sets stoichiometry to 1
 
 #        for species in rule.reactants_outside:
 
@@ -215,32 +220,50 @@ def recursively_create_rules(compartment):
                 sbml_species.setCompartment(compartment.id)
                 sbml_species.setInitialAmount(0)
                 sbml_species_reference.setSpecies(compartment.species_ids[species])
+                sbml_species_reference.initDefaults() # sets stoichiometry to 1
 
 #        for species in rule.products_outside:
 
     for compartment in compartment.compartments:
-        recursively_create_rules(compartment)
+        recursively_create_reactions(compartment)
 
 
 
 if __name__ == '__main__':
 
     import libsbml
+    # see http://sbml.org/Software/libSBML/docs/python-api/
 
     document = libsbml.SBMLDocument()
+
     model = document.createModel()
+    document.setLevelAndVersion(2, 4)
 
     default_compartment = model.createCompartment()
     default_compartment.setId('default')
     default_compartment.setSpatialDimensions(2)
 
+    for unit_definition in (
+        ('substance', libsbml.UNIT_KIND_ITEM, 1),
+        ('volume', libsbml.UNIT_KIND_LITRE, 1),
+        ('area', libsbml.UNIT_KIND_METRE, 2),
+        ('length', libsbml.UNIT_KIND_METRE, 1),
+        ('time', libsbml.UNIT_KIND_SECOND, 1),
+    ):
+        sbml_unit_defintion = model.createUnitDefinition()
+        sbml_unit_defintion.setId(unit_definition[0])
+        sbml_unit_defintion.setName(unit_definition[0])
+        sbml_unit = model.createUnit()
+        sbml_unit.setKind(unit_definition[1])
+        sbml_unit.initDefaults() # sets exponent to 1, scale to 0 and multiplier to 1.0
+        if len(unit_definition) > 2:
+            sbml_unit.setExponent(unit_definition[2])
+
     for p in flatten(m.SPsystems):
         recursively_create_compartments(p, default_compartment)
         recursively_create_species(p)
-        recursively_create_rules(p)
+        recursively_create_reactions(p)
 
-    if not document.setLevelAndVersion(2, 4):
-        document.checkL2v4Compatibility()
-        document.printErrors()
-#    else:
-        print libsbml.writeSBMLToString(document)
+    document.checkL2v4Compatibility()
+    document.printErrors()
+    print libsbml.writeSBMLToString(document)
