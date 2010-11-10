@@ -1,3 +1,5 @@
+''' This is probably and dead end, see compartments for a more exciting solution. '''
+
 from sbml import Rule
 from enthought.traits.api import HasTraits, List, Str, This
 from infobiotics.commons.sequences import flatten

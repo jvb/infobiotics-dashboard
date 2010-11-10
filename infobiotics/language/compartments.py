@@ -18,7 +18,7 @@ class Reaction(HasTraits):
 		
 def reaction(reactants, products, constant):
 	return Reaction(reactants, products, constant)
-print reaction('a,b',['c'], 0.1)
+#print reaction('a,b',['c'], 0.1)
 
 # shorthand. Alternatively 'import reaction as r'
 r = Reaction
@@ -66,7 +66,7 @@ class Compartment(HasTraits):
 	_ = Disallow # e.g HasStrictTraits http://code.enthought.com/projects/traits/docs/html/traits_user_manual/advanced.html#hasstricttraits
 
 	compartment_ = Either(Instance(This), Callable)
-	reaction_ = Either(Instance(Reaction), Callable)
+	reaction_ = Either(Instance(Reaction))#, Callable)
 	species_ = Int
 
 	def _compartments_values(self):
@@ -102,7 +102,7 @@ class Compartment(HasTraits):
 				reactions.append(reaction)
 		return reactions
 				
-			
+	volume = Float #TODO make into a litre/length**3 validated Trait
 
 
 # inheritable
@@ -119,6 +119,9 @@ class Compartment3(Compartment1):
 	def reaction1(self): 
 		return Reaction('x,y','z')
 	reaction2 = lambda: Reaction(['e'],['f'])
+	constantX = 1.0
+	reactionX = Reaction('x','y',constantX)
+	
 
 # Modules == Compartments?
 # multiple inheritance uses first superclasses definition of initial amounts
