@@ -176,3 +176,113 @@ if __name__ == '__main__':
 	
 	print c4.reactions()
 	
+'''
+from enthought.traits.api import *
+class Compartment(HasTraits):
+    _ = Either(Instance('Reaction'), Instance('Species'), Instance('Compartment'))
+    
+class Species(HasTraits): pass
+class Reaction(HasTraits): pass
+class Bacteria(Compartment):
+    a = Species(multiplicity=10)
+    c = Compartment(d=Compartment())
+    r1 = Reaction()
+    r2 = Reaction()
+    
+class Bacteria(Compartment):
+    a = Species(multiplicity=10)
+    c = Compartment()
+    r1 = Reaction()
+    r2 = Reaction()
+    
+b = Bacteria()
+b
+b.print_traits()
+t.traits()
+b.traits()
+b.__dict__
+b.trait('a')
+b.__dict__
+b.__class__.__dict__
+print b.__class__.__dict__
+print b.__dict__
+x = HasStrictTraits()
+x.print_traits()
+x.__dict__
+class X(HasTraits):
+    s_ = Either(Instance('Compartment'), Instance('Reaction'), Instance('Species')
+    )
+    
+class Y(X):
+    s1 = Species()
+    species = Species()
+    
+Y.__dict__
+y = Y()
+y.print_traits()
+y.trait('s1')
+print y.trait('s1')
+print y.trait('species')
+print y.species
+print y.s1
+y.__dict__
+y.__class__.__dict__
+print y.__class__.__dict__
+y.s2 = None
+y.s2 = 0
+b.1 = 0
+b.a = 0
+_ip.system("cat ")
+_ip.system("ls -F ")
+_ip.system("cat ipython_log.py")
+class Bacterium(Bacteria):
+    def reactions(self):
+        for key, value in self.__dict__.iteritems():
+            if isinstance(value, Reaction):
+                print key
+b = Bacterium()
+b.reactions()
+b.__dict__
+class Bacterium(Bacteria):
+    def reactions(self):
+        for key, value in self.__dict__.iteritems():
+            if isinstance(value, Reaction):
+                print key
+    _ = Either(Instance('Reaction'), Python)
+    
+class Bacterium(Bacteria):
+    def reactions(self):
+        for key, value in self.__dict__.iteritems():
+            if isinstance(value, Reaction):
+                print key
+    _ = Either(Instance('Reaction'), PythonValue)
+    
+b = Bacterium()
+b.reactions()
+b.a = Reaction()
+b.a = Reaction
+b.a = Reaction()
+class Bacterium(Bacteria):
+    def reactions(self):
+        for key, value in self.__dict__.iteritems():
+            if isinstance(value, Reaction):
+                print key
+    _ = Either(Instance(Reaction), PythonValue)
+    
+b.a = Reaction()
+b = Bacterium()
+b.a = Reaction()
+b.c = Reaction()
+b.c
+b.a
+print b.__dict__
+del b.a
+print b.__dict__
+b.a = Reaction()
+_ip.system("cat ipython_log.py")
+b.reaction()
+b.reactions()
+b.d = 0123
+b.d = lambda: print 1
+b.d = lambda: 1
+'''
