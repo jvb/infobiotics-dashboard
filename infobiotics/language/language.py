@@ -20,7 +20,7 @@ Species = Either(
 )
 
 Reactions = Either(
-    Str, #TODO regex for r1: a + b [c + d ]_l -k_on-> e + f[  g + h]_j k_on   =     0.01
+    Regex(regex='.*'), #TODO regex for r1: a + b [c + d ]_l -k_on-> e + f[  g + h]_j k_on   =     0.01
     Instance('reaction'),
     List(Instance('reaction')),
 #    List(List(Instance('Reaction'))),
@@ -28,6 +28,7 @@ Reactions = Either(
     Tuple(Instance('reaction')),
 #    Tuple(List(Instance('Reaction'))),
 #    Tuple(Tuple(Instance('Reaction'))),
+    #TODO Dict(Str, Reaction)
 )
 
 CompartmentOrSpeciesOrReactions = Either(
@@ -70,8 +71,36 @@ Products = Either(
 )
 
 
-class reaction(HasTraits):
-    ''' Only ',' and '+' are reserved symbols in species names. '''
+class base(HasTraits):
+
+    id = Str
+
+    name = Property(Str)
+    def _get_name(self):
+        return self._name if self._name != '' else self.id
+    def _set_name(self, name):
+        self._name = name
+    _name = Str
+
+
+class reaction(base):
+    '''
+class Reaction(HasTraits):
+    reactants = List(Str)
+    products = List(Str)
+    constant = Float
+    def __str__(self):
+        return '%s -> %s' % (self.reactants, self.products)
+    def __init__(self, reactants, products, constant=0.0):
+        ''' Allows instantiation of reactions with only a pair of strings (or lists of strings). '''
+        if isinstance(reactants, str):
+            reactants = [reactant.strip() for reactant in reactants.split(',')]
+        self.reactants = reactants
+        if isinstance(products, str):
+            products = [product.strip() for product in products.split(',')]
+        self.products = products
+        self.constant = constant
+    '''
 
     reactants = Property(Reactants)
 
@@ -121,58 +150,92 @@ class reaction(HasTraits):
 #r7 = reaction(reactants={'a':1, ' b':1}, products=['a', 'b', 'c'])
 #exit()
 
-def module(var, var_with_default='a'): #TODO
-    r1 = reaction(products=var)
-    r2 = reaction(reactants=var_with_default)
-    return r1, r2
 
+class species(base):
 
-class species(HasTraits):
-    name = Str
     quantity = Quantity
+
     def __init__(self, quantity, **traits):
         self.quantity = quantity
         super(species, self).__init__(**traits)
+
+    def __str__(self):
+        return '%s=%s' % (self.name, self.quantity)
 
 #class gene(species):
 ##    sequence = dna
 #    pass
 
 
+def id_generator(prefix=''):
+    i = 1
+    while True:
+        yield '%s%s' % (prefix, i)
+        i += 1
+
+# from sbml
+compartment_id_generator = id_generator('c')
+species_id_generator = id_generator('s')
+constant_id_generator = id_generator('k')
+reaction_id_generator = id_generator('r')
+
+
 def filter_by_type(dict, type):
     filtered = []
-    for k, v in dict.items():
 
-        # skip private keys
-        if k.startswith('_'):
-            continue
+    def fix_missing_id(item, id):
+        if hasattr(item, 'id') and item.id == '':
+            item.id = id
 
-        # fix missing names
-        if isinstance(v, type):
-            if v.name == '':
-                v.name = k
-            filtered.append(v)
+    def append_item(item, id):
+        if isinstance(item, type):
+            fix_missing_id(item, id)
+            filtered.append(item)
+        elif hasattr(item, '__iter__'):
+            for i in item:
+                append_item(i, globals()['%s_id_generator' % type.__name__].next())
+
+    for id, item in dict.items():
+        if id.startswith('_'): continue # skip private keys #TODO necessary now that __dir does this?
+        append_item(item, id)
 
     return filtered
 
-
-class compartment(HasTraits):
-    name = Str
+class compartment(base):
+    volume = Float #TODO make into a litre/length**3 validated Trait
     __ = Any
     _ = CompartmentOrSpeciesOrReactions
+
+#    def __class_dir(self):
+#        return [name for name in dir(self.__class__) if not name.startswith(('__', '_')) and not callable(getattr(self.__class__, name)) and name != 'wrappers']
+#
+#    def __class_dir_items(self):
+#        return dict([(name, getattr(self.__class__, name)) for name in self.__class_dir()])
+
+    def __dir(self):
+        return [name for name in dir(self) if not name.startswith(('__', '_')) and not callable(getattr(self, name)) and name != 'wrappers']
+
+    def __dir_items(self):
+        return dict([(name, getattr(self, name)) for name in self.__dir()])
 
     def __attributes(self, type):
         d = dict(self.__class__.__dict__) # copy items from class dictproxy
         d.update(self.__dict__) # overwrite traits with instances from self
+        d.update(self.__dir_items()) # catches attributes of superclasses
         return filter_by_type(d, type)
 
     def __instance_attributes(self, type):
-        return filter_by_type(self.__dict__, type)
+        d = dict(self.__dict__)
+#        d.update(self.__dir_items())
+        return filter_by_type(d, type)
 
     def __class_attributes(self, type):
-        return filter_by_type(dict(self.__class__.__dict__), type)
+        d = dict(self.__class__.__dict__)
+        d.update(self.__dir_items())#d.update(self.__class_dir_items())
+        return filter_by_type(dict(d), type)
 
     def _species(self):
+        #TODO self.__attributes(int)
         return self.__attributes(species)
 
     def _instance_species(self):
@@ -191,6 +254,8 @@ class compartment(HasTraits):
         return self.__class_attributes(compartment)
 
     def _reactions(self):
+        #TODO self.__attributes(str)
+        print self.__attributes(tuple)
         return self.__attributes(reaction)
 
     def _instance_reactions(self):
@@ -200,42 +265,76 @@ class compartment(HasTraits):
         return self.__class_attributes(reaction)
 
 
+## multiple inheritance
+#
+#class c1(compartment):
+#    x = compartment(name='1')
+#    a = species(1)
+#    b = reaction()
+#    c = species(3)
+#
+#class c2(compartment):
+#    x = compartment(name='2')
+#    c = species(2)
+#
+#class C(c2, c1):
+#    pass
+#
+#c = C()
+#assert c.c.quantity == 2 # c in C2 overrides c in C1
+##print [i.name for i in c._compartments()]
+##print [str(i) for i in c._species()]
+##print [i.name for i in c._reactions()]
 
 
+# modules
+
+def module(var, var_with_default='a'): #TODO
+    r1 = reaction(products=var)
+    r2 = reaction(reactants=var_with_default)
+    return r1, r2
+
+class HasModule(compartment):
+    module1 = module('b')
+c = HasModule()
+print c.module1
+print c._reactions() #TODO look inside tuples for reactions
+exit()
+
+#TODO modules within modules 
 
 
-class WildType(compartment):
-    species_rsmA = 1
-class rsmAKnockout(WildType):
-    species_rsmA = 0
-
-# use 2D numpy array for lattice
-def find_empty_2D_array_positions(array):
-    empty = []
-    for x, a in enumerate(np.equal(array, None)):
-        for y, i in enumerate(a):
-            if i:
-                empty.append((x, y))
-    return empty
-
-class LPPSystem(HasTraits):
-    distribution = Array(dtype=compartment)
-    def validate_distribution(self):
-        return find_empty_2D_array_positions(self.distribution)
-
-SpatialDistribution = np.array
-class Model(LPPSystem):
-    # funny that 'and' gives the wrong distribution by 'or' doesn't
-#    distribution = np.array([[WildType() if (x != 4 or y != 4) else rsmAKnockout() for x in range(10)] for y in range(10)])
-#    distribution = np.array([[WildType() if (x != 4 and y != 4) else rsmAKnockout() for x in range(10)] for y in range(10)])
-    # rephrase it so that exception comes first
-    distribution = SpatialDistribution([[rsmAKnockout() if (x == 4 and y == 4) else WildType() for x in range(10)] for y in range(10)])
-
-
-m = Model()
-#print m.distribution
-#print m.distribution[4,4]
-m.distribution[4, 4] = None
-print m.validate_distribution()
-print m.distribution.shape
-print np.array([]).shape
+## knockout as subclass of wildtype
+#class WildType(compartment):
+#    species_rsmA = 1
+#class rsmAKnockout(WildType):
+#    species_rsmA = 0
+#
+#
+## use 2D numpy array for lattice
+#def find_empty_2D_array_positions(array):
+#    empty = []
+#    for x, a in enumerate(np.equal(array, None)):
+#        for y, i in enumerate(a):
+#            if i:
+#                empty.append((x, y))
+#    return empty
+#
+#class LPPSystem(HasTraits):
+#    distribution = Array(dtype=compartment)
+#    def empty_positions(self):
+#        return find_empty_2D_array_positions(self.distribution)
+#
+## aliases
+#lpp = LPPSystem
+#sps = compartment
+#SpatialDistribution = np.array
+#
+#class model(LPPSystem):
+#    distribution = SpatialDistribution([[rsmAKnockout() if (x == 4 and y == 4) else WildType() for x in range(10)] for y in range(10)])
+#
+#m = model()
+##print m.distribution
+#print m.distribution[4, 4]
+#m.distribution[4, 4] = None
+#print m.empty_positions()
