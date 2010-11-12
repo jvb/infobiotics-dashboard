@@ -1,6 +1,9 @@
 from enthought.traits.api import *
 from quantities import Quantity # importing imports sum which overwrite builtin
 import numpy as np
+import itertools
+from infobiotics.commons.counter import Counter as multiset
+
 
 # compound trait definitions
 
@@ -11,11 +14,11 @@ Compartments = Either(
 )
 
 Species = Either(
-#    Int,
+#    Int, Quantity
     Instance('species'),
     List(Instance('species')),
     Tuple(Instance('species')),
-    DictStrInt, # initial_amounts = {'a':1} 
+    DictStrInt, #TODO initial_amounts = {'a':1} 
 #    ListStr, Tuple(Str) # alphabet?
 )
 
@@ -28,9 +31,10 @@ Reactions = Either(
     Tuple(Instance('reaction')),
 #    Tuple(List(Instance('Reaction'))),
 #    Tuple(Tuple(Instance('Reaction'))),
-    #TODO Dict(Str, Reaction)
+    Dict(Str, Instance('reaction')),
 )
 
+# sum of above, can't think of a way how not to do this manually 
 CompartmentOrSpeciesOrReactions = Either(
     Instance('compartment'),
     List(Instance('compartment')),
@@ -48,9 +52,10 @@ CompartmentOrSpeciesOrReactions = Either(
     List(Instance('reaction')),
 #    List(List(Instance('Reaction'))),
 #    List(Tuple(Instance('Reaction'))),
-    Tuple(Instance('reaction')),
+    Tuple(Instance('reaction')), # id's assigned from reaction_id_generator
 #    Tuple(List(Instance('Reaction'))),
 #    Tuple(Tuple(Instance('Reaction'))),
+    Dict(Str, Instance('reaction')), # id's assigned from dict keys for instance in modules 
 )
 
 Reactants = Either(
@@ -92,7 +97,7 @@ class Reaction(HasTraits):
     def __str__(self):
         return '%s -> %s' % (self.reactants, self.products)
     def __init__(self, reactants, products, constant=0.0):
-        ''' Allows instantiation of reactions with only a pair of strings (or lists of strings). '''
+        \''' Allows instantiation of reactions with only a pair of strings (or lists of strings). \'''
         if isinstance(reactants, str):
             reactants = [reactant.strip() for reactant in reactants.split(',')]
         self.reactants = reactants
@@ -112,8 +117,7 @@ class Reaction(HasTraits):
             self._reactants = [j.strip() for i in reactants.split(',') for j in i.split('+')] # nice one-liner
         elif hasattr(reactants, '__iter__'):
             if isinstance(reactants, dict):
-                from infobiotics.commons.counter import Counter
-                reactants = Counter(reactants)
+                reactants = multiset(reactants)
                 if sum(reactants.values()) > 2:
                     raise ValueError('Too many reactants: %s' % reactants)
                 else:
@@ -137,6 +141,8 @@ class Reaction(HasTraits):
                 self._products = [k for k, v in products.items() for i in range(v)]
             else:
                 self._products = [r for r in products]
+
+    rate = Quantity
 
 #TODO recast as unit tests
 ##r1 = reaction()
@@ -176,11 +182,11 @@ def id_generator(prefix=''):
 # from sbml
 compartment_id_generator = id_generator('c')
 species_id_generator = id_generator('s')
-constant_id_generator = id_generator('k')
+rate_id_generator = id_generator('k')
 reaction_id_generator = id_generator('r')
 
 
-def filter_by_type(dict, type):
+def filter_by_type(d, type):
     filtered = []
 
     def fix_missing_id(item, id):
@@ -192,10 +198,14 @@ def filter_by_type(dict, type):
             fix_missing_id(item, id)
             filtered.append(item)
         elif hasattr(item, '__iter__'):
-            for i in item:
-                append_item(i, globals()['%s_id_generator' % type.__name__].next())
+            if isinstance(item, dict):
+                for k, v in item.items():
+                    append_item(v, k)
+            else:
+                for i in item:
+                    append_item(i, globals()['%s_id_generator' % type.__name__].next())
 
-    for id, item in dict.items():
+    for id, item in d.items():
         if id.startswith('_'): continue # skip private keys #TODO necessary now that __dir does this?
         append_item(item, id)
 
@@ -205,6 +215,20 @@ class compartment(base):
     volume = Float #TODO make into a litre/length**3 validated Trait
     __ = Any
     _ = CompartmentOrSpeciesOrReactions
+
+    def _trait_added_fired(self, trait):
+        ''' Catches attributes added after instantiation. '''
+#        print getattr(self, trait)
+        print self.trait(trait)
+
+    def _get_item(self, id):
+        for i in itertools.chain(self._species(), self._reactions(), self._compartments()):
+            if isinstance(i, compartment): # descend into compartments
+                item = i._get_item(id)
+                if item is not None:
+                    return item
+            if i.id == id:
+                return i
 
 #    def __class_dir(self):
 #        return [name for name in dir(self.__class__) if not name.startswith(('__', '_')) and not callable(getattr(self.__class__, name)) and name != 'wrappers']
@@ -236,6 +260,11 @@ class compartment(base):
 
     def _species(self):
         #TODO self.__attributes(int)
+        # self.__attributes(dict)
+        ld = self.__attributes(dict)
+        ld = [d for d in ld if isinstance(d.items()[0][0], str) and isinstance(d.items()[0][1], int)]
+        print ld
+
         return self.__attributes(species)
 
     def _instance_species(self):
@@ -255,7 +284,6 @@ class compartment(base):
 
     def _reactions(self):
         #TODO self.__attributes(str)
-        print self.__attributes(tuple)
         return self.__attributes(reaction)
 
     def _instance_reactions(self):
@@ -287,21 +315,43 @@ class compartment(base):
 ##print [i.name for i in c._reactions()]
 
 
-# modules
+## modules
+#
+#def module(var, var_with_default='a'): #TODO
+#    r1 = reaction(products=var)
+#    r2 = reaction(reactants=var_with_default)
+#    return r1, r2
+#
+#class HasModule(compartment):
+#    module1 = module('b')
+#c = HasModule()
+#print c._reactions() #TODO look inside tuples for reactions
+#exit()
 
-def module(var, var_with_default='a'): #TODO
-    r1 = reaction(products=var)
-    r2 = reaction(reactants=var_with_default)
-    return r1, r2
 
-class HasModule(compartment):
-    module1 = module('b')
-c = HasModule()
-print c.module1
-print c._reactions() #TODO look inside tuples for reactions
-exit()
-
-#TODO modules within modules 
+## modules within modules 
+#
+#def module2():
+#    r1 = reaction()
+#    r2 = reaction()
+#    return r1, r2
+#
+#def module(var, var_with_default='a'): #TODO
+#    r1 = reaction(products=var)
+#    r2 = reaction(reactants=var_with_default)
+##    r3, r4 = module('c') # infinite recursion!
+#    r3, r4 = module2()
+##    return r1, r2, r3, r4
+#    return {'a':r1, 'b':r2, '1':r3, 'atas':r4}
+#
+#class HasModule(compartment):
+#    module1 = module('b')
+#    c = compartment(x=species(10))
+#c = HasModule()
+#print [(r.id, r) for r in c._reactions()]
+##print c._get_item('a')
+##print c._get_item('x')
+#exit()
 
 
 ## knockout as subclass of wildtype
@@ -311,26 +361,26 @@ exit()
 #    species_rsmA = 0
 #
 #
-## use 2D numpy array for lattice
-#def find_empty_2D_array_positions(array):
-#    empty = []
-#    for x, a in enumerate(np.equal(array, None)):
-#        for y, i in enumerate(a):
-#            if i:
-#                empty.append((x, y))
-#    return empty
-#
-#class LPPSystem(HasTraits):
-#    distribution = Array(dtype=compartment)
-#    def empty_positions(self):
-#        return find_empty_2D_array_positions(self.distribution)
+# use 2D numpy array for lattice
+def find_empty_2D_array_positions(array):
+    empty = []
+    for x, a in enumerate(np.equal(array, None)):
+        for y, i in enumerate(a):
+            if i:
+                empty.append((x, y))
+    return empty
+
+class model(HasTraits):
+    distribution = Array(dtype=compartment)
+    def empty_positions(self):
+        return find_empty_2D_array_positions(self.distribution)
 #
 ## aliases
-#lpp = LPPSystem
+#lpp = model
 #sps = compartment
 #SpatialDistribution = np.array
 #
-#class model(LPPSystem):
+#class model1(lpp):
 #    distribution = SpatialDistribution([[rsmAKnockout() if (x == 4 and y == 4) else WildType() for x in range(10)] for y in range(10)])
 #
 #m = model()
