@@ -8,11 +8,9 @@ class idd(HasTraits):
 class named(idd):
 
     name = Property(Str)
-
+    _name = Str
     def _get_name(self):
         return self._name if self._name != '' else self.id
-
     def _set_name(self, name):
         self._name = name
 
-    _name = Str

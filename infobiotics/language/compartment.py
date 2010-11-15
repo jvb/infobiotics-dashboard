@@ -1,10 +1,11 @@
 __all__ = ['compartment']
 
-from core import named
+from core import named, Quantity
 from enthought.traits.api import Either, Instance, List, Tuple, Dict, Str, Int, Float, Any, Property
 import itertools
 from species import species
 from reaction import reaction
+from id_generators import *
 
 CompartmentOrSpeciesOrReactions = Either(
 
@@ -14,7 +15,7 @@ CompartmentOrSpeciesOrReactions = Either(
     Tuple(Instance('compartment')),
 
     # species
-#    Int, Quantity, #TODO a=10, a=10*M, a=10*molecules
+    Int, Quantity, #TODO a=10, a=10*M, a=10*molecules
     Instance('species'),
     List(Instance('species')),
     Tuple(Instance('species')),
@@ -33,7 +34,153 @@ CompartmentOrSpeciesOrReactions = Either(
     Dict(Str, Instance('reaction')), # id's assigned from dict keys for instance in modules 
 )
 
+basic_types = (int, dict) # types that can be converted into model objects
+
+#TODO factoring out __getattribute__ and __setattr__ from metacompartment and compartment
+
+def __getattribute__(self, name, parent):
+    value = parent.__getattribute__(name)
+    if not name.startswith('_') and isinstance(value, basic_types):
+        print '%s.__getattribute__' % self
+        setattr(self, name, value) # convert value to object via __setattr__
+        return parent.__getattribute__(name)
+    return value
+
+def __setattr__(self, name, value, parent):
+#    print '%s.__setattr__(%s, %s)' % (self, name, value)
+    if isinstance(value, int): # convert int to species
+        parent.__setattr__(name, species(value, id=name))
+    elif isinstance(value, dict):
+        print '%s.__setattr__' % self
+    else:
+        parent.__setattr__(name, value)
+
+from enthought.traits.api import MetaHasTraits
+
+class metacompartment(MetaHasTraits):
+    ''' Needed to convert class attributes to correct types. See: 
+    http://docs.python.org/reference/datamodel.html#special-method-lookup-for-new-style-classes 
+    
+    '''
+
+    def __getattribute__(cls, name): #@NoSelf
+        ''' Convert basic types on first access. See compartment.__setattr__. 
+        
+        Called whenever 'print Class.a'
+        
+        '''
+        return __getattribute__(cls, name, super(MetaHasTraits, cls))
+
+    def __setattr__(cls, name, value): #@NoSelf
+        ''' Called whenever 'Class.a = x' '''
+        __setattr__(cls, name, value, super(MetaHasTraits, cls))
+
+
+class compartment(named):
+    __metaclass__ = metacompartment
+
+    y = 2
+
+    volume = Float #TODO make into a litre/length**3 validated Trait
+    __ = Any
+    _ = CompartmentOrSpeciesOrReactions
+
+    def __getattribute__(self, name):
+        ''' Spy on attribute access, sending basic types for conversion. 
+
+        Used because HasTraits doesn't define __getattr__. See: 
+        http://docs.python.org/reference/datamodel.html#object.__getattribute__
+        
+        '''
+        return __getattribute__(self, name, super(compartment, self))
+
+    def __setattr__(self, name, value):
+        ''' Spy on attribute assignment and convert basic types. '''
+        __setattr__(self, name, value, super(compartment, self))
+
+    def __getitem__(self, id):
+        ''' Enable mapping item access, e.g. compartment[id] '''
+        for i in itertools.chain(self.species, self.reactions, self.compartments):
+#            don't
+#            # descend into compartments
+#            if isinstance(i, compartment):
+#                item = i._get_item(id)
+#                if item is not None:
+#                    return item
+            if i.id == id:
+                return i
+
+    def __setitem__(self, id, value):
+        ''' Enable mapping item assignment, e.g. compartment[id] = subcompartment '''
+        setattr(self, id, value)
+
+##    def __class_dir(self):
+##        return [name for name in dir(self.__class__) if not name.startswith(('__', '_')) and not callable(getattr(self.__class__, name)) and name != 'wrappers']
+#
+##    def __class_dir_items(self):
+##        return dict([(name, getattr(self.__class__, name)) for name in self.__class_dir()])
+
+    def __dir(self):
+        return [name for name in dir(self) if not name.startswith(('__', '_')) and not callable(getattr(self, name)) and name != 'wrappers']
+
+    def __dir_items(self):
+        return dict([(name, getattr(self, name)) for name in self.__dir()])
+#
+    def __attributes(self, type):
+        d = dict(self.__class__.__dict__) # copy items from class dictproxy
+        d.update(self.__dict__) # overwrite traits with instances from self
+        d.update(self.__dir_items()) # catches attributes of superclasses
+        return filter_by_type(d, type)
+#
+##    def __instance_attributes(self, type):
+##        d = dict(self.__dict__)
+###        d.update(self.__dir_items())
+##        return filter_by_type(d, type)
+##    def _instance_compartments(self):
+##        return self.__instance_attributes(compartment)
+##    def _instance_species(self):
+##        return self.__instance_attributes(species)
+##    def _instance_reactions(self):
+##        return self.__instance_attributes(reaction)
+#
+##    def __class_attributes(self, type):
+##        d = dict(self.__class__.__dict__)
+##        d.update(self.__dir_items())#d.update(self.__class_dir_items())
+##        return filter_by_type(dict(d), type)
+##    def _class_compartments(self):
+##        return self.__class_attributes(compartment)
+##    def _class_species(self):
+##        return self.__class_attributes(species)
+##    def _class_reactions(self):
+##        return self.__class_attributes(reaction)
+#
+    compartments = Property(List(Instance('compartment')))
+    def _get_compartments(self):
+        return self.__attributes(compartment)
+
+    species = Property(List(Instance('species')))
+    def _get_species(self):
+        #TODO self.__attributes(int)
+        # self.__attributes(dict)
+        ld = self.__attributes(dict)
+        ld = [d for d in ld if isinstance(d.items()[0][0], str) and isinstance(d.items()[0][1], int)]
+#        print ld
+        return self.__attributes(species)
+
+    reactions = Property(List(Instance('reaction')))
+    def _get_reactions(self):
+        return self.__attributes(reaction)
+#
+#    def amount(self, id):
+#        i = self[id]
+#        if i is None or not isinstance(i, species):
+#            raise ValueError('%s is not a species' % id)
+#        return i.quantity
+
+
 def filter_by_type(d, type):
+    ''' Used to extract attributes by type and to create traits from class 
+    attributes... '''
     filtered = []
 
     def fix_missing_id(item, id):
@@ -41,6 +188,8 @@ def filter_by_type(d, type):
             item.id = id
 
     def append_item(item, id):
+        ''' Recursive so that it can work with nested sequences. '''
+        #TODO add int -> species here?
         if isinstance(item, type):
             fix_missing_id(item, id)
             filtered.append(item)
@@ -58,97 +207,25 @@ def filter_by_type(d, type):
 
     return filtered
 
-class compartment(named):
-    volume = Float #TODO make into a litre/length**3 validated Trait
-    __ = Any
-    _ = CompartmentOrSpeciesOrReactions
 
-    def _trait_added_fired(self, trait):
-        ''' Catches attributes added after instantiation. '''
-#        print getattr(self, trait)
-        print self.trait(trait)
 
-    def __getitem__(self, id):
-        for i in itertools.chain(self._species(), self._reactions(), self._compartments()):
-#            don't
-#            # descend into compartments
-#            if isinstance(i, compartment):
-#                item = i._get_item(id)
-#                if item is not None:
-#                    return item
-            if i.id == id:
-                return i
+if __name__ == '__main__':
 
-    def quantity(self, id):
-        i = self[id]
-        if i is None or not isinstance(i, species):
-            raise ValueError('%s is not a species' % id)
-        return i.quantity
+    class C(compartment):
+        __metaclass__ = metacompartment
+        a = 1
+        b = {'a':5}
+        _t = 'x' # should be ignored
 
-#    def __class_dir(self):
-#        return [name for name in dir(self.__class__) if not name.startswith(('__', '_')) and not callable(getattr(self.__class__, name)) and name != 'wrappers']
-#
-#    def __class_dir_items(self):
-#        return dict([(name, getattr(self.__class__, name)) for name in self.__class_dir()])
-
-    def __dir(self):
-        return [name for name in dir(self) if not name.startswith(('__', '_')) and not callable(getattr(self, name)) and name != 'wrappers']
-
-    def __dir_items(self):
-        return dict([(name, getattr(self, name)) for name in self.__dir()])
-
-    def __attributes(self, type):
-        d = dict(self.__class__.__dict__) # copy items from class dictproxy
-        d.update(self.__dict__) # overwrite traits with instances from self
-        d.update(self.__dir_items()) # catches attributes of superclasses
-        return filter_by_type(d, type)
-
-    def __instance_attributes(self, type):
-        d = dict(self.__dict__)
-#        d.update(self.__dir_items())
-        return filter_by_type(d, type)
-
-    def __class_attributes(self, type):
-        d = dict(self.__class__.__dict__)
-        d.update(self.__dir_items())#d.update(self.__class_dir_items())
-        return filter_by_type(dict(d), type)
-
-    def _species(self):
-        #TODO self.__attributes(int)
-        # self.__attributes(dict)
-        ld = self.__attributes(dict)
-        ld = [d for d in ld if isinstance(d.items()[0][0], str) and isinstance(d.items()[0][1], int)]
-        print ld
-
-        return self.__attributes(species)
-
-    def _instance_species(self):
-        return self.__instance_attributes(species)
-
-    def _class_species(self):
-        return self.__class_attributes(species)
-
-    #TODO repeat pattern if it works to make readonly properties
-    compartments = Property(trait=List(Instance('compartment')), fget=lambda: self.__attributes(compartment))
-#    def _get_compartments(self):
-#        return self._compartments()
-
-    def _compartments(self):
-        return self.__attributes(compartment)
-
-    def _instance_compartments(self):
-        return self.__instance_attributes(compartment)
-
-    def _class_compartments(self):
-        return self.__class_attributes(compartment)
-
-    def _reactions(self):
-        #TODO self.__attributes(str)
-        return self.__attributes(reaction)
-
-    def _instance_reactions(self):
-        return self.__instance_attributes(reaction)
-
-    def _class_reactions(self):
-        return self.__class_attributes(reaction)
-
+    if __name__ == '__main__':
+        c = C()
+    ##    print C.a, type(C.a)
+        print c.a, type(c.a)
+    #    t = c.trait('a')
+    #    print t.handler
+        c.print_traits()
+        print c.b
+        print c._t
+        C.a = 6
+        print c.a
+        print C().a

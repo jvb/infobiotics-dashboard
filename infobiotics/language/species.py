@@ -10,14 +10,15 @@ class species(named):
 
     amount = Either(Int, Instance(Quantity))
 
-    def __init__(self, quantity=0, **traits):
-        self.quantity = quantity
+    def __init__(self, amount=0, **traits):
+        self.amount = amount
         super(species, self).__init__(**traits)
 
     def __str__(self):
-        return self.quantity
+        return '%s=%s' % (self.name, self.amount)
 
 class sequenced(species):
+    ''' http://www.biopython.org/wiki/Seq '''
     sequence = Property(Str)#Instance(Seq))
     def _get_sequence(self):
         return self._sequence
