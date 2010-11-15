@@ -1,1 +1,5 @@
-from language import species, compartment, reaction, model, multiset
+from compartment import *
+from species import *
+from reaction import *
+from model import *
+from ids import *
