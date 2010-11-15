@@ -25,7 +25,10 @@ class TestCompartment(unittest.TestCase):
         self.assertEqual(c.a.id, 'a')
 
     def test_class_DictStrInt(self):
-        pass
+        class C(compartment):
+            d = {'a':5, 'b':1}
+        self.assertEqual(C.a, 5)
+        self.assertEqual(C.b, 1)
 
     def test_mapping_access(self):
         c = compartment()

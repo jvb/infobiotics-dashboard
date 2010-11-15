@@ -34,26 +34,36 @@ CompartmentOrSpeciesOrReactions = Either(
     Dict(Str, Instance('reaction')), # id's assigned from dict keys for instance in modules 
 )
 
+
+# factoring out __getattribute__ and __setattr__ from metacompartment and compartment
+
 basic_types = (int, dict) # types that can be converted into model objects
 
-#TODO factoring out __getattribute__ and __setattr__ from metacompartment and compartment
-
 def __getattribute__(self, name, parent):
+    ''' Convert basic types on first access if they were set at class 
+    declaration time using __setattr__. Doesn't convert private traits. '''
     value = parent.__getattribute__(name)
     if not name.startswith('_') and isinstance(value, basic_types):
-        print '%s.__getattribute__' % self
-        setattr(self, name, value) # convert value to object via __setattr__
+#        print '%s.__getattribute__' % self
+        __setattr__(self, name, value, parent) # convert value to object via __setattr__
         return parent.__getattribute__(name)
     return value
 
 def __setattr__(self, name, value, parent):
+    ''' Convert basic types on assignment. Doesn't convert private traits. '''
 #    print '%s.__setattr__(%s, %s)' % (self, name, value)
-    if isinstance(value, int): # convert int to species
-        parent.__setattr__(name, species(value, id=name))
-    elif isinstance(value, dict):
-        print '%s.__setattr__' % self
-    else:
-        parent.__setattr__(name, value)
+    if not name.startswith('_') and isinstance(value, basic_types):
+        if isinstance(value, int): # convert int to species
+            parent.__setattr__(name, species(value, id=name))
+        elif isinstance(value, dict):
+    #        print '%s.__setattr__' % self
+            for k, v in value.items():
+                if not (isinstance(k, str) and isinstance(v, int)):
+                    raise ValueError
+                __setattr__(self, k, v, parent)
+        else:
+            parent.__setattr__(name, value)
+
 
 from enthought.traits.api import MetaHasTraits
 
@@ -63,23 +73,28 @@ class metacompartment(MetaHasTraits):
     
     '''
 
-    def __getattribute__(cls, name): #@NoSelf
-        ''' Convert basic types on first access. See compartment.__setattr__. 
-        
-        Called whenever 'print Class.a'
-        
-        '''
-        return __getattribute__(cls, name, super(MetaHasTraits, cls))
+    def __init__(self, name, bases, d):
+        #TODO dicts are unordered so we can't be sure which definition was last
+        #TODO therefore a = 1 and b = {'a':2} could results in a == 1 or a == 2  
+        parent = super(metacompartment, self)
+        for k, v in dict(d).items():
+            if not k.startswith('_') and isinstance(v, basic_types):
+                if k == 'a' or k == 'b':
+                    print v
+                __setattr__(self, k, v, parent) #TODO what about b = {'b':1}? 
+        parent.__init__(name, bases, self.__dict__)
 
-    def __setattr__(cls, name, value): #@NoSelf
+    def __getattribute__(self, name):
+        ''' Called whenever 'print Class.a' '''
+        return __getattribute__(self, name, super(metacompartment, self))
+
+    def __setattr__(self, name, value):
         ''' Called whenever 'Class.a = x' '''
-        __setattr__(cls, name, value, super(MetaHasTraits, cls))
+        __setattr__(self, name, value, super(metacompartment, self))
 
 
 class compartment(named):
     __metaclass__ = metacompartment
-
-    y = 2
 
     volume = Float #TODO make into a litre/length**3 validated Trait
     __ = Any
@@ -212,20 +227,21 @@ def filter_by_type(d, type):
 if __name__ == '__main__':
 
     class C(compartment):
-        __metaclass__ = metacompartment
+#        __metaclass__ = metacompartment
         a = 1
         b = {'a':5}
-        _t = 'x' # should be ignored
 
-    if __name__ == '__main__':
-        c = C()
-    ##    print C.a, type(C.a)
-        print c.a, type(c.a)
-    #    t = c.trait('a')
-    #    print t.handler
-        c.print_traits()
-        print c.b
-        print c._t
-        C.a = 6
-        print c.a
-        print C().a
+    class D(C):
+        a = 2
+
+    print C.a
+    print D.a
+
+#    c = C()
+##        print C.a, type(C.a)
+##        print c.a, type(c.a)
+##        print c.b
+#    print C.a, c.a, c.b, c.a
+##        C.a = 6
+##        print c.a
+##        print C().a
