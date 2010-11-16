@@ -244,31 +244,20 @@ class compartment(named):
     reactions = Property(List(Instance('reaction')))
     def _get_reactions(self):
         return self.__attributes(reaction)
-
-##    def amount(self, id):
-##        i = self[id]
-##        if i is None or not isinstance(i, species):
-##            raise ValueError('%s is not a species' % id)
-##        return i.quantity
-#    amounts = Property(Dict(Str, Int))
-#    def _get_amounts(self):
-#        return dict([(s.name, s.amount) for s in self.species])
-#    def _set_amounts(self): #TODO
-#        pass
-
-    @property
-    def amounts(self):
+#
+#    def amount(self, id):
+#        i = self[id]
+#        if i is None or not isinstance(i, species):
+#            raise ValueError('%s is not a species' % id)
+#        return i.quantity
+    amounts = Property(Dict(Str, Int))
+    def _get_amounts(self):
         return dict([(s.name, s.amount) for s in self.species])
-    @amounts.setter
-    def set_amounts(self):
-        print 'got here'
+    def _set_amounts(self): #TODO
+        pass
 
-    def num_species(self):
-        return len(self.amounts)
-
-    def __init__(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, v)
+    def _anytrait_changed(self, name, old, new):
+        print '%s._anytrait_changed(%s, %s, %s)' % (self, name, old, new)
 
 
 def filter_by_type(d, type):
@@ -327,8 +316,7 @@ if __name__ == '__main__':
     print type(c.a)
     c.a = 2
 
-    print c.amounts
-
+#
 #    amounts = {'e':20, 'f':10}
 #    c = compartment(a=3, b=4, c=5, d=0, **amounts)
 #    print c.a, c.b, c.c, c.d, c.e, c.f
