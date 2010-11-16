@@ -43,7 +43,7 @@ def __getattribute__(self, name, parent):
     ''' Convert basic types on first access if they were set at class 
     declaration time using __setattr__. Doesn't convert private traits. '''
     value = parent.__getattribute__(name)
-    if not name.startswith('_') and isinstance(value, basic_types):
+    if not name.startswith(('_', 'wrappers')) and isinstance(value, basic_types):
 #        print '%s.__getattribute__' % self
         __setattr__(self, name, value, parent) # convert value to object via __setattr__
         return parent.__getattribute__(name)
@@ -52,17 +52,19 @@ def __getattribute__(self, name, parent):
 def __setattr__(self, name, value, parent):
     ''' Convert basic types on assignment. Doesn't convert private traits. '''
 #    print '%s.__setattr__(%s, %s)' % (self, name, value)
-    if not name.startswith('_') and isinstance(value, basic_types):
+    if not name.startswith(('_', 'wrappers')) and isinstance(value, basic_types):
         if isinstance(value, int): # convert int to species
             parent.__setattr__(name, species(value, id=name))
-        elif isinstance(value, dict):
-    #        print '%s.__setattr__' % self
-            for k, v in value.items():
-                if not (isinstance(k, str) and isinstance(v, int)):
-                    raise ValueError
-                __setattr__(self, k, v, parent)
+#        elif isinstance(value, dict):
+#    #        print '%s.__setattr__' % self
+#            for k, v in value.items():
+#                if not (isinstance(k, str) and isinstance(v, int)):
+#                    raise ValueError
+#                __setattr__(self, k, v, parent)
         else:
-            parent.__setattr__(name, value)
+            print name, value#, parent
+    else:
+        parent.__setattr__(name, value)
 
 
 from enthought.traits.api import MetaHasTraits
@@ -77,11 +79,11 @@ class metacompartment(MetaHasTraits):
         #TODO dicts are unordered so we can't be sure which definition was last
         #TODO therefore a = 1 and b = {'a':2} could results in a == 1 or a == 2  
         parent = super(metacompartment, self)
-        for k, v in dict(d).items():
-            if not k.startswith('_') and isinstance(v, basic_types):
-                if k == 'a' or k == 'b':
-                    print v
-                __setattr__(self, k, v, parent) #TODO what about b = {'b':1}? 
+#        for k, v in dict(d).items():
+#            if not k.startswith('_') and isinstance(v, basic_types):
+#                if k == 'a' or k == 'b':
+#                    print v
+#                __setattr__(self, k, v, parent) #TODO what about b = {'b':1}? 
         parent.__init__(name, bases, self.__dict__)
 
     def __getattribute__(self, name):
@@ -136,7 +138,7 @@ class compartment(named):
 ##        return dict([(name, getattr(self.__class__, name)) for name in self.__class_dir()])
 
     def __dir(self):
-        return [name for name in dir(self) if not name.startswith(('__', '_')) and not callable(getattr(self, name)) and name != 'wrappers']
+        return [name for name in dir(self) if not name.startswith('_') and not callable(getattr(self, name)) and name != 'wrappers']
 
     def __dir_items(self):
         return dict([(name, getattr(self, name)) for name in self.__dir()])
@@ -175,11 +177,11 @@ class compartment(named):
 
     species = Property(List(Instance('species')))
     def _get_species(self):
-        #TODO self.__attributes(int)
-        # self.__attributes(dict)
-        ld = self.__attributes(dict)
-        ld = [d for d in ld if isinstance(d.items()[0][0], str) and isinstance(d.items()[0][1], int)]
-#        print ld
+#        #TODO self.__attributes(int)
+#        # self.__attributes(dict)
+#        ld = self.__attributes(dict)
+#        ld = [d for d in ld if isinstance(d.items()[0][0], str) and isinstance(d.items()[0][1], int)]
+##        print ld
         return self.__attributes(species)
 
     reactions = Property(List(Instance('reaction')))
@@ -191,6 +193,9 @@ class compartment(named):
 #        if i is None or not isinstance(i, species):
 #            raise ValueError('%s is not a species' % id)
 #        return i.quantity
+    amounts = Property(Dict(Str, Int))
+    def _get_amounts(self):
+        return dict([(s.name, s.amount) for s in self.species])
 
 
 def filter_by_type(d, type):
@@ -229,7 +234,7 @@ if __name__ == '__main__':
     class C(compartment):
 #        __metaclass__ = metacompartment
         a = 1
-        b = {'a':5}
+#        b = {'a':5}
 
     class D(C):
         a = 2
@@ -237,6 +242,12 @@ if __name__ == '__main__':
     print C.a
     print D.a
 
+    amounts = {'e':20, 'f':10}
+    c = compartment(a=3, b=4, c=5, d=0, **amounts)
+    print c.a, c.b, c.c, c.d, c.e, c.f
+    print c.species
+    print c.amounts
+    
 #    c = C()
 ##        print C.a, type(C.a)
 ##        print c.a, type(c.a)
