@@ -1,7 +1,21 @@
+__all__ = [ #TODO add convert_substance function?
+    'mole',
+    'mmoles', 'millimoles', 'millimole',
+    'umoles', 'micromoles', 'micromole',
+    'nmoles', 'nanomoles', 'nanomole',
+    'pmoles', 'picomoles', 'picomole',
+    'fmoles', 'femtomoles', 'femtomole',
+    'amoles', 'attomoles', 'attomole',
+    'molecules', 'molecule',
+    'N_A', 'Avogadros', 'Avogadro',
+    'substance_units'
+]
+
 from quantities.unitquantity import UnitQuantity
 from quantities.units.substance import mole
 from quantities.units.prefixes import milli, micro, nano, pico, femto, atto
 from scipy.constants import N_A # Avogadro's constant 6.0221415e+23
+Avogadros = Avogadro = N_A
 
 mmoles = millimoles = millimole = UnitQuantity('millimoles', milli * mole)
 umoles = micromoles = micromole = UnitQuantity('micromoles', micro * mole)

@@ -1,28 +1,25 @@
+__all__ = [ #TODO add convert_volume function?
+    'l', 'L', 'litre', 'liter',
+    'ml', 'mL', 'millilitre', 'milliliter',
+    'ul', 'uL', 'microlitre', 'microliter',
+    'nl', 'nL', 'nanolitre', 'nanoliter',
+    'pl', 'pL', 'picolitre', 'picoliter',
+    'fl', 'fL', 'femtolitre', 'femtoliter',
+    'al', 'aL', 'attolitre', 'attoliter',
+    'volume_units',
+]
+
 from quantities.unitquantity import UnitQuantity
 from quantities.units.volume import liter
 from quantities.units.prefixes import milli, micro, nano, pico, femto, atto
 
-litre = liter
+l = L = litre = liter
 ml = mL = millilitre = milliliter = UnitQuantity('milliliter', milli * liter, symbol='mL')
 ul = uL = microlitre = microliter = UnitQuantity('microliter', micro * liter, symbol='uL')
 nl = nL = nanolitre = nanoliter = UnitQuantity('nanoliter', nano * liter, symbol='nL')
 pl = pL = picolitre = picoliter = UnitQuantity('picoliter', pico * liter, symbol='pL')
 fl = fL = femtolitre = femtoliter = UnitQuantity('femtoliter', femto * liter, symbol='fL')
 al = aL = attolitre = attoliter = UnitQuantity('attoliter', atto * liter, symbol='aL')
-
-#liters = 'liters'
-#milliliters = 'milli%s (10^-3 %s)' % (liters, liters)
-#microliters = 'micro%s (10^-6 %s)' % (liters, liters)
-#nanoliters = 'nano%s (10^-9 %s)' % (liters, liters)
-#picoliters = 'pico%s (10^-12 %s)' % (liters, liters)
-#femtoliters = 'femto%s (10^-15 %s)' % (liters, liters)
-#attoliters = 'atto%s (10^-18 %s)' % (liters, liters)
-#milliliters = 'millilitres'
-#microliters = 'microlitres'
-#nanoliters = 'nanolitres'
-#picoliters = 'picolitres'
-#femtoliters = 'femtolitres'
-#attoliters = 'attolitres'
 
 volume_units = {
     # US English

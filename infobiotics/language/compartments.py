@@ -1,37 +1,52 @@
+from infobiotics.commons.quantities.api import *
+
 from infobiotics.commons.counter import Counter
 class multiset(Counter):
     def __str__(self):
         ''' Returns 'a + b + b' for {'a':1,'b':2}. '''
         return ' + '.join([k for k, v in self.items() for _ in range(v)])
 
-from quantities.quantity import Quantity
 from id_generators import *
 import re
 from types import GeneratorType
+import itertools
 
 class base(object):
 
-    def __init__(self, name=None, id=None):
+    def __init__(self, name=None, id=None, **kwargs):
         if not hasattr(self, 'id_generator') and not isinstance(self.id_generator, GeneratorType):
             raise AttributeError('Subclasses of base must have an attribute "id_generator" that is a generator')
         self.id = id if id is not None else self.id_generator.next()
         self.name = name if name is not None else self.id
-
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 class species(base):
 
     id_generator = species_id_generator
 
-    def __init__(self, amount=0, name=None, id=None):
+    def __init__(self, amount=0 * molecules, name=None, id=None, **kwargs):
 
         if isinstance(amount, int):
-            self.amount = amount
+            self.amount = amount * molecules
+            self.is_concentration = False
         elif isinstance(amount, Quantity):
-            print 'got here'
+            # quantity.rescale() raises ValueError if conversion not possible
+            try:
+                amount.rescale('mole')
+                self.amount = amount
+                self.is_concentration = False
+            except ValueError:
+                try:
+                    amount.rescale('molar')
+                    self.amount = amount
+                    self.is_concentration = True
+                except ValueError:
+                    raise ValueError('Dimensionality of species amount (%s) not in molar, moles or molecules.' % amount.dimensionality)
         else:
-            raise ValueError('amount must be an integer (number of molecules) or a quantity (in units molecules, moles or molar concentration).')
+            raise ValueError('Species amount must be an integer (number of molecules) or a quantity (in units of molecules, moles or molar concentration).')
 
-        base.__init__(self, name, id)
+        base.__init__(self, name, id, **kwargs)
 
 
 class reaction(base):
@@ -70,10 +85,9 @@ class reaction(base):
                 else:
                     print 'Failed to create reaction from "%s"' % reaction_or_name
 
-        for k, v in kwargs:
-            setattr(self, k, v)
+        #TODO rate - see infobiotics.commons.quantities.units.calculators:conversion_function_from_units
 
-        base.__init__(self, reaction_or_name, id)
+        base.__init__(self, reaction_or_name, id, **kwargs)
 
         if len(self.reactants_outside) > 2:
             raise ValueError('Too many reactants outside')
@@ -99,8 +113,9 @@ class reaction(base):
         )
 
 
-reserved_attribute_name_prefixes = ('_', 'name', 'id', 'id_generator')
+reserved_attribute_name_prefixes = ('_', 'name', 'id', 'id_generator', 'volume')
 
+class compartment(base): pass
 
 class metacompartment(type):
     def __new__(self, name, bases, dictionary):
@@ -114,16 +129,16 @@ class metacompartment(type):
         
         '''
         dictionary['id'] = name
-        self.species = []
-        self.reactions = []
-        self.compartments = []
+        self._species = []
+        self._reactions = []
+        self._compartments = []
         for key, value in dictionary.items():
             if key.startswith(reserved_attribute_name_prefixes):
                 continue
             if isinstance(value, (int, Quantity)): # convert int/Quantity to species
                 s = species(value, id=key)
                 dictionary[key] = s
-                self.species.append(s)
+                self._species.append(s)
             elif isinstance(value, (str)): # convert str to reaction
                 r = reaction(value, id=key)
                 if key != r.id:
@@ -132,31 +147,39 @@ class metacompartment(type):
 #                    else:
 #                        print 'Decided not to add reaction twice under name from string.'
                 dictionary[key] = r
-                self.reactions.append(r)
+                self._reactions.append(r)
             elif isinstance(value, species):
-                self.species.append(value)
+                self._species.append(value)
             elif isinstance(value, reaction):
-                self.reactions.append(value)
+                self._reactions.append(value)
             elif isinstance(value, compartment):
-                self.compartments.append(value)
+                self._compartments.append(value)
         return super(metacompartment, self).__new__(self, name, bases, dictionary)
 
+    @property
+    def compartments(self):
+        return self._compartments
 
-class compartment(base):
+    @property
+    def reactions(self):
+        return self._reactions
+
+    @property
+    def species(self):
+        return self._species
+
+
+class compartment(base): #@DuplicatedSignature
     __metaclass__ = metacompartment
 #    import module_introspection.ply
 
     id_generator = compartment_id_generator
 
-    volume = 1
-
     def __init__(self, name=None, id=None, **kwargs): #TODO *args for subcompartments?
-        self.species = self.__class__.species[:]
-        self.reactions = self.__class__.reactions[:]
-        self.compartments = self.__class__.compartments[:]
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-        base.__init__(self, name, id)# if id is not None else self.__class__.__name__)
+        self._species = self.__class__._species[:]
+        self._reactions = self.__class__._reactions[:]
+        self._compartments = self.__class__._compartments[:]
+        base.__init__(self, name, id, **kwargs)
 
     def __setattr__(self, name, value):
         ''' compartment().a = 1 and compartment(a=1) '''
@@ -165,40 +188,124 @@ class compartment(base):
             return
         if isinstance(value, (int, Quantity)):
             value = species(value, id=name)
-            self.species.append(value)
+            self._species.append(value)
         elif isinstance(value, (str)):
             value = reaction(value, id=name)
-            self.reactions.append(value)
+            self._reactions.append(value)
         elif isinstance(value, species):
-            self.species.append(value)
+            self._species.append(value)
         elif isinstance(value, reaction):
-            self.reactions.append(value)
+            self._reactions.append(value)
         elif isinstance(value, compartment):
-            self.compartments.append(value)
+            self._compartments.append(value)
         super(compartment, self).__setattr__(name, value)
 
-class subcompartment(compartment):
-    # coerced to species or reaction by metacompartment.__new__
-    a = 1
-    r1 = 'r2: signal [receptor ]_bacteria -K_D-> [signal_receptor]_media K_D = 0.001'
-    r2 = '[ ]_bacteria -k_production-> [signal_receptor]_media k_production = 0.001'
+    
+    @property
+    def compartments(self):
+        return self._compartments
+
+    @property
+    def reactions(self):
+        return self._reactions
+
+    @property
+    def species(self):
+        return self._species
+
+    
+    @property
+    def amounts(self):
+        return dict([(s.name, s.amount) for s in self._species])
+
+    def set_amounts(self, **kwargs):
+        self.set_amounts()
+        #TODO update species
+        for id, amount in kwargs.items():
+            pass
+    
+    def amount(self, id):
+        return getattr(self, id, 0)
+    
+    def set_amount(self, id, amount):
+        pass
+            
+#    def num_species(self):
+#        return len(self.amounts)
 
 
-#print compartment.a.amount
-#print compartment().a.amount
-#print compartment(a=2).a.amount
+    _volume = 1 * metre ** 3
 
-#print compartment.species
-#print compartment().species
-#print compartment(b=2).species
-##print compartment.r1
+    @property
+    def volume(self):
+        return self._volume
 
-c = subcompartment(name='name')
-print 'c.id', c.id
-print 'c.name', c.name
-c = subcompartment
-print c.id
-print c.reactions
-print c.r1
-print c.species
-print c.compartments
+    @volume.setter
+    def volume(self, volume):
+        if isinstance(volume, Quantity):
+            try:
+                volume.rescale('metre**3')
+            except ValueError:
+                raise ValueError('Dimensionality of volume (%s) cannot be rescaled to metre**3, required for concentration calculation.' % volume.dimensionality)
+            if volume.size > 1:
+                raise ValueError('...')
+            self._volume = volume
+        elif isinstance(volume, (int, float)):
+            self._volume = volume * metre ** 3
+        else:
+            raise ValueError('Volume not a quantity, an int or a float: %s' % type(volume))
+
+    def __getitem__(self, id):
+        ''' compartment()[id] ''' 
+        for i in itertools.chain(self.species, self.reactions, self.compartments):
+#            don't
+#            # descend into compartments
+#            if isinstance(i, compartment):
+#                item = i._get_item(id)
+#                if item is not None:
+#                    return item
+            if i.id == id:
+                return i
+
+    def __setitem__(self, id, value):
+        ''' compartment()[id] = value '''
+        setattr(self, id, value)
+
+                
+if __name__ == '__main__':
+    pass
+
+    
+
+
+
+
+
+
+
+
+#class subcompartment(compartment):
+#    # coerced to species or reaction by metacompartment.__new__
+#    a = 1
+#    r1 = 'r2: signal [receptor ]_bacteria -K_D-> [signal_receptor]_media K_D = 0.001'
+#    r2 = '[ ]_bacteria -k_production-> [signal_receptor]_media k_production = 0.001'
+#
+#
+##print compartment.a.amount
+##print compartment().a.amount
+##print compartment(a=2).a.amount
+#
+##print compartment.species
+##print compartment().species
+##print compartment(b=2).species
+###print compartment.r1
+#
+#c = subcompartment(name='name')
+#print 'c.id', c.id
+#print 'c.name', c.name
+#c = subcompartment
+#print c.id
+#print c.reactions
+#print c.r1
+#print c.species
+#print c.compartments

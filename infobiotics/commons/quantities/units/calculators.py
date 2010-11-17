@@ -1,10 +1,6 @@
 from __future__ import division
-from concentration import *
-from volume import *
-from substance import *
-from infobiotics.commons.quantities.units.time import *
-from quantities.units import metre
-from quantities import UnitTime 
+from infobiotics.commons.quantities.api import *
+from quantities import UnitTime
 
 #def concentration(moles=1 * mole, volume=1 * litre, concentration_unit=molar):
 #    return (moles / volume).rescale(concentration_unit)
@@ -80,8 +76,6 @@ def conversion_function_from_units(q):
     molarity = 0
     time = 0
     for key, value in q.dimensionality.iteritems():
-        if type(key) == UnitQuantity:
-            molarity = value
         if type(key) == UnitQuantity:
             molarity = value
         elif type(key) == UnitTime:
