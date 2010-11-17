@@ -46,8 +46,10 @@ class species(base):
         else:
             raise ValueError('Species amount must be an integer (number of molecules) or a quantity (in units of molecules, moles or molar concentration).')
 
-        base.__init__(self, name, id, **kwargs)
+        base.__init__(self, name=name, id=id, **kwargs)
 
+    def __str__(self):
+        return '%s=%s' % (self.id, self.amount)
 
 class reaction(base):
 
@@ -59,10 +61,12 @@ class reaction(base):
 
         self.reactants_outside = multiset()
         self.reactants_inside = multiset()
-        self.reactants_label = 'l'
+        self.reactants_label = 'l' #TODO compartment
         self.products_outside = multiset()
         self.products_inside = multiset()
         self.products_label = 'l'
+        self.rate_id = 'k'
+        self.rate = 0
 
         if reaction_or_name is not None:
             if isinstance(reaction_or_name, str):
@@ -175,11 +179,19 @@ class compartment(base): #@DuplicatedSignature
 
     id_generator = compartment_id_generator
 
-    def __init__(self, name=None, id=None, **kwargs): #TODO *args for subcompartments?
+    def __init__(self, *args, **kwargs):
         self._species = self.__class__._species[:]
         self._reactions = self.__class__._reactions[:]
         self._compartments = self.__class__._compartments[:]
-        base.__init__(self, name, id, **kwargs)
+        for arg in args:
+            if isinstance(arg, (species, compartment, reaction)):
+                setattr(self, arg.id, arg)
+            elif isinstance(arg, str):
+                r = reaction(arg)
+                setattr(self, r.id, r)
+            else:
+                raise ValueError('%s is not a species, compartment or reaction.' % arg)
+        base.__init__(self, **kwargs)
 
     def __setattr__(self, name, value):
         ''' compartment().a = 1 and compartment(a=1) '''
@@ -200,7 +212,7 @@ class compartment(base): #@DuplicatedSignature
             self._compartments.append(value)
         super(compartment, self).__setattr__(name, value)
 
-    
+
     @property
     def compartments(self):
         return self._compartments
@@ -213,7 +225,7 @@ class compartment(base): #@DuplicatedSignature
     def species(self):
         return self._species
 
-    
+
     @property
     def amounts(self):
         return dict([(s.name, s.amount) for s in self._species])
@@ -223,13 +235,13 @@ class compartment(base): #@DuplicatedSignature
         #TODO update species
         for id, amount in kwargs.items():
             pass
-    
+
     def amount(self, id):
         return getattr(self, id, 0)
-    
+
     def set_amount(self, id, amount):
         pass
-            
+
 #    def num_species(self):
 #        return len(self.amounts)
 
@@ -256,7 +268,7 @@ class compartment(base): #@DuplicatedSignature
             raise ValueError('Volume not a quantity, an int or a float: %s' % type(volume))
 
     def __getitem__(self, id):
-        ''' compartment()[id] ''' 
+        ''' compartment()[id] '''
         for i in itertools.chain(self.species, self.reactions, self.compartments):
 #            don't
 #            # descend into compartments
@@ -271,15 +283,38 @@ class compartment(base): #@DuplicatedSignature
         ''' compartment()[id] = value '''
         setattr(self, id, value)
 
-                
+
+#    def __str__(self):
+#        return 'TODO'
+
+    def __repr__(self):
+        print ', '.join([str(i) for i in self.compartments])
+        print ', '.join([str(i) for i in self.species])
+        print ', '.join([str(i) for i in self.reactions])
+#        return ', '.join(self.compartments + self.species + self.reactions)
+        return 'TODO'
+
+
+
+
+
+
+
 if __name__ == '__main__':
-    pass
-
-    
-
-
-
-
+    c = compartment(# compartment *args can be species/compartment/reaction() or str but *not* int
+        species(5), #, a), # no name or id should raise ValueError
+        species(5, name='b'), #, a), # name but no id should use name as id - if there are no spaces?
+        reaction('[ a ]_bacteria k-> [ b ]_bacteria k=0.1'), #, r1),
+        'shit',
+        reaction('rX: [ b ]_bacteria k-> [ a ]_bacteria k=0.01'), #, r2),
+        compartment(
+            compartment(a=1),
+            a=2,
+        ),
+        a=3,
+        b=1,
+    )
+    print c
 
 
 
