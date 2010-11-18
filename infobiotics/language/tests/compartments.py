@@ -5,12 +5,14 @@ class TestReaction(unittest.TestCase):
 
     def test(self):
         pass
+#        reaction(''), #TODO
 
 
 class TestSpecies(unittest.TestCase):
 
     def test(self):
         pass
+    
 
 
 def setitem(object, name, value):
@@ -22,12 +24,21 @@ class TestCompartment(unittest.TestCase):
     def test_class_setattr(self):
         class c(compartment):
             a = 5
-            d = {'a':5, 'b':1}
-            pass
+            f = 5.1 #TODO
+#            d = {'a':5, 'b':1}
+#            pass
+        exit()
+
         self.assertIsInstance(c.a, species)
         self.assertEqual(c.a.id, 'a')
         self.assertEqual(c.a.amount, 5)
-        pass # d
+        self.assertEqual(c.a.amount, 5 * molecule)
+#        pass # d
+#        print c.d
+        print type(c.f)
+        
+        self.assertRaises(ValueError, setattr(c, 'f', 0.1))
+
 
 
     def test_class_setattr_private(self):
@@ -102,6 +113,9 @@ class TestCompartment(unittest.TestCase):
 
         self.assertRaises(ValueError, setattr, c, 'a', 1 * mL)
 
+
+        self.assertRaises(ValueError, setattr, c, 'f', 0.1)
+        
 
 if __name__ == '__main__':
     unittest.main()
