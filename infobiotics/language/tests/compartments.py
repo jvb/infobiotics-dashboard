@@ -27,8 +27,6 @@ class TestCompartment(unittest.TestCase):
             f = 5.1 #TODO
 #            d = {'a':5, 'b':1}
 #            pass
-        exit()
-
         self.assertIsInstance(c.a, species)
         self.assertEqual(c.a.id, 'a')
         self.assertEqual(c.a.amount, 5)
