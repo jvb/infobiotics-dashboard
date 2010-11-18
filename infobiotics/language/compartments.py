@@ -13,7 +13,7 @@ class multiset(Counter):
 
 
 class base(object):
-    ''' Base class for species, reaction and compartment that implements common functionality.  
+    ''' Base class for species, reaction and compartment that implements common functionality. 
     
     id should be automatically generated using self._id_generator.next(), too conform with SBML specification. 
     
@@ -21,27 +21,40 @@ class base(object):
     
     '''
 
-    _named = False # used to distinguish model objects that are named explicitly as opposed to mirroring their generated id 
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def metadata(self):
+        return dict((k, v) for k, v in self.__dict__.items() if not k.startswith(('_', 'name'))) #TODO add to reversed prefixes?
     
-    def __init__(self, name=None, **kwargs):
+    def __init__(self, **kwargs):
         if self.__class__.__name__ != 'base' and (not hasattr(self, '_id_generator') or not isinstance(self._id_generator, GeneratorType)):
             raise NotImplementedError("Subclasses of base must have a class attribute '_id_generator' that is a generator")
 
         # set id automatically
-        self.id = self._id_generator.next()
-         
+        self._id = self._id_generator.next() #FIXME use name_generator, abandon ids and make name readonly - use ids only for SBML, and name as id for IML. remove compartment base (add __getitem__ and reinstate properties in metacompartment and compartment that do different things)
+
         # set name if given and valid, falling back to id if not given and raising error if invalid
-        if name is not None:
-            self._named = True
-        else:
+        name = kwargs.pop('name', None)
+        if name is None:
             name = self.id
-        if not re.match('[_A-Za-z][_A-Za-z1-9]*', name):
-            raise ValueError("name should be a valid Python identifier, i.e. a string that starts with a letter or _, and containing any number of letters, digits or _'s. Got '%s' " % name)
+            self._named = False # used to distinguish model objects that are named explicitly as opposed to mirroring their generated id
+        else:
+            if not re.match('[_A-Za-z][_A-Za-z1-9]*', name):
+                raise ValueError("name should be a valid Python identifier, i.e. a string that starts with a letter or _, and containing any number of letters, digits or _'s. Got '%s' " % name)
+            self._named = True
         self.name = name
         
         # try and set all kwargs on instance
         for k, v in kwargs.items():
             setattr(self, k, v)
+#            try:
+#                setattr(self, k, v)
+#            except AttributeError, e:
+#                sys.stderr.write('base.__init__(%s=%s)\n' % (k, v if not isinstance(v, str) else "'%s'" % v))
+#                raise e
 
     def __repr__(self):
         return self.repr()
@@ -61,27 +74,35 @@ class base(object):
 class species(base):
     _id_generator = species_id_generator
 
-    def __init__(self, amount=0 * molecule, name=None, **kwargs):
+    @property
+    def amount(self):
+        return self._amount
+    
+    @amount.setter
+    def amount(self, amount):
         if isinstance(amount, int):
-            self.amount = amount * molecules
-            self.is_concentration = False
+            self._amount = amount * molecules
+            self._concentration = False
         elif isinstance(amount, Quantity):
             if amount.size > 1:
                 raise ValueError('Species amounts should be single numbers, not arrays.')
             # quantity.rescale() raises ValueError if conversion not possible
             try:
                 amount.rescale('mole')
-                self.amount = amount
-                self.is_concentration = False
+                self._amount = amount
+                self._concentration = False
             except ValueError:
                 try:
                     amount.rescale('molar')
-                    self.amount = amount
-                    self.is_concentration = True
+                    self._amount = amount
+                    self._concentration = True
                 except ValueError:
                     raise ValueError('Dimensionality of species amount (%s) not in molar, moles or molecules.' % amount.dimensionality)
         else:
             raise ValueError('Species amount must be an integer (number of molecules) or a quantity (in units of molecules, moles or molar concentration).')
+
+    def __init__(self, amount=0 * molecule, name=None, **kwargs):
+        self.amount = amount
 
         base.__init__(self, name=name, **kwargs)
 
@@ -100,9 +121,9 @@ class species(base):
         return indent + "%s = %s '%s'" % (str(self.amount.magnitude), dims, self.name)
 
     def repr(self, indent=''):
-#        return indent + "species(id='%s', name='%s', amount=%s * %s)" % (self.id, self.name, self.amount.magnitude, self.amount.dimensionality)
-        decl = '' if self._named else '%s=%s' % (self.id, self.__class__.__name__)
-        return indent + "%s%s * %s" % (decl, self.amount.magnitude, self.amount.dimensionality)
+        return indent + "species(id='%s', name='%s', amount=%s * %s)" % (self.id, self.name, self.amount.magnitude, self.amount.dimensionality)
+#        decl = '' if self._named else '%s=%s' % (self.id, self.__class__.__name__)
+#        return indent + "%s%s * %s" % (decl, self.amount.magnitude, self.amount.dimensionality)
 
 
 class reaction(base):
@@ -110,7 +131,7 @@ class reaction(base):
 
     rule_matcher = re.compile('\s*((?P<rule_id>\w+)\:)?\s*(?P<reactants_outside>(\w+)\s*(\+\s*(\w+)\s*)*\s*)?\s*\[\s*(?P<reactants_inside>(\w+)\s*(\+\s*(\w+)\s*)*\s*)?\s*\]_(?P<reactants_label>\w+)\s*-?(?P<rate_id>\w+)(->){1}\s*(?P<products_outside>(\w+)\s*(\+\s*(\w+)\s*)*\s*)?\s*\[\s*(?P<products_inside>(\w+)\s*(\+\s*(\w+)\s*)*\s*)?\s*\]_(?P<products_label>\w+)\s*(\w+)\s*\=\s*[-+]?(?P<rate>\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?\s*')
 
-    def __init__(self, reaction_or_name=None, **kwargs):
+    def __init__(self, reaction=None, **kwargs):
 
         self.rule_id = None
         self.reactants_outside = multiset()
@@ -122,10 +143,13 @@ class reaction(base):
         self.rate_id = 'k'
         self.rate = 0
 
-        if reaction_or_name is not None:
-            if isinstance(reaction_or_name, str):
+        # overwrite above with kwargs
+        base.__init__(self, **kwargs)
+
+        if reaction is not None:
+            if isinstance(reaction, str):
                 # attempt regex
-                match = self.rule_matcher.match(reaction_or_name)
+                match = self.rule_matcher.match(reaction)
                 if match is not None:
                     match_groups_dict = match.groupdict()
                     for k, v in match_groups_dict.items():
@@ -138,13 +162,10 @@ class reaction(base):
                                 setattr(self, k, multiset())
                         else:
                             setattr(self, k, v)
-                    reaction_or_name = None
                 else:
-                    print 'Failed to create reaction from "%s"' % reaction_or_name
+                    print 'Failed to create reaction from "%s"' % reaction
 
         #TODO rate - see infobiotics.commons.quantities.units.calculators:conversion_function_from_units
-
-        base.__init__(self, reaction_or_name, **kwargs)
 
         #TODO needs testing
         if len(self.reactants_outside) > 2:
@@ -181,170 +202,38 @@ class reaction(base):
         return indent + "'%s'" % self.str()
 
 
+
+reserved_prefixes = ('_', 'species', 'reaction', 'compartment', 'amounts') # catches 'compartments' and 'reactions' properties too because of startswith
+
+def self_dict_filtered_by_prefix_and_type(self, type):
+    return dict((key, value) for key, value in dict((k, getattr(self, k)) for k in [i for i in dir(self) if not i.startswith(reserved_prefixes)]).items() if isinstance(value, type))
+
+def self_dict_filtered_by_prefix_and_type_as_values_list(self, type):
+    return self_dict_filtered_by_prefix_and_type(self, type).values()
+
+class compartment(object): pass # forward declaration
+
 class compartment_base(object):
-    ''' Base class for compartment and metacompartment that implements common functionality. '''
+    ''' Base class for compartment and metacompartment that implements common functionality. 
+    
+    Because we want compartment and metacompartment to behaviour similarly it makes sense to put almost everything here.
+    
+    '''
      
     @property
     def compartments(self):
-        return self._compartments
+#        return self_dict_filtered_by_prefix_and_type(self, compartment)
+        return self_dict_filtered_by_prefix_and_type_as_values_list(self, compartment)
 
     @property
     def reactions(self):
-        return self._reactions
+#        return self_dict_filtered_by_prefix_and_type(self, reaction)
+        return self_dict_filtered_by_prefix_and_type_as_values_list(self, reaction)
 
     @property
     def species(self):
-        return self._species
-    
-    def __getitem__(self, name):
-        for i in itertools.chain(self.species, self.reactions, self.compartments):
-#            don't
-#            # descend into compartments
-#            if isinstance(i, compartment):
-#                item = i._get_item(id)
-#                if item is not None:
-#                    return item
-            if i.name == name:
-                return i
-
-    def __setitem__(self, name, value):
-        setattr(self, name, value)
-#        for i in itertools.chain(self.species, self.reactions, self.compartments):
-#            if i.name == name:
-#                setattr(self, name, value)
-#                return
-
-
-reserved_attribute_name_prefixes = ('_', 'name', 'id', 'volume')
-
-
-class compartment(object): pass # forward declaration needed in metacompartment.__new__ switch
-
-
-class metacompartment(type, compartment_base):
-    _id_generator = template_id_generator
-    def __new__(self, name, bases, dictionary):
-        ''' class c(compartment): a = 1, r1='...'
-        
-        Can directly alter dictionary. 
-        
-        Should be used for construction.
-        
-        See p59 of Python Metaclasses: Who? Why? When?
-        
-        '''
-        dictionary['id'] = self._id_generator.next()
-        
-        dictionary['name'] = name
-        
-        self._species = []
-        self._reactions = []
-        self._compartments = []
-        
-        for key, value in dictionary.items():
-            
-            if key.startswith(reserved_attribute_name_prefixes):
-                continue #TODO why not raise an Error?
-            
-            if isinstance(value, (int, Quantity)): # convert int/Quantity to species #TODO float?
-                s = species(value, name=key)
-                dictionary[key] = s
-                self._species.append(s)
-            
-            elif isinstance(value, (str)): # convert str to reaction
-                r = reaction(value, name=key)
-                dictionary[key] = r
-                self._reactions.append(r)
-            
-            elif isinstance(value, species):
-                self._species.append(value)
-            
-            elif isinstance(value, reaction):
-                self._reactions.append(value)
-            
-            elif isinstance(value, compartment):
-                self._compartments.append(value)
-        
-        return super(metacompartment, self).__new__(self, name, bases, dictionary)
-
-
-class compartment(base, compartment_base): #@DuplicatedSignature
-    __metaclass__ = metacompartment
-#    import module_introspection.ply
-
-    _id_generator = compartment_id_generator
-
-    def __init__(self, *args, **kwargs):
-        self._species = self.__class__._species[:]
-        self._reactions = self.__class__._reactions[:]
-        self._compartments = self.__class__._compartments[:]
-        for arg in args:
-            if isinstance(arg, (species, compartment, reaction)):
-                setattr(self, arg.id, arg)
-            elif isinstance(arg, str):
-                r = reaction(arg)
-                setattr(self, r.id, r)
-            else:
-                raise ValueError('%s is not a species, compartment or reaction.' % arg)
-        base.__init__(self, **kwargs)
-
-    def __setattr__(self, name, value):
-        ''' compartment().a = 1 and compartment(a=1) '''
-        if name.startswith(reserved_attribute_name_prefixes):
-            super(compartment, self).__setattr__(name, value)
-            return
-        if isinstance(value, float):
-            raise ValueError("Compartments don't know the meaning of floats like '%s', but they do understand ints and quantities." % name)
-        elif isinstance(value, (int, Quantity)): #TODO float?
-#            
-#            # if a species with id == name exists in class then update amount of species with value in self
-#            
-#            # elif another object with id == name exists in class then raise Error?
-#            
-#            
-#            d = dict(self.__class__.__dict__) # copy items from class dictproxy
-#            d.update(self.__dict__) # overwrite traits with instances from self
-##            d.update(self.__dir_items()) # catches attributes of superclasses
-#            print 'got here'
-#            try:
-#                s = d[name]
-#                if isinstance(s, species):
-#                    s.amount = value
-#            except KeyError:
-            value = species(value, id=name)
-            self._species.append(value)
-        elif isinstance(value, (str)):
-            value = reaction(value, id=name)
-            self._reactions.append(value)
-        elif isinstance(value, species):
-            self._species.append(value)
-        elif isinstance(value, reaction):
-            self._reactions.append(value)
-        elif isinstance(value, compartment):
-            self._compartments.append(value)
-        super(compartment, self).__setattr__(name, value)
-
-#    def _setattr(self, name, value): pass #TODO use to make if, elif switch consistent for compartment and metacompartment
-
-    @property
-    def amounts(self):
-        return dict([(s.name, s.amount) for s in self._species])
-
-    def set_amounts(self, **kwargs):
-        self.set_amounts()
-        #TODO update species
-        for id, amount in kwargs.items():
-            pass
-
-    def amount(self, id):
-        return getattr(self, id, 0)
-
-    def set_amount(self, id, amount):
-        pass
-
-#    def num_species(self):
-#        return len(self.amounts)
-
+#        return self_dict_filtered_by_prefix_and_type(self, species)
+        return self_dict_filtered_by_prefix_and_type_as_values_list(self, species)
 
     _volume = 1 * metre ** 3
 
@@ -367,7 +256,128 @@ class compartment(base, compartment_base): #@DuplicatedSignature
         else:
             raise ValueError('Volume not a quantity, an int or a float: %s' % type(volume))
 
+    @property
+    def amounts(self):
+        return dict([(s.name, s.amount) for s in self.species])
 
+    def set_amounts(self, **kwargs): #TODO update species
+        for id, amount in kwargs.items():
+            pass
+
+    def alphabet(self): pass #TODO
+
+
+#    def __getitem__(self, name):
+#        ''' Returns species amount, reaction rate or compartment attribute by matching name in that order. '''
+#        for i in self.species:
+#            if i.name == name:
+#                return i.amount
+#        for i in self.reactions:
+#            if i.name == name:
+#                return i.rate
+#        return getattr(self, name)
+#
+#    def __setitem__(self, name, value):
+#        ''' Quickly set species amount, reaction rate or compartment attribute by matching name in that order.'''
+#        for i in self.species:
+#            if i.name == name:
+#                i.amount = value
+#                return
+#        for i in self.reactions:
+#            if i.name == name:
+#                i.rate = value
+#                return
+#        setattr(self, name, value)
+#
+    def __getitem__(self, id):
+        ''' Returns species, reaction or compartment by matching id in that order, recursing into compartments. '''
+        for i in itertools.chain(self.species, self.reactions, self.compartments):
+            if i.id == id:
+                return i
+        # if that fails, descend into compartments
+        for c in self.compartments:
+            i = c[id]
+            if i is not None:
+                return i
+
+
+reserved_attribute_name_prefixes = ('_', 'name', 'id', 'volume') # used by metacompartment.__new__ and compartment.__setattr__ 
+
+
+class metacompartment(type, compartment_base):
+    _id_generator = template_id_generator
+    def __new__(self, name, bases, dictionary):
+        ''' class c(compartment): a = 1, r1='...'
+        
+        Can directly alter dictionary. 
+        
+        Should be used for construction.
+        
+        See p59 of Python Metaclasses: Who? Why? When?
+        
+        '''
+        dictionary['id'] = self._id_generator.next()
+        dictionary['name'] = name
+        dictionary['bases'] = bases
+        
+        for key, value in dictionary.items():
+            if key.startswith(reserved_attribute_name_prefixes):
+                continue # deliberately skip the above keys
+            if isinstance(value, (int, Quantity)): # convert int/Quantity to species #TODO float?
+                s = species(value, name=key)
+                dictionary[key] = s
+            elif isinstance(value, (str)): # convert str to reaction
+                r = reaction(value, name=key, reactants_label=name, products_label=name)
+                dictionary[key] = r
+            elif isinstance(value, (reaction)):
+                print reaction.metadata #TODO
+        return super(metacompartment, self).__new__(self, name, bases, dictionary)
+    
+    def __repr__(self):
+        return 'class %s(%s):\n\t%s%s%s' % (
+            self.name,
+            ', '.join([base.__name__ for base in self.bases]),
+            ',\n\t'.join([repr(i) for i in self.species]),
+            ',\n\t'.join([repr(i) for i in self.reactions]),
+            ',\n\t'.join([repr(i) for i in self.compartments]),
+        )
+
+#    def __str__(self):
+#        return 'TODO'
+
+
+class compartment(base, compartment_base): #@DuplicatedSignature
+    __metaclass__ = metacompartment
+    _id_generator = compartment_id_generator
+#    import module_introspection.ply
+
+    def __init__(self, *args, **kwargs):
+        for arg in args:
+            if isinstance(arg, (species, compartment, reaction)):
+                setattr(self, arg.name, arg)
+            elif isinstance(arg, str):
+                r = reaction(arg)
+                setattr(self, r.name, r)
+            else:
+#                raise ValueError('%s is not a species, compartment or reaction.' % arg)
+                sys.stderr.write("'%s' ignored.\n" % arg)
+        base.__init__(self, **kwargs)
+
+    def __setattr__(self, name, value):
+        ''' compartment().a = 1 and compartment(a=1) '''
+        if name.startswith(reserved_attribute_name_prefixes):
+            super(compartment, self).__setattr__(name, value) # defer to properties
+            return
+        if isinstance(value, (int, Quantity)):
+            value = species(value, name=name)
+#        elif isinstance(value, float):
+#            raise ValueError("Compartments don't know the meaning of floats like '%s', but they do understand ints (10) and quantities (0.5 * millimolar)." % name)
+        elif isinstance(value, (str)):
+            value = reaction(value, name=name, reactants_label=self.__class__.__name__, products_label=self.__class__.__name__)
+        elif isinstance(value, (reaction)):
+            print reaction.metadata #TODO
+#            value = reaction(value, name=name, reactants_label=self.__class__.__name__, products_label=self.__class__.__name__)
+        super(compartment, self).__setattr__(name, value)
 
 
     def repr(self, indent=''):
@@ -403,11 +413,54 @@ class compartment(base, compartment_base): #@DuplicatedSignature
             indent
         ) 
 
+
 if __name__ == '__main__':
+    
+#    # subclassing correctly *not replaces* but never creates a/s1 in d, only a/s2
+#    class c(compartment):
+#        a = 1
+#    class d(c):
+#        a = 2
+#    print c.a, c.species, c['s1']
+#    print d.a, d.species, d['s1']
+    
+    
+##    # instantiating correctly replaces instance a/s1 with a/s2 without incorrect changing value of class species a/s1  
+##    class c(compartment):
+##        a = 1
+###        a = species(1, 'test', desc='this is a test')
+##    print 'c.a', c.a, c.species, c['s1']
+##    d = c(a=2)
+###    d = c(b=1)
+##    print 'c.a', c.a, c.species, c['s1']
+##    print 'd.a', d.a, d.species, d['s1']
+##    assert c.a.amount == 1
+##    print id(c.a)
+##    print id(d.a)
+##    assert d.a.amount == 2
+    
+#    # assigning new int to c.a updates existing species
+#    c = compartment(a=1)
+#    print c.a, c.species
+#    c.a = 2
+#    print c.a, c.species
+#    
+#    # assigning new int to c.a updates existing species
+#    c = compartment(a=1)
+#    print c.a, c.species
+#    c.a = '[]_l k-> []_l k=1'
+#    print c.a, c.species
+    
+    
     
     class c(compartment):
         a = 4
-    assert c['a'] == 4 # c is class
+        r1 = '[ a ]_bacteria k-> [ b ]_bacteria k=0.1'
+        r2 = reaction('[ a ]_bacteria k-> [ b ]_bacteria k=0.1')
+    assert c[c.a.id].amount == 4 # c is class
+    
+    print c
+    exit()
 
     c = compartment(# compartment *args can be species/compartment/reaction() or str but *not* int
         species(6), #, a), # no name or id should raise ValueError
@@ -421,7 +474,10 @@ if __name__ == '__main__':
         a=3,
         b=1,
     )
+    assert c[c.a.id].amount == 3 # c is instance
     print repr(c)
-#    assert c['a'] == 3 # c is instance
-
-
+    print
+    print c.species
+    print c.reactions
+    print c.compartments
+    print c.amounts
