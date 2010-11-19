@@ -8,6 +8,7 @@ import config
 from species import species
 from reactions import reaction
 
+
 class compartment(base, basecompartment): #@DuplicatedSignature
     __metaclass__ = metacompartment
     _id_generator = compartment_id_generator
@@ -27,7 +28,7 @@ class compartment(base, basecompartment): #@DuplicatedSignature
 
     def __setattr__(self, name, value): # see metacompartment.__new__
         ''' compartment().a = 1 and compartment(a=1) '''
-        if name.startswith(reserved_attribute_name_prefixes):
+        if name.startswith(self.reserved_attribute_name_prefixes):
             super(compartment, self).__setattr__(name, value) # defer to properties
             return
         if isinstance(value, (int, Quantity)):
@@ -63,6 +64,7 @@ class compartment(base, basecompartment): #@DuplicatedSignature
         )
         
     def str(self, indent=''):
+        return super(base, self).__str__()
         return '%s%s(\n%s%s%s%s%s%s%s)' % (
             indent,
             self.id,
@@ -115,22 +117,16 @@ if __name__ == '__main__':
     
     
     
-    class c(compartment):
-        a = 4
-        r1 = '[ a ]_bacteria k-> [ b ]_bacteria k=0.1'
-        r2 = reaction('[ a ]_bacteria k-> [ b ]_bacteria k=0.1')
-        r2 = reaction('[ a ] k-> [ b ] k=0.1')
-        r3 = reaction('a k-> b k=0.1')
-#        c = 0.5
-#    exit()
-    assert c[c.a.id].amount == 4 # c is class
-    
-    print c
-    print c.species
-    print c.reactions
+#    class c(compartment):
+#        a = 4
+#    assert c.a.amount == 4 # c is class
+#    
+#    print c
+#    print c.species
+#    print c.reactions
 
     c = compartment(# compartment *args can be species/compartment/reaction() or str but *not* int
-        species(6), #, a), # no name or id should raise ValueError
+        species(6, test=5), #, a), # no name or id should raise ValueError
         species(5, name='b'), #, a), # name but no id should use name as id - if there are no spaces?
         reaction('[ a ]_bacteria k-> [ b ]_bacteria k=0.1'), #, r1),
         reaction('rX: [ b ]_bacteria k-> [ a ]_bacteria k=0.01'), #, r2),
@@ -140,12 +136,24 @@ if __name__ == '__main__':
         ),
         a=3,
         b=1,
-        c=0.5
+        c=0.5,
+        d=1,
     )
-    assert c[c.a.id].amount == 3 # c is instance
-    print repr(c)
-    print
-    print c.species
-    print c.reactions
-    print c.compartments
-    print c.amounts
+#    assert c.a.amount == 3 # c is instance
+#    print repr(c)
+#    print
+#    print c.reactions
+#    print c.compartments
+    print c.species(test=5)
+    s = c.species()
+    print s
+    print s(amount=1)
+    print c.species(amount=lambda amount: amount > 1)
+    print c.amounts(amount=lambda amount: amount > 1)
+    
+
+    r = c.reactions()
+    
+    # setting a flag on (class) species and using it as metadata
+    c.a.flag = True
+    print c.amounts(flag=True)

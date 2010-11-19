@@ -1,3 +1,5 @@
+# don't import id generators!
+
 from enthought.traits.api import HasTraits, Either, Str, List, Dict, Int, Float, Constant, Instance, Tuple, Property, cached_property, DelegatesTo
 from infobiotics.commons.sequences import flatten
 
@@ -123,21 +125,21 @@ m = Model()
 #print m.SPsystems[-1].rules
 #m.print_traits()
 
-
 def id_generator(prefix=''):
     i = 1
     while True:
         yield '%s%s' % (prefix, i)
         i += 1
 
-compartment_id_generator = id_generator('c')
 species_id_generator = id_generator('s')
 constant_id_generator = id_generator('k')
 reaction_id_generator = id_generator('r')
+compartment_id_generator = id_generator('c') #TODO want to put these into function but function is recursive
 
 
 def recursively_create_compartments(compartment, outside_sbml_compartment):
 #    compartment.parent = 
+
     compartment.id = compartment_id_generator.next()
     sbml_compartment = model.createCompartment()
     sbml_compartment.setId(compartment.id)

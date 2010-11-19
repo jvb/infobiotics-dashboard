@@ -45,11 +45,11 @@ class base(object):
 #                sys.stderr.write('base.__init__(%s=%s)\n' % (k, v if not isinstance(v, str) else "'%s'" % v))
 #                raise e
 
-    def __repr__(self):
-        return self.repr()
-
-    def __str__(self):
-        return self.str()
+#    def __repr__(self):
+#        return self.repr()
+#
+#    def __str__(self):
+#        return self.str()
     
     def repr(self, indent=''):
         ''' Return indented string representation of object construction. '''

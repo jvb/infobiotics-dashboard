@@ -1,7 +1,7 @@
 from base import base
 from id_generators import reaction_id_generator
 from multiset import multiset
-import re
+import re, sys
 
 
 class reaction(base):
