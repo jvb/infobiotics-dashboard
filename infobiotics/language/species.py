@@ -2,14 +2,18 @@ __all__ = ['species', 'dna', 'gene', 'rna', 'transcript', 'protein']
 
 from base import base
 from infobiotics.commons.quantities.api import Quantity, molecules
-from id_generators import species_id_generator
+from id_generators import id_generator
 from quantities import markup
 from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna, generic_rna, generic_protein
 
 class species(base):
-    _id_generator = species_id_generator
+    _id_generator = id_generator('s')
 
+    def __init__(self, name, amount=0 * molecules, **kwargs):
+        self.amount = amount
+        base.__init__(self, name=name, **kwargs)
+        
     @property
     def amount(self):
         return self._amount
@@ -37,10 +41,10 @@ class species(base):
         else:
             raise ValueError('Species amount must be an integer (number of molecules) or a quantity (in units of molecules, moles or molar concentration).')
 
-    def __init__(self, amount=0 * molecules, name=None, **kwargs):
-        self.amount = amount
-
-        base.__init__(self, name=name, **kwargs)
+    def repr(self, indent=''):
+        return indent + "species(id='%s', name='%s', amount=%s * %s)" % (self.id, self.name, self.amount.magnitude, self.amount.dimensionality)
+#        decl = '' if self._named else '%s=%s' % (self.id, self.__class__.__name__)
+#        return indent + "%s%s * %s" % (decl, self.amount.magnitude, self.amount.dimensionality)
 
     def str(self, indent=''):
         # adapted from Quantity.__str__
@@ -55,12 +59,6 @@ class species(base):
 #        return '%s = %s %s' % (str(self.amount.magnitude), dims, self.name)
             return indent + "%d %s '%s'" % (self.amount.magnitude, dims, self.name)
         return indent + "%s = %s '%s'" % (str(self.amount.magnitude), dims, self.name)
-
-    def repr(self, indent=''):
-        return indent + "species(id='%s', name='%s', amount=%s * %s)" % (self.id, self.name, self.amount.magnitude, self.amount.dimensionality)
-#        decl = '' if self._named else '%s=%s' % (self.id, self.__class__.__name__)
-#        return indent + "%s%s * %s" % (decl, self.amount.magnitude, self.amount.dimensionality)
-
 
 class sequenced(species):
     ''' http://www.biopython.org/wiki/Seq '''

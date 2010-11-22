@@ -1,4 +1,4 @@
-# don't import id generators!
+#TODO Don't import ID generators! Use different IDs for SBML, and simplified names for IML IDs.
 
 from enthought.traits.api import HasTraits, Either, Str, List, Dict, Int, Float, Constant, Instance, Tuple, Property, cached_property, DelegatesTo
 from infobiotics.commons.sequences import flatten

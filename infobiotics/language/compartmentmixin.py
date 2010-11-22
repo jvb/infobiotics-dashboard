@@ -3,10 +3,9 @@ import itertools
 from species import species
 from reactions import reaction 
 
+reserved_prefixes = ('reserved_prefixes', 'reserved_attribute_name_prefixes', 'metadata', '_', 'name', 'species', 'reaction', 'compartment', 'amounts') # catches 'compartments' and 'reactions' properties too because of startswith
 
-reserved_prefixes = ('reserved_prefixes', 'reserved_attribute_name_prefixes', '_', 'species', 'reaction', 'compartment', 'amounts') # catches 'compartments' and 'reactions' properties too because of startswith
-
-def compartment_dict_filtered_by_prefix_and_type(compartment, type):
+def compartment_dict_filtered_by_prefix_and_type(c, type):
     ''' Uses dir(compartment) to obtain a list of valid attributes for that 
     compartment from its instance and class, thereby allowing species, 
     reactions and compartments to be inherited. See: 
@@ -15,13 +14,14 @@ def compartment_dict_filtered_by_prefix_and_type(compartment, type):
     Skips attributes with names in reserved_prefixes.
     
     '''
-    return dict((key, value) for key, value in dict((k, getattr(compartment, k)) for k in [i for i in dir(compartment) if not i.startswith(reserved_prefixes)]).items() if isinstance(value, type))
+    return dict(
+        (key, value) for key, value in dict(
+            (k, getattr(c, k)) for k in [i for i in dir(c) if not i.startswith(reserved_prefixes)]
+        ).items() if isinstance(value, type)
+    )
 
 
-class compartment(object): pass # forward declaration
-
-
-from types import FunctionType
+from types import FunctionType, MethodType
     
 class _SimpleTest:
     ''' from enthought.traits.has_traits '''
@@ -73,7 +73,7 @@ class filterablelist(list):
     when called with a dictionary of metadata criteria. Doesn't work for int, 
     etc. 
     
-    Used by basecompartment to provide readonly properties whose results are 
+    Used by compartmentmixin to provide readonly properties whose results are 
     filterable. For example compartment().species returns a list of species.
     compartment().species(name='a') returns a list of species whose name is 'a'. 
     '''
@@ -95,8 +95,8 @@ class filterabledict(dict):
         return filter_dict_by_metadata(self, **metadata) 
 
 
-class basecompartment(object):
-    ''' Base class for compartment and metacompartment that implements common
+class compartmentmixin(object):
+    ''' Mixin for compartment and metacompartment that implements common
     functionality. 
     
     Because we want compartment and metacompartment to behaviour similarly it
@@ -110,24 +110,47 @@ class basecompartment(object):
 
     '''
 
+    @property
+    def metadata(self):
+        return dict(
+            (key, value) for key, value in dict(
+                (k, getattr(self, k)) for k in [i for i in dir(self) if not i.startswith(reserved_prefixes)]
+            ).items() if not isinstance(value, (species, compartment, reaction, MethodType))
+        )
+
     reserved_attribute_name_prefixes = ('_', 'name', 'id', 'volume') # used by metacompartment.__new__ and compartment.__setattr__
+
+    
+    
+    # __species for species added in a sequence - reuse __setattr__ for all items in the flatten sequence
+    
+    
+    
+    # compartments, reactions and species properties return a list of species with duplicates removed using an ordered set
+    #TODO should duplicates be removed though? Does it make sense to instantiate a class and use it several times? e.g. ToolkitEditorFactory
+
+    def __getter(self, type):
+        ''' Returns a filterablelist of objects of type 'type' from the 
+        values of the compartment's attributes and removed of duplicates 
+        using a set. '''
+        return filterablelist(set(compartment_dict_filtered_by_prefix_and_type(self, type).values()))
 
     @property
     def compartments(self, **metadata):
         ''' Returns a list of all the compartments in the compartment that match the 
-        set of *metadata* criteria. See basecompartment __doc__ for more info. '''
-        return filterablelist(compartment_dict_filtered_by_prefix_and_type(self, compartment).values())
+        set of *metadata* criteria. '''
+        return self.__getter(compartment)
 
     @property
     def reactions(self, **metadata):
         ''' Returns a list of all the reactions in the compartment that match the 
-        set of *metadata* criteria. See basecompartment __doc__ for more info. '''        
-        return filterablelist(compartment_dict_filtered_by_prefix_and_type(self, reaction).values())
+        set of *metadata* criteria. '''        
+        return self.__getter(reaction)
 
     @property
     def species(self, **metadata):
         ''' Returns a list of all the species in the compartment that match the 
-        set of *metadata* criteria. See basecompartment __doc__ for more info. 
+        set of *metadata* criteria. 
         
         For example, to get all species with amounts > 5:
 
@@ -137,7 +160,7 @@ class basecompartment(object):
             2
 
         '''
-        return filterablelist(compartment_dict_filtered_by_prefix_and_type(self, species).values())
+        return self.__getter(species)
 
         
     _volume = 1 * metre ** 3
