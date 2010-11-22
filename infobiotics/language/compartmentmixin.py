@@ -1,7 +1,8 @@
+from infobiotics.commons.sequences import flatten
 from infobiotics.commons.quantities.api import metre
 import itertools
 from species import species
-from reactions import reaction 
+from reactions import reaction
 
 reserved_prefixes = ('reserved_prefixes', 'reserved_attribute_name_prefixes', 'metadata', '_', 'name', 'species', 'reaction', 'compartment', 'amounts') # catches 'compartments' and 'reactions' properties too because of startswith
 
@@ -22,12 +23,12 @@ def compartment_dict_filtered_by_prefix_and_type(c, type):
 
 
 from types import FunctionType, MethodType
-    
+
 class _SimpleTest:
     ''' from enthought.traits.has_traits '''
     def __init__(self, value): self.value = value
     def __call__(self, test): return test == self.value
-    
+
 def filter_dict_by_metadata(dictionary, **metadata):
     ''' Adapted from enthought.traits.has_traits.HasTraits.traits(self, **metadata) '''
     if len(metadata) == 0: # nothing to do
@@ -92,7 +93,7 @@ class filterablelist(list):
 
 class filterabledict(dict):
     def __call__(self, **metadata):
-        return filter_dict_by_metadata(self, **metadata) 
+        return filter_dict_by_metadata(self, **metadata)
 
 
 class compartmentmixin(object):
@@ -110,42 +111,42 @@ class compartmentmixin(object):
 
     '''
 
-    @property
-    def metadata(self):
-        return dict(
-            (key, value) for key, value in dict(
-                (k, getattr(self, k)) for k in [i for i in dir(self) if not i.startswith(reserved_prefixes)]
-            ).items() if not isinstance(value, (species, compartment, reaction, MethodType))
-        )
-
     reserved_attribute_name_prefixes = ('_', 'name', 'id', 'volume') # used by metacompartment.__new__ and compartment.__setattr__
 
-    
-    
-    # __species for species added in a sequence - reuse __setattr__ for all items in the flatten sequence
-    
-    
-    
-    # compartments, reactions and species properties return a list of species with duplicates removed using an ordered set
-    #TODO should duplicates be removed though? Does it make sense to instantiate a class and use it several times? e.g. ToolkitEditorFactory
-
-    def __getter(self, type):
+    def _getter(self, type):
         ''' Returns a filterablelist of objects of type 'type' from the 
-        values of the compartment's attributes and removed of duplicates 
-        using a set. '''
-        return filterablelist(set(compartment_dict_filtered_by_prefix_and_type(self, type).values()))
+        values of the compartment's attributes.
+        
+        Previously and removed duplicates using a set because it could make 
+        sense to instantiate a class and use it several times? e.g. same as 
+        a ToolkitEditorFactory like TableEditor in Traits. 
+        
+        '''
+        # single objects of type 'type' 
+        d = compartment_dict_filtered_by_prefix_and_type(self, type)
+        l = d.values()
+        # sequences, possibly nested, possibly containing objects of type 'type'
+        d = compartment_dict_filtered_by_prefix_and_type(self, (list, tuple))
+        for value in d.values():
+            [l.append(i) for i in flatten(value) if isinstance(i, type)]
+#        s = set(l)
+#        return filterablelist(s)
+        return filterablelist(l)
 
     @property
     def compartments(self, **metadata):
         ''' Returns a list of all the compartments in the compartment that match the 
         set of *metadata* criteria. '''
-        return self.__getter(compartment)
+#        try:
+        return self._getter(compartmentmixin) + self._compartments
+#        except TypeError:
+#            return self._getter(self, compartmentmixin)
 
     @property
     def reactions(self, **metadata):
         ''' Returns a list of all the reactions in the compartment that match the 
-        set of *metadata* criteria. '''        
-        return self.__getter(reaction)
+        set of *metadata* criteria. '''
+        return self._getter(reaction) + self._reactions
 
     @property
     def species(self, **metadata):
@@ -160,9 +161,20 @@ class compartmentmixin(object):
             2
 
         '''
-        return self.__getter(species)
+        return self._getter(species) + self._species
 
-        
+
+    @property
+    def metadata(self):
+        return dict(
+            (key, value) for key, value in dict(
+                (k, getattr(self, k)) for k in [i for i in dir(self) if not i.startswith(reserved_prefixes)]
+            ).items() if not isinstance(value, (species, compartmentmixin, reaction, MethodType))
+        )
+
+
+
+
     _volume = 1 * metre ** 3
 
     @property

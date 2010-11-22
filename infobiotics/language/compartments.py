@@ -7,44 +7,53 @@ from infobiotics.commons.quantities.api import Quantity
 import config
 from species import species
 from reactions import reaction
-from infobiotics.commons.names import find_names
+from infobiotics.commons.sequences import flatten
 
-class compartment(compartmentmixin, base):
+class compartment(compartmentmixin):
     __metaclass__ = metacompartment
     _id_generator = id_generator('c')
 #    import module_introspection.ply #TODO
 
+    def add(self, *args):
+        for arg in args:
+            if isinstance(arg, compartment):
+                self._compartments.append(arg)
+            elif isinstance(arg, species):
+                self._species.append(arg)
+            elif isinstance(arg, basestring):
+                self._reactions.append(reaction(arg, reactants_label=self.label, products_label=self.label))
+            else:
+                print "Don't know what to do with %s" % arg
+
     def __init__(self, *args, **kwargs):
         ''' Compartment should have a label which defaults to its class name. '''
-        self.label = self.__class__.__name__
+
+        super(compartment, self).__setattr__('label', self.__class__.__name__)
+
         self.outside = None
+
+        # handle anonymous args by putting into private list
+        #TODO use list in compartmentmixin.compartments()
+        self._compartments = [] #TODO maybe use self._anonymous_compartments instead?
+        self._species = []
+        self._reactions = []
+
         for arg in args: # handle anonymous compartments and reactions
-            print 'print find_names(arg)', find_names(arg)
-            if not isinstance(arg, (compartment, species, reaction, basestring)):
-#                sys.stderr.write("'%s' ignored.\n" % arg)
-                raise ValueError('Anonymous attributes of a compartment must be either compartments, species or reactions (or strings convertible to reactions).')
-            if isinstance(arg, (compartment, reaction, species)):
-                if re.match('[_A-Za-z][_A-Za-z1-9]*', arg.name):
-                    setattr(self, arg.name, arg) # use name for id if it is a valid Python name
-                else:
-                    while True: # otherwise generate an id
-                        id = arg._id_generator.next()
-                        if id not in dir(self): # and if it is not in dir(self) use it
-                            setattr(self, id, arg) 
-                            break
-            elif isinstance(arg, basestring):
-                r = reaction(arg)
-                setattr(self, r.name, r)
-        base.__init__(self, **kwargs) # base will call setattr on all kwargs
+            if isinstance(arg, (list, tuple)):
+                self.add(*flatten(arg))
+            else:
+                self.add(arg)
+
+        for k, v in kwargs.items(): setattr(self, k, v)
 
     def __setattr__(self, name, value): # see metacompartment.__new__
         ''' compartment().a = 1 and compartment(a=1) '''
-        if name.startswith(self.reserved_attribute_name_prefixes):
+        if name.startswith(self.reserved_attribute_name_prefixes + ('outside',)):
 #            super(compartment, self).__setattr__(name, value) # defer to properties
 #            return
             pass # drop to bottom and set
         elif isinstance(value, (int, Quantity)):
-            value = species(name=name, value)
+            value = species(name=name, amount=value)
         elif isinstance(value, float) and config.warn_about_floats:
             sys.stderr.write("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar).\n" % name)
         elif isinstance(value, (basestring)):
@@ -54,13 +63,9 @@ class compartment(compartmentmixin, base):
                 sys.stderr.write(str(e) + ' Setting %s as metadata instead.\n' % name)
                 # value should still be the string so set it as metadata
         elif isinstance(value, compartment):
+#            if not value == self:
             value.outside = self
-        elif isinstance(value, (list, tuple)):
-            from infobiotics.commons.sequence import flatten
-            for i in flatten(value):
-                setattr(self, name?, value) # there isn't a name! 
-                #TODO Add to __species, etc? Name-mangling can be useful to prevent subclasses from overwriting...
-                #TODO factor out value changing from __setattr__ so it can be reused for i in flatten(value) #TODO for metacompartment also?
+#        elif isinstance(value, (list, tuple)): # done in compartmentmixin.compartments()
         super(compartment, self).__setattr__(name, value)
 
 
@@ -83,7 +88,7 @@ class compartment(compartmentmixin, base):
             ',\n' if len(kwargs) > 0 else '',
             indent
         )
-        
+
     def str(self, indent=''):
         return super(base, self).__str__()
         return '%s%s(\n%s%s%s%s%s%s%s)' % (
@@ -96,7 +101,7 @@ class compartment(compartmentmixin, base):
             '\n'.join([i.str(indent + '\t') for i in self.compartments]),
             '\n' if len(self.compartments) > 0 else '',
             indent
-        ) 
+        )
 
 # change compartment type in compartmentmixin module
 import compartmentmixin
@@ -105,7 +110,7 @@ compartmentmixin.compartment = compartment
 
 if __name__ == '__main__':
     pass
-    
+
     c1 = compartment(desc='desc', ouch='ouch')
 
     c = compartment(a=c1, d=c1, b=compartment(), f=1, g=2)
@@ -123,8 +128,8 @@ if __name__ == '__main__':
 #        a = 2
 #    print c.a, c.species, c['s1']
 #    print d.a, d.species, d['s1']
-    
-    
+
+
 ##    # instantiating correctly replaces instance a/s1 with a/s2 without incorrect changing value of class species a/s1  
 ##    class c(compartment):
 ##        a = 1
@@ -138,7 +143,7 @@ if __name__ == '__main__':
 ##    print id(c.a)
 ##    print id(d.a)
 ##    assert d.a.amount == 2
-    
+
 #    # assigning new int to c.a updates existing species
 #    c = compartment(a=1)
 #    print c.a, c.species
@@ -150,8 +155,8 @@ if __name__ == '__main__':
 #    print c.a, c.species
 #    c.a = '[]_l k-> []_l k=1'
 #    print c.a, c.species
-    
-    
+
+
 #    c = compartment(# compartment *args can be species/compartment/reaction() or str but *not* int
 #        species(6, test=5), #, a), # no name or id should raise ValueError
 #        species(5, name='b'), #, a), # name but no id should use name as id - if there are no spaces?
