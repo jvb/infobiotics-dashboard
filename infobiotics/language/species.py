@@ -1,18 +1,18 @@
-__all__ = ['species', 'dna', 'gene', 'rna', 'transcript', 'protein']
+__all__ = ['species', 'dna', 'gene', 'rna', 'transcript', 'protein', 'transcription_factor', 'tf']
 
-from base import base
 from infobiotics.commons.quantities.api import Quantity, molecules
-from id_generators import id_generator
+#from id_generators import id_generator
 from quantities import markup
 from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna, generic_rna, generic_protein
 
-class species(base):
-    _id_generator = id_generator('s')
+class species(object):
+#    _id_generator = id_generator('s')
 
     def __init__(self, name, amount=0 * molecules, **kwargs):
+        self.name = name
         self.amount = amount
-        base.__init__(self, name=name, **kwargs)
+        for k, v in kwargs.items(): setattr(self, k, v)
         
     @property
     def amount(self):
@@ -41,10 +41,8 @@ class species(base):
         else:
             raise ValueError('Species amount must be an integer (number of molecules) or a quantity (in units of molecules, moles or molar concentration).')
 
-    def repr(self, indent=''):
-        return indent + "species(id='%s', name='%s', amount=%s * %s)" % (self.id, self.name, self.amount.magnitude, self.amount.dimensionality)
-#        decl = '' if self._named else '%s=%s' % (self.id, self.__class__.__name__)
-#        return indent + "%s%s * %s" % (decl, self.amount.magnitude, self.amount.dimensionality)
+    def repr(self, indent='', id=''):
+        return indent + "%s%s%sspecies(name='%s', amount=%s * %s)" % (indent, id, '=' if id != '' else '', self.name, self.amount.magnitude, self.amount.dimensionality)
 
     def str(self, indent=''):
         # adapted from Quantity.__str__
@@ -60,6 +58,7 @@ class species(base):
             return indent + "%d %s '%s'" % (self.amount.magnitude, dims, self.name)
         return indent + "%s = %s '%s'" % (str(self.amount.magnitude), dims, self.name)
 
+
 class sequenced(species):
     ''' http://www.biopython.org/wiki/Seq '''
     @property
@@ -70,11 +69,13 @@ class sequenced(species):
     def sequence(self, sequence):
         raise NotImplementedError 
 
+
 class dna(sequenced):
     def sequence(self, sequence):
         self._sequence = Seq(sequence, generic_dna)
 
 gene = dna # alias
+
 
 class rna(sequenced):
     def sequence(self, sequence):
@@ -82,6 +83,9 @@ class rna(sequenced):
 
 transcript = rna # alias
 
+
 class protein(sequenced):
     def sequence(self, sequence):
         self._sequence = Seq(sequence, generic_protein)
+
+tf = transcription_factor = protein

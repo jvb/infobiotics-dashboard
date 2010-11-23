@@ -83,6 +83,21 @@ def flatten(a):
         return lambda: flatten_k(a[0], k1)
     return bounce(flatten_k(a, lambda x: x))
 
+
+
+def flattened(f):
+    ''' Decorator that flattens the returned sequence. 
+    
+    See http://www.artima.com/weblogs/viewpost.jsp?thread=240808 for more on decorators.
+    
+    '''
+    def decorated(*args, **kwargs):
+        return flatten(f(*args, **kwargs))
+    decorated.__name__ = f.__name__ # otherwise returned .__name__ = 'new_f'
+    decorated.__doc__ = f.__doc__ # ditto for docstring
+    return decorated
+
+
 def k_common_subsequence(sequences):
     ''' Returns the set of longest common subsequences in a collection of 
     sequences.

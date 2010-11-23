@@ -1,13 +1,13 @@
 from compartmentmixin import compartmentmixin
-from id_generators import id_generator
+#from id_generators import id_generator
 from infobiotics.commons.quantities.api import Quantity
 import config
 from reactions import reaction
 from species import species
 import sys
+from infobiotics.commons.sequences import flatten
 
 class metacompartment(type, compartmentmixin):
-    _id_generator = id_generator('t')
 
     def __new__(self, name, bases, dictionary): # see compartment.__init__
         ''' class c(compartment): a = 1, r1='...'
@@ -18,10 +18,11 @@ class metacompartment(type, compartmentmixin):
         
         See p59 of Python Metaclasses: Who? Why? When?
         
+        
+        self == <class '...metacompartment'>
+        
         '''
-#        dictionary['_id'] = self._id_generator.next()
         dictionary['label'] = name
-
         for key, value in dictionary.items():
             if key.startswith(self.reserved_attribute_name_prefixes):
                 continue # deliberately skip the above keys
@@ -31,23 +32,31 @@ class metacompartment(type, compartmentmixin):
                 try:
                     value = reaction(value, reactants_label=name, products_label=name)
                 except ValueError, e:
-                    sys.stderr.write(str(e) + ' Setting %s as metadata instead.\n' % name)
+                    sys.stderr.write(str(e) + ' Setting %s as metadata instead.\n' % key)
             elif isinstance(value, float) and config.warn_about_floats:
                 sys.stderr.write("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar).\n" % name)
             elif isinstance(value, compartmentmixin):
-                value.outside = self
+                value.outside = self #TODO might be problematic setting outside to metacompartment class
+            elif isinstance(value, (list, tuple)):
+                for i, item in enumerate(flatten(value)):
+                    if isinstance(item, basestring):
+                        try:
+                            r = reaction(item, reactants_label=name, products_label=name)
+                            value[i] = r
+                        except ValueError, e:
+                            print e
             dictionary[key] = value
         return super(metacompartment, self).__new__(self, name, bases, dictionary)
 
-    def repr(self, indent=''):
-        return 'class %s(%s):\n\t%s%s%s' % (
-            self.name,
-            ', '.join([base.__name__ for base in self.bases]),
-            ',\n\t'.join([repr(i) for i in self.species]),
-            ',\n\t'.join([repr(i) for i in self.reactions]),
-            ',\n\t'.join([repr(i) for i in self.compartments]),
-        )
+#    def __init__(self, name, bases, dictionary):
+#        ''' self == <class '...compartment'> '''
+#        super(metacompartment, self).__init__(name, bases, dictionary)
 
-    def str(self, indent=''):
-        return 'TODO'
 
+    # only way to call methods on compartmentmixin is to prefix metaclass and pass class
+
+    def __repr__(self):
+        return metacompartment.repr(self)
+
+    def __str__(self):
+        return metacompartment.str(self) 

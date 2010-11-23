@@ -1,9 +1,12 @@
-from base import base
-from id_generators import id_generator
+#from id_generators import id_generator
 from multiset import multiset
-import re, sys
+import re
 
-rule_matcher = re.compile('''
+# use http://re-try.appspot.com/ for live regex matching - use method 'match' and make sure 'VERBOSE' is on
+
+rule_comment = """\s*(\#\s*(?P<comment>[ ,=+/*\?\-\^()"'\w\t]+)\s*\#??\s*)? # optional comment without new lines or '#' but including some math expressions with optional closing '#'"""
+
+transformation_rule_matcher = re.compile("""
     # ' r1 : a + b [ c + d ]_l1 k1-> e + f [ g + h ]_l2     k2 = 0.1 '
     # ' r1 : (a+b|a + b [ c + d ]_l1) k1-> (e + f|e + f [ g + h ]_l2)     k2 = 0.1 '        
     \s*
@@ -21,21 +24,20 @@ rule_matcher = re.compile('''
     (\w+)                                                      # c
     (\s*\+\s*(\w+))*                                           # + d (+ ...)
     )?
-    \s*                                         
     \s*
     \]                                                         # ]
     (_(?P<reactants_label>\w+))?                               # _l1
-|
+|                                                              # OR
     (?P<reactants>
     (\w+)                                                      # a
     (\s*\+\s*(\w+))*                                           # + b (+ ...)
     )?                                      
 )
-    \s+                                                        # whitespace (one or more times)
-    -*                                                         # - (zero or more times)
-    (?P<rate_id>\w+)?                                          # k1 **
-    (->){1}                                                    # -> (once)
-    \s*
+\s+                                                        # whitespace (one or more times)
+-*                                                         # - (zero or more times)
+(?P<rate_id>((\w+)|([+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?))?                                          # rate_id can nothing, a Python identifer or a number (int or float). Previous -* will greedily match away any '-' (minus) symbols
+(-*>)                                              # - (zero or more times) followed by > # -> (once)
+\s*
 (
     (?P<products_outside>
     (\w+)                                                      # e
@@ -57,95 +59,211 @@ rule_matcher = re.compile('''
     (\s*\+\s*(\w+))*                                           # + b (+ ...)
     )?                                      
 )                             
+    (                                                        
     \s+                                                        # whitespace (one or more times)
-    (?(rate_id)(\w+)?|(?P<rate_id2>\w+))                       # rate_id2 if rate_id not specified
+    (?(rate_id)(\w+)?|(?P<rate_id2>\w+))?                      # rate_id2 if rate_id not specified (optional and not greedy '??')
+    (
     \s*
-    \=                                                         # =
+    \=*                                                         # zero or more =
     \s*
-    [-+]?(?P<rate>\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?            # 0.01 (any float or int)
-    \s*        
-''', re.VERBOSE)
+    [+]?(?P<rate>\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?            # 0.01 (any float or int), possibly preceeded but a '+' (plus) but never a '-' (minus)
+    )?
+    )?
+""" + rule_comment, re.VERBOSE)
 
-class reaction(base):
-    _id_generator = id_generator('r')
+transport_rule_matcher = re.compile("""
 
-    def create_reaction_from_rule(self, rule):
-        match = rule_matcher.match(rule)
-        if match is None:
-            raise ValueError('Failed to create reaction from rule "%s".' % rule)
-        reactants_set = False
-        products_set = False
-        for name, value in match.groupdict().items():
-            if name in ('reactants_outside', 'reactants_inside',
-                        'products_outside', 'products_inside',
-                        'reactants', 'products',
-            ):
-                # reactants or products are specified only when '[ ]' missing
-                if name == 'reactants':
-                    reactants_set = True
-                elif name == 'products':
-                    products_set = True
-                if name == 'reactants_inside' and reactants_set:
-                    continue
-                elif name == 'products_inside' and products_set:
-                    continue
-                if name == 'reactants':
-                    name = 'reactants_inside'
-                elif name == 'products':
-                    name = 'products_inside'
-                if value is not None:
-                    value = multiset([s.strip() for s in value.split('+')]) # can construct multiset from a list of str where the same str value might appear more than once
-                else:
-                    value = multiset()
-            elif name == 'rate_id':
-                if value is None:
-                    continue # don't overwrite value from rate_id if already set
-            elif name == 'rate_id2':
-                if match.groupdict()['rate_id'] is None:
-                    if value is None:
-                        raise ValueError('rate_id2 ignored if rate_id set otherwise mandatory')
-                    name = 'rate_id'
-            #TODO reactants_label, products_label
-            setattr(self, name, value)
+# [ PQS ]_medium == ( 1, 0 ) == [   ] -1.0-> [   ]_medium = (  1, 0 ) = [PQS] d = 100   #visible #hidden
 
-    def __init__(self, rule=None, **kwargs):
+    \s*
+    ((?P<rule_id>\w+)\s*\:)? # nothing or 'r1:' or 'r_1' or 'r:' or 'r :' but not ':'
+    \s*
+
+\s*\[\s*(?P<reactant_here>(\w+))?\s*\](_(?P<reactant_label>\w+))? # reactant and label
+
+\s*=+\s*\(\s*(?P<vector>[-]?\d+\s*,\s*[-]?\d+\s*)\)\s*=+\s*\[\s*\] # vector between one or more equals
+
+\s+                                                        # whitespace (one or more times)
+-*                                                         # - (zero or more times)
+(?P<rate_id>((\w+)|([+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?))?                                          # rate_id can be a Python identifer or a positive number (int or float). Previous -* will greedily match away any '-' (minus) symbols
+(-*>)                                              # - (zero or more times) followed by > # -> (once)
+\s*
+
+\[\s*\](_(?P<reactant_label2>\w+))?
+\s*=+\s*\(\s*(?P<vector2>[-]?\d+\s*,\s*[-]?\d+\s*)\)\s*=+\s*\[\s*(?P<product_there>(\w+))?\s*\]
+
+    (                                                        
+    \s+                                                        # whitespace (one or more times)
+    (?(rate_id)(\w+)?|(?P<rate_id2>\w+))??                      # rate_id2 if rate_id not specified (optional and not greedy '??')
+    (
+    \s*
+    \=*                                                         # zero or more =
+    \s*
+    [+]?(?P<rate>\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?            # 0.01 (any float or int), possibly preceeded but a '+' (plus) but never a '-' (minus)
+    )?
+    )?
+""" + rule_comment, re.VERBOSE)
+
+##TODO attempt to refactor regex as composed of smaller regexes - could use Meld for comparing transport_rule_matcher and transformation_rule_matcher strings
+#
+#one_whitespace = """\s # one whitespace"""
+#zero_or_more_whitespace = """\s*"""
+#one_or_more_whitespace = """\s+"""
+#
+#
+#vector_between_one_or_more_equals = """\s*=+\s*\(\s*(?P<vector>[-]?\d+\s*,\s*[-]?\d+\s*)\)\s*=+\s*\[\s*\] # vector between one or more equals"""
+#
+#rule_id = """((?P<rule_id>\w+)\s*\:)? # nothing or 'r1:' or 'r_1' or 'r:' or 'r :' but not ':'"""
+#
+#one_species_and_label = """\s*\[\s*(?P<reactant_here>(\w+))?\s*\](_(?P<reactant_label>\w+))? # reactant and label"""
+
+class reaction(object):
+#    _id_generator = id_generator('r')
+
+    def __init__(self, rule=None, rate=None, **kwargs):
 
         self.rule_id = None
         self.reactants_outside = multiset()
         self.reactants_inside = multiset()
-        self.reactants_label = 'l'
+        self.reactants_label = None
         self.products_outside = multiset()
         self.products_inside = multiset()
-        self.products_label = 'l'
-        self.rate_id = 'k'
-        self.rate = 0
+        self.products_label = None
+        self.rate_id = None
+        self.rate_id2 = None
+        self.rate = rate 
+        self.comment = None
+        
+        self.reactant_label = None
+        self.reactant_here = multiset()
+        self.vector = None
+        self.reactant_label2 = None
+        self.vector2 = None
+        self.product_there = multiset()
 
         for k, v in kwargs.items(): setattr(self, k, v)
 
         if rule is not None:
-            if isinstance(rule, basestring):
-                self.create_reaction_from_rule(rule)
-            else:
-                raise ValueError('rule is not a string: %s' % rule)
+            if not isinstance(rule, basestring):
+                raise ValueError('rule is not a string: % s' % rule)
+            self.create_reaction_from_rule(rule)
 
         #TODO rate - see infobiotics.commons.quantities.units.calculators:conversion_function_from_units
 
         #TODO needs testing
         if len(self.reactants_outside) > 2:
-            raise ValueError("Rule '%s' has too many reactants outside, a maximum of 2 reactants is permitted for any reaction." % self.str())
+            raise ValueError("Rule ' % s' has too many reactants outside, a maximum of 2 reactants is permitted for any reaction." % self.str())
         elif len(self.reactants_inside) > 2:
-            raise ValueError("Rule '%s' has too many reactants inside %s, a maximum of 2 reactants is permitted for any reaction." % (self.str(), self.reactants_label))
+            raise ValueError("Rule ' % s' has too many reactants inside %s, a maximum of 2 reactants is permitted for any reaction." % (self.str(), self.reactants_label))
         elif len(self.reactants_outside) + len(self.reactants_inside) > 2:
-            raise ValueError("Rule '%s' has too many reactants, a maximum of 2 reactants is permitted for any reaction." % self.str())
+            raise ValueError("Rule ' % s' has too many reactants, a maximum of 2 reactants is permitted for any reaction." % self.str())
 
-#        # must be after base.__init__ as id not set otherwise 
-#        if self.rule_id is not None: #TODO remove, use rule_id for name instead of generating one
-#            sys.stderr.write("Rule id '%s' of the rule '%s: %s' will not be used internally, instead the id '%s' will be used as it is guaranteed to be globally unique.\n" % (self.rule_id, self.rule_id, self.str(), self.id))
 
-    def str(self, indent=''):
+    def create_reaction_from_rule(self, rule):
+        if transformation_rule_matcher.match(rule):
+            match = transformation_rule_matcher.match(rule)
+            reactants_set = False
+            products_set = False
+            for name, value in match.groupdict().items():
+                if name in ('reactants_outside', 'reactants_inside',
+                            'products_outside', 'products_inside',
+                            'reactants', 'products',
+                ):
+                    # reactants or products are specified only when '[ ]' missing
+                    if name == 'reactants' and value is not None:
+                        reactants_set = True
+                    elif name == 'products' and value is not None:
+                        products_set = True
+                    if name == 'reactants_inside' and reactants_set:
+                        continue
+                    elif name == 'products_inside' and products_set:
+                        continue
+                    if name == 'reactants':
+                        name = 'reactants_inside'
+                    elif name == 'products':
+                        name = 'products_inside'
+                    if value is not None:
+                        # can construct multiset from a list of str where the same str value might appear more than once
+                        value = multiset([s.strip() for s in value.split(' + ')])
+                        del s 
+                    else:
+                        value = multiset()
+                elif name == 'rate_id':
+                    if value is None:
+                        continue # don't overwrite value from rate_id if already set
+                elif name == 'rate_id2':
+                    if match.groupdict()['rate_id'] is None:
+    #                    if value is None:
+    #                        raise ValueError('rate_id2 ignored if rate_id set otherwise mandatory')
+                        name = 'rate_id'
+                elif name in ('reactants_label', 'products_label') and value is None: #TODO do same for 'label' as for reactants and products
+                    continue
+                elif name == 'rate':
+                    if hasattr(self, 'rate') and self.rate is not None: 
+                        continue
+                    elif value is not None:
+                        value = float(value)
+                elif name == 'comment' and value is not None:
+                    value = value.strip()
+                setattr(self, name, value)
+    
+                    
+        elif transport_rule_matcher.match(rule):
+            match = transport_rule_matcher.match(rule)
+            for name, value in match.groupdict().items():
+                print name, value #TODO
+                if name in ('reactant_label', 'reactant_label2'):
+                    if value is not None:
+                        pass
+                elif name in ('vector', 'vector2'):
+                    pass
+                elif name in ('rate_id', 'rate_id2'):
+                    pass
+                elif name in ('reactant_here'):
+                    pass
+                elif name in ('product_there'):
+                    pass
+                elif name == 'rate':
+                    pass
+                elif name == 'rule_id': #TODO if value is None: use name in metacompartment and compartment
+                    pass
+                setattr(self, name, value)
+            print
+        else:
+            raise ValueError('Failed to create reaction from rule "%s".' % rule)
+
+        # if self.rate is None
+        # try and get rate from (in this order):
+        #     rate group in rule, 
+        #     rate metadata on reaction, 
+        #     metadata attribute with same name as rule_id on reaction
+        # see test_reaction_rate.py  
+        if self.rate is None and self.rate_id is not None:
+            try:
+                self.rate = float(self.rate_id)
+                self.rate_id = 'c' # since rate_id is number we should make it a generic label
+            except ValueError:
+                try:
+                    self.rate = float(getattr(self, self.rate_id))
+                except ValueError, e: # float conversion failed
+                    raise ValueError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
+                except AttributeError, e: # no attribute with name rate_id
+                    raise AttributeError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
+
+    def __repr__(self):
+        return self.repr()
+
+    def __str__(self):
+        return self.str()
+
+    def repr(self, indent='', id=''):
+#        return "%s%s%sreaction(reactants_outside=%r, reactants_inside=%r, reactants_label='%s', products_outside=%r, products_inside=%r, products_label='%s', rate=%s)" % (indent, id, '=' if id != '' else '', self.reactants_outside, self.reactants_inside, self.reactants_label, self.products_outside, self.products_inside, self.products_label, self.rate)
+        return "%s%s%sreaction('%s')" % (indent, id, '=' if id != '' else '', self.str())
+
+    def str(self, indent='', comment=False):
 #        return indent + '%s: %s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
 #            self.id,
-        return indent + '%s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
+        return indent + '%s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s=%f %s' % (
             self.reactants_outside,
             ' ' if len(self.reactants_outside) > 0 else '',
             self.reactants_inside,
@@ -157,11 +275,6 @@ class reaction(base):
             self.products_label,
             self.rate_id,
             self.rate,
+            '' if not comment or self.comment is None else '# %s #' % self.comment
         )
-
-    def repr(self, indent=''):
-#        return indent + "reaction('%s')" % self.str()
-#        decl = '' if self._named else '%s=%s' % (self.id, self.__class__.__name__ if self.__class__.__name__ != 'species' else '')
-#        return indent + "'%s'" % self.str()
-        return "reaction(reactants_outside=%s, reactants_inside=%s, reactants_label='%s', products_outside=%s, products_inside=%s, products_label='%s', rate_id='%s', rate=%s)" % (self.reactants_outside, self.reactants_inside, self.reactants_label, self.products_outside, self.products_inside, self.products_label, self.rate_id, self.rate)
-
+        

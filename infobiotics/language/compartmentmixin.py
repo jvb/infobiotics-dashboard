@@ -6,7 +6,7 @@ from reactions import reaction
 
 reserved_prefixes = ('reserved_prefixes', 'reserved_attribute_name_prefixes', 'metadata', '_', 'name', 'species', 'reaction', 'compartment', 'amounts') # catches 'compartments' and 'reactions' properties too because of startswith
 
-def compartment_dict_filtered_by_prefix_and_type(c, type):
+def dir_filtered_by_prefix_and_type(c, type):
     ''' Uses dir(compartment) to obtain a list of valid attributes for that 
     compartment from its instance and class, thereby allowing species, 
     reactions and compartments to be inherited. See: 
@@ -95,6 +95,25 @@ class filterabledict(dict):
     def __call__(self, **metadata):
         return filter_dict_by_metadata(self, **metadata)
 
+def _getter(compartmentmixin, type):
+    ''' Returns a filterablelist of objects of type 'type' from the 
+    values of the compartment's attributes.
+    
+    Previously and removed duplicates using a set because it could make 
+    sense to instantiate a class and use it several times? e.g. same as 
+    a ToolkitEditorFactory like TableEditor in Traits. 
+    
+    '''
+    # single objects of type 'type' 
+    d = dir_filtered_by_prefix_and_type(compartmentmixin, type)
+    l = d.values()
+    # sequences, possibly nested, possibly containing objects of type 'type'
+    d = dir_filtered_by_prefix_and_type(compartmentmixin, (list, tuple))
+    for value in d.values():
+        [l.append(i) for i in flatten(value) if isinstance(i, type)]
+#    s = set(l)
+#    return filterablelist(s)
+    return filterablelist(l)
 
 class compartmentmixin(object):
     ''' Mixin for compartment and metacompartment that implements common
@@ -111,42 +130,20 @@ class compartmentmixin(object):
 
     '''
 
-    reserved_attribute_name_prefixes = ('_', 'name', 'id', 'volume') # used by metacompartment.__new__ and compartment.__setattr__
+    reserved_attribute_name_prefixes = ('_', 'name', 'id', 'volume', 'outside', 'label') # used by metacompartment.__new__ and compartment.__setattr__
 
-    def _getter(self, type):
-        ''' Returns a filterablelist of objects of type 'type' from the 
-        values of the compartment's attributes.
-        
-        Previously and removed duplicates using a set because it could make 
-        sense to instantiate a class and use it several times? e.g. same as 
-        a ToolkitEditorFactory like TableEditor in Traits. 
-        
-        '''
-        # single objects of type 'type' 
-        d = compartment_dict_filtered_by_prefix_and_type(self, type)
-        l = d.values()
-        # sequences, possibly nested, possibly containing objects of type 'type'
-        d = compartment_dict_filtered_by_prefix_and_type(self, (list, tuple))
-        for value in d.values():
-            [l.append(i) for i in flatten(value) if isinstance(i, type)]
-#        s = set(l)
-#        return filterablelist(s)
-        return filterablelist(l)
 
     @property
     def compartments(self, **metadata):
         ''' Returns a list of all the compartments in the compartment that match the 
         set of *metadata* criteria. '''
-#        try:
-        return self._getter(compartmentmixin) + self._compartments
-#        except TypeError:
-#            return self._getter(self, compartmentmixin)
+        return _getter(self, compartment)
 
     @property
     def reactions(self, **metadata):
         ''' Returns a list of all the reactions in the compartment that match the 
         set of *metadata* criteria. '''
-        return self._getter(reaction) + self._reactions
+        return _getter(self, reaction)
 
     @property
     def species(self, **metadata):
@@ -161,7 +158,7 @@ class compartmentmixin(object):
             2
 
         '''
-        return self._getter(species) + self._species
+        return _getter(self, species)
 
 
     @property
@@ -206,7 +203,7 @@ class compartmentmixin(object):
         return dict([(s.name, s.amount) for s in self.species(**metadata)])
 
     def set_amounts(self, **kwargs): #TODO update species
-        species = compartment_dict_filtered_by_prefix_and_type(self, species)
+        species = dir_filtered_by_prefix_and_type(self, species).values()
         for name, amount in kwargs.items():
             s = species[name]
             if s is None:
@@ -249,3 +246,82 @@ class compartmentmixin(object):
 #            i = c[id]
 #            if i is not None:
 #                return i
+    
+
+    def __str__(self):
+        return self.str()
+    
+    def str(self, indent=''):
+        return '%s%s(\n%s%s%s%s%s%s%s)' % (
+            indent,
+            self.label,
+            '\n'.join([i.str(indent + '\t') for i in self.species]),
+            '\n' if len(self.species) > 0 else '',
+            '\n'.join([i.str(indent + '\t') for i in self.reactions]),
+            '\n' if len(self.reactions) > 0 else '',
+            '\n'.join([i.str(indent + '\t') for i in self.compartments]),
+            '\n' if len(self.compartments) > 0 else '',
+            indent
+        )
+
+
+#    def repr(self, indent=''):
+#        return 'class %s(%s):\n\t%s%s%s' % (
+#            self.name,
+#            ', '.join([base.__name__ for base in self.bases]),
+#            ',\n\t'.join([repr(i) for i in self.species]),
+#            ',\n\t'.join([repr(i) for i in self.reactions]),
+#            ',\n\t'.join([repr(i) for i in self.compartments]),
+#        )
+#
+#
+    def __repr__(self):
+        return self.repr()
+    
+    def repr(self, indent='', id=''):
+        from species import species
+        
+        # list/tuple
+        sequences = dir_filtered_by_prefix_and_type(self, (list, tuple))
+        #TODO reduce each named sequence get compartments, reactions and species
+        # or use metadata?
+        for k, v in self.metadata.items():
+            print '%s=[%s]' % (k, ',\n'.join([i.__repr__() for i in v])) if isinstance(v, (list, tuple)) else '%s=%r' % (k, v)
+        exit()
+        
+        [flatten(value) for value in dir_filtered_by_prefix_and_type(self, (list, tuple)).values()]
+        print sequences
+        [i for i in sequences if isinstance(i, compartment)]
+        [i for i in sequences if isinstance(i, reaction)]
+        [i for i in sequences if isinstance(i, species)]
+        
+        # named
+        compartments = dir_filtered_by_prefix_and_type(self, compartment)
+        reactions = dir_filtered_by_prefix_and_type(self, reaction)
+        species = dir_filtered_by_prefix_and_type(self, species)
+
+        # anonymous
+        _compartments = self._compartments if hasattr(self, '_compartments') else []
+        _reactions = self._reactions if hasattr(self, '_reactions') else []
+        _species = self._species if hasattr(self, '_species') else []
+
+        return '%s%s%s%s(\n%s%s%s%s%s%s%s%s%s%s%s%s%s)' % (
+            indent,
+            id,
+            '=' if id != '' else '',
+            self.label,
+            ',\n'.join([i.repr(indent + '\t') for i in _compartments]),
+            ',\n' if len(_compartments) > 0 else '',
+            ',\n'.join([i.repr(indent + '\t') for i in _reactions]),
+            ',\n' if len(_reactions) > 0 else '',
+            ',\n'.join([i.repr(indent + '\t') for i in _species]),
+            ',\n' if len(_species) > 0 else '',
+            ',\n'.join([i.repr(indent + '\t', k) for k, i in compartments.items()]),
+            ',\n' if len(compartments) > 0 else '',
+            ',\n'.join([i.repr(indent + '\t', k) for k, i in reactions.items()]),
+            ',\n' if len(reactions) > 0 else '',
+            ',\n'.join([i.repr(indent + '\t', k) for k, i in species.items()]),
+            ',\n' if len(species) > 0 else '',
+            indent
+        )
+

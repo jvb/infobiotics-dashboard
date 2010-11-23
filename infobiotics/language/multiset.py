@@ -43,3 +43,8 @@ class multiset(Counter):
 if __name__ == '__main__':
     import doctest
     print doctest.testmod()
+
+
+    m = multiset({'a':1, 'b':2})
+    print m.__str__()
+    print m.__repr__()

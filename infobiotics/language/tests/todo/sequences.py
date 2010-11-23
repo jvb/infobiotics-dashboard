@@ -64,25 +64,25 @@ log.setLevel(logging.WARN)
 
 def module(a):
 #    print a
-    return [compartment(name=a)]
+    return [compartment(label=a)]
 
 
 if __name__ == '__main__':
 
     # class
     class c(compartment):
-        a = [compartment(name='c.a')]
+        a = [compartment(label='c.a')]
         e = module('c.e')
         f = module('c.f')
 
     # class instance
-    ci = c(x=[compartment(name='c().g')])
+    ci = c(x=[compartment(label='c().g')])
 
     # subclass
     class d(c):
-        a = [compartment(name='d.a')] # overwrite c.a
-        b = [compartment(name='d.b')]
-        c = [compartment(name='d.c')]
+        a = [compartment(label='d.a')] # overwrite c.a
+        b = [compartment(label='d.b')]
+        c = [compartment(label='d.c')]
         e = module('d.e') # overwrite c.e
 
     # subclass instance
@@ -90,8 +90,8 @@ if __name__ == '__main__':
        compartment(name='anon'),
        species('a', 10),
        'xyz: a -> b k=1',
-        b=[compartment(name='d().b')], # overwrite d.b 
-        d=[compartment(name='d().d')],
+        b=[compartment(label='d().b')], # overwrite d.b 
+        d=[compartment(label='d().d')],
 #        a=1, c=1, e=1, f=1 # successfully overrides
     )
 
@@ -101,6 +101,6 @@ if __name__ == '__main__':
 #    print 'ci', ci.compartments # ci [c.a, c.e, c.f] # missing c().g
 #    print 'd', d.compartments # d [d.a, d.b, d.e, d.c] # missing c.f
 #    print di.a, di.c
-    print 'di', [c.name for c in di.compartments] # di [d.a, d.b, d.e, d.c] # missing c.f, d().b, d().d 
+    print 'di', [c.label for c in di.compartments] # di [d.a, d.b, d.e, d.c] # missing c.f, d().b, d().d 
     print di.species[0].str()
     print di.reactions[0].str()
