@@ -289,6 +289,7 @@ class compartmentmixin(object):
             print '%s=[%s]' % (k, ',\n'.join([i.__repr__() for i in v])) if isinstance(v, (list, tuple)) else '%s=%r' % (k, v)
         exit()
         
+        
         [flatten(value) for value in dir_filtered_by_prefix_and_type(self, (list, tuple)).values()]
         print sequences
         [i for i in sequences if isinstance(i, compartment)]
