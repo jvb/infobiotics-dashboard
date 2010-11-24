@@ -1,9 +1,13 @@
 from infobiotics.language import *
 
+cardinals = [(1, 0), (0, 1), (-1, 0), (0, -1)] # up, right, down, left 
+
 class diffusion(compartment):
     _defines_template = 1
-    rxns = ['a -> a 1 # (%s,%s)' % (x, y) for x, y in [(0, 1), (0, -1), (1, 0), (-1, 0)]]
-    # a -> (0, 1) 10
+    #TODO a -> (0, 1) 10
+#    rxns = ['a -> a 1 # (%s,%s)' % (x, y) for x, y in cardinals]
+    rxns = ['a -> a 1 # (%s,%s)' % (_x, _y) for _x, _y in cardinals]
+#    del x, y #TODO otherwise these variables get left in class, or prefix with underscore
 
 class rxn(compartment):
     _defines_template = 2
@@ -11,7 +15,7 @@ class rxn(compartment):
 
 class E(compartment):
     _uses_templates = [1]
-    
+
 class B(compartment):
     _uses_templates = [2]
 

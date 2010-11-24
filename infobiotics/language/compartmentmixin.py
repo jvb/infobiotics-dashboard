@@ -1,4 +1,4 @@
-from infobiotics.commons.sequences import flatten
+from infobiotics.commons.sequences import flatten, iterable
 from infobiotics.commons.quantities.api import metre
 import itertools
 from species import species
@@ -6,8 +6,24 @@ from reactions import reaction
 
 reserved_prefixes = ('reserved_prefixes', 'reserved_attribute_name_prefixes', 'metadata', '_', 'name', 'species', 'reaction', 'compartment', 'amounts') # catches 'compartments' and 'reactions' properties too because of startswith
 
+#def dir_dict(o):
+#    return dict((name, getattr(o, name)) for name in dir(o))
+#
+#def dir_dict_filtered_by_prefix(o, *prefixes):
+#    return dict((name, value) for name, value in dir_dict(o).items() if not name.startswith(prefixes))
+#
+#def dir_dict_filtered_by_type(o, *types):
+#    return dict((name, value) for name, value in dir_dict(o).items() if isinstance(value, types))
+#
+#def dir_dict_filtered_by_prefix_and_type(o, prefixes, types):
+#    return dict((name, value) for name, value in dir_dict(o).items() if not name.startswith(prefixes) and isinstance(value, types))
+#
+#print dir_dict('s')
+#print dir_dict_filtered_by_prefix('s', '_', 'up')
+#exit()
+
 def dir_filtered_by_prefix_and_type(c, type):
-    ''' Uses dir(compartment) to obtain a list of valid attributes for that 
+    ''' Uses dir(c) to obtain a list of valid attributes for that 
     compartment from its instance and class, thereby allowing species, 
     reactions and compartments to be inherited. See: 
     http://docs.python.org/library/functions.html#dir
@@ -246,11 +262,11 @@ class compartmentmixin(object):
 #            i = c[id]
 #            if i is not None:
 #                return i
-    
+
 
     def __str__(self):
         return self.str()
-    
+
     def str(self, indent=''):
         return '%s%s(\n%s%s%s%s%s%s%s)' % (
             indent,
@@ -277,25 +293,59 @@ class compartmentmixin(object):
 #
     def __repr__(self):
         return self.repr()
-    
+
     def repr(self, indent='', id=''):
         from species import species
-        
+
         # list/tuple
-        sequences = dir_filtered_by_prefix_and_type(self, (list, tuple))
+#        sequences = dir_filtered_by_prefix_and_type(self, (list, tuple))
         #TODO reduce each named sequence get compartments, reactions and species
+#        [flatten(value) for value in dir_filtered_by_prefix_and_type(self, (list, tuple)).values()]
+#        print sequences
+#        [i for i in sequences if isinstance(i, compartment)]
+#        [i for i in sequences if isinstance(i, reaction)]
+#        [i for i in sequences if isinstance(i, species)]
+
         # or use metadata?
-        for k, v in self.metadata.items():
-            print '%s=[%s]' % (k, ',\n'.join([i.__repr__() for i in v])) if isinstance(v, (list, tuple)) else '%s=%r' % (k, v)
+        metadata = self.metadata
+        def metadata_str(indent=''):
+            '''
+            
+            compartment(
+                s = [
+                    1,
+                    2,
+                ]
+                t = 5,
+                v = 'six',
+                
+            
+            '''
+            _metadata = []
+            for k, v in metadata.items():
+                e = '%s=' % k
+#                '%s=[%s]' % (k, ',\n'.join([i.__repr__() for i in v if hasattr(i, 'repr') for k, v in metadata.items()])) if iterable(v) else '%s=%r' % (k, v)
+                if iterable(v):
+                    s = '%s=[\n' % k
+                    for i in v:
+                        s += '\t%r,\n' % i
+                    s += '],\n'
+                    _metadata.append(s)
+                elif isinstance(v, basestring):
+                    print self.__class__.__name__ #TODO continue from here
+                    if k == 'label' and v == self.__class__.__name__:
+                        continue
+                    _metadata.append(e + "'%s'" % v)
+                else:
+                    _metadata.append(e + str(v))
+            return ',\n'.join(_metadata)
+
+#        metadata_str('\t')
+        print metadata_str('\t')
         exit()
-        
-        
-        [flatten(value) for value in dir_filtered_by_prefix_and_type(self, (list, tuple)).values()]
-        print sequences
-        [i for i in sequences if isinstance(i, compartment)]
-        [i for i in sequences if isinstance(i, reaction)]
-        [i for i in sequences if isinstance(i, species)]
-        
+
+
+
         # named
         compartments = dir_filtered_by_prefix_and_type(self, compartment)
         reactions = dir_filtered_by_prefix_and_type(self, reaction)
@@ -323,6 +373,43 @@ class compartmentmixin(object):
             ',\n' if len(reactions) > 0 else '',
             ',\n'.join([i.repr(indent + '\t', k) for k, i in species.items()]),
             ',\n' if len(species) > 0 else '',
+            #TODO metadata
+            ',\n' if len(metadata) > 0 else '',
             indent
         )
+
+
+if __name__ == '__main__':
+
+    execfile('module1.py')
+
+#    from infobiotics.language import *
+#    class C(compartment):
+#
+#        # attributes
+#        a = 10,
+#        r = 'a -> b 1'
+#
+#        # sequences, found by dir...(list)
+#        s = ['b -> c 2', species('c', 10), compartment()]
+#
+#    c = C(
+#        species('b', 2), # anonymous species -> could be made an attribute because we know name - but name is not the same as id - need to handle name clashes in sbml, etc
+#        'b -> a 0.5', #anonymous reactions
+#
+#    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

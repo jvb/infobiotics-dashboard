@@ -1,20 +1,37 @@
-'''
-Some common, and not so common, sequence operations.
-'''
+''' Some common, and not so common, sequence operations. '''
 
-def copy(l):
+def iterable(a): #TODO doctests
+    ''' Tests if an object is iterable (but lies that str/unicode are not). 
+    
+    Attempts to makes a generator out of a sequence and then discards it
+    which works for both __iter__ and __getitem__ iterable interfaces.
+
+    Adapted from http://stackoverflow.com/questions/1952464/in-python-how-do-i-determine-if-a-variable-is-iterable/1952507#1952507
     '''
-    Returns a copy of the list l. 
+    if isinstance(a, basestring):
+        return False
+    try:
+        (x for x in a)
+        return True
+    except TypeError:
+        return False
+
+
+def copy(l): #TODO doctests
+    ''' Returns a copy of the list l.
+
+    Using copy(l) just makes the intention more explicit (e.g. in pseudo - code).
     '''
     return l[:]
 
 
-def unique(l):
-    '''
-    From http://stackoverflow.com/questions/89178/#91430
-    Returns list of unique items from a list with duplicates.
-    Warning: this modifies the list in-place for speed, use unique(copy(l)) 
-    if you don't want your list modified.
+def unique(l): #TODO doctests
+    ''' Returns the list with duplicates removed.
+
+    From http: // stackoverflow.com / questions / 89178 / #91430
+
+    Modifies the list in - place for speed and memory, use unique(copy(l)) if you
+    don't want the list to be modified.
     '''
     s = set(); n = 0
     for x in l:
@@ -23,7 +40,7 @@ def unique(l):
     return l
 
 
-def overlapping(left, right):
+def overlapping(left, right): #TODO doctests
     for c in reversed(range(len(right))):
         c += 1
         r = right[0:c]
@@ -33,7 +50,7 @@ def overlapping(left, right):
     t = type(left) or type(right)
     return t()
 
-def join_overlapping(left, right):
+def join_overlapping(left, right): #TODO doctests
     o = overlapping(left, right)
     t = type(o)
     l = list(left[:])
@@ -49,20 +66,25 @@ def padded_range(n, padding_char='0'):
     
     >>> padded_range(5)
     ['0', '1', '2', '3', '4']
-    
     '''
     return [str(padding_char[0]) * (len(str(n)) - len(str(i))) + str(i) for i in range(n)]
+#    # alternative implementation:    
+#    w = len(str(n))
+#    import string
+#    return [string.zfill(i, w) for i in range(n)]
 
 
-def flatten(a):
-    ''' Flatten a list. (from http://www.archivum.info/tutor@python.org/2005-01/00506/Re:-[Tutor]-flattening-a-list.html) '''
+def flatten(a): #TODO doctests
+    ''' Flatten a list. 
+    
+    (from http://www.archivum.info/tutor@python.org/2005-01/00506/Re:-[Tutor]-flattening-a-list.html) '''
     def bounce(thing):
         """Bounce the 'thing' until it stops being a callable."""
         while callable(thing):
             thing = thing()
         return thing
     def flatten_k(a, k):
-        """CPS/trampolined version of the flatten function.  The original
+        ''' CPS/trampolined version of the flatten function.  The original
         function, before the CPS transform, looked like this:
     
         def flatten(a):
@@ -71,8 +93,8 @@ def flatten(a):
             return flatten(a[0])+flatten(a[1:])
     
         The following code is not meant for human consumption.
-        """
-        if not isinstance(a, (tuple, list)):
+        '''
+        if not iterable(a):#if not isinstance(a, (tuple, list)):
             return lambda: k([a])
         if len(a) == 0:
             return lambda: k([])
@@ -84,8 +106,7 @@ def flatten(a):
     return bounce(flatten_k(a, lambda x: x))
 
 
-
-def flattened(f):
+def flattened(f): #TODO doctests
     ''' Decorator that flattens the returned sequence. 
     
     See http://www.artima.com/weblogs/viewpost.jsp?thread=240808 for more on decorators.
@@ -153,7 +174,7 @@ def LCSubstr_set(S, T):
                     LCS.add(S[i - v + 1:i + 1])
     return LCS
 
-def findall(L, value, start=0):
+def findall(L, value, start=0): #TODO doctests
     ''' Lifted from: http://effbot.org/zone/python-list.htm '''
     # generator version
     i = start - 1
@@ -188,14 +209,14 @@ def in_sequence(sub, sequence):
             return True
     return False
 
-def in_all_sequences(sub, S):
+def in_all_sequences(sub, S): #TODO doctests
     for s in S:
         if not in_sequence(sub, s):
             return False
     return True
 
 
-def arrange(sequence):
+def arrange(sequence): #TODO doctests
     ''' Returns the smallest rows x columns tuple for a given number of items.
     
     Adapted from Pawel's tiling code.
