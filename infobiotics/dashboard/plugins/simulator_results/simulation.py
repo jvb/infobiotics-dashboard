@@ -14,8 +14,6 @@ class Simulation(object):
         self._runs_list = []
         self._species_list = []
 
-#        for key, value in attributes.iteritems():
-#            setattr(self, key, value)
         self.data_file = attributes.data_file
 #        self.division_direction = attributes.division_direction
 #        self.duplicate_initial_amounts = attributes.duplicate_initial_amounts

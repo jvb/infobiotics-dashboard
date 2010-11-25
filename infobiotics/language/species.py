@@ -1,6 +1,6 @@
 __all__ = ['species', 'dna', 'gene', 'rna', 'transcript', 'protein', 'transcription_factor', 'tf']
 
-from infobiotics.commons.quantities.api import Quantity, molecules
+from infobiotics.commons.quantities.api import *
 #from id_generators import id_generator
 from quantities import markup
 from Bio.Seq import Seq
@@ -25,6 +25,7 @@ class species(object):
             self._concentration = False
         elif isinstance(amount, Quantity):
             if amount.size > 1:
+                print amount.size
                 raise ValueError('Species amounts should be single numbers, not arrays.')
             # quantity.rescale() raises ValueError if conversion not possible
             try:
@@ -41,10 +42,16 @@ class species(object):
         else:
             raise ValueError('Species amount must be an integer (number of molecules) or a quantity (in units of molecules, moles or molar concentration).')
 
-    def repr(self, indent='', id=''):
-        return indent + "%s%s%sspecies(name='%s', amount=%s * %s)" % (indent, id, '=' if id != '' else '', self.name, self.amount.magnitude, self.amount.dimensionality)
+#    def __str__(self):
+#        return self.str()
+#    
+#    def __repr__(self):
+#        return self.repr()
 
-    def str(self, indent=''):
+    def repr(self, indent='\t', indent_level=0, id=''):
+        return "%s%s%sspecies(name='%s', amount=%s * %s)" % (indent * indent_level, id, '=' if id != '' else '', self.name, repr(self.amount.magnitude), self.amount.dimensionality)
+
+    def str(self, indent='\t', indent_level=0):
         # adapted from Quantity.__str__
         if markup.config.use_unicode:
             dims = self.amount.dimensionality.unicode
@@ -55,8 +62,8 @@ class species(object):
 #        return '%s = %s %s' % (self.id, str(self.amount.magnitude), dims)
 #            return '%d %s %s' % (self.amount.magnitude, dims, self.name)
 #        return '%s = %s %s' % (str(self.amount.magnitude), dims, self.name)
-            return indent + "%d %s '%s'" % (self.amount.magnitude, dims, self.name)
-        return indent + "%s = %s '%s'" % (str(self.amount.magnitude), dims, self.name)
+            return "%s%d %s '%s'" % (indent * indent_level, self.amount.magnitude, dims, self.name)
+        return "%s%s = %s '%s'" % (indent * indent_level, str(self.amount.magnitude), dims, self.name)
 
 
 class sequenced(species):
@@ -89,3 +96,11 @@ class protein(sequenced):
         self._sequence = Seq(sequence, generic_protein)
 
 tf = transcription_factor = protein
+
+
+#if __name__ == '__main__':
+#    # metaspecies? e.g.
+#    class molecule(species):
+#        amount = 100
+#        formula = 'C5H2OH'
+#    print molecule

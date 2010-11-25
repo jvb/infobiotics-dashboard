@@ -1,42 +1,44 @@
 from compartmentmixin import compartmentmixin
-#from id_generators import id_generator
-from infobiotics.commons.quantities.api import Quantity
+from infobiotics.commons.quantities import *
 import config
 from reactions import reaction
 from species import species
-import sys
-from infobiotics.commons.sequences import flatten, iterable
+from infobiotics.commons.sequences import iterable, flatten 
+#import sys
+import logging
+log = logging.getLogger('metacompartment')
+log.addHandler(logging.StreamHandler())
+log.setLevel(logging.WARN)
 
 class metacompartment(type, compartmentmixin):
 
-    def __new__(self, name, bases, dictionary): # see compartment.__init__
+    def __new__(metacls, name, bases, dictionary): # see compartment.__init__
         ''' class c(compartment): a = 1, r1='...'
         
-        Can directly alter dictionary. 
-        
-        Should be used for construction.
-        
-        See p59 of Python Metaclasses: Who? Why? When?
-        
-        
-        self == <class '...metacompartment'>
-        
+        Features of __new__: (see p59 of Python Metaclasses: Who? Why? When?)
+            Can directly alter dictionary. 
+            Should be used for construction.
         '''
         dictionary['label'] = name
+        dictionary['_bases'] = bases
         for key, value in dictionary.items():
-            if key.startswith(self.reserved_attribute_name_prefixes):
+            if key.startswith(metacls.reserved_attribute_name_prefixes):
                 continue # deliberately skip the above keys
             if isinstance(value, (int, Quantity)): # convert int/Quantity to species
-                if key == 'x':
-                    print 'got here'
-                value = species(name=key, amount=value)
+                try:
+                    value = species(name=key, amount=value)
+                except ValueError, e:
+                    print e
+                    value = Quantity(value)
             elif isinstance(value, (basestring)): # convert str to reaction
                 try:
                     value = reaction(value, reactants_label=name, products_label=name)
                 except ValueError, e:
-                    sys.stderr.write(str(e) + ' Setting %s as metadata instead.\n' % key)
+#                    sys.stderr.write(str(e) + ' Setting %s as metadata instead.\n' % key)
+                    log.warn(str(e) + ' Setting %s as metadata instead.' % key)
             elif isinstance(value, float) and config.warn_about_floats:
-                sys.stderr.write("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar).\n" % name)
+#                sys.stderr.write("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar).\n" % name)
+                log.warn("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar)." % name)
             elif iterable(value):#elif isinstance(value, (list, tuple)):
                 for i, item in enumerate(flatten(value)):
                     if isinstance(item, basestring):
@@ -46,20 +48,41 @@ class metacompartment(type, compartmentmixin):
                         except ValueError, e:
                             print e
             dictionary[key] = value
-        return super(metacompartment, self).__new__(self, name, bases, dictionary)
+        try:
+            return super(metacompartment, metacls).__new__(metacls, name, bases, dictionary)
+        except TypeError, e:
+            reason = '''.
+Some of these bases share a common ancestor (making at least one redundant).
+Either at least one base should to be removed, or bases reordered, derived 
+classes first, to prevent this error. See: http://bit.ly/ezmEIu'''
+            raise TypeError, str(e) + reason 
+            
 
-    def __init__(self, name, bases, dictionary):
-        ''' self == <class '...compartment'> '''
-        for _, value in dictionary.items():
+    def __init__(cls, name, bases, dictionary):
+        for key, value in dictionary.items():
             if isinstance(value, compartmentmixin):
-                value.outside = self
-        super(metacompartment, self).__init__(name, bases, dictionary)
+                value.outside = cls # update outside #TODO test
+            elif key == 'volume' or key == '_volume':
+                cls.volume = value
+        super(metacompartment, cls).__init__(name, bases, dictionary)
+
+#    def __repr__(cls): # overloading __repr__ enables repr(cls) on compartment classes
+#        return cls.repr() # can call normally thanks to mixedmethod # previous had to pass cls to superclass e.g. compartmentmixin.repr(cls) 
+#    
+#    def __str__(cls): # see __repr__ for hints
+#        return cls.str()
 
 
-    # only way to call methods on compartmentmixin is to prefix metaclass and pass class
-
-    def __repr__(self):
-        return metacompartment.repr(self)
-
-    def __str__(self):
-        return metacompartment.str(self)
+if __name__ == '__main__':
+    from compartments import compartment
+    class c(compartment):
+        volume = 10
+    print c.volume
+    print eval(repr(c.volume))
+#    class c(compartment):
+#        a = 10
+#        d = compartment()
+#        m = [compartment(), species('b', 20), 666, 'a 0.1-> b']
+#    print c # test overridden __str__
+#    print repr(c) # test overridden __repr__ 
+#    print c.repr() # test mixedmethod repr

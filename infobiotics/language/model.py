@@ -89,8 +89,15 @@ class model(object):
 
     @property
     def compartments(self):
-        ''' Returns an iterator over all top-level compartments in the model. '''
-        return self.distribution.flat
+#        ''' Returns an iterator over all top-level compartments in the model. '''
+#        return self.distribution.flat
+        ''' Returns an iterator over all top-level compartments in the model,
+        that yields a tuple of (compartment, x, y) at each iteration.
+        '''
+        for x, row in enumerate(self.distribution):
+            for y, c in enumerate(row):
+                print c, x, y
+                yield (c, x, y)         
     
 #    def get_compartments(self):
 #        pass

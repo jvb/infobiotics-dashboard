@@ -196,12 +196,12 @@ class bacteria(Brown, blakes()): # using multiple inheritance for modularity
 class media(compartment):
     bacteria = bacteria()
     
-    r201 = '[PQS] -> [ ] m_QE=10'
-    r202 = '[ PQS ]_medium=( 1, 0)=[  ] -d-> [  ]_medium=( 1, 0)=[ PQS ]  d=100'
-    r203 = '[ PQS ]_medium=(-1, 0)=[  ] -d-> [  ]_medium=(-1, 0)=[ PQS ]  d=100'
-    r204 = '[ PQS ]_medium=( 0, 1)=[  ] -d-> [  ]_medium=( 0, 1)=[ PQS ]  d=100'
-    r205 = '[ PQS ]_medium=( 0,-1)=[  ] -d-> [  ]_medium=( 0,-1)=[ PQS ]  d=100'
-    r206 = 'PQS [ ]_bacterium -d-> [ PQS ]_bacterium    d=100'
+#    r201 = '[PQS] -> [ ] m_QE=10'
+#    r202 = '[ PQS ]_medium=( 1, 0)=[  ] -d-> [  ]_medium=( 1, 0)=[ PQS ]  d=100'
+#    r203 = '[ PQS ]_medium=(-1, 0)=[  ] -d-> [  ]_medium=(-1, 0)=[ PQS ]  d=100'
+#    r204 = '[ PQS ]_medium=( 0, 1)=[  ] -d-> [  ]_medium=( 0, 1)=[ PQS ]  d=100'
+#    r205 = '[ PQS ]_medium=( 0,-1)=[  ] -d-> [  ]_medium=( 0,-1)=[ PQS ]  d=100'
+#    r206 = 'PQS [ ]_bacterium -d-> [ PQS ]_bacterium    d=100'
     
 #    _d = 100
 #    r200 = reaction('[ PQS ]_medium=( 0,-1)=[  ] -d-> [  ]_medium=( 0,-1)=[ PQS ]  d=100', stochastic_rate_constant=_d)

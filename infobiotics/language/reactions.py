@@ -158,7 +158,7 @@ class reaction(object):
         elif len(self.reactants_outside) + len(self.reactants_inside) > 2:
             raise ValueError("Rule ' % s' has too many reactants, a maximum of 2 reactants is permitted for any reaction." % self.str())
 
-
+#    @classmethod #TODO
     def create_reaction_from_rule(self, rule):
         if transformation_rule_matcher.match(rule):
             match = transformation_rule_matcher.match(rule)
@@ -256,14 +256,14 @@ class reaction(object):
     def __str__(self):
         return self.str()
 
-    def repr(self, indent='', id=''):
+    def repr(self, indent='\t', indent_level=0, id=''):
 #        return "%s%s%sreaction(reactants_outside=%r, reactants_inside=%r, reactants_label='%s', products_outside=%r, products_inside=%r, products_label='%s', rate=%s)" % (indent, id, '=' if id != '' else '', self.reactants_outside, self.reactants_inside, self.reactants_label, self.products_outside, self.products_inside, self.products_label, self.rate)
-        return "%s%s%sreaction('%s')" % (indent, id, '=' if id != '' else '', self.str())
+        return "%s%s%sreaction('%s')" % (indent * indent_level, id, '=' if id != '' else '', self.str())
 
-    def str(self, indent='', comment=False):
-#        return indent + '%s: %s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
-#            self.id,
-        return indent + '%s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s=%f %s' % (
+    def str(self, indent='', indent_level=0, comment=False):
+#        return '%s%s: %s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
+        return '%s%s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s=%f %s' % (
+            indent * indent_level,
             self.reactants_outside,
             ' ' if len(self.reactants_outside) > 0 else '',
             self.reactants_inside,

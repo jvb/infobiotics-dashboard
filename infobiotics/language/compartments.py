@@ -1,16 +1,24 @@
 from compartmentmixin import compartmentmixin
 from metacompartment import metacompartment
-import sys
-#from id_generators import id_generator
-from infobiotics.commons.quantities.api import Quantity
-import config
+from infobiotics.commons.quantities import *
 from species import species
 from reactions import reaction
-from infobiotics.commons.sequences import flatten, iterable
+from infobiotics.commons.sequences import iterable, flatten 
+import sys
+#TODO logging
+import config #TODO get log level from config
+from infobiotics.language.compartmentmixin import filterablelist
 
+#from infobiotics.commons.metaclasses.noconflict import classmaker
+#
+#class _compartment(compartmentmixin):
+#    __metaclass__ = metacompartment
+#
+#class compartment(_compartment):
+#    __metaclass__ = classmaker(left_metas=(metacompartment,))
+#
 class compartment(compartmentmixin):
     __metaclass__ = metacompartment
-#    _id_generator = id_generator('c')
 
     def add(self, *args):
         for arg in args:
@@ -70,19 +78,19 @@ class compartment(compartmentmixin):
     # overridden properties that append anonymous model items from instances
 
     @property
-    def compartments(self, **metadata):
+    def compartments(self, **metadata): #@UnusedVariable
         ''' Returns a list of all the compartments in the compartment that match the 
         set of *metadata* criteria. '''
         return super(compartment, self).compartments + self._compartments
 
     @property
-    def reactions(self, **metadata):
+    def reactions(self, **metadata): #@UnusedVariable
         ''' Returns a list of all the reactions in the compartment that match the 
         set of *metadata* criteria. '''
         return super(compartment, self).reactions + self._reactions
 
     @property
-    def species(self, **metadata):
+    def species(self, **metadata): #@UnusedVariable
         ''' Returns a list of all the species in the compartment that match the 
         set of *metadata* criteria. 
         
@@ -97,10 +105,7 @@ class compartment(compartmentmixin):
         return super(compartment, self).species + self._species
 
 
-
-
-
-# monkey patch compartmentmixin module with compartment type
+# monkey patch compartmentmixin module with compartment type here to avoid circular import earlier
 import compartmentmixin
 compartmentmixin.compartment = compartment
 # necessary to make compartmentmixin().compartments work

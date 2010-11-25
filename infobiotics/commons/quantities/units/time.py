@@ -3,7 +3,7 @@ __all__ = [
     'd', 'day',
     'MM', 'month',
     'h', 'hour',
-    'm', 'minute',
+    'mm', 'minute',
     's', 'second',
     'ms', 'msecs', 'millisecs', 'milliseconds', 'millisecond',
     'us', 'usecs', 'microsecs', 'microseconds', 'microsecond',
@@ -20,7 +20,7 @@ y = year
 d = day
 MM = month
 h = hour
-m = minute
+mm = minute
 s = second
 ms = msecs = millisecs = milliseconds = millisecond
 us = usecs = microsecs = microseconds = microsecond

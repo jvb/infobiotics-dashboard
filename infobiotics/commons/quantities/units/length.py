@@ -1,5 +1,6 @@
 __all__ = [
-    'metre', 'meter',
+     'm', 'metre', 'meter',
 ]
 from quantities.units import metre
-meter = metre
+m = meter = metre
+#TODO centimetre

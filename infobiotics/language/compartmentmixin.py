@@ -1,10 +1,24 @@
+from infobiotics.commons.descriptors import mixedmethod 
 from infobiotics.commons.sequences import flatten, iterable
-from infobiotics.commons.quantities.api import metre
-import itertools
+from infobiotics.commons.quantities import *
 from species import species
 from reactions import reaction
+from config import repr
+import itertools
+compartment = None # patched by compartments module later 
 
-reserved_prefixes = ('reserved_prefixes', 'reserved_attribute_name_prefixes', 'metadata', '_', 'name', 'species', 'reaction', 'compartment', 'amounts') # catches 'compartments' and 'reactions' properties too because of startswith
+reserved_prefixes = (
+    '_', # prefix for hidden variables
+    'reserved_prefixes', # this 
+    'reserved_attribute_name_prefixes', # attribute of compartmentmixin, used by metacompartment.__new__ and compartment.__setattr__ 
+    'outside', # prevent recursion when print metadata as outer compartment of inner compartment has a reference inner compartment ...
+    # properties/methods
+    'species',
+    'reaction', # catches 'reactions' too because of startswith
+    'compartment', # catches 'compartments' too because of startswith
+    'metadata',
+    'amounts',
+) 
 
 #def dir_dict(o):
 #    return dict((name, getattr(o, name)) for name in dir(o))
@@ -105,7 +119,24 @@ class filterablelist(list):
             2
 
         '''
-        return filter_list_by_metadata(self, **metadata)
+        return filterablelist(filter_list_by_metadata(self, **metadata))
+
+    def __add__(self, other):
+        '''
+        >>> filterablelist(['a']) + ['b']
+        filterablelist(['a','b'])
+        '''
+        return filterablelist(list.__add__(self, other))
+
+    def __radd__(self, other):
+        '''
+        >>> ['b'] + filterablelist(['a'])
+        filterablelist(['b','a'])
+        '''
+        return filterablelist(list.__add__(other, self))
+
+    def __iadd__(self, other):
+        return self.extend(other) # seemingly uses __radd__ and so returns a filterablelist
 
 class filterabledict(dict):
     def __call__(self, **metadata):
@@ -146,23 +177,23 @@ class compartmentmixin(object):
 
     '''
 
-    reserved_attribute_name_prefixes = ('_', 'name', 'id', 'volume', 'outside', 'label') # used by metacompartment.__new__ and compartment.__setattr__
+    reserved_attribute_name_prefixes = ('_', 'volume', 'outside', 'label') # used by metacompartment.__new__ and compartment.__setattr__
 
 
     @property
-    def compartments(self, **metadata):
+    def compartments(self, **metadata): #@UnusedVariable
         ''' Returns a list of all the compartments in the compartment that match the 
         set of *metadata* criteria. '''
         return _getter(self, compartment)
 
     @property
-    def reactions(self, **metadata):
+    def reactions(self, **metadata): #@UnusedVariable
         ''' Returns a list of all the reactions in the compartment that match the 
         set of *metadata* criteria. '''
         return _getter(self, reaction)
 
     @property
-    def species(self, **metadata):
+    def species(self, **metadata): #@UnusedVariable
         ''' Returns a list of all the species in the compartment that match the 
         set of *metadata* criteria. 
         
@@ -182,10 +213,12 @@ class compartmentmixin(object):
         return dict(
             (key, value) for key, value in dict(
                 (k, getattr(self, k)) for k in [i for i in dir(self) if not i.startswith(reserved_prefixes)]
-            ).items() if not isinstance(value, (species, compartmentmixin, reaction, MethodType))
+            ).items() if not isinstance(value, (species, reaction,
+                                                compartmentmixin, # covers metacompartment and compartment 
+                                                MethodType, # hide methods and thereby prevent infinite recursion
+                                                FunctionType, # hide functions ( and methods decorated with @mixedmethod)
+                                                ))
         )
-
-
 
 
     _volume = 1 * metre ** 3
@@ -202,7 +235,7 @@ class compartmentmixin(object):
             except ValueError:
                 raise ValueError('Dimensionality of volume (%s) cannot be rescaled to metre**3, required for concentration calculation.' % volume.dimensionality)
             if volume.size > 1:
-                raise ValueError('...')
+                raise ValueError('Volume should be a single value, not an array.')
             self._volume = volume
         elif isinstance(volume, (int, float)):
             self._volume = volume * metre ** 3
@@ -216,7 +249,9 @@ class compartmentmixin(object):
 #        return dict([(s.name, s.amount) for s in self.species])
     def amounts(self, **metadata):
         ''' Method that returns a dictionary of the amount of all species matching the metadata criteria. '''
-        return dict([(s.name, s.amount) for s in self.species(**metadata)])
+        l = self.species(**metadata)
+        return dict([(s.name, s.amount) for s in l])
+#        return filterabledict(...) #TODO make property and return filterabledict
 
     def set_amounts(self, **kwargs): #TODO update species
         species = dir_filtered_by_prefix_and_type(self, species).values()
@@ -264,152 +299,128 @@ class compartmentmixin(object):
 #                return i
 
 
-    def __str__(self):
-        return self.str()
-
-    def str(self, indent=''):
-        return '%s%s(\n%s%s%s%s%s%s%s)' % (
-            indent,
-            self.label,
-            '\n'.join([i.str(indent + '\t') for i in self.species]),
-            '\n' if len(self.species) > 0 else '',
-            '\n'.join([i.str(indent + '\t') for i in self.reactions]),
-            '\n' if len(self.reactions) > 0 else '',
-            '\n'.join([i.str(indent + '\t') for i in self.compartments]),
-            '\n' if len(self.compartments) > 0 else '',
-            indent
-        )
-
-
-#    def repr(self, indent=''):
-#        return 'class %s(%s):\n\t%s%s%s' % (
-#            self.name,
-#            ', '.join([base.__name__ for base in self.bases]),
-#            ',\n\t'.join([repr(i) for i in self.species]),
-#            ',\n\t'.join([repr(i) for i in self.reactions]),
-#            ',\n\t'.join([repr(i) for i in self.compartments]),
-#        )
-#
-#
-    def __repr__(self):
-        return self.repr()
-
-    def repr(self, indent='', id=''):
-        from species import species
-
-        # list/tuple
-#        sequences = dir_filtered_by_prefix_and_type(self, (list, tuple))
-        #TODO reduce each named sequence get compartments, reactions and species
-#        [flatten(value) for value in dir_filtered_by_prefix_and_type(self, (list, tuple)).values()]
-#        print sequences
-#        [i for i in sequences if isinstance(i, compartment)]
-#        [i for i in sequences if isinstance(i, reaction)]
-#        [i for i in sequences if isinstance(i, species)]
-
-        # or use metadata?
-        metadata = self.metadata
-        def metadata_str(indent=''):
-            '''
-            
-            compartment(
-                s = [
-                    1,
-                    2,
-                ]
-                t = 5,
-                v = 'six',
+#    def __str__(self):
+#        return self.str()
+#    
+#    def __repr__(self):
+#        return self.repr()
                 
-            
-            '''
+    @mixedmethod
+    def repr(self, indent='\t', indent_level=0, id='', evalable=True):
+        ''' Returns an evalable string. 
+        
+        Warning: some quantities use symbols which are likely to be overridden
+        in the eval statements context (locals() and globals()). For example
+        a quantity like 1 metre**3 returns a repr() string of 'array(1) * m**3'.
+        A global variable named 'm' that is not an alias for metre will raise a
+        "TypeError: unsupported operand type(s) for ** or pow(): 'list' and 'int'."
+
+        Warning: metaclass...
+
+        '''
+        metadata = self.metadata
+        def get_metadata_strs(indent=indent, indent_level=indent_level + 1, as_dict_items=False):
             _metadata = []
+            assignment = ':' if as_dict_items else '='
             for k, v in metadata.items():
-                e = '%s=' % k
-#                '%s=[%s]' % (k, ',\n'.join([i.__repr__() for i in v if hasattr(i, 'repr') for k, v in metadata.items()])) if iterable(v) else '%s=%r' % (k, v)
+                e = '%s%s%s' % (indent * indent_level, "'%s'" % k if as_dict_items else k, assignment) # assignment to k
                 if iterable(v):
-                    s = '%s=[\n' % k
-                    for i in v:
-                        s += '\t%r,\n' % i
-                    s += '],\n'
+                    s = '%s%s%s[\n' % (indent * indent_level, "'%s'" % k if as_dict_items else k, assignment)
+                    for i in flatten(v): # flatten iterables because that is how compartment.add treats them and we get full info
+                        s += '%s,\n' % (i.repr(indent, indent_level + 1) if hasattr(i, 'repr') else (indent * (indent_level + 1)) + repr(i))
+                    s += indent + ']'
                     _metadata.append(s)
                 elif isinstance(v, basestring):
-                    print self.__class__.__name__ #TODO continue from here
-                    if k == 'label' and v == self.__class__.__name__:
+                    if k == 'label' and (isinstance(self, type) or (v == self.__class__.__name__)): # hide label when repr(class) or repr(instance) when same as default
                         continue
                     _metadata.append(e + "'%s'" % v)
                 else:
-                    _metadata.append(e + str(v))
-            return ',\n'.join(_metadata)
-
-#        metadata_str('\t')
-        print metadata_str('\t')
-        exit()
-
-
+                    if k == 'volume':
+                        if v == compartment.volume: # hide volume when same as default
+                            continue
+                        else:
+                            pass #TODO?
+#                    # done in reserved_prefixes
+#                    if k == 'outer':
+#                        continue
+                    _metadata.append(e + repr(v))
+            return _metadata
+        metadata_strs = get_metadata_strs()
 
         # named
-        compartments = dir_filtered_by_prefix_and_type(self, compartment)
+        compartments = dir_filtered_by_prefix_and_type(self, compartment) # don't panic, compartment is set on compartmentmixin by compartments module
         reactions = dir_filtered_by_prefix_and_type(self, reaction)
-        species = dir_filtered_by_prefix_and_type(self, species)
+        from species import species as species_ # fixes UnboundLocalError: local variable 'species' referenced before assignment
+        species = dir_filtered_by_prefix_and_type(self, species_)
 
-        # anonymous
-        _compartments = self._compartments if hasattr(self, '_compartments') else []
-        _reactions = self._reactions if hasattr(self, '_reactions') else []
-        _species = self._species if hasattr(self, '_species') else []
-
-        return '%s%s%s%s(\n%s%s%s%s%s%s%s%s%s%s%s%s%s)' % (
-            indent,
-            id,
-            '=' if id != '' else '',
-            self.label,
-            ',\n'.join([i.repr(indent + '\t') for i in _compartments]),
-            ',\n' if len(_compartments) > 0 else '',
-            ',\n'.join([i.repr(indent + '\t') for i in _reactions]),
-            ',\n' if len(_reactions) > 0 else '',
-            ',\n'.join([i.repr(indent + '\t') for i in _species]),
-            ',\n' if len(_species) > 0 else '',
-            ',\n'.join([i.repr(indent + '\t', k) for k, i in compartments.items()]),
-            ',\n' if len(compartments) > 0 else '',
-            ',\n'.join([i.repr(indent + '\t', k) for k, i in reactions.items()]),
-            ',\n' if len(reactions) > 0 else '',
-            ',\n'.join([i.repr(indent + '\t', k) for k, i in species.items()]),
-            ',\n' if len(species) > 0 else '',
-            #TODO metadata
-            ',\n' if len(metadata) > 0 else '',
-            indent
-        )
+        # switch depending on whether method called with class or instance        
+        if isinstance(self, type): # class
+            if evalable:
+                return "type('%s', (%s%s), {%s%s%s})" % (
+                    self.__name__,
+#                    ', '.join([base.__name__ for base in self._bases]),
+                    ', '.join([base.repr() if base.__name__ != 'compartment' else 'compartment' for base in self._bases]),
+                    ',' if len(self._bases) == 1 else '',
+                    ', '.join(["'%s':%s" % (k, v.repr()) for k, v in itertools.chain(compartments.items(), reactions.items(), species.items())]),
+                    ', ' if len(metadata_strs) > 0 else '',
+                    ', '.join(get_metadata_strs(as_dict_items=True))
+                )
+            else:
+                return '%sclass %s(%s):\n%s%s%s%s%s%s%s%s%s' % (
+                    indent * indent_level,
+                    self.__name__,
+                    ', '.join([base.__name__ for base in self._bases]),
+                    '\n'.join([i.repr(indent, indent_level + 1, k) for k, i in compartments.items()]),
+                    '\n' if len(compartments) > 0 else '',
+                    '\n'.join([i.repr(indent, indent_level + 1, k) for k, i in reactions.items()]),
+                    '\n' if len(reactions) > 0 else '',
+                    '\n'.join([i.repr(indent, indent_level + 1, k) for k, i in species.items()]),
+                    '\n' if len(species) > 0 else '',
+                    '\n'.join(metadata_strs), #indent, indent_level+1
+                    '\n' if len(metadata_strs) > 0 else '',
+                    indent * indent_level,
+                )
+        
+        else: # instance
+    
+            # anonymous (only in instance)
+            _compartments = self._compartments if hasattr(self, '_compartments') else []
+            _reactions = self._reactions if hasattr(self, '_reactions') else []
+            _species = self._species if hasattr(self, '_species') else []
+    
+            len_contents = len(_compartments + _reactions + _species + compartments.items() + reactions.items() + species.items() + metadata_strs) 
+            
+            return '%s%s%s%s(%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s)' % (
+                indent * indent_level,
+                id,
+                '=' if id != '' else '',
+                self.__class__.__name__,
+                '\n' if len_contents > 0 else '',
+                ',\n'.join([i.repr(indent, indent_level + 1) for i in _compartments]),
+                ',\n' if len(_compartments) > 0 else '',
+                ',\n'.join([i.repr(indent, indent_level + 1) for i in _reactions]),
+                ',\n' if len(_reactions) > 0 else '',
+                ',\n'.join([i.repr(indent, indent_level + 1) for i in _species]),
+                ',\n' if len(_species) > 0 else '',
+                ',\n'.join([i.repr(indent, indent_level + 1, k) for k, i in compartments.items()]),
+                ',\n' if len(compartments) > 0 else '',
+                ',\n'.join([i.repr(indent, indent_level + 1, k) for k, i in reactions.items()]),
+                ',\n' if len(reactions) > 0 else '',
+                ',\n'.join([i.repr(indent, indent_level + 1, k) for k, i in species.items()]),
+                ',\n' if len(species) > 0 else '',
+                ',\n'.join(metadata_strs), #indent, indent_level+1
+                ',\n' if len(metadata_strs) > 0 else '',
+                indent * indent_level if len_contents > 0 else '',
+            )
+            
+    @mixedmethod
+    def str(self, indent='\t', indent_level=0, id='', evalable=False):
+#        if isinstance(self, type):
+#            pass
+#        else:
+#            pass
+        return self.repr(indent, indent_level, id, evalable)
 
 
 if __name__ == '__main__':
-
     execfile('module1.py')
-
-#    from infobiotics.language import *
-#    class C(compartment):
-#
-#        # attributes
-#        a = 10,
-#        r = 'a -> b 1'
-#
-#        # sequences, found by dir...(list)
-#        s = ['b -> c 2', species('c', 10), compartment()]
-#
-#    c = C(
-#        species('b', 2), # anonymous species -> could be made an attribute because we know name - but name is not the same as id - need to handle name clashes in sbml, etc
-#        'b -> a 0.5', #anonymous reactions
-#
-#    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
