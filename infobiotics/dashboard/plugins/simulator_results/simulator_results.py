@@ -123,7 +123,14 @@ class SimulatorResults(object):
     
     volumes_axes = ['runs', 'compartments', 'timepoints']    
     
-    
+    timepoints_data_units = 'seconds'
+    quantities_data_units = 'molecules'
+    volumes_data_units = 'litres'
+    timepoints_display_units = 'seconds'
+    quantities_display_type = 'molecules'
+    quantities_display_units = 'molecules'
+    volumes_display_units = 'litres'
+        
     def __init__(self,
         filename,
         simulation,
