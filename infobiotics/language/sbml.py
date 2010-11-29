@@ -13,13 +13,6 @@ compartment_id_generator = id_generator('c')
 template_id_generator = id_generator()#'t')
 z_position_generator = id_generator()
 
-class C(compartment):
-    volume = 2
-    inner = compartment(volume=3)
-    r1 = 'a -> b 0.1'
-#    r2 = 'b -> [ b ] 0.5'
-    a = 10
-
 def recursively_create_compartments(compartment, outside_sbml_compartment, x, y):
     compartment._id = compartment_id_generator.next()
     template_id = template_id_generator.next()
@@ -32,7 +25,7 @@ def recursively_create_compartments(compartment, outside_sbml_compartment, x, y)
     sbml_compartment.setUnits('volume')
     sbml_compartment.setSpatialDimensions(3) # required for setOutside below
     sbml_compartment.setOutside(outside_sbml_compartment.getId())
-    
+
     # users of templates
     sbml_compartment = model.createCompartment()
     sbml_compartment.setId(compartment._id)
@@ -122,7 +115,7 @@ def recursively_create_reactions(compartment):
 #                sbml_species.setHasOnlySubstanceUnits(True)
                 sbml_species_reference.setSpecies(compartment._species_ids[name])
             sbml_species_reference.initDefaults() # sets stoichiometry to 1
-            
+
         for name in rule.reactants_inside:
             initialise_sbml_species_reference(sbml_reaction.createReactant())
 
@@ -142,10 +135,19 @@ def recursively_create_reactions(compartment):
 
 if __name__ == '__main__':
 
+    class C(compartment):
+        volume = 2
+        inner = compartment(volume=3)
+        r1 = 'a -> b 0.1'
+    #    r2 = 'b -> [ b ] 0.5'
+        a = 10
+
     c = C()
 #    print c.repr()
 #    exit()
+
     system = model(c)
+
     import libsbml
     # see http://sbml.org/Software/libSBML/docs/python-api/
 
@@ -183,6 +185,6 @@ if __name__ == '__main__':
 
     document.checkL2v4Compatibility()
     document.printErrors()
-    
+
     print libsbml.writeSBMLToString(document)
-    libsbml.writeSBMLToFile(document, 'test.sbml')
+#    libsbml.writeSBMLToFile(document, 'test.sbml')

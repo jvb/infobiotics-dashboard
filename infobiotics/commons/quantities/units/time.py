@@ -1,10 +1,10 @@
 __all__ = [
-    'y', 'year',
-    'd', 'day',
-    'MM', 'month',
-    'h', 'hour',
-    'mm', 'minute',
-    's', 'second',
+    'y', 'year', 'years',
+    'd', 'day', 'days',
+    'MM', 'month', 'months',
+    'h', 'hour', 'hours',
+    'mm', 'minute', 'minutes',
+    's', 'second', 'seconds',
     'ms', 'msecs', 'millisecs', 'milliseconds', 'millisecond',
     'us', 'usecs', 'microsecs', 'microseconds', 'microsecond',
     'ns', 'nsecs', 'nanosecs', 'nanoseconds', 'nanosecond',
@@ -16,12 +16,12 @@ __all__ = [
 
 from quantities.units.time import attosecond, femtosecond, picosecond, nanosecond, microsecond, millisecond, second, minute, hour, day, week, month, year
 
-y = year
-d = day
-MM = month
-h = hour
-mm = minute
-s = second
+y = years = year
+d = days = day
+MM = months = month
+h = hours = hour
+mm = minutes = minute
+s = seconds = second
 ms = msecs = millisecs = milliseconds = millisecond
 us = usecs = microsecs = microseconds = microsecond
 ns = nsecs = nanosecs = nanoseconds = nanosecond

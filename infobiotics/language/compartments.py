@@ -3,7 +3,7 @@ from metacompartment import metacompartment
 from infobiotics.commons.quantities import *
 from species import species
 from reactions import reaction
-from infobiotics.commons.sequences import iterable, flatten 
+from infobiotics.commons.sequences import iterable, flatten
 import sys
 #TODO logging
 import config #TODO get log level from config
@@ -26,6 +26,9 @@ class compartment(compartmentmixin):
                 self._compartments.append(arg)
             elif isinstance(arg, species):
                 self._species.append(arg)
+            elif isinstance(arg, reaction):
+                #TODO validate compartment labels
+                self._reactions.append(arg)
             elif isinstance(arg, basestring):
                 self._reactions.append(reaction(arg, reactants_label=self.label, products_label=self.label))
             else:

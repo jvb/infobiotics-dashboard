@@ -1,7 +1,6 @@
 __all__ = ['species', 'dna', 'gene', 'rna', 'transcript', 'protein', 'transcription_factor', 'tf']
 
 from infobiotics.commons.quantities.api import *
-#from id_generators import id_generator
 from quantities import markup
 from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna, generic_rna, generic_protein
@@ -13,11 +12,11 @@ class species(object):
         self.name = name
         self.amount = amount
         for k, v in kwargs.items(): setattr(self, k, v)
-        
+
     @property
     def amount(self):
         return self._amount
-    
+
     @amount.setter
     def amount(self, amount):
         if isinstance(amount, int):
@@ -71,10 +70,10 @@ class sequenced(species):
     @property
     def sequence(self):
         return self._sequence
-    
+
     @sequence.setter
     def sequence(self, sequence):
-        raise NotImplementedError 
+        raise NotImplementedError
 
 
 class dna(sequenced):
