@@ -1,5 +1,6 @@
 from multiset import multiset
 import re
+from infobiotics.commons.quantities import Quantity
 
 # use http://re-try.appspot.com/ for live regex matching - use method 'match' and make sure 'VERBOSE' is on
 
@@ -251,17 +252,25 @@ class reaction(object):
             self.rate = self.rate_id
 
         # now convert to quantity or float
-        try:
-            print self.rate,
-            maybe_quantity = False
-            for ch in self.rate:
-                if ch in '':
-                    maybe_quantity = True
-            try:
-                self.rate = eval(self.rate)
-                print self.rate
-            except Exception, e:
-                print 'eval exception', e
+
+#        #TODO move below quantity parsing
+#        if not isinstance(self.rate, Quantity):
+#            if isinstance(self.rate, (int, float)):
+#                self.rate = self.rate * config.time_units ** -1
+#            else:
+#                raise ValueError('...')
+
+#        #TODO parse quantity using eval
+#        print self.rate,
+#        maybe_quantity = False
+#        for ch in self.rate:
+#            if ch in '':
+#                maybe_quantity = True
+#        try:
+#            self.rate = eval(self.rate)
+#            print self.rate
+#        except Exception, e:
+#            print 'eval exception', e
 
         try:
             self.rate = float(self.rate)
@@ -273,6 +282,62 @@ class reaction(object):
                 raise ValueError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
             except AttributeError, e: # no attribute with name rate_id
                 raise AttributeError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
+
+    def has_zeroth_order_reactants(self):
+        reactants = multiset(self.reactants_outside + self.reactants_inside)
+        return True if len(reactants) == 0 else False
+
+    def has_first_order_reactants(self):
+        reactants = multiset(self.reactants_outside + self.reactants_inside)
+        return True if len(reactants) == 1 and reactants.cardinality() == 1 else False
+
+    def has_second_order_homo_reactants(self):
+        '''a+a[], a+a=[a+a] hom'''
+        print len(self.reactants_outside), self.reactants_outside.cardinality(), len(self.reactants_inside), self.reactants_inside.cardinality()
+        return True if (len(self.reactants_outside) == 1 and self.reactants_outside.cardinality() == 2) or (len(self.reactants_inside) == 1 and self.reactants_inside.cardinality() == 2) else False
+
+    def has_second_order_hetero_reactants(self):
+        '''a[a], a[b], a+b[], a+b=[a+b] het'''
+        reactants = multiset(self.reactants_outside + self.reactants_inside)
+        if reactants.cardinality() != 2:
+            return False
+        if len(reactants) == 1: # a[a]
+            if self.reactants_outside.cardinality() != 1 or self.reactants_inside.cardinality() != 1:
+                return False
+            return True
+        elif len(reactants) == 2:
+            if self.reactants_outside.cardinality() == 1 and self.reactants_inside.cardinality() == 1:
+                return True
+            elif self.reactants_outside.cardinality() == 2 and self.reactants_inside.cardinality() == 0:
+                return True
+            elif self.reactants_outside.cardinality() == 0 and self.reactants_inside.cardinality() == 2:
+                return True
+            return False
+        return False
+
+    def has_zeroth_order_rate(self):
+        if not isinstance(self.rate, Quantity):
+            return False
+#        i = self.rate.dimensionality.items()
+##        if i[0]
+#        for k, v in self.rate.dimensionality.items():
+#        return
+
+    def has_first_order_rate(self):
+        if not isinstance(self.rate, Quantity):
+            return False
+        return
+
+    def has_second_order_rate(self):
+        if not isinstance(self.rate, Quantity):
+            return False
+        return
+
+    def has_equilibrium_dissociation_rate(self):
+        if not isinstance(self.rate, Quantity):
+            return False
+        return
+
 
 
     def __repr__(self):
@@ -287,19 +352,19 @@ class reaction(object):
 
     def str(self, indent='', indent_level=0, comment=False):
 #        return '%s%s: %s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
-        return '%s%s%s[ %s ]%s -%s-> %s%s[ %s ]%s %s=%f %s' % (
+        return '%s%s%s[ %s ]%s -%s-> %s%s[ %s ]%s %s=%s %s' % (
             indent * indent_level,
             self.reactants_outside if self.reactants_outside is not None else '',
             ' ' if len(self.reactants_outside) > 0 else '',
             self.reactants_inside if self.reactants_inside is not None else '',
-            '_' + self.reactants_label if self.reactants_label is not None else 'c',
-            self.rate_id if self.rate_id is not None else '',
+            '_' + self.reactants_label if self.reactants_label is not None else '_l',
+            self.rate_id if self.rate_id is not None else 'c',
             self.products_outside if self.products_outside is not None else '',
             ' ' if len(self.products_outside) > 0 else '',
             self.products_inside if self.products_inside is not None else '',
-            '_' + self.products_label if self.products_label is not None else 'c',
-            self.rate_id if self.rate_id is not None else '',
-            self.rate,
+            '_' + self.products_label if self.products_label is not None else '_l',
+            self.rate_id if self.rate_id is not None else 'c',
+            str(self.rate),
             '' if not comment or self.comment is None else '# %s #' % self.comment
         )
 

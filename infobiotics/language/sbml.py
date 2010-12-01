@@ -1,3 +1,16 @@
+'''Work in progress method for converting infobiotics.language models into
+mcss-compatible sbml.
+
+TODO differentiate between mcss-compatible sbml and real sbml.
+
+TODO degraded species in reactions with no products
+
+TODO transport rules need products as well as reactants
+TODO transport rules from inside compartments to outside ones use 'r1:c1' rather than 'r1:0,1'
+TODO inside compartments (templates) have names like c2:::c1
+
+'''
+
 from infobiotics.language import *
 
 # Don't import ID generators! Use different IDs for SBML, and simplified names for IML IDs.

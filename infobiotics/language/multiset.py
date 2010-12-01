@@ -24,7 +24,7 @@ class multiset(Counter):
         
         '''
         return len(list(self.elements()))
-    
+
     def multiplicity(self, key):
         '''
         
@@ -48,3 +48,6 @@ if __name__ == '__main__':
     m = multiset({'a':1, 'b':2})
     print m.__str__()
     print m.__repr__()
+
+    n = multiset(m + m)
+    print 'cardinality =', n.cardinality(), 'len =', len(n)

@@ -1,6 +1,0 @@
-
-0    1855.300659    3    PosReg(X=1,Y=1)NegReg(X=1,Y=1)
-1    1855.300659    2    PosReg(X=1,Y=1)NegReg(X=1,Y=1)
-2    1855.300659    3    PosReg(X=1,Y=1)NegReg(X=1,Y=1)
-3    749.167725    3    NegReg(X=1,Y=1)UnReg(X=1)
-4    372.352539    4    NegReg(X=1,Y=1)UnReg(X=1)

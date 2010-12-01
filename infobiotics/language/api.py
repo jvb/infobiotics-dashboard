@@ -1,3 +1,4 @@
+from config import *
 from compartments import *
 from species import *
 from reactions import *
