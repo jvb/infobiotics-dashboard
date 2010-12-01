@@ -1,7 +1,8 @@
 from multiset import multiset
 import re
 from infobiotics.commons.quantities import *
-from config import log, time_units, k_on_max
+import config
+
 
 
 # use http://re-try.appspot.com/ for live regex matching - use method 'match' and make sure 'VERBOSE' is on
@@ -72,6 +73,26 @@ transformation_rule_matcher = re.compile("""
     )?
     )?
 """ + rule_comment, re.VERBOSE)
+
+
+new_rate_regex = '''
+\s*
+(?P<rate>([-+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+\s*)?)
+\s*
+((?P<units>[*/]\s*[-+.\w]\s*[-+*/.\^\w\s]+)?)
+\s*
+0.1 * micromolar / hour
+0.2 * micromolar
+100 / hour
+250 / micromolar / hour
+
+n */ molar ** -1 * 
+
+
+label = self.__regex.sub(r"\g<1>*\g<2>", label.replace('^', '**').replace('·', '*')) # from quantities.registry.__getitem__
+
+'''
+
 
 transport_rule_matcher = re.compile("""
 
@@ -285,7 +306,7 @@ class reaction(object):
 #        #TODO move below quantity parsing
 #        if not isinstance(self.rate, Quantity):
 #            if isinstance(self.rate, (int, float)):
-#                self.rate = self.rate * time_units ** -1
+#                self.rate = self.rate * config.time_units ** -1
 #            else:
 #                raise ValueError('...')
 
@@ -353,13 +374,13 @@ class reaction(object):
         return True
 
     def has_zeroth_order_rate(self):
-        return self.can_rescale_rate(molar * time_units ** -1)
+        return self.can_rescale_rate(molar * config.time_units ** -1)
 
     def has_first_order_rate(self):
-        return self.can_rescale_rate(time_units ** -1)
-    
+        return self.can_rescale_rate(config.time_units ** -1)
+
     def has_second_order_rate(self):
-        return self.can_rescale_rate((molar ** -1) * (time_units ** -1))
+        return self.can_rescale_rate((molar ** -1) * (config.time_units ** -1))
 
     def has_equilibrium_dissociation_rate(self):
         return self.can_rescale_rate(molar)
@@ -367,77 +388,93 @@ class reaction(object):
 
 def stochastic_rate_constant(reaction, volume=1):
     '''Checks whether rate constant is appropriate for reactants and raises ValueError if conversion not possible.'''
-    
+
     V = volume.rescale(metre ** 3)
     N = N_A * (mole ** -1)
 
     k = reaction.rate
-    
+
     if k < 0:
         raise ValueError('Reaction rates cannot be less than zero.')
-    
-    k_on_max = k_on_max
+
+    k_on_max = config.k_on_max
     if reaction.has_equilibrium_dissociation_rate():
         K_D = k
-        del(k)
-    
+#        del(k)
+
     # convert rate to first order if not a quantity     
     if isinstance(reaction.rate, (int, float)):
-        k = k * time_units ** -1
-                      
+        k = k * config.time_units ** -1
+
+    #TODO zeroth order too and reactants in different compartments (and products!)
     more_than_3_reactants_error = ValueError("Stochastic simulation algorithm cannot handle reactions with more than 2 reactants '%s'." % reaction)
-                        
+
     # rate is stochastic rate constant already (?)
     if reaction.has_first_order_rate():
         if not reaction.has_first_order_reactants():
             if reaction.has_zeroth_order_reactants():
-                log.info("Using first order rate for zeroth order reaction '%s'." % reaction)
+                config.log.info("Using first order rate for zeroth order reaction '%s'." % reaction)
             elif reaction.has_second_order_homo_reactants():
-                log.info("Using first order rate for homogenous second order reaction '%s'." % reaction)
+                config.log.info("Using first order rate for homogenous second order reaction '%s'." % reaction)
             elif reaction.has_second_order_hetero_reactants():
-                log.info("Using first order rate for heterogenous second order reaction '%s'." % reaction)
+                config.log.info("Using first order rate for heterogenous second order reaction '%s'." % reaction)
             else:
-                raise more_than_3_reactants_error 
-        c = k.rescale(time_units ** -1)
-    
+                raise more_than_3_reactants_error
+        c = k.rescale(config.time_units ** -1)
+
     if reaction.has_zeroth_order_reactants():
         if reaction.has_zeroth_order_rate():
             # convert to first order
-            c = (N * V * k.rescale(molar / second)).rescale(time_units ** -1)
+            c = (N * V * k.rescale(molar / second)).rescale(config.time_units ** -1)
         else:
-            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for zeroth order reaction '%s'." % (k, reaction))
+            raise ValueError("Cannot convert deterministic reaction rate constant '%s' for zeroth order reaction '%s'." % (k, reaction))
     elif reaction.has_first_order_reactants():
         if reaction.has_first_order_rate():
-            # rescale rate to time_units
-            c = k.rescale(time_units ** -1) # don't expect to ever reach here
+            # rescale rate to config.time_units
+            c = k.rescale(config.time_units ** -1) # don't expect to ever reach here
         elif reaction.has_equilibrium_dissociation_rate():
             # use K_D and k_on_max to calculate k_off 
             k_off = K_D * k_on_max
-            c = k_off.rescale(time_units ** -1)
+            c = k_off.rescale(config.time_units ** -1)
         else:
-            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for first order reaction '%s'." % (k, reaction))
+            raise ValueError("Cannot convert deterministic reaction rate constant '%s' for first order reaction '%s'." % (k, reaction))
     elif reaction.has_second_order_homo_reactants():
         if reaction.has_second_order_rate():
             # convert rate to first order 
-            c = ((2 * k.rescale(molar ** -1 * second ** -1)) / (N * V)).rescale(time_units ** -1)
+            c = ((2 * k.rescale(molar ** -1 * second ** -1)) / (N * V)).rescale(config.time_units ** -1)
         elif reaction.has_equilibrium_dissociation_rate():
-            # use k_on_max instead
-            c = ((2 * k_on_max.rescale(molar ** -1 * second ** -1)) / (N * V)).rescale(time_units ** -1)
+            # use k_on_max instead #TODO log this
+            c = ((2 * k_on_max.rescale(molar ** -1 * second ** -1)) / (N * V)).rescale(config.time_units ** -1)
         else:
-            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for homogenous second order reaction '%s'." % (k, reaction))
+            raise ValueError("Cannot convert deterministic reaction rate constant '%s' for homogenous second order reaction '%s'." % (k, reaction))
     elif reaction.has_second_order_hetero_reactants():
         if reaction.has_second_order_rate():
             # convert rate to first order
-            c = (k.rescale(molar ** -1 * second ** -1) / (N * V)).rescale(time_units ** -1)
+            c = (k.rescale(molar ** -1 * second ** -1) / (N * V)).rescale(config.time_units ** -1)
         elif reaction.has_equilibrium_dissociation_rate():
             # use k_on_max instead
-            c = (k_on_max.rescale(molar ** -1 * second ** -1) / (N * V)).rescale(time_units ** -1)
+            c = (k_on_max.rescale(molar ** -1 * second ** -1) / (N * V)).rescale(config.time_units ** -1)
         else:
-            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for heterogenous second order  '%s'." % (k, reaction))
+            raise ValueError("Cannot convert deterministic reaction rate constant '%s' for heterogenous second order  '%s'." % (k, reaction))
     else:
         raise more_than_3_reactants_error
 #    print c
     return c
+
+
+    #TODO transport reaction rates
+    '''
+    c = D/L**2
+    
+    D = m ** 2 / second # Diffusion coefficient for a particular molecule
+    
+    L = centroid to centroid length in m (changes with volume - assume cube of side length L)
+    
+    :*
+    
+    if scale_transport_rules=true then c == D else c == c
+        
+    '''
 
 
 
@@ -445,77 +482,14 @@ def stochastic_rate_constant(reaction, volume=1):
 if __name__ == '__main__':
 
 
-    # test reaction.has_*_order_reactants(self) #TODO move to test suite
-    
-    assert     reaction(' ->a', 1).has_zeroth_order_reactants() # '->a' fails. #TODO allow zeroth order reactions?
-    assert not reaction(' ->a', 1).has_first_order_reactants()
-    assert not reaction(' ->a', 1).has_second_order_homo_reactants()
-    assert not reaction(' ->a', 1).has_second_order_hetero_reactants()
-    
-    assert not reaction('a ->  ', 1).has_zeroth_order_reactants()
-    assert     reaction('a ->  ', 1).has_first_order_reactants()
-    assert not reaction('a ->  ', 1).has_second_order_homo_reactants()
-    assert not reaction('a ->  ', 1).has_second_order_hetero_reactants()
-    
-    assert not reaction('a + a ->  ', 1).has_zeroth_order_reactants()
-    assert not reaction('a + a ->  ', 1).has_first_order_reactants()
-    assert     reaction('a + a ->  ', 1).has_second_order_homo_reactants()
-    assert not reaction('a + a ->  ', 1).has_second_order_hetero_reactants()
-    assert not reaction('a [a] ->  ', 1).has_second_order_homo_reactants()
-    
-    assert not reaction('a + b ->  ', 1).has_zeroth_order_reactants()
-    assert not reaction('a + b ->  ', 1).has_first_order_reactants()
-    assert not reaction('a + b ->  ', 1).has_second_order_homo_reactants()
-    assert     reaction('a + b ->  ', 1).has_second_order_hetero_reactants()
-    assert     reaction('a [a] ->  ', 1).has_second_order_hetero_reactants()
-    
-    assert not reaction('a + a + a ->  ', 1).has_zeroth_order_reactants()
-    assert not reaction('a + a + a ->  ', 1).has_first_order_reactants()
-    assert not reaction('a + a + a ->  ', 1).has_second_order_homo_reactants()
-    assert not reaction('a + a + a ->  ', 1).has_second_order_hetero_reactants()
-    
-    
-    # test reaction.has_*_order_rate(self) #TODO move to test suite
-    
-    rate = 1.0
-    zeroth = rate * millimolar * time_units ** -1
-    first = rate * time_units ** -1
-    second = rate * ((molar ** -1) * (time_units ** -1))
-    K_D = rate * molar
-    
-    assert     reaction(rate=zeroth).has_zeroth_order_rate()
-    assert not reaction(rate=first).has_zeroth_order_rate()
-    assert not reaction(rate=second).has_zeroth_order_rate()
-    assert not reaction(rate=K_D).has_zeroth_order_rate()
-    
-    assert not reaction(rate=zeroth).has_first_order_rate()
-    assert     reaction(rate=first).has_first_order_rate()
-    assert not reaction(rate=second).has_first_order_rate()
-    assert not reaction(rate=K_D).has_first_order_rate()
-    
-    assert not reaction(rate=zeroth).has_second_order_rate()
-    assert not reaction(rate=first).has_second_order_rate()
-    assert     reaction(rate=second).has_second_order_rate()
-    assert not reaction(rate=K_D).has_second_order_rate()
-    
-    assert not reaction(rate=zeroth).has_equilibrium_dissociation_rate()
-    assert not reaction(rate=first).has_equilibrium_dissociation_rate()
-    assert not reaction(rate=second).has_equilibrium_dissociation_rate()
-    assert     reaction(rate=K_D).has_equilibrium_dissociation_rate()
-    
-    assert not reaction(rate=1).has_zeroth_order_rate()
-    assert not reaction(rate=1).has_first_order_rate()
-    assert not reaction(rate=1).has_second_order_rate()
-    assert not reaction(rate=1).has_equilibrium_dissociation_rate()
-    
-    
-    exit()
-    
-    
-#    from infobiotics.language import *
-##    r = reaction('a -> b 5*10^-3 M^-1 s**-1')
-##    r = reaction('a -> b', rate=5e-3 * M ** -1 * seconds ** -1)
-#
+    from infobiotics.language import *
+
+    r1 = reaction('a -> b 5*10^-3 M^-1 s**-1')
+    print r1
+
+    r2 = reaction('a -> b', rate=5e-3 * M ** -1 * seconds ** -1)
+    print r2
+
 #    units = M ** -1 * seconds ** -1
 #
 #    rates = np.linspace(0, 1, 11)
@@ -526,3 +500,151 @@ if __name__ == '__main__':
 #    print
 #    print system
 
+    exit()
+
+
+    from infobiotics.commons.ordereddict import OrderedDict
+    parameters = OrderedDict([
+        ('g_S0', 0.1 * micromolar / hour),
+        ('g_SA', 1.0 * micromolar / hour),
+        ('h_A', 2),
+        ('K_SA', 0.2 * micromolar),
+        ('k_+S', 100 / hour),
+        ('h_Q', 2),
+        ('K_S', 0.008 * micromolar),
+        ('k_+p', 250 / micromolar / hour), # changed 'K' to 'k' in 'k_+p'
+        ('k_-p', 200 / micromolar / hour),
+        ('k_D', 90 / hour),
+        ('m_s', 1.5 / hour),
+        ('g_A', 10 / hour),
+        ('m_A', 1 / hour),
+        ('K_XI', .005 * micromolar),
+        ('K_ZI', .005 * micromolar),
+        ('h_I', 2),
+        ('g_X0', 0 * micromolar / hour),
+        ('g_Z0', 0 * micromolar / hour),
+        ('K_XA', 0.1 * micromolar),
+        ('K_ZA', 0.2 * micromolar),
+        ('h_A', 2),
+        ('g_XA', 3.33 * micromolar / hour),
+        ('g_ZA', 1.67 * micromolar / hour),
+        ('k_+RX', 14 / micromolar / hour),
+        ('k_-RX', 1 / hour),
+        ('k_+EX', 17 / micromolar / hour),
+        ('k_-EX', 1 / hour),
+        ('k_+RZ', 14 / micromolar / hour),
+        ('k_-RZ', 1 / hour),
+        ('k_+EZ', 20 / micromolar / hour),
+        ('k_-EZ', 1 / hour),
+        ('n', 4),
+        ('m_X', 15 / hour),
+        ('m_Z', 7 / hour),
+        ('g_R', 0.3 * micromolar / hour),
+        ('m_R', 1 / hour),
+        ('g_E', 12 * micromolar / hour),
+        ('K_ER', 0.2 * micromolar),
+        ('K_EE', 0.2 * micromolar),
+        ('m_E', 1 / hour),
+        ('m_RX', 1.5 / hour),
+        ('m_EX', 1.5 / hour),
+        ('m_RZ', 1.5 / hour),
+        ('m_EZ', 1.5 / hour),
+        ('g_I', 0.5 * micromolar / hour),
+        ('K_IR', 0.005 * micromolar),
+        ('K_IE', 0.038 * micromolar),
+        ('m_I', 3 / hour),
+        ('g_Q', 120 * uM / h),
+        ('K_QR', 0.04 * micromolar),
+        ('K_QE', 0.1 * micromolar),
+        ('m_Q', 10 / hour),
+        ('m_QE', 10 / hour),
+        ('d', 100 / hour),
+        ('w', 0.02), #* litre),
+        ('m_B', 0.05 / hour),
+    ])
+
+    zeroth = reaction(' ->a', 1)
+    first = reaction('a ->  ', 1)
+    second_homo = reaction('a + a ->  ', 1)
+    second_hetero = reaction('a + b ->  ', 1)
+
+#    import config
+#    config.time_units = hour
+#    for parameter, rate in parameters.items():
+#        print parameter
+#        for r in (zeroth, first, second_homo, second_hetero):
+#            r.rate_id = parameter
+#            r.rate = rate
+#            print r.has_zeroth_order_rate(), r.has_first_order_rate(), r.has_second_order_rate(), r.has_equilibrium_dissociation_rate(),
+#            try:
+#                c = stochastic_rate_constant(r, 1 * (micro * metre) ** 3)
+#                print r, rate, c
+#            except ValueError, e:
+#                print e
+#                pass
+#        print
+#    exit()
+
+
+    # test reaction.has_*_order_reactants(self) #TODO move to test suite
+
+    assert     zeroth.has_zeroth_order_reactants() # '->a' fails. #TODO allow zeroth order reactions?
+    assert not zeroth.has_first_order_reactants()
+    assert not zeroth.has_second_order_homo_reactants()
+    assert not zeroth.has_second_order_hetero_reactants()
+
+    assert not first.has_zeroth_order_reactants()
+    assert     first.has_first_order_reactants()
+    assert not first.has_second_order_homo_reactants()
+    assert not first.has_second_order_hetero_reactants()
+
+    assert not second_homo.has_zeroth_order_reactants()
+    assert not second_homo.has_first_order_reactants()
+    assert     second_homo.has_second_order_homo_reactants()
+    assert not second_homo.has_second_order_hetero_reactants()
+    assert not reaction('a [a] ->  ', 1).has_second_order_homo_reactants()
+
+    assert not second_hetero.has_zeroth_order_reactants()
+    assert not second_hetero.has_first_order_reactants()
+    assert not second_hetero.has_second_order_homo_reactants()
+    assert     second_hetero.has_second_order_hetero_reactants()
+    assert     reaction('a [a] ->  ', 1).has_second_order_hetero_reactants()
+
+    assert not reaction('a + a + a ->  ', 1).has_zeroth_order_reactants()
+    assert not reaction('a + a + a ->  ', 1).has_first_order_reactants()
+    assert not reaction('a + a + a ->  ', 1).has_second_order_homo_reactants()
+    assert not reaction('a + a + a ->  ', 1).has_second_order_hetero_reactants()
+
+
+    # test reaction.has_*_order_rate(self) #TODO move to test suite
+
+    rate = 1.0
+    zeroth = rate * millimolar * config.time_units ** -1
+    first = rate * config.time_units ** -1
+    second = rate * ((molar ** -1) * (config.time_units ** -1))
+    K_D = rate * molar
+
+    assert     reaction(rate=zeroth).has_zeroth_order_rate()
+    assert not reaction(rate=first).has_zeroth_order_rate()
+    assert not reaction(rate=second).has_zeroth_order_rate()
+    assert not reaction(rate=K_D).has_zeroth_order_rate()
+
+    assert not reaction(rate=zeroth).has_first_order_rate()
+    assert     reaction(rate=first).has_first_order_rate()
+    assert not reaction(rate=second).has_first_order_rate()
+    assert not reaction(rate=K_D).has_first_order_rate()
+
+    assert not reaction(rate=zeroth).has_second_order_rate()
+    assert not reaction(rate=first).has_second_order_rate()
+    assert     reaction(rate=second).has_second_order_rate()
+    assert not reaction(rate=K_D).has_second_order_rate()
+
+    assert not reaction(rate=zeroth).has_equilibrium_dissociation_rate()
+    assert not reaction(rate=first).has_equilibrium_dissociation_rate()
+    assert not reaction(rate=second).has_equilibrium_dissociation_rate()
+    assert     reaction(rate=K_D).has_equilibrium_dissociation_rate()
+
+    assert not reaction(rate=1).has_zeroth_order_rate()
+    assert not reaction(rate=1).has_first_order_rate()
+    assert not reaction(rate=1).has_second_order_rate()
+    assert not reaction(rate=1).has_equilibrium_dissociation_rate()
