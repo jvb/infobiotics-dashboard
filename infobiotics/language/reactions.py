@@ -1,6 +1,8 @@
 from multiset import multiset
 import re
-from infobiotics.commons.quantities import Quantity
+from infobiotics.commons.quantities import *
+from config import log, time_units, k_on_max
+
 
 # use http://re-try.appspot.com/ for live regex matching - use method 'match' and make sure 'VERBOSE' is on
 
@@ -33,7 +35,7 @@ transformation_rule_matcher = re.compile("""
     (\s*\+\s*(\w+))*                                           # + b (+ ...)
     )?                                      
 )
-\s+                                                        # whitespace (one or more times)
+\s+ # whitespace (one or more times), so at least one space is required if there are no reactants (nothing to left of ->). This could be replaced with (?(reactants)\s*|\s+)? which doesn't need a space if there are no reactants but then we need a way to handle non-'-' prefixed rate/rate_id because '1->a' has 1 as a reactant.                                                        
 -*                                                         # - (zero or more times)
 (?P<rate_id>((\w+)|([+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?))?                                          # rate_id can nothing, a Python identifer or a number (int or float). Previous -* will greedily match away any '-' (minus) symbols
 (-*>)                                              # - (zero or more times) followed by > # -> (once)
@@ -128,7 +130,34 @@ transport_rule_matcher = re.compile("""
 #one_species_and_label = """\s*\[\s*(?P<reactant_here>(\w+))?\s*\](_(?P<reactant_label>\w+))? # reactant and label"""
 
 class reaction(object):
-#    _id_generator = id_generator('r')
+
+    def __repr__(self):
+        return self.repr()
+
+    def __str__(self):
+        return self.str()
+
+    def repr(self, indent='\t', indent_level=0, id=''):
+#        return "%s%s%sreaction(reactants_outside=%r, reactants_inside=%r, reactants_label='%s', products_outside=%r, products_inside=%r, products_label='%s', rate=%s)" % (indent, id, '=' if id != '' else '', self.reactants_outside, self.reactants_inside, self.reactants_label, self.products_outside, self.products_inside, self.products_label, self.rate)
+        return "%s%s%sreaction('%s')" % (indent * indent_level, id, '=' if id != '' else '', self.str())
+
+    def str(self, indent='', indent_level=0, comment=False):
+#        return '%s%s: %s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
+        return '%s%s%s[ %s ]%s -%s-> %s%s[ %s ]%s %s=%s %s' % (
+            indent * indent_level,
+            self.reactants_outside if self.reactants_outside is not None else '',
+            ' ' if len(self.reactants_outside) > 0 else '',
+            self.reactants_inside if self.reactants_inside is not None else '',
+            '_' + self.reactants_label if self.reactants_label is not None else '_l',
+            self.rate_id if self.rate_id is not None else 'c',
+            self.products_outside if self.products_outside is not None else '',
+            ' ' if len(self.products_outside) > 0 else '',
+            self.products_inside if self.products_inside is not None else '',
+            '_' + self.products_label if self.products_label is not None else '_l',
+            self.rate_id if self.rate_id is not None else 'c',
+            str(self.rate),
+            '' if not comment or self.comment is None else '# %s #' % self.comment
+        )
 
     def __init__(self, rule=None, rate=None, **kwargs):
 
@@ -158,7 +187,7 @@ class reaction(object):
                 raise ValueError('rule is not a string: % s' % rule)
             self.create_reaction_from_rule(rule)
 
-        print repr(self.rate) #TODO rate - see infobiotics.commons.quantities.units.calculators:conversion_function_from_units
+#        print repr(self.rate) #TODO rate - see infobiotics.commons.quantities.units.calculators:conversion_function_from_units
         if self.rate is None:
             raise ValueError("No rate could be determined for reaction%s." % " '%s'" % rule if rule is not None else '')
 
@@ -240,7 +269,7 @@ class reaction(object):
                 setattr(self, name, value)
             print
         else:
-            raise ValueError('Failed to create reaction from rule "%s".' % rule)
+            raise ValueError("Failed to create reaction from rule '%s'.\nAll rules require at least one space before '->'." % rule) #TODO examples of valid rules
 
         # if self.rate is None
         # try and get rate from (in this order):
@@ -256,7 +285,7 @@ class reaction(object):
 #        #TODO move below quantity parsing
 #        if not isinstance(self.rate, Quantity):
 #            if isinstance(self.rate, (int, float)):
-#                self.rate = self.rate * config.time_units ** -1
+#                self.rate = self.rate * time_units ** -1
 #            else:
 #                raise ValueError('...')
 
@@ -272,16 +301,18 @@ class reaction(object):
 #        except Exception, e:
 #            print 'eval exception', e
 
-        try:
-            self.rate = float(self.rate)
-        except ValueError:
+        if not isinstance(self.rate, Quantity):
             try:
-                self.rate = float(getattr(self, self.rate_id))
-                self.rate_id = 'c' # since rate_id is number we should make it a generic label
-            except ValueError, e: # float conversion failed
-                raise ValueError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
-            except AttributeError, e: # no attribute with name rate_id
-                raise AttributeError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
+                self.rate = float(self.rate)
+            except ValueError:
+                try:
+                    self.rate = float(getattr(self, self.rate_id))
+                    self.rate_id = 'c' # since rate_id is number we should make it a generic label
+                except ValueError, e: # float conversion failed
+                    raise ValueError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
+                except AttributeError, e: # no attribute with name rate_id
+                    raise AttributeError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
+
 
     def has_zeroth_order_reactants(self):
         reactants = multiset(self.reactants_outside + self.reactants_inside)
@@ -293,7 +324,6 @@ class reaction(object):
 
     def has_second_order_homo_reactants(self):
         '''a+a[], a+a=[a+a] hom'''
-        print len(self.reactants_outside), self.reactants_outside.cardinality(), len(self.reactants_inside), self.reactants_inside.cardinality()
         return True if (len(self.reactants_outside) == 1 and self.reactants_outside.cardinality() == 2) or (len(self.reactants_inside) == 1 and self.reactants_inside.cardinality() == 2) else False
 
     def has_second_order_hetero_reactants(self):
@@ -306,81 +336,193 @@ class reaction(object):
                 return False
             return True
         elif len(reactants) == 2:
-            if self.reactants_outside.cardinality() == 1 and self.reactants_inside.cardinality() == 1:
+            if (self.reactants_outside.cardinality() == 1 and self.reactants_inside.cardinality() == 1) or (self.reactants_outside.cardinality() == 2 and self.reactants_inside.cardinality() == 0) or (self.reactants_outside.cardinality() == 0 and self.reactants_inside.cardinality() == 2):
                 return True
-            elif self.reactants_outside.cardinality() == 2 and self.reactants_inside.cardinality() == 0:
-                return True
-            elif self.reactants_outside.cardinality() == 0 and self.reactants_inside.cardinality() == 2:
-                return True
-            return False
         return False
 
-    def has_zeroth_order_rate(self):
-        if not isinstance(self.rate, Quantity):
+
+    def can_rescale_rate(self, unitquantity):
+        try:
+            self.rate.rescale(unitquantity)
+        except ValueError, e: # couldn't rescale
+#            print e
             return False
-#        i = self.rate.dimensionality.items()
-##        if i[0]
-#        for k, v in self.rate.dimensionality.items():
-#        return
+        except AttributeError, e: # rate is float or int
+#            print e
+            return False
+        return True
+
+    def has_zeroth_order_rate(self):
+        return self.can_rescale_rate(molar * time_units ** -1)
 
     def has_first_order_rate(self):
-        if not isinstance(self.rate, Quantity):
-            return False
-        return
-
+        return self.can_rescale_rate(time_units ** -1)
+    
     def has_second_order_rate(self):
-        if not isinstance(self.rate, Quantity):
-            return False
-        return
+        return self.can_rescale_rate((molar ** -1) * (time_units ** -1))
 
     def has_equilibrium_dissociation_rate(self):
-        if not isinstance(self.rate, Quantity):
-            return False
-        return
+        return self.can_rescale_rate(molar)
 
 
+def stochastic_rate_constant(reaction, volume=1):
+    '''Checks whether rate constant is appropriate for reactants and raises ValueError if conversion not possible.'''
+    
+    V = volume.rescale(metre ** 3)
+    N = N_A * (mole ** -1)
 
-    def __repr__(self):
-        return self.repr()
+    k = reaction.rate
+    
+    if k < 0:
+        raise ValueError('Reaction rates cannot be less than zero.')
+    
+    k_on_max = k_on_max
+    if reaction.has_equilibrium_dissociation_rate():
+        K_D = k
+        del(k)
+    
+    # convert rate to first order if not a quantity     
+    if isinstance(reaction.rate, (int, float)):
+        k = k * time_units ** -1
+                      
+    more_than_3_reactants_error = ValueError("Stochastic simulation algorithm cannot handle reactions with more than 2 reactants '%s'." % reaction)
+                        
+    # rate is stochastic rate constant already (?)
+    if reaction.has_first_order_rate():
+        if not reaction.has_first_order_reactants():
+            if reaction.has_zeroth_order_reactants():
+                log.info("Using first order rate for zeroth order reaction '%s'." % reaction)
+            elif reaction.has_second_order_homo_reactants():
+                log.info("Using first order rate for homogenous second order reaction '%s'." % reaction)
+            elif reaction.has_second_order_hetero_reactants():
+                log.info("Using first order rate for heterogenous second order reaction '%s'." % reaction)
+            else:
+                raise more_than_3_reactants_error 
+        c = k.rescale(time_units ** -1)
+    
+    if reaction.has_zeroth_order_reactants():
+        if reaction.has_zeroth_order_rate():
+            # convert to first order
+            c = (N * V * k.rescale(molar / second)).rescale(time_units ** -1)
+        else:
+            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for zeroth order reaction '%s'." % (k, reaction))
+    elif reaction.has_first_order_reactants():
+        if reaction.has_first_order_rate():
+            # rescale rate to time_units
+            c = k.rescale(time_units ** -1) # don't expect to ever reach here
+        elif reaction.has_equilibrium_dissociation_rate():
+            # use K_D and k_on_max to calculate k_off 
+            k_off = K_D * k_on_max
+            c = k_off.rescale(time_units ** -1)
+        else:
+            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for first order reaction '%s'." % (k, reaction))
+    elif reaction.has_second_order_homo_reactants():
+        if reaction.has_second_order_rate():
+            # convert rate to first order 
+            c = ((2 * k.rescale(molar ** -1 * second ** -1)) / (N * V)).rescale(time_units ** -1)
+        elif reaction.has_equilibrium_dissociation_rate():
+            # use k_on_max instead
+            c = ((2 * k_on_max.rescale(molar ** -1 * second ** -1)) / (N * V)).rescale(time_units ** -1)
+        else:
+            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for homogenous second order reaction '%s'." % (k, reaction))
+    elif reaction.has_second_order_hetero_reactants():
+        if reaction.has_second_order_rate():
+            # convert rate to first order
+            c = (k.rescale(molar ** -1 * second ** -1) / (N * V)).rescale(time_units ** -1)
+        elif reaction.has_equilibrium_dissociation_rate():
+            # use k_on_max instead
+            c = (k_on_max.rescale(molar ** -1 * second ** -1) / (N * V)).rescale(time_units ** -1)
+        else:
+            raise ValueError("Cannot convert deterministic reaction rate constant '%r' for heterogenous second order  '%s'." % (k, reaction))
+    else:
+        raise more_than_3_reactants_error
+#    print c
+    return c
 
-    def __str__(self):
-        return self.str()
 
-    def repr(self, indent='\t', indent_level=0, id=''):
-#        return "%s%s%sreaction(reactants_outside=%r, reactants_inside=%r, reactants_label='%s', products_outside=%r, products_inside=%r, products_label='%s', rate=%s)" % (indent, id, '=' if id != '' else '', self.reactants_outside, self.reactants_inside, self.reactants_label, self.products_outside, self.products_inside, self.products_label, self.rate)
-        return "%s%s%sreaction('%s')" % (indent * indent_level, id, '=' if id != '' else '', self.str())
-
-    def str(self, indent='', indent_level=0, comment=False):
-#        return '%s%s: %s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
-        return '%s%s%s[ %s ]%s -%s-> %s%s[ %s ]%s %s=%s %s' % (
-            indent * indent_level,
-            self.reactants_outside if self.reactants_outside is not None else '',
-            ' ' if len(self.reactants_outside) > 0 else '',
-            self.reactants_inside if self.reactants_inside is not None else '',
-            '_' + self.reactants_label if self.reactants_label is not None else '_l',
-            self.rate_id if self.rate_id is not None else 'c',
-            self.products_outside if self.products_outside is not None else '',
-            ' ' if len(self.products_outside) > 0 else '',
-            self.products_inside if self.products_inside is not None else '',
-            '_' + self.products_label if self.products_label is not None else '_l',
-            self.rate_id if self.rate_id is not None else 'c',
-            str(self.rate),
-            '' if not comment or self.comment is None else '# %s #' % self.comment
-        )
 
 
 if __name__ == '__main__':
-    from infobiotics.language import *
-#    r = reaction('a -> b 5*10^-3 M^-1 s**-1')
-#    r = reaction('a -> b', rate=5e-3 * M ** -1 * seconds ** -1)
 
-    units = M ** -1 * seconds ** -1
 
-    rates = np.linspace(0, 1, 11)
-
-    for rate in rates:
-        print rate * units,
-        system = model(compartment(reaction('a -> b', rate=rate)))
-    print
-    print system
+    # test reaction.has_*_order_reactants(self) #TODO move to test suite
+    
+    assert     reaction(' ->a', 1).has_zeroth_order_reactants() # '->a' fails. #TODO allow zeroth order reactions?
+    assert not reaction(' ->a', 1).has_first_order_reactants()
+    assert not reaction(' ->a', 1).has_second_order_homo_reactants()
+    assert not reaction(' ->a', 1).has_second_order_hetero_reactants()
+    
+    assert not reaction('a ->  ', 1).has_zeroth_order_reactants()
+    assert     reaction('a ->  ', 1).has_first_order_reactants()
+    assert not reaction('a ->  ', 1).has_second_order_homo_reactants()
+    assert not reaction('a ->  ', 1).has_second_order_hetero_reactants()
+    
+    assert not reaction('a + a ->  ', 1).has_zeroth_order_reactants()
+    assert not reaction('a + a ->  ', 1).has_first_order_reactants()
+    assert     reaction('a + a ->  ', 1).has_second_order_homo_reactants()
+    assert not reaction('a + a ->  ', 1).has_second_order_hetero_reactants()
+    assert not reaction('a [a] ->  ', 1).has_second_order_homo_reactants()
+    
+    assert not reaction('a + b ->  ', 1).has_zeroth_order_reactants()
+    assert not reaction('a + b ->  ', 1).has_first_order_reactants()
+    assert not reaction('a + b ->  ', 1).has_second_order_homo_reactants()
+    assert     reaction('a + b ->  ', 1).has_second_order_hetero_reactants()
+    assert     reaction('a [a] ->  ', 1).has_second_order_hetero_reactants()
+    
+    assert not reaction('a + a + a ->  ', 1).has_zeroth_order_reactants()
+    assert not reaction('a + a + a ->  ', 1).has_first_order_reactants()
+    assert not reaction('a + a + a ->  ', 1).has_second_order_homo_reactants()
+    assert not reaction('a + a + a ->  ', 1).has_second_order_hetero_reactants()
+    
+    
+    # test reaction.has_*_order_rate(self) #TODO move to test suite
+    
+    rate = 1.0
+    zeroth = rate * millimolar * time_units ** -1
+    first = rate * time_units ** -1
+    second = rate * ((molar ** -1) * (time_units ** -1))
+    K_D = rate * molar
+    
+    assert     reaction(rate=zeroth).has_zeroth_order_rate()
+    assert not reaction(rate=first).has_zeroth_order_rate()
+    assert not reaction(rate=second).has_zeroth_order_rate()
+    assert not reaction(rate=K_D).has_zeroth_order_rate()
+    
+    assert not reaction(rate=zeroth).has_first_order_rate()
+    assert     reaction(rate=first).has_first_order_rate()
+    assert not reaction(rate=second).has_first_order_rate()
+    assert not reaction(rate=K_D).has_first_order_rate()
+    
+    assert not reaction(rate=zeroth).has_second_order_rate()
+    assert not reaction(rate=first).has_second_order_rate()
+    assert     reaction(rate=second).has_second_order_rate()
+    assert not reaction(rate=K_D).has_second_order_rate()
+    
+    assert not reaction(rate=zeroth).has_equilibrium_dissociation_rate()
+    assert not reaction(rate=first).has_equilibrium_dissociation_rate()
+    assert not reaction(rate=second).has_equilibrium_dissociation_rate()
+    assert     reaction(rate=K_D).has_equilibrium_dissociation_rate()
+    
+    assert not reaction(rate=1).has_zeroth_order_rate()
+    assert not reaction(rate=1).has_first_order_rate()
+    assert not reaction(rate=1).has_second_order_rate()
+    assert not reaction(rate=1).has_equilibrium_dissociation_rate()
+    
+    
+    exit()
+    
+    
+#    from infobiotics.language import *
+##    r = reaction('a -> b 5*10^-3 M^-1 s**-1')
+##    r = reaction('a -> b', rate=5e-3 * M ** -1 * seconds ** -1)
+#
+#    units = M ** -1 * seconds ** -1
+#
+#    rates = np.linspace(0, 1, 11)
+#
+#    for rate in rates:
+#        print rate * units,
+#        system = model(compartment(reaction('a -> b', rate=rate)))
+#    print
+#    print system
 

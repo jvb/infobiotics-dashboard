@@ -13,42 +13,6 @@ class products(specieslist): pass
 
 from infobiotics.language import *
 
-rate = 1.0
-zeroth = rate * molar * config.time_units ** -1
-zeroth2 = rate * config.time_units ** -1 * molar
-first = rate * config.time_units ** -1
-second = rate * ((molar ** -1) * (config.time_units ** -1))
-K_D = rate * molar
-for rate in (zeroth, zeroth2, first, second, K_D):
-    print rate, rate.dimensionality.items()
-
-# correct
-#assert reaction('->a', 1).has_zeroth_order_reactants() #TODO allow zeroth order reactions?
-assert reaction('a ->  ', 1).has_first_order_reactants()
-assert reaction('a + a ->  ', 1).has_second_order_homo_reactants()
-assert reaction('a + b ->  ', 1).has_second_order_hetero_reactants()
-
-# incorrect
-assert not reaction('a ->  ', 1).has_second_order_homo_reactants()
-assert not reaction('a ->  ', 1).has_second_order_hetero_reactants()
-
-assert not reaction('a + a ->  ', 1).has_first_order_reactants()
-assert not reaction('a + a ->  ', 1).has_second_order_hetero_reactants()
-
-assert not reaction('a + b ->  ', 1).has_first_order_reactants()
-assert not reaction('a + b ->  ', 1).has_second_order_homo_reactants()
-
-assert not reaction('a + a + a ->  ', 1).has_first_order_reactants()
-assert not reaction('a + a + a ->  ', 1).has_second_order_homo_reactants()
-assert not reaction('a + a + a ->  ', 1).has_second_order_hetero_reactants()
-
-
-
-
-exit()
-
-
-
 def rxn(reactants=reactants(), products=products(), rate=zero):
     '''A factory function for reaction object.
 

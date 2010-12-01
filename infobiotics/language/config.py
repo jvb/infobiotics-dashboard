@@ -40,14 +40,9 @@ zero = 0 # a stochastic rate constant of zero (time units don't matter because z
 k_on_max = 1e6 * 1 / (M * s) # the maximal (deterministic) rate of association between two reactants (ref. Northrup), used to calculate k_off from K_D
 
 
-#class joining(str):
-#    def join(self, *args):
-#        '''Accepts multiple args and passes them to str.join as a tuple.'''
-#        return super(str, self).join(args)
-#    def __call__(self, *args):
-#        return self.join(*args)
-#joiner = joining('_') # used to indicate non-covalent bonding between two species
 joiner = '_' # used when, for example, 'a' is complexed with 'b' to produce 'a_b'
 def join(*args):
     '''Accepts multiple args and passes them to str.join as a tuple.'''
+    if len(args) == 1:
+        return joiner.join(*args)
     return joiner.join(args)
