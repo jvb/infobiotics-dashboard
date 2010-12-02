@@ -3,37 +3,71 @@ import re
 from infobiotics.commons.quantities import *
 import config
 
-
-
 # use http://re-try.appspot.com/ for live regex matching - use method 'match' and make sure 'VERBOSE' is on
 
-rule_comment = """\s*(\#\s*(?P<comment>[ ,=+/*\?\-\^()"'\w\t]+)\s*\#??\s*)? # optional comment without new lines or '#' but including some math expressions with optional closing '#'"""
+id = r'\w+'
+id = r'[_A-Za-z][_A-Za-z1-9]*' # http://homepage.mac.com/s_lott/books/python/html/p04/p04c04_re.html#modules-re
 
-transformation_rule_matcher = re.compile("""
-    # ' r1 : a + b [ c + d ]_l1 k1-> e + f [ g + h ]_l2     k2 = 0.1 '
-    # ' r1 : (a+b|a + b [ c + d ]_l1) k1-> (e + f|e + f [ g + h ]_l2)     k2 = 0.1 '        
+species = id + r'(\s*\+\s*' + id + r')*' # ab [+ c [+ ...]] but not 2d [+ e]
+
+comment = r'\s*(\#\s*(?P<comment>[ ,=+/*\?\-\^()"\'\w\t]+)\s*\#??\s*)?' # optional comment without new lines or '#' but including some math expressions with optional closing '#'"""
+
+# ' r1 : a + b [ c + d ]_l1 k1-> e + f [ g + h ]_l2     k2 = 0.1 '
+# ' r1 : (a+b|a + b [ c + d ]_l1) k1-> (e + f|e + f [ g + h ]_l2)     k2 = 0.1 '        
+
+rule_id = r'((?P<rule_id>\w+)\s*\:)?' # 'r1' from ' r1: '
+
+reactants_outside = r'(?P<reactants_outside>%s)' % species
+reactants_inside = r'(?P<reactants_inside>%s)' % species
+reactants_label = r'(?P<reactants_label>\w+)'
+reactants = r'(?P<reactants>%s)' % species
+
+products_outside = r'(?P<products_outside>%s)' % species
+products_inside = r'(?P<products_inside>%s)' % species
+products_label = r'(?P<products_label>\w+)'
+products = r'(?P<products>%s)' % species
+
+number = r'([-+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?'
+
+rate_id = r'(?P<rate_id>(%s|%s))?' % (id, number) # rate_id can nothing, a Python identifer or a number (int or float). Previous -* will greedily match away any '-' (minus) symbols
+rate_id2 = r'(?P<rate_id2>(%s|%s))?'
+
+
+transformation_rule = r'''
+\s*%s\s*
+(%s?\s*\[\s*%s?\s*\](_%s)?|%s?)\s*-*
+%s
+-*>
+\s*
+(%s?\s*\[\s*%s?\s*\](_%s)?|%s?)
+(?(products_inside)\s+|\s*)?
+(?(products)\s+|\s*)?
+''' % (
+    rule_id, reactants_outside, reactants_inside, reactants_label, reactants,
+    rate_id,
+    products_outside, products_inside, products_label, products,
+)
+
+transformation_rule = """
     \s*
     ((?P<rule_id>\w+)\s*\:)?                                   # r1:
     \s*
 (
     (?P<reactants_outside>
-    (\w+)                                                      # a
-    (\s*\+\s*(\w+))*                                           # + b (+ ...)
+    [_A-Za-z][_A-Za-z1-9]*(\s*\+\s*[_A-Za-z][_A-Za-z1-9]*)*
     )?                                      
     \s*
     \[                                                         # [
     \s*
     (?P<reactants_inside>
-    (\w+)                                                      # c
-    (\s*\+\s*(\w+))*                                           # + d (+ ...)
-    )?
+[_A-Za-z][_A-Za-z1-9]*(\s*\+\s*[_A-Za-z][_A-Za-z1-9]*)*    
+)?
     \s*
     \]                                                         # ]
     (_(?P<reactants_label>\w+))?                               # _l1
 |                                                              # OR
     (?P<reactants>
-    (\w+)                                                      # a
-    (\s*\+\s*(\w+))*                                           # + b (+ ...)
+[_A-Za-z][_A-Za-z1-9]*(\s*\+\s*[_A-Za-z][_A-Za-z1-9]*)*
     )?                                      
 )
 \s+ # whitespace (one or more times), so at least one space is required if there are no reactants (nothing to left of ->). This could be replaced with (?(reactants)\s*|\s+)? which doesn't need a space if there are no reactants but then we need a way to handle non-'-' prefixed rate/rate_id because '1->a' has 1 as a reactant.                                                        
@@ -43,56 +77,52 @@ transformation_rule_matcher = re.compile("""
 \s*
 (
     (?P<products_outside>
-    (\w+)                                                      # e
-    (\s*\+\s*(\w+))*                                           # + f (+ ...)
+[_A-Za-z][_A-Za-z1-9]*(\s*\+\s*[_A-Za-z][_A-Za-z1-9]*)*
     )?                                      
     \s*
     \[                                                         # ]
     \s*
     (?P<products_inside>
-    (\w+)                                                      # g
-    (\s*\+\s*(\w+))*                                           # + h (+ ...)
+[_A-Za-z][_A-Za-z1-9]*(\s*\+\s*[_A-Za-z][_A-Za-z1-9]*)*
     )?                                      
     \s*
     \]                                                         # ]
     (_(?P<products_label>\w+))?                                # _l2
 |
-    (?P<products>
-    (\w+)                                                      # a
-    (\s*\+\s*(\w+))*                                           # + b (+ ...)
-    )?                                      
-)                             
-    (                                                        
-    \s+                                                        # whitespace (one or more times)
+(?P<products>
+    [_A-Za-z][_A-Za-z1-9]*(\s*\+\s*[_A-Za-z][_A-Za-z1-9]*)* # a [+ b [+ ...]] and not 1 + a
+)?                                  
+)?                       
+
+
+#    \s+                                                        # whitespace (one or more times)
+(?(products)\s*|\s+)?
+
     (?(rate_id)(\w+)?|(?P<rate_id2>\w+))?                      # rate_id2 if rate_id not specified (optional and not greedy '??')
     (
     \s*
     \=*                                                         # zero or more =
-    \s*
-    [+]?(?P<rate>\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?            # 0.01 (any float or int), possibly preceeded but a '+' (plus) but never a '-' (minus)
     )?
-    )?
-""" + rule_comment, re.VERBOSE)
-
-
-new_rate_regex = '''
+(
 \s*
-(?P<rate>([-+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+\s*)?)
+(?P<rate>([-+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+\s*)?)? # last ? needed for "a >b 5 * molar" as 5 is rate_id
 \s*
-((?P<units>[*/]\s*[-+.\w]\s*[-+*/.\^\w\s]+)?)
+(?P<units>([*/]\s*[-+.\w]\s*[-+*/()\^\w\s]+)|([^*/#]([^#]|[.])*))?
 \s*
-0.1 * micromolar / hour
-0.2 * micromolar
-100 / hour
-250 / micromolar / hour
+)?
+""" + comment
 
-n */ molar ** -1 * 
+rate = r'(?P<rate>%s)' % number
+
+units = """(?P<units>([*/]\s*[-+.\w]\s*[-+*/()\^\w\s]+)|([^*/#]([^#]|[.])*))"""
+
+transformation_rule = """(\s*%s?\s*%s)?\s*)?%s""" % (rule_id,
+
+                                                     rate, units, comment)
+print transformation_rule
 
 
-label = self.__regex.sub(r"\g<1>*\g<2>", label.replace('^', '**').replace('·', '*')) # from quantities.registry.__getitem__
-
-'''
-
+transformation_rule_matcher = re.compile(transformation_rule, re.VERBOSE)
 
 transport_rule_matcher = re.compile("""
 
@@ -106,36 +136,36 @@ transport_rule_matcher = re.compile("""
 # reaction('PQS x-> (1,0)', x=0.1)
 # reaction('PQS -> (1,0)' x, x=0.1)
 # reaction('PQS -> (1,0) x', x=0.1, rate=0.2)
-  
 
-    \s*
-    ((?P<rule_id>\w+)\s*\:)? # nothing or 'r1:' or 'r_1' or 'r:' or 'r :' but not ':'
-    \s*
 
-\s*\[\s*(?P<reactant_here>(\w+))?\s*\](_(?P<reactant_label>\w+))? # reactant and label
+    \s *
+    ((?P < rule_id > \w +)\s * \:)? # nothing or 'r1:' or 'r_1' or 'r:' or 'r :' but not ':'
+    \s *
 
-\s*=+\s*\(\s*(?P<vector>[-]?\d+\s*,\s*[-]?\d+\s*)\)\s*=+\s*\[\s*\] # vector between one or more equals
+\s * \[\s * (?P < reactant_here > (\w +))?\s * \](_(?P < reactant_label > \w +))? # reactant and label
 
-\s+                                                        # whitespace (one or more times)
--*                                                         # - (zero or more times)
-(?P<rate_id>((\w+)|([+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?))?                                          # rate_id can be a Python identifer or a positive number (int or float). Previous -* will greedily match away any '-' (minus) symbols
+\s *= +\s * \(\s * (?P < vector > [-]?\d + \s * , \s * [-]?\d + \s *)\)\s *= +\s * \[\s * \] # vector between one or more equals
+
+\s + # whitespace (one or more times)
+-* # - (zero or more times)
+(?P < rate_id > ((\w +) | ([+]?\d + (\.\d *)? | \.\d +)([eE][- +]?\d +)?))?                                          # rate_id can be a Python identifer or a positive number (int or float). Previous -* will greedily match away any '-' (minus) symbols
 (-*>)                                              # - (zero or more times) followed by > # -> (once)
-\s*
+\s *
 
-\[\s*\](_(?P<reactant_label2>\w+))?
-\s*=+\s*\(\s*(?P<vector2>[-]?\d+\s*,\s*[-]?\d+\s*)\)\s*=+\s*\[\s*(?P<product_there>(\w+))?\s*\]
+\[\s * \](_(?P < reactant_label2 > \w +))?
+\s *= +\s * \(\s * (?P < vector2 > [-]?\d + \s * , \s * [-]?\d + \s *)\)\s *= +\s * \[\s * (?P < product_there > (\w +))?\s * \]
 
-    (                                                        
-    \s+                                                        # whitespace (one or more times)
-    (?(rate_id)(\w+)?|(?P<rate_id2>\w+))??                      # rate_id2 if rate_id not specified (optional and not greedy '??')
     (
-    \s*
-    \=*                                                         # zero or more =
-    \s*
-    [+]?(?P<rate>\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?            # 0.01 (any float or int), possibly preceeded but a '+' (plus) but never a '-' (minus)
+    \s + # whitespace (one or more times)
+    (?(rate_id)(\w +)? | (?P < rate_id2 > \w +))??                      # rate_id2 if rate_id not specified (optional and not greedy '??')
+    (
+    \s *
+    \= * # zero or more =
+    \s *
+    [+]?(?P < rate > \d + (\.\d *)? | \.\d +)([eE][- +]?\d +)?            # 0.01 (any float or int), possibly preceeded but a '+' (plus) but never a '-' (minus)
     )?
     )?
-""" + rule_comment, re.VERBOSE)
+""" + comment, re.VERBOSE)
 
 ##TODO attempt to refactor regex as composed of smaller regexes - could use Meld for comparing transport_rule_matcher and transformation_rule_matcher strings
 #
@@ -164,7 +194,7 @@ class reaction(object):
 
     def str(self, indent='', indent_level=0, comment=False):
 #        return '%s%s: %s%s[ %s ]_%s -%s-> %s%s[ %s ]_%s %s = %s' % (
-        return '%s%s%s[ %s ]%s -%s-> %s%s[ %s ]%s %s=%s %s' % (
+        return '%s%s%s[ %s ]%s -%s-> %s%s[ %s ]%s %s=%s %s%s' % (
             indent * indent_level,
             self.reactants_outside if self.reactants_outside is not None else '',
             ' ' if len(self.reactants_outside) > 0 else '',
@@ -177,11 +207,21 @@ class reaction(object):
             '_' + self.products_label if self.products_label is not None else '_l',
             self.rate_id if self.rate_id is not None else 'c',
             str(self.rate),
+            str(self.units),
             '' if not comment or self.comment is None else '# %s #' % self.comment
         )
 
     def __init__(self, rule=None, rate=None, **kwargs):
+        '''Uni- or bimolecular reaction that either transforms or transports
+        molecular species in a compartment and possibly between an enclosed, 
+        enclosing or neighbouring compartment.  
+        
+        Keyword arguments (*kwargs*) and *rate* will override values from 
+        *rule*.
+        
+        '''
 
+        # set defaults
         self.rule_id = None
         self.reactants_outside = multiset()
         self.reactants_inside = multiset()
@@ -191,37 +231,215 @@ class reaction(object):
         self.products_label = None
         self.rate_id = None
         self.rate_id2 = None
-        self.rate = rate
+        self.rate = rate # won't be overwritten by rule
         self.comment = None
 
-        self.reactant_label = None
-        self.reactant_here = multiset()
-        self.vector = None
-        self.reactant_label2 = None
-        self.vector2 = None
-        self.product_there = multiset()
+#        self.reactant_label = None
+#        self.reactant_here = multiset()
+#        self.vector = None
+#        self.reactant_label2 = None
+#        self.vector2 = None
+#        self.product_there = multiset()
 
+        # set kwargs that rate_id might refer to
         for k, v in kwargs.items(): setattr(self, k, v)
 
         if rule is not None:
             if not isinstance(rule, basestring):
-                raise ValueError('rule is not a string: % s' % rule)
-            self.create_reaction_from_rule(rule)
+                raise ValueError("Reaction rule '%s' is not a string." % rule)
+            self.create_self_from_rule(rule)
 
-#        print repr(self.rate) #TODO rate - see infobiotics.commons.quantities.units.calculators:conversion_function_from_units
+        # override rule values with kwargs #TODO ?
+        for k, v in kwargs.items(): setattr(self, k, v)
+
         if self.rate is None:
             raise ValueError("No rate could be determined for reaction%s." % " '%s'" % rule if rule is not None else '')
 
-        #TODO needs testing
-        if len(self.reactants_outside) > 2:
-            raise ValueError("Rule ' % s' has too many reactants outside, a maximum of 2 reactants is permitted for any reaction." % self.str())
-        elif len(self.reactants_inside) > 2:
-            raise ValueError("Rule ' % s' has too many reactants inside %s, a maximum of 2 reactants is permitted for any reaction." % (self.str(), self.reactants_label))
-        elif len(self.reactants_outside) + len(self.reactants_inside) > 2:
-            raise ValueError("Rule ' % s' has too many reactants, a maximum of 2 reactants is permitted for any reaction." % self.str())
+        # validation
 
-#    @classmethod #TODO ?
-    def create_reaction_from_rule(self, rule):
+#        if len(self.reactants_outside) > 2:
+#            raise ValueError("Rule ' % s' has too many reactants outside, a maximum of 2 reactants is permitted for any reaction." % self.str())
+#        elif len(self.reactants_inside) > 2:
+#            raise ValueError("Rule ' % s' has too many reactants inside %s, a maximum of 2 reactants is permitted for any reaction." % (self.str(), self.reactants_label))
+#        elif len(self.reactants_outside) + len(self.reactants_inside) > 2:
+#            raise ValueError("Rule ' % s' has too many reactants, a maximum of 2 reactants is permitted for any reaction." % self.str())
+        less_than_1_reactant_error = ValueError("mcss cannot handle reactions with less than 1 reactant '%s'." % reaction)
+        more_than_2_reactants_error = ValueError("mcss cannot handle reactions with more than 2 reactants '%s'." % reaction)
+        if self.has_zeroth_order_reactants():
+            raise less_than_1_reactant_error
+        elif not any((self.has_first_order_reactants(), self.has_second_order_homo_reactants(), self.has_second_order_hetero_reactants())):
+            raise more_than_2_reactants_error
+
+
+        if self.rate is None and self.rate_id is None:
+            print 'got here'
+
+        if self.rate_id is None and self.rate_id2 is None:
+            print 'got here too'
+
+#        # rate is stochastic rate constant already (?)
+#        if reaction.has_first_order_rate():
+#            if not reaction.has_first_order_reactants():
+#                if reaction.has_second_order_homo_reactants():
+#                    config.log.info("Using first order rate for homogenous second order reaction '%s'." % reaction)
+#                elif reaction.has_second_order_hetero_reactants():
+#                    config.log.info("Using first order rate for heterogenous second order reaction '%s'." % reaction)
+##                if reaction.has_zeroth_order_reactants():
+##                    config.log.info("Using first order rate for zeroth order reaction '%s'." % reaction)
+##                else:
+##                    raise more_than_2_reactants_error
+
+        # test whether rate with units can be converted into a stochastic rate constant 
+        if reaction.has_zeroth_order_rate():
+            try:
+                self.rate.rescale(molar / second)
+            except ValueError:
+                raise ValueError("Cannot convert deterministic reaction rate constant '%s' for reaction '%s'." % (self.rate, reaction))
+        elif reaction.has_first_order_rate():
+            pass # no conversion necessary
+        elif reaction.has_second_order_rate():
+            try:
+                V = 1 * metre ** 3
+                N = N_A * (mole ** -1)
+                self.rate.rescale(molar ** -1 * second ** -1) / (N * V)
+            except ValueError:
+                raise ValueError("Cannot convert deterministic reaction rate constant '%s' for reaction '%s'." % (self.rate, reaction))
+        elif reaction.has_equilibrium_dissociation_rate():
+            try:
+                self.rate * k_on_max
+            except ValueError:
+                raise ValueError("Cannot convert equilibrium constant '%s' for reaction '%s'." % (self.rate, reaction))
+        else:
+            print 'got here'
+
+
+    @classmethod
+    def create_from_rule(self, rule, **kwargs):
+        if transformation_rule_matcher.match(rule):
+            match = transformation_rule_matcher.match(rule) # can't think of a good way to do this without having to call match twice
+            reactants_set = False
+            products_set = False
+            for name, value in match.groupdict().items():
+                if name in ('reactants_outside', 'reactants_inside',
+                            'products_outside', 'products_inside',
+                            'reactants', 'products',
+                ):
+                    # reactants or products are specified only when '[ ]' missing
+                    if name == 'reactants' and value is not None:
+                        reactants_set = True
+                    elif name == 'products' and value is not None:
+                        products_set = True
+                    if name == 'reactants_inside' and reactants_set:
+                        continue
+                    elif name == 'products_inside' and products_set:
+                        continue
+                    if name == 'reactants':
+                        name = 'reactants_inside'
+                    elif name == 'products':
+                        name = 'products_inside'
+                    if value is not None:
+                        # can construct multiset from a list of str where the same str value might appear more than once
+                        value = multiset([s.strip() for s in value.split(' + ')])
+                        del s # remove variable 's' from locals() as it could interfere with rate units
+                    else:
+                        value = multiset()
+                elif name == 'rate_id':
+                    if value is None:
+                        continue # don't overwrite value from rate_id if already set
+                elif name == 'rate_id2':
+                    if match.groupdict()['rate_id'] is None:
+    #                    if value is None:
+    #                        raise ValueError('rate_id2 ignored if rate_id set otherwise mandatory')
+                        name = 'rate_id'
+                elif name in ('reactants_label', 'products_label') and value is None: #TODO do same for 'label' as for reactants and products
+                    continue
+                elif name == 'rate':
+                    if hasattr(self, 'rate') and self.rate is not None:
+                        continue # don't overwrite rate
+                elif name == 'comment' and value is not None:
+                    value = value.strip()
+                setattr(self, name, value)
+
+        elif transport_rule_matcher.match(rule):
+            match = transport_rule_matcher.match(rule)
+            for name, value in match.groupdict().items():
+                print name, value #TODO
+                if name in ('reactant_label', 'reactant_label2'):
+                    if value is not None:
+                        pass
+                elif name in ('vector', 'vector2'):
+                    pass
+                elif name in ('rate_id', 'rate_id2'):
+                    pass
+                elif name in ('reactant_here'):
+                    pass
+                elif name in ('product_there'):
+                    pass
+                elif name == 'rate':
+                    pass
+                elif name == 'rule_id': #TODO if value is None: use name in metacompartment and compartment
+                    pass
+                setattr(self, name, value)
+            print
+        else:
+            raise ValueError("Failed to create reaction from rule '%s'.\nAll rules require at least one space before '->'." % rule) #TODO examples of valid rules
+
+        if self.rate is None and self.rate_id is None:
+            print 'got here'
+
+#        if self.rate_id is None and self.rate_id2 is None:
+#            print 'got here too'
+
+        # if self.rate is None
+        # try and get rate from (in this order):
+        #     rate group in rule, 
+        #     rate metadata on reaction, # enables generic overriding
+        #     metadata attribute with same name as rule_id on reaction
+        # see test_reaction_rate.py  
+
+        if self.rate is None and self.rate_id is not None:
+            self.rate = self.rate_id
+
+        if isinstance(self.rate, basestring):
+            try:
+                self.rate = float(self.rate)
+            except ValueError:
+                try:
+                    self.rate = float(getattr(self, self.rate_id))
+                    self.rate_id = 'c' # since rate_id is number we should make it a generic label
+                except ValueError, e: # float conversion failed
+                    raise ValueError("Couldn't assign a rate for rule '%s' from 'rate'." % rule)
+                except AttributeError, e: # no attribute with name rate_id
+                    raise AttributeError("Couldn't assign a rate for rule '%s' from 'rate' or '%s'." % (rule, self.rate_id))
+
+        if not isinstance(self.rate, Quantity):
+            if isinstance(self.rate, (int, float)):
+                if self.units is None: # rate was immediately followed by a comment or nothing
+                    # assume rate is stochastic rate per default time units #TODO log?
+                    self.rate = self.rate / config.time_units  # creates Quantity
+                else:
+                    self.units = self.units.replace('^', '**')
+                    try:
+                        self.rate = eval(self.rate + self.units) # creates Quantity
+                        # rate and units are syntactically OK
+                    except SyntaxError, e:
+                        print e
+                        self.units = self.units.strip()
+                        error = "Couldn't find or parse rate units ' % s'." % self.units
+                        ch = self.units[0]
+                        if ch not in ' */ ':
+                            error += " Rate must be either multiplied ('*') or divided (' / ') by units, e.g. '0.1e-2 * (micromolar / second)'."
+                        print error
+            else:
+                # not a Quantity, str, int or float
+                raise ValueError('Unknown rate type.')
+
+        #TODO check units are semantically OK
+
+        return reaction(**kwargs)
+
+
+    def create_self_from_rule(self, rule):
         if transformation_rule_matcher.match(rule):
             match = transformation_rule_matcher.match(rule)
 #            print 'here', match.groupdict()['rate']
@@ -268,6 +486,7 @@ class reaction(object):
                     value = value.strip()
                 setattr(self, name, value)
 
+        #TODO transport rules
         elif transport_rule_matcher.match(rule):
             match = transport_rule_matcher.match(rule)
             for name, value in match.groupdict().items():
@@ -292,37 +511,23 @@ class reaction(object):
         else:
             raise ValueError("Failed to create reaction from rule '%s'.\nAll rules require at least one space before '->'." % rule) #TODO examples of valid rules
 
+        if self.rate is None and self.rate_id is None:
+            print 'got here'
+
+        if self.rate_id is None and self.rate_id2 is None:
+            print 'got here too'
+
         # if self.rate is None
         # try and get rate from (in this order):
         #     rate group in rule, 
         #     rate metadata on reaction, # enables generic overriding
         #     metadata attribute with same name as rule_id on reaction
         # see test_reaction_rate.py  
+
         if self.rate is None and self.rate_id is not None:
             self.rate = self.rate_id
 
-        # now convert to quantity or float
-
-#        #TODO move below quantity parsing
-#        if not isinstance(self.rate, Quantity):
-#            if isinstance(self.rate, (int, float)):
-#                self.rate = self.rate * config.time_units ** -1
-#            else:
-#                raise ValueError('...')
-
-#        #TODO parse quantity using eval
-#        print self.rate,
-#        maybe_quantity = False
-#        for ch in self.rate:
-#            if ch in '':
-#                maybe_quantity = True
-#        try:
-#            self.rate = eval(self.rate)
-#            print self.rate
-#        except Exception, e:
-#            print 'eval exception', e
-
-        if not isinstance(self.rate, Quantity):
+        if isinstance(self.rate, basestring):
             try:
                 self.rate = float(self.rate)
             except ValueError:
@@ -333,6 +538,33 @@ class reaction(object):
                     raise ValueError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
                 except AttributeError, e: # no attribute with name rate_id
                     raise AttributeError("Couldn't assign a rate with id '%s' from metadata: %s" % (self.rate_id, e))
+
+        if not isinstance(self.rate, Quantity):
+            if isinstance(self.rate, (int, float)):
+                if self.units is None: # rate was immediately followed by a comment or nothing
+                    # assume rate is stochastic rate per default time units #TODO log?
+                    self.rate = self.rate / config.time_units  # creates Quantity
+                else:
+                    self.units = self.units.replace('^', '**')
+                    try:
+                        self.rate = eval(self.rate + self.units) # creates Quantity
+                        # rate and units are syntactically OK
+                    except SyntaxError, e:
+                        print e
+                        self.units = self.units.strip()
+                        error = "Couldn't find or parse rate units '%s'." % self.units
+                        ch = self.units[0]
+                        if ch not in '*/':
+                            error += " Rate must be either multiplied ('*') or divided ('/') by units, e.g. '0.1e-2 * (micromolar / second)'."
+                        print error
+            else:
+                # not a Quantity, str, int or float
+                raise ValueError('Unknown rate type.')
+        else:
+            # set self.units from Quantity
+            self.units = self.rate.dimensionality #TODO test
+
+        #TODO check units are semantically OK
 
 
     def has_zeroth_order_reactants(self):
@@ -484,11 +716,17 @@ if __name__ == '__main__':
 
     from infobiotics.language import *
 
-    r1 = reaction('a -> b 5*10^-3 M^-1 s**-1')
-    print r1
+    reaction.create_from_rule('a -> b')
+    exit()
 
-    r2 = reaction('a -> b', rate=5e-3 * M ** -1 * seconds ** -1)
-    print r2
+    r = reaction('a -> b 0.1e-3 * M / s')
+#    r = reaction('a -> b 0.1e-3  molar^-1 * s**-1')
+
+#    r1 = reaction('a -> b 5*10^-3 M^-1 s**-1')
+#    print r1
+#
+#    r2 = reaction('a -> b', rate=5e-3 * M ** -1 * seconds ** -1)
+#    print r2
 
 #    units = M ** -1 * seconds ** -1
 #
