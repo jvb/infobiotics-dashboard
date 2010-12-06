@@ -3,7 +3,7 @@ from infobiotics.commons.quantities import *
 import config
 from reactions import reaction
 from species import species
-from infobiotics.commons.sequences import iterable, flatten 
+from infobiotics.commons.sequences import iterable, flatten
 #import sys
 import logging
 log = logging.getLogger('metacompartment')
@@ -12,14 +12,21 @@ log.setLevel(logging.WARN)
 
 class metacompartment(type, compartmentmixin):
 
-    def __new__(metacls, name, bases, dictionary): # see compartment.__init__
+    def __new__(metacls, name, bases, dictionary): # see compartment.__init__ @NoSelf
         ''' class c(compartment): a = 1, r1='...'
         
         Features of __new__: (see p59 of Python Metaclasses: Who? Why? When?)
             Can directly alter dictionary. 
             Should be used for construction.
         '''
-        dictionary['label'] = name
+
+        if not 'label' in dictionary.keys():
+            if name != 'compartment':
+                dictionary['label'] = name
+            dictionary['_explicitly_labelled'] = False
+        else:
+            dictionary['_explicitly_labelled'] = True
+
         dictionary['_bases'] = bases
         for key, value in dictionary.items():
             if key.startswith(metacls.reserved_attribute_name_prefixes):
@@ -39,6 +46,9 @@ class metacompartment(type, compartmentmixin):
             elif isinstance(value, float) and config.warn_about_floats:
 #                sys.stderr.write("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar).\n" % name)
                 log.warn("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar)." % name)
+            elif isinstance(value, compartment):
+                print 'got here'
+
             elif iterable(value):#elif isinstance(value, (list, tuple)):
                 for i, item in enumerate(flatten(value)):
                     if isinstance(item, basestring):
@@ -47,6 +57,7 @@ class metacompartment(type, compartmentmixin):
                             value[i] = r
                         except ValueError, e:
                             print e
+#            elif
             dictionary[key] = value
         try:
             return super(metacompartment, metacls).__new__(metacls, name, bases, dictionary)
@@ -55,10 +66,10 @@ class metacompartment(type, compartmentmixin):
 Some of these bases share a common ancestor (making at least one redundant).
 Either at least one base should to be removed, or bases reordered, derived 
 classes first, to prevent this error. See: http://bit.ly/ezmEIu'''
-            raise TypeError, str(e) + reason 
-            
+            raise TypeError, str(e) + reason
 
-    def __init__(cls, name, bases, dictionary):
+
+    def __init__(cls, name, bases, dictionary): #@NoSelf
         for key, value in dictionary.items():
             if isinstance(value, compartmentmixin):
                 value.outside = cls # update outside #TODO test

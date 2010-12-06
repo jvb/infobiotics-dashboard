@@ -1,4 +1,4 @@
-from infobiotics.commons.descriptors import mixedmethod 
+from infobiotics.commons.descriptors import mixedmethod
 from infobiotics.commons.sequences import flatten, iterable
 from infobiotics.commons.quantities import *
 from species import species
@@ -18,7 +18,7 @@ reserved_prefixes = (
     'compartment', # catches 'compartments' too because of startswith
     'metadata',
     'amounts',
-) 
+)
 
 #def dir_dict(o):
 #    return dict((name, getattr(o, name)) for name in dir(o))
@@ -304,7 +304,7 @@ class compartmentmixin(object):
 #    
 #    def __repr__(self):
 #        return self.repr()
-                
+
     @mixedmethod
     def repr(self, indent='\t', indent_level=0, id='', evalable=True):
         ''' Returns an evalable string. 
@@ -331,7 +331,7 @@ class compartmentmixin(object):
                     s += indent + ']'
                     _metadata.append(s)
                 elif isinstance(v, basestring):
-                    if k == 'label' and (isinstance(self, type) or (v == self.__class__.__name__)): # hide label when repr(class) or repr(instance) when same as default
+                    if k == 'label' and not self._explicitly_labelled:#((isinstance(self, type) and v == self.__name__)or (v == self.__class__.__name__)): # hide label when repr(class) or repr(instance) when same as default
                         continue
                     _metadata.append(e + "'%s'" % v)
                 else:
@@ -366,10 +366,11 @@ class compartmentmixin(object):
                     ', '.join(get_metadata_strs(as_dict_items=True))
                 )
             else:
-                return '%sclass %s(%s):\n%s%s%s%s%s%s%s%s%s' % (
+                return '%sclass %s(%s):%s\n%s%s%s%s%s%s%s%s%s' % (
                     indent * indent_level,
                     self.__name__,
                     ', '.join([base.__name__ for base in self._bases]),
+                    ' pass' if len(compartments) + len(reactions) + len(species) + len(metadata_strs) == 0 else '',
                     '\n'.join([i.repr(indent, indent_level + 1, k) for k, i in compartments.items()]),
                     '\n' if len(compartments) > 0 else '',
                     '\n'.join([i.repr(indent, indent_level + 1, k) for k, i in reactions.items()]),
@@ -380,17 +381,17 @@ class compartmentmixin(object):
                     '\n' if len(metadata_strs) > 0 else '',
                     indent * indent_level,
                 )
-        
+
         else: # instance
-    
+
             # anonymous (only in instance)
             _compartments = self._compartments if hasattr(self, '_compartments') else []
             _reactions = self._reactions if hasattr(self, '_reactions') else []
             _species = self._species if hasattr(self, '_species') else []
-    
-            len_contents = len(_compartments + _reactions + _species + compartments.items() + reactions.items() + species.items() + metadata_strs) 
-            
-            return '%s%s%s%s(%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s)' % (
+
+            len_contents = len(_compartments + _reactions + _species + compartments.items() + reactions.items() + species.items() + metadata_strs)
+
+            return '%s%s%s%s(%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s)' % (#%s
                 indent * indent_level,
                 id,
                 '=' if id != '' else '',
@@ -412,7 +413,7 @@ class compartmentmixin(object):
                 ',\n' if len(metadata_strs) > 0 else '',
                 indent * indent_level if len_contents > 0 else '',
             )
-            
+
     @mixedmethod
     def str(self, indent='\t', indent_level=0, id='', evalable=False):
 #        if isinstance(self, type):

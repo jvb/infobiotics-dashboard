@@ -30,14 +30,33 @@ class compartment(compartmentmixin):
                 #TODO validate compartment labels
                 self._reactions.append(arg)
             elif isinstance(arg, basestring):
-                self._reactions.append(reaction(arg, reactants_label=self.label, products_label=self.label))
+                self._reactions.append(reaction(arg))#, reactants_label=self.label, products_label=self.label))
             else:
                 print "Don't know what to do with %s" % arg
 
     def __init__(self, *args, **kwargs):
-        ''' Compartment should have a label which defaults to its class name. '''
+        '''Each compartment must have a label, which can be defined here or in
+        its class definition (defaulting to the class name if not 
+        'compartment'), or else a ValueError will be raised.'''
 
-        self.label = self.__class__.__name__
+        if not 'label' in kwargs.keys():
+            if hasattr(self, 'label'):
+                kwargs['label'] = self.label#[:] # copy from class
+            else:
+                if self.__class__.__name__ != 'compartment':
+                    kwargs['label'] = self.__class__.__name__
+                else:
+                    raise ValueError("""All compartments must have a label, although this can be determined from the class name of a compartment subclass, e.g.
+    >>> a = compartment(label='nucleus')
+    >>> print a.label
+    'nucleus'
+    >>> a = vesicle()
+    >>> print a.label
+    'vesicle'""")
+            self._explicitly_labelled = False
+        else:
+            self._explicitly_labelled = True
+
         self.outside = None # overridden in metacompartment.__init__ and compartment.__setattr__
         for k, v in kwargs.items(): setattr(self, k, v)
 
@@ -60,22 +79,80 @@ class compartment(compartmentmixin):
 #            super(compartment, self).__setattr__(name, value) # defer to properties
 #            return
             pass # drop to bottom and set
+#        elif isinstance(value, (list, tuple)): # done in compartmentmixin.compartments()
         elif isinstance(value, (int, Quantity)):
             value = species(name=name, amount=value)
         elif isinstance(value, float) and config.warn_about_floats:
             sys.stderr.write("Compartments don't know the meaning of floats like '%s', but they do understand ints (e.g. 10) and quantities (e.g. 0.5 * millimolar).\n" % name)
         elif isinstance(value, (basestring)):
             try:
-                value = reaction(value, reactants_label=self.label, products_label=self.label)
-                #TODO rule_id from name
+                value = reaction(value)#TODO, reactants_label=self.label, products_label=self.label)
+                setattr(self, name, value) # call this again but with a reaction
+                #TODO rule_id from name?
             except ValueError, e:
                 sys.stderr.write(str(e) + ' Setting %s as metadata instead.\n' % name)
                 # value should still be the string so set it as metadata
+        elif isinstance(value, reaction):
+            # permute reaction?
+            value = self.validate_reaction(value)
         elif isinstance(value, compartment):
 #            if not value == self:
             value.outside = self
-#        elif isinstance(value, (list, tuple)): # done in compartmentmixin.compartments()
+#            if value.label == 'compartment' and name != 'compartment':
+#                value.label = name
+#            print value.label
         super(compartment, self).__setattr__(name, value)
+
+
+        def validate_reaction(self, reaction, name=None):
+            '''
+            
+             can:
+             '[a]_self ->'
+             '[a+b]_self ->'
+             '-> a'
+             '-> [a]_self'
+             '-> [a]_not_self'
+             
+             can't:
+             'a [b]_self ->'
+             'a [b]_not_self ->'
+             '[a]_not_self ->'
+             '-> a [b]_self'
+             '-> a [b]_not_self'
+             '-> a [b]_self'
+
+            '''
+            if len(reaction.reactants_outside) > 0 and len(reaction.reactants_inside) > 0:
+                # 'a [b] ->'
+                raise ValueError('All reactants have to be in the same source compartment.')
+            elif len(reaction.products_outside) > 0 and len(reaction.products_inside) > 0:
+                # '-> a [b]'
+                raise ValueError('All products have to go to the same target compartment.')
+            elif len(reaction.reactants_outside) > 0 and (reaction.reactants_label is None or reaction.reactants_label == self.label):
+                # 'a [ ]_y -> [a]_y' can be converted to 'a -> a (y)' in outside compartment
+                raise ValueError("Reaction '%s' should go in the enclosing compartment ('%s') as reactions can only push species, not pull them." % (reaction, self.outside.label))
+                enclosing = self.outside
+                if self.outside is None:
+                    raise ValueError("No outside compartment to add reaction to.")
+                if name is not None:
+                    setattr(enclosing, name, reaction)
+                else:
+                    enclosing.add(reaction)
+                return None
+            elif len(reaction.reactants_inside) > 0 and reaction.reactants_label is not None and reaction.reactants_label != self.label:
+                raise ValueError("Reaction '%s' should go in the enclosed compartment ('%s') as reactions can only push species, not pull them." % (reaction, reaction.reactants_label))
+                enclosed, _ = [compartment for compartment in self.compartments if compartment.label == reaction.reactants_label]
+                if name is not None:
+                    setattr(enclosed, name, reaction)
+                else:
+                    enclosed.add(reaction)
+                return None
+            elif len(reaction.products_outside) > 0 and reaction.products_label == self.label:
+                raise ValueError("Use a transport rule such as 'a -> a (*)' to send species outside the compartment.")
+                reaction.vector = '*'
+                reaction.is_transport_rule = True
+            return reaction
 
 
     # overridden properties that append anonymous model items from instances
@@ -112,10 +189,32 @@ class compartment(compartmentmixin):
 import compartmentmixin
 compartmentmixin.compartment = compartment
 # necessary to make compartmentmixin().compartments work
+metacompartment.compartment = compartment
 
 
 if __name__ == '__main__':
-    execfile('module1.py')
+
+#    # labels
+#    c = compartment() # raises ValueError
+#    c = compartment(label='compartment') # explicitly labelled 'compartment'
+#    c = compartment(label='c') # explicitly labelled 'c'
+#    class c(compartment): pass # implicitly labelled 'c'
+#    print c.str()
+#    class c(compartment): label = 'c' # explicitly labelled 'c'
+#    print c.str()
+
+#    c = compartment(
+#        'a -> [b] 1', # can't know reactants label #TODO make labels mandatory (?)
+#        label='c',
+#    )
+#    print c.str()
+
+    r = reaction('a -> [b] 1')
+    print r
+    print repr(r.products_outside), repr(r.products_inside)
+
+
+#    execfile('module1.py')
 
 #    pass
 #
@@ -202,4 +301,4 @@ if __name__ == '__main__':
 ##    
 ##    # setting a flag on (class) species and using it as metadata
 ##    c.a.flag = True
-###    print c.amounts(flag=True)
+##    print c.amounts(flag=True)

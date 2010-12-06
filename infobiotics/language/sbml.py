@@ -11,9 +11,60 @@ TODO inside compartments (templates) have names like c2:::c1
 
 '''
 
+{
+    'a -> b': '', # transformation reaction
+
+    'a -> [a]_name': ':name', # send 'a' into compartment named 'name'
+
+    '[a] -> a': ':*', # sends 'a' to any neighbour if outmost compartment or enclosing compartment if not
+    'a -> a (0,1)': ':0,1', # send along vector (0,1) (if outmost compartment?)
+
+    'a -> a (name)': ':name', # send 'a' (out?) to neighbouring compartment named 'name'
+
+    # same
+    'a -> a [ ]_vesicle': 'name:*', # send 'a' out of vesicle
+    '[a]_vesicle -> a [ ]_vesicle': 'name:*' # send 'a' out of vesicle
+}
+
+
+
+
+
+#from infobiotics.language import *
+#
+#cell = compartment(
+##    'a -> b 1',
+##    'a -> [a]_vesicle 1',
+##    '[a] -> a 1',
+##    'a -> a (0,1) 1',
+#    label='cytoplasm',
+#    nucleus=compartment('[a]_nucleus -> a []_nucleus 1'),
+#    vesicle=compartment(),
+#)
+#print cell.str()
+##print cell.nucleus.repr()
+#
+#class cytoplasm(compartment):
+#    nucleus = compartment('[a] -> a []_nucleus 1')
+#    vesicle = compartment()
+#print cytoplasm.nucleus.str()
+#
+#
+#class nucleus(compartment):
+##    label = 'nucleus' # if not set glean from class name 
+#    r = '[a] -> a []_nucleus 1'
+#
+#nucleus = compartment(label='nucleus')
+#nucleus = compartment() # not possible to know label without introspection module stack    
+#
+#print nucleus.str()
+#
+#exit()
+
+
 from infobiotics.language import *
 
-# Don't import ID generators! Use different IDs for SBML, and simplified names for IML IDs.
+# Don't import ID generators ! Use different IDs for SBML, and simplified names for IML IDs.
 def id_generator(prefix=''):
     i = 1
     while True:
@@ -86,23 +137,41 @@ def recursively_create_species(compartment):
 
 
 def recursively_create_reactions(compartment):
-    for rule in compartment.reactions:
+    for reaction in compartment.reactions:
 
         sbml_reaction = model.createReaction()
         sbml_reaction.setId(reaction_id_generator.next())
-        sbml_reaction.setName(sbml_reaction.getId()) #TODO '%s:%s,%s' for transport reactions
+
+#        sbml_reaction.setName(sbml_reaction.getId()) #TODO '%s:%s,%s' for transport reactions
+        if reaction.is_transport_rule:
+            # 'a -> a (0,1)': ':0,1', # send along vector (0,1) (if outmost compartment?)
+            # 'a -> a (*)'
+            # 'a -> a (nucleus)'
+            name = ':' + reaction.vector
+        elif reaction.products_label is not None:
+            if reaction.products_label != compartment.label:
+                # 'a -> [a]_name': ':name', # send 'a' into compartment named 'name'
+                name = ':' + reaction.products_label
+            elif len(reaction.products_outside) > 0:
+                # 'a -> a []_self'
+                name = ':*'
+        else:
+            # transformation rule
+            name = ''
+        sbml_reaction.setName(name)
+
         sbml_reaction.setReversible(False)
         sbml_reaction.setFast(False)
 
-#        if isinstance(rule.constant, Constant):
-#            constant_value = rule.constant.value
+#        if isinstance(reaction.constant, Constant):
+#            constant_value = reaction.constant.value
 #        else:
-#            constant_value = rule.constant
-#        if isinstance(rule.constant, Constant) and rule.constant.id != '':
-#            constant_id = rule.constant.id
+#            constant_value = reaction.constant
+#        if isinstance(reaction.constant, Constant) and reaction.constant.id != '':
+#            constant_id = reaction.constant.id
 #        else:
 #            constant_id = constant_id_generator.next()
-        constant_value = rule.rate
+        constant_value = reaction.rate
         constant_id = constant_id_generator.next()
 
         kinetic_law = sbml_reaction.createKineticLaw()
@@ -129,15 +198,15 @@ def recursively_create_reactions(compartment):
                 sbml_species_reference.setSpecies(compartment._species_ids[name])
             sbml_species_reference.initDefaults() # sets stoichiometry to 1
 
-        for name in rule.reactants_inside:
+        for name in reaction.reactants_inside:
             initialise_sbml_species_reference(sbml_reaction.createReactant())
 
-#        for species in rule.reactants_outside: #TODO
+#        for species in reaction.reactants_outside: #TODO
 
-        for name in rule.products_inside:
+        for name in reaction.products_inside:
             initialise_sbml_species_reference(sbml_reaction.createProduct())
 
-#        for species in rule.products_outside: #TODO
+#        for species in reaction.products_outside: #TODO
 
     for compartment in compartment.compartments:
         recursively_create_reactions(compartment)
