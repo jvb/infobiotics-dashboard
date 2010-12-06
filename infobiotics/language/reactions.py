@@ -509,7 +509,7 @@ class reaction(object):
                 else:
                     self.units = self.units.replace('^', '**')
                     try:
-                        self.rate = eval(self.rate + self.units) # creates Quantity
+                        self.rate = eval('%s%s' % (self.rate, self.units)) # creates Quantity
                         # rate and units are syntactically OK
                     except SyntaxError, e:
                         print e
@@ -678,10 +678,10 @@ if __name__ == '__main__':
 
     from infobiotics.language import *
 
+    r = reaction('a + a -> b 0.1e-3 * M / s')
+    print r, r.iml()
     print reaction.create_from_rule('a -> b', 7 * molar).iml()
-    exit()
 
-    r = reaction('a -> b 0.1e-3 * M / s')
 #    r = reaction('a -> b 0.1e-3  molar^-1 * s**-1')
 
 #    r1 = reaction('a -> b 5*10^-3 M^-1 s**-1')
@@ -700,7 +700,6 @@ if __name__ == '__main__':
 #    print
 #    print system
 
-    exit()
 
 
     from infobiotics.commons.ordereddict import OrderedDict
