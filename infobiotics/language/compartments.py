@@ -89,6 +89,7 @@ class compartment(compartmentmixin):
                 value = reaction(value)#TODO, reactants_label=self.label, products_label=self.label)
                 setattr(self, name, value) # call this again but with a reaction
                 #TODO rule_id from name?
+                return #FIXME added early in the morning because what happens when setattr above returns. Do we overwrite it?
             except ValueError, e:
                 sys.stderr.write(str(e) + ' Setting %s as metadata instead.\n' % name)
                 # value should still be the string so set it as metadata
@@ -104,58 +105,60 @@ class compartment(compartmentmixin):
         super(compartment, self).__setattr__(name, value)
 
 
-        def validate_reaction(self, reaction, name=None):
-            '''
-            
-             can:
-             '[a]_self ->'
-             '[a+b]_self ->'
-             '-> a'
-             '-> [a]_self'
-             '-> [a]_not_self'
-             
-             can't:
-             'a [b]_self ->'
-             'a [b]_not_self ->'
-             '[a]_not_self ->'
-             '-> a [b]_self'
-             '-> a [b]_not_self'
-             '-> a [b]_self'
+    def validate_reaction(self, reaction, name=None):
+        '''
+        
+         can:
+         '[a]_self ->'
+         '[a+b]_self ->'
+         '-> a'
+         '-> [a]_self'
+         '-> [a]_not_self'
+         
+         can't:
+         'a [b]_self ->'
+         'a [b]_not_self ->'
+         '[a]_not_self ->'
+         '-> a [b]_self'
+         '-> a [b]_not_self'
+         '-> a [b]_self'
 
-            '''
-            if len(reaction.reactants_outside) > 0 and len(reaction.reactants_inside) > 0:
-                # 'a [b] ->'
-                raise ValueError('All reactants have to be in the same source compartment.')
-            elif len(reaction.products_outside) > 0 and len(reaction.products_inside) > 0:
-                # '-> a [b]'
-                raise ValueError('All products have to go to the same target compartment.')
-            elif len(reaction.reactants_outside) > 0 and (reaction.reactants_label is None or reaction.reactants_label == self.label):
-                # 'a [ ]_y -> [a]_y' can be converted to 'a -> a (y)' in outside compartment
-                raise ValueError("Reaction '%s' should go in the enclosing compartment ('%s') as reactions can only push species, not pull them." % (reaction, self.outside.label))
-                enclosing = self.outside
-                if self.outside is None:
-                    raise ValueError("No outside compartment to add reaction to.")
-                if name is not None:
-                    setattr(enclosing, name, reaction)
-                else:
-                    enclosing.add(reaction)
-                return None
-            elif len(reaction.reactants_inside) > 0 and reaction.reactants_label is not None and reaction.reactants_label != self.label:
-                raise ValueError("Reaction '%s' should go in the enclosed compartment ('%s') as reactions can only push species, not pull them." % (reaction, reaction.reactants_label))
-                enclosed, _ = [compartment for compartment in self.compartments if compartment.label == reaction.reactants_label]
-                if name is not None:
-                    setattr(enclosed, name, reaction)
-                else:
-                    enclosed.add(reaction)
-                return None
-            elif len(reaction.products_outside) > 0 and reaction.products_label == self.label:
-                raise ValueError("Use a transport rule such as 'a -> a (*)' to send species outside the compartment.")
-                reaction.vector = '*'
-                reaction.is_transport_rule = True
-            return reaction
+        '''
+        if len(reaction.reactants_outside) > 0 and len(reaction.reactants_inside) > 0:
+            # 'a [b] ->'
+            raise ValueError('All reactants have to be in the same source compartment.')
+        elif len(reaction.products_outside) > 0 and len(reaction.products_inside) > 0:
+            # '-> a [b]'
+            raise ValueError('All products have to go to the same target compartment.')
+        elif len(reaction.reactants_outside) > 0 and (reaction.reactants_label is None or reaction.reactants_label == self.label):
+            # 'a [ ]_y -> [a]_y' can be converted to 'a -> a (y)' in outside compartment
+            raise ValueError("Reaction '%s' should go in the enclosing compartment ('%s') as reactions can only push species, not pull them." % (reaction, self.outside.label))
+            enclosing = self.outside
+            if self.outside is None:
+                raise ValueError("No outside compartment to add reaction to.")
+            if name is not None:
+                setattr(enclosing, name, reaction)
+            else:
+                enclosing.add(reaction)
+            return None
+        elif len(reaction.reactants_inside) > 0 and reaction.reactants_label is not None and reaction.reactants_label != self.label:
+            raise ValueError("Reaction '%s' should go in the enclosed compartment ('%s') as reactions can only push species, not pull them." % (reaction, reaction.reactants_label))
+            enclosed, _ = [compartment for compartment in self.compartments if compartment.label == reaction.reactants_label]
+            if name is not None:
+                setattr(enclosed, name, reaction)
+            else:
+                enclosed.add(reaction)
+            return None
+        elif len(reaction.products_outside) > 0 and reaction.products_label == self.label:
+            raise ValueError("Use a transport rule such as 'a -> a (*)' to send species outside the compartment.")
+            reaction.vector = '*'
+            reaction.is_transport_rule = True
+        return reaction
 
 
     # overridden properties that append anonymous model items from instances
+    # must redeclare property decorator otherwise compartmentmixin methods are 
+    # called, see http://books.google.co.uk/books?id=JnR9hQA3SncC&lpg=PA81&ots=JaaTFv-17w&dq=python%20mix%20class%20and%20object%20behaviour&pg=PA101#v=onepage&q&f=false
 
     @property
     def compartments(self, **metadata): #@UnusedVariable

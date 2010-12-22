@@ -94,7 +94,7 @@ def flatten(a): #TODO doctests
     
         The following code is not meant for human consumption.
         '''
-        if not iterable(a):#if not isinstance(a, (tuple, list)):
+        if isinstance(a, dict) or not iterable(a): #not isinstance(a, (tuple, list)):
             return lambda: k([a])
         if len(a) == 0:
             return lambda: k([])

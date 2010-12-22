@@ -53,10 +53,14 @@ class metacompartment(type, compartmentmixin):
                 for i, item in enumerate(flatten(value)):
                     if isinstance(item, basestring):
                         try:
-                            r = reaction(item, reactants_label=name, products_label=name)
+                            r = reaction(item, reactants_label=name, products_label=name) #FIXME
                             value[i] = r
                         except ValueError, e:
                             print e
+                    elif isinstance(item, species): #TODO
+                        raise NotImplementedError
+                    elif isinstance(item, compartment): pass #TODO
+                        raise NotImplementedError
 #            elif
             dictionary[key] = value
         try:
@@ -64,7 +68,7 @@ class metacompartment(type, compartmentmixin):
         except TypeError, e:
             reason = '''.
 Some of these bases share a common ancestor (making at least one redundant).
-Either at least one base should to be removed, or bases reordered, derived 
+Either at least one base should to be removed, or the bases reordered, derived 
 classes first, to prevent this error. See: http://bit.ly/ezmEIu'''
             raise TypeError, str(e) + reason
 
