@@ -1,4 +1,6 @@
-import os; os.environ['ETS_TOOLKIT'] = 'qt4'
+if __name__ == '__main__':
+    from enthought.etsconfig.api import ETSConfig
+    ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import (
     HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum,
     Property, Button, on_trait_change, Tuple, cached_property, Bool,
@@ -23,7 +25,6 @@ from bisect import bisect
 # check if mayavi2 version < 3.3.0        
 import enthought.mayavi.__version__
 version = enthought.mayavi.__version__.__version__
-print version
 if version == '': # see enthought/mayavi/version.py
     outdated_mayavi = False # assume we froze it on Mac OS X or Windows with EPD>=6.2
 else:

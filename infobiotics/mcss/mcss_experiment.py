@@ -30,5 +30,8 @@ class McssExperiment(McssParams, Experiment):
 
 if __name__ == '__main__':
     experiment = McssExperiment()
-    experiment.load('../../tests/workbench_examples/modules/module1.params')
-    experiment.configure()
+#    experiment.load('../../tests/workbench_examples/modules/module1.params')
+#    experiment.configure()
+    experiment.load('/home/jvb/src/mcss-0.0.41/examples/models/module1.params')
+    experiment.perform()#thread=True)
+    #TODO del experiment.temp_params_file

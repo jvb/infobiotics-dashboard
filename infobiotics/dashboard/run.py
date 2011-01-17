@@ -1,5 +1,10 @@
-from enthought.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'qt4'
+if __name__ == '__main__':
+    
+    import setproctitle
+    setproctitle.setproctitle('Infobiotics Dashboard')
+    
+    from enthought.etsconfig.api import ETSConfig
+    ETSConfig.toolkit = 'qt4'
 
 # preferences
 from infobiotics.api import preferences

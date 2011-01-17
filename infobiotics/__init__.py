@@ -1,3 +1,19 @@
+#from __future__ import absolute_import
+#
+#try:
+#    __import__('pkg_resources').declare_namespace(__name__)
+#except:
+#    pass
+#
+## For py2app / py2exe support
+#try:
+#    import modulefinder
+#    for p in __path__:
+#        modulefinder.AddPackagePath(__name__, p)
+#except:
+#    pass
+
+
 # setup version information
 from __version__ import __version__, __version_info__
 version = VERSION = __version__
@@ -13,28 +29,3 @@ ETSConfig.toolkit = 'qt4' # set toolkit to 'qt4' (TraitsBackendQt) before any Tr
 # set company to 'Infobiotics': 
 # used by ETSConfig.get_application_data() for persistence (preferences)
 ETSConfig.company = 'Infobiotics' # use ~/.infobiotics (or "Application Data\\Infobiotics") instead of ~/.enthought for preferences.ini
-
-
-#------------------------------------------------------------------------------
-#
-#  Copyright (c) 2007 by Enthought, Inc.
-#  All rights reserved.
-#
-#------------------------------------------------------------------------------
-
-from __future__ import absolute_import
-
-try:
-    __import__('pkg_resources').declare_namespace(__name__)
-except:
-    pass
-
-
-
-# For py2app / py2exe support
-try:
-    import modulefinder
-    for p in __path__:
-        modulefinder.AddPackagePath(__name__, p)
-except:
-    pass

@@ -1,4 +1,6 @@
-from PyQt4.QtCore import QSettings, QVariant, QDir, QString, QFileInfo, SIGNAL, \
+import sip
+sip.setapi('QString', 2)
+from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, \
     Qt
 from PyQt4.QtGui import QApplication, QWidget, QListWidgetItem, \
     QItemSelectionModel, QFileDialog, QMessageBox, qApp
@@ -112,7 +114,7 @@ class SimulatorResultsDialog(QWidget):
                                                    self.tr("Open HDF5 simulation data file"),
                                                    self.current_directory,
                                                    self.tr("HDF5 data files (*.h5 *.hdf5);;All files (*)"))
-            if filename == QString(""):
+            if filename == '':
                 if self.loaded:
                     return
                 else:
@@ -120,14 +122,14 @@ class SimulatorResultsDialog(QWidget):
                     return False
 
         self.current_directory = QFileInfo(filename).absolutePath()
-        filename = unicode(filename) # must convert QString into unicode
+#        filename = unicode(filename) # must convert QString into unicode
         simulation = None
         try:
             simulation = load_h5(filename)
         except IOError, e:
-            QMessageBox.warning(self, "Error", "There was an error reading %s\n%s" % (filename, QString(unicode(e))))
+            QMessageBox.warning(self, "Error", "There was an error reading %s\n%s" % (filename, e))
         except AttributeError, e:
-            e = QString(unicode(e) + u"\nDid you use a old version of mcss? (<0.0.19)")
+            e = e + "\nDid you use a old version of mcss? (<0.0.19)"
             QMessageBox.warning(self, "Error", "There was an error reading %s\n%s" % (filename, e))
         if simulation == None:
             if self.loaded:
@@ -721,7 +723,7 @@ class SimulatorResultsDialog(QWidget):
             wb.save(file_name)
 
         def write_npz(species_indices=species_indices, compartment_indices=compartment_indices):
-            # convert QString to str
+            # convert QString to str #TODO is this now unncessary with QString api version 2?
             species_names = [str(s.text()) for s in species]
             compartment_labels_and_positions = [str(c.text()) for c in compartments]
             run_numbers = [str(r.text()) for r in runs]

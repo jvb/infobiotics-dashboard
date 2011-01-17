@@ -18,21 +18,22 @@ class McssExperimentAction(Action):
 #        )
         obj.edit()
 
-from simulator_results import SimulationResultsDialog #TODO
-from editor import SimulatorResultsEditor
-
-class SimulatorResultsAction(Action):
-    name = 'mcss'
-    tooltip = 'Visualise mcss simulations.' #TODO
-    
-    def perform(self, event=None):
-        obj = SimulationResultsDialog()
-        if not obj.loaded: return # user cancelled load
-        self.window.workbench.edit(
-            obj=obj,
-            kind=SimulatorResultsEditor,
-            use_existing=False
-        )
+## in simulator_results/actions.py
+#from simulator_results import SimulationResultsDialog #TODO
+#from editor import SimulatorResultsEditor
+#
+#class SimulatorResultsAction(Action):
+#    name = 'mcss'
+#    tooltip = 'Visualise mcss simulations.' #TODO
+#    
+#    def perform(self, event=None):
+#        obj = SimulationResultsDialog()
+#        if not obj.loaded: return # user cancelled load
+#        self.window.workbench.edit(
+#            obj=obj,
+#            kind=SimulatorResultsEditor,
+#            use_existing=False
+#        )
 
 #class LoadMcssParametersAction(PyFaceAction): #TODO
 #    ''' ... 

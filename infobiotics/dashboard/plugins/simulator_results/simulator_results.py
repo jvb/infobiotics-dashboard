@@ -93,7 +93,6 @@ def functions_of_values_over_axis_generator(array, array_axes, axis, functions):
 #)
 #print mean.shape, std.shape
 #exit()
-exit()
 
 def functions_of_values_over_successive_axes(array, array_axes, axes, functions):
     ''' Returns a tuple of the dimensionally reduced array and a tuple of remaining

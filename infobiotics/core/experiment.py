@@ -138,19 +138,17 @@ class Experiment(Params):
 #    
 #        except Exception, e:
 #            print e
+        
         import subprocess
-        if subprocess.mswindows: # http://www.gossamer-threads.com/lists/python/python/783937#783937
+        args = [self.executable, self._params_file] + self.executable_kwargs[:]
+        kwargs = {'cwd':self.directory}
+        if subprocess.mswindows:
+            # hide empty terminal window that will appear (http://bit.ly/hNQUlQ)
             su = subprocess.STARTUPINFO() 
             su.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
             su.wShowWindow = subprocess.SW_HIDE 
-            p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], startupinfo=su, cwd=self.directory) # directory defined in Params
-        else:
-            p = subprocess.Popen([self.executable, self._params_file] + self.executable_kwargs[:], 
-                cwd=self.directory, # directory defined in Params
-#                # debugging
-#                stdout=subprocess.PIPE,
-#                stderr=subprocess.PIPE,#STDOUT,
-            ) 
+            kwargs['startupinfo'] = su
+        p = subprocess.Popen(args, **kwargs)
         self.started = True
         p.wait()
 
@@ -172,7 +170,7 @@ class Experiment(Params):
         import tempfile
         import sys
         if sys.platform.startswith('win'):
-            self.temp_params_file = tempfile.NamedTemporaryFile(prefix=self._params_file.split('.params')[0], suffix='.params', dir=self.directory, 
+            self.temp_params_file = tempfile.NamedTemporaryFile(prefix=self._params_file.split('.params')[0], suffix='.params', dir=self.directory,
             	delete=False)
             	# see comment http://stackoverflow.com/questions/94153/how-do-i-persist-to-disk-a-temporary-file-using-python/94339#94339
             self.temp_params_file.close()
