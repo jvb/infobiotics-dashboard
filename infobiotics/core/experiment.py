@@ -152,7 +152,12 @@ class Experiment(Params):
 #                stderr=subprocess.PIPE,#STDOUT,
             ) 
         self.started = True
-        p.wait()
+        stderr_output = p.communicate()[1]
+
+        if stderr_output != "":
+            error_log = open("mcss-error.log", 'w')
+            error_log.write(stderr_output)
+            error_log.close()
 
         # trigger ExperimentHandler.show_results()
         self.finished = True

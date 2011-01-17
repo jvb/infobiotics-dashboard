@@ -125,7 +125,14 @@ class SimulatorResultsDialog(QWidget):
         try:
             simulation = load_h5(filename)
         except IOError, e:
-            QMessageBox.warning(self, "Error", "There was an error reading %s\n%s" % (filename, QString(unicode(e))))
+            if os.path.exists('mcss-error.log'):
+                error_log = open("mcss-error.log", 'r')
+                error_message = error_log.read()
+                error_log.close()
+                os.remove('mcss-error.log')
+                QMessageBox.warning(self, "Error", "Unable to execute model:\n\n%s" % (QString(unicode(error_message.replace('error: ', '', 1)))))
+            else:
+                QMessageBox.warning(self, "Error", "There was an error reading %s\n%s" % (filename, QString(unicode(e))))
         except AttributeError, e:
             e = QString(unicode(e) + u"\nDid you use a old version of mcss? (<0.0.19)")
             QMessageBox.warning(self, "Error", "There was an error reading %s\n%s" % (filename, e))
