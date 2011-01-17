@@ -10,6 +10,7 @@ set_default_preferences(preferences) # allows use of Preferences, PreferencesHel
 assert preferences == get_default_preferences()
 
 DEFAULT_MCSS_EXECUTABLE = 'default/mcss.executable'
+DEFAULT_MCSSCMAES_EXECUTABLE = 'default/mcsscmaes.executable'
 DEFAULT_PMODELCHECKER_EXECUTABLE = 'default/pmodelchecker.executable'
 DEFAULT_POPTIMIZER_EXECUTABLE = 'default/poptimizer.executable'
 
@@ -22,6 +23,7 @@ else:
     # need to hard code paths like this: 
     #     preferences.set(DEFAULT_MCSS_EXECUTABLE, '/usr/bin/mcss'),
     preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss'),
+    preferences.set(DEFAULT_MCSSCMAES_EXECUTABLE, 'mcss-cmaes'),
     preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'pmodelchecker'),
     preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'poptimizer'),
 
@@ -53,3 +55,4 @@ preferences.set('default/poptimizer.directory', os.path.expanduser('~'))
 
 if __name__ == '__main__':
     preferences.dump()
+    print "'%s'" % preferences.get('mcsscmaes.executable')

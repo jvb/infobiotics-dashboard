@@ -35,7 +35,7 @@ class Params(HasTraits):
     def _preferences_helper_default(self):
         raise NotImplementedError('Params subclasses must provide a _get_preferences_helper methods that returns an instance of (a subclass of) ParamsPreferencesHelper.')
 
-    preferences = List(Str, ['executable','directory'], desc='a list of trait names to bind to preferences')
+    preferences = List(Str, ['executable', 'directory'], desc='a list of trait names to bind to preferences')
     
     executable = EXECUTABLE_TRAIT
 
@@ -78,7 +78,7 @@ class Params(HasTraits):
         for preference in self.preferences:
             preferences_path = '.'.join([self._preferences_path, preference])
             if preference in ('directory'):#, 'executable'):
-                path = infobiotics.preferences.preferences.get(preferences_path)
+                path = infobiotics.preferences.preferences.get(preferences_path, '')
                 if not os.path.exists(path): #TODO what about None?
 #                    sys.stderr.write(path)
 #                    sys.stderr.write('\n')
@@ -492,8 +492,8 @@ def traits_repr(self, *names):
         elif type == 'TraitMap': # Trait({'2+2':5})
             repr += "%s_='%s'" % (name, getattr(self, '%s_' % name)) # use shadow name/value
         elif type in (
-            'Unicode','Str', 'Enum', 'File', 'Directory', 
-            'RelativeFile', 'RelativeDirectory', 
+            'Unicode', 'Str', 'Enum', 'File', 'Directory',
+            'RelativeFile', 'RelativeDirectory',
             'ParamsRelativeFile', 'ParamsRelativeDirectory',
         ):
             repr += "%s='%s'" % (name, getattr(self, '%s' % name))

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<parameters name="McssCmaesParameters" xmlns="http://www.cpib.ac.uk/~jpt"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+<!-- mcss parameter definitions -->
+<parameterSet name="McssCmaesParameters">
+	<parameter name="population_size" type="int" description="number of individuals in population (lambda)"/>
+	<parameter name="num_parameters" type="int" description="number of parameters (N)"/>
+	<parameter name="max_iterations" type="double" default="-1.0" description="maximum number of iterations (stopMaxIter)"/>
+	<parameter name="max_function_evals" type="double" default="-1.0" description="maximum number of fitness function evaluations (stopMaxFunEvals)"/>
+	<parameter name="stop_fitness" type="double" default="0.0" description="stop if fitness is less than given value (stopFitness)"/>
+	<parameter name="stop_fitness_diff" type="double" default="1.0E-12" description="stop if fitness differences are less than given value (stopTolFun)"/>
+	<parameter name="stop_fitness_diff_best" type="double" default="1.0E-13" description="stop if fitness differences of best individuals are less than given value (stopTolFunHist)"/>
+	<parameter name="stop_step_size" type="double" default="0.0" description="stop if parameter steps are less than given value (stopTolX)"/>
+	<parameter name="stop_sd" type="double" default="1.0E3" description="stop if standard deviation is greater than given value (stopTolUpXFactor)"/>
+	<parameter name="seed" type="uint" default="0" description="random number seed (seed)"/>
+	<parameter name="max_eigen_decomposition_time" type="double" default="1.0" description="maximum CPU time fraction for eigensystem decomposition (maxTimeFractionForEigendecompostion)"/>
+	<parameter name="updatecov" type="double" default="-1.0" description="number of generations before updating eignesystem (updatecov)"/>
+	<parameter name="updatecov_multiplier" type="double" default="1.0" description="multiplier for updatecov (fac*updatecov)"/>
+	<parameter name="resume_distribution" type="filename" default="_no_" description="filename of restart distribution to read (resume)"/>
+	<parameter name="used_parameter_file" type="filename" default="non" description="filename to saved parameters actually used to (actparcmaes.par)"/>
+	<parameter name="weights" value="log|linear|equal" type="string" default="log" description="(weights)"/>
+	<parameter name="mu" type="int" default="-1" description="(mu)"/>
+	<parameter name="fac_cs" type="double" default="-1.0" description="(fac*cs)"/>
+	<parameter name="fac_damps" type="double" default="-1.0" description="(fac*damps)"/>
+	<parameter name="ccumcov" type="double" default="-1.0" description="(ccumcov)"/>
+	<parameter name="mucov" type="double" default="-1.0" description="(mucov)"/>
+	<parameter name="fac_ccov" type="double" default="-1.0" description="(fac*ccov)"/>
+	<parameter name="diagonal_covariance_matrix" type="double" default="0.0" description="(diagonalCovarianceMatrix)"/>
+	<parameter name="fac_max_func_evals" type="double" default="1.0" description="(fac*maxFunEvals)"/>
+
+	<parameter name="function_file" type="filename" default="" description="file containing user defined functions"/>
+	<parameter name="initial_x" type="string" value="random|user|fixed" default="random" description="initial optimisation starting point"/>
+	<parameter name="mcss_parameter_file" type="filename" default="" description="mcss parameter filename"/>
+	<parameter name="parallel_runs" type="bool" default="true" description="perform individual mcss runs in parallel"/>
+	<parameter name="lower_bound" type="double" default="0.0" description="lower bounds for parameter values"/>
+	<parameter name="upper_bound" type="double" default="1.0" description="upper bounds for parameter values"/>
+	<parameter name="mcss_executable" type="filename" default="mcss" description="mcss executable"/>
+	<parameter name="column_separator" type="char" default=" " description="separator for input data columns"/>
+	<parameter name="target_data_file" type="filename" default="" description="file containing target data"/>
+	<parameter name="data_file" type="filename" default="cmaes.h5" description="file tp save optimisation results to"/>
+	<parameter name="compress" type="bool" default="false" description="compress hdf5 output"/>
+	<parameter name="compression_level" type="uint" default="9" lbound="0" ubound="9" description="hdf5 compression level (0-9; 9=best)"/>
+	<parameter name="show_progress" type="bool" default="false" description="output current log interval to screen"/>
+	<parameter name="runs" type="ulong" default="0" description="number of simulation runs to perform for each individual (overrides mcss runs parameter)"/>
+</parameterSet>
+
+</parameters>

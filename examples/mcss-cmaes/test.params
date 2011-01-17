@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<parameters name="mcsscmaes" xmlns="http://www.cpib.ac.uk/~jpt"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+    <!-- parameter definitions -->
+    <parameterSet name="McssCmaesParameters">
+        <parameter name="population_size" value="1"/>
+        <parameter name="num_parameters" value="1"/>
+        <parameter name="max_iterations" value="-1.0"/>
+        <parameter name="max_function_evals" value="-1.0"/>
+        <parameter name="stop_fitness" value="0.0"/>
+        <parameter name="stop_fitness_diff" value="1e-12"/>
+        <parameter name="stop_fitness_diff_best" value="1e-13"/>
+        <parameter name="stop_step_size" value="0.0"/>
+        <parameter name="stop_sd" value="1000.0"/>
+        <parameter name="seed" value="0"/>
+        <parameter name="max_eigen_decomposition_time" value="1.0"/>
+        <parameter name="updatecov" value="-1.0"/>
+        <parameter name="updatecov_multiplier" value="1.0"/>
+        <parameter name="resume_distribution" value="_no_"/>
+        <parameter name="used_parameter_file" value="non"/>
+        <parameter name="weights" value="log"/>
+        <parameter name="mu" value="-1"/>
+        <parameter name="fac_cs" value="-1.0"/>
+        <parameter name="fac_damps" value="-1.0"/>
+        <parameter name="ccumcov" value="-1.0"/>
+        <parameter name="mucov" value="-1.0"/>
+        <parameter name="fac_ccov" value="-1.0"/>
+        <parameter name="diagonal_covariance_matrix" value="0.0"/>
+        <parameter name="fac_max_func_evals" value="1.0"/>
+        <parameter name="function_file" value=""/>
+        <parameter name="initial_x" value="random"/>
+        <parameter name="mcss_parameter_file" value=""/>
+        <parameter name="parallel_runs" value="true"/>
+        <parameter name="lower_bound" value="0.0"/>
+        <parameter name="upper_bound" value="1.0"/>
+        <parameter name="mcss_executable" value="/usr/local/bin/mcss"/>
+        <parameter name="column_separator" value=" "/>
+        <parameter name="target_data_file" value=""/>
+        <parameter name="data_file" value="cmaes.h5"/>
+        <parameter name="compress" value="true"/>
+        <parameter name="compression_level" value="9"/>
+        <parameter name="runs" value="0"/>
+    </parameterSet>
+</parameters>

@@ -1,0 +1,45 @@
+'''Describes how user preferences are persisted.
+
+'infobiotics/__init__.py' does
+"from enthought.etsconfig.api import ETSConfig"
+"ETSConfig.company = 'Infobiotics'"
+which means that
+'~/.infobiotics' (or 'Application Data\\Infobiotics' on Windows) is used instead
+of '~/.enthought' (or 'Application Data\\Enthought' on Windows) is used as the
+path to 'preferences.ini'.
+
+'''
+
+#FIXME bug when directory referenced in preferences.ini is not found:
+'''
+Traceback (most recent call last):
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/bin/infobiotics-dashboard.py", line 3, in <module>
+    import infobiotics.dashboard.run as run
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/dashboard/run.py", line 5, in <module>
+    from infobiotics.api import preferences
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/api.py", line 5, in <module>
+    from pmodelchecker.mc2.api import MC2Experiment
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/pmodelchecker/mc2/api.py", line 2, in <module>
+    from mc2_params import MC2Params
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/pmodelchecker/mc2/mc2_params.py", line 1, in <module>
+    from infobiotics.pmodelchecker.api import PModelCheckerParams
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/pmodelchecker/api.py", line 4, in <module>
+    from pmodelchecker_params import PModelCheckerParams
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/pmodelchecker/pmodelchecker_params.py", line 10, in <module>
+    class PModelCheckerParams(Params):
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/pmodelchecker/pmodelchecker_params.py", line 13, in PModelCheckerParams
+    preferences_helper = PModelCheckerParamsPreferencesHelper()
+  File "/home/jvb/src/ets-trunk/AppTools/enthought/preferences/preferences_helper.py", line 46, in __init__
+    self._initialize(self.preferences)
+  File "/home/jvb/src/ets-trunk/AppTools/enthought/preferences/preferences_helper.py", line 167, in _initialize
+    value = self._get_value(trait_name, preferences.get(key))
+  File "/home/jvb/src/ets-trunk/AppTools/enthought/preferences/preferences_helper.py", line 151, in _get_value
+    validated = handler.validate(self, trait_name, value)
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/commons/traits/relative_directory.py", line 92, in validate
+    return self._validate(object, name, value, os.path.isdir)
+  File "/home/jvb/phd/eclipse/infobiotics/dashboard/infobiotics/commons/traits/relative_file.py", line 274, in _validate
+    self.error(object, name, value)
+  File "/home/jvb/src/ets-trunk/Traits/enthought/traits/trait_handlers.py", line 167, in error
+    value )
+enthought.traits.trait_errors.TraitError: The 'directory' trait of a PModelCheckerParamsPreferencesHelper instance must be an existing writable and absolute directory, but a value of '/home/jvb/Desktop/autoregulation' <type 'str'> was specified.
+'''
