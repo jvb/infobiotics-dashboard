@@ -57,7 +57,7 @@ class McssParamsHandler(ParamsHandler):
 #        'ldm'    : 'Multicompartment Gillespie Logarithmic Direct Method',
         'dmq'    : 'Multicompartment Gillespie Queue',
         'dmq2'   : 'Multicompartment Gillespie Enhanced Queue',
-        'dmgq'   : 'Multicompartment Gillespie Direct Method with growth and division',
+        'dmgd'   : 'Multicompartment Gillespie Direct Method with growth and division',
         'dmcp'   : 'Multicompartment Gillespie Direct Method Cellular Potts',
         'dmqg'   : 'Multicompartment Gillespie Queue with growth',
         'dmq2g'  : 'Multicompartment Gillespie Enhanced Queue with growth',

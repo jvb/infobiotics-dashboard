@@ -1,4 +1,3 @@
-#TODO rename to versions.txt
 0.0.12 skipped as a 0.0.12 with Jamie's 12/01/2011 fix is already in the apt repository. #TODO remove in version 0.0.14.dev
 
 '''Describes how the dashboard version is determined. 

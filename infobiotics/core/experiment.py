@@ -140,7 +140,7 @@ class Experiment(Params):
 #            print e
         
         import subprocess
-        args = [self.executable, self._params_file] + self.executable_kwargs[:]
+        args = [self.executable, self.temp_params_file.name] + self.executable_kwargs[:]
         kwargs = {'cwd':self.directory}
         if subprocess.mswindows:
             # hide empty terminal window that will appear (http://bit.ly/hNQUlQ)
@@ -150,11 +150,11 @@ class Experiment(Params):
             kwargs['startupinfo'] = su
         p = subprocess.Popen(args, **kwargs)
         self.started = True
-#        p.wait()
-        stderr_output = p.communicate()[1]
+
+        stderr_output = p.communicate()[1]#p.wait()
 
         if stderr_output != "":
-            error_log = open("mcss-error.log", 'w')
+            error_log = open('mcss-error.log', 'w')
             error_log.write(stderr_output)
             error_log.close()
 
@@ -169,33 +169,33 @@ class Experiment(Params):
 
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
-        
-        #TODO check if dirty/saved first
-
         # save to temporary file in the same directory
         import tempfile
         import sys
-        if sys.platform.startswith('win'):
-            self.temp_params_file = tempfile.NamedTemporaryFile(prefix=self._params_file.split('.params')[0], suffix='.params', dir=self.directory,
-            	delete=False)
-            	# see comment http://stackoverflow.com/questions/94153/how-do-i-persist-to-disk-a-temporary-file-using-python/94339#94339
-            self.temp_params_file.close()
-            '''
-            tempfile.NamedTemporaryFile([mode='w+b'[, bufsize=-1[, suffix=''[, prefix='tmp'[, dir=None[, delete=True]]]]]])
-                This function operates exactly as TemporaryFile() does, except that the 
-                file is guaranteed to have a visible name in the file system (on Unix, the
-                directory entry is not unlinked). That name can be retrieved from the name 
-                member of the file object. Whether the name can be used to open the file a 
-                second time, while the named temporary file is still open, varies across 
-                platforms (it can be so used on Unix; it cannot on Windows NT or later). 
-                If delete is true (the default), the file is deleted as soon as it is 
-                closed.        
-            '''
-        else:
-            self.temp_params_file = tempfile.NamedTemporaryFile(prefix=self._params_file.split('.params')[0], suffix='.params', dir=self.directory) 
-        self.save(self.temp_params_file.name)
-        # see also PModelCheckerParams.translate_model_specification
-        
+        import os.path
+        kwargs = dict(
+            prefix=self._params_file.split('.params')[0],
+            suffix='.params',
+            dir=self.directory,
+        ) 
+        if sys.platform.startswith('win'): 
+            print os.path.splitunc(self._params_file_) #TODO use for paths
+            kwargs.update(delete=False)
+#        '''
+#        tempfile.NamedTemporaryFile([mode='w+b'[, bufsize=-1[, suffix=''[, prefix='tmp'[, dir=None[, delete=True]]]]]])
+#            This function operates exactly as TemporaryFile() does, except that the 
+#            file is guaranteed to have a visible name in the file system (on Unix, the
+#            directory entry is not unlinked). That name can be retrieved from the name 
+#            member of the file object. Whether the name can be used to open the file a 
+#            second time, while the named temporary file is still open, varies across 
+#            platforms (it can be so used on Unix; it cannot on Windows NT or later). 
+#            If delete is true (the default), the file is deleted as soon as it is 
+#            closed.        
+#        '''
+        self.temp_params_file = tempfile.NamedTemporaryFile(**kwargs) # must be an instance variable (self...) overwise it will not be usable by self._spawn/will be deleted at the end of the method?
+        if sys.platform.startswith('win'): self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
+        self.save(self.temp_params_file.name, update_object=False)
+        #TODO maybe repeat this pattern in PModelCheckerParams.translate_model_specification when model_specification == ''
         if thread:
             Thread(target=self._spawn).start()
         else:

@@ -34,8 +34,8 @@ from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
 
 tools_menu = Menu(
     Action(
-        name='&Preferences', 
-        action='edit_preferences', 
+        name='&Preferences',
+        action='edit_preferences',
         tooltip='TODO',
         enabled_when='len(controller._preferences_pages) > 0',
     ),
@@ -59,8 +59,8 @@ class ParamsHandler(HelpfulController):
         ) 
         return ViewClass(
             self.params_group,
-            id = self.id,
-            menubar = menubar,
+            id=self.id,
+            menubar=menubar,
         ) 
         
     params_group = Instance(Group) 
@@ -69,20 +69,24 @@ class ParamsHandler(HelpfulController):
 
     id = Str(desc='the ID to use when preserving window size and position')
     
-    title = Property(Str, depends_on='model._params_file, model.directory')
+    title = Property(Str, depends_on='model._params_file, model.directory, model._dirty_changed')
 
     def _get_title(self):
+        titles = [self.model.executable_name]
         path = self.model._params_file
         if len(path) > 0:
             dirname, basename = os.path.split(path)
             dirname = os.path.relpath(dirname, self.model.directory)
             if dirname == '.':
-                return '%s %s' % (self.model.executable_name, basename)
+                titles += [basename]
             else:
-                return '%s %s (%s)' % (self.model.executable_name, basename, dirname)
-            return 
-        else:
-            return self.model.executable_name
+                titles += [basename, '(%s)' % dirname]
+            if getattr(self.model, '__dirty', False):
+                titles += ['*']
+        return ' '.join(titles)
+
+    def object__dirty_changed(self, info):
+        info.ui.title = self.title
 
     def _title_changed(self, title):
         if self.info is not None and self.info.initialized:
@@ -140,10 +144,10 @@ class ParamsHandler(HelpfulController):
         
     def get_load_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
-            wildcard=self.wildcard, 
+            wildcard=self.wildcard,
             title=title,
-            default_filename = self.model._params_file,
-            default_directory = self.model.directory_ # note extra '_' in directory_, this means that it uses the shadow value of the trait 'directory' which is the full path
+            default_filename=self.model._params_file,
+            default_directory=self.model.directory_ # note extra '_' in directory_, this means that it uses the shadow value of the trait 'directory' which is the full path
         )
         if fd.open() == OK:
             return fd.path
@@ -151,10 +155,10 @@ class ParamsHandler(HelpfulController):
                
     def get_load_file_name_using_Traits_FileDialog(self, title):
         fd = OpenFileDialog(
-            file_name = self.model._params_file,
-            filter = self.filter,
-            title = title,
-            id = 'ParamsHandler.get_load_file_name_using_Traits_FileDialog',
+            file_name=self.model._params_file,
+            filter=self.filter,
+            title=title,
+            id='ParamsHandler.get_load_file_name_using_Traits_FileDialog',
         )
         if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
             return fd.file_name
@@ -166,7 +170,7 @@ class ParamsHandler(HelpfulController):
     def save(self, info):
         ''' Saves the traits of experiment to a .params XML file. '''
         params = info.object
-        title='Save %s parameters' % params._parameters_name
+        title = 'Save %s parameters' % params._parameters_name
         file_name = self.get_save_file_name_using_PyFace_FileDialog(title)
 #        file_name = self.get_save_file_name_using_Traits_FileDialog(title)
         if file_name is not None:
@@ -178,11 +182,11 @@ class ParamsHandler(HelpfulController):
                                    
     def get_save_file_name_using_PyFace_FileDialog(self, title):
         fd = FileDialog(
-            action='save as', 
-            default_filename = self.model._params_file,
-            default_directory = self.model.directory_, 
+            action='save as',
+            default_filename=self.model._params_file,
+            default_directory=self.model.directory_,
             wildcard=self.wildcard,
-            title = title,
+            title=title,
         )
         if fd.open() == OK:
             return fd.path
@@ -190,16 +194,16 @@ class ParamsHandler(HelpfulController):
     
     def get_save_file_name_using_Traits_FileDialog(self, title):
         fd = OpenFileDialog(
-            is_save_file = True,
-            extensions = [
-                CopyInputFilesWithRelativePathsExtension(), 
+            is_save_file=True,
+            extensions=[
+                CopyInputFilesWithRelativePathsExtension(),
                 FileInfo(),
                 TextInfo(),
             ],
-            file_name = self.model._params_file,
-            filter = self.filter,
-            title = title,
-            id = 'ParamsHandler.get_save_file_name_using_Traits_FileDialog',
+            file_name=self.model._params_file,
+            filter=self.filter,
+            title=title,
+            id='ParamsHandler.get_save_file_name_using_Traits_FileDialog',
         )
         if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
             # get whether to copy input files with relative paths or not
@@ -210,7 +214,7 @@ class ParamsHandler(HelpfulController):
         return None
             
     filters = [ # used to create wildcard and filter traits for FileDialog and OpenFileDialog respectively
-        ('Experiment parameters', ['*.params']), 
+        ('Experiment parameters', ['*.params']),
         ('All files', ['*']),
     ]
 
@@ -246,23 +250,7 @@ class ParamsHandler(HelpfulController):
                 if i < len(self.filters) - 1:
                     wildcard += '|'
         return wildcard
-    
-#    # set _dirty on model and * on title ---  
-#    # self.model._dirty == info.object._dirty == Params()._dirty
-#    # http://code.enthought.com/projects/traits/docs/html/TUIUG/handler.html
-#
-#    def setattr(self, info, object, name, value):
-#        super(ParamsController, self).setattr(info, object, name, value)
-#        self.model._dirty = True
-##        if name in self.model.parameter_names():
-##            self.model._dirty = True
-#        
-#    def object__dirty_changed(self, info):
-#        if info.initialized:
-#            info.ui.title += '*'
-#        else:
-#            self.model._dirty = False
-    
+        
     
 if __name__ == '__main__':
     execfile('params.py')

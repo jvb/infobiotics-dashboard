@@ -104,7 +104,7 @@ class Params(HasTraits):
         Returns True if a params file was successfully loaded. 
         
         '''
-        if self._dirty:
+        if getattr(self, '__dirty', False):
             logger.warn('loading %s when current parameters are dirty', file)
             #TODO prompt to save, with timeout/override for non-interactive_mode
             pass
@@ -161,9 +161,19 @@ class Params(HasTraits):
         self._dirty = False #TODO use dirty for prompting to save on perform
         return True
 
-    _dirty = Bool(False) #TODO def _changed(self): if name in self.parameter_names: self._dirty = True
+    from enthought.traits.api import Event
+    _dirty = Event
+    def __dirty_changed(self, dirty):
+        print dirty
+        self.__dirty = dirty
+    
+    def _anytrait_changed(self, name, old, new):
+#        print name, old, new
+        if name in self.parameter_names():
+            print name, old, new
+            self._dirty = True
 
-    def save(self, file='', force=False, copy=False):
+    def save(self, file='', force=False, copy=False, update_object=True):
         # handle whether or not to overwrite an existing file ---
         if can_access(file) and not force:
             if self._interactive is True:
@@ -231,8 +241,9 @@ class Params(HasTraits):
         # success!
 #        logger.debug("Saved '%s'." % file)
         self.directory = os.path.dirname(file)
-        self._params_file = file
-        self._dirty = False #TODO use dirty for prompting to save on perform    
+        if update_object:
+            self._params_file = file
+            self._dirty = False #TODO use dirty for prompting to save on perform    
         return True
 
 
