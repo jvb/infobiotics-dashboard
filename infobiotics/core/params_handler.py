@@ -44,8 +44,12 @@ tools_menu = Menu(
 
 class ParamsHandler(HelpfulController):
     
-    def traits_view(self): # overriden in ExperimentHandler
-        return self.get_traits_view(ParamsView)
+    params_group = Instance(Group)
+    
+    def _params_group_default(self):
+        raise NotImplementedError
+
+    id = Str(desc='the ID to use when preserving window size, position and monitor')
     
     def get_traits_view(self, ViewClass):
         help_menu = self.get_help_menu() # see HelpfulController
@@ -62,15 +66,19 @@ class ParamsHandler(HelpfulController):
             id=self.id,
             menubar=menubar,
         ) 
-        
-    params_group = Instance(Group) 
-    def _params_group_default(self):
-        raise NotImplementedError
-
-    id = Str(desc='the ID to use when preserving window size and position')
     
-    title = Property(Str, depends_on='model._params_file, model.directory, model._dirty_changed')
+    def traits_view(self): # overridden in ExperimentHandler
+        return self.get_traits_view(ParamsView)
 
+    status = Str
+    
+    def init(self, info):
+        self.status = "Please ensure the current working directory is correct."
+        info.ui.title = self.title
+        
+    title = Property(Str, depends_on='model._params_file, model.directory')
+
+#    @cached_property #TODO
     def _get_title(self):
         titles = [self.model.executable_name]
         path = self.model._params_file
@@ -81,17 +89,21 @@ class ParamsHandler(HelpfulController):
                 titles += [basename]
             else:
                 titles += [basename, '(%s)' % dirname]
-            if getattr(self.model, '__dirty', False):
-                titles += ['*']
         return ' '.join(titles)
-
-    def object__dirty_changed(self, info):
-        info.ui.title = self.title
 
     def _title_changed(self, title):
         if self.info is not None and self.info.initialized:
             if self.info.ui is not None:
                 self.info.ui.title = title
+    
+    def object__dirty_changed(self, info):
+        print 'here'
+        if info.initialized:
+            if info.object._dirty:
+                info.ui.title = self.title + '*'
+            else:
+                info.ui.title = self.title        
+
 
 
     preferences_pages = List(PreferencesPage)
@@ -116,12 +128,6 @@ class ParamsHandler(HelpfulController):
                 page.preferences.save() # must save preferences manually
         return ui.result
 
-
-    status = Str
-    
-    def init(self, info):
-        self.status = "Please ensure the current working directory is correct."
-        info.ui.title = self.title
 
     def close_window(self, info):
         info.ui.control.close()

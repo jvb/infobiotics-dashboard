@@ -1,3 +1,5 @@
+import sip
+sip.setapi('QString', 2)
 from infobiotics.commons.qt4 import centre_window
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, \
     time_units, substance_units, concentration_units, volume_units
@@ -627,10 +629,13 @@ def profile_SimulatorResults_get_amounts():
     print amounts
     exit()
 
+import sys
+from PyQt4.QtGui import qApp
 def main():
     argv = qApp.arguments()
 #    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
-    argv.insert(1, '/home/jvb/dashboard/examples/germination_09.h5')
+#    argv.insert(1, '/home/jvb/dashboard/examples/germination_09.h5')
+    argv.insert(1, '/home/jvb/Desktop/PAmodel/changed2.h5')
     if len(argv) > 2:
         print 'usage: python simulator_results.py {h5file}'#mcss_results.sh {h5file}'
         sys.exit(2)

@@ -2,7 +2,7 @@ from __future__ import with_statement # from __future__ imports must come first
 import infobiotics # set up TraitsUI backend before traits imports
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, EXECUTABLE_TRAIT, DIRECTORY_TRAIT
 from enthought.traits.api import (
-    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property,
+    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property, Enum
 #    on_trait_change
 )
 from enthought.traits.ui.api import Controller
@@ -95,8 +95,24 @@ class Params(HasTraits):
 
         
     _unresetable = List(Str)
+
+    _interaction_mode = Enum(['script', 'terminal', 'gui'])
+
+    def __interaction_mode_default(self):
+        import sys
+        import __main__
+        if sys.flags.interactive or not hasattr(__main__, '__file__'):
+            return 'terminal'
+        else:
+            return 'script'
+
+    _dirty = Bool(False)
+    
+    def _anytrait_changed(self, name, old, new): #@UnusedVariable
+        if name in self.parameter_names():
+            self._dirty = True
         
-    def load(self, file=''):
+    def load(self, file='', force=True):
         ''' Reads parameters file, 
         resets traits,
         sets traits to new parameters,
@@ -104,10 +120,16 @@ class Params(HasTraits):
         Returns True if a params file was successfully loaded. 
         
         '''
-        if getattr(self, '__dirty', False):
-            logger.warn('loading %s when current parameters are dirty', file)
-            #TODO prompt to save, with timeout/override for non-interactive_mode
-            pass
+        if self._dirty and not force:
+            if self._interaction_mode == 'gui':
+#                print 'message box'
+                from enthought.traits.ui.message import auto_close_message, error, message
+                if message(str('Save parameters before continuing?'), title='Unsaved parameters', buttons=['OK', 'Cancel']):
+                    self.save() #TODO need to call handler's save method either from here or in save
+            elif self._interaction_mode == 'terminal':
+                print 'command line prompt'
+            else:
+                print 'log overwriting unsaved parameters'
 
         # open and parse params file with ParamsXMLReader
         # reporting errors or responding to success 
@@ -160,18 +182,6 @@ class Params(HasTraits):
         self._params_file = file
         self._dirty = False #TODO use dirty for prompting to save on perform
         return True
-
-    from enthought.traits.api import Event
-    _dirty = Event
-    def __dirty_changed(self, dirty):
-        print dirty
-        self.__dirty = dirty
-    
-    def _anytrait_changed(self, name, old, new):
-#        print name, old, new
-        if name in self.parameter_names():
-            print name, old, new
-            self._dirty = True
 
     def save(self, file='', force=False, copy=False, update_object=True):
         # handle whether or not to overwrite an existing file ---
@@ -324,12 +334,18 @@ class Params(HasTraits):
         raise NotImplementedError
     
     def configure(self, **args):
-        self._interactive = True
+        interaction_mode = self._interaction_mode # remember previous mode of interaction
+        self._interaction_mode = 'gui' # set mode of interaction
         self.handler.configure_traits(**args)
-        
+        self._interaction_mode = interaction_mode # restore previous mode of interaction
+
     def edit(self, **args):
-        self._interactive = True
+        interaction_mode = self._interaction_mode # remember previous mode of interaction
+        self._interaction_mode = 'gui' # set mode of interaction
         ui = self.handler.edit_traits(**args)
+        self._interaction_mode = interaction_mode # restore previous mode of interaction
+        return ui.result
+
 
 
 

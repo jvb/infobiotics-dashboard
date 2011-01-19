@@ -23,8 +23,9 @@ class McssParamsHandler(ParamsHandler):
     ]
 
     model_format = Trait(
-        'P system XML',
+        'Lattice Population P system',
         {
+            'Lattice Population P system'  : 'lpp',
             'P system XML'                 : 'xml',
             'SBML'                         : 'sbml',
         },
@@ -32,6 +33,7 @@ class McssParamsHandler(ParamsHandler):
     )
 
     model_format_reversed = {
+        'lpp'  : 'Lattice Population P system',
         'xml'  : 'P system XML',
         'sbml' : 'SBML',
     }
@@ -66,15 +68,31 @@ class McssParamsHandler(ParamsHandler):
 
     def init(self, info):
         super(McssParamsHandler, self).init(info)
+        
+        # remember traits
+        model_format = info.object.model_format
+        simulation_algorithm = info.object.simulation_algorithm
+
+        # remember dirty
+        dirty = info.object._dirty
+
         self.sync_trait('model_format_', info.object, alias='model_format', mutual=False) # doesn't sync mutually even if mutual=True, this just makes it explicit
         self.sync_trait('simulation_algorithm_', info.object, alias='simulation_algorithm', mutual=False) # ditto
 
+        # reset traits
+        info.object.model_format = model_format
+        info.object.simulation_algorithm = simulation_algorithm
+        
+        # reset dirty 
+        info.object._dirty = dirty
+
     def object_model_file_changed(self, info):
         ext = os.path.splitext(info.object.model_file)[1].lower()
+        # quietly set traits
         if ext == '.sbml':
-            self.model_format = 'SBML'
+            self.trait_setq(model_format='SBML')#self.model_format = 'SBML'
         else:
-            self.model_format = 'P system XML'
+            self.trait_setq(model_format='Lattice Population P system')#self.model_format = 'Lattice Population P system' 
 
     def object_model_format_changed(self, info):
         self.model_format = self.model_format_reversed[info.object.model_format]

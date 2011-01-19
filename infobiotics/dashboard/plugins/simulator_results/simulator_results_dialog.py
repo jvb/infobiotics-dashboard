@@ -270,6 +270,7 @@ class SimulatorResultsDialog(QWidget):
             ui.compartments_list_widget,
         )
         for i in simulation._runs_list:
+#            print i, ui.runs_list_widget
             SimulationListWidgetItem(i, ui.runs_list_widget)
         for i in simulation._species_list:
             SimulationListWidgetItem(i, ui.species_list_widget)
