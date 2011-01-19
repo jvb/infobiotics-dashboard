@@ -23,7 +23,7 @@ experiment.load(params_file_name)
 args = [experiment.executable, experiment._params_file]#params_file_name
 args += ['show_progress=true']
 #args += ['show_progress=true', 'runs=10000']
-args += ['model_file=wrong'] # incorrent parameters
+#args += ['model_file=wrong'] # incorrent parameters
 #args = [os.path.join(os.path.dirname(__file__), 'segfault')] # segfault
 kwargs = dict(
     cwd=experiment.directory,
@@ -69,6 +69,8 @@ else:
         error = '%s caused a segmentation fault and was terminated by the operating system.' % arg_string
     elif p.returncode == -15:
         error = '%s was terminated by the dashboard.' % arg_string
+#    elif p.returncode == 127:
+#        error = 'shared library error'
     else:
         error = '%s exited with returncode %s' % (arg_string, p.returncode)
     error_log.write(error)

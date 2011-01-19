@@ -1,8 +1,11 @@
-import sys
-if sys.platform.startswith('win'):
-
-    # for py2exe frozen executables:
-    
+from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change
+from infobiotics.core.params import Params
+import sys 
+import os
+import tempfile
+import subprocess
+from threading import Thread
+if sys.platform.startswith('win'): # for py2exe frozen executables
     # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
     import pywintypes
     import pythoncom
@@ -21,14 +24,9 @@ if sys.platform.startswith('win'):
     except ImportError:
         # no build path setup, no worries.
         pass
-    
     import infobiotics.thirdparty.winpexpect.winpexpect as expect
 else:
     import pexpect as expect
-#    import infobiotics.thirdparty.pexpect as expect
-from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change
-from threading import Thread
-from infobiotics.core.params import Params
 
 class Experiment(Params):
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.
@@ -82,97 +80,9 @@ class Experiment(Params):
 #        print 'overridden parameters =', self.executable_kwargs
 #        print 'directory =', self.directory
     
-#    @profile
-    def _spawn(self):
-        ''' Start the program and try to match output.
-        
-        Spawns the program (starting it in self.cwd), 
-        compiles list of patterns for expect_list, 
-        adds EOF to list,
-        calls 'started' hook,
-        loops calling the '_output_pattern_matched' hook with the index of the pattern
-        and the match until EOF whereupon it calls the 'finished' hook.
-         
-        '''
-        self.starting = True
-        
-#        try:
-#    
-#            # spawn process
-#            if sys.platform.startswith('win'):
-#                self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
-#            else:    
-#                self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
-#            # note that the expect module doesn't like list traits so we copy them using [:] 
-#            # and directory is defined in Params
-#    
-#            # compile pattern list for expect_list
-#            compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
-#            
-#            # append EOF to compiled pattern list
-#            compiled_pattern_list.append(expect.EOF)
-#            eof_index = compiled_pattern_list.index(expect.EOF)
-#            
-#            # append TIMEOUT to compiled pattern list
-#            compiled_pattern_list.append(expect.TIMEOUT)
-#            timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
-#            
-#            self.started = True
-#
-#            # expect loop
-#            patterns_matched = 0
-#            while True:
-#                pattern_index = self.child.expect_list(compiled_pattern_list, searchwindowsize=100)
-#                if pattern_index == eof_index:
-#                    if patterns_matched == 0:
-#                        if self.child.before != '':
-#                            self.finished_without_output = True
-#                    # process has finished, perhaps prematurely
-#                    break
-#                elif pattern_index == timeout_index:
-#                    self.timed_out = True
-#                else:
-#                    self._output_pattern_matched(pattern_index, self.child.match.group())
-#                    patterns_matched += 1
-##            print patterns_matched
-#    
-#        except Exception, e:
-#            print e
-        
-        import subprocess
-        args = [self.executable, self.temp_params_file.name] + self.executable_kwargs[:]
-        kwargs = {'cwd':self.directory}
-        if subprocess.mswindows:
-            # hide empty terminal window that will appear (http://bit.ly/hNQUlQ)
-            su = subprocess.STARTUPINFO() 
-            su.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
-            su.wShowWindow = subprocess.SW_HIDE 
-            kwargs['startupinfo'] = su
-        p = subprocess.Popen(args, **kwargs)
-        self.started = True
-
-        stderr_output = p.communicate()[1]#p.wait()
-
-        if stderr_output != "":
-            error_log = open('mcss-error.log', 'w')
-            error_log.write(stderr_output)
-            error_log.close()
-
-        # trigger ExperimentHandler.show_results()
-        self.finished = True
-
-    def _finished_fired(self):
-        del self.temp_params_file #TODO may not be enough when 'delete=False' below
-        
-#    def _finished_without_output_fired(self):
-#        print '_finished_without_output_fired', self.child.before
-
     def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
         # save to temporary file in the same directory
-        import tempfile
-        import sys
-        import os.path
         kwargs = dict(
             prefix=self._params_file.split('.params')[0],
             suffix='.params',
@@ -192,16 +102,164 @@ class Experiment(Params):
 #            If delete is true (the default), the file is deleted as soon as it is 
 #            closed.        
 #        '''
-        self.temp_params_file = tempfile.NamedTemporaryFile(**kwargs) # must be an instance variable (self...) overwise it will not be usable by self._spawn/will be deleted at the end of the method?
+        self.temp_params_file = tempfile.NamedTemporaryFile(**kwargs) # must be an instance variable (self...) overwise it will not be usable by self._execute/will be deleted at the end of the method?
         if sys.platform.startswith('win'): self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
         self.save(self.temp_params_file.name, update_object=False)
         #TODO maybe repeat this pattern in PModelCheckerParams.translate_model_specification when model_specification == ''
         if thread:
-            Thread(target=self._spawn).start()
+            Thread(target=self._execute).start()
         else:
-            self._spawn()
+            self._execute()
             #TODO call serial progress function from here
         return True
+
+    def _execute(self):
+        '''Might be running in a thread.'''
+        self.starting = True
+        self.__subprocess()
+#        self.__expect()
+        self.finished = True # trigger ExperimentHandler.show_results()
+
+
+    def __subprocess(self):
+        import subprocess
+                
+        def cancel(process):
+            import signal
+            os.kill(process.pid, signal.SIGINT)
+            #http://docs.python.org/library/os.html#os.kill
+            #http://docs.python.org/library/signal.html#signal.CTRL_C_EVENT
+            
+        def last_non_empty_line(liststr):
+            for line in reversed(liststr):
+                if len(line) > 0:
+                    return line
+            return None
+        
+        args = [self.executable, self.temp_params_file.name] + self.executable_kwargs[:]
+        arg_string = ' '.join(args)
+        kwargs = dict(
+            cwd=self.directory,
+            stdout=subprocess.PIPE, # capture stdout
+            stderr=subprocess.PIPE, # capture stderr
+        )
+        if subprocess.mswindows:
+            # prevent empty terminal window opening (http://bit.ly/hNQUlQ)
+            su = subprocess.STARTUPINFO() 
+            su.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
+            su.wShowWindow = subprocess.SW_HIDE 
+            kwargs.update(startupinfo=su)
+        p = subprocess.Popen(args, **kwargs)
+#        import time
+#        time.sleep(0.005)
+#        cancel(p)
+#        #p.terminate()
+#        ##p.kill() # kill        
+        self.started = True
+        error_log_file_name = 'mcss-error.log'
+        error_log = None
+        stdout_output, stderr_output = p.communicate()
+        if p.returncode == 0: # returncode is set by communicate() 
+            pass
+        else:
+            error_log = open(error_log_file_name, 'w')
+            if p.returncode == 1:
+                # get last non-empty line of stdout or None
+                if len(stderr_output) > 0:#stderr_output != '':
+                    stdout_output_error = last_non_empty_line(stdout_output.split(os.linesep))
+                    stderr_output_error = last_non_empty_line(stderr_output.split(os.linesep))
+                    if stdout_output_error is not None:
+                        if stderr_output_error is not None:
+                            error = os.linesep.join((stdout_output_error, stderr_output_error))
+                        else:
+                            error = stdout_output_error
+                    else:
+                        if stderr_output_error is not None:
+                            error = stderr_output_error
+                        else:
+                            error = '%s exited with return code %s' % (arg_string, p.returncode)
+            elif p.returncode == -2:
+                error = '%s was cancelled by the user before data could be written.' % arg_string
+            elif p.returncode == -9:
+                error = '%s was terminated by the user.' % arg_string
+            elif p.returncode == -11:
+                error = '%s caused a segmentation fault and was terminated by the operating system.' % arg_string
+            elif p.returncode == -15:
+                error = '%s was terminated by the dashboard.' % arg_string
+        #    elif p.returncode == 127:
+        #        error = 'shared library error'
+            else:
+                error = '%s exited with returncode %s' % (arg_string, p.returncode)
+            error_log.write(error)
+            error_log.close()
+#        if error_log is not None:
+#            for line in open(error_log_file_name, 'r'):
+#                print line,
+
+
+    def __expect(self):
+        ''' Start the program and try to match output.
+        
+        Spawns the program (starting it in self.cwd), 
+        compiles list of patterns for expect_list, 
+        adds EOF to list,
+        calls 'started' hook,
+        loops calling the '_output_pattern_matched' hook with the index of the pattern
+        and the match until EOF whereupon it calls the 'finished' hook.
+         
+        '''
+        try:
+    
+            # spawn process
+            if sys.platform.startswith('win'):
+                self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
+            else:    
+                self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
+            # note that the expect module doesn't like list traits so we copy them using [:] 
+            # and directory is defined in Params
+    
+            # compile pattern list for expect_list
+            compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
+            
+            # append EOF to compiled pattern list
+            compiled_pattern_list.append(expect.EOF)
+            eof_index = compiled_pattern_list.index(expect.EOF)
+            
+            # append TIMEOUT to compiled pattern list
+            compiled_pattern_list.append(expect.TIMEOUT)
+            timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+            
+            self.started = True
+
+            # expect loop
+            patterns_matched = 0
+            while True:
+                pattern_index = self.child.expect_list(compiled_pattern_list, searchwindowsize=100)
+                if pattern_index == eof_index:
+                    if patterns_matched == 0:
+                        if self.child.before != '':
+                            self.finished_without_output = True
+                    # process has finished, perhaps prematurely
+                    break
+                elif pattern_index == timeout_index:
+                    self.timed_out = True
+                else:
+                    self._output_pattern_matched(pattern_index, self.child.match.group())
+                    patterns_matched += 1
+#            print patterns_matched
+    
+        except Exception, e:
+            print e    
+            
+    
+    def _finished_fired(self):
+        if sys.platform.startswith('win'):
+            os.remove(self.temp_params_file.name) #TODO test
+        else:
+            del self.temp_params_file
+        
+#    def _finished_without_output_fired(self):
+#        print '_finished_without_output_fired', self.child.before
 
     def _output_pattern_matched(self, pattern_index, match):
         ''' Update traits in response to matching error patterns.
