@@ -58,6 +58,9 @@ def can_read_file(path):
     ''' Return whether path is an existing readable file. '''
     return can_access(path, os.R_OK) if can_access_file(path) else False
 
+def can_write_file(path):
+    return can_write(path) if os.path.split(path)[1] != '' else False
+
 def read(file, mode='r'):
     if not can_read(file):
         raise IOError("Cannot read '%s'." % file)
@@ -67,11 +70,14 @@ def read(file, mode='r'):
 def read_binary(file):
     return read(file, mode='rb')
 
-def can_write(path):
-    ''' When testing whether a file can be written to the statement:
+def can_write(path=''):
+    ''' When testing whether a file or directoy can be written to.
+        
         "open(path, 'w')" alone will overwrite the file specified by path!
         Use "if not can_write(self.temporal_formulas):" instead.
     '''
+    if path.strip() == '':
+        raise ValueError("Path empty.")
     if can_access(path):
         return can_access(path, os.W_OK)
     else:

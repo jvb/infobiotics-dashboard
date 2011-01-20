@@ -50,6 +50,9 @@ class Test(HasTraits):
     _names = ListStr(['switch1', 'switch2'])
     _interaction_mode = Enum(['script', 'terminal', 'gui'])
 
+#    def __dirty_changed(self): # not working in Params!
+#        print 'got here'
+
     def __interaction_mode_default(self):
         import sys
         import __main__

@@ -2,7 +2,7 @@ from __future__ import with_statement # from __future__ imports must come first
 import infobiotics # set up TraitsUI backend before traits imports
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, EXECUTABLE_TRAIT, DIRECTORY_TRAIT
 from enthought.traits.api import (
-    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property, Enum
+    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property, Enum, on_trait_change, Dict, Any
 #    on_trait_change
 )
 from enthought.traits.ui.api import Controller
@@ -106,13 +106,35 @@ class Params(HasTraits):
         else:
             return 'script'
 
-    _dirty = Bool(False)
     
+    _clean_parameters = Dict(Str, Any)
+    
+    def __clean_parameters_default(self):
+        return self.parameter_name_values_dict()
+    
+    def parameter_name_values_dict(self):
+        return dict([(name, getattr(self, name)) for name in self.parameter_names()])
+    
+    _dirty_parameters = Property(Dict(Str, Any))
+    
+    def _get__dirty_parameters(self):
+        return dict([(name, value) for name, value in self.parameter_name_values_dict().items() if value != self._clean_parameters[name]]) 
+    
+    _dirty = Bool(False)
+##    @on_trait_change('dirty') # not working!
+#    def __dirty_changed(self): # not working either!
+#        print 'got here'
     def _anytrait_changed(self, name, old, new): #@UnusedVariable
+        if name == '_dirty' and new == False:
+            self._clean_parameters = self.parameter_name_values_dict()
         if name in self.parameter_names():
-            self._dirty = True
+            if self.parameter_name_values_dict() != self._clean_parameters:
+                self._dirty = True
+            else:
+                self._dirty = False
         
-    def load(self, file='', force=True):
+        
+    def load(self, file='', force=False):
         ''' Reads parameters file, 
         resets traits,
         sets traits to new parameters,
@@ -121,21 +143,18 @@ class Params(HasTraits):
         
         '''
         if self._dirty and not force:
-            if self._interaction_mode == 'gui':
-#                print 'message box'
-                from enthought.traits.ui.message import auto_close_message, error, message
-                if message(str('Save parameters before continuing?'), title='Unsaved parameters', buttons=['OK', 'Cancel']):
-                    self.save() #TODO need to call handler's save method either from here or in save
-            elif self._interaction_mode == 'terminal':
-                print 'command line prompt'
-            else:
-                print 'log overwriting unsaved parameters'
+            if self._interaction_mode == 'terminal':
+                answer = raw_input('Save current parameters before continuing? [Y/n] ')
+                if len(answer.strip()) == 0 or answer.upper().startswith('Y'):
+                    self.save() # will prompt for file name with self._params_file as default
+            elif self._interaction_mode == 'script':
+                logger.warn('Overwriting unsaved parameters: %s' % ',' .join(['%s=%s' % (name, value) for name, value in self._dirty_parameters.items()]))
 
         # open and parse params file with ParamsXMLReader
         # reporting errors or responding to success 
         with read(file, 'rb') as fh:
             parser = sax.make_parser()
-            parameters_dictionary = {}
+            parameters_dictionary = {} # keep reference to dictionary that will be filled by handler
             handler = ParamsXMLReader(parameters_dictionary, self._parameter_set_name)
             parser.setContentHandler(handler)
             error = None
@@ -184,24 +203,40 @@ class Params(HasTraits):
         return True
 
     def save(self, file='', force=False, copy=False, update_object=True):
-        # handle whether or not to overwrite an existing file ---
-        if can_access(file) and not force:
-            if self._interactive is True:
-                #TODO prompt not to overwrite with a message box
-                pass
-            else:
-                #TODO prompt not to overwrite, with a timeout in case of non-interactive mode
-                pass
-#                    print "Are you sure you want to overwrite '%s' (Y/n)?" % file
-##                    start_time = time()
-##                    while(whatever):
-##                        do_something
-##                        if time() - smart_time > 5:
-##                            return
-#                    answer = sys.stdin.readline()
-#                    if answer.lower().startswith('y'):
-#                        pass
-
+        from infobiotics.commons.files import can_read, can_write_file
+        if file.strip() == '':
+            if force:
+                file = self._params_file
+            elif self._interaction_mode == 'terminal':
+                file = raw_input("Enter file name ['%s']: " % self._params_file)
+                if len(file.strip()) == 0:
+                    file = self._params_file
+            elif self._interaction_mode == 'script':
+                raise ValueError("No file name specified, use 'save(force=True)' to overwrite current file.")
+    
+        if not can_write_file(file):
+            if self._interaction_mode == 'terminal':
+                print "Can't write to '%s'. Save aborted." % file
+                return
+            elif self._interaction_mode == 'script':
+                raise IOError("Can't write to '%s'." % file)
+                
+        if can_read(file) and not force:
+            if self._interaction_mode == 'terminal':
+                while True:
+                    answer = raw_input("Overwrite '%s'? [y/N] " % file)
+                    if answer.lower().startswith('y'):
+                        break
+                    elif answer.strip() == '' or answer.upper().startswith('N'):
+                        print 'Save aborted.'
+                        return
+                    else:
+                        print "Don't understand '%s'." % answer,
+            elif self._interaction_mode == 'script':
+                exit("'%s' exists, use \"save('%s', force=True)\" to overwrite. Exited without saving." % (file, file))
+                
+#        print "Saving parameters to '%s'." % file
+                    
         # handle problem of invalidating relative paths when saving to a new directory
         old_params_file_dir = os.path.dirname(self._params_file)
         new_params_file_dir = os.path.dirname(file) 
@@ -239,13 +274,8 @@ class Params(HasTraits):
             with write(file) as fh:
                 fh.write(self.params_file_string()) # important bit
         except IOError, e:
-            # handle IOError ---
             logger.exception(e)
-            if self._interactive:
-                from enthought.traits.ui.message import auto_close_message, error, message
-                message(str(e), title='Error')
-            else:
-                print e
+            raise e #TODO replace with something useful?
             return False
             
         # success!

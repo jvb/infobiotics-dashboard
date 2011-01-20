@@ -97,7 +97,6 @@ class ParamsHandler(HelpfulController):
                 self.info.ui.title = title
     
     def object__dirty_changed(self, info):
-        print 'here'
         if info.initialized:
             if info.object._dirty:
                 info.ui.title = self.title + '*'
@@ -139,6 +138,12 @@ class ParamsHandler(HelpfulController):
 
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
+        
+        from enthought.traits.ui.message import auto_close_message, error, message
+        if info.object._dirty:
+            if message(str('Save current parameters before loading?'), title='Unsaved parameters', buttons=['OK', 'Cancel']):
+                self.save(info)        
+
         params = info.object
         title = 'Load %s parameters' % params._parameters_name
         file_name = self.get_load_file_name_using_PyFace_FileDialog(title)

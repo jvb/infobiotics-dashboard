@@ -4,14 +4,14 @@ from enthought.traits.api import (
     Int, Range, Property, Instance, on_trait_change, Button, Bool
 )
 from infobiotics.pmodelchecker.api import (
-    PModelCheckerParamsHandler, 
+    PModelCheckerParamsHandler,
 )
 #from infobiotics.pmodelchecker.mc2.api import MC2Params
 from mc2_params_group import mc2_params_group
 from mc2_mcss_experiment import MC2McssExperiment
 from mc2_mcss_experiment_group import mc2_mcss_experiment_group
 from infobiotics.mcss.api import McssExperiment
-from infobiotics.commons.files import can_read_file, can_write
+from infobiotics.commons.files import can_read_file
 import tables
 
 class MC2ParamsHandler(PModelCheckerParamsHandler):
@@ -23,7 +23,7 @@ class MC2ParamsHandler(PModelCheckerParamsHandler):
     
     help_urls = [
         ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/modelCheckingMC2.html'),
-        ('MC2 webpage','http://www.brc.dcs.gla.ac.uk/software/mc2/'),
+        ('MC2 webpage', 'http://www.brc.dcs.gla.ac.uk/software/mc2/'),
     ]
     
     default_temporal_formula = 'P=?[ (Time=1000)U([molecule] >= T ^ [molecule] < T + constant)'
