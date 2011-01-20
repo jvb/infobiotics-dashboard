@@ -31,6 +31,10 @@ preferences.set('default/mcss.directory', os.path.expanduser('~'))
 preferences.set('default/pmodelchecker.directory', os.path.expanduser('~'))
 preferences.set('default/poptimizer.directory', os.path.expanduser('~'))
 
+#preferences.set('default/execution_mode', 'subprocess')
+preferences.set('default/execution_mode', 'pexpect')
+
+
 ##TODO per plugin-style preferences, in the transient 'default' scope 
 #import infobiotics.preferences
 #from enthought.preferences.api import get_default_preferences 

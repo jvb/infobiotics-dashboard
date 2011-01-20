@@ -3,30 +3,36 @@ from infobiotics.core.params import Params
 import sys 
 import os
 import tempfile
-import subprocess
 from threading import Thread
-if sys.platform.startswith('win'): # for py2exe frozen executables
-    # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
-    import pywintypes
-    import pythoncom
-    import win32api
-    try:
-    # if this doesn't work, try import modulefinder
-        import py2exe.mf as modulefinder
-        import win32com
-        for p in win32com.__path__[1:]:
-            modulefinder.AddPackagePath("win32com", p)
-        for extra in ["win32com.shell"]: #,"win32com.mapi"
-            __import__(extra)
-            m = sys.modules[extra]
-            for p in m.__path__[1:]:
-                modulefinder.AddPackagePath(extra, p)
-    except ImportError:
-        # no build path setup, no worries.
-        pass
-    import infobiotics.thirdparty.winpexpect.winpexpect as expect
-else:
-    import pexpect as expect
+from infobiotics.preferences import preferences#import infobiotics.config
+execution_mode = preferences.get('execution_mode')
+if execution_mode not in ('subprocess', 'pexpect'):
+    execution_mode = 'subprocess'
+if execution_mode == 'subprocess':
+    import subprocess
+else: 
+    if sys.platform.startswith('win'): # for py2exe frozen executables
+        # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
+        import pywintypes
+        import pythoncom
+        import win32api
+        try:
+        # if this doesn't work, try import modulefinder
+            import py2exe.mf as modulefinder
+            import win32com
+            for p in win32com.__path__[1:]:
+                modulefinder.AddPackagePath("win32com", p)
+            for extra in ["win32com.shell"]: #,"win32com.mapi"
+                __import__(extra)
+                m = sys.modules[extra]
+                for p in m.__path__[1:]:
+                    modulefinder.AddPackagePath(extra, p)
+        except ImportError:
+            # no build path setup, no worries.
+            pass
+        import infobiotics.thirdparty.winpexpect.winpexpect as expect
+    else:
+        import pexpect as expect
 
 class Experiment(Params):
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.
@@ -62,11 +68,12 @@ class Experiment(Params):
     ])
     _error_string = Str
 
-    starting = Event
+#    starting = Event # not used as of 504
     started = Event
     timed_out = Event
     finished = Event
-    finished_without_output = Event
+    finished_successfully = Bool
+    finished_without_output = Event #TODO
 
 #    @on_trait_change('started')
 #    def forward_program_output_to_stdout(self):
@@ -80,7 +87,7 @@ class Experiment(Params):
 #        print 'overridden parameters =', self.executable_kwargs
 #        print 'directory =', self.directory
     
-    def perform(self, thread=False):
+    def perform(self, thread=False):#TODO make thread True by default?
         ''' Spawns an expect process and handles it in a separate thread. '''
         # save to temporary file in the same directory
         kwargs = dict(
@@ -104,31 +111,43 @@ class Experiment(Params):
 #        '''
         self.temp_params_file = tempfile.NamedTemporaryFile(**kwargs) # must be an instance variable (self...) overwise it will not be usable by self._execute/will be deleted at the end of the method?
         if sys.platform.startswith('win'): self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
-        self.save(self.temp_params_file.name, update_object=False)
+        self.save(self.temp_params_file.name, force=True, update_object=False)
         #TODO maybe repeat this pattern in PModelCheckerParams.translate_model_specification when model_specification == ''
-        if thread:
-            Thread(target=self._execute).start()
-        else:
-            self._execute()
+        if not thread or self._interaction_mode == 'terminal':
+            self._execute() # always do this in terminal mode
             #TODO call serial progress function from here
+        else:
+            Thread(target=self._execute).start()
+#        print 'executed'
         return True
 
     def _execute(self):
         '''Might be running in a thread.'''
-        self.starting = True
-        self.__subprocess()
-#        self.__expect()
-        self.finished = True # trigger ExperimentHandler.show_results()
+#        self.starting = True # not used as of 504
+        if execution_mode == 'subprocess':
+            self.__subprocess()
+        else:
+            self.__expect()
+        self.finished = True
 
+    def _finished_fired(self):
+        if self.finished_successfully:
+            print 'succeeded', self
+        else:
+            print 'failed', self
+        if sys.platform.startswith('win'):
+            os.remove(self.temp_params_file.name) #TODO test
+        else:
+            del self.temp_params_file
 
     def __subprocess(self):
-        import subprocess
                 
         def cancel(process):
             import signal
             os.kill(process.pid, signal.SIGINT)
             #http://docs.python.org/library/os.html#os.kill
             #http://docs.python.org/library/signal.html#signal.CTRL_C_EVENT
+        self.cancel = cancel
             
         def last_non_empty_line(liststr):
             for line in reversed(liststr):
@@ -160,7 +179,7 @@ class Experiment(Params):
         error_log = None
         stdout_output, stderr_output = p.communicate()
         if p.returncode == 0: # returncode is set by communicate() 
-            pass
+            self.finished_successfully = True # trigger ExperimentHandler.show_results()
         else:
             error_log = open(error_log_file_name, 'w')
             if p.returncode == 1:
@@ -192,6 +211,7 @@ class Experiment(Params):
                 error = '%s exited with returncode %s' % (arg_string, p.returncode)
             error_log.write(error)
             error_log.close()
+            self.finished_successfully = False
 #        if error_log is not None:
 #            for line in open(error_log_file_name, 'r'):
 #                print line,
@@ -212,9 +232,9 @@ class Experiment(Params):
     
             # spawn process
             if sys.platform.startswith('win'):
-                self.child = expect.winspawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
-            else:    
-                self.child = expect.spawn(self.executable, [self._params_file] + self.executable_kwargs[:], cwd=self.directory)
+                self.child = expect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+            else:
+                self.child = expect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
             # note that the expect module doesn't like list traits so we copy them using [:] 
             # and directory is defined in Params
     
@@ -238,11 +258,12 @@ class Experiment(Params):
                 if pattern_index == eof_index:
                     if patterns_matched == 0:
                         if self.child.before != '':
-                            self.finished_without_output = True
+                            self.finished_without_output = True #TODO
                     # process has finished, perhaps prematurely
                     break
                 elif pattern_index == timeout_index:
                     self.timed_out = True
+                    # failed?
                 else:
                     self._output_pattern_matched(pattern_index, self.child.match.group())
                     patterns_matched += 1
@@ -250,16 +271,12 @@ class Experiment(Params):
     
         except Exception, e:
             print e    
-            
-    
-    def _finished_fired(self):
-        if sys.platform.startswith('win'):
-            os.remove(self.temp_params_file.name) #TODO test
-        else:
-            del self.temp_params_file
+        
+        self.finished_successfully = True
         
 #    def _finished_without_output_fired(self):
 #        print '_finished_without_output_fired', self.child.before
+            
 
     def _output_pattern_matched(self, pattern_index, match):
         ''' Update traits in response to matching error patterns.
@@ -275,10 +292,16 @@ class Experiment(Params):
                 
         '''
         self._error_string = match.split('rror')[1].strip(':') if 'rror' in match else match
-
+        if self._interaction_mode == 'terminal':
+            print self._error_string
+        elif self._interaction_mode == 'script':
+            logger.error(self._error_string)
+    
     def __error_string_changed(self, _error_string):
         print _error_string, '(from Experiment.__error_string_changed)'
 
+from infobiotics.commons.api import logging
+logger = logging.getLogger(level=logging.ERROR)
 
 #from enthought.traits.ui.api import Group, Item
 #

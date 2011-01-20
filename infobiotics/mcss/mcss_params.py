@@ -30,7 +30,7 @@ class McssParams(Params):
         ],
         entries=10,
     )
-    model_format = Enum(['xml', 'sbml', 'lpp'], desc='the model specification format')
+    model_format = Enum(['sbml', 'xml', 'lpp'], desc='the model specification format')
     duplicate_initial_amounts = Bool(False, desc='whether to duplicate initial amounts for all templates in the SBML model')
 #    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
     max_time = FloatGreaterThanZero(desc='the maximum time to run simulation')

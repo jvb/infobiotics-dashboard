@@ -302,11 +302,11 @@ class ListWidget(QListWidget):
         ''' Enables functionality to be add to line edit outside of factory. '''
         self.connect(filter_line_edit, SIGNAL('textChanged(QString)'), self.filter)
 
-        #TODO move to filter_line_edit_factory?
-        from infobiotics.commons.qt4 import version
-        split = version.split('.')
-        if int(split[0]) > 4 or (int(split[0]) == 4 and int(split[1]) >= 7):
-            filter_line_edit.setPlaceholderText('Filter')
+#        #TODO move to filter_line_edit_factory?
+#        from infobiotics.commons.qt4 import version
+#        split = version.split('.')
+#        if int(split[0]) > 4 or (int(split[0]) == 4 and int(split[1]) >= 7): # doesn't work with PyQt 4.7
+#            filter_line_edit.setPlaceholderText('Filter')
 
 class CheckBoxListWidget(ListWidget):
     

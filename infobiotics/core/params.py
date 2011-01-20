@@ -148,7 +148,7 @@ class Params(HasTraits):
                 if len(answer.strip()) == 0 or answer.upper().startswith('Y'):
                     self.save() # will prompt for file name with self._params_file as default
             elif self._interaction_mode == 'script':
-                logger.warn('Overwriting unsaved parameters: %s' % ',' .join(['%s=%s' % (name, value) for name, value in self._dirty_parameters.items()]))
+                logger.warn('Overwriting unsaved parameters: %s' % ','.join(['%s=%s' % (name, value) for name, value in self._dirty_parameters.items()]))
 
         # open and parse params file with ParamsXMLReader
         # reporting errors or responding to success 

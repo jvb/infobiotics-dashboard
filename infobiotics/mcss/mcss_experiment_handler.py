@@ -8,7 +8,11 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
     def object_finished_changed(self, info):
         ''' Triggered when experiment's expect loop finishes. '''
-        self.show_results()
+        if info.object.finished_successfully:
+            print 'succeeded', self
+            self.show_results()
+        else:
+            print 'failed', self
         
     def show_results(self):
         import os.path

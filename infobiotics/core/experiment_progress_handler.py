@@ -48,7 +48,8 @@ class ExperimentProgressHandler(Controller):
         width=250,
     )
 
-    def object_finished_changed(self, info):
+    def object_finished_changed(self, info): # sometimes this isn't called
         ''' Triggered when experiment's expect loop finishes. '''
+#        print self
         if self.close(info, True):
             self._on_close(info)
