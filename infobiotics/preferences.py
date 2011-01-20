@@ -31,7 +31,7 @@ preferences.set('default/mcss.directory', os.path.expanduser('~'))
 preferences.set('default/pmodelchecker.directory', os.path.expanduser('~'))
 preferences.set('default/poptimizer.directory', os.path.expanduser('~'))
 
-#preferences.set('default/execution_mode', 'subprocess')
+preferences.set('default/execution_mode', 'subprocess')
 preferences.set('default/execution_mode', 'pexpect')
 
 

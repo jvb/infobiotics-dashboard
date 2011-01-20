@@ -31,7 +31,7 @@ default_handler = stream_handler
 custom_format = '"%(message)s" %(module)s:%(lineno)s(%(funcName)s) \
 %(name)s(%(levelno)s) \
 %(asctime)s,%(msecs).3f [%(thread)d:%(process)d] \'%(pathname)s\''  
-simple_format = '"%(message)s" %(module)s:%(lineno)s(%(funcName)s) [%(name)s(%(levelno)s)]'
+simple_format = "%(message)s (line %(lineno)s of module '%(module)s' in '%(funcName)s') [logger '%(name)s', level %(levelno)s]"
 default_format = simple_format
 default_date_format = '%Y%m%d;%H:%M:%S'
 

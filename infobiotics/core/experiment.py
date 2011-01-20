@@ -4,8 +4,10 @@ import sys
 import os
 import tempfile
 from threading import Thread
+
 from infobiotics.preferences import preferences#import infobiotics.config
-execution_mode = preferences.get('execution_mode')
+import re
+execution_mode = preferences.get('execution_mode') #TODO move into each experiments scope
 if execution_mode not in ('subprocess', 'pexpect'):
     execution_mode = 'subprocess'
 if execution_mode == 'subprocess':
@@ -34,7 +36,13 @@ else:
     else:
         import pexpect as expect
 
+from infobiotics.commons.api import logging
+log = logging.getLogger()
+log.setLevel(logging.ERROR)
+#log.setLevel(logging.DEBUG)
+
 class Experiment(Params):
+    log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.
 #    
 #    ParamsExperiments are performed by external programs with parameters from
@@ -68,25 +76,15 @@ class Experiment(Params):
     ])
     _error_string = Str
 
-#    starting = Event # not used as of 504
+    starting = Event # used to reset finished_successfully
+    def _starting_fired(self):
+        self.finished_successfully = False
     started = Event
     timed_out = Event
     finished = Event
     finished_successfully = Bool
     finished_without_output = Event #TODO
 
-#    @on_trait_change('started')
-#    def forward_program_output_to_stdout(self):
-#        self.child.logfile_read = sys.stdout
-
-#    @on_trait_change('started')
-#    def print_experiment_command_line(self):
-#        # debugging #TODO silence
-#        print 'executable =', self.executable
-#        print 'params file =', self._params_file
-#        print 'overridden parameters =', self.executable_kwargs
-#        print 'directory =', self.directory
-    
     def perform(self, thread=False):#TODO make thread True by default?
         ''' Spawns an expect process and handles it in a separate thread. '''
         # save to temporary file in the same directory
@@ -121,10 +119,12 @@ class Experiment(Params):
 #        print 'executed'
         return True
 
+    execution_mode = execution_mode
+    
     def _execute(self):
         '''Might be running in a thread.'''
-#        self.starting = True # not used as of 504
-        if execution_mode == 'subprocess':
+        self.starting = True
+        if self.execution_mode == 'subprocess':
             self.__subprocess()
         else:
             self.__expect()
@@ -132,9 +132,9 @@ class Experiment(Params):
 
     def _finished_fired(self):
         if self.finished_successfully:
-            print 'succeeded', self
+            log.debug('succeeded')
         else:
-            print 'failed', self
+            log.debug('failed')
         if sys.platform.startswith('win'):
             os.remove(self.temp_params_file.name) #TODO test
         else:
@@ -175,18 +175,18 @@ class Experiment(Params):
 #        #p.terminate()
 #        ##p.kill() # kill        
         self.started = True
-        error_log_file_name = 'mcss-error.log'
+        self.error_log_file_name = 'mcss-error.log'
         error_log = None
         stdout_output, stderr_output = p.communicate()
         if p.returncode == 0: # returncode is set by communicate() 
             self.finished_successfully = True # trigger ExperimentHandler.show_results()
         else:
-            error_log = open(error_log_file_name, 'w')
+            error_log = open(self.error_log_file_name, 'w')
             if p.returncode == 1:
                 # get last non-empty line of stdout or None
                 if len(stderr_output) > 0:#stderr_output != '':
-                    stdout_output_error = last_non_empty_line(stdout_output.split(os.linesep))
-                    stderr_output_error = last_non_empty_line(stderr_output.split(os.linesep))
+                    stdout_output_error = stdout_output.strip()#last_non_empty_line(stdout_output.split(os.linesep))
+                    stderr_output_error = stderr_output.strip()#last_non_empty_line(stderr_output.split(os.linesep))
                     if stdout_output_error is not None:
                         if stderr_output_error is not None:
                             error = os.linesep.join((stdout_output_error, stderr_output_error))
@@ -205,16 +205,13 @@ class Experiment(Params):
                 error = '%s caused a segmentation fault and was terminated by the operating system.' % arg_string
             elif p.returncode == -15:
                 error = '%s was terminated by the dashboard.' % arg_string
-        #    elif p.returncode == 127:
-        #        error = 'shared library error'
+            elif p.returncode == 127:
+                error = 'shared library error'
             else:
                 error = '%s exited with returncode %s' % (arg_string, p.returncode)
+#            self.log.error(error)
             error_log.write(error)
             error_log.close()
-            self.finished_successfully = False
-#        if error_log is not None:
-#            for line in open(error_log_file_name, 'r'):
-#                print line,
 
 
     def __expect(self):
@@ -228,81 +225,77 @@ class Experiment(Params):
         and the match until EOF whereupon it calls the 'finished' hook.
          
         '''
-        try:
-    
-            # spawn process
-            if sys.platform.startswith('win'):
-                self.child = expect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+        if sys.platform.startswith('win'):
+            self.child = expect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+        else:
+            self.child = expect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+        # note that the expect module doesn't like list traits so we copy them using [:] 
+        # and directory is defined in Params
+
+        # compile pattern list for expect_list
+        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
+        
+        # append EOF to compiled pattern list
+        compiled_pattern_list.append(expect.EOF)
+        eof_index = compiled_pattern_list.index(expect.EOF)
+        
+        # append TIMEOUT to compiled pattern list
+        compiled_pattern_list.append(expect.TIMEOUT)
+        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+        
+        self.started = True
+
+        # expect loop
+        patterns_matched = 0
+        eof = True
+        while eof:
+            pattern_index = self.child.expect_list(compiled_pattern_list, searchwindowsize=100)
+            if pattern_index == eof_index:
+                if patterns_matched == 0:
+                    if self.child.before != '':
+                        # scour before for error messages
+                        for line in self.child.before.split(os.linesep):
+                            for i, pattern in enumerate(self._error_pattern_list):
+                                if re.match(pattern, line) is not None:
+                                    self._output_pattern_matched(len(self._output_pattern_list) + i, line)
+                                    break # out of inner for loop
+                            else:
+                                continue # don't break out of outer loop yet
+                            break # out of outer for loop
+                        else:
+                            self._output_pattern_matched(-1, self.child.before)
+                    else:
+                        self.finished_without_output = True #TODO
+                    break # out of while loop
+                eof = False
+                # process has finished, perhaps prematurely, but can't tell so call it a success
+            elif pattern_index == timeout_index:
+                log.debug('timed out')
+                self.timed_out = True #TODO
             else:
-                self.child = expect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
-            # note that the expect module doesn't like list traits so we copy them using [:] 
-            # and directory is defined in Params
-    
-            # compile pattern list for expect_list
-            compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
-            
-            # append EOF to compiled pattern list
-            compiled_pattern_list.append(expect.EOF)
-            eof_index = compiled_pattern_list.index(expect.EOF)
-            
-            # append TIMEOUT to compiled pattern list
-            compiled_pattern_list.append(expect.TIMEOUT)
-            timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
-            
-            self.started = True
-
-            # expect loop
-            patterns_matched = 0
-            while True:
-                pattern_index = self.child.expect_list(compiled_pattern_list, searchwindowsize=100)
-                if pattern_index == eof_index:
-                    if patterns_matched == 0:
-                        if self.child.before != '':
-                            self.finished_without_output = True #TODO
-                    # process has finished, perhaps prematurely
-                    break
-                elif pattern_index == timeout_index:
-                    self.timed_out = True
-                    # failed?
-                else:
-                    self._output_pattern_matched(pattern_index, self.child.match.group())
-                    patterns_matched += 1
-#            print patterns_matched
-    
-        except Exception, e:
-            print e    
+                self._output_pattern_matched(pattern_index, self.child.match.group())
+                patterns_matched += 1
+        else: # while loop finished without a break
+            self.finished_successfully = True
         
-        self.finished_successfully = True
-        
-#    def _finished_without_output_fired(self):
-#        print '_finished_without_output_fired', self.child.before
-            
-
     def _output_pattern_matched(self, pattern_index, match):
-        ''' Update traits in response to matching error patterns.
+        '''Update traits in response to matching error patterns.
         
-        Subclasses should call this method after processing their own patterns,
-        e.g.:
+        Subclasses should call this method after processing their own patterns, e.g.:
             if pattern_index == 0:
                 # do something
             elif pattern_index == 1:
                 # do something else
             else:
-                super(McssExperiment, self)._output_pattern_matched(pattern_index, match)
-                
+                Experiment._output_pattern_matched(self, pattern_index, match)
+
         '''
-        self._error_string = match.split('rror')[1].strip(':') if 'rror' in match else match
+        self._error_string = match.strip()
         if self._interaction_mode == 'terminal':
             print self._error_string
         elif self._interaction_mode == 'script':
-            logger.error(self._error_string)
+            self.log.error(self._error_string)
     
-    def __error_string_changed(self, _error_string):
-        print _error_string, '(from Experiment.__error_string_changed)'
-
-from infobiotics.commons.api import logging
-logger = logging.getLogger(level=logging.ERROR)
-
 #from enthought.traits.ui.api import Group, Item
 #
 #error_string_group = Group(

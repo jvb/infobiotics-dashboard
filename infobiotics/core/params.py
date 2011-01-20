@@ -486,10 +486,10 @@ def trait_value_from_parameter_value(self, name, value): # change name to 'trait
             return float(value)   
         elif isinstance(trait.default, long):
             return long(value)
-    elif type in ('Enum', 'File', 'Directory'):
+    elif type in ('Enum', 'File', 'Directory', 'ParamsRelativeFile', 'ParamsRelativeDirectory', 'RelativeFile', 'RelativeDirectory'):
         return str(value)    
     else:
-        logger.warn('unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
+        logger.warn('Unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
         return value
 
 #TODO could replace name with trait.metadata.parameter_name and return (new_name, value)
