@@ -5,66 +5,60 @@ import os
 import tempfile
 from threading import Thread
 
-from infobiotics.preferences import preferences#import infobiotics.config
-import re
-execution_mode = preferences.get('execution_mode') #TODO move into each experiments scope
-if execution_mode not in ('subprocess', 'pexpect'):
-    execution_mode = 'subprocess'
-if execution_mode == 'subprocess':
-    import subprocess
-else: 
-    if sys.platform.startswith('win'): # for py2exe frozen executables
-        # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
-        import pywintypes
-        import pythoncom
-        import win32api
-        try:
-        # if this doesn't work, try import modulefinder
-            import py2exe.mf as modulefinder
-            import win32com
-            for p in win32com.__path__[1:]:
-                modulefinder.AddPackagePath("win32com", p)
-            for extra in ["win32com.shell"]: #,"win32com.mapi"
-                __import__(extra)
-                m = sys.modules[extra]
-                for p in m.__path__[1:]:
-                    modulefinder.AddPackagePath(extra, p)
-        except ImportError:
-            # no build path setup, no worries.
-            pass
-        import infobiotics.thirdparty.winpexpect.winpexpect as expect
-    else:
-        import pexpect as expect
+from infobiotics.thirdparty import which
+import sys
+if sys.platform.startswith('win'):    
+    # for py2exe frozen executables
+    # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
+    import pywintypes
+    import pythoncom
+    import win32api
+    try:
+        import py2exe.mf as modulefinder # if this doesn't work, try import modulefinder
+        import win32com
+        for p in win32com.__path__[1:]:
+            modulefinder.AddPackagePath("win32com", p)
+        for extra in ["win32com.shell"]: #,"win32com.mapi"
+            __import__(extra)
+            m = sys.modules[extra]
+            for p in m.__path__[1:]:
+                modulefinder.AddPackagePath(extra, p)
+    except ImportError:
+        pass # no build path setup, no worries.
 
+    import winpexpect
+#    import wexpect # deprecated
+import pexpect # provided by pexpect or winpexpect PyPI packages
+    
 from infobiotics.commons.api import logging
-log = logging.getLogger()
+log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
 log.setLevel(logging.ERROR)
-#log.setLevel(logging.DEBUG)
+log.setLevel(logging.WARN)
+log.setLevel(logging.DEBUG)
 
 class Experiment(Params):
-    log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
-#    ''' Abstract base class of all Infobiotics Dashboard experiments.
-#    
-#    ParamsExperiments are performed by external programs with parameters from
-#    files with the extension '.params' (hence forth called 'params files'). 
-#    Params files are XML in nature with 'parameters', 'parameterSet' 
-#    and 'parameter' elements. Only one 'parameters' element is present and 
-#    its name attribute is supposed to correlate to the program that parsers the
-#    file. Generally only one 'parameterSet' element is present in each params 
-#    file and its name attribute is supposed to correlate to a type of 
-#    experiment that the program performs. For example in a PModelChecker 
-#    experiment <parameters name="pmodelchecker"> and 
-#    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
-#    element has 'name' and 'value' attributes that are used by the experiment
-#    performing program to parameterise and perform an experiment.    
-#
-#    ParamsExperiment implements usable load(), save() and reset() methods from 
-#    the IParamsExperiment interface. has_valid_parameters() and 
-#    parameter_names() are left to subclasses to implement: in ParamsExperiment 
-#    they each raise a NotImplementedError when called, as does perform() from 
-#    the Experiment superclass.    
-#    
-#    '''
+    ''' Abstract base class of all Infobiotics Dashboard experiments.
+    
+    ParamsExperiments are performed by external programs with parameters from
+    files with the extension '.params' (hence forth called 'params files'). 
+    Params files are XML in nature with 'parameters', 'parameterSet' 
+    and 'parameter' elements. Only one 'parameters' element is present and 
+    its name attribute is supposed to correlate to the program that parsers the
+    file. Generally only one 'parameterSet' element is present in each params 
+    file and its name attribute is supposed to correlate to a type of 
+    experiment that the program performs. For example in a PModelChecker 
+    experiment <parameters name="pmodelchecker"> and 
+    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
+    element has 'name' and 'value' attributes that are used by the experiment
+    performing program to parameterise and perform an experiment.    
+
+    ParamsExperiment implements usable load(), save() and reset() methods from 
+    the IParamsExperiment interface. has_valid_parameters() and 
+    parameter_names() are left to subclasses to implement: in ParamsExperiment 
+    they each raise a NotImplementedError when called, as does perform() from 
+    the Experiment superclass.    
+    
+    '''
     executable_kwargs = ListStr
     _output_pattern_list = ListStr
     _error_pattern_list = ListStr([
@@ -107,27 +101,22 @@ class Experiment(Params):
 #            If delete is true (the default), the file is deleted as soon as it is 
 #            closed.        
 #        '''
-        self.temp_params_file = tempfile.NamedTemporaryFile(**kwargs) # must be an instance variable (self...) overwise it will not be usable by self._execute/will be deleted at the end of the method?
+        self.temp_params_file = tempfile.NamedTemporaryFile(**kwargs) # must be an instance variable (self...) otherwise it will not be usable by self._perform and will be deleted at the end of the method
         if sys.platform.startswith('win'): self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
         self.save(self.temp_params_file.name, force=True, update_object=False)
         #TODO maybe repeat this pattern in PModelCheckerParams.translate_model_specification when model_specification == ''
         if not thread or self._interaction_mode == 'terminal':
-            self._execute() # always do this in terminal mode
+            self._perform() # always do this in terminal mode
             #TODO call serial progress function from here
         else:
-            Thread(target=self._execute).start()
+            Thread(target=self._perform).start()
 #        print 'executed'
         return True
 
-    execution_mode = execution_mode
-    
-    def _execute(self):
+    def _perform(self):
         '''Might be running in a thread.'''
         self.starting = True
-        if self.execution_mode == 'subprocess':
-            self.__subprocess()
-        else:
-            self.__expect()
+        self.__expect()
         self.finished = True
 
     def _finished_fired(self):
@@ -140,79 +129,78 @@ class Experiment(Params):
         else:
             del self.temp_params_file
 
-    def __subprocess(self):
-                
-        def cancel(process):
-            import signal
-            os.kill(process.pid, signal.SIGINT)
-            #http://docs.python.org/library/os.html#os.kill
-            #http://docs.python.org/library/signal.html#signal.CTRL_C_EVENT
-        self.cancel = cancel
-            
-        def last_non_empty_line(liststr):
-            for line in reversed(liststr):
-                if len(line) > 0:
-                    return line
-            return None
-        
-        args = [self.executable, self.temp_params_file.name] + self.executable_kwargs[:]
-        arg_string = ' '.join(args)
-        kwargs = dict(
-            cwd=self.directory,
-            stdout=subprocess.PIPE, # capture stdout
-            stderr=subprocess.PIPE, # capture stderr
-        )
-        if subprocess.mswindows:
-            # prevent empty terminal window opening (http://bit.ly/hNQUlQ)
-            su = subprocess.STARTUPINFO() 
-            su.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
-            su.wShowWindow = subprocess.SW_HIDE 
-            kwargs.update(startupinfo=su)
-        p = subprocess.Popen(args, **kwargs)
-#        import time
-#        time.sleep(0.005)
-#        cancel(p)
-#        #p.terminate()
-#        ##p.kill() # kill        
-        self.started = True
-        self.error_log_file_name = 'mcss-error.log'
-        error_log = None
-        stdout_output, stderr_output = p.communicate()
-        if p.returncode == 0: # returncode is set by communicate() 
-            self.finished_successfully = True # trigger ExperimentHandler.show_results()
-        else:
-            error_log = open(self.error_log_file_name, 'w')
-            if p.returncode == 1:
-                # get last non-empty line of stdout or None
-                if len(stderr_output) > 0:#stderr_output != '':
-                    stdout_output_error = stdout_output.strip()#last_non_empty_line(stdout_output.split(os.linesep))
-                    stderr_output_error = stderr_output.strip()#last_non_empty_line(stderr_output.split(os.linesep))
-                    if stdout_output_error is not None:
-                        if stderr_output_error is not None:
-                            error = os.linesep.join((stdout_output_error, stderr_output_error))
-                        else:
-                            error = stdout_output_error
-                    else:
-                        if stderr_output_error is not None:
-                            error = stderr_output_error
-                        else:
-                            error = '%s exited with return code %s' % (arg_string, p.returncode)
-            elif p.returncode == -2:
-                error = '%s was cancelled by the user before data could be written.' % arg_string
-            elif p.returncode == -9:
-                error = '%s was terminated by the user.' % arg_string
-            elif p.returncode == -11:
-                error = '%s caused a segmentation fault and was terminated by the operating system.' % arg_string
-            elif p.returncode == -15:
-                error = '%s was terminated by the dashboard.' % arg_string
-            elif p.returncode == 127:
-                error = 'shared library error'
-            else:
-                error = '%s exited with returncode %s' % (arg_string, p.returncode)
-#            self.log.error(error)
-            error_log.write(error)
-            error_log.close()
-
+#    def __subprocess(self):
+#                
+#        def cancel(process):
+#            import signal
+#            os.kill(process.pid, signal.SIGINT)
+#            #http://docs.python.org/library/os.html#os.kill
+#            #http://docs.python.org/library/signal.html#signal.CTRL_C_EVENT
+#        self.cancel = cancel
+#            
+#        def last_non_empty_line(liststr):
+#            for line in reversed(liststr):
+#                if len(line) > 0:
+#                    return line
+#            return None
+#        
+#        args = [self.executable, self.temp_params_file.name] + self.executable_kwargs[:]
+#        arg_string = ' '.join(args)
+#        kwargs = dict(
+#            cwd=self.directory,
+#            stdout=subprocess.PIPE, # capture stdout
+#            stderr=subprocess.PIPE, # capture stderr
+#        )
+#        if subprocess.mswindows:
+#            # prevent empty terminal window opening (http://bit.ly/hNQUlQ)
+#            su = subprocess.STARTUPINFO() 
+#            su.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
+#            su.wShowWindow = subprocess.SW_HIDE 
+#            kwargs.update(startupinfo=su)
+#        p = subprocess.Popen(args, **kwargs)
+##        import time
+##        time.sleep(0.005)
+##        cancel(p)
+##        #p.terminate()
+##        ##p.kill() # kill        
+#        self.started = True
+#        self.error_log_file_name = 'mcss-error.log'
+#        error_log = None
+#        stdout_output, stderr_output = p.communicate()
+#        if p.returncode == 0: # returncode is set by communicate() 
+#            self.finished_successfully = True # trigger ExperimentHandler.show_results()
+#        else:
+#            error_log = open(self.error_log_file_name, 'w')
+#            if p.returncode == 1:
+#                # get last non-empty line of stdout or None
+#                if len(stderr_output) > 0:#stderr_output != '':
+#                    stdout_output_error = stdout_output.strip()#last_non_empty_line(stdout_output.split(os.linesep))
+#                    stderr_output_error = stderr_output.strip()#last_non_empty_line(stderr_output.split(os.linesep))
+#                    if stdout_output_error is not None:
+#                        if stderr_output_error is not None:
+#                            error = os.linesep.join((stdout_output_error, stderr_output_error))
+#                        else:
+#                            error = stdout_output_error
+#                    else:
+#                        if stderr_output_error is not None:
+#                            error = stderr_output_error
+#                        else:
+#                            error = '%s exited with return code %s' % (arg_string, p.returncode)
+#            elif p.returncode == -2:
+#                error = '%s was cancelled by the user before data could be written.' % arg_string
+#            elif p.returncode == -9:
+#                error = '%s was terminated by the user.' % arg_string
+#            elif p.returncode == -11:
+#                error = '%s caused a segmentation fault and was terminated by the operating system.' % arg_string
+#            elif p.returncode == -15:
+#                error = '%s was terminated by the dashboard.' % arg_string
+#            elif p.returncode == 127:
+#                error = 'shared library error'
+#            else:
+#                error = '%s exited with returncode %s' % (arg_string, p.returncode)
+##            self.log.error(error)
+#            error_log.write(error)
+#            error_log.close()
 
     def __expect(self):
         ''' Start the program and try to match output.
@@ -226,22 +214,22 @@ class Experiment(Params):
          
         '''
         if sys.platform.startswith('win'):
-            self.child = expect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+            self.child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         else:
-            self.child = expect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
-        # note that the expect module doesn't like list traits so we copy them using [:] 
+            self.child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+        # note that spawn doesn't like list traits so we copy them using [:] 
         # and directory is defined in Params
 
         # compile pattern list for expect_list
         compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
         
         # append EOF to compiled pattern list
-        compiled_pattern_list.append(expect.EOF)
-        eof_index = compiled_pattern_list.index(expect.EOF)
+        compiled_pattern_list.append(pexpect.EOF)
+        eof_index = compiled_pattern_list.index(pexpect.EOF)
         
         # append TIMEOUT to compiled pattern list
-        compiled_pattern_list.append(expect.TIMEOUT)
-        timeout_index = compiled_pattern_list.index(expect.TIMEOUT)
+        compiled_pattern_list.append(pexpect.TIMEOUT)
+        timeout_index = compiled_pattern_list.index(pexpect.TIMEOUT)
         
         self.started = True
 
@@ -295,6 +283,8 @@ class Experiment(Params):
             print self._error_string
         elif self._interaction_mode == 'script':
             self.log.error(self._error_string)
+        else:
+            print 'got here'
     
 #from enthought.traits.ui.api import Group, Item
 #
