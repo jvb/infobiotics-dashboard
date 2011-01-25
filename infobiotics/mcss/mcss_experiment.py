@@ -88,10 +88,14 @@ class McssExperiment(McssParams, Experiment):
 def main():
     experiment = McssExperiment()
 
-#    experiment.load('../../tests/workbench_examples/modules/module1.params')
-#    experiment.load('/home/jvb/src/mcss-0.0.41/examples/models/module1.params')
-    experiment.load('C:\\src\\mcss-0.0.41\\examples\\models\\module1.params')
-
+    import sys
+    if sys.platform.startswith('win'):
+        experiment.load('C:\\src\\mcss-0.0.41\\examples\\models\\module1.params')
+    elif sys.platform == 'darwin':
+	experiment.load('/Users/jvb/src/mcss-0.0.41/examples/models/module1.params') 
+    else:
+	experiment.load('/home/jvb/src/mcss-0.0.41/examples/models/module1.params')
+        
 #    experiment.runs = 3
 #    experiment.max_time = 3
 
