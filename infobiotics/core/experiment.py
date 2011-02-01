@@ -234,6 +234,7 @@ class Experiment(Params):
         self.started = True
 
         # expect loop
+        import re
         patterns_matched = 0
         eof = True
         while eof:
