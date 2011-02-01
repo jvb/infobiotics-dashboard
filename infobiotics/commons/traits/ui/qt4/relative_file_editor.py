@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 
 class SimpleEditor(SimpleTextEditor):
 
-    directory = RelativeDirectory(exists=True)
+    directory = Str#RelativeDirectory
     exists = Bool(False)
     empty_ok = Bool(False)
     
@@ -41,7 +41,7 @@ class SimpleEditor(SimpleTextEditor):
         button = QtGui.QPushButton("Browse...")
         layout.addWidget(button)
 
-        QtCore.QObject.connect(button, QtCore.SIGNAL('clicked()'), 
+        QtCore.QObject.connect(button, QtCore.SIGNAL('clicked()'),
                                self.show_file_dialog)
 
         self.set_tooltip(control) # != self.control
@@ -68,7 +68,7 @@ class SimpleEditor(SimpleTextEditor):
         # editor is in an invalid state
 
     def show_file_dialog(self):
-        ''' Displays the pop-up file dialog. '''
+        ''' Displays the pop - up file dialog. '''
         # We don't used the canned functions because we don't know how the
         # file name is to be used (ie. an existing one to be opened or a new
         # one to be created).
@@ -115,21 +115,18 @@ class SimpleEditor(SimpleTextEditor):
             else:
                 self.set_tooltip(self._file_name) # restore desc over excp
         except TraitError, excp:
-            self._file_name.setToolTip(wrap(unicode(excp),80))
+            self._file_name.setToolTip(wrap(unicode(excp), 80))
             self.error(excp)
 
 class RelativeFileEditor(FileEditor): # EditorFactory
     
     absolute = Bool(False)
-    directory = RelativeDirectory(exists=True)
+    directory = Str#RelativeDirectory
     directory_name = Str
     exists = Bool(False)
     exists_name = Str
     empty_ok = Bool(False)
     empty_ok_name = Str
-
-    def _directory_default(self):
-        return os.getcwd()
     
     def _get_simple_editor_class(self):
         return SimpleEditor

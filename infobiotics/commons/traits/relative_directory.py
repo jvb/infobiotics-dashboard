@@ -1,24 +1,34 @@
+#TODO update docstrings
+
 import os.path
 from relative_file import RelativeFile
 
 class RelativeDirectory(RelativeFile):
-    """ Defines a trait whose value must be the name of a directory (which can 
+    '''Defines a trait whose value must be the name of a directory (which can 
     be relative to a directory other than the current working directory, as
-    specified by 'directory_name').
+    specified by the 'directory' attribute or the value of the attribute on the
+    HasTraits object named in the 'directory_name' attribute).'''
     
-    """
-    def __init__(self, 
-        value='', 
-        filter=[], 
-        auto_set=False, 
-        entries=0, 
+    def get_default_value(self):
+        if self.absolute:
+            value = os.path.abspath(self.directory)
+        else:
+            value = '.' # the same directory as self.directory 
+        return (1, value)
+    
+    def __init__(self,
+        value='.', #TODO how does this square with get_default_value?
+        filter=[],
+        auto_set=False,
+        entries=0,
         exists=False, exists_name='',
         directory='', directory_name='',
         absolute=False,
         readable=None, writable=None, executable=None,
+        empty_ok=False, empty_ok_name='',
         **metadata
     ):
-        """ Creates a RelativeDirectory trait.
+        '''Creates a RelativeDirectory trait.
         
         Parameters
         ----------
@@ -71,27 +81,43 @@ class RelativeDirectory(RelativeFile):
                 
         Default Value
         -------------
-        *value* or ''
+        *value* or '.' if not absolute else 
+            os.abspath(os.path.join(self.directory, value)) # == os.path.normpath(os.path.join(os.getcwd(), self.directory, value) 
         
-        """
+        '''
         super(RelativeDirectory, self).__init__(
-            value, filter, auto_set, entries, 
-            exists, exists_name, 
+            value, filter, auto_set, entries,
+            exists, exists_name,
             directory, directory_name,
             absolute,
             readable, writable, executable,
+            empty_ok, empty_ok_name,
             **metadata
         )
 
     def full_info(self, object, name, value):
-        ''' Constructs an error string to be incorporated into a TraitError. '''
+        '''Calls RelativeFile._full_info with kind='directory'.'''
         return self._full_info(object, name, value, kind='directory')
            
     def validate(self, object, name, value):
-        ''' Calls RelativeFile._validate with os.path.isdir as function. '''
-        return self._validate(object, name, value, os.path.isdir)
+        '''Calls RelativeFile._validate with function=os.path.isdir.'''
+        return self._validate(object, name, value, function=os.path.isdir)
    
     def create_editor(self):
+        '''
+        RelativeDirectoryEditor (factory) has a directory trait that has a 
+        directory attribute that cannot be empty if the traits empty_ok value 
+        is False.
+        
+        RelativeDirectory trait has a directory attribute that cannot be empty 
+        if the traits empty_ok value is False.
+        
+        RelativeFile trait has a directory attribute that can be empty even if 
+        the traits empty_ok value is False.
+        
+        If the directory *attribute* of a RelativeDirectory trait is empty the 
+        trait's value is relative to os.getcwd().    
+        '''
         from infobiotics.commons.traits.ui.qt4.relative_directory_editor import RelativeDirectoryEditor
         editor = RelativeDirectoryEditor(
             filter=self.filter or [],
@@ -99,8 +125,10 @@ class RelativeDirectory(RelativeFile):
             entries=self.entries,
             absolute=self.absolute,
             exists_name=self.exists_name,
-            directory=self.directory,
+            directory=os.path.abspath(self.directory), # must not be '' if RelativeDirectoryEditor.directory(empty_ok=False) which it is by default
             directory_name=self.directory_name,
+            empty_ok=self.empty_ok,
+            empty_ok_name=self.empty_ok_name,
         )
         return editor
     

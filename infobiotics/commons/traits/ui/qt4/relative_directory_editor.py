@@ -2,7 +2,8 @@ from infobiotics.commons.traits.ui.qt4.relative_file_editor import SimpleEditor 
 from infobiotics.commons.traits.ui.qt4.relative_file_editor import RelativeFileEditor 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QDir
-
+import os.path
+ 
 class SimpleEditor(SimpleRelativeFileEditor):
     
     def _create_file_dialog(self):
@@ -38,9 +39,5 @@ class RelativeDirectoryEditor(RelativeFileEditor): # EditorFactory
     def _get_simple_editor_class(self):
         return SimpleEditor
 
-    def _get_readonly_editor_class(self):
-        return SimpleTextEditor
-    
     def _get_custom_editor_class(self):
         return SimpleEditor
-    

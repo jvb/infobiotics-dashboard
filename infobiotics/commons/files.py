@@ -4,6 +4,7 @@ import os, errno
 from sequences import join_overlapping
 
 def mkdir_p(path):
+    # confirmed in http://stackoverflow.com/questions/273192/python-best-way-to-create-directory-if-it-doesnt-exist-for-file-write/273208#273208
     try:
         os.makedirs(path)
     except OSError, exc: # Python >2.5
@@ -59,6 +60,8 @@ def can_read_file(path):
     return can_access(path, os.R_OK) if can_access_file(path) else False
 
 def can_write_file(path):
+    if os.path.isdir(path):
+        return False
     return can_write(path) if os.path.split(path)[1] != '' else False
 
 def read(file, mode='r'):
@@ -71,7 +74,7 @@ def read_binary(file):
     return read(file, mode='rb')
 
 def can_write(path=''):
-    ''' When testing whether a file or directoy can be written to.
+    ''' When testing whether a file or directory can be written to.
         
         "open(path, 'w')" alone will overwrite the file specified by path!
         Use "if not can_write(self.temporal_formulas):" instead.
