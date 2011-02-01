@@ -1,6 +1,6 @@
 from infobiotics.core.params import Params
 from infobiotics.core.api import ParamsRelativeFile
-from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property
+from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property, cached_property
 from infobiotics.commons.traits.api import LongGreaterThanZero
 from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
 import tempfile
@@ -45,17 +45,47 @@ class PModelCheckerParams(Params):
     transitions_file = ParamsRelativeFile('transitions.sm', desc='the name of the file to output the transitions of the Markov chain generated from the LPP-system when using PRISM with the tasks Build or Verify')
 
     # MC2 only
-    simulations_generatedHDF5 = Bool(False, desc='a flag to determine if the simulations needed to run MC2 are available in HDF5 format')
-    simulations_file_hdf5 = ParamsRelativeFile(empty_ok_name='_empty_ok', auto_set=False, exists_name='simulations_generatedHDF5', writable=True, filter=['*.h5', '*'], desc='the filename(.h5) of the simulation')
     
-    mcss_params_file = ParamsRelativeFile(empty_ok_name='_empty_ok', auto_set=False, filters=['*.params'], desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
+    simulations_generatedHDF5 = Bool(False, desc='a flag to determine if the simulations needed to run MC2 are available in HDF5 format')
 
-    _empty_ok = Property(Bool, depends_on='simulations_generatedHDF5, simulations_generatedMC2')
-    def _get__empty_ok(self):
+    simulations_generatedMC2 = Bool(False, desc='a flag to determine if the simulations needed to run MC2 are available in MC2 format')
+
+    _mcss_params_file_empty_ok = Property(Bool, depends_on='simulations_generatedHDF5, simulations_generatedMC2')
+    @cached_property
+    def _get__mcss_params_file_empty_ok(self):
         return self.simulations_generatedHDF5 or self.simulations_generatedMC2
     
-    simulations_generatedMC2 = Bool(False, desc='a flag to determine if the simulations needed to run MC2 are available in MC2 format')
-    simulations_file_MC2 = ParamsRelativeFile(exists_name='simulations_generatedMC2', writable=True, filter=['*.mc2', '*'], desc='the filename(.mc2) of the simulation converted to MC2 format')
+    _simulations_file_hdf5_exists = Property(Bool, depends_on='simulations_generatedHDF5, simulations_generatedMC2')
+    @cached_property
+    def _get__simulations_file_hdf5_exists(self):
+        '''Necessary because simulations_generatedMC2 overrides 
+        simulations_generatedHDF5.'''
+        if self.simulations_generatedMC2:
+            return False
+        elif self.simulations_generatedHDF5:
+            return True
+        return False
+    
+    simulations_file_hdf5 = ParamsRelativeFile(
+        empty_ok_name='simulations_generatedMC2',
+        auto_set=False,
+        exists_name='_simulations_file_hdf5_exists',
+        writable=True, #TODO writable_name in RelativeFile instead of not using can_write_file in RelativeFile._validate 
+        filter=['*.h5', '*'], desc='the filename(.h5) of the simulation')
+    
+    mcss_params_file = ParamsRelativeFile(
+        empty_ok_name='_mcss_params_file_empty_ok', # True if simulations_generatedHDF5 or simulations_generatedMC2 else False 
+        auto_set=False,
+        filters=['*.params'],
+        desc='the name of the file containing the parameters to run mcss in order to generate the necessary simulations when using MC2 as the model checker')
+
+    simulations_file_MC2 = ParamsRelativeFile(
+        exists_name='simulations_generatedMC2',
+        writable=True, #TODO writable_name in RelativeFile instead of not using can_write_file in RelativeFile._validate
+        filter=['*.mc2', '*'],
+        desc='the filename(.mc2) of the simulation converted to MC2 format')
+
+
 
     @on_trait_change('model_specification, PRISM_model')
     def translate_model_specification(self, object, name, old, new):

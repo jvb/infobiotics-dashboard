@@ -50,7 +50,11 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = PRISMExperiment()
+    
 #    experiment.load('../../../examples/NAR-pmodelchecker/model_checking_prism.params')
+    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/NAR-pmodelchecker/model_checking_prism.params')
+
 #    experiment.model_specification = 'negativeAutoregulationModel.lpp' #TODO comment out before release
+
     experiment.configure()
     
