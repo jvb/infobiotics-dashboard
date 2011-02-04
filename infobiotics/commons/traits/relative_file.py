@@ -203,7 +203,10 @@ class RelativeFile(BaseStr):
             trait_name = attribute_name + '_name'
         if not getattr(self, trait_name):
             return
+#        try:
         setattr(self, attribute_name, getattr(object, getattr(self, trait_name)))
+#        except AttributeError, e:
+#            pass
     
     def _set_directory_from_directory_name(self, object):
         self._set_attribute_from_trait(object, 'directory')

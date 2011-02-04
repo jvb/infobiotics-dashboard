@@ -2,7 +2,7 @@ from infobiotics.core.api import ParamsRelativeFile
 from infobiotics.core.params import Params
 from enthought.traits.api import Enum, Bool, Range, Long, Property, Float
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
-from infobiotics.mcss.mcss_preferences import McssParamsPreferencesHelper
+
 
 class McssParams(Params):
 
@@ -11,8 +11,8 @@ class McssParams(Params):
         return McssParamsHandler(model=self)
 
     def _preferences_helper_default(self):
-        helper = McssParamsPreferencesHelper()
-        return helper
+        from infobiotics.mcss.mcss_preferences import McssParamsPreferencesHelper
+        return McssParamsPreferencesHelper()
 
     executable_name = 'mcss'
     
@@ -74,9 +74,23 @@ class McssParams(Params):
 
 
 if __name__ == '__main__':
-    parameters = McssParams()
+#    from infobiotics.preferences import preferences
+#    preferences.set('mcss.directory', '/usr')
+    parameters = McssParams()#executable='/usr/bin/mcs')
+    
+    # import that Params never changes cwd
+    
 #    parameters.load('../../tests/workbench_examples/modules/module1.params')
-    parameters.load('/home/jvb/src/mcss-0.0.41/examples/models/module1.params')
-#    parameters.edit()
+
+#    parameters.load('/home/jvb/src/mcss-0.0.41/examples/models/module1.params')
+
+#    import os
+#    print 0, os.getcwd() # same directory as this file
+#    os.chdir('/home/jvb/src/mcss-0.0.41/examples/models/')
+##    print 1, os.getcwd() # as above
+##    print 2, parameters.directory # as 0
+#    parameters.load('module1.params') # 1 + name
+#    print 3, parameters.directory # as 1
     parameters.configure()
+#    parameters.edit()
             

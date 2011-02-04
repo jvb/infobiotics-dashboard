@@ -1,21 +1,63 @@
 from __future__ import with_statement # from __future__ imports must come first
 import infobiotics # set up TraitsUI backend before traits imports
-from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, EXECUTABLE_TRAIT, DIRECTORY_TRAIT
 from enthought.traits.api import (
-    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property, Enum, on_trait_change, Dict, Any
-#    on_trait_change
+    HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property, Enum, Dict, Any, Unicode,
+    cached_property, on_trait_change,
 )
-from enthought.traits.ui.api import Controller
+from infobiotics.core.params_handler import ParamsHandler
 from infobiotics.core.traits.params_relative_file import ParamsRelativeFile
-from infobiotics.commons.api import key_from_value, can_access, read, write, logging, can_execute
+from infobiotics.commons.api import key_from_value, can_access, read, write, can_execute
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 import os, sys
 from xml import sax
 from infobiotics.thirdparty.which import which, WhichError
 
-logger = logging.getLogger(level=logging.ERROR)
+from infobiotics.commons.api import logging
+log = logging.getLogger(level=logging.WARN)
 
-import infobiotics.preferences # calls set_default_preferences, do not remove
+from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
+from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
+
+from enthought.preferences.api import PreferenceBinding
+
+class ParamsPreferenceBinding(PreferenceBinding):
+    '''Overrides a couple of methods that raise errors for RelativeFile traits.'''
+    
+    def _get_value(self, trait_name, value):
+        # fixme: This method is mostly duplicated in 'PreferencesHelper' (the only
+        # difference is the line that gets the handler).
+        handler = self.obj.trait(trait_name).handler
+        if type(handler) is Str:
+            pass
+        elif type(handler) is Unicode:
+            value = unicode(value)
+        else:
+            try:
+                value = eval(value)
+            except:
+                pass
+        return handler.validate(self.obj, trait_name, value) # validate with self.obj instead of self    
+
+    def _on_trait_changed(self, obj, trait_name, old, new):
+        try:
+            self.preferences.set(self.preference_path, new)
+        except TraitError:
+            pass # don't worry about readable RelativeFiles becoming '' 
+        return
+        
+def bind_preference(obj, trait_name, preference_path, preferences=None):
+    traits = {
+        'obj'             : obj,
+        'trait_name'      : trait_name,
+        'preference_path' : preference_path
+    }
+    if preferences is not None:
+        traits['preferences'] = preferences
+    return ParamsPreferenceBinding(**traits)
+
+
+from infobiotics.core.params_preferences import Executable, Directory
+
 
 class Params(HasTraits): 
 
@@ -28,65 +70,53 @@ class Params(HasTraits):
 
     _preferences_path = Property(depends_on='executable_name')
 
+    @cached_property
     def _get__preferences_path(self):
         return self.executable_name
 
-    preferences_helper = Instance(ParamsPreferencesHelper)
+    preferences_helper = Instance(ParamsPreferencesHelper) #TODO 'ParamsPreferencesHelper'
     def _preferences_helper_default(self):
         raise NotImplementedError('Params subclasses must provide a _get_preferences_helper methods that returns an instance of (a subclass of) ParamsPreferencesHelper.')
 
-    preferences = List(Str, ['executable', 'directory'], desc='a list of trait names to bind to preferences')
-    
-    executable = EXECUTABLE_TRAIT
+    executable = Executable
 
-    def _executable_default(self):
-        try:
-            executable = self.preferences_helper.executable # load saved or default
-#            print 'got here'
-            return executable
-        except TraitError, e:
-            print e
-            try:
-                alternative = which(self.executable_name) # search path for alternative
-#                print 'got here 2'
-                return alternative
-            except WhichError, e:
-                print e
-                return Undefined # fail ignomiously
-
-    directory = DIRECTORY_TRAIT # infinite recursion if ParamsRelativeDirectory because directory='directory'
+    directory = Directory # infinite recursion if ParamsRelativeDirectory because directory='directory'
     
     def __init__(self, file=None, **traits):
         self.bind_preferences()
-        super(Params, self).__init__(**traits)
-        self.on_trait_change(self.update_repr, self.parameter_names())
+        super(Params, self).__init__(**traits) # do this after binding preferences so that we can override executable and directory 
+        self.on_trait_change(self.update_repr, self.parameter_names()) #TODO
         if file is not None:
             self.load(file)
 
     def bind_preferences(self):
         ''' Changes to preferences object will update bound trait value and 
-        vice versa. Uses get_default_preferences and therefore 
-        set_default_preferences must have been called with the correct preferences object.
+        vice versa. 
         '''
-        from enthought.preferences.api import bind_preference #, get_default_preferences
-#	    preferences = get_default_preferences()
-        from infobiotics.preferences import preferences
-#        print preferences
-        # must assign bound_preferences otherwise bindings will be lost when this method returns 
-#        self.bound_preferences = [bind_preference(self, preference, '.'.join([self._preferences_path, preference]), infobiotics.preferences.preferences) for preference in self.preferences]
-        self.bound_preferences = []
-        for preference in self.preferences:
+#        self._bound_preferences = [] # must assign _bound_preferences otherwise bindings are lost when this method returns
+        for preference in ['executable', 'directory'] + self.parameter_names():# + preferences.node(self._preferences_path).keys():
             preferences_path = '.'.join([self._preferences_path, preference])
-            if preference in ('directory'):#, 'executable'):
-                path = infobiotics.preferences.preferences.get(preferences_path, '')
-                if not os.path.exists(path): #TODO what about None?
-#                    sys.stderr.write(path)
-#                    sys.stderr.write('\n')
-                    infobiotics.preferences.preferences.set(preferences_path, '')
-                    infobiotics.preferences.preferences.flush()
-            # this fails if preference trait is DelegatesTo
-            bound_preference = bind_preference(self, preference, preferences_path, infobiotics.preferences.preferences)
-            self.bound_preferences.append(bound_preference)
+            try:
+#                bound_preference = bind_preference(self, preference, preferences_path, preferences)
+                bind_preference(self, preference, preferences_path, preferences)
+            except TraitError:#, e:
+                value = preferences.get(preferences_path)
+                preferences.remove(preferences_path)
+                preferences.flush()
+                default = preferences.get(preferences_path)
+#                warning = "Value of preference %s in '%s' ('%s') is invalid. %s Using default ('%s')." % (preferences_path, preferences.filename, value, e, default)
+                warning = "Value of preference %s in '%s' ('%s') is invalid. Removing and using default ('%s') instead." % (preferences_path, preferences.filename, value, default)
+                if self._interaction_mode == 'script':
+                    log.warn(warning)
+                elif self._interaction_mode == 'terminal':
+                    print warning
+                elif self._interaction_mode == 'gui':
+                    pass 
+#                bound_preference = bind_preference(self, preference, preferences_path, infobiotics.preferences.preferences)
+                bind_preference(self, preference, preferences_path, infobiotics.preferences.preferences)
+#            self._bound_preferences.append(bound_preference)
+#            bound_preference = None
+        preferences.save() # save preferences because some invalid ones might have been removed
         
     def save_preferences(self):
         ''' Called from self.handler.close() '''
@@ -94,13 +124,10 @@ class Params(HasTraits):
         get_default_preferences().save()
 
         
-    _unresetable = List(Str)
-
     _interaction_mode = Enum(['script', 'terminal', 'gui'])
 
     def __interaction_mode_default(self):
-        import sys
-        import __main__
+        import sys, __main__
         if sys.flags.interactive or not hasattr(__main__, '__file__'):
             return 'terminal'
         else:
@@ -134,6 +161,8 @@ class Params(HasTraits):
                 self._dirty = False
         
         
+    _unresetable = List(Str)
+
     def load(self, file='', force=False):
         ''' Reads parameters file, 
         resets traits,
@@ -148,7 +177,7 @@ class Params(HasTraits):
                 if len(answer.strip()) == 0 or answer.upper().startswith('Y'):
                     self.save() # will prompt for file name with self._params_file as default
             elif self._interaction_mode == 'script':
-                logger.warn('Overwriting unsaved parameters: %s' % ','.join(['%s=%s' % (name, value) for name, value in self._dirty_parameters.items()]))
+                log.warn('Overwriting unsaved parameters: %s' % ','.join(['%s=%s' % (name, value) for name, value in self._dirty_parameters.items()]))
 
         # open and parse params file with ParamsXMLReader
         # reporting errors or responding to success 
@@ -171,7 +200,7 @@ class Params(HasTraits):
             elif len(parameters_dictionary) == 0:
                 error = "No parameters in file '%s'." % file
             if error is not None:
-                logger.error(error)
+                log.error(error)
 #                auto_close_message(message=error) #TODO is this desirable when scripting?...might not happen, as with ProgressDialog
                 return False
         # read parameters ok
@@ -180,13 +209,11 @@ class Params(HasTraits):
         # the file we are loading
         self._unresetable = self.reset(self.parameter_names())
         if len(self._unresetable) > 0:
-            logger.warn("Some parameters were not reset: %s", ', '.join(self._unresetable))
-
-        # change directory so that setting of File traits with relative paths works
-        if not os.path.isabs(file):
-            file = os.path.abspath(file)
+            log.warn("Some parameters were not reset: %s", ', '.join(self._unresetable))
 
         # change directory here so that relative paths don't trigger TraitError
+        if not os.path.isabs(file):
+            file = os.path.abspath(file) # prepends os.getcwd() to relative file names
         self.directory = os.path.dirname(file)
 
         # set parameters from dictionary, passing if values are not suitable
@@ -197,9 +224,9 @@ class Params(HasTraits):
                 pass
             
         # success!
-#        logger.debug("Loaded '%s'." % file)
+#        log.debug("Loaded '%s'." % file)
         self._params_file = file
-        self._dirty = False #TODO use dirty for prompting to save on perform
+        self._dirty = False
         return True
 
     def save(self, file='', force=False, copy=False, update_object=True):
@@ -274,12 +301,12 @@ class Params(HasTraits):
             with write(file) as fh:
                 fh.write(self.params_file_string()) # important bit
         except IOError, e:
-            logger.exception(e)
+            log.exception(e)
             raise e #TODO replace with something useful?
             return False
             
         # success!
-#        logger.debug("Saved '%s'." % file)
+#        log.debug("Saved '%s'." % file)
         self.directory = os.path.dirname(file)
         if update_object:
             self._params_file = file
@@ -353,8 +380,8 @@ class Params(HasTraits):
     # interactive methods ---
         
     _interactive = False
-
-    handler = Instance(Controller)
+    
+    handler = Instance(ParamsHandler)
     def _handler_default(self):
         '''
         e.g.
@@ -434,7 +461,7 @@ def set_trait_value_from_parameter_value(self, name, value):
 #            # The second form is consistent with __repr__ and reset in 
 #            # ParamsExperiment.
 #        except TraitError, e:
-#            logger.debug('%s.%s=%s; %s' % (self.experiment, name, value, e))
+#            log.debug('%s.%s=%s; %s' % (self.experiment, name, value, e))
 
 def trait_value_from_parameter_value(self, name, value): # change name to 'trait_value_from_param_value'?
     ''' Return parameter trait value from a parameter value string. '''
@@ -489,7 +516,7 @@ def trait_value_from_parameter_value(self, name, value): # change name to 'trait
     elif type in ('Enum', 'File', 'Directory', 'ParamsRelativeFile', 'ParamsRelativeDirectory', 'RelativeFile', 'RelativeDirectory'):
         return str(value)    
     else:
-        logger.warn('Unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
+        log.warn('Unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
         return value
 
 #TODO could replace name with trait.metadata.parameter_name and return (new_name, value)

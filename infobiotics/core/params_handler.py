@@ -3,7 +3,8 @@ from enthought.traits.ui.menu import Menu, Action, MenuBar
 from infobiotics.commons.api import can_read, mkdir_p
 import os
 from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance, TraitError
-from enthought.pyface.api import FileDialog, OK
+from enthought.pyface.api import OK
+from enthought.pyface.ui.qt4.file_dialog import FileDialog
 from enthought.traits.ui.api import View, Item, Group
 from infobiotics.commons.traits.ui.api import HelpfulController
 from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
@@ -73,7 +74,7 @@ class ParamsHandler(HelpfulController):
     status = Str
     
     def init(self, info):
-        self.status = "Please ensure the current working directory is correct."
+#        self.status = "Please ensure the current working directory is correct." #TODO
         info.ui.title = self.title
         
     title = Property(Str, depends_on='model._params_file, model.directory')
@@ -133,6 +134,7 @@ class ParamsHandler(HelpfulController):
 
     def closed(self, info, is_ok): # must return True or else window is uncloseable!
         if is_ok:
+            pass
             self.model.save_preferences()
         return True
 
@@ -164,16 +166,16 @@ class ParamsHandler(HelpfulController):
             return fd.path
         return None
                
-    def get_load_file_name_using_Traits_FileDialog(self, title):
-        fd = OpenFileDialog(
-            file_name=self.model._params_file,
-            filter=self.filter,
-            title=title,
-            id='ParamsHandler.get_load_file_name_using_Traits_FileDialog',
-        )
-        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
-            return fd.file_name
-        return None
+#    def get_load_file_name_using_Traits_FileDialog(self, title):
+#        fd = OpenFileDialog(
+#            file_name=self.model._params_file,
+#            filter=self.filter,
+#            title=title,
+#            id='ParamsHandler.get_load_file_name_using_Traits_FileDialog',
+#        )
+#        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
+#            return fd.file_name
+#        return None
 
     copy = Bool(False, desc='whether to copy required files with relatives paths to new save directory (set by eponymous FileDialog extension)')
 #    copy = Bool(True) #TODO remove after adding file_dialog2.py
@@ -203,26 +205,26 @@ class ParamsHandler(HelpfulController):
             return fd.path
         return None
     
-    def get_save_file_name_using_Traits_FileDialog(self, title):
-        fd = OpenFileDialog(
-            is_save_file=True,
-            extensions=[
-                CopyInputFilesWithRelativePathsExtension(),
-                FileInfo(),
-                TextInfo(),
-            ],
-            file_name=self.model._params_file,
-            filter=self.filter,
-            title=title,
-            id='ParamsHandler.get_save_file_name_using_Traits_FileDialog',
-        )
-        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
-            # get whether to copy input files with relative paths or not
-            for extension in fd.extensions:
-                if isinstance(extension, CopyInputFilesWithRelativePathsExtension):
-                    self.copy = extension.copy if extension.copy_enabled else False
-            return fd.file_name
-        return None
+#    def get_save_file_name_using_Traits_FileDialog(self, title):
+#        fd = OpenFileDialog(
+#            is_save_file=True,
+#            extensions=[
+#                CopyInputFilesWithRelativePathsExtension(),
+#                FileInfo(),
+#                TextInfo(),
+#            ],
+#            file_name=self.model._params_file,
+#            filter=self.filter,
+#            title=title,
+#            id='ParamsHandler.get_save_file_name_using_Traits_FileDialog',
+#        )
+#        if fd.edit_traits(view='open_file_view', parent=self.info.ui.control).result: # if kind='modal' here fd.file_name never changes!
+#            # get whether to copy input files with relative paths or not
+#            for extension in fd.extensions:
+#                if isinstance(extension, CopyInputFilesWithRelativePathsExtension):
+#                    self.copy = extension.copy if extension.copy_enabled else False
+#            return fd.file_name
+#        return None
             
     filters = [ # used to create wildcard and filter traits for FileDialog and OpenFileDialog respectively
         ('Experiment parameters', ['*.params']),

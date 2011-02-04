@@ -66,7 +66,7 @@ def can_write_file(path):
 
 def read(file, mode='r'):
     if not can_read(file):
-        raise IOError("Cannot read '%s'." % file)
+        raise IOError("Cannot read '%s' (current working directory = '%s')." % (file, os.getcwd()))
     else:
         return open(file, mode)
 
