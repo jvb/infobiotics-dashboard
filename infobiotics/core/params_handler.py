@@ -1,11 +1,11 @@
 from infobiotics.core.views import ParamsView, file_menu
 from enthought.traits.ui.menu import Menu, Action, MenuBar
-from infobiotics.commons.api import can_read, mkdir_p
+#from infobiotics.commons.api import can_read, mkdir_p
 import os
-from enthought.traits.api import Property, Str, List, Unicode, Bool, Instance, TraitError
+from enthought.traits.api import Str, List, Unicode, Instance, Property, Bool, cached_property
 from enthought.pyface.api import OK
 from enthought.pyface.ui.qt4.file_dialog import FileDialog
-from enthought.traits.ui.api import View, Item, Group
+from enthought.traits.ui.api import Group#, View, Item, 
 from infobiotics.commons.traits.ui.api import HelpfulController
 from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
 
@@ -79,7 +79,7 @@ class ParamsHandler(HelpfulController):
         
     title = Property(Str, depends_on='model._params_file, model.directory')
 
-#    @cached_property #TODO
+    @cached_property
     def _get_title(self):
         titles = [self.model.executable_name]
         path = self.model._params_file
@@ -134,7 +134,6 @@ class ParamsHandler(HelpfulController):
 
     def closed(self, info, is_ok): # must return True or else window is uncloseable!
         if is_ok:
-            pass
             self.model.save_preferences()
         return True
 
@@ -264,6 +263,32 @@ class ParamsHandler(HelpfulController):
                     wildcard += '|'
         return wildcard
         
+
+    has_valid_parameters = Property(Bool, depends_on='info.ui.errors, model.executable')
+    @cached_property
+    def _get_has_valid_parameters(self):
+        # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
+        if not self.info:
+            return
+        if self.info.initialized:
+            if self.info.ui is None:
+                return False
+            if self.info.ui.errors > 0:
+                return False
+            elif not os.path.isfile(self.model.executable):
+                return False
+        return True
     
+    def _has_valid_parameters_changed(self, value):
+        if value:
+            self.status = ''
+            return
+        if not self.info:
+            return
+        if self.info.initialized:
+            if self.info.ui is None:
+                return
+            self.status = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
+        
 if __name__ == '__main__':
     execfile('params.py')

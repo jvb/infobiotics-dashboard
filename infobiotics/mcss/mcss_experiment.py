@@ -111,11 +111,11 @@ def main():
 ##        print name, value 
 ##    exit()
 
-    experiment.perform()
+#    experiment.perform()
 #    experiment.perform(thread=True)
 
 ##    #TODO del experiment.temp_params_file # done in Experiment._finished_fired
-#    experiment.configure()
+    experiment.configure()
 
 if __name__ == '__main__':
     main()

@@ -37,28 +37,28 @@ log.setLevel(logging.WARN)
 log.setLevel(logging.DEBUG)
 
 class Experiment(Params):
-    ''' Abstract base class of all Infobiotics Dashboard experiments.
-    
-    ParamsExperiments are performed by external programs with parameters from
-    files with the extension '.params' (hence forth called 'params files'). 
-    Params files are XML in nature with 'parameters', 'parameterSet' 
-    and 'parameter' elements. Only one 'parameters' element is present and 
-    its name attribute is supposed to correlate to the program that parsers the
-    file. Generally only one 'parameterSet' element is present in each params 
-    file and its name attribute is supposed to correlate to a type of 
-    experiment that the program performs. For example in a PModelChecker 
-    experiment <parameters name="pmodelchecker"> and 
-    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
-    element has 'name' and 'value' attributes that are used by the experiment
-    performing program to parameterise and perform an experiment.    
-
-    ParamsExperiment implements usable load(), save() and reset() methods from 
-    the IParamsExperiment interface. has_valid_parameters() and 
-    parameter_names() are left to subclasses to implement: in ParamsExperiment 
-    they each raise a NotImplementedError when called, as does perform() from 
-    the Experiment superclass.    
-    
-    '''
+#    ''' Abstract base class of all Infobiotics Dashboard experiments.
+#    
+#    ParamsExperiments are performed by external programs with parameters from
+#    files with the extension '.params' (hence forth called 'params files'). 
+#    Params files are XML in nature with 'parameters', 'parameterSet' 
+#    and 'parameter' elements. Only one 'parameters' element is present and 
+#    its name attribute is supposed to correlate to the program that parsers the
+#    file. Generally only one 'parameterSet' element is present in each params 
+#    file and its name attribute is supposed to correlate to a type of 
+#    experiment that the program performs. For example in a PModelChecker 
+#    experiment <parameters name="pmodelchecker"> and 
+#    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
+#    element has 'name' and 'value' attributes that are used by the experiment
+#    performing program to parameterise and perform an experiment.    
+#
+#    ParamsExperiment implements usable load(), save() and reset() methods from 
+#    the IParamsExperiment interface. has_valid_parameters() and 
+#    parameter_names() are left to subclasses to implement: in ParamsExperiment 
+#    they each raise a NotImplementedError when called, as does perform() from 
+#    the Experiment superclass.    
+#    
+#    '''
     executable_kwargs = ListStr
     _output_pattern_list = ListStr
     _error_pattern_list = ListStr([

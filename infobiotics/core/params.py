@@ -83,7 +83,9 @@ class Params(HasTraits):
     directory = Directory # infinite recursion if ParamsRelativeDirectory because directory='directory'
     
     def __init__(self, file=None, **traits):
-        self.bind_preferences()
+#        self.bind_preferences() # now done in configure() or edit() so that scripts and terminal can rely on defaults not preferences
+##        if self._interaction_mode == 'terminal':
+##            self.directory = os.getcwd()
         super(Params, self).__init__(**traits) # do this after binding preferences so that we can override executable and directory 
         self.on_trait_change(self.update_repr, self.parameter_names()) #TODO
         if file is not None:
@@ -207,7 +209,7 @@ class Params(HasTraits):
         
         # reset traits so we don't carry over parameters that are missing from 
         # the file we are loading
-        self._unresetable = self.reset(self.parameter_names())
+        self._unresetable = self.reset(self.parameter_names()) #FIXME reverts to default values not preferences!
         if len(self._unresetable) > 0:
             log.warn("Some parameters were not reset: %s", ', '.join(self._unresetable))
 
@@ -393,12 +395,14 @@ class Params(HasTraits):
     def configure(self, **args):
         interaction_mode = self._interaction_mode # remember previous mode of interaction
         self._interaction_mode = 'gui' # set mode of interaction
+        self.bind_preferences()
         self.handler.configure_traits(**args)
         self._interaction_mode = interaction_mode # restore previous mode of interaction
 
     def edit(self, **args):
         interaction_mode = self._interaction_mode # remember previous mode of interaction
         self._interaction_mode = 'gui' # set mode of interaction
+        self.bind_preferences()
         ui = self.handler.edit_traits(**args)
         self._interaction_mode = interaction_mode # restore previous mode of interaction
         return ui.result

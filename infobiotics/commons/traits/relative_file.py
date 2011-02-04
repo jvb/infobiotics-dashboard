@@ -154,11 +154,11 @@ class RelativeFile(BaseStr):
         '''Constructs an error string to be incorporated into a TraitError.'''
         permissions = []
         if self.readable is not None:
-            permissions.append('readable ') if self.readable else permissions.append('non-readable ')
+            permissions.append('readable') if self.readable else permissions.append('non-readable')
         if self.writable is not None:
-            permissions.append('writable ') if self.writable else permissions.append('non-writable ')
+            permissions.append('writable') if self.writable else permissions.append('non-writable')
         if self.executable is not None:
-            permissions.append('executable ') if self.executable else permissions.append('non-executable ')
+            permissions.append('executable') if self.executable else permissions.append('non-executable')
         
         info = 'a '
         if self.exists:
@@ -168,7 +168,7 @@ class RelativeFile(BaseStr):
             
         if self.absolute:
             if len(permissions) > 0:
-                info += 'and '
+                info += ' and '
             info += 'absolute '
         
         info += kind

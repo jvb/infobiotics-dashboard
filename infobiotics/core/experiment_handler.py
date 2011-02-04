@@ -1,8 +1,7 @@
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
 from infobiotics.core.views import ExperimentView
-from enthought.traits.api import Instance, Property, Bool
-import os.path
+from enthought.traits.api import Instance
 
 class ExperimentHandler(ParamsHandler):
     
@@ -25,15 +24,3 @@ class ExperimentHandler(ParamsHandler):
 
     def _show_progress(self):
         self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates
-
-    has_valid_parameters = Property(Bool, depends_on='info.ui.errors, model.executable')
-    def _get_has_valid_parameters(self):
-        # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
-        if self.info.ui is None:
-            return False
-        if self.info.ui.errors > 0:
-            return False
-        elif not os.path.isfile(self.model.executable):
-            return False
-        return True
-    
