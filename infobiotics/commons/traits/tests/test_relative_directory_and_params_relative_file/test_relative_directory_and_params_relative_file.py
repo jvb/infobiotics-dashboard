@@ -21,7 +21,7 @@ class Params(HasTraits):
 #    params_relative_file = ParamsRelativeFile(writable=True)
 #    params_relative_directory = ParamsRelativeDirectory(writable=True, empty_ok=True)
 #    params_relative_file = ParamsRelativeFile(writable=True, empty_ok=True)
-    readable = ParamsRelativeFile(readable=True)
+    readable = ParamsRelativeFile(readable=True, desc='readable')
     executable = ParamsRelativeFile(executable=True)
     writable = ParamsRelativeFile(writable=True)
     
@@ -89,6 +89,13 @@ class Params(HasTraits):
         #    'params_relative_directory',
         #    'params_relative_file',
             
+    def __str__(self):
+        s = ''
+        s += '\n'.join(
+            ["%s = %s" % (parameter_name, getattr(self, parameter_name)) + ("(%s)" % self.trait(parameter_name).handler.desc if self.trait(parameter_name).handler.desc is not None else "") for parameter_name in self.parameter_names()]
+        )
+        return s
+
 
 def main():
     params = Params(
@@ -112,8 +119,10 @@ def main():
     if os.path.exists(temp_file_path):
         print "loading traits from '%s'" % temp_file_path
         print
-    params.configure_traits(temp_file_path)
-#    t.configure_traits()
+#    params.configure_traits(temp_file_path)
+#    print params
+#    print params.trait('readable').handler.exists
+    params.configure_traits()
     
     
 if __name__ == '__main__':

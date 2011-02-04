@@ -5,14 +5,13 @@ Adapted from qt4/extras/bounds_editor.py, qt4/file_editor.py, and qt4/html_edito
 from enthought.traits.ui.qt4.text_editor import SimpleEditor as SimpleTextEditor, ReadonlyEditor
 from enthought.traits.ui.api import FileEditor
 from enthought.traits.api import Str, Bool, TraitError, on_trait_change
-from infobiotics.commons.traits.relative_directory import RelativeDirectory
 from infobiotics.commons.strings import wrap
 import os
 from PyQt4 import QtCore, QtGui
 
 class SimpleEditor(SimpleTextEditor):
 
-    directory = Str#RelativeDirectory
+    directory = Str
     exists = Bool(False)
     empty_ok = Bool(False)
     
@@ -23,7 +22,7 @@ class SimpleEditor(SimpleTextEditor):
         self.sync_value(factory.exists_name, 'exists', 'from')
         self.sync_value(factory.empty_ok_name, 'empty_ok', 'from')
             
-        # same as file_editor.SimpleEditor ---
+        # same as enthought.traits.ui.qt4.file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
         layout = QtGui.QHBoxLayout(self.control)
         layout.setMargin(0)
@@ -95,9 +94,7 @@ class SimpleEditor(SimpleTextEditor):
             dlg.setFileMode(QtGui.QFileDialog.ExistingFile)
         if len(self.factory.filter) > 0:
             dlg.setNameFilters(self.factory.filter)
-        
         dlg.selectFile(self._file_name.text())
-        
         return dlg
 
     def _update(self, file_name):
@@ -110,18 +107,17 @@ class SimpleEditor(SimpleTextEditor):
                 self._error = None
                 self.ui.errors -= 1
             self.set_error_state(False)
-            if self.description == '' and self.object.base_trait(self.name).desc is None:
-                self._file_name.setToolTip('') # restore '' over excp
-            else:
-                self.set_tooltip(self._file_name) # restore desc over excp
+            if not self.set_tooltip(self._file_name): # restore desc over excp
+                self._file_name.setToolTip(wrap(self.object.base_trait(self.name).full_info(self.object, self.name, self.value))) # set tooltip over excp using traits info
         except TraitError, excp:
-            self._file_name.setToolTip(wrap(unicode(excp), 80))
+            self._file_name.setToolTip(wrap(unicode(excp), 80)) # fix tooltip line lengths
             self.error(excp)
+
 
 class RelativeFileEditor(FileEditor): # EditorFactory
     
     absolute = Bool(False)
-    directory = Str#RelativeDirectory
+    directory = Str
     directory_name = Str
     exists = Bool(False)
     exists_name = Str

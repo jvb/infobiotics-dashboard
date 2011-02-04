@@ -1,12 +1,36 @@
 #TODO update docstrings
 
 import os
-#from enthought.traits.api import BaseFile
 from enthought.traits.api import BaseStr
 from infobiotics.commons.api import can_read, can_write, can_write_file, can_execute
 from infobiotics.thirdparty.which import which, WhichError
 
-#class RelativeFile(BaseFile):
+#def shorten_path(path, length=76):
+#    # adapted from http://stackoverflow.com/questions/1616678/bash-pwd-shortening/1616781#1616781
+#    while len(path) > length:
+#        dirs = path.split("/");
+#    
+#        # Find the longest directory in the path.
+#        max_index = -1
+#        max_length = 3
+#    
+#        for i in range(len(dirs) - 1):
+#            if len(dirs[i]) > max_length:
+#                max_index = i
+#                max_length = len(dirs[i])
+#    
+#        # Shorten it by one character.    
+#        if max_index >= 0:
+#            dirs[max_index] = dirs[max_index][:max_length - 3] + ".."
+#            path = "/".join(dirs)
+#    
+#        # Didn't find anything to shorten. This is as good as it gets.
+#        else:
+#            break
+#
+#    return path
+    
+
 class RelativeFile(BaseStr):
     """ Defines a trait whose value must be the name of a file (which can be 
     relative to a directory other than the current working directory, as
@@ -81,18 +105,27 @@ class RelativeFile(BaseStr):
         
         """
 
-        self.absolute = absolute
+        super(RelativeFile, self).__init__(
+            value, **metadata
+        )
+
+        self.auto_set = auto_set
+
+        self.entries = entries
         
+        if readable or executable:
+            exists = True
+        self.exists = exists
+
+        self.exists_name = exists_name
+            
         if directory != '' and directory_name != '': #TODO necessary?
             raise ValueError("Please specify only 'directory' or 'directory_name', the value of '%s' named in the attribute directory_name will override '%s' in the attribute directory of the %s trait." % (directory_name, directory, self.__class__.__name__))
         self.directory = directory  
         self.directory_name = directory_name
 
-        self.exists_name = exists_name
-            
-        if readable or executable:
-            exists = True
-
+        self.absolute = absolute
+                
         self.readable = readable
         self.writable = writable
         self.executable = executable
@@ -100,25 +133,18 @@ class RelativeFile(BaseStr):
         self.empty_ok = empty_ok
         self.empty_ok_name = empty_ok_name
 
-        super(RelativeFile, self).__init__(
-#            value, filter, auto_set, entries, exists, **metadata # File
-            value, **metadata # BaseStr
-        )
-
         if isinstance(filter, (str, unicode)):
             filter = [filter]
         self.filter = filter
-        self.auto_set = auto_set
-        self.entries = entries
-        self.exists = exists # why are these set here rather than in super?
         
-#        self.editor = self.create_editor() # problem with circular imports - try not subclassing BaseFile instead.
+#        self.editor = self.create_editor()
+
 
 #    info_text = 'a file name' # used if info() and full_info() are not defined
 #
 #    def info(self): # used if full_info() is not defined
 #        return self.info_text
-
+#
     def full_info(self, object, name, value):
         '''Calls _full_info with kind='file name' so that we can call 
         _full_info with kind='directory' for RelativeDirectory traits.'''
@@ -148,27 +174,46 @@ class RelativeFile(BaseStr):
         info += kind
         
         if not os.path.isabs(value) or (self.directory != '' and not self.absolute):
-#            info += '\n' # make tooltips easier to read # now done using wrap
+#            info += '\n' # make tooltips easier to read # now done using infobiotics.commons.strings.wrap in RelativeFileEditor
             info += " in '%s'" % os.path.abspath(self.directory)
-#            info += '\n'  
+#            info += " in '%s'" % shorten_path(os.path.abspath(self.directory))
+#            info += '\n' # ditto  
 
         return info
            
+           
+#    def _set_directory_from_directory_name(self, object):
+#        ''' Factored out of _validate because it also used in post_setattr. '''
+#        if self.directory_name == '':
+#            return
+#        self.directory = getattr(object, self.directory_name)#, self.directory) #FIXME won't work for extended trait names (Range doesn't seem to do this either, maybe sync_value or _sync_values does?)
+#        
+#    def _set_exists_from_exists_name(self, object):
+#        if self.exists_name == '':
+#            return
+#        self.exists = getattr(object, self.exists_name)#, self.exists)
+#
+#    def _set_empty_ok_from_empty_ok_name(self, object):
+#        if self.empty_ok_name == '':
+#            return
+#        self.empty_ok = getattr(object, self.empty_ok_name)#, self.empty_ok)
+#
+    def _set_attribute_from_trait(self, object, attribute_name, trait_name=None):
+        if trait_name is None: # works for ''
+            trait_name = attribute_name + '_name'
+        if not getattr(self, trait_name):
+            return
+        setattr(self, attribute_name, getattr(object, getattr(self, trait_name)))
+    
     def _set_directory_from_directory_name(self, object):
-        ''' Factored out of _validate because it also used in post_setattr. '''
-        if self.directory_name == '':
-            return
-        self.directory = getattr(object, self.directory_name)#, self.directory) #FIXME won't work for extended trait names (Range doesn't seem to do this either, maybe sync_value or _sync_values does?)
-        
+        self._set_attribute_from_trait(object, 'directory')
+    
     def _set_exists_from_exists_name(self, object):
-        if self.exists_name == '':
-            return
-        self.exists = getattr(object, self.exists_name)#, self.exists)
-
+        self._set_attribute_from_trait(object, 'exists')
+    
     def _set_empty_ok_from_empty_ok_name(self, object):
-        if self.empty_ok_name == '':
-            return
-        self.empty_ok = getattr(object, self.empty_ok_name)#, self.empty_ok)
+        self._set_attribute_from_trait(object, 'empty_ok')
+
 
     def validate(self, object, name, value):
         '''Calls _validate with function=os.path.isfile so that we can call 
@@ -205,26 +250,11 @@ class RelativeFile(BaseStr):
                     # value is not an executable file in system path
                     pass
         
-        abspath = self._abspath(value)
+        abspath = self._abspath(value) # used later
         
+        # coerce value to be absolute if necessary
         if self.absolute:
             value = abspath
-#            #TODO is this a bad idea? 
-#            # shouldn't value be absolute already for self.absolute to be useful
-#            # or should validate return the valid form
-#            '''
-#            validate(self, object, name, value)
-#            This method validates, coerces, or adapts the specified value as the 
-#            value of the name trait of the object object. This method is called 
-#            when a value is assigned to an object trait that is based on this 
-#            subclass of TraitType and the class does not contain a definition for 
-#            either the get() or set() methods. This method must return the original
-#            value or any suitably coerced or adapted value that is a legal value 
-#            for the trait. If value is not a legal value for the trait, and cannot 
-#            be coerced or adapted to a legal value, the method should either raise 
-#            a TraitError or call the error method to raise the TraitError on its 
-#            behalf.        
-#            '''
 
         # sync self.exists from object
         self._set_exists_from_exists_name(object)
@@ -286,7 +316,6 @@ class RelativeFile(BaseStr):
         self._set_directory_from_directory_name(object) # only required here the first time the value is set
         # create shadow value
         abspath = self._abspath(value) 
-#        print abspath
         object.__dict__[name + '_'] = abspath # setattr doesn't work so we have to mutate the object's dictionary instead
     
     def _abspath(self, value):
