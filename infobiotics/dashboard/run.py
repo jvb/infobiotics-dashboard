@@ -1,15 +1,10 @@
+# set process title and TraitsUI backend if run directly
 if __name__ == '__main__':
-    
     import setproctitle
     setproctitle.setproctitle('Infobiotics Dashboard')
-    
     from enthought.etsconfig.api import ETSConfig
     ETSConfig.toolkit = 'qt4'
 
-# preferences
-from infobiotics.api import preferences
-preferences.set('default/enthought.envisage.ui.workbench.prompt_on_exit', False)
-           
 # fixes 'no handlers could be found for logger "enthought.envisage.plugin"'
 import logging
 logger = logging.getLogger("enthought.envisage.plugin")
@@ -50,17 +45,23 @@ from infobiotics.dashboard.plugins.poptimizer.ui_plugin import POptimizerUIPlugi
 #TODO optimise plugin loading
 
 def main():
-    ''' Main entry point for Infobiotics Dashboard.
+    '''Main entry point for Infobiotics Dashboard.
 
     Creates the Workbench Application from a collection of plugins.
-    
     '''
+    # don't prompt on exit by default
+    from infobiotics.api import preferences
+    preferences.set('default/enthought.envisage.ui.workbench.prompt_on_exit', False) # done in infobiotics.preferences
+    # use our preferences instead of the pkgfile://enthought.envisage.ui.workbench/preferences.ini
+    workbench_plugin = WorkbenchPlugin(my_preferences=['file://%s' % preferences.filename]) # splits on '://' 
+
+    # create application from plugins
     application = InfobioticsDashboardWorkbenchApplication(
         
         # create plugins
         plugins=[
             CorePlugin(),
-            WorkbenchPlugin(),
+            workbench_plugin,
 
 #            DeveloperPlugin(),
 #            DeveloperUIPlugin(),
@@ -93,7 +94,6 @@ def main():
     application.run()
     # This starts the application, starts the GUI event loop, and when that 
     # terminates, stops the application.
-    
 
 if __name__ == '__main__':
     main()

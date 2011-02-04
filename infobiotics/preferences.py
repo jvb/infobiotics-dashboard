@@ -34,11 +34,13 @@ preferences.set('default/mcsscmaes.directory', default_directory)
 preferences.set('default/pmodelchecker.directory', default_directory)
 preferences.set('default/poptimizer.directory', default_directory)
 
+#preferences.set('default/enthought.envisage.ui.workbench.prompt_on_exit', False)
+
 # uncomment to make scope 'default' non-transient
 #preferences.get_scope('default').filename = os.path.join(ETSConfig.get_application_data(create=True), 'default_preferences.ini')
 #print default_preferences.filename
-#preferences.flush() # save preferences
-
+#preferences.flush()
+#preferences.save()
 
 if __name__ == '__main__':
     preferences.dump()
