@@ -18,7 +18,7 @@ class McssExperimentProgressHandler(ExperimentProgressHandler):
     @on_trait_change('model.time_in_run, model.runs, model.max_time')
     def update_progress(self):
         self.progress = int((((self.model.time_in_run) + ((self.model.run - 1) * self.model.max_time)) / (self.model.max_time * self.model.runs)) * 100)
-        print self.progress
+#        print self.progress
 
 if __name__ == '__main__':
     execfile('mcss_experiment.py')

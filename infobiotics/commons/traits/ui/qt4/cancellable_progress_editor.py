@@ -20,7 +20,7 @@ class _CancellableProgressEditor(Editor):
 
     def _title_changed(self):
         if self._title is not None:
-            self._title.setText('<B>%s</B>'%self.title)
+            self._title.setText('<B>%s</B>' % self.title)
             self._title.setVisible(len(self.title) > 0)
     
     def _message_changed(self):
@@ -63,8 +63,20 @@ class _CancellableProgressEditor(Editor):
             self.sync_value(self.factory.show_time_name, 'show_time')#, 'from')
         
         self.control = self._create_control(parent)
+
+        self.can_cancel = self.factory.can_cancel
+        if len(self.factory.can_cancel_name) > 0:
+            self.sync_value(self.factory.can_cancel_name, 'can_cancel')#, 'from')
+                
         self.set_tooltip()
         self.reset()
+
+    can_cancel = Bool(False)
+    from enthought.traits.api import Any
+    buttons = Any
+    @on_trait_change('can_cancel')
+    def set_buttons_visible(self, value):
+        self.buttons.setVisible(value)
 
     def _create_control(self, parent):
         layout = QVBoxLayout()
@@ -84,13 +96,13 @@ class _CancellableProgressEditor(Editor):
         if not self.factory.can_cancel:
             layout.addWidget(self._progress_bar)
         else:
-            buttons = QDialogButtonBox()
-            buttons.addButton(u'Cancel', QDialogButtonBox.RejectRole)
-            buttons.connect(buttons, SIGNAL('rejected()'), self.factory.cancelled)
+            self.buttons = QDialogButtonBox()
+            self.buttons.addButton(u'Cancel', QDialogButtonBox.RejectRole)
+            self.buttons.connect(self.buttons, SIGNAL('rejected()'), self.factory.cancelled)
             grid_layout = QGridLayout()
             grid_layout.addWidget(self._progress_bar, 0, 0)
             grid_layout.setColumnStretch(0, 1)
-            grid_layout.addWidget(buttons, 0, 1)
+            grid_layout.addWidget(self.buttons, 0, 1)
             layout.addLayout(grid_layout)
                 
         if self.factory.show_time:
@@ -158,7 +170,7 @@ class _CancellableProgressEditor(Editor):
 
         if self.factory.show_time:
             if (self.factory.max != self.factory.min):
-                percent = (float(self.value) - self.factory.min)/(self.factory.max - self.factory.min)
+                percent = (float(self.value) - self.factory.min) / (self.factory.max - self.factory.min)
                 # if float(<undefined>) raises an error here then probably the
                 # name of the trait this is editing is mispelled or owned by
                 # the handler, e.g. 'handler.progress' instead of 'progress'. 
@@ -167,7 +179,7 @@ class _CancellableProgressEditor(Editor):
             if self.factory.show_time and (percent != 0):
                 current_time = time.time()
                 elapsed = current_time - self._start_time
-                estimated = elapsed/percent
+                estimated = elapsed / percent
                 remaining = estimated - elapsed
                 self._set_time_label(elapsed, self._elapsed_control)
                 self._set_time_label(estimated, self._estimated_control)
@@ -193,6 +205,7 @@ class CancellableProgressEditor(BasicEditorFactory):
     show_value = Bool(True)
     show_max = Bool(True)
     can_cancel = Bool(False)
+    can_cancel_name = Str
     cancelled = Callable(_cancelled)
     show_time = Bool(False)
     title_name = Str
@@ -205,7 +218,7 @@ class CancellableProgressEditor(BasicEditorFactory):
 
 if __name__ == '__main__':
     
-    import os; os.environ['ETS_TOOLKIT']='qt4'
+    import os; os.environ['ETS_TOOLKIT'] = 'qt4'
     from enthought.traits.api import HasTraits, Int, Button
     from enthought.traits.ui.api import View, Item, HGroup, Spring
 #    from infobiotics.commons.traits.ui.qt4.cancellable_progress_editor import CancellableProgressEditor
@@ -221,11 +234,14 @@ if __name__ == '__main__':
         min = Int
         max = Int(100)
         
+        cancellable = Bool(True)
+        
         def _go_fired(self):
             import time
             for i in range(101):
                 self.progress = i
                 time.sleep(0.025)
+                self.cancellable = False
         
         view = View(
             Item('title'),
@@ -234,7 +250,7 @@ if __name__ == '__main__':
                 Item('min'),
                 Item('max'),
             ),
-            Item('progress', 
+            Item('progress',
                 show_label=False,
                 editor=CancellableProgressEditor(
                     title='Title',
@@ -246,11 +262,12 @@ if __name__ == '__main__':
                     max=100,
                     max_name='max',
 #                    show_text=False,
-                    show_percent = True,
+                    show_percent=True,
                     can_cancel=True, cancelled=cancel,
-                    show_time = True,
-                    show_max = False,
-                    show_value = False,
+                    can_cancel_name='cancellable',
+                    show_time=True,
+                    show_max=False,
+                    show_value=False,
                     prefix_message=True,
                 ),
             ),

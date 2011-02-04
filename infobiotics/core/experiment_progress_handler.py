@@ -16,10 +16,10 @@ class ExperimentProgressHandler(Controller):
     def init(self, info):
         self.info.ui.title = self.model.handler.title
     
-    def _progress_changed(self, info):
-        print info #FIXME
-        print self.min, self.max, self.show_time
-        print self.progress
+#    def _progress_changed(self, info):
+#        print info #FIXME
+#        print self.min, self.max, self.show_time
+#        print self.progress
     
     traits_view = View(
         VGroup(

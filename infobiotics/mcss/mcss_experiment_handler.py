@@ -3,17 +3,27 @@ from infobiotics.core.experiment_handler import ExperimentHandler
 
 class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
-    def __progress_handler_default(self):
-        return McssExperimentProgressHandler(model=self.model)
+#    def __progress_handler_default(self): #TODO remove
+#        return McssExperimentProgressHandler(model=self.model)
 
-    def object_finished_changed(self, info):
-        ''' Triggered when experiment's expect loop finishes. '''
-        if info.object.finished_successfully:
-            print 'succeeded', self
-            self.show_results()
-        else:
-            print 'failed', self
-        
+    def _starting(self):
+        pass #TODO create and show *cancellable* progress dialog
+        self._progress_dialog_started = False
+
+
+    def object__progress_percentage_changed(self, info):
+        if not self._progress_dialog_started:
+            self._progress_dialog_started = True
+#            self._progress_dialog.edit_traits()
+        print self.info.object._progress_percentage
+        pass #TODO nothing, self._progress_dialog should update based on self.percentage
+    
+    def _finished(self, success):
+        #TODO close progress dialog
+        if success:
+            print 'got here'
+#            self.show_results()
+
     def show_results(self):
         import os.path
         if os.path.exists(self.model.data_file_):

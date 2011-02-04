@@ -83,7 +83,7 @@ class Params(HasTraits):
     directory = Directory # infinite recursion if ParamsRelativeDirectory because directory='directory'
     
     def __init__(self, file=None, **traits):
-#        self.bind_preferences() # now done in configure() or edit() so that scripts and terminal can rely on defaults not preferences
+        self.bind_preferences() # now done in configure() or edit() so that scripts and terminal can rely on defaults not preferences
 ##        if self._interaction_mode == 'terminal':
 ##            self.directory = os.getcwd()
         super(Params, self).__init__(**traits) # do this after binding preferences so that we can override executable and directory 
@@ -121,7 +121,7 @@ class Params(HasTraits):
         preferences.save() # save preferences because some invalid ones might have been removed
         
     def save_preferences(self):
-        ''' Called from self.handler.close() '''
+        ''' Called from self._handler.close() '''
         from enthought.preferences.api import get_default_preferences
         get_default_preferences().save()
 
@@ -383,8 +383,8 @@ class Params(HasTraits):
         
     _interactive = False
     
-    handler = Instance(ParamsHandler)
-    def _handler_default(self):
+    _handler = Instance(ParamsHandler)
+    def __handler_default(self):
         '''
         e.g.
             from infobiotics.mcss.api import McssParamsHandler
@@ -396,14 +396,14 @@ class Params(HasTraits):
         interaction_mode = self._interaction_mode # remember previous mode of interaction
         self._interaction_mode = 'gui' # set mode of interaction
         self.bind_preferences()
-        self.handler.configure_traits(**args)
+        self._handler.configure_traits(**args)
         self._interaction_mode = interaction_mode # restore previous mode of interaction
 
     def edit(self, **args):
         interaction_mode = self._interaction_mode # remember previous mode of interaction
         self._interaction_mode = 'gui' # set mode of interaction
         self.bind_preferences()
-        ui = self.handler.edit_traits(**args)
+        ui = self._handler.edit_traits(**args)
         self._interaction_mode = interaction_mode # restore previous mode of interaction
         return ui.result
 

@@ -8,9 +8,9 @@ class ExperimentHandler(ParamsHandler):
     def traits_view(self):
         return self.get_traits_view(ExperimentView)
         
-    _progress_handler = Instance(ExperimentProgressHandler)
-    def __progress_handler_default(self):
-        raise NotImplementedError('e.g. return McssExperimentProgressHandler(model=self.model)')
+#    _progress_handler = Instance(ExperimentProgressHandler)
+#    def __progress_handler_default(self):
+#        raise NotImplementedError('e.g. return McssExperimentProgressHandler(model=self.model)')
 
     def perform(self, info):
         ''' Hide window and show progress instead. '''
@@ -20,7 +20,8 @@ class ExperimentHandler(ParamsHandler):
         # including 'finished'
 #        info.ui.control.setVisible(False) 
         if info.object.perform(thread=True):
-            self._show_progress()
+#            self._show_progress()
+            pass
 
-    def _show_progress(self):
-        self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates
+#    def _show_progress(self):
+#        self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates

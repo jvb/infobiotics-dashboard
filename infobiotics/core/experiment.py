@@ -29,6 +29,7 @@ if sys.platform.startswith('win'):
     import winpexpect
 #    import wexpect # deprecated
 import pexpect # provided by pexpect or winpexpect PyPI packages
+from progressbar import ProgressBar, Percentage, Bar, RotatingMarker, ETA
     
 from infobiotics.commons.api import logging
 log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
@@ -60,24 +61,24 @@ class Experiment(Params):
 #    
 #    '''
     executable_kwargs = ListStr
-    _output_pattern_list = ListStr
-    _error_pattern_list = ListStr([
-        '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
-        '^[eE]rror[^:].+\nline [0-9]+: \([0-9]+ \[Error\]\) .*', # Fran & LibSBML 'error reading sbml input file\nline 1: (00002 [Error]) File unreadable.' 
-        '^[eE]rror[^:].*', # Fran 'error ...'
-        '^.+: command not found', # bash
-        '^I/O warning : failed to load external entity ".+"', # libxml++
-    ])
+#    _output_pattern_list = ListStr
+#    _error_pattern_list = ListStr([
+#        '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
+#        '^[eE]rror[^:].+\nline [0-9]+: \([0-9]+ \[Error\]\) .*', # Fran & LibSBML 'error reading sbml input file\nline 1: (00002 [Error]) File unreadable.' 
+#        '^[eE]rror[^:].*', # Fran 'error ...'
+#        '^.+: command not found', # bash
+#        '^I/O warning : failed to load external entity ".+"', # libxml++
+#    ])
     _error_string = Str
 
-    starting = Event # used to reset finished_successfully
-    def _starting_fired(self):
-        self.finished_successfully = False
-    started = Event
-    timed_out = Event
-    finished = Event
-    finished_successfully = Bool
-    finished_without_output = Event #TODO
+#    starting = Event # used to reset finished_successfully
+#    def _starting_fired(self):
+#        self.finished_successfully = False
+#    started = Event
+#    timed_out = Event
+#    finished = Event
+#    finished_successfully = Bool
+#    finished_without_output = Event #TODO
 
     def perform(self, thread=False):#TODO make thread True by default?
         ''' Spawns an expect process and handles it in a separate thread. '''
@@ -113,21 +114,196 @@ class Experiment(Params):
 #        print 'executed'
         return True
 
-    def _perform(self):
-        '''Might be running in a thread.'''
-        self.starting = True
-        self.__expect()
-        self.finished = True
 
-    def _finished_fired(self):
-        if self.finished_successfully:
-            log.debug('succeeded')
+    def _perform(self):
+#        '''Might be running in a thread.'''
+#        self.starting = True
+#        self.__expect()
+#        self.finished = True
+
+#        self._child = pexpect.spawn('python process.py')
+        ''' Start the program and try to match output.
+        
+        Spawns the program (starting it in self.cwd), 
+        compiles list of patterns for expect_list, 
+        adds EOF to list,
+        calls 'started' hook,
+        loops calling the '_output_pattern_matched' hook with the index of the pattern
+        and the match until EOF whereupon it calls the 'finished' hook.
+         
+        '''
+        if sys.platform.startswith('win'):
+            self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         else:
-            log.debug('failed')
+            self._child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+        # note that spawn doesn't like list traits so we copy them using [:] 
+        # and directory is defined in Params
+        
+#        self._stdout_pattern_list = [
+#            '[0-9]+'
+#        ]
+        stdout_pattern_range = range(0, len(self._stdout_pattern_list))
+        
+#        self._stderr_pattern_list = [
+#            '[Ee]rror.+'
+#        ]
+        stderr_pattern_range = range(len(self._stdout_pattern_list), len(self._stdout_pattern_list) + len(self._stderr_pattern_list))
+        
+        # compile pattern list for expect_list
+        compiled_pattern_list = self._child.compile_pattern_list(self._stdout_pattern_list + self._stderr_pattern_list)
+        
+        # append EOF to compiled pattern list        
+        compiled_pattern_list.append(pexpect.EOF)
+        eof_index = compiled_pattern_list.index(pexpect.EOF)
+        
+        # append TIMEOUT to compiled pattern list
+        compiled_pattern_list.append(pexpect.TIMEOUT)
+        timeout_index = compiled_pattern_list.index(pexpect.TIMEOUT)        
+        
+        self._starting()
+
+        import re, os
+
+        # expect loop
+        patterns_matched = 0
+        stdout_patterns_matched = 0
+        stderr_patterns_matched = 0
+        while True:
+#            break
+            pattern_index = self._child.expect_list(compiled_pattern_list, searchwindowsize=100)#, timeout=1)
+            if pattern_index == eof_index:
+#                if patterns_matched == 0:
+#                    if self.child.before != '':
+#                        print self.child.before
+#                        # scour before for error messages
+#                        for line in self.child.before.split(os.linesep):
+#                            for i, pattern in enumerate(self._stderr_pattern_list):
+#                                if re.match(pattern, line) is not None:
+#                                    self._stderr_pattern_matched(len(self._stdout_pattern_list) + i, line)
+#                                    break # out of inner for loop
+#                            else:
+#                                continue # don't break out of outer loop yet
+##                            for i, pattern in enumerate(self._stdout_pattern_list):
+##                                if re.match(pattern, line) is not None:
+##                                    self._stdout_pattern_matched(i, line)
+##                                    break # out of inner for loop
+##                            else:
+##                                continue # don't break out of outer loop yet
+#                            break # out of outer for loop
+#                        else:
+##                            self._stdout_pattern_matched(-1, self.child.before)
+#                            print '-1', self.child.before
+#                    else:
+##                        self.finished_without_output = True #TODO
+#                        print 'finished without output'
+#                    break # out of while loop
+#                print 'finished'
+                break
+                # process has finished, perhaps prematurely, but can't tell so call it a success
+            elif pattern_index == timeout_index:
+#                self.timed_out = True #TODO
+                print 'timed out'
+                break
+            elif pattern_index in stdout_pattern_range:
+                match = self._child.match.group()
+                self._stdout_pattern_matched(pattern_index, match)
+                stdout_patterns_matched += 1
+            elif pattern_index in stderr_pattern_range:
+                match = self._child.match.group()
+                self._stderr_pattern_matched(pattern_index - len(self._stdout_pattern_list), match)
+                stderr_patterns_matched += 1
+            else:
+                print 'got here'
+
+        # gather information before finishing
+                
+        self._finished_without_output = True if stdout_patterns_matched + stderr_patterns_matched == 0 else False
+            
+        self._child.close()
+#        if self._child.exitstatus is not None:
+#            print 'exitstatus == %s' % self._child.exitstatus
+#        if self._child.signalstatus is not None:
+#            print 'signalstatus == %s' % self._child.signalstatus
+#        print 'status == %s' % self._child.status
+#        print
+
+        self._finished(True if self._child.exitstatus == 0 else False)
+
+    _stdout_pattern_list = ListStr
+    _stderr_pattern_list = ListStr([
+        '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
+        '^[eE]rror[^:].+\nline [0-9]+: \([0-9]+ \[Error\]\) .*', # Fran & LibSBML 'error reading sbml input file\nline 1: (00002 [Error]) File unreadable.' 
+        '^[eE]rror[^:].*', # Fran 'error ...'
+        '^.+: command not found', # bash
+        '^I/O warning : failed to load external entity ".+"', # libxml++
+    ])
+    
+    def _stdout_pattern_matched(self, pattern_index, match):
+#        if self._interaction_mode not in ('script', 'terminal'):
+#            self._handler._stdout_pattern_matched(pattern_index, match)
+#        else:
+#            if pattern_index == 0:
+#                print match
+#            else:
+        raise ValueError('Experiment._stdout_pattern_matched called with unrecognised pattern_index %s' % pattern_index)
+            
+    def _stderr_pattern_matched(self, pattern_index, match):
+#        if self._interaction_mode not in ('script', 'terminal'):
+#            self._handler._stderr_pattern_matched(pattern_index, match)
+#        else:
+#            if pattern_index == 0:
+#                print match
+#            else:
+#                raise ValueError('Experiment._stderr_pattern_matched called with unrecognised pattern_index %s' % pattern_index)
+        self._error_string = match.strip()
+        if self._interaction_mode == 'terminal':
+            print self._error_string
+        elif self._interaction_mode == 'script':
+            self.log.error(self._error_string)
+        else:
+            print 'got here'
+
+
+    def _starting(self):
+        if self._interaction_mode not in ('script', 'terminal'):
+            self._handler._starting()
+        else:
+            self._progress_bar = ProgressBar(
+                widgets=[
+                    self.executable_name,
+                    ' ',
+                    Percentage(),
+                    ' ',
+                    Bar(marker=RotatingMarker()),
+                    ' ',
+                    ETA()
+                ],
+                maxval=100,
+            )
+            self._progress_bar_started = False
+
+    
+    def _finished(self, success):
+        if self._interaction_mode not in ('script', 'terminal'):
+            self._handler._finished(success)
+        elif success and not self._finished_without_output:
+            self._progress_bar.finish()
+        if self._progress_bar_started:
+            print
         if sys.platform.startswith('win'):
             os.remove(self.temp_params_file.name) #TODO test
         else:
             del self.temp_params_file
+
+#    def _finished_fired(self):
+#        if self.finished_successfully:
+#            log.debug('succeeded')
+#        else:
+#            log.debug('failed')
+#        if sys.platform.startswith('win'):
+#            os.remove(self.temp_params_file.name) #TODO test
+#        else:
+#            del self.temp_params_file
 
 #    def __subprocess(self):
 #                
@@ -202,90 +378,90 @@ class Experiment(Params):
 #            error_log.write(error)
 #            error_log.close()
 
-    def __expect(self):
-        ''' Start the program and try to match output.
+#    def __expect(self):
+#        ''' Start the program and try to match output.
+#        
+#        Spawns the program (starting it in self.cwd), 
+#        compiles list of patterns for expect_list, 
+#        adds EOF to list,
+#        calls 'started' hook,
+#        loops calling the '_output_pattern_matched' hook with the index of the pattern
+#        and the match until EOF whereupon it calls the 'finished' hook.
+#         
+#        '''
+#        if sys.platform.startswith('win'):
+#            self.child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+#        else:
+#            self.child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+#        # note that spawn doesn't like list traits so we copy them using [:] 
+#        # and directory is defined in Params
+#
+#        # compile pattern list for expect_list
+#        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
+#        
+#        # append EOF to compiled pattern list
+#        compiled_pattern_list.append(pexpect.EOF)
+#        eof_index = compiled_pattern_list.index(pexpect.EOF)
+#        
+#        # append TIMEOUT to compiled pattern list
+#        compiled_pattern_list.append(pexpect.TIMEOUT)
+#        timeout_index = compiled_pattern_list.index(pexpect.TIMEOUT)
+#        
+#        self.started = True
+#
+#        # expect loop
+#        import re
+#        patterns_matched = 0
+#        eof = True
+#        while eof:
+#            pattern_index = self.child.expect_list(compiled_pattern_list, searchwindowsize=100)
+#            if pattern_index == eof_index:
+#                if patterns_matched == 0:
+#                    if self.child.before != '':
+#                        # scour before for error messages
+#                        for line in self.child.before.split(os.linesep):
+#                            for i, pattern in enumerate(self._error_pattern_list):
+#                                if re.match(pattern, line) is not None:
+#                                    self._output_pattern_matched(len(self._output_pattern_list) + i, line)
+#                                    break # out of inner for loop
+#                            else:
+#                                continue # don't break out of outer loop yet
+#                            break # out of outer for loop
+#                        else:
+#                            self._output_pattern_matched(-1, self.child.before)
+#                    else:
+#                        self.finished_without_output = True #TODO
+#                    break # out of while loop
+#                eof = False
+#                # process has finished, perhaps prematurely, but can't tell so call it a success
+#            elif pattern_index == timeout_index:
+#                log.debug('timed out')
+#                self.timed_out = True #TODO
+#            else:
+#                self._output_pattern_matched(pattern_index, self.child.match.group())
+#                patterns_matched += 1
+#        else: # while loop finished without a break
+#            self.finished_successfully = True
         
-        Spawns the program (starting it in self.cwd), 
-        compiles list of patterns for expect_list, 
-        adds EOF to list,
-        calls 'started' hook,
-        loops calling the '_output_pattern_matched' hook with the index of the pattern
-        and the match until EOF whereupon it calls the 'finished' hook.
-         
-        '''
-        if sys.platform.startswith('win'):
-            self.child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
-        else:
-            self.child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
-        # note that spawn doesn't like list traits so we copy them using [:] 
-        # and directory is defined in Params
-
-        # compile pattern list for expect_list
-        compiled_pattern_list = self.child.compile_pattern_list(self._output_pattern_list + self._error_pattern_list)
-        
-        # append EOF to compiled pattern list
-        compiled_pattern_list.append(pexpect.EOF)
-        eof_index = compiled_pattern_list.index(pexpect.EOF)
-        
-        # append TIMEOUT to compiled pattern list
-        compiled_pattern_list.append(pexpect.TIMEOUT)
-        timeout_index = compiled_pattern_list.index(pexpect.TIMEOUT)
-        
-        self.started = True
-
-        # expect loop
-        import re
-        patterns_matched = 0
-        eof = True
-        while eof:
-            pattern_index = self.child.expect_list(compiled_pattern_list, searchwindowsize=100)
-            if pattern_index == eof_index:
-                if patterns_matched == 0:
-                    if self.child.before != '':
-                        # scour before for error messages
-                        for line in self.child.before.split(os.linesep):
-                            for i, pattern in enumerate(self._error_pattern_list):
-                                if re.match(pattern, line) is not None:
-                                    self._output_pattern_matched(len(self._output_pattern_list) + i, line)
-                                    break # out of inner for loop
-                            else:
-                                continue # don't break out of outer loop yet
-                            break # out of outer for loop
-                        else:
-                            self._output_pattern_matched(-1, self.child.before)
-                    else:
-                        self.finished_without_output = True #TODO
-                    break # out of while loop
-                eof = False
-                # process has finished, perhaps prematurely, but can't tell so call it a success
-            elif pattern_index == timeout_index:
-                log.debug('timed out')
-                self.timed_out = True #TODO
-            else:
-                self._output_pattern_matched(pattern_index, self.child.match.group())
-                patterns_matched += 1
-        else: # while loop finished without a break
-            self.finished_successfully = True
-        
-    def _output_pattern_matched(self, pattern_index, match):
-        '''Update traits in response to matching error patterns.
-        
-        Subclasses should call this method after processing their own patterns, e.g.:
-            if pattern_index == 0:
-                # do something
-            elif pattern_index == 1:
-                # do something else
-            else:
-                Experiment._output_pattern_matched(self, pattern_index, match)
-
-        '''
-        self._error_string = match.strip()
-        if self._interaction_mode == 'terminal':
-            print self._error_string
-        elif self._interaction_mode == 'script':
-            self.log.error(self._error_string)
-        else:
-            print 'got here'
+#    def _output_pattern_matched(self, pattern_index, match):
+#        '''Update traits in response to matching error patterns.
+#        
+#        Subclasses should call this method after processing their own patterns, e.g.:
+#            if pattern_index == 0:
+#                # do something
+#            elif pattern_index == 1:
+#                # do something else
+#            else:
+#                Experiment._output_pattern_matched(self, pattern_index, match)
+#
+#        '''
+#        self._error_string = match.strip()
+#        if self._interaction_mode == 'terminal':
+#            print self._error_string
+#        elif self._interaction_mode == 'script':
+#            self.log.error(self._error_string)
+#        else:
+#            print 'got here'
     
 #from enthought.traits.ui.api import Group, Item
 #
