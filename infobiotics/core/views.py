@@ -7,26 +7,26 @@ from enthought.traits.ui.menu import Action
 from enthought.traits.ui.api import View, HGroup, VGroup, Item, StatusItem
 
 close_action = Action(
-    name='&Close', 
+    name='&Close',
 #    action='_on_close', # doesn't terminate event loop if last window closed 
     action='close_window', # in ParamsHandler; calls info.ui.control.close() 
 ) 
 
 load_action = Action(
-    name='&Load', 
-    action='load', 
+    name='&Load',
+    action='load',
     tooltip='Load parameters from a file'
 ) 
 
 save_action = Action(
-    name='&Save', 
-    action='save', 
+    name='&Save',
+    action='save',
     tooltip='Save the current parameters to a file'
 )
 
 perform_action = Action(
-    name='&Perform', 
-    action='perform', 
+    name='&Perform',
+    action='perform',
     tooltip='Perform the experiment with the current parameters',
     enabled_when='handler.has_valid_parameters',
 )
@@ -49,7 +49,7 @@ params_actions = [ # ParamsView only
 experiment_actions = [ # ExperimentView only
 #    load_action, 
 #    save_action, 
-    perform_action, 
+    perform_action,
     'Cancel',
 ]
 
@@ -57,7 +57,7 @@ from enthought.traits.ui.menu import Menu, MenuBar, ToolBar
 
 file_menu = Menu(
     load_action, save_action, close_action,
-    name = '&File'
+    name='&File'
 )
 
 #TODO about_action
@@ -75,7 +75,7 @@ toolbar = ToolBar(load_action, save_action)
 #)
 
 directory_group = HGroup(
-    Item('directory', 
+    Item('directory',
 #        tooltip='Relative file paths will be resolved to this directory.',
     ),
 )
@@ -94,7 +94,7 @@ class ParamsView(View): # can be used to edit parameters without performing the 
     statusbar = [ 
         StatusItem(
             name='handler.status',
-            width=1.0
+            width=1.0,
         ),
     ]
 
