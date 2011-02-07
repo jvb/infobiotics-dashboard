@@ -7,7 +7,7 @@ mcss_params_group = Group(
                 VGroup(
                     Item('model_file'),
                     HGroup(
-                        Item('handler.model_format', 
+                        Item('handler.model_format',
                             label='XML type',
                             visible_when='object.model_file.endswith(".xml")',
                         ),
@@ -16,10 +16,11 @@ mcss_params_group = Group(
                     ),
                     label='P system model',
                 ),
-                VGroup( 
+                VGroup(
                     Item('max_time'),
                     Item('log_interval'),
                     Item('runs'),
+                    Item('max_run_time'),
                     Item('data_file'),
             #        Item('show_progress'), #TODO popup showing stdout and stderr for each params program
                     Item('compress', label='Compress output'),
