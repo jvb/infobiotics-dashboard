@@ -13,7 +13,7 @@ from xml import sax
 from infobiotics.thirdparty.which import which, WhichError
 
 from infobiotics.commons.api import logging
-log = logging.getLogger(level=logging.WARN)
+log = logging.getLogger(name='Params', level=logging.WARN)
 
 from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
