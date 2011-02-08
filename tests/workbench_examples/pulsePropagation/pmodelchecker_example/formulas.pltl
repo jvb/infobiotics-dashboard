@@ -1,7 +1,0 @@
-Formulas:
-"P=?[ F [LuxR2_$X$_$Y$_pulsingCellbacterium] > 0 ]"												{$X$ =6:1:20,$Y$=2:1:3}
-"P=?[ F [proteinGFP_$X$_$Y$_pulsingCellbacterium] > 0 ]"											{$X$ =6:1:20,$Y$=2:1:3}
-"P=?[ (time=$T$)U([proteinGFP_$X$_$Y$_pulsingCellbacterium] > 10){time=$T$} ]"			{$X$ =6:1:20,$Y$=2:1:3,$T$=0:10:600}
-
-
-
