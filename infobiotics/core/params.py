@@ -14,6 +14,7 @@ from infobiotics.thirdparty.which import which, WhichError
 
 from infobiotics.commons.api import logging
 log = logging.getLogger(name='Params', level=logging.WARN)
+log.setLevel(logging.ERROR)
 
 from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
@@ -521,7 +522,7 @@ def trait_value_from_parameter_value(self, name, value): # change name to 'trait
     elif type in ('Enum', 'File', 'Directory', 'ParamsRelativeFile', 'ParamsRelativeDirectory', 'RelativeFile', 'RelativeDirectory'):
         return str(value)    
     else:
-        log.warn('Unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
+#        log.warn('Unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
         return value
 
 #TODO could replace name with trait.metadata.parameter_name and return (new_name, value)

@@ -98,7 +98,6 @@ class Experiment(Params):
         
         if not thread or self._interaction_mode in ('terminal', 'script'):
             self._perform()
-            #TODO call serial progress function from here
         else:
             thread = Thread(target=self._perform)
             thread.daemon = True # kills threads on exit
@@ -278,6 +277,7 @@ class Experiment(Params):
             log.error(self._error_string)
 
     def _starting(self):
+        self.__finished = False
 #        print 'starting in %s' % self._interaction_mode
         if self._interaction_mode not in ('script', 'terminal'):
             self._handler._starting()
@@ -320,8 +320,9 @@ class Experiment(Params):
         if sys.platform.startswith('win'):
             os.remove(self.temp_params_file.name) #TODO test
         else:
-#            del self.temp_params_file
-            os.remove(self.temp_params_file.name)
+            del self.temp_params_file
+#            os.remove(self.temp_params_file.name)
+        self.__finished = True
 
     
 #from enthought.traits.ui.api import Group, Item

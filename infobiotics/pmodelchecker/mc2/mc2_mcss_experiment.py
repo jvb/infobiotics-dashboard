@@ -10,9 +10,9 @@ class MC2McssExperimentHandler(McssExperimentHandler):
             mc2_mcss_experiment_group,
             show_border=True,
         ),
-        buttons=['OK','Cancel'],
+        buttons=['OK', 'Cancel'],
         resizable=True,
-        id = 'MC2McssExperimentHandler'
+        id='MC2McssExperimentHandler'
     )
 
 #    def init(self, info):
@@ -56,8 +56,6 @@ class MC2McssExperiment(McssExperiment):
             'log_volumes',
             'log_steady_state',
             'log_degraded',
-            # not edited by user
-            'just_psystem',
         ]
 
 
