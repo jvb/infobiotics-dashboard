@@ -1,0 +1,34 @@
+Pconst_geneGFP 1
+Pconst_geneLuxR 1
+Pconst_geneLacI 1
+Pconst_geneTetR 1
+Pconst_geneCI 1
+Plux_geneGFP 1
+Plux_geneLuxR 1
+Plux_geneLacI 1
+Plux_geneTetR 1
+Plux_geneCI 1
+PluxPR_geneGFP 1
+PluxPR_geneLuxR 1
+PluxPR_geneLacI 1
+PluxPR_geneTetR 1
+PluxPR_geneCI 1
+PconstPR_geneGFP 1
+PconstPR_geneLuxR 1
+PconstPR_geneLacI 1
+PconstPR_geneTetR 1
+PconstPR_geneCI 1
+Plac_geneGFP 1
+Plac_geneLuxR 1
+Plac_geneLacI 1
+Plac_geneTetR 1
+Plac_geneCI 1
+PluxPtetR_geneGFP 1
+PluxPtetR_geneLuxR 1
+PluxPtetR_geneLacI 1
+PluxPtetR_geneTetR 1
+PluxPtetR_geneCI 1
+
+
+
+

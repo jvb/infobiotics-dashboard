@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<parameters name="POptimizerParameters" xmlns="http://www.cpib.ac.uk/~jpt"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+<!-- parameter definitions -->
+<parameterSet name="POptimizerParameters">
+	<parameter name="num_initials" value="4"/>
+	<parameter name="target_file" value="target"/>
+	<parameter name="initial_file" value="initials"/>
+	<parameter name="nonfix_module_lib_file" value="library1-lin.xml"/>
+	<parameter name="fix_module_lib_file" value="library2.xml"/>
+	<parameter name="molecules" value="GFP:LuxR:LacI:TetR:CI"/>
+	<parameter name="para_opti_algo" value="DE"/>
+	<parameter name="fitness_func_type" value="RandomWeightedSum"/>  
+	<parameter name="target_obj_num" value="1"/>
+	<parameter name="maxtime" value="170"/>
+	<parameter name="interval" value="10"/>
+	<parameter name="maxmodulesno" value="5"/>
+	<parameter name="simu_runs" value="20"/>
+	<parameter name="seednum" value="1234"/>	
+	<parameter name="show_progress" value="true"/>
+        <parameter name="debug_mode" value="false"/>
+	<parameter name="popsize" value="20"/>
+	<parameter name="maxgeno" value="10"/>
+	<parameter name="percent_paraopti" value="0.1"/>
+	<parameter name="DE_psize" value="20"/>
+	<parameter name="DE_maxgeno" value="10"/>
+	<parameter name="GA_psize" value="10"/>
+	<parameter name="GA_maxxo" value="100"/>
+	<parameter name="EDA_psize" value="30"/>
+	<parameter name="EDA_maxgeno" value="2"/>
+	<parameter name="CMAES_maxgeno" value="2"/>
+
+</parameterSet>
+
+</parameters>

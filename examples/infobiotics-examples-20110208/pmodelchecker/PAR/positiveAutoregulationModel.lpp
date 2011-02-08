@@ -1,0 +1,20 @@
+LPPsystem negativeAutoregulationModel
+
+	SPsystems
+    SPsystem PAR from PAR.sps
+	endSPsystems
+
+	lattice onePoint from onePointLattice.lat
+
+	spatialDistribution
+		
+		positions for PAR
+			coordinates
+				x = 0
+				y = 0
+			endCoordinates
+		endPositions
+
+	endSpatialDistribution
+
+endLPPsystem

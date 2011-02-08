@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<parameters name="Model_checker_parameters">
+
+  <!-- parameter definitions -->
+  <parameterSet name="PRISMParameters">
+    <parameter name="model_specification" value="negativeAutoregulationModel.lpp"/>
+    <parameter name="PRISM_model" value="NAR.sm"/>
+    <parameter name="temporal_formulas" value="property.csl"/>
+    <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=0,ub_gene1_0_0_NARbacterium=1,lb_protein1_gene1_0_0_NARbacterium=0,ub_protein1_gene1_0_0_NARbacterium=1,lb_protein1_0_0_NARbacterium=0,ub_protein1_0_0_NARbacterium=10000,lb_rna1_0_0_NARbacterium=0,ub_rna1_0_0_NARbacterium=1000"/>   
+	 <parameter name="task" value="Approximate"/>
+    <parameter name="number_samples" value="1000" />
+    <parameter name="confidence" value="0.05" />
+    <parameter name="states_file" value="file_states.psm" />
+    <parameter name="transitions_file" value="file_transitions.psm" />
+    <parameter name="results_file" value="results.psm" />
+  </parameterSet>
+  
+</parameters>

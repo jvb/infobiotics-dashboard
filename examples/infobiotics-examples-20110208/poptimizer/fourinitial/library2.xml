@@ -1,0 +1,697 @@
+<?xml version="1.0"?>
+<libraryOfModules name="Weiss Library">
+
+  <!-- PostTranscriptional Regulation LuxR -->
+  <moduleDefinition name="PostTranscLuxR">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="3.2" upperBound="3.2" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.3" upperBound="0.3" precision="1" scale="linear" />
+      <constant name="c_3" lowerBound="0.04" upperBound="0.04" precision="1" scale="linear" />
+      <constant name="c_4" lowerBound="3.6" upperBound="3.6" precision="1" scale="linear" />
+      <constant name="c_5" lowerBound="0.075" upperBound="0.075" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ rnaLuxR_RNAP ]_b -> [ rnaLuxR ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLuxR_RNAP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="rnaLuxR"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaLuxR ]_b -> [ rnaLuxR + proteinLuxR_Rib ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLuxR"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLuxR"/>
+	    <object name="proteinLuxR_Rib"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaLuxR ]_b -> [ ]_b -->
+      <rule name="r_3" module_rule="1" type ="boundary" constant="c_3">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLuxR"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinLuxR_Rib ]_b -> [ proteinLuxR ]_b -->
+      <rule name="r_4" module_rule="1" type ="boundary" constant="c_4">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinLuxR_Rib"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinLuxR"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinLuxR ]_b -> [ ]_b -->
+      <rule name="r_5" module_rule="1" type ="boundary" constant="c_5">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinLuxR"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+  <!-- Protein Dimerisation after signal sensing -->
+  <moduleDefinition name="DimSig">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="1" upperBound="1" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.0154" upperBound="0.0154" precision="1" scale="linear" />
+      <constant name="c_3" lowerBound="1" upperBound="1" precision="1" scale="linear" />
+      <constant name="c_4" lowerBound="0.0154" upperBound="0.0154" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ proteinLuxR + signal3OC12 ]_b -> [ proteinLuxR_3OC12 ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinLuxR"/>
+	    <object name="signal3OC12"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="proteinLuxR_3OC12"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinLuxR_3OC12 ]_b -> [ ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="proteinLuxR_3OC12"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinLuxR_3OC12 + proteinLuxR_3OC12 ]_b -> [ LuxR2 ]_b -->
+      <rule name="r_3" module_rule="1" type ="boundary" constant="c_3">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="proteinLuxR_3OC12"/>
+            <object name="proteinLuxR_3OC12"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="LuxR2"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ LuxR2 ]_b -> [ ]_b -->
+      <rule name="r_4" module_rule="1" type ="boundary" constant="c_4">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="LuxR2"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+  <!-- PostTranscriptional Regulation CI -->
+  <moduleDefinition name="PostTranscCI">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="3.2" upperBound="3.2" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.02" upperBound="0.02" precision="1" scale="linear" />
+      <constant name="c_3" lowerBound="0.04" upperBound="0.04" precision="1" scale="linear" />
+      <constant name="c_4" lowerBound="3.6" upperBound="3.6" precision="1" scale="linear" />
+      <constant name="c_5" lowerBound="0.1" upperBound="0.1" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ rnaCI_RNAP ]_b -> [ rnaCI ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaCI_RNAP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="rnaCI"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaCI ]_b -> [ rnaCI + proteinCI_Rib ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaCI"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaCI"/>
+	    <object name="proteinCI_Rib"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaCI ]_b -> [ ]_b -->
+      <rule name="r_3" module_rule="1" type ="boundary" constant="c_3">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaCI"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinCI_Rib ]_b -> [ proteinCI ]_b -->
+      <rule name="r_4" module_rule="1" type ="boundary" constant="c_4">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinCI_Rib"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinCI"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinCI ]_b -> [ ]_b -->
+      <rule name="r_5" module_rule="1" type ="boundary" constant="c_5">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinCI"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+  <!-- Protein Dimerisation -->
+  <moduleDefinition name="Dim">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="1" upperBound="1" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.00554" upperBound="0.00554" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ proteinCI + proteinCI ]_b -> [ CI2 ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinCI"/>
+	    <object name="proteinCI"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="CI2"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ CI2 ]_b -> [ ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="CI2"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+  <!-- PostTranscriptional Regulation -->
+  <moduleDefinition name="PostTranscLacI">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="2.22" upperBound="2.22" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.01" upperBound="0.01" precision="1" scale="linear" />
+      <constant name="c_3" lowerBound="0.04" upperBound="0.04" precision="1" scale="linear" />
+      <constant name="c_4" lowerBound="2.5" upperBound="2.5" precision="1" scale="linear" />
+      <constant name="c_5" lowerBound="0.069" upperBound="0.069" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ rnaLacI_RNAP ]_b -> [ rnaLacI ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLacI_RNAP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="rnaLacI"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaLacI ]_b -> [ rnaLacI + proteinLacI_Rib ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLacI"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLacI"/>
+	    <object name="proteinLacI_Rib"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaLacI ]_b -> [ ]_b -->
+      <rule name="r_3" module_rule="1" type ="boundary" constant="c_3">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaLacI"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinLacI_Rib ]_b -> [ proteinLacI ]_b -->
+      <rule name="r_4" module_rule="1" type ="boundary" constant="c_4">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinLacI_Rib"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinLacI"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinLacI ]_b -> [ ]_b -->
+      <rule name="r_5" module_rule="1" type ="boundary" constant="c_5">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinLacI"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+  <!-- PostTranscriptional Regulation -->
+  <moduleDefinition name="PostTranscTetR">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="3.65" upperBound="3.65" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.01" upperBound="0.01" precision="1" scale="linear" />
+      <constant name="c_3" lowerBound="0.04" upperBound="0.04" precision="1" scale="linear" />
+      <constant name="c_4" lowerBound="4.11" upperBound="4.11" precision="1" scale="linear" />
+      <constant name="c_5" lowerBound="0.069" upperBound="0.069" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ rnaTetR_RNAP ]_b -> [ rnaTetR ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaTetR_RNAP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="rnaTetR"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaTetR ]_b -> [ rnaTetR + proteinTetR_Rib ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaTetR"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaTetR"/>
+	    <object name="proteinTetR_Rib"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaTetR ]_b -> [ ]_b -->
+      <rule name="r_3" module_rule="1" type ="boundary" constant="c_3">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaTetR"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinTetR_Rib ]_b -> [ proteinTetR ]_b -->
+      <rule name="r_4" module_rule="1" type ="boundary" constant="c_4">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinTetR_Rib"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinTetR"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinTetR ]_b -> [ ]_b -->
+      <rule name="r_5" module_rule="1" type ="boundary" constant="c_5">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinTetR"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+  <!-- PostTranscriptional Regulation -->
+  <moduleDefinition name="PostTranscGFP">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="3.36" upperBound="3.36" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.667" upperBound="0.667" precision="1" scale="linear" />
+      <constant name="c_3" lowerBound="0.04" upperBound="0.04" precision="1" scale="linear" />
+      <constant name="c_4" lowerBound="3.78" upperBound="3.78" precision="1" scale="linear" />
+      <constant name="c_5" lowerBound="0.0667" upperBound="0.0667" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ rnaGFP_RNAP ]_b -> [ rnaGFP ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaGFP_RNAP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+            <object name="rnaGFP"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaGFP ]_b -> [ rnaGFP + proteinGFP_Rib ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaGFP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaGFP"/>
+	    <object name="proteinGFP_Rib"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ rnaGFP ]_b -> [ ]_b -->
+      <rule name="r_3" module_rule="1" type ="boundary" constant="c_3">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="rnaGFP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinGFP_Rib ]_b -> [ proteinGFP ]_b -->
+      <rule name="r_4" module_rule="1" type ="boundary" constant="c_4">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinGFP_Rib"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinGFP"/>
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+      <!-- [ proteinGFP ]_b -> [ ]_b -->
+      <rule name="r_5" module_rule="1" type ="boundary" constant="c_5">
+        <lhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+	    <object name="proteinGFP"/>
+          </listOfInsideObjects>
+        </lhs>
+        <rhs>
+          <listOfOutsideObjects>
+          </listOfOutsideObjects>
+          <listOfInsideObjects label="l">
+          </listOfInsideObjects>
+        </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+  <!-- General Degradation module -->
+  <moduleDefinition name="Deg">
+    <setOfObjects>
+    </setOfObjects>
+    <setOfConstants>
+      <constant name="c_1" lowerBound="0.1" upperBound="0.1" precision="1" scale="linear" />
+      <constant name="c_2" lowerBound="0.0625" upperBound="0.0625" precision="1" scale="linear" />
+    </setOfConstants>
+    <setOfLabels>
+      <label name="l" />
+    </setOfLabels>
+    <setOfRules>
+      <!-- [ signal3OC12 ]_b -> [ ]_b -->
+      <rule name="r_1" module_rule="1" type ="boundary" constant="c_1">
+            <lhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="l">
+		<object name="signal3OC12"/>
+              </listOfInsideObjects>
+            </lhs>
+            <rhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="l">
+              </listOfInsideObjects>
+            </rhs>
+      </rule>
+      <!-- [ source ]_b -> [ source + signal3OC12 ]_b -->
+      <rule name="r_2" module_rule="1" type ="boundary" constant="c_2">
+            <lhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="l">
+		<object name="source"/>
+              </listOfInsideObjects>
+            </lhs>
+            <rhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="l">
+		<object name="source"/>
+		<object name="signal3OC12"/>
+              </listOfInsideObjects>
+            </rhs>
+      </rule>
+    </setOfRules>
+  </moduleDefinition>
+
+</libraryOfModules>
