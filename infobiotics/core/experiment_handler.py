@@ -8,9 +8,22 @@ class ExperimentHandler(ParamsHandler):
     def traits_view(self):
         return self.get_traits_view(ExperimentView)
         
-#    _progress_handler = Instance(ExperimentProgressHandler)
-#    def __progress_handler_default(self):
-#        raise NotImplementedError('e.g. return McssExperimentProgressHandler(model=self.model)')
+    def _starting(self):
+        pass #TODO create and show *cancellable* progress dialog
+        self._progress_dialog_started = False
+
+    def object__progress_percentage_changed(self, info):
+        if not self._progress_dialog_started:
+            self._progress_dialog_started = True
+#            self._progress_dialog.edit_traits(kind='live') # must be live to receive progress updates
+#        print self.info.object._progress_percentage
+        pass #TODO nothing, self._progress_dialog should update based on self.percentage
+    
+    def _finished(self, success):
+        #TODO close progress dialog
+        if success:
+            print 'got here'
+#            self.show_results()
 
     def perform(self, info):
         ''' Hide window and show progress instead. '''
@@ -19,9 +32,4 @@ class ExperimentHandler(ParamsHandler):
         # if we do self._on_close(info) then subclasses can't catch events 
         # including 'finished'
 #        info.ui.control.setVisible(False) 
-        if info.object.perform(thread=True):
-#            self._show_progress()
-            pass
-
-#    def _show_progress(self):
-#        self._progress_handler.edit_traits(kind='live') # must be live to receive progress updates
+        info.object.perform(thread=True)

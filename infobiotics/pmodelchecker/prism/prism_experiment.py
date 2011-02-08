@@ -1,43 +1,13 @@
-#import os.path
+from __future__ import division
 from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExperiment
 from infobiotics.pmodelchecker.prism.prism_params import PRISMParams
-from enthought.traits.api import Enum, Property, Str, Int, Range, Bool
+from enthought.traits.api import Str, Int, Range, on_trait_change#, Enum, Property, Bool 
 
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
-    def _handler_default(self):
+    def __handler_default(self):
         from infobiotics.pmodelchecker.prism.api import PRISMExperimentHandler
         return PRISMExperimentHandler(model=self)
-
-#    pattern_list = [
-#        '[0-9]+ properties:', # '2 properties:',
-#        'Simulating: .+\]',
-#        '[0-9]+%',
-#        'Sampling complete: [0-9]+ iterations in [0-9]+[.][0-9]+ seconds \(average [0-9]+[.][0-9]+\)', # 'Sampling complete: 10000 iterations in 234.15 seconds (average 0.023415)',
-#        'Exception in thread "main" java',
-##        'Parsing model file ".+"...', # 'Parsing model file "constitutive.sm"...',
-##        'Parsing properties file ".+"...', # 'Parsing properties file "formulas.temp"...',
-##        'Exporting results to file ".+"...', # 'Exporting results to file "Const_results.psm"...',
-#    ]
-#        
-#    def pattern_matched(self, pattern_index, match):
-#        if pattern_index == 0:
-#            self.max_properties = int(match.split(' properties:')[0])
-#        elif pattern_index == 1:
-#            self.current_property = match.split('Simulating: ')[1].strip()
-#        elif pattern_index == 2:
-#            self.property_progress = int(match.strip('%'))
-#        elif pattern_index == 3:
-#            self.property_index += 1
-#        elif pattern_index == 4:
-#            self.error_string = match
-#        elif pattern_index > 4:
-#            super(PRISMExperiment, self).pattern_matched(self, pattern_index, match)
-#
-#    current_property = Str
-#    max_properties = Int(1)
-#    property_index = Int(0)
-#    property_progress = Range(0, 100)
 
     def perform(self, thread=True):
         # if prism model doesn't exist quickly do a Translate to create it
@@ -45,16 +15,75 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
         if hasattr(self, 'PRISM_model_') and not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
             print 'Translating model specification in PRISMExperiment.perform()'
             self.translate_model_specification()
-        return super(PRISMExperiment, self).perform(thread) #FRAGILE must return True here or the PRISMExperimentProgressHandler is never shown
+#        if self.message:
+#            print self.message
+        super(PRISMExperiment, self).perform(thread)
+
+    _stdout_pattern_list = [
+        '[0-9]+ properties:', # '2 properties:',
+        'Simulating: .+\]',
+        'Sampling complete: [0-9]+ iterations in [0-9]+[.][0-9]+ seconds \(average [0-9]+[.][0-9]+\)', # 'Sampling complete: 10000 iterations in 234.15 seconds (average 0.023415)',
+        '[0-9]+%',
+#        'Parsing model file ".+"...', # 'Parsing model file "constitutive.sm"...',
+#        'Parsing properties file ".+"...', # 'Parsing properties file "formulas.temp"...',
+#        'Exporting results to file ".+"...', # 'Exporting results to file "Const_results.psm"...',
+    ] 
+
+    _current_property = Str
+    _max_properties = Int(1) # pmodelchecker treats properties that are the same as one, which can cause problems in update_progress
+    _property_index = Int(0)
+        
+    def _stdout_pattern_matched(self, pattern_index, match):
+        if pattern_index == 0:
+            self._max_properties = int(match.split(' properties:')[0])
+            print self._max_properties
+        elif pattern_index == 1:
+            self._current_property = match.split('Simulating: ')[1].strip()
+        elif pattern_index == 2:
+            self._property_index += 1
+        elif pattern_index == 3:
+            property_progress = int(match.strip('%'))
+            subtotal = property_progress + (100 * (self._property_index))
+            total = 100 * self._max_properties
+            self._progress_percentage = (subtotal / total) * 100
+        elif pattern_index > 3:
+            super(PRISMExperiment, self).pattern_matched(self, pattern_index, match)
+#        elif pattern_index == 4:
+#            self.error_string = match
+#            print self.error_string
+
+    _stderr_pattern_list = [
+        'Exception in thread "main" java',
+#        ''' Error: parameters with same name and different ranges: 
+#0:10:3000:10:100''',
+    ] 
+    
+#    message = Str
+#
+#    def _message_default(self):
+#        if self.task == 'Approximate':
+#            return 'Approximating %s' % self._current_property if self._current_property != '' else ''
+#        elif self.task == 'Verify':
+#            return 'Verifying %s' % self._current_property
+#        elif self.task == 'Build':
+#            return 'Building PRISM model %s' % self.PRISM_model
+#        elif self.task == 'Translate':
+#            return 'Translating PRISM model %s' % self.PRISM_model
+#            
+#    @on_trait_change('_current_property')
+#    def update_message(self):
+##        print 'got here'
+#        self.message = self._message_default()
+##        print self.message
+#    def _message_changed(self, value):
+##        print 'got here too'
+#        print self.message
+
 
 
 if __name__ == '__main__':
     experiment = PRISMExperiment()
-    
-#    experiment.load('../../../examples/NAR-pmodelchecker/model_checking_prism.params')
-    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/NAR-pmodelchecker/model_checking_prism.params')
-
-#    experiment.model_specification = 'negativeAutoregulationModel.lpp' #TODO comment out before release
-
-    experiment.configure()
-    
+    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_prism.params')
+#    experiment._interaction_mode = 'gui'
+    experiment.perform()#thread=False)
+#    experiment.configure()

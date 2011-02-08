@@ -3,13 +3,9 @@ from infobiotics.core.experiment_handler import ExperimentHandler
 
 class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
-#    def __progress_handler_default(self): #TODO remove
-#        return McssExperimentProgressHandler(model=self.model)
-
     def _starting(self):
         pass #TODO create and show *cancellable* progress dialog
         self._progress_dialog_started = False
-
 
     def object__progress_percentage_changed(self, info):
         if not self._progress_dialog_started:

@@ -1,3 +1,5 @@
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
 from enthought.traits.ui.api import (
     VGroup, Item, HGroup, InstanceEditor, View, VSplit, Group, Spring
 )
@@ -21,13 +23,13 @@ prism_params_group = VGroup(
         ),
         Group(
             VGroup(
-                Item('handler.model_parameters_object', 
+                Item('handler.model_parameters_object',
                     style='custom',
-                    show_label=False, 
+                    show_label=False,
                     editor=InstanceEditor(
                         label='Edit model parameters',
                         kind='live',
-                        view = View(
+                        view=View(
                             model_parameters_group,
                         ),
                     ),

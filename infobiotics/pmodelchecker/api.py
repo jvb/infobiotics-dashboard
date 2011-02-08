@@ -4,5 +4,5 @@ from pmodelchecker_experiment import PModelCheckerExperiment
 from pmodelchecker_params import PModelCheckerParams
 from pmodelchecker_params_handler import PModelCheckerParamsHandler
 from pmodelchecker_results import PModelCheckerResults
-from mc2.api import *
-from prism.api import *
+#from mc2.api import *
+#from prism.api import *

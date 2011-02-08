@@ -2,7 +2,6 @@ from __future__ import division
 from mcss_params import McssParams
 from infobiotics.core.experiment import Experiment
 from enthought.traits.api import Int, Float
-from infobiotics.commons.traits.api import Percentage
 
 class McssExperiment(McssParams, Experiment):
     
@@ -16,35 +15,26 @@ class McssExperiment(McssParams, Experiment):
     ]
 
     _stdout_pattern_list = [
-#        '0 1', # fixed in mcss
         '[0-9]+ [0-9]+', # 'time_in_run, run'
     ] 
 
-    run = Int(1)
-    time_in_run = Float
-
-    _progress_percentage = Percentage
-    
-#    def __progress_percentage_changed(self, value):
-#        print value
-    
     def _stdout_pattern_matched(self, pattern_index, match):
-        # parse stdout into percentage
         if pattern_index == 0:
-#            pass
-#        elif pattern_index == 1:
             time_in_run, run = match.split(' ')
             run = int(run)
             time_in_run = float(time_in_run)
             self._progress_percentage = int((((time_in_run) + ((run - 1) * self.max_time)) / (self.runs * self.max_time)) * 100)
-            if self._interaction_mode in ('script', 'terminal'):
-                if not self._progress_bar_started:
-                    self._progress_bar_started = True
-                    self._progress_bar.start()
-                self._progress_bar.update(self._progress_percentage)
         else:
             Experiment._stdout_pattern_matched(self, pattern_index, match)
             
+#    @on_trait_change('progress')
+#    def update_message(self):
+#        if self.progress < self.max:
+#            self.message = 'Simulating %s' % self.model.model_file
+#        else:
+#            self.message = "Loading results '%s'" % self.model.data_file
+#
+
 
 def test():
     experiment = McssExperiment()
@@ -76,10 +66,11 @@ def test():
 ##    exit()
 
 
-#    experiment.perform()
+    experiment.perform()
 #    experiment.perform(thread=True)
 
-    experiment.configure()
+#    experiment.configure()
+
 
 
 if __name__ == '__main__':

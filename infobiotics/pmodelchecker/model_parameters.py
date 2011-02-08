@@ -1,6 +1,8 @@
 from __future__ import with_statement
+from enthought.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import (
-    HasTraits, Str, Float, Int, Undefined, Range, Enum, Property, List, Tuple, 
+    HasTraits, Str, Float, Int, Undefined, Range, Enum, Property, List, Tuple,
     Instance, Dict, cached_property
 ) 
 from enthought.traits.ui.api import (
@@ -35,7 +37,7 @@ model_parameter_view = View(
     title='Edit model parameter',
     width=400,
     resizable=True,
-    buttons = ['OK', 'Cancel'] 
+    buttons=['OK', 'Cancel'] 
 )    
 
 class ModelVariable(HasTraits):
@@ -54,17 +56,17 @@ class ModelVariable(HasTraits):
 class RuleConstant(ModelVariable):
 
     def traits_view(self):
-        model_parameter_view.title=self.name
+        model_parameter_view.title = self.name
         return model_parameter_view
     
     kind = Str('rule constant')
 
     value = Float(Undefined)
     lower = Float(Undefined)
-    step  = Range('lower','upper', 'value', editor=TextEditor)
+    step = Range('lower', 'upper', 'value', editor=TextEditor)
     upper = Float(Undefined)
     
-    range_or_value = Enum(['range','value'])
+    range_or_value = Enum(['range', 'value'])
 
     value_string = Property(depends_on='range_or_value, value, lower, step, upper')
  
@@ -160,7 +162,7 @@ class ModelParametersXMLReader(ContentHandler):
             elif self.switch1 == 'rewardConstants':
                 self.object = RewardConstant()
             if self.switch1 in ('modelVariables', 'ruleConstants', 'moleculeConstants'):
-                self.object.id=attrs['id']
+                self.object.id = attrs['id']
         elif name in ('name', 'description', 'value'):
             self.switch2 = name
 
@@ -246,7 +248,7 @@ class ModelParameters(HasTraits):
                         model_parameter.value = type(value)
                     else:
                         model_parameter.lower = type(lower)
-                        model_parameter.step  = type(step)
+                        model_parameter.step = type(step)
                         model_parameter.upper = type(upper)
                     model_parameter.range_or_value = range_or_value
                     break
@@ -316,7 +318,7 @@ model_parameters_group = Group(
     VGroup(
         Item(label='Molecule constants:'),
         Item('moleculeConstants',
-            show_label=False, 
+            show_label=False,
             editor=moleculeConstants_table_editor,
         ),
         visible_when='len(object.moleculeConstants) > 0',

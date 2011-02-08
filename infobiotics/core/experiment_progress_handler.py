@@ -1,3 +1,5 @@
+#TODO adapt for ExperimentHandler and then remove
+
 from enthought.traits.ui.api import Controller, View, VGroup, Item
 from enthought.traits.api import Int, Str, Bool, Callable 
 from infobiotics.commons.traits.ui.qt4.cancellable_progress_editor import CancellableProgressEditor

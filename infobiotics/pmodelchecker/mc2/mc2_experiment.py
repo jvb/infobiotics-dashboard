@@ -5,7 +5,7 @@ from enthought.traits.api import Str, Int, Range
 
 class MC2Experiment(MC2Params, PModelCheckerExperiment):
 
-    def _handler_default(self):
+    def __handler_default(self):
         from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
         return MC2ExperimentHandler(model=self)
 
@@ -30,6 +30,12 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
 #    min_simulation = Int(0) # because Range(0, 'max_simulation') which raises: "TypeError: unsupported operand type(s) for -: 'int' and 'code'"
 #    max_simulation = Int(1)
 #    simulation = Range('min_simulation', 'max_simulation')
+
+
+#    @on_trait_change('model.max_simulation, model.simulation')
+#    def update_progress(self):
+#        self.progress = int((100 / self.max_simulation) * self.simulation) 
+
 
 
 if __name__ == '__main__':

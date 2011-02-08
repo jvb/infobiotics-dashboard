@@ -1,10 +1,8 @@
 from infobiotics.pmodelchecker.api import PModelCheckerParams
-from enthought.traits.api import Str, Enum
-import os.path
 
 class PRISMParams(PModelCheckerParams):
 
-    def _handler_default(self):
+    def __handler_default(self):
         from prism_params_handler import PRISMParamsHandler
         return PRISMParamsHandler(model=self)
 
@@ -41,7 +39,7 @@ class PRISMParams(PModelCheckerParams):
             ]    
 
 
-if __name__ == '__main__':
-    parameters = PRISMParams()
-    parameters.configure()
+#if __name__ == '__main__':
+#    parameters = PRISMParams()
+#    parameters.configure()
                         

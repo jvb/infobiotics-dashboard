@@ -1,12 +1,11 @@
 from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change
+from infobiotics.commons.traits.percentage import Percentage
 from infobiotics.core.params import Params
 import sys 
 import os
 import tempfile
 from threading import Thread
 
-from infobiotics.thirdparty import which
-import sys
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
     # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
@@ -29,7 +28,7 @@ if sys.platform.startswith('win'):
     import winpexpect
 #    import wexpect # deprecated
 import pexpect # provided by pexpect or winpexpect PyPI packages
-from progressbar import ProgressBar, Percentage, Bar, RotatingMarker, ETA
+from progressbar import ProgressBar, Percentage as Percent, Bar, RotatingMarker, ETA
     
 from infobiotics.commons.api import logging
 log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
@@ -164,8 +163,7 @@ class Experiment(Params):
         while True:
             pattern_index = self._child.expect_list(
                 compiled_pattern_list,
-#                searchwindowsize=100, # 10 is not sufficient to catch some error messages
-                searchwindowsize=10, # 10 is not sufficient to catch some error messages
+                searchwindowsize=2000, # at least 2000 is required to catch some pmodelchecker output
                 timeout=10,
             )
             if pattern_index == eof_index:
@@ -192,7 +190,8 @@ class Experiment(Params):
                             print '-1', self._child.before
                     else:
 #                        self.finished_without_output = True #TODO
-                        print 'finished without output'
+#                        print 'finished without output'
+                        pass
                     break # out of while loop
                 break
                 # process has finished, perhaps prematurely, but can't tell so call it a success
@@ -279,14 +278,15 @@ class Experiment(Params):
             log.error(self._error_string)
 
     def _starting(self):
+#        print 'starting in %s' % self._interaction_mode
         if self._interaction_mode not in ('script', 'terminal'):
             self._handler._starting()
         else:
             self._progress_bar = ProgressBar(
                 widgets=[
-                    ' '.join((self.executable_name, os.path.split(self._params_file)[1])),
+                    self.executable_name, #' '.join((self.executable_name, os.path.split(self._params_file)[1])),
                     ' ',
-                    Percentage(),
+                    Percent(),
                     ' ',
                     Bar(), #marker=RotatingMarker()),
                     ' ',
@@ -295,18 +295,33 @@ class Experiment(Params):
                 maxval=100,
             )
             self._progress_bar_started = False
+
+
+    _progress_percentage = Percentage
+    
+    @on_trait_change('_progress_percentage')    
+    def _update_progress_bar(self):
+#    def __progress_percentage_changed(self, value): # doesn't work, maybe because of double underscore ...
+        if self._interaction_mode in ('script', 'terminal'):
+            if not self._progress_bar_started:# and self._progress_percentage > 0:
+                self._progress_bar_started = True
+                self._progress_bar.start()
+            self._progress_bar.update(self._progress_percentage)
+
     
     def _finished(self, success):
-        if self._interaction_mode not in ('script', 'terminal'):
+        if self._interaction_mode in ('script', 'terminal'):
+            if success and not self._finished_without_output:
+                self._progress_bar.finish()
+            if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
+                print
+        else:
             self._handler._finished(success)
-        elif success and not self._finished_without_output:
-            self._progress_bar.finish()
-        if self._progress_bar_started: #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
-            print
         if sys.platform.startswith('win'):
             os.remove(self.temp_params_file.name) #TODO test
         else:
-            del self.temp_params_file
+#            del self.temp_params_file
+            os.remove(self.temp_params_file.name)
 
     
 #from enthought.traits.ui.api import Group, Item
