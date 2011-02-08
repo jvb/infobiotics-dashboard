@@ -1,6 +1,7 @@
+from __future__ import division
 from poptimizer_params import POptimizerParams
 from infobiotics.core.experiment import Experiment
-#from enthought.traits.api import HasTraits, Str, DictStrStr, List, Float, Instance, Constant, Int, Range, Property
+from enthought.traits.api import HasTraits, Str, DictStrStr, List, Float, Instance, Constant, Int, Range, Property
 #from matplotlib.figure import Figure, SubplotParams
 #from enthought.traits.ui.api import View, VGroup, Item, HGroup, TabularEditor
 #from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
@@ -14,9 +15,14 @@ from infobiotics.core.experiment import Experiment
     
 class POptimizerExperiment(POptimizerParams, Experiment):
 
-    def _handler_default(self):
+    def __handler_default(self):
         from infobiotics.poptimizer.api import POptimizerExperimentHandler
         return POptimizerExperimentHandler(model=self)
+
+    executable_kwargs = [
+        'show_progress=true',
+#        'debug_mode=true'
+    ]
     
 #    best_fitnesses = List(Float)
 #    figure = Instance(Figure, 
@@ -31,22 +37,70 @@ class POptimizerExperiment(POptimizerParams, Experiment):
 #        )
 #    )
 #    status = Str
-#    current_best_fitness = Float
+    current_best_fitness = Float
 #    current_fittest_module_list = List(Module)
-#    zero = Constant(0)
-#    parameter_optimization_total = Int(1)
-#    parameter_optimization_subtotal = Range('zero', 'parameter_optimization_total')
-#    current_generation = Int # starting from 0
+    zero = Constant(0)
+    parameter_optimization_total = Int(1)
+    parameter_optimization_subtotal = Range('zero', 'parameter_optimization_total')
+    current_generation = Int # starting from 0
 #    generations = Constant(10) #TODO remove, get 'maxgeno' from 'parameters' instead
 #    overall_progress = Property(Range(0.0, 100.0), depends_on='parameter_optimization_subtotal, current_generation')
-#    
-#    _output_pattern_list = [
-#        'initialization',
-#        'parameter optimization [0-9]+/[0-9]+',
-#        '[0-9]+ [0-9]+[.][0-9]+ .+\n',
-#        'simulate final model',
-#    ]
-#    
+    
+    _stdout_pattern_list = [
+        'initialization',
+        'parameter optimization [0-9]+/[0-9]+',
+        '[0-9]+ [0-9]+[.][0-9]+ .+\n',
+        'simulate final model',
+    ]
+
+    def _stdout_pattern_matched(self, pattern_index, match):
+        '''
+initialization
+0 1890.74 NegReg(X=1,Y=1) CoopNegReg(X=1,Y=1) PosReg(X=1,Y=1) 
+1 1625.77 UnReg(X=1) PosReg(X=1,Y=1) 
+2 168.65 UnReg(X=1) NegReg(X=1,Y=1) 
+3 168.65 UnReg(X=1) NegReg(X=1,Y=1) 
+4 168.65 UnReg(X=1) NegReg(X=1,Y=1) 
+5 168.65 UnReg(X=1) NegReg(X=1,Y=1) 
+6 139.22 UnReg(X=1) NegReg(X=1,Y=1) 
+7 139.22 UnReg(X=1) NegReg(X=1,Y=1) 
+8 120.80 UnReg(X=1) NegReg(X=1,Y=1) 
+9 120.80 UnReg(X=1) NegReg(X=1,Y=1) 
+simulate final model
+        '''
+        if pattern_index == 0:
+            self.message = 'Initialising...'
+        elif pattern_index == 1:
+            self.status = 'Optimizing parameters'
+            split = match.split(' ')[2].split('/')
+            self.parameter_optimization_subtotal = int(split[0]) 
+            self.parameter_optimization_total = int(split[1])
+        elif pattern_index == 2:
+            split = match.split(' ')
+            self.current_generation = int(split[0]) + 1 
+            self.current_best_fitness = float(split[1])
+        elif pattern_index == 3:
+            self.message = 'Simulating final model...'
+        else:
+            Experiment._stdout_pattern_matched(self, pattern_index, match)
+        
+        if pattern_index in (1, 2):
+            subtotal = ((self.parameter_optimization_subtotal / self.parameter_optimization_total) * 100) + (100 * self.current_generation)
+            total = 100 * self.maxgeno
+            self._progress_percentage = (subtotal / total) * 100
+
+#    def _get_overall_progress(self):
+#        subtotal = ((self.parameter_optimization_subtotal/self.parameter_optimization_total)*100) + (100 * self.current_generation)
+#        total = 100 * self.generations
+#        return float((subtotal / total) * 100)
+
+#    @on_trait_change('model.generations, model.parameter_optimization_subtotal, model.parameter_optimization_total, model.current_generation')
+#    def update_progress(self):
+#        self.progress = int((((self.model.parameter_optimization_subtotal/self.model.parameter_optimization_total)*100) + (100 * self.model.current_generation) / (100 * self.model.generations)) * 100)     
+
+
+
+    
 #    def _starting_fired(self):
 #        self.axes = self.figure.add_subplot(111)
 #    
@@ -152,6 +206,7 @@ class POptimizerExperiment(POptimizerParams, Experiment):
 
 if __name__ == '__main__':
     experiment = POptimizerExperiment()
-    experiment.load('../../examples/NAR-poptimizer/NAR_optimization.params')
-    experiment.configure()
+    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/optimisation.params')
+    experiment.perform()
+#    experiment.configure()
     

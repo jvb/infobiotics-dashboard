@@ -6,7 +6,7 @@ from infobiotics.poptimizer.poptimizer_preferences import POptimizerParamsPrefer
 
 class POptimizerParams(Params):
     
-    def _handler_default(self):
+    def __handler_default(self):
         from infobiotics.poptimizer.poptimizer_params_handler import POptimizerParamsHandler
         return POptimizerParamsHandler(model=self)
         
@@ -47,8 +47,8 @@ An example target timeseries file with 2 objects should look like:
     simu_runs = IntGreaterThanZero(20, desc='the number of simulations when running the simulator to calculate the fitness of one individual')
 
     # structure optimisation
-    fitness_func_type = Enum(['RandomWeightedSum','EqualWeightedSum'], desc='the fitness function chosen to do the model quality evaluation')
-    para_opti_algo = Enum(['DE','GA','EDA','CMA-ES'], desc='the algorithm chosen to do the model parameter optimization')
+    fitness_func_type = Enum(['RandomWeightedSum', 'EqualWeightedSum'], desc='the fitness function chosen to do the model quality evaluation')
+    para_opti_algo = Enum(['DE', 'GA', 'EDA', 'CMA-ES'], desc='the algorithm chosen to do the model parameter optimization')
     percent_paraopti = Range(0.0, 1.0, 0.1, desc='the percentage of the individuals in the model population on which to do the parameter optimization')
     maxgeno = IntGreaterThanZero(50, desc='the maximum number of generations to evolve the best model')
     popsize = IntGreaterThanZero(50, desc='the population size for a generation\n(recommend 10x the maximum number of modules)')
@@ -61,7 +61,6 @@ An example target timeseries file with 2 objects should look like:
     EDA_psize = IntGreaterThanZero(50, desc='the population size for EDA parameter optimization')
     EDA_maxgeno = IntGreaterThanZero(20, desc='the maximum number of generations to evolve the best parameter set with EDA')
     CMAES_maxgeno = IntGreaterThanZero(20, desc='the maximum number of generations to evolve the best parameter set with CMA-ES')
-    # above not shown in favour of parameter_optmisation_generations and parameter_optmisation_population_size in handler
     
     # below not shown
     show_progress = Bool(False, desc='whether to show progress of the optimization procedure')
@@ -88,41 +87,21 @@ An example target timeseries file with 2 objects should look like:
 #            'debug_mode',
             'maxgeno',
             'popsize',
-#            'DE_psize',
-#            'DE_maxgeno',
-#            'GA_psize',
-#            'GA_maxxo',
-#            'EDA_psize',
-#            'EDA_maxgeno',
-#            'CMAES_maxgeno',
         ]
-        if self.para_opti_algo == 'GA':
-            return parameter_names + [
-                'GA_psize',
-                'GA_maxxo',
-            ]
-        elif self.para_opti_algo == 'DE':
-            return parameter_names + [
-                'DE_psize',
-                'DE_maxgeno',
-            ]
-        elif self.para_opti_algo == 'EDA':
-            return parameter_names + [
-                'EDA_psize',
-                'EDA_maxgeno',
-            ]
-        elif self.para_opti_algo == 'CMA-ES':
-            return parameter_names + [
-#                'DE_psize',
-                'CMAES_maxgeno',
-            ]
-        else:
-            raise ValueError("para_opti_algo not in ('GA', 'DE', 'EDA', 'CMA-ES')")
+        return parameter_names + [
+            'DE_psize',
+            'DE_maxgeno',
+            'GA_psize',
+            'GA_maxxo',
+            'EDA_psize',
+            'EDA_maxgeno',
+            'CMAES_maxgeno',
+        ]
         
 #    def _nonfix_module_lib_file_changed(self, library): pass #TODO update maxmodulesno, maxgeno, popsize
 
     
+    
 if __name__ == '__main__':
     parameters = POptimizerParams()
     parameters.configure()
-    

@@ -25,7 +25,7 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
         elif pattern_index == 2:
             self.message = match
         else:
-            super(MC2Experiment, self)._output_pattern_matched(self, pattern_index, match)
+            super(MC2Experiment, self)._stdout_pattern_matched(self, pattern_index, match)
         
 
 
