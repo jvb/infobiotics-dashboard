@@ -9,15 +9,17 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
         from infobiotics.pmodelchecker.prism.api import PRISMExperimentHandler
         return PRISMExperimentHandler(model=self)
 
-    def perform(self, thread=True):
-        # if prism model doesn't exist quickly do a Translate to create it
-        import os.path
-        if hasattr(self, 'PRISM_model_') and not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
-            print 'Translating model specification in PRISMExperiment.perform()'
-            self.translate_model_specification()
-#        if self.message:
-#            print self.message
-        super(PRISMExperiment, self).perform(thread)
+
+#    def perform(self, thread=True):
+#        # if prism model doesn't exist quickly do a Translate to create it
+#        import os.path
+#        if hasattr(self, 'PRISM_model_') and not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
+#            print 'Translating model specification in PRISMExperiment.perform()'
+#            self.translate_model_specification()
+##        if self.message:
+##            print self.message
+#        super(PRISMExperiment, self).perform(thread)
+
 
     _stdout_pattern_list = [
         '[0-9]+ properties:', # '2 properties:',
@@ -36,7 +38,6 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
     def _stdout_pattern_matched(self, pattern_index, match):
         if pattern_index == 0:
             self._max_properties = int(match.split(' properties:')[0])
-            print self._max_properties
         elif pattern_index == 1:
             self._current_property = match.split('Simulating: ')[1].strip()
         elif pattern_index == 2:

@@ -1,3 +1,2 @@
 Formulas:
-"P=?[ (Time=1000)U([protein1_0_0_NARbacterium] >= B ^ [protein1_0_0_NARbacterium] < B + 5){Time=1000}]"				{B =0:10:300}
-
+"P=?[ (Time=1000)U([protein1_0_0_NARbacterium] >= B ^ [protein1_0_0_NARbacterium] < B + 5){Time=1000}]" {B=0:10:300}

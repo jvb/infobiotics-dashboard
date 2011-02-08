@@ -21,8 +21,8 @@ class ExperimentHandler(ParamsHandler):
     
     def _finished(self, success):
         #TODO close progress dialog
-        if success:
-            print 'got here'
+        print 'ExperimentHandler._finished', success
+#        if success:
 #            self.show_results()
 
     def perform(self, info):

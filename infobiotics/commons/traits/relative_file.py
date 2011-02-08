@@ -164,7 +164,7 @@ class RelativeFile(BaseStr):
         if self.exists:
             info = 'an existing '
         if len(permissions) > 0:
-            info += ', '.join(permissions)
+            info += ', '.join(permissions) + ' '
             
         if self.absolute:
             if len(permissions) > 0:

@@ -1,4 +1,4 @@
-from infobiotics.mcss.api import McssParamsHandler, McssExperimentProgressHandler
+from infobiotics.mcss.api import McssParamsHandler
 from infobiotics.core.experiment_handler import ExperimentHandler
 
 class McssExperimentHandler(McssParamsHandler, ExperimentHandler):

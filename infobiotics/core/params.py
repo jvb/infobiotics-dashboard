@@ -36,7 +36,10 @@ class ParamsPreferenceBinding(PreferenceBinding):
                 value = eval(value)
             except:
                 pass
-        return handler.validate(self.obj, trait_name, value) # validate with self.obj instead of self    
+        try:
+            return handler.validate(self.obj, trait_name, value) # validate with self.obj instead of self
+        except:
+            return ''
 
     def _on_trait_changed(self, obj, trait_name, old, new):
         try:
@@ -150,9 +153,7 @@ class Params(HasTraits):
         return dict([(name, value) for name, value in self.parameter_name_values_dict().items() if value != self._clean_parameters[name]]) 
     
     _dirty = Bool(False)
-##    @on_trait_change('dirty') # not working!
-#    def __dirty_changed(self): # not working either!
-#        print 'got here'
+
     def _anytrait_changed(self, name, old, new): #@UnusedVariable
         if name == '_dirty' and new == False:
             self._clean_parameters = self.parameter_name_values_dict()

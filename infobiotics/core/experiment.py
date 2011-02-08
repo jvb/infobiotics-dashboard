@@ -164,7 +164,7 @@ class Experiment(Params):
             pattern_index = self._child.expect_list(
                 compiled_pattern_list,
                 searchwindowsize=2000, # at least 2000 is required to catch some pmodelchecker output
-                timeout=10,
+                timeout=60,
             )
             if pattern_index == eof_index:
                 if stdout_patterns_matched + stderr_patterns_matched == 0:
