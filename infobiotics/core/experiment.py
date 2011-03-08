@@ -5,6 +5,7 @@ import sys
 import os
 import tempfile
 from threading import Thread
+from enthought.pyface.timer.api import do_later
 
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
@@ -69,7 +70,7 @@ class Experiment(Params):
             dir=self.directory,
         ) 
         if sys.platform.startswith('win'): 
-            print os.path.splitunc(self._params_file_) #TODO use for paths
+#            print os.path.splitunc(self._params_file_) #TODO use for paths
             kwargs.update(delete=False)
 #        '''
 #        tempfile.NamedTemporaryFile([mode='w+b'[, bufsize=-1[, suffix=''[, prefix='tmp'[, dir=None[, delete=True]]]]]])
@@ -83,9 +84,9 @@ class Experiment(Params):
 #            closed.        
 #        '''
         self.temp_params_file = tempfile.NamedTemporaryFile(**kwargs) # must be an instance variable (self...) otherwise it will not be usable by self._perform and will be deleted at the end of the method
-        if sys.platform.startswith('win'): self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
+        if sys.platform.startswith('win'): 
+            self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
         self.save(self.temp_params_file.name, force=True, update_object=False)
-        #TODO maybe repeat this pattern in PModelCheckerParams.translate_model_specification when model_specification == ''
 
         def terminate(signum, frame):
             '''Signal handler that terminates child processes elegantly.'''
@@ -103,6 +104,7 @@ class Experiment(Params):
             thread = Thread(target=self._perform)
             thread.daemon = True # kills threads on exit
             thread.start()
+#        self._perform() # not using threads for now
 
         # restore default SIGINT handler that raises KeyboardInterrupt 
         signal.signal(signal.SIGINT, signal.default_int_handler)
@@ -150,6 +152,7 @@ class Experiment(Params):
         timeout_index = compiled_pattern_list.index(pexpect.TIMEOUT)        
         
         self._starting()
+        self.running = True
 
         import re, os
 
@@ -202,10 +205,12 @@ class Experiment(Params):
             elif pattern_index in stdout_pattern_range:
                 match = self._child.match.group()
                 self._stdout_pattern_matched(pattern_index, match)
+#                do_later(self._stdout_pattern_matched, pattern_index, match)
                 stdout_patterns_matched += 1
             elif pattern_index in stderr_pattern_range:
                 match = self._child.match.group()
                 self._stderr_pattern_matched(pattern_index - len(self._stdout_pattern_list), match)
+#                do_later(self._stderr_pattern_matched, pattern_index - len(self._stdout_pattern_list), match)
                 stderr_patterns_matched += 1
 
         # gather information before finishing
@@ -254,7 +259,8 @@ class Experiment(Params):
 #            error_log.write(error)
 #            error_log.close()
 
-        self._finished(True if self._child.exitstatus == 0 else False)
+        self._finished(True if self._child.exitstatus == 0 else False) # success
+#        do_later(self._finished, True if self._child.exitstatus == 0 else False) # success
 
     _stdout_pattern_list = ListStr
     _stderr_pattern_list = ListStr([
@@ -279,6 +285,7 @@ class Experiment(Params):
 
     def _starting(self):
 #        print 'starting in %s' % self._interaction_mode
+        self._progress_percentage = 0
         if self._interaction_mode not in ('script', 'terminal'):
             self._handler._starting()
         else:
@@ -303,12 +310,17 @@ class Experiment(Params):
     def _update_progress_bar(self):
 #    def __progress_percentage_changed(self, value): # doesn't work, maybe because of double underscore ...
         if self._interaction_mode in ('script', 'terminal'):
-            if not self._progress_bar_started:# and self._progress_percentage > 0:
+            if not self._progress_bar_started and self._progress_percentage > 0:
                 self._progress_bar_started = True
                 self._progress_bar.start()
             self._progress_bar.update(self._progress_percentage)
+#        else:
+#            self._handler.update_progress_dialog(self._progress_percentage)
+        # done automatically
 
-    
+    def cancel(self):
+        self._child.terminate()
+
     def _finished(self, success):
         if self._interaction_mode in ('script', 'terminal'):
             if success and not self._finished_without_output:
@@ -317,13 +329,17 @@ class Experiment(Params):
                 print
         else:
             self._handler._finished(success)
+        
+        del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
         if sys.platform.startswith('win'):
-            os.remove(self.temp_params_file.name) #TODO test
-        else:
-#            del self.temp_params_file
-            os.remove(self.temp_params_file.name)
-
+            os.remove(self.temp_params_file.name) # deletes file on Windows
+        
+        self._reset_progress_traits()
+        self.running = False
     
+    def _reset_progress_traits(self):
+        self._progress_percentage = 0
+            
 #from enthought.traits.ui.api import Group, Item
 #
 #error_string_group = Group(
@@ -336,3 +352,13 @@ class Experiment(Params):
 #    enabled_when='len(object.error_string) > 0',
 #    label='Error(s)',
 #)
+
+
+def test():
+#    from infobiotics.mcss.mcss_experiment import McssExperiment
+#    McssExperiment().configure()
+    from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment
+    PRISMExperiment().configure()
+     
+if __name__ == '__main__':
+    test()

@@ -267,37 +267,37 @@ class Params(HasTraits):
                 
 #        print "Saving parameters to '%s'." % file
                     
-        # handle problem of invalidating relative paths when saving to a new directory
-        old_params_file_dir = os.path.dirname(self._params_file)
-        new_params_file_dir = os.path.dirname(file) 
-        if old_params_file_dir != new_params_file_dir:
-            for name in self.parameter_names():
-                trait = self.base_trait(name)
-                if not trait.trait_type.__class__.__name__ == 'File':
-                    continue
-                handler = trait.handler
-                if handler.exists:
-                    value = getattr(self, name)
-                    if not os.path.isabs(value): 
-                        if handler.directory != old_params_file_dir:
-                            continue #FIXME what if old_params_file_dir == '' because the params/experiment hasn't been saved yet?
-                        if copy: # copy input files whose parameter values are paths relative to _params_file to new _params_file directory
-                            src = os.path.normpath(os.path.join(old_params_file_dir, value))
-                            dst = os.path.normpath(os.path.join(new_params_file_dir, value))
-                            print src
-                            print dst
-                            if not force:
-                                pass
-                                #TODO prompt to overwrite existing file
-                                result = True #FIXME
-                                if not result:
-                                    continue
-                            import shutil
-                            shutil.copy2(src, dst) 
-                            print 'copied', src, 'to', dst
-                        else: # change relative paths to point to old locations
-                            self.directory = new_params_file_dir
-                            setattr(self, name, os.path.relpath(os.path.normpath(os.path.join(old_params_file_dir, value)), new_params_file_dir))
+#        # handle problem of invalidating relative paths when saving to a new directory
+#        old_params_file_dir = os.path.dirname(self._params_file)
+#        new_params_file_dir = os.path.dirname(file) 
+#        if old_params_file_dir != new_params_file_dir:
+#            for name in self.parameter_names():
+#                trait = self.base_trait(name)
+#                if not trait.trait_type.__class__.__name__ == 'File':
+#                    continue
+#                handler = trait.handler
+#                if handler.exists:
+#                    value = getattr(self, name)
+#                    if not os.path.isabs(value): 
+#                        if handler.directory != old_params_file_dir:
+#                            continue #FIXME what if old_params_file_dir == '' because the params/experiment hasn't been saved yet?
+#                        if copy: # copy input files whose parameter values are paths relative to _params_file to new _params_file directory
+#                            src = os.path.normpath(os.path.join(old_params_file_dir, value))
+#                            dst = os.path.normpath(os.path.join(new_params_file_dir, value))
+#                            print src
+#                            print dst
+#                            if not force:
+#                                pass
+#                                #TODO prompt to overwrite existing file
+#                                result = True #FIXME
+#                                if not result:
+#                                    continue
+#                            import shutil
+#                            shutil.copy2(src, dst) 
+#                            print 'copied', src, 'to', dst
+#                        else: # change relative paths to point to old locations
+#                            self.directory = new_params_file_dir
+#                            setattr(self, name, os.path.relpath(os.path.normpath(os.path.join(old_params_file_dir, value)), new_params_file_dir))
 
         # actually write the file ---
         try:
@@ -310,8 +310,8 @@ class Params(HasTraits):
             
         # success!
 #        log.debug("Saved '%s'." % file)
-        self.directory = os.path.dirname(file)
         if update_object:
+            self.directory = os.path.dirname(file)
             self._params_file = file
             self._dirty = False #TODO use dirty for prompting to save on perform    
         return True

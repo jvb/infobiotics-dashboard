@@ -1,3 +1,2 @@
 Formulas:
-"P = ? [ true U[1000,1000] (protein1_0_0_NARbacterium >= B ^ protein1_0_0_NARbacterium < B + 5) ]"			{B =0:10:300}
-
+"P = ? [ true U[1000,1000] (protein1_0_0_NARbacterium >= B ^ protein1_0_0_NARbacterium < B + 5) ]" {B=0:10:300}

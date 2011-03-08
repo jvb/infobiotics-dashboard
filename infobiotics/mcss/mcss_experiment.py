@@ -50,7 +50,7 @@ def test():
     
 #    experiment.directory = '/home/jvb/src/mcss-0.0.41/examples'#/models'
 
-    experiment.runs = 100
+    experiment.runs = 1
 #    experiment.max_time = 3
 
     # test erroneous input for mcss
@@ -65,11 +65,9 @@ def test():
 ##        print name, value 
 ##    exit()
 
-
-    experiment.perform()
 #    experiment.perform(thread=True)
-
-#    experiment.configure()
+#    experiment.perform(thread=False)
+    experiment.configure()
 
 
 

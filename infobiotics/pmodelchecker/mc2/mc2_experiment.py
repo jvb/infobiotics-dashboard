@@ -2,10 +2,17 @@ from __future__ import division
 from infobiotics.pmodelchecker.api import PModelCheckerExperiment
 from infobiotics.pmodelchecker.mc2.api import MC2Params
 
+from infobiotics.pmodelchecker.mc2.api import MC2ParamsHandler
+from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
+
+class MC2ExperimentHandler(MC2ParamsHandler, PModelCheckerExperimentHandler):
+    '''_params_group from MC2ParamsHandler and 
+    perform functionality from PModelCheckerExperimentHandler'''
+    pass
+
 class MC2Experiment(MC2Params, PModelCheckerExperiment):
 
     def __handler_default(self):
-        from infobiotics.pmodelchecker.mc2.api import MC2ExperimentHandler
         return MC2ExperimentHandler(model=self)
 
     _stdout_pattern_list = [
@@ -32,5 +39,5 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
 if __name__ == '__main__':
     experiment = MC2Experiment()
     experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_mc2.params')
-    experiment.perform()
-#    experiment.configure()
+#    experiment.perform()
+    experiment.configure()

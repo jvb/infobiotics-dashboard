@@ -21,10 +21,10 @@ class PModelCheckerParamsHandler(ParamsHandler):
 
     @on_trait_change('model._translated')
     def model_specification_changed(self):
-        if self.model._translated and self.model._model_specification_changed:
-            self.model_parameters_object = ModelParameters(directory=self.model.directory)
-            self.model_parameter_names = [modelVariable.name for modelVariable in self.model_parameters_object.modelVariables]
-
+#        if self.model._translated and self.model._model_specification_changed:
+        #FIXME removed guards and passing IOError in ModelParameters._directory_changed 
+        self.model_parameters_object = ModelParameters(directory=self.model.directory)
+        self.model_parameter_names = [modelVariable.name for modelVariable in self.model_parameters_object.modelVariables]
 
     temporal_formulas = List(TemporalFormula)
     
@@ -96,7 +96,7 @@ class PModelCheckerParamsHandler(ParamsHandler):
     
     def _add_temporal_formula_fired(self):
         temporal_formula = TemporalFormula(
-            params_handler=self, 
+            params_handler=self,
             formula=self.default_temporal_formula,
         )
         if self.__edit_temporal_formula(temporal_formula):

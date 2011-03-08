@@ -85,7 +85,6 @@ if False: # guard
     import infobiotics.language.lpp_editor2
     import infobiotics.language.sps_lexer
     import infobiotics.pmodelchecker.mc2.mc2_params_group
-    import infobiotics.pmodelchecker.mc2.mc2_experiment_handler
     import infobiotics.pmodelchecker.mc2.mc2_experiment
     import infobiotics.pmodelchecker.mc2.mc2_params
     import infobiotics.pmodelchecker.mc2.api

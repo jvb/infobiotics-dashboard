@@ -25,10 +25,10 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     help_urls = [
         ('Quick start', 'http://www.infobiotics.org/infobiotics-workbench/quickStart/modelProperties.html'),
         ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/modelChecking.html'),
-        ('Introduction to PRISM','http://www.prismmodelchecker.org/manual/Main/Introduction'),
-        ('The PRISM language','http://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction'),
-        ('Property specifiation','http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction'),
-        ('Tutorial for systems biologists','http://www.prismmodelchecker.org/tutorial/circadian.php'),
+        ('Introduction to PRISM', 'http://www.prismmodelchecker.org/manual/Main/Introduction'),
+        ('The PRISM language', 'http://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction'),
+        ('Property specifiation', 'http://www.prismmodelchecker.org/manual/PropertySpecification/Introduction'),
+        ('Tutorial for systems biologists', 'http://www.prismmodelchecker.org/tutorial/circadian.php'),
     ]
 
     default_temporal_formula = 'P = ? [ true U[T,T] ( molecule >= constant ) ]'
@@ -36,8 +36,8 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
     _prism_model_str = Str
 
     @on_trait_change('model._translated')
-    def PRISM_model_changed(self):
-        if not self.model._translated:
+    def load_translated_model(self, translated):
+        if not translated:
             return
         self._prism_model_str = ''
         if self.model.PRISM_model != '':
@@ -63,19 +63,19 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                     HGroup(
                         Item(label='PRISM model:'),
                         Item('PRISM_model_', show_label=False, style='readonly'),
-                        Item(label='(Ctrl-F to find)'),#, Ctrl-D duplicates line)'), # not when "style = 'readonly'"
+                        Item(label='(Ctrl-F to find)'), #, Ctrl-D duplicates line)'), # not when "style = 'readonly'"
                     ),
                     Item('handler._prism_model_str',
-                        show_label = False, 
-                        style = 'readonly', #TODO style = 'custom',
-                        editor = CodeEditor(lexer='null'),
+                        show_label=False,
+                        style='readonly', #TODO style = 'custom',
+                        editor=CodeEditor(lexer='null'),
                     ),
-                    show_border = True,
+                    show_border=True,
                 ),
-                buttons = ['OK'],#,'Revert','Undo'], # not when "style = 'readonly'"
+                buttons=['OK'], #,'Revert','Undo'], # not when "style = 'readonly'"
                 width=640, height=480,
-                resizable = True,
-                id = 'view_prism_model_view',
+                resizable=True,
+                id='view_prism_model_view',
             )
         )
 

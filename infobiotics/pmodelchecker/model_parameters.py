@@ -212,7 +212,9 @@ class ModelParameters(HasTraits):
                 self.rewardConstant_descriptions = [rewardConstant.description.replace('A', 'a') for rewardConstant in handler.rewardConstants]
                 self.rewardConstant = self.rewardConstant_descriptions[0]
         except IOError, e:
-            print e, 'ModelParameters._directory_changed()'
+#            print e, 'ModelParameters._directory_changed()'
+#            raise e
+            pass
     
     all_model_parameters = Property(List(RuleConstant), depends_on='ruleConstants, moleculeConstants') 
 #    @cached_property

@@ -3,12 +3,18 @@ from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExpe
 from infobiotics.pmodelchecker.prism.prism_params import PRISMParams
 from enthought.traits.api import Str, Int, Range, on_trait_change#, Enum, Property, Bool 
 
+from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler#, PRISMExperimentProgressHandler 
+from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
+
+class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler):
+    '''_params_group from PRISMParamsHandler and 
+    perform functionality from PModelCheckerExperimentHandler'''
+    pass
+
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
     def __handler_default(self):
-        from infobiotics.pmodelchecker.prism.api import PRISMExperimentHandler
         return PRISMExperimentHandler(model=self)
-
 
 #    def perform(self, thread=True):
 #        # if prism model doesn't exist quickly do a Translate to create it
@@ -31,10 +37,17 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 #        'Exporting results to file ".+"...', # 'Exporting results to file "Const_results.psm"...',
     ] 
 
+    def _reset_progress_traits(self):
+        '''Prevent TraitError where _progress_percentage is calculated to be > 100'''
+        self._current_property = ''
+        self._max_properties = 1
+        self._property_index = 0
+        PModelCheckerExperiment._reset_progress_traits(self) # resets _progress_percentage
+
     _current_property = Str
     _max_properties = Int(1) # pmodelchecker treats properties that are the same as one, which can cause problems in update_progress
     _property_index = Int(0)
-        
+
     def _stdout_pattern_matched(self, pattern_index, match):
         if pattern_index == 0:
             self._max_properties = int(match.split(' properties:')[0])
@@ -81,10 +94,11 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 #        print self.message
 
 
-
 if __name__ == '__main__':
     experiment = PRISMExperiment()
-    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_prism.params')
+#    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_prism.params')
 #    experiment._interaction_mode = 'gui'
-    experiment.perform()#thread=False)
-#    experiment.configure()
+#    experiment.perform(thread=True)
+#    experiment.perform(thread=False)
+#    experiment.perform(thread=False)
+    experiment.configure()

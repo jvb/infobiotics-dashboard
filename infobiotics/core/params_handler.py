@@ -275,7 +275,9 @@ class ParamsHandler(HelpfulController):
                 return False
             if self.info.ui.errors > 0:
                 return False
-            elif not os.path.isfile(self.model.executable):
+            if not os.path.isfile(self.model.executable):
+                return False
+            if self.model.running:
                 return False
         return True
     
@@ -289,6 +291,7 @@ class ParamsHandler(HelpfulController):
             if self.info.ui is None:
                 return
             self.status = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
+            #TODO shorten these!
         
 if __name__ == '__main__':
     execfile('params.py')
