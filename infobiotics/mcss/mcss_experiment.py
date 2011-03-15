@@ -23,6 +23,8 @@ class McssExperiment(McssParams, Experiment):
             time_in_run, run = match.split(' ')
             run = int(run)
             time_in_run = float(time_in_run)
+            if run == 0 or time_in_run == 0:
+                return
             self._progress_percentage = int((((time_in_run) + ((run - 1) * self.max_time)) / (self.runs * self.max_time)) * 100)
         else:
             Experiment._stdout_pattern_matched(self, pattern_index, match)

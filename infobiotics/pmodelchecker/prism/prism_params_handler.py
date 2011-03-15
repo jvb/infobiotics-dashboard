@@ -5,9 +5,8 @@ from enthought.traits.api import (
     Trait, Range, Button, Str, Bool, Instance, DelegatesTo, on_trait_change
 )
 from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor, Controller
-from infobiotics.pmodelchecker.api import (
-    PModelCheckerParamsHandler, ModelParameters,
-)
+from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelCheckerParamsHandler
+from infobiotics.pmodelchecker.model_parameters import ModelParameters
 from prism_params_group import prism_params_group
 
 import logging

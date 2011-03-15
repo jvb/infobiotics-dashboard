@@ -1,6 +1,6 @@
-from infobiotics.api import PRISMExperiment
-from infobiotics.dashboard.core.api import DashboardExperiment
-from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperimentHandler 
+from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment
+from infobiotics.dashboard.core.dashboard_experiment import DashboardExperiment
+from infobiotics.dashboard.pmodelchecker.prism_dashboard_experiment_handler import PRISMDashboardExperimentHandler 
 
 class PRISMDashboardExperiment(PRISMExperiment, DashboardExperiment):
     

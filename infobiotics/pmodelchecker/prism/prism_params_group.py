@@ -3,9 +3,8 @@ ETSConfig.toolkit = 'qt4'
 from enthought.traits.ui.api import (
     VGroup, Item, HGroup, InstanceEditor, View, VSplit, Group, Spring
 )
-from infobiotics.pmodelchecker.api import (
-    model_parameters_group, temporal_formulas_group,
-)
+from infobiotics.pmodelchecker.model_parameters import model_parameters_group
+from infobiotics.pmodelchecker.temporal_formulas import temporal_formulas_group
 
 prism_params_group = VGroup(
     Item('model_specification', label='P system model'),

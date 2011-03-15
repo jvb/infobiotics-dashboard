@@ -1,4 +1,4 @@
-from infobiotics.pmodelchecker.api import PModelCheckerParams
+from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
 
 class MC2Params(PModelCheckerParams):
     
@@ -31,7 +31,7 @@ class MC2Params(PModelCheckerParams):
         if self.simulations_generatedHDF5:
             return parameter_names + [
                 'simulations_file_hdf5',
-                'simulations_file_MC2',                                      
+                'simulations_file_MC2',
             ]
         else:
             return parameter_names + [

@@ -1,5 +1,5 @@
 from enthought.traits.ui.api import Group, Item, VGroup, HGroup, RangeEditor
-from infobiotics.pmodelchecker.api import temporal_formulas_group
+from infobiotics.pmodelchecker.temporal_formulas import temporal_formulas_group
 
 mc2_params_group = VGroup(
     Item('model_specification'),

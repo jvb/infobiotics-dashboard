@@ -36,7 +36,7 @@ from infobiotics.dashboard.app import InfobioticsDashboardWorkbenchApplication
 
 def workbench_plugin_factory():
     '''Creates a WorkbenchPlugin that doesn't prompt on exit by default.'''
-    from infobiotics.api import preferences
+    from infobiotics.preferences import preferences
     preferences.set('default/enthought.envisage.ui.workbench.prompt_on_exit', False) # previously done in infobiotics.preferences
     # use our preferences instead of the pkgfile://enthought.envisage.ui.workbench/preferences.ini
     return WorkbenchPlugin(my_preferences=['file://%s' % preferences.filename]) # need 'file://' because this later gets split on '://' 

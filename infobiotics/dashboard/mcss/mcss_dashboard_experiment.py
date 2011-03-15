@@ -1,6 +1,6 @@
-from infobiotics.api import McssExperiment
-from infobiotics.dashboard.core.api import DashboardExperiment
-from infobiotics.dashboard.mcss.api import McssDashboardExperimentHandler 
+from infobiotics.mcss.mcss_experiment import McssExperiment
+from infobiotics.dashboard.core.dashboard_experiment import DashboardExperiment
+from infobiotics.dashboard.mcss.mcss_dashboard_experiment_handler import McssDashboardExperimentHandler 
 
 class McssDashboardExperiment(McssExperiment, DashboardExperiment):
     

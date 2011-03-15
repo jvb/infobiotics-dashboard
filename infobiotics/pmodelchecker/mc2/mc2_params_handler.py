@@ -1,11 +1,7 @@
 from __future__ import with_statement
 from infobiotics.core.views import ParamsView
-from enthought.traits.api import (
-    Int, Range, Property, Instance, on_trait_change, Button, Bool
-)
-from infobiotics.pmodelchecker.api import (
-    PModelCheckerParamsHandler,
-)
+from enthought.traits.api import Int, Range, Property, Instance, on_trait_change, Button, Bool
+from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelCheckerParamsHandler
 #from infobiotics.pmodelchecker.mc2.api import MC2Params
 from mc2_params_group import mc2_params_group
 from mc2_mcss_experiment import MC2McssExperiment

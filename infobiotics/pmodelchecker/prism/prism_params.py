@@ -1,4 +1,4 @@
-from infobiotics.pmodelchecker.api import PModelCheckerParams
+from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
 from enthought.traits.api import on_trait_change
 
 class PRISMParams(PModelCheckerParams):
@@ -64,7 +64,7 @@ class PRISMParams(PModelCheckerParams):
 #                self.trait_set(PRISM_model=self._PRISM_model_tempfile.name)
 #            return
             
-        from infobiotics.pmodelchecker.prism.api import PRISMExperiment # avoids circular import    
+        from prism_experiment import PRISMExperiment # avoids circular import    
         translate = PRISMExperiment(directory=self.directory)
         translate.trait_setq(# set quietly otherwise this triggers _model_specification_changed above
             model_specification=self.model_specification,
