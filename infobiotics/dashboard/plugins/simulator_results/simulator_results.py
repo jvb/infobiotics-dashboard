@@ -238,15 +238,22 @@ class SimulatorResults(object):
         timepoints.units = time_units[timepoints_display_units]    
         return timepoints
     
+#        
     
     def allocate_array(self, shape, failed_message):
+        '''
+        
+        >>> million = 1000 * 1000
+        >>> results = allocate_array(million, million, million), 'Should raise a MemoryError')
+        
+        '''
         try:
             array = np.zeros(shape, self.type)
         except MemoryError:
             if self.parent is not None:
                 QMessageBox.warning('Out of memory', failed_message)
             else:
-                print message
+                print failed_message
             return
         return array
 
@@ -332,18 +339,25 @@ class SimulatorResults(object):
                 QMessageBox.warning('Error', message) #TODO test
             else:
                 print message
-            return (self.get_timepoints(timepoints_display_units), [])
+#            return (self.get_timepoints(timepoints_display_units), [])
+            return
         
-        try:
-#            million = 1000 * 1000; results = np.zeros((million, million, million)) # should raise a MemoryError
-            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in self.run_indices]
-        except MemoryError:
-            message = 'Could not allocate memory for amounts.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
-            if self.parent is not None:
-                QMessageBox.warning('Out of memory', message)
-            else:
-                print message
-            return (self._timepoints, [])
+#        results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in self.run_indices]
+        results = [
+            self.allocate_array(
+                (
+                    len(self.species_indices),
+                    len(self.compartment_indices),
+                    len(self._timepoints)
+                ),
+                'Could not allocate memory for amounts.\n' \
+                'Try selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+            )
+            for _ in self.run_indices
+        ]
+        if results is None:
+            return
+            
         h5 = tables.openFile(self.filename)
         for ri, r in enumerate(self.run_indices):
             where = '/run%s' % (r + 1)
@@ -421,15 +435,29 @@ class SimulatorResults(object):
         array of floats and results is a list of 3-D arrays of floats with the 
         shape (species, compartments, timepoint) for each function in 
         functions. '''
-        try:
-            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in functions]
-        except MemoryError:
-            message = 'Could not allocate memory for functions.\nTry selecting fewer functions, a shorter time window or a bigger time interval multipler.'
-            if self.parent is not None:
-                QMessageBox.warning('Out of memory', message)
-            else:
-                print message
-            return (self._timepoints, [])
+#        try:
+#            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in functions]
+#        except MemoryError:
+#            message = 'Could not allocate memory for functions.\nTry selecting fewer functions, a shorter time window or a bigger time interval multipler.'
+#            if self.parent is not None:
+#                QMessageBox.warning('Out of memory', message)
+#            else:
+#                print message
+#            return (self._timepoints, [])
+        results = [
+            self.allocate_array(
+                (
+                    len(self.species_indices),
+                    len(self.compartment_indices),
+                    len(self._timepoints)
+                ),
+                'Could not allocate memory for functions.\n' \
+                'Try selecting fewer functions, a shorter time window or a bigger time interval multipler.'
+            )
+            for _ in self.run_indices
+        ]
+        if results is None:
+            return        
 
         chunk_size = self.max_chunk_size
 
@@ -619,23 +647,22 @@ def test_volumes():
 #    p.combine()
     
 
-def profile_SimulatorResults_get_amounts():
-    results = SimulatorResults(
-        '/home/jvb/dashboard/examples/germination_09.h5',
-        None,
-    )
-    get_amounts = profile(results.get_amounts)
-    amounts = get_amounts()
-    print amounts
-    exit()
+#def profile_SimulatorResults_get_amounts():
+#    results = SimulatorResults(
+#        '/home/jvb/dashboard/examples/germination_09.h5',
+#        None,
+#    )
+#    get_amounts = profile(results.get_amounts)
+#    amounts = get_amounts()
+#    print amounts
+#    exit()
 
 import sys
 from PyQt4.QtGui import qApp
 def main():
     argv = qApp.arguments()
-#    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
-#    argv.insert(1, '/home/jvb/dashboard/examples/germination_09.h5')
-    argv.insert(1, '/home/jvb/Desktop/PAmodel/changed2.h5')
+#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/simulation.h5')
+    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/mcss-postprocess/germination_09.h5')
     if len(argv) > 2:
         print 'usage: python simulator_results.py {h5file}'#mcss_results.sh {h5file}'
         sys.exit(2)

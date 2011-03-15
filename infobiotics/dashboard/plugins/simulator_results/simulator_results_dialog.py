@@ -530,8 +530,9 @@ class SimulatorResultsDialog(QWidget):
         if result:
             axes = [axis.name.lower() for axis in ao.order]
             functions = [axis.function for axis in ao.order]
-        results = self.selected_items_results()
-        array, axes = results.functions_over_successive_axes(axes, functions) 
+            
+            results = self.selected_items_results()
+            array, axes = results.functions_over_successive_axes(axes, functions) 
 
     def histogram(self):
         raise NotImplementedError
@@ -547,7 +548,7 @@ class SimulatorResultsDialog(QWidget):
 #            timepoints, results = results.get_amounts_mean_over_runs()
 #            mean_index = 0
 #        else:
-#            timepoints, results = results.get_amounts(
+#            timepoints, results = results.amounts(
 #                timepoints_display_units=timepoints_display_units,
 #                quantities_display_type=quantities_display_type,
 #                quantities_display_units=quantities_display_units,
@@ -603,7 +604,7 @@ class SimulatorResultsDialog(QWidget):
             timepoints, results = results.get_amounts_mean_over_runs()
             mean_index = 0
         else:
-            timepoints, results = results.get_amounts()
+            timepoints, results = results.amounts()
         if len(results) == 0:
             return
 
@@ -813,8 +814,8 @@ class SimulatorResultsDialog(QWidget):
 #            if self.volumes_selected:
 #                timepoints, volumes = results.get_volumes_mean_over_runs() #TODO
         else:
-            timepoints, amounts = results.get_amounts(
-                timepoints_display_units=timepoints_display_units,
+            timepoints = results.timepoints(timepoints_display_units=timepoints_display_units)
+            amounts = results.amounts(
                 quantities_display_type=quantities_display_type,
                 quantities_display_units=quantities_display_units,
                 volume=volume if self.simulation.log_volumes != 1 else None,
@@ -903,7 +904,7 @@ class SimulatorResultsDialog(QWidget):
         TimeseriesPlot(
             timeseries=timeseries,
             window_title='Timeseries Plot(s) for %s' % self.filename,
-        ).configure_traits()
+        ).edit_traits()
 
 #        plots = []
 #        if averaging:
