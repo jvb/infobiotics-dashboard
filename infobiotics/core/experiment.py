@@ -262,11 +262,11 @@ class Experiment(Params):
         self._finished(True if self._child.exitstatus == 0 else False) # success
 #        do_later(self._finished, True if self._child.exitstatus == 0 else False) # success
 
-        self.finished = True
+        self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
 
     finished = Event
     def _finished_changed(self):
-        # changes running in the main loop
+        '''Sets self.running to False in the main thread'''
         self.running = False
         
 
