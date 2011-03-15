@@ -1,11 +1,9 @@
 import sip
 sip.setapi('QString', 2)
 from infobiotics.commons.qt4 import centre_window
-from infobiotics.commons.quantities.traits_ui_converters import Quantity, \
-    time_units, substance_units, concentration_units, volume_units
+from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
 from simulation import load_h5
-from simulator_results_dialog import \
-    SimulatorResultsDialog as SimulationResultsDialog
+from simulator_results_dialog import SimulatorResultsDialog as SimulationResultsDialog
 import bisect
 import math
 import numpy as np
@@ -117,7 +115,7 @@ class SimulatorResults(object):
         beginning=0,
         end= -1,
         every=1,
-        type=float, #decimal.Decimal
+        type=float,
         species_indices=None,
         compartment_indices=None,
         run_indices=None,
@@ -259,31 +257,31 @@ class SimulatorResults(object):
         return volumes
     
     
-    def functions_of_amounts_over_axis(self, axis, functions):
-        ''' Narrow by amounts array. '''
-        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, axis, functions)
-
-    def functions_of_volumes_over_axis(self, axis, functions):
-        ''' Narrow by volumes array. '''
-        return functions_of_values_over_axis(self.volumes(), self.volumes_axes, axis, functions)
-    
-    def functions_of_amounts_over_runs(self, functions):
-        ''' Narrow by amounts array and runs axis. '''
-        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, 'runs', (functions))
-    
-    def mean_and_standard_deviation_of_amounts_over_runs(self):
-        ''' Narrow by amounts array, runs axis and mean and std functions. '''
-#        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, 'runs', (mean, std))
-        return self.functions_of_amounts_over_runs((mean, std))
-
-
-    def functions_of_amounts_over_successive_axes(self, axes, functions):
-        ''' Narrow by amounts array. '''
-        return functions_of_values_over_successive_axes(self.amounts(), self.amounts_axes, axes, functions)
-    
-    def functions_of_volumes_over_successive_axes(self, axes, functions):
-        ''' Narrow by volumes array. '''
-        return functions_of_values_over_successive_axes(self.volumes(), self.volumes_axes, axes, functions)
+#    def functions_of_amounts_over_axis(self, axis, functions):
+#        ''' Narrow by amounts array. '''
+#        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, axis, functions)
+#
+#    def functions_of_volumes_over_axis(self, axis, functions):
+#        ''' Narrow by volumes array. '''
+#        return functions_of_values_over_axis(self.volumes(), self.volumes_axes, axis, functions)
+#    
+#    def functions_of_amounts_over_runs(self, functions):
+#        ''' Narrow by amounts array and runs axis. '''
+#        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, 'runs', (functions))
+#    
+#    def mean_and_standard_deviation_of_amounts_over_runs(self):
+#        ''' Narrow by amounts array, runs axis and mean and std functions. '''
+##        return functions_of_values_over_axis(self.amounts(), self.amounts_axes, 'runs', (mean, std))
+#        return self.functions_of_amounts_over_runs((mean, std))
+#
+#
+#    def functions_of_amounts_over_successive_axes(self, axes, functions):
+#        ''' Narrow by amounts array. '''
+#        return functions_of_values_over_successive_axes(self.amounts(), self.amounts_axes, axes, functions)
+#    
+#    def functions_of_volumes_over_successive_axes(self, axes, functions):
+#        ''' Narrow by volumes array. '''
+#        return functions_of_values_over_successive_axes(self.volumes(), self.volumes_axes, axes, functions)
 
     
 #    def chunk_generator(self, h5file): #TODO depends on array dimensions (a function for each) and order of dimensions to calculate functions over
@@ -394,9 +392,6 @@ class SimulatorResults(object):
                 results.units = substance_units[quantities_display_units]
 
         return results
-
-
-
         
 
     def get_functions_over_runs(self, functions):

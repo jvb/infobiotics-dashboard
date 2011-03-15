@@ -1,5 +1,6 @@
 import sip
 sip.setapi('QString', 2)
+from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow
 from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, \
     Qt
 from PyQt4.QtGui import QApplication, QWidget, QListWidgetItem, \

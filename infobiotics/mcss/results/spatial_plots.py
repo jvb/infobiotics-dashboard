@@ -1,14 +1,20 @@
+import sip
+sip.setapi('QString', 2)
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
+from enthought.traits.api import *
+from enthought.traits.ui.api import *
 from enthought.mayavi.core.pipeline_base import PipelineBase
 from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
 from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
 from enthought.tvtk.pyface.scene_editor import SceneEditor
-from PyQt4.QtGui import QWidget, QHBoxLayout, QGridLayout, QVBoxLayout
-from PyQt4.QtCore import Qt, SIGNAL
+import numpy as np
+from PyQt4.QtGui import QWidget, QHBoxLayout, QGridLayout, QVBoxLayout, QPushButton, QListWidget, QPixmap, QListWidgetItem, QIcon, QLabel, QFileDialog, QSlider
+from PyQt4.QtCore import Qt, SIGNAL, QSize, QFileInfo, QTimer, SLOT
+from infobiotics.commons.qt4 import centre_window
 import cStringIO as StringIO
 from ui_player_control_widget import Ui_ControlsWidget
-
+from infobiotics.commons.sequences import arrange
 
 class SpatialPlotsWindow(QWidget):
     def __init__(self, surfaces, parent=None):
@@ -29,7 +35,7 @@ class SpatialPlotsWindow(QWidget):
             self.widgets.append(surface.edit_traits().control)
 #        for widget in self.widgets:
 #            h.addWidget(widget)
-        rows, cols = arrange(len(self.surfaces))
+        rows, cols = arrange(self.surfaces)
 #        print rows, cols
         gridLayout = QGridLayout()
         for i, widget in enumerate(self.widgets):
@@ -157,8 +163,8 @@ class SurfacesListWidget(QWidget):
     def saveLabel(self):
         filename = self.getSaveFilename(self.label.windowTitle())
         if filename != '':
-            if not filename.endsWith(QString('.png'), Qt.CaseInsensitive):
-                filename = QString('%s.png' % filename)
+            if not filename.endsWith('.png', Qt.CaseInsensitive):
+                filename = '%s.png' % filename
             pixmap = self.label.pixmap().scaled(self.label.size())
             pixmap.save(filename, 'png')
             self.lastDirectory = QFileInfo(filename).absolutePath()
@@ -168,8 +174,8 @@ class SurfacesListWidget(QWidget):
             filename = '%s/%s' % (self.lastDirectory, filename)
         filename = QFileDialog.getSaveFileName(self, 'Specify a filename to save image to', filename, 'PNG files (*.png)')
         if filename != '':
-            if not filename.endsWith(QString('.png'), Qt.CaseInsensitive):
-                filename = QString('%s.png' % filename)
+            if not filename.endsWith('.png', Qt.CaseInsensitive):
+                filename = '%s.png' % filename
             self.lastDirectory = QFileInfo(filename).absolutePath()
         return filename
 
@@ -399,3 +405,7 @@ class Surface(HasTraits):
 
     def arrayAtPosition(self, position):
         return self.array[:, :, position]
+
+
+if __name__ == '__main__':
+    execfile('simulator_results_dialog.py')
