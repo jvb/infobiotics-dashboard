@@ -46,16 +46,6 @@ def functions_of_values_over_axis(array, array_axes, axis, functions):
     for index, function in enumerate(functions): # iterate over functions
         out[index] = function(array, axis=axis_index) # apply function along axis
     return out
-#print functions_of_values_over_axis(
-#    np.zeros((1, 2, 3, 4)),
-#    ('runs', 'species', 'compartments', 'timepoints'),
-#    'runs',
-#    (
-#        lambda array, axis: np.mean(array, axis),
-#        lambda array, axis: np.std(array, axis, ddof=1)
-#    )
-#).shape
-#exit()
 
 #def function_of_values_over_axis(array, array_axes, axis, function):
 #    return functions_of_values_over_axis(array, array_axes, axis, [function])
@@ -84,17 +74,6 @@ def functions_of_values_over_axis_generator(array, array_axes, axis, functions):
     axis_index = array_axes.index(axis)
     for function in functions: # iterate over functions
         yield function(array, axis=axis_index) # yield result of applying function along axis
-#mean, std = functions_of_values_over_axis_generator(
-#    np.zeros((1, 2, 3, 4)),
-#    ('runs', 'species', 'compartments', 'timepoints'),
-#    'runs',
-#    (
-#        lambda array, axis: np.mean(array, axis),
-#        lambda array, axis: np.std(array, axis, ddof=1)
-#    )
-#)
-#print mean.shape, std.shape
-#exit()
 
 def functions_of_values_over_successive_axes(array, array_axes, axes, functions):
     ''' Returns a tuple of the dimensionally reduced array and a tuple of remaining
@@ -138,7 +117,6 @@ class SimulatorResults(object):
         beginning=0,
         end= -1,
         every=1,
-#        chunk_size=2 ** 20,
         type=float, #decimal.Decimal
         species_indices=None,
         compartment_indices=None,
@@ -199,14 +177,6 @@ class SimulatorResults(object):
 
         self._timepoints = Quantity(all_timepoints[self.start:self.finish:self.every], time_units[timepoints_data_units])
 
-#        if chunk_size is not int:
-#            chunk_size = int(chunk_size)
-#        if chunk_size < 1:
-#            self.chunk_size = 1
-#        elif chunk_size > self.finish - self.start:
-#            self.chunk_size = self.finish - self.start
-#        else:
-#            self.chunk_size = chunk_size
         self.max_chunk_size = self.finish - self.start #TODO determine based on any axis not just timepoints
 
         if species_indices is None:
@@ -320,9 +290,8 @@ class SimulatorResults(object):
 #        pass
 
 
-
 #    @profile # use profile(results.get_amounts) instead - won't raise "'profile' not found" error
-    def amounts(self, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units, volume=None, timepoints_display_units=timepoints_display_units):#, volumes_display_units='litres'): 
+    def amounts(self, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units, volume=None): 
 #        ''' Returns a tuple of (timepoints, results) where timepoints is an 1 - D
 #        array of floats and results is a list of 3-D arrays of ints with the 
 #        shape (species, compartments, timepoint) for each run. '''
@@ -402,7 +371,7 @@ class SimulatorResults(object):
                 concentrations = np.zeros(results.shape)
                 for ri, r in enumerate(self.run_indices):
                     for ci, c in enumerate(self.compartment_indices):
-                        for ti, t in enumerate(self._timepoints):
+                        for ti, _ in enumerate(self._timepoints):
                             # can't replace results in-place as it raises a dimensionality error
                             volume = volumes[ri, ci, ti]
                             if volume <= 0:
@@ -484,17 +453,7 @@ class SimulatorResults(object):
                 buffer = None
                 continue
 
-#            # try to get statistics from data in buffer
-#            try:
-#                for fi, f in enumerate(functions):
-#                    f(buffer)
-#            except MemoryError:
-#                # progressively halve chunk_size until statistics can be done
-#                self.chunk_size = self.chunk_size // 2
-#                buffer = None
-#                continue
-
-        def iteration():#chunk_size):
+        def iteration():
             """One iteration reads amounts into buffer and applies statistical functions to those amounts."""
             self.amounts_chunk_end = amounts_chunk_start + (chunk_size * self.every)
             for ri, r in enumerate(self.run_indices):
@@ -555,11 +514,11 @@ class SimulatorResults(object):
 
         h5 = tables.openFile(self.filename)
         results = []
-        for si, s in enumerate(selected_species):
+        for s in selected_species:
             surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self._timepoints)), self.type)
 
             # fill surface with amounts
-            for ri, r in enumerate(self.run_indices): # only one for now, see SimulationResultsDialog.update_ui()
+            for r in self.run_indices: # only one for now, see SimulationResultsDialog.update_ui()
                 where = '/run%s' % (r + 1)
                 try:
                     amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.finish:self.every]
@@ -571,80 +530,76 @@ class SimulatorResults(object):
                         print message
                     return (self._timepoints, [], None, None, None, None)
                 if sum_compartments_at_same_xy_lattice_position:
-                    for ci, c in enumerate(selected_compartments):
+                    for c in selected_compartments:
                         surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :] + surface[c.x_position, c.y_position, :]
                 else:
-                    for ci, c in enumerate(selected_compartments):
+                    for c in selected_compartments:
                         surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :]
             results.append(surface)
         h5.close()
         return (self._timepoints, results, xmin, xmax, ymin, ymax)
 
 
-
-
-
-
-def test():
-#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
-#    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
-    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
-
-    if w.loaded:
-#        w.ui.species_list_widget.selectAll()
-#        w.ui.species_list_widget.setCurrentItem(w.ui.species_list_widget.findItems("proteinGFP", Qt.MatchExactly)[0])
-#        for item in w.ui.species_list_widget.findItems("protein1*", Qt.MatchWildcard): item.setSelected(True)
-
-#        w.ui.compartments_list_widget.selectAll()
-#        w.ui.compartments_list_widget.setCurrentItem(w.ui.compartments_list_widget.item(0))
-
-#        w.ui.runs_list_widget.setCurrentItem(w.ui.runs_list_widget.item(0))
-
-        for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
-            widget.item(0).setSelected(True)
-            widget.item(widget.count() - 1).setSelected(True)
-
-        w.ui.average_over_selected_runs_check_box.setChecked(False)
-
-###        w.ui.visualise_population_button.click()
-
-##        w.plot()
-##        w.plotsPreviewDialog.ui.plotsListWidget.selectAll() #TODO rename
-##        w.plotsPreviewDialog.combine()
-
-#        w.export_data_as('test.csv')    # write_csv
-#        w.export_data_as('test.txt')   # write_csv
-#        w.export_data_as('test', open_after_save=False)        # write_csv
-#        w.export_data_as('test.xls')    # write_xls
-        w.export_data_as('test.npz')    # write_npz
-
-#    centre_window(w)
-#    w.show()
-
-
-def test_SimulatorResults_export_data_as():
-#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/modules/module1.h5')
-    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
-    for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
-        widget.item(0).setSelected(True)
-        widget.item(widget.count() - 1).setSelected(True)
-    w.ui.average_over_selected_runs_check_box.setChecked(False)
-#    w.export_data_as('test.csv')    # write_csv
-    w.export_data_as('test.xls')    # write_xls
-#    w.export_data_as('test.npz')    # write_npz
-
-
-def test_volumes():
-    w = main()
-    w.ui.runs_list_widget.select(0)
-    w.ui.species_list_widget.select(-1)
-    w.ui.species_list_widget.select(-2)
-    w.ui.compartments_list_widget.select(-1)
-    w.ui.compartments_list_widget.select(-2)
-    w.every = 100
-    p = w.plot()
-#    p.ui.plotsListWidget.selectAll()
-#    p.combine()
+#def test():
+##    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
+##    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
+#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
+#
+#    if w.loaded:
+##        w.ui.species_list_widget.selectAll()
+##        w.ui.species_list_widget.setCurrentItem(w.ui.species_list_widget.findItems("proteinGFP", Qt.MatchExactly)[0])
+##        for item in w.ui.species_list_widget.findItems("protein1*", Qt.MatchWildcard): item.setSelected(True)
+#
+##        w.ui.compartments_list_widget.selectAll()
+##        w.ui.compartments_list_widget.setCurrentItem(w.ui.compartments_list_widget.item(0))
+#
+##        w.ui.runs_list_widget.setCurrentItem(w.ui.runs_list_widget.item(0))
+#
+#        for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
+#            widget.item(0).setSelected(True)
+#            widget.item(widget.count() - 1).setSelected(True)
+#
+#        w.ui.average_over_selected_runs_check_box.setChecked(False)
+#
+####        w.ui.visualise_population_button.click()
+#
+###        w.plot()
+###        w.plotsPreviewDialog.ui.plotsListWidget.selectAll() #TODO rename
+###        w.plotsPreviewDialog.combine()
+#
+##        w.export_data_as('test.csv')    # write_csv
+##        w.export_data_as('test.txt')   # write_csv
+##        w.export_data_as('test', open_after_save=False)        # write_csv
+##        w.export_data_as('test.xls')    # write_xls
+#        w.export_data_as('test.npz')    # write_npz
+#
+##    centre_window(w)
+##    w.show()
+#
+#
+#def test_SimulatorResults_export_data_as():
+##    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/modules/module1.h5')
+#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
+#    for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
+#        widget.item(0).setSelected(True)
+#        widget.item(widget.count() - 1).setSelected(True)
+#    w.ui.average_over_selected_runs_check_box.setChecked(False)
+##    w.export_data_as('test.csv')    # write_csv
+#    w.export_data_as('test.xls')    # write_xls
+##    w.export_data_as('test.npz')    # write_npz
+#
+#
+#def test_volumes():
+#    w = main()
+#    w.ui.runs_list_widget.select(0)
+#    w.ui.species_list_widget.select(-1)
+#    w.ui.species_list_widget.select(-2)
+#    w.ui.compartments_list_widget.select(-1)
+#    w.ui.compartments_list_widget.select(-2)
+#    w.every = 100
+#    p = w.plot()
+##    p.ui.plotsListWidget.selectAll()
+##    p.combine()
     
 
 #def profile_SimulatorResults_get_amounts():
@@ -656,6 +611,7 @@ def test_volumes():
 #    amounts = get_amounts()
 #    print amounts
 #    exit()
+
 
 import sys
 from PyQt4.QtGui import qApp

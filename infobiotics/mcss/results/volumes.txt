@@ -1,8 +1,0 @@
-In [22]: f.root.run1.volumes
-Out[22]: 
-/run1/volumes (EArray(9, 3601)) ''
-  atom := Float64Atom(shape=(), dflt=0.0)
-  maindim := 0
-  flavor := 'numpy'
-  byteorder := 'little'
-  chunkshape := (9, 1000)
