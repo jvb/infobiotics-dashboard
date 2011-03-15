@@ -41,16 +41,16 @@ shared_actions = [ # ParamsView and ExperimentView
 #shared_actions = shared_actions + [help_action]
 
 params_actions = [ # ParamsView only
-#    load_action, 
-#    save_action, 
-    'OK',
+    load_action,
+    save_action,
+#    'OK',
 ]
 
 experiment_actions = [ # ExperimentView only
-#    load_action, 
-#    save_action, 
+    load_action,
+    save_action,
     perform_action,
-    'Cancel',
+#    'Cancel',
 ]
 
 from enthought.traits.ui.menu import Menu, MenuBar, ToolBar

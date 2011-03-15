@@ -264,21 +264,28 @@ class ParamsHandler(HelpfulController):
         return wildcard
         
 
-    has_valid_parameters = Property(Bool, depends_on='info.ui.errors, model.executable')
-    @cached_property
+    has_valid_parameters = Property(Bool, depends_on='info.ui.errors, model.executable, model.running')
+#    @cached_property
     def _get_has_valid_parameters(self):
+#        print '_get_has_valid_parameters',
         # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
         if not self.info:
+#            print 'not self.info'
             return
         if self.info.initialized:
             if self.info.ui is None:
+#                print 'self.info.ui is None'
                 return False
             if self.info.ui.errors > 0:
+#                print 'self.info.ui.errors > 0'
                 return False
             if not os.path.isfile(self.model.executable):
+#                print 'not os.path.isfile(self.model.executable)'
                 return False
             if self.model.running:
+#                print 'self.model.running', self.model.running
                 return False
+#        print 'True'
         return True
     
     def _has_valid_parameters_changed(self, value):

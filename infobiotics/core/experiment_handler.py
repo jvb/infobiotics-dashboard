@@ -23,7 +23,7 @@ class ExperimentHandler(ParamsHandler):
         # do nothing else as self._progress_dialog should update based on self.percentage
 
     def _finished(self, success):
-        if self._progress_handler.info.ui is not None:
+        if self._progress_handler.info is not None and self._progress_handler.info.ui is not None:
 #    #        if self.close(info, True):
 #    #            self._on_close(info)
 #            # if we do self._on_close(info) then subclasses can't catch events 

@@ -262,6 +262,14 @@ class Experiment(Params):
         self._finished(True if self._child.exitstatus == 0 else False) # success
 #        do_later(self._finished, True if self._child.exitstatus == 0 else False) # success
 
+        self.finished = True
+
+    finished = Event
+    def _finished_changed(self):
+        # changes running in the main loop
+        self.running = False
+        
+
     _stdout_pattern_list = ListStr
     _stderr_pattern_list = ListStr([
         '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
@@ -335,7 +343,6 @@ class Experiment(Params):
             os.remove(self.temp_params_file.name) # deletes file on Windows
         
         self._reset_progress_traits()
-        self.running = False
     
     def _reset_progress_traits(self):
         self._progress_percentage = 0
