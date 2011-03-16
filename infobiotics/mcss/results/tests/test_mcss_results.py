@@ -31,13 +31,13 @@ class TestMcssResults(unittest.TestCase):
             np.sum(np.sum(amounts[0], 1), 0).magnitude,
             6
         )        
-        # as above but for all runs individually
-        for r in results.run_indices:
-            assert_array_almost_equal(
-                mcss_postprocess('-a -l -S 0,1,2,3 -t %s' % (r + 1))[2][0], # 2 is outputs, 0 is 1st output array
-                np.sum(np.sum(amounts[r], 1), 0).magnitude,
-                6
-            )    
+#        # as above but for all runs individually
+#        for r in results.run_indices:
+#            assert_array_almost_equal(
+#                mcss_postprocess('-a -l -S 0,1,2,3 -t %s' % (r + 1))[2][0], # 2 is outputs, 0 is 1st output array
+#                np.sum(np.sum(amounts[r], 1), 0).magnitude,
+#                6
+#            )    
 
         #TODO move amounts_axes from McssResults to mcss_results?
         array_axes = McssResults.amounts_axes # ('runs', 'species', 'compartments', 'timepoints')
@@ -50,12 +50,12 @@ class TestMcssResults(unittest.TestCase):
         assert_array_almost_equal(
             mcss_postprocess('-a -l -S 0,1,2,3 -t 1')[2][0], # 2 is outputs, 0 is 1st output array
             f[0, 0, 0, :].magnitude, #np.sum(np.sum(amounts[0], 1), 0)
-            6,
+            verbose=True
         )
         assert_array_almost_equal(
             np.sum(np.sum(amounts[0], 1), 0),
             f[0, 0, 0, :], #np.sum(np.sum(amounts[0], 1), 0)
-            6,
+            verbose=True
         )
         
         # mean and std
@@ -76,7 +76,7 @@ class TestMcssResults(unittest.TestCase):
         assert_array_almost_equal(
             mcss_postprocess('-l')[2][1], # 2 is outputs, 0 is 1st output array
             f[1, 0, 0, :].magnitude,
-            6
+            verbose=True
         )
         # compare mean and std of each species in only compartment of all runs at each timepoint
         for i in range(0, 4):
@@ -84,13 +84,13 @@ class TestMcssResults(unittest.TestCase):
             assert_array_almost_equal(
                 mcss_postprocess('-l')[2][i * 3], # 2 is outputs, 0 is 1st output array
                 f[0, i, 0, :].magnitude,
-                6
+                verbose=True
             )
             # std
             assert_array_almost_equal(
                 mcss_postprocess('-l')[2][i * 3 + 1], # 2 is outputs, 0 is 1st output array
                 f[1, i, 0, :].magnitude,
-                6
+                verbose=True
             )
         #TODO extend to c_i
         
