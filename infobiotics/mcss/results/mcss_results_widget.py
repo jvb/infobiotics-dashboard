@@ -1,32 +1,44 @@
 import sip
 sip.setapi('QString', 2)
-from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow
-from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, \
-    Qt
-from PyQt4.QtGui import QApplication, QWidget, QListWidgetItem, \
-    QItemSelectionModel, QFileDialog, QMessageBox, qApp
+
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
+
 from enthought.traits.api import HasTraits, Range, String
 from enthought.traits.ui.api import View, VGroup, HGroup, Item
+from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow
+
+from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, Qt
+from PyQt4.QtGui import QWidget, QListWidgetItem, QItemSelectionModel, QFileDialog, QMessageBox
+
 from infobiotics.commons import colours
-from infobiotics.commons.qt4 import disable_widgets, enable_widgets, \
-    hide_widgets, show_widgets, uncheck_widgets, clear_widgets #, centre_window
+from infobiotics.commons.qt4 import *#disable_widgets, enable_widgets, hide_widgets, show_widgets, uncheck_widgets, clear_widgets, centre_window
+
+from ui_mcss_results_widget import Ui_McssResultsWidget
+
 from random import randint
+import os
+
+import xlwt
+
+import numpy as np
+
+
 from simulation import load_h5
 from simulation_list_widget_item import SimulationListWidgetItem
 from species import Species
-from ui_mcss_results_widget import Ui_McssResultsWidget
-import infobiotics
-import numpy as np
-import os
-import xlwt
-from infobiotics.commons.qt4 import centre_window
+
+
+from mcss_results import McssResults
 
 # for QSettings
+import infobiotics
+import sys
+from PyQt4.QtGui import qApp
 # must use qApp not QApplication(sys.argv) when mixing with TraitsUI
 if qApp is None:
     import sys
+    from PyQt4.QtGui import QApplication
     app = QApplication(sys.argv) # must keep reference too
 qApp.setOrganizationDomain('www.infobiotics.org')
 qApp.setOrganizationName('Infobiotics')
@@ -505,8 +517,7 @@ class McssResultsWidget(QWidget):
         run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
         from_, to, every, _ = self.options()
         timepoints_data_units, _, quantities_data_units, _, _, _, volumes_data_units, _ = self.units()
-        from simulator_results import SimulatorResults
-        return SimulatorResults(
+        return McssResults(
             filename=self.filename,
             simulation=self.simulation,
             type=type,

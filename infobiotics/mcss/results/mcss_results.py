@@ -1,17 +1,25 @@
 import sip
 sip.setapi('QString', 2)
+from PyQt4.QtGui import QMessageBox
+
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
+
 from simulation import load_h5
+
 import bisect
 import math
-import numpy as np
-import tables
 #import decimal
+
+import numpy as np
+
+import tables
+
 
 sum_compartments_at_same_xy_lattice_position = True
 
 mean = lambda array, axis: np.mean(array, axis, dtype=np.float64)
-std = lambda array, axis: np.std(array, axis, ddof=1, dtype=np.float64)
+#std = lambda array, axis: np.std(array, axis, ddof=1, dtype=np.float64)
+std = lambda array, axis: Quantity(np.std(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.std(array, axis, ddof=1, dtype=np.float64) # work around Quantity.std not having 'ddof' keyword argument
 
 
 def functions_of_values_over_axis(array, array_axes, axis, functions): 
@@ -34,6 +42,9 @@ def functions_of_values_over_axis(array, array_axes, axis, functions):
     assert axis in array_axes
     assert len(functions) > 0
     for function in functions: assert callable(function) # each item in functions must be a callable, preferably a NumPy ufunc
+    is_quantity = isinstance(array, Quantity)
+    if is_quantity:
+        units = array.units
     axis_index = array_axes.index(axis)
     out_shape = list(array.shape) # make a mutable copy of array.shape
     out_shape.pop(axis_index) # remove the axis functions will be applied along
@@ -41,6 +52,8 @@ def functions_of_values_over_axis(array, array_axes, axis, functions):
     out = np.empty(out_shape) # create output array
     for index, function in enumerate(functions): # iterate over functions
         out[index] = function(array, axis=axis_index) # apply function along axis
+    if is_quantity:
+        out = Quantity(out, units)
     return out
 
 #def function_of_values_over_axis(array, array_axes, axis, function):
@@ -109,7 +122,7 @@ class McssResults(object):
         
     def __init__(self,
         filename,
-        simulation,
+        simulation=None,
         beginning=0,
         end= -1,
         every=1,
@@ -126,7 +139,7 @@ class McssResults(object):
         quantities_display_units='molecules', #TODO use quantities_data_units if None
         volumes_display_units='litres', #TODO use volumes_data_units if None
     ):
-        self.parent = parent # used by McssResultsWidget for QMessageBox
+        self.parent = parent #FIXME used by McssResultsWidget for QMessageBox
         
         self.type = type
         
@@ -143,7 +156,7 @@ class McssResults(object):
         
         max_time = number_of_timepoints * log_interval#= self.simulation.max_time
         
-        all_timepoints = np.linspace(0, max_time, number_of_timepoints + 1)
+        all_timepoints = np.linspace(0, max_time, number_of_timepoints)# + 1)#FIXED
 
         if 0 < beginning < all_timepoints[-1]:
             # make start the index of the timepoint closest to, and including, beginning
@@ -170,7 +183,7 @@ class McssResults(object):
         if every < 1:
             every = 1
         self.every = every
-
+        #FIXME create all timepoints but use every from getting them
         self._timepoints = Quantity(all_timepoints[self.start:self.finish:self.every], time_units[timepoints_data_units])
 
         self.max_chunk_size = self.finish - self.start #TODO determine based on any axis not just timepoints
@@ -307,19 +320,16 @@ class McssResults(object):
 #            return (self.get_timepoints(timepoints_display_units), [])
             return
         
-#        results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in self.run_indices]
-        results = [
-            self.allocate_array(
-                (
-                    len(self.species_indices),
-                    len(self.compartment_indices),
-                    len(self._timepoints)
-                ),
-                'Could not allocate memory for amounts.\n' \
-                'Try selecting fewer runs, a shorter time window or a bigger time interval multipler.'
-            )
-            for _ in self.run_indices
-        ]
+        results = self.allocate_array(
+            (
+                len(self.run_indices),
+                len(self.species_indices),
+                len(self.compartment_indices),
+                len(self._timepoints)
+            ),
+            'Could not allocate memory for amounts.\n' \
+            'Try selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+        )
         if results is None:
             return
             
@@ -329,11 +339,10 @@ class McssResults(object):
             amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.finish:self.every]
             for si, s in enumerate(self.species_indices):
                 for ci, c in enumerate(self.compartment_indices):
-                    results[ri][si, ci, :] = amounts[s, c, :]
-#                    results[ri][si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every] # about 10 times slower!
+                    results[ri, si, ci, :] = amounts[s, c, :]
+#                    results[ri, si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every] # about 10 times slower!
         h5.close()
 
-        results = np.array(results) # convert from list of 3D arrays to 4D array #TODO test
         results = Quantity(results, substance_units[self.quantities_data_units])
 
         if self.quantities_data_units != quantities_display_units:
