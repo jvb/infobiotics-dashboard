@@ -1,4 +1,6 @@
 import sip
+from infobiotics.mcss.results import mcss_results
+from infobiotics.commons.quantities.units.time import time_units
 sip.setapi('QString', 2)
 
 from enthought.etsconfig.api import ETSConfig
@@ -12,7 +14,7 @@ from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, Qt
 from PyQt4.QtGui import QWidget, QListWidgetItem, QItemSelectionModel, QFileDialog, QMessageBox
 
 from infobiotics.commons import colours
-from infobiotics.commons.qt4 import *#disable_widgets, enable_widgets, hide_widgets, show_widgets, uncheck_widgets, clear_widgets, centre_window
+from infobiotics.commons.qt4 import *#wait_cursor, disable_widgets, enable_widgets, hide_widgets, show_widgets, uncheck_widgets, clear_widgets, centre_window
 
 from ui_mcss_results_widget import Ui_McssResultsWidget
 
@@ -521,9 +523,9 @@ class McssResultsWidget(QWidget):
             filename=self.filename,
             simulation=self.simulation,
             type=type,
-            beginning=from_,
+            from_=from_,
             end=to,
-            every=every,
+            step=every,
             run_indices=run_indices,
             species_indices=species_indices,
             compartment_indices=compartment_indices,
@@ -574,11 +576,10 @@ class McssResultsWidget(QWidget):
 #        print results
 
 
+    #FIXME migrate export functionality to McssResults 
     # remember these within this instance
     csv_precision = 3
     csv_delimiter = ','
-
-    from infobiotics.commons.qt4 import wait_cursor
     @wait_cursor
     def export_data_as(self, file_name='',
         open_after_save=True, copy_file_name_to_clipboard=True,
@@ -821,13 +822,15 @@ class McssResultsWidget(QWidget):
 
         if averaging:
 #            timepoints, amounts = results.get_amounts_mean_over_runs()
-            timepoints, amounts = results.get_functions_over_runs((SimulatorResults.mean, SimulatorResults.std))
+            timepoints, amounts = results.get_functions_over_runs((mcss_results.mean, mcss_results.std))
             mean_index = 0
             std_index = 1
 #            if self.volumes_selected:
 #                timepoints, volumes = results.get_volumes_mean_over_runs() #TODO
         else:
-            timepoints = results.timepoints(timepoints_display_units=timepoints_display_units)
+#            timepoints = results.timepoints(timepoints_display_units=timepoints_display_units)
+            timepoints = results.timepoints
+            timepoints.units = time_units[timepoints_display_units]
             amounts = results.amounts(
                 quantities_display_type=quantities_display_type,
                 quantities_display_units=quantities_display_units,

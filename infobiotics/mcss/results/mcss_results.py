@@ -112,20 +112,21 @@ class McssResults(object):
     
     volumes_axes = ['runs', 'compartments', 'timepoints']    
     
-    timepoints_data_units = 'seconds'
-    quantities_data_units = 'molecules'
-    volumes_data_units = 'litres'
-    timepoints_display_units = 'seconds'
-    quantities_display_type = 'molecules'
-    quantities_display_units = 'molecules'
-    volumes_display_units = 'litres'
+#    timepoints_data_units = 'seconds'
+#    quantities_data_units = 'molecules'
+#    volumes_data_units = 'litres'
+#    timepoints_display_units = 'seconds'
+#    quantities_display_type = 'molecules'
+#    quantities_display_units = 'molecules'
+#    volumes_display_units = 'litres'
         
     def __init__(self,
         filename,
-        simulation=None,
-        beginning=0,
-        end= -1,
-        every=1,
+        simulation=None, # McssResultsWidget can provide pre-loaded Simulation here
+        from_=0,
+        to= -1, #TODO change to 'end'
+        #TODO add start, stop and timestep
+        step=1,
         type=float,
         species_indices=None,
         compartment_indices=None,
@@ -134,12 +135,41 @@ class McssResults(object):
         timepoints_data_units='seconds',
         quantities_data_units='molecules',
         volumes_data_units='litres',
-        timepoints_display_units='seconds', #TODO use timepoints_data_units if None
-        quantities_display_type='molecules', #TODO determine from quantities data units if None
-        quantities_display_units='molecules', #TODO use quantities_data_units if None
-        volumes_display_units='litres', #TODO use volumes_data_units if None
+        quantities_display_type=None, #'molecules',
+        timepoints_display_units=None,
+        quantities_display_units=None,
+        volumes_display_units=None,
     ):
-        self.parent = parent #FIXME used by McssResultsWidget for QMessageBox
+        # these can all raise ValueErrors
+        self.timepoints_data_units = str(timepoints_data_units)
+        self.quantities_data_units = str(quantities_data_units)
+        self.volumes_data_units = str(volumes_data_units)
+
+        if quantities_display_type is None:
+            if self.quantities_data_units == 'molecules':
+                quantities_display_type = 'molecules'
+            elif self.quantities_data_units in substance_units:
+                quantities_display_type = 'moles'
+            elif self.quantities_data_units in concentration_units:
+                quantities_display_type = 'concentrations'
+            else:
+                raise ValueError
+        self.quantities_display_type = str(quantities_display_type)
+
+        if timepoints_display_units is None:
+            timepoints_display_units = self.timepoints_data_units
+        self.timepoints_display_units = str(timepoints_display_units)
+        
+        if quantities_display_units is None:
+            quantities_display_units = quantities_data_units
+        self.quantities_display_units = str(quantities_display_units)
+        
+        if volumes_display_units is None:
+            volumes_display_units = volumes_data_units
+        self.volumes_display_units = str(volumes_display_units)
+        
+        
+        self.parent = parent # used by McssResultsWidget for QMessageBox
         
         self.type = type
         
@@ -154,39 +184,40 @@ class McssResults(object):
         
         log_interval = self.simulation.log_interval
         
-        max_time = number_of_timepoints * log_interval#= self.simulation.max_time
+#        max_time = number_of_timepoints * log_interval
+#        print max_time, self.simulation.max_time
+#        assert max_time == self.simulation.max_time
+        max_time = self.simulation.max_time
         
-        all_timepoints = np.linspace(0, max_time, number_of_timepoints)# + 1)#FIXED
+        self._timepoints = Quantity(np.linspace(0, max_time, number_of_timepoints), time_units[self.timepoints_data_units])
 
-        if 0 < beginning < all_timepoints[-1]:
-            # make start the index of the timepoint closest to, and including, beginning
-            self.start = bisect.bisect_left(all_timepoints, math.floor(beginning))
+        self._start = 0 
+        self._stop = len(self._timepoints)
+        self._step = 1
+
+        if 0 < from_ < self._timepoints[-1]:
+            # make start the index of the timepoint closest to, and including, from_
+            self.start = bisect.bisect_left(self._timepoints, math.floor(from_))
         else:
             # make start the index of the first timepoint
             self.start = 0
 
-        if 0 < end < beginning:
+        if 0 < to < from_:
             # shouldn't have to happen because of spinboxes synchronised min/max
-            end = -1
+            to = -1
 
-        if 0 < end < all_timepoints[-1]:
-            # make finish the index of the timepoint closest to, and including, end
-            self.finish = bisect.bisect_right(all_timepoints, math.ceil(end))
+        if 0 < to < self._timepoints[-1]:
+            # make stop the index of the timepoint closest to, and including, to
+            self.stop = bisect.bisect_right(self._timepoints, math.ceil(to))
         else:
-            # make finish the index of the final timepoint + 1
-            self.finish = len(all_timepoints) #- 1
+            # make stop the index of the final timepoint + 1
+            self.stop = len(self._timepoints)
 
-        if every is not int:
-            every = int(every)
-        if every > self.finish:
-            every = self.finish - self.start
-        if every < 1:
-            every = 1
-        self.every = every
-        #FIXME create all timepoints but use every from getting them
-        self._timepoints = Quantity(all_timepoints[self.start:self.finish:self.every], time_units[timepoints_data_units])
+        self.max_chunk_size = self.stop - self.start #TODO determine based on any axis not just timepoints
 
-        self.max_chunk_size = self.finish - self.start #TODO determine based on any axis not just timepoints
+        self.timestep = log_interval
+
+        self.step = step # uses step.setter
 
         if species_indices is None:
             self.species_indices = range(self.simulation.number_of_species)
@@ -201,23 +232,159 @@ class McssResults(object):
         else:
             self.run_indices = run_indices
 
-        self.timepoints_data_units = str(timepoints_data_units)
-        self.quantities_data_units = str(quantities_data_units)
-        self.volumes_data_units = str(volumes_data_units)
-        self.timepoints_display_units = str(timepoints_display_units)
-        self.quantities_display_type = str(quantities_display_type)
-        self.quantities_display_units = str(quantities_display_units)
-        self.volumes_display_units = str(volumes_display_units)
 
+    # indices
 
-    def timepoints(self, timepoints_display_units=None):
-        if timepoints_display_units is None:
-            timepoints_display_units = self.timepoints_display_units
-        timepoints = Quantity(self._timepoints, time_units[self.timepoints_data_units])
-        timepoints.units = time_units[timepoints_display_units]    
-        return timepoints
+    @property
+    def start(self): #TODO rename to _start
+        return self._start #TODO rename to __start
+    @start.setter
+    def start(self, start): #TODO rename to _start
+        if 0 < start < self.stop:
+            self._start = start
+        elif start <= 0:
+            self._start = 0
+        elif start >= self.stop:
+            self._start = self.stop - 1
+            print 'to ensure start is less than stop it has been set to %s' % self.start 
+
+    @property
+    def stop(self): #TODO rename to _stop
+        return self._stop
+    @stop.setter
+    def stop(self, stop): #TODO rename to _stop
+        if self.start < stop < len(self._timepoints):
+            self._stop = stop 
+        elif stop >= len(self._timepoints):
+            self._stop = len(self._timepoints)
+        elif stop <= self.start:
+            self._stop = self.start + 1
+            print 'to ensure stop is greater than start it has been set to %s' % self.stop
+
+    @property
+    def step(self): #TODO rename to _step
+        return self._step
+    @step.setter
+    def step(self, step): #TODO rename to _step
+        if step is not int:
+            step = int(step)
+        if step > self.stop:
+            step = self.stop - self.start
+        if step < 1:
+            step = 1
+        self._step = step
+
     
-#        
+    # times
+
+    @property
+    def from_(self):
+        return float(self.timepoints[0])
+#        return self.timepoints[0]
+    @from_.setter
+    def from_(self, from_):
+        self.start = int(from_ // self.simulation.log_interval)
+    
+    @property
+    def to(self):
+        return float(self.timepoints[-1])
+#        return self.timepoints[-1]
+    @to.setter
+    def to(self, to):
+        self.stop = int((to // self.simulation.log_interval) + 1)
+        
+    @property
+    def timestep(self):
+        return self.step * self.simulation.log_interval
+    @timestep.setter
+    def timestep(self, timestep):
+        self.step = timestep // self.simulation.log_interval
+
+
+        
+
+#    def timepoints(self, timepoints_display_units=None):
+#        if timepoints_display_units is None:
+#            timepoints_display_units = self.timepoints_display_units
+#        timepoints = Quantity(self._timepoints, time_units[self.timepoints_data_units])
+#        timepoints.units = time_units[timepoints_display_units]    
+#        return timepoints
+    
+    @property
+    def timepoints(self):
+        return Quantity(self._timepoints[self.start:self.stop:self.step], time_units[self.timepoints_display_units])
+
+#    @timepoints.setter
+#    def timepoints(self, values):
+#        pass 
+    
+    
+    @property
+    def timepoints_data_units(self):
+        return self._timepoints_data_units
+    @timepoints_data_units.setter
+    def timepoints_data_units(self, timepoints_data_units):
+        if timepoints_data_units not in time_units.keys():
+            raise ValueError
+        self._timepoints_data_units = timepoints_data_units
+    
+    @property
+    def timepoints_display_units(self):
+        return self._timepoints_display_units
+    @timepoints_display_units.setter
+    def timepoints_display_units(self, timepoints_display_units):
+        if timepoints_display_units not in time_units.keys():
+            raise ValueError
+        self._timepoints_display_units = timepoints_display_units
+    
+    
+    @property
+    def quantities_display_type(self):
+        return self._quantities_display_type
+    @quantities_display_type.setter
+    def quantities_display_type(self, quantities_display_type):
+        if quantities_display_type not in ('molecules', 'concentrations', 'moles'):
+            raise ValueError
+        self._quantities_display_type = quantities_display_type
+        
+    @property
+    def quantities_data_units(self):
+        return self._quantities_data_units
+    @quantities_data_units.setter
+    def quantities_data_units(self, quantities_data_units):
+        if quantities_data_units not in substance_units.keys() + concentration_units.keys():
+            raise ValueError
+        self._quantities_data_units = quantities_data_units
+    
+    @property
+    def quantities_display_units(self):
+        return self._quantities_display_units
+    @quantities_display_units.setter
+    def quantities_display_units(self, quantities_display_units):
+        if quantities_display_units not in substance_units.keys() + concentration_units.keys():
+            raise ValueError
+        self._quantities_display_units = quantities_display_units
+    
+    
+    @property
+    def volumes_data_units(self):
+        return self._volumes_data_units
+    @volumes_data_units.setter
+    def volumes_data_units(self, volumes_data_units):
+        if volumes_data_units not in volume_units.keys():
+            raise ValueError
+        self._volumes_data_units = volumes_data_units
+    
+    @property
+    def volumes_display_units(self):
+        return self._volumes_display_units
+    @volumes_display_units.setter
+    def volumes_display_units(self, volumes_display_units):
+        if volumes_display_units not in volume_units.keys():
+            raise ValueError
+        self._volumes_display_units = volumes_display_units    
+    
+        
     
     def allocate_array(self, shape, failed_message):
         '''
@@ -242,7 +409,7 @@ class McssResults(object):
             (
                 len(self.run_indices),
                 len(self.compartment_indices),
-                len(self._timepoints)
+                len(self.timepoints)
             ),
             'Could not allocate memory for volumes.\nTry selecting fewer ' \
             'runs, a shorter time window or a bigger time interval multipler.'
@@ -254,7 +421,7 @@ class McssResults(object):
         h5 = tables.openFile(self.filename)
         for ri, r in enumerate(self.run_indices):
             where = '/run%s' % (r + 1)
-            volumes_for_one_run = h5.getNode(where, 'volumes')[:, self.start:self.finish:self.every]
+            volumes_for_one_run = h5.getNode(where, 'volumes')[:, self.start:self.stop:self.step]
             for ci, c in enumerate(self.compartment_indices):
                 volumes[ri, ci, :] = volumes_for_one_run[c, :]
         h5.close()
@@ -317,7 +484,6 @@ class McssResults(object):
                 QMessageBox.warning('Error', message) #TODO test
             else:
                 print message
-#            return (self.get_timepoints(timepoints_display_units), [])
             return
         
         results = self.allocate_array(
@@ -325,7 +491,7 @@ class McssResults(object):
                 len(self.run_indices),
                 len(self.species_indices),
                 len(self.compartment_indices),
-                len(self._timepoints)
+                len(self.timepoints)
             ),
             'Could not allocate memory for amounts.\n' \
             'Try selecting fewer runs, a shorter time window or a bigger time interval multipler.'
@@ -336,11 +502,11 @@ class McssResults(object):
         h5 = tables.openFile(self.filename)
         for ri, r in enumerate(self.run_indices):
             where = '/run%s' % (r + 1)
-            amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.finish:self.every]
+            amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.stop:self.step]
             for si, s in enumerate(self.species_indices):
                 for ci, c in enumerate(self.compartment_indices):
                     results[ri, si, ci, :] = amounts[s, c, :]
-#                    results[ri, si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.finish:self.every] # about 10 times slower!
+#                    results[ri, si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.stop:self.step] # about 10 times slower!
         h5.close()
 
         results = Quantity(results, substance_units[self.quantities_data_units])
@@ -368,7 +534,7 @@ class McssResults(object):
                     _, volumes = self.get_volumes(self.volumes_data_units)
                 else:
                     assert volume is not None
-                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self._timepoints)))
+                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
                     volumes.fill(volume)
                 _volume_units = volume_units[self.volumes_data_units]
                 _concentration_units = concentration_units[quantities_display_units]
@@ -376,7 +542,7 @@ class McssResults(object):
                 concentrations = np.zeros(results.shape)
                 for ri, r in enumerate(self.run_indices):
                     for ci, c in enumerate(self.compartment_indices):
-                        for ti, _ in enumerate(self._timepoints):
+                        for ti, _ in enumerate(self.timepoints):
                             # can't replace results in-place as it raises a dimensionality error
                             volume = volumes[ri, ci, ti]
                             if volume <= 0:
@@ -396,7 +562,7 @@ class McssResults(object):
 #                results = results * N_A
             else:
                 results = Quantity(results, substance_units[self.quantities_data_units])
-                results.units = substance_units[quantities_display_units]
+                results.units = substance_units[self.quantities_display_units]
 
         return results
         
@@ -407,20 +573,20 @@ class McssResults(object):
         shape (species, compartments, timepoint) for each function in 
         functions. '''
 #        try:
-#            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self._timepoints)), self.type) for _ in functions]
+#            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in functions]
 #        except MemoryError:
 #            message = 'Could not allocate memory for functions.\nTry selecting fewer functions, a shorter time window or a bigger time interval multipler.'
 #            if self.parent is not None:
 #                QMessageBox.warning('Out of memory', message)
 #            else:
 #                print message
-#            return (self._timepoints, [])
+#            return (self.timepoints, [])
         results = [
             self.allocate_array(
                 (
                     len(self.species_indices),
                     len(self.compartment_indices),
-                    len(self._timepoints)
+                    len(self.timepoints)
                 ),
                 'Could not allocate memory for functions.\n' \
                 'Try selecting fewer functions, a shorter time window or a bigger time interval multipler.'
@@ -457,10 +623,10 @@ class McssResults(object):
 
         def iteration():
             """One iteration reads amounts into buffer and applies statistical functions to those amounts."""
-            self.amounts_chunk_end = amounts_chunk_start + (chunk_size * self.every)
+            self.amounts_chunk_stop = amounts_chunk_start + (chunk_size * self.step)
             for ri, r in enumerate(self.run_indices):
                 where = '/run%s' % (r + 1)
-                amounts = h5.getNode(where, 'amounts')[:, :, amounts_chunk_start:self.amounts_chunk_end:self.every]
+                amounts = h5.getNode(where, 'amounts')[:, :, amounts_chunk_start:self.amounts_chunk_stop:self.step]
                 for si, s in enumerate(self.species_indices):
                     for ci, c in enumerate(self.compartment_indices):
                         buffer[si, ci, :, ri] = amounts[s, c, :] #FIXME works but surely buffer[:, :, :, ri] = amounts[self.species_indices, self.compartment_indices, :] could work too, no?
@@ -479,14 +645,14 @@ class McssResults(object):
         amounts_chunk_start = self.start
         stat_chunk_start = 0
         # for each whole chunk
-        quotient = len(self._timepoints) // chunk_size
+        quotient = len(self.timepoints) // chunk_size
         for _ in range(quotient):
             iteration()#chunk_size)
-            amounts_chunk_start = self.amounts_chunk_end
+            amounts_chunk_start = self.amounts_chunk_stop
             stat_chunk_start = self.statChunkEnd
 
         # and the remaining timepoints           
-        remainder = len(self._timepoints) % chunk_size
+        remainder = len(self.timepoints) % chunk_size
         if remainder > 0:
             buffer = np.zeros((len(self.species_indices),
                                len(self.compartment_indices),
@@ -496,7 +662,7 @@ class McssResults(object):
             iteration(remainder)
 
         h5.close()
-        return (self._timepoints, results)
+        return (self.timepoints, results)
 
 
     def get_surfaces(self):
@@ -517,20 +683,20 @@ class McssResults(object):
         h5 = tables.openFile(self.filename)
         results = []
         for s in selected_species:
-            surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self._timepoints)), self.type)
+            surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self.timepoints)), self.type)
 
             # fill surface with amounts
             for r in self.run_indices: # only one for now, see SimulationResultsDialog.update_ui()
                 where = '/run%s' % (r + 1)
                 try:
-                    amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.finish:self.every]
+                    amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.stop:self.step]
                 except MemoryError:
                     message = 'Could not allocate memory for amounts.\nTry selecting fewer species, a shorter time window or a bigger time interval multipler.'
                     if self.parent is not None:
                         QMessageBox.warning('Out of memory', message)
                     else:
                         print message
-                    return (self._timepoints, [], None, None, None, None)
+                    return (self.timepoints, [], None, None, None, None)
                 if sum_compartments_at_same_xy_lattice_position:
                     for c in selected_compartments:
                         surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :] + surface[c.x_position, c.y_position, :]
@@ -539,7 +705,7 @@ class McssResults(object):
                         surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :]
             results.append(surface)
         h5.close()
-        return (self._timepoints, results, xmin, xmax, ymin, ymax)
+        return (self.timepoints, results, xmin, xmax, ymin, ymax)
 
 
 if __name__ == '__main__':

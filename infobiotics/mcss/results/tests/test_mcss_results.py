@@ -26,35 +26,38 @@ class TestMcssResults(unittest.TestCase):
         self.assertEqual(amounts.shape, (200, 4, 1, 601))
 
         # sum of all species in only compartment of run 1 at each timepoint
-        self.assertTrue(
-            np.array_equal(
-                mcss_postprocess('-a -l -S 0,1,2,3 -t 1')[2][0], # 2 is outputs, 0 is 1st output array
-                np.sum(np.sum(amounts[0], 1), 0)
-            )
-        )
-#        # as above but for all runs individually
-#        for r in results.run_indices:
-#            self.assertTrue(
-#                np.array_equal(
-#                    mcss_postprocess('-a -l -S 0,1,2,3 -t %s' % (r + 1))[2][0], # 2 is outputs, 0 is 1st output array
-#                    np.sum(np.sum(amounts[r], 1), 0)
-#                )
-#            )    
+        assert_array_almost_equal(
+            mcss_postprocess('-a -l -S 0,1,2,3 -t 1')[2][0], # 2 is outputs, 0 is 1st output array
+            np.sum(np.sum(amounts[0], 1), 0).magnitude,
+            6
+        )        
+        # as above but for all runs individually
+        for r in results.run_indices:
+            assert_array_almost_equal(
+                mcss_postprocess('-a -l -S 0,1,2,3 -t %s' % (r + 1))[2][0], # 2 is outputs, 0 is 1st output array
+                np.sum(np.sum(amounts[r], 1), 0).magnitude,
+                6
+            )    
 
-        array_axes = ('runs', 'species', 'compartments', 'timepoints')
+        #TODO move amounts_axes from McssResults to mcss_results?
+        array_axes = McssResults.amounts_axes # ('runs', 'species', 'compartments', 'timepoints')
 
         # as above using functions_of_values_over_axis with sum function
         functions = (
             lambda array, axis: np.sum(array, axis),
         )
         f = mcss_results.functions_of_values_over_axis(amounts, array_axes, 'species', functions)
-        self.assertTrue(
-            np.array_equal(
-                mcss_postprocess('-a -l -S 0,1,2,3 -t 1')[2][0], # 2 is outputs, 0 is 1st output array
-                f[0, 0, 0, :]#np.sum(np.sum(amounts[0], 1), 0)
-            )
+        assert_array_almost_equal(
+            mcss_postprocess('-a -l -S 0,1,2,3 -t 1')[2][0], # 2 is outputs, 0 is 1st output array
+            f[0, 0, 0, :].magnitude, #np.sum(np.sum(amounts[0], 1), 0)
+            6,
         )
-
+        assert_array_almost_equal(
+            np.sum(np.sum(amounts[0], 1), 0),
+            f[0, 0, 0, :], #np.sum(np.sum(amounts[0], 1), 0)
+            6,
+        )
+        
         # mean and std
         functions = (
             mcss_results.mean,
@@ -97,7 +100,7 @@ class TestMcssResults(unittest.TestCase):
         results.finish = 2000
         results.every = 10
         results.every = 20 
-        print results.amounts().shape
+#        print results.amounts().shape
 
         
 
