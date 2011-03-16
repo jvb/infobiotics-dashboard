@@ -1,0 +1,2 @@
+simulator_results.SimulatorResults handles data
+simulation_results_dialog.SimulatorResultsDialog handles user selections/options and calls simulator_results.SimulatorResults with those selections/options
