@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'plots_preview_dialog.ui'
 #
-# Created: Wed Aug 25 18:33:59 2010
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Wed Mar 16 09:54:31 2011
+#      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,7 +20,7 @@ class Ui_PlotsPreviewDialog(object):
         self.instructionLabel.setObjectName("instructionLabel")
         self.verticalLayout_2.addWidget(self.instructionLabel)
         self.hideInvariantsCheckBox = QtGui.QCheckBox(PlotsPreviewDialog)
-        self.hideInvariantsCheckBox.setEnabled(False)
+        self.hideInvariantsCheckBox.setEnabled(True)
         self.hideInvariantsCheckBox.setChecked(True)
         self.hideInvariantsCheckBox.setObjectName("hideInvariantsCheckBox")
         self.verticalLayout_2.addWidget(self.hideInvariantsCheckBox)

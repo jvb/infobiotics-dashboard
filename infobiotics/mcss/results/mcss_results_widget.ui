@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SimulationResultsDialog</class>
- <widget class="QWidget" name="SimulationResultsDialog">
+ <class>McssResultsWidget</class>
+ <widget class="QWidget" name="McssResultsWidget">
   <property name="enabled">
    <bool>true</bool>
   </property>

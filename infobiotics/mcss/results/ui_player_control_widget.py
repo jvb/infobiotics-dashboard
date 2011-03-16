@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'player_control_widget.ui'
 #
-# Created: Fri May 29 19:09:24 2009
-#      by: PyQt4 UI code generator 4.4.4
+# Created: Wed Mar 16 09:54:31 2011
+#      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
 

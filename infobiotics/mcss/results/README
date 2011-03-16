@@ -1,2 +1,2 @@
-simulator_results.SimulatorResults handles data
-simulation_results_dialog.SimulatorResultsDialog handles user selections/options and calls simulator_results.SimulatorResults with those selections/options
+mcss_results.McssResults handles data
+simulation_results_widget.McssResultsWidget handles user selections/options and calls mcss_results.McssResults with those selections/options

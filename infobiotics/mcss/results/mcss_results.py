@@ -1,9 +1,7 @@
 import sip
 sip.setapi('QString', 2)
-from infobiotics.commons.qt4 import centre_window
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
 from simulation import load_h5
-from simulator_results_dialog import SimulatorResultsDialog as SimulationResultsDialog
 import bisect
 import math
 import numpy as np
@@ -95,7 +93,7 @@ def functions_of_values_over_successive_axes(array, array_axes, axes, functions)
     return array, tuple(array_axes)
 
 
-class SimulatorResults(object):
+class McssResults(object):
     
     amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
     
@@ -128,7 +126,7 @@ class SimulatorResults(object):
         quantities_display_units='molecules', #TODO use quantities_data_units if None
         volumes_display_units='litres', #TODO use volumes_data_units if None
     ):
-        self.parent = parent # used by SimulatorResultsDialog for QMessageBox
+        self.parent = parent # used by McssResultsWidget for QMessageBox
         
         self.type = type
         
@@ -535,104 +533,5 @@ class SimulatorResults(object):
         return (self._timepoints, results, xmin, xmax, ymin, ymax)
 
 
-#def test():
-##    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
-##    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
-#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
-#
-#    if w.loaded:
-##        w.ui.species_list_widget.selectAll()
-##        w.ui.species_list_widget.setCurrentItem(w.ui.species_list_widget.findItems("proteinGFP", Qt.MatchExactly)[0])
-##        for item in w.ui.species_list_widget.findItems("protein1*", Qt.MatchWildcard): item.setSelected(True)
-#
-##        w.ui.compartments_list_widget.selectAll()
-##        w.ui.compartments_list_widget.setCurrentItem(w.ui.compartments_list_widget.item(0))
-#
-##        w.ui.runs_list_widget.setCurrentItem(w.ui.runs_list_widget.item(0))
-#
-#        for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
-#            widget.item(0).setSelected(True)
-#            widget.item(widget.count() - 1).setSelected(True)
-#
-#        w.ui.average_over_selected_runs_check_box.setChecked(False)
-#
-####        w.ui.visualise_population_button.click()
-#
-###        w.plot()
-###        w.plotsPreviewDialog.ui.plotsListWidget.selectAll() #TODO rename
-###        w.plotsPreviewDialog.combine()
-#
-##        w.export_data_as('test.csv')    # write_csv
-##        w.export_data_as('test.txt')   # write_csv
-##        w.export_data_as('test', open_after_save=False)        # write_csv
-##        w.export_data_as('test.xls')    # write_xls
-#        w.export_data_as('test.npz')    # write_npz
-#
-##    centre_window(w)
-##    w.show()
-#
-#
-#def test_SimulatorResults_export_data_as():
-##    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/modules/module1.h5')
-#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
-#    for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
-#        widget.item(0).setSelected(True)
-#        widget.item(widget.count() - 1).setSelected(True)
-#    w.ui.average_over_selected_runs_check_box.setChecked(False)
-##    w.export_data_as('test.csv')    # write_csv
-#    w.export_data_as('test.xls')    # write_xls
-##    w.export_data_as('test.npz')    # write_npz
-#
-#
-#def test_volumes():
-#    w = main()
-#    w.ui.runs_list_widget.select(0)
-#    w.ui.species_list_widget.select(-1)
-#    w.ui.species_list_widget.select(-2)
-#    w.ui.compartments_list_widget.select(-1)
-#    w.ui.compartments_list_widget.select(-2)
-#    w.every = 100
-#    p = w.plot()
-##    p.ui.plotsListWidget.selectAll()
-##    p.combine()
-    
-
-#def profile_SimulatorResults_get_amounts():
-#    results = SimulatorResults(
-#        '/home/jvb/dashboard/examples/germination_09.h5',
-#        None,
-#    )
-#    get_amounts = profile(results.get_amounts)
-#    amounts = get_amounts()
-#    print amounts
-#    exit()
-
-
-import sys
-from PyQt4.QtGui import qApp
-def main():
-    argv = qApp.arguments()
-#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/simulation.h5')
-    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/mcss-postprocess/germination_09.h5')
-    if len(argv) > 2:
-        print 'usage: python simulator_results.py {h5file}'#mcss_results.sh {h5file}'
-        sys.exit(2)
-    if len(argv) == 1:
-#        shared.settings.register_infobiotics_settings()
-        w = SimulationResultsDialog()
-    elif len(argv) == 2:
-        w = SimulationResultsDialog(filename=argv[1])
-    centre_window(w)
-    w.show()
-    return w
-#    shared.settings.restore_window_size_and_position(w)
-
-
-if __name__ == "__main__":
-    main()
-#    test()
-#    test_SimulatorResults_export_data_as()
-#    test_volumes()
-#    profile_SimulatorResults_get_amounts()
-    exit(qApp.exec_())
-
+if __name__ == '__main__':
+    execfile('mcss_results_widget.py')
