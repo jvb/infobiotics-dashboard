@@ -1,10 +1,12 @@
+'''Provides a data structure for convenient access to model information held
+in an h5 file produced by mcss.'''
+
 from run import Run
 from species import Species
 from compartment import Compartment
 import tables
 
-class Simulation(object):
-    """An mcss simulation dataset as a Python object."""
+class Simulation(object): #TODO rename McssSimulation
 
     def __init__(self, attributes):
 #        self._propensities_list = []

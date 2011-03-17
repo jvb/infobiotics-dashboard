@@ -1,5 +1,4 @@
-class Run(object):
-    """An mcss run dataset as a Python object."""
+class Run(object): #TODO rename McssRun
 
     def __init__(self, attributes, run_number, simulation):
         self._run_number = run_number

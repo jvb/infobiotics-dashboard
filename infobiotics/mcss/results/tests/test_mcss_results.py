@@ -10,14 +10,61 @@ import infobiotics.mcss.results.mcss_results as mcss_results
 
 class TestMcssResults(unittest.TestCase):
 
+#    def test(self):
+#        pass
+
     def setUp(self):        
         self.results = McssResults('NAR_simulation.h5')
         self.assertEqual(len(self.results.species_indices), 4)
         self.assertEqual(len(self.results.run_indices), 200)
         self.assertEqual(len(self.results.compartment_indices), 1)
         self.assertEqual(len(self.results._timepoints), 601)
+#        self.results.amounts()
+#        self.results.amounts(quantities_display_type='concentrations')
+#        print self.results.amounts(quantities_display_type='concentrations',
+#                                   quantities_display_units='attomolar',
+#                                   volume=1)
 
-    def test_McssResults(self):
+    def test_McssResults_get_functions_over_runs(self):
+        file_name = 'germination_09.h5'
+        results = McssResults(file_name)
+        results.run_indices = [0]
+        results.species_indices = [27]
+        results.compartment_indices = [27]
+        results.to = 300
+        print results.volumes()
+        results.quantities_data_units = 'micromolar'
+        amounts = results.amounts(quantities_display_type='concentrations', quantities_display_units='micromolar')
+#        print amounts.shape
+        print amounts
+#        print mcss_postprocess('-l -x -C 27 -t 1 -s SIG1', file_name)[2][0]
+        
+    def _test_McssResults_get_functions_over_runs(self):
+        
+#        print self.results.amounts().shape
+#        print np.mean(self.results.amounts(), axis=0)
+
+        functions = (
+            mcss_results.mean,
+            mcss_results.std,
+        )
+        f = self.results.get_functions_over_runs(functions)
+        # compare mean and std of each species in only compartment of all runs at each timepoint
+        for i in range(0, 4):
+            # mean
+            assert_array_almost_equal(
+                mcss_postprocess('-l')[2][i * 3], # 2 is outputs, 0 is 1st output array
+                f[0, i, 0, :].magnitude,
+                verbose=True
+            )
+            # std
+            assert_array_almost_equal(
+                mcss_postprocess('-l')[2][i * 3 + 1], # 2 is outputs, 0 is 1st output array
+                f[1, i, 0, :].magnitude,
+                verbose=True
+            )        
+    
+    def _test_McssResults(self):
         results = self.results
         
         # get all amounts
@@ -102,13 +149,10 @@ class TestMcssResults(unittest.TestCase):
         results.every = 20 
 #        print results.amounts().shape
 
-        
-
 #        #FIXME this h5 file doesn't test compartments
 #        results.compartment_indices = (10, 20)
         
-        
-        
+
 #    def test_functions_of_values_over_axis(self):
 #        from mcss_results import functions_of_values_over_axis
 #        import numpy as np
@@ -158,9 +202,6 @@ class TestMcssResults(unittest.TestCase):
 #        pass
 #
 #    def test_McssResults_amounts(self):
-#        pass
-#
-#    def test_McssResults_get_functions_over_runs(self):
 #        pass
 #
 #    def test_McssResults_get_surfaces(self):

@@ -1,5 +1,4 @@
-class Species(object):
-    """An mcss species dataset as a Python object."""
+class Species(object): #TODO rename mcss_species
 
     def __init__(self, index, name, simulation):
         self.index = index

@@ -1,3 +1,6 @@
+'''Provides the McssResults class for getting simulation data out of h5 files
+and functions for applying NumPy ufuncs multi-dimensional arrays.'''
+
 import sip
 sip.setapi('QString', 2)
 from PyQt4.QtGui import QMessageBox
@@ -17,6 +20,7 @@ import tables
 
 sum_compartments_at_same_xy_lattice_position = True
 
+# pre-defined functions that are applied along one axis 
 mean = lambda array, axis: np.mean(array, axis, dtype=np.float64)
 #std = lambda array, axis: np.std(array, axis, ddof=1, dtype=np.float64)
 std = lambda array, axis: Quantity(np.std(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.std(array, axis, ddof=1, dtype=np.float64) # work around Quantity.std not having 'ddof' keyword argument
@@ -107,10 +111,10 @@ def functions_of_values_over_successive_axes(array, array_axes, axes, functions)
 
 
 class McssResults(object):
+
+#    amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
     
-    amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
-    
-    volumes_axes = ['runs', 'compartments', 'timepoints']    
+#    volumes_axes = ['runs', 'compartments', 'timepoints']    
     
 #    timepoints_data_units = 'seconds'
 #    quantities_data_units = 'molecules'
@@ -134,11 +138,12 @@ class McssResults(object):
         parent=None,
         timepoints_data_units='seconds',
         quantities_data_units='molecules',
-        volumes_data_units='litres',
+        volumes_data_units='microlitres',
         quantities_display_type=None, #'molecules',
         timepoints_display_units=None,
         quantities_display_units=None,
         volumes_display_units=None,
+        **ignored_kwargs
     ):
         # these can all raise ValueErrors
         self.timepoints_data_units = str(timepoints_data_units)
@@ -246,7 +251,7 @@ class McssResults(object):
             self._start = 0
         elif start >= self.stop:
             self._start = self.stop - 1
-            print 'to ensure start is less than stop it has been set to %s' % self.start 
+            print 'to ensure start is less than stop it has been set to %s' % self.start #TODO
 
     @property
     def stop(self): #TODO rename to _stop
@@ -259,7 +264,7 @@ class McssResults(object):
             self._stop = len(self._timepoints)
         elif stop <= self.start:
             self._stop = self.start + 1
-            print 'to ensure stop is greater than start it has been set to %s' % self.stop
+            print 'to ensure stop is greater than start it has been set to %s' % self.stop #TODO
 
     @property
     def step(self): #TODO rename to _step
@@ -300,69 +305,68 @@ class McssResults(object):
     def timestep(self, timestep):
         self.step = timestep // self.simulation.log_interval
 
-
-        
-
-#    def timepoints(self, timepoints_display_units=None):
-#        if timepoints_display_units is None:
-#            timepoints_display_units = self.timepoints_display_units
-#        timepoints = Quantity(self._timepoints, time_units[self.timepoints_data_units])
-#        timepoints.units = time_units[timepoints_display_units]    
-#        return timepoints
     
     @property
     def timepoints(self):
         return Quantity(self._timepoints[self.start:self.stop:self.step], time_units[self.timepoints_display_units])
 
-#    @timepoints.setter
-#    def timepoints(self, values):
-#        pass 
-    
     
     @property
     def timepoints_data_units(self):
         return self._timepoints_data_units
+    
     @timepoints_data_units.setter
     def timepoints_data_units(self, timepoints_data_units):
-        if timepoints_data_units not in time_units.keys():
-            raise ValueError
+        self.validate_time_units(timepoints_data_units)
         self._timepoints_data_units = timepoints_data_units
+    
+    def validate_time_units(self, time_units_):
+        if time_units_ not in time_units.keys():
+            raise ValueError
     
     @property
     def timepoints_display_units(self):
         return self._timepoints_display_units
+
     @timepoints_display_units.setter
     def timepoints_display_units(self, timepoints_display_units):
-        if timepoints_display_units not in time_units.keys():
-            raise ValueError
+        self.validate_time_units(timepoints_display_units)
         self._timepoints_display_units = timepoints_display_units
     
     
     @property
     def quantities_display_type(self):
         return self._quantities_display_type
+    
     @quantities_display_type.setter
     def quantities_display_type(self, quantities_display_type):
+        self.validate_quantities_display_type(quantities_display_type)
+        self._quantities_display_type = quantities_display_type
+        
+    def validate_quantities_display_type(self, quantities_display_type):
         if quantities_display_type not in ('molecules', 'concentrations', 'moles'):
             raise ValueError
-        self._quantities_display_type = quantities_display_type
         
     @property
     def quantities_data_units(self):
         return self._quantities_data_units
+    
     @quantities_data_units.setter
     def quantities_data_units(self, quantities_data_units):
-        if quantities_data_units not in substance_units.keys() + concentration_units.keys():
-            raise ValueError
+        self.validate_quantities_units(quantities_data_units)
         self._quantities_data_units = quantities_data_units
+
+    def validate_quantities_units(self, quantities_units):
+        if quantities_units not in substance_units.keys() + concentration_units.keys():
+            raise ValueError
     
     @property
     def quantities_display_units(self):
         return self._quantities_display_units
+    
     @quantities_display_units.setter
     def quantities_display_units(self, quantities_display_units):
-        if quantities_display_units not in substance_units.keys() + concentration_units.keys():
-            raise ValueError
+        self.validate_quantities_units(quantities_display_units)
         self._quantities_display_units = quantities_display_units
     
     
@@ -371,20 +375,21 @@ class McssResults(object):
         return self._volumes_data_units
     @volumes_data_units.setter
     def volumes_data_units(self, volumes_data_units):
-        if volumes_data_units not in volume_units.keys():
-            raise ValueError
+        self.validate_volumes_units(volumes_data_units)
         self._volumes_data_units = volumes_data_units
+
+    def validate_volumes_units(self, volumes_units):
+        if volumes_units not in volume_units.keys():
+            raise ValueError
     
     @property
     def volumes_display_units(self):
         return self._volumes_display_units
     @volumes_display_units.setter
     def volumes_display_units(self, volumes_display_units):
-        if volumes_display_units not in volume_units.keys():
-            raise ValueError
+        self.validate_volumes_units(volumes_display_units)
         self._volumes_display_units = volumes_display_units    
     
-        
     
     def allocate_array(self, shape, failed_message):
         '''
@@ -403,8 +408,13 @@ class McssResults(object):
             return
         return array
 
-    def volumes(self, volumes_display_units=None):
+    def volumes(self, volumes_display_units=None, **ignored_kwargs):
         # create array for extracted 'results', printing error if too big for memory
+        
+        if volumes_display_units is None:
+            volumes_display_units = self.volumes_display_units
+        self.validate_volumes_units(volumes_display_units)
+        
         volumes = self.allocate_array(
             (
                 len(self.run_indices),
@@ -428,8 +438,6 @@ class McssResults(object):
     
         # adjust scale of volumes to match volumes_display_units
         volumes = Quantity(volumes, volume_units[self.volumes_data_units])
-        if volumes_display_units is None:
-            volumes_display_units = self.volumes_display_units
         volumes.units = volume_units[volumes_display_units]
 
         return volumes
@@ -466,8 +474,56 @@ class McssResults(object):
 #        pass
 
 
+    def convert_amounts_quantities(self, amounts, quantities_display_type=None, quantities_display_units=None, volume=None):
+        if quantities_display_type is None:
+            quantities_display_type = self.quantities_display_type
+        self.validate_quantities_display_type(quantities_display_type)
+        
+        if quantities_display_units is None:
+            quantities_display_units = self.quantities_display_units
+        self.validate_quantities_units(quantities_display_units)
+        
+        if quantities_display_type == 'concentrations' and not quantities_display_units.endswith('molar'):
+            quantities_display_units = 'molar'
+        
+        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1 and volume is None:
+            message = 'Cannot calculate concentrations without volumes dataset, rerun mcss with log_volumes=1' 
+            if self.parent is not None:
+                QMessageBox.warning('Error', message) #TODO test
+            else:
+                print message, 'or provide volume argument in %s' % self.volumes_data_units
+            return
+        
+        if self.quantities_data_units != quantities_display_units:
+            
+            # convert to moles
+            amounts.units = substance_units['moles']
+
+            # convert from moles to whatever
+            if quantities_display_type == 'concentrations':
+                
+                if self.simulation.log_volumes == 1:
+                    volumes = self.volumes()#self.volumes_data_units)
+                else:
+                    assert volume is not None
+                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
+                    volumes.fill(volume)
+                    _volume_units = volume_units[self.volumes_data_units]
+                    volumes = volumes * _volume_units
+                _concentration_units = concentration_units['molar']
+                concentrations = np.zeros(amounts.shape)# * _concentration_units
+                np.seterr(divide='ignore') # ignore divide by zero errors - will replace values with np.inf instead
+                for si, _ in enumerate(self.species_indices):
+                    concentrations[:, si, :, :] = amounts[:, si, :, :] / volumes # divide amount by volume
+                concentrations[concentrations == np.inf] = 0 # replace all occurences of np.inf with 0
+                amounts = concentrations.rescale(quantities_display_units) # rescale to display units
+            else:
+                amounts.units = substance_units[quantities_display_units]
+        return amounts
+    
+
 #    @profile # use profile(results.get_amounts) instead - won't raise "'profile' not found" error
-    def amounts(self, quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units, volume=None): 
+    def amounts(self, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
 #        ''' Returns a tuple of (timepoints, results) where timepoints is an 1 - D
 #        array of floats and results is a list of 3-D arrays of ints with the 
 #        shape (species, compartments, timepoint) for each run. '''
@@ -478,13 +534,21 @@ class McssResults(object):
         be calculated for models without volumes information. 
         
         '''
-        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1 and volume is None:
-            message = 'Cannot calculate concentrations without volumes dataset, rerun simulation with log_volumes=1' 
-            if self.parent is not None:
-                QMessageBox.warning('Error', message) #TODO test
-            else:
-                print message
-            return
+#        if quantities_display_type is None:
+#            quantities_display_type = self.quantities_display_type
+#        self.validate_quantities_display_type(quantities_display_type)
+#        
+#        if quantities_display_units is None:
+#            quantities_display_units = self.quantities_display_units
+#        self.validate_quantities_units(quantities_display_units)
+#        
+#        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1 and volume is None:
+#            message = 'Cannot calculate concentrations without volumes dataset, rerun mcss with log_volumes=1' 
+#            if self.parent is not None:
+#                QMessageBox.warning('Error', message) #TODO test
+#            else:
+#                print message, 'or provide volume argument in %s' % self.volumes_data_units
+#            return
         
         results = self.allocate_array(
             (
@@ -511,103 +575,73 @@ class McssResults(object):
 
         results = Quantity(results, substance_units[self.quantities_data_units])
 
-        if self.quantities_data_units != quantities_display_units:
-            
-            # convert to moles
-#            if self.quantities_data_units == 'moles':
-#                results = Quantity(results, mole)
-#            elif self.quantities_data_units.endswith('moles'):
-#                converter = SubstanceConverter(
-#                    data=results,
-#                    data_units=self.quantities_data_units,
-#                    display_units='moles',
-#                )
-#                results = converter.display_quantity
-#            else: # molecules
-#                results = Quantity(results / N_A, mole)
-            results.units = substance_units['moles']
-
-            # convert from moles to whatever
-            if quantities_display_type == 'concentrations':
-                
-                if self.simulation.log_volumes == 1:
-                    _, volumes = self.get_volumes(self.volumes_data_units)
-                else:
-                    assert volume is not None
-                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
-                    volumes.fill(volume)
-                _volume_units = volume_units[self.volumes_data_units]
-                _concentration_units = concentration_units[quantities_display_units]
-
-                concentrations = np.zeros(results.shape)
-                for ri, r in enumerate(self.run_indices):
-                    for ci, c in enumerate(self.compartment_indices):
-                        for ti, _ in enumerate(self.timepoints):
-                            # can't replace results in-place as it raises a dimensionality error
-                            volume = volumes[ri, ci, ti]
-                            if volume <= 0:
-                                concentrations[ri, :, ci, ti] = np.zeros(results[ri, :, ci, ti].shape) 
-                            else:
-                                concentrations[ri, :, ci, ti] = (results[ri, :, ci, ti] / (volume * _volume_units)).rescale(_concentration_units)
-                results = Quantity(concentrations, _concentration_units)
-
-#            elif quantities_display_units.endswith('moles'):
-#                converter = SubstanceConverter(
-#                    data=results,
-#                    data_units='moles',
-#                    display_units=quantities_display_units,
-#                )
-#                results = converter.display_quantity
-#            else: # molecules
-#                results = results * N_A
-            else:
-                results = Quantity(results, substance_units[self.quantities_data_units])
-                results.units = substance_units[self.quantities_display_units]
-
-        return results
+#        if self.quantities_data_units != quantities_display_units:
+#            
+#            # convert to moles
+#            results.units = substance_units['moles']
+#
+#            # convert from moles to whatever
+#            if quantities_display_type == 'concentrations':
+#                
+#                if self.simulation.log_volumes == 1:
+#                    volumes = self.volumes(self.volumes_data_units)
+#                else:
+#                    assert volume is not None
+#                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
+#                    volumes.fill(volume)
+#                _volume_units = volume_units[self.volumes_data_units]
+#                _concentration_units = concentration_units[quantities_display_units]
+#
+#                concentrations = np.zeros(results.shape)
+#                for ri, r in enumerate(self.run_indices):
+#                    for ci, c in enumerate(self.compartment_indices):
+#                        for ti, _ in enumerate(self.timepoints):
+#                            # can't replace results in-place as it raises a dimensionality error
+#                            volume = volumes[ri, ci, ti]
+#                            if volume <= 0:
+#                                concentrations[ri, :, ci, ti] = np.zeros(results[ri, :, ci, ti].shape) 
+#                            else:
+#                                concentrations[ri, :, ci, ti] = (results[ri, :, ci, ti] / (volume * _volume_units)).rescale(_concentration_units)
+#                results = Quantity(concentrations, _concentration_units)
+#
+#            else:
+#                results.units = substance_units[quantities_display_units]
+#
+#        return results
+        
+        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
         
 
-    def get_functions_over_runs(self, functions):
-        ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
-        array of floats and results is a list of 3-D arrays of floats with the 
-        shape (species, compartments, timepoint) for each function in 
-        functions. '''
-#        try:
-#            results = [np.zeros((len(self.species_indices), len(self.compartment_indices), len(self.timepoints)), self.type) for _ in functions]
-#        except MemoryError:
-#            message = 'Could not allocate memory for functions.\nTry selecting fewer functions, a shorter time window or a bigger time interval multipler.'
-#            if self.parent is not None:
-#                QMessageBox.warning('Out of memory', message)
-#            else:
-#                print message
-#            return (self.timepoints, [])
-        results = [
-            self.allocate_array(
-                (
-                    len(self.species_indices),
-                    len(self.compartment_indices),
-                    len(self.timepoints)
-                ),
-                'Could not allocate memory for functions.\n' \
-                'Try selecting fewer functions, a shorter time window or a bigger time interval multipler.'
-            )
-            for _ in self.run_indices
-        ]
+    def get_functions_over_runs(self, functions, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
+        '''Returns a 4D array of floats with the shape (functions, species, 
+        compartments, timepoint).'''
+        results = self.allocate_array(# outputs error message if anything goes wrong
+            (
+                len(functions),
+                len(self.species_indices),
+                len(self.compartment_indices),
+                len(self.timepoints)
+            ),
+            'Could not allocate memory for functions.\n' \
+            'Try selecting fewer functions, a shorter time window or a bigger time interval multipler.'
+        )
         if results is None:
             return        
 
+        # create biggest possible buffer
         chunk_size = self.max_chunk_size
-
-        # create large arrays handling failure
         buffer = None
         while buffer == None:
-            # allocate buffer (4-dimensional array)
             try:
-                buffer = np.zeros((len(self.species_indices),
-                                      len(self.compartment_indices),
-                                      chunk_size,
-                                      len(self.run_indices)),
-                                      self.type)
+                buffer = np.zeros(
+                    (
+                        len(self.run_indices),
+                        len(self.species_indices),
+                        len(self.compartment_indices),
+                        chunk_size,
+                    ),
+                    self.type
+                )
             except MemoryError:
                 if chunk_size == 0:
                     if self.parent is not None:
@@ -622,23 +656,18 @@ class McssResults(object):
                 continue
 
         def iteration():
-            """One iteration reads amounts into buffer and applies statistical functions to those amounts."""
+            '''Fills buffer with amounts for all runs and updates results with outcome of functions applied to runs.'''
             self.amounts_chunk_stop = amounts_chunk_start + (chunk_size * self.step)
             for ri, r in enumerate(self.run_indices):
                 where = '/run%s' % (r + 1)
                 amounts = h5.getNode(where, 'amounts')[:, :, amounts_chunk_start:self.amounts_chunk_stop:self.step]
                 for si, s in enumerate(self.species_indices):
                     for ci, c in enumerate(self.compartment_indices):
-                        buffer[si, ci, :, ri] = amounts[s, c, :] #FIXME works but surely buffer[:, :, :, ri] = amounts[self.species_indices, self.compartment_indices, :] could work too, no?
-            self.statChunkEnd = stat_chunk_start + chunk_size
-#            print results[1][:,:,stat_chunk_start:self.statChunkEnd]
-#            print "amounts.shape: ", amounts.shape, "buffer.shape: ", buffer.shape
-#            print "buffer:"
-#            print buffer
+                        buffer[ri, si, ci, :] = amounts[s, c, :] #FIXME works but surely buffer[:, :, :, ri] = amounts[self.species_indices, self.compartment_indices, :] could work too, no?
+            self.stat_chunk_stop = stat_chunk_start + chunk_size
             for fi, f in enumerate(functions):
-                stat = results[fi][:]
-                stat[:, :, stat_chunk_start:self.statChunkEnd] = f(buffer)
-#                print stat[:,:,stat_chunk_start:self.statChunkEnd], "=", "std(", buffer, ")"
+                stat = results[fi] # stat is a 'view' on results so change stat changes results
+                stat[:, :, stat_chunk_start:self.stat_chunk_stop] = f(buffer, axis=0) # axis 0 is runs
 
         h5 = tables.openFile(self.filename)
 
@@ -649,20 +678,26 @@ class McssResults(object):
         for _ in range(quotient):
             iteration()#chunk_size)
             amounts_chunk_start = self.amounts_chunk_stop
-            stat_chunk_start = self.statChunkEnd
+            stat_chunk_start = self.stat_chunk_stop
 
         # and the remaining timepoints           
         remainder = len(self.timepoints) % chunk_size
         if remainder > 0:
-            buffer = np.zeros((len(self.species_indices),
-                               len(self.compartment_indices),
-                               remainder,
-                               len(self.run_indices)),
-                               type)
+            buffer = np.zeros(
+                (
+                    len(self.run_indices),
+                    len(self.species_indices),
+                    len(self.compartment_indices),
+                    chunk_size,
+                ),
+                self.type
+            )
             iteration(remainder)
 
         h5.close()
-        return (self.timepoints, results)
+        
+        results = Quantity(results, substance_units[self.quantities_data_units])
+        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
 
 
     def get_surfaces(self):
@@ -708,5 +743,5 @@ class McssResults(object):
         return (self.timepoints, results, xmin, xmax, ymin, ymax)
 
 
-if __name__ == '__main__':
-    execfile('mcss_results_widget.py')
+#if __name__ == '__main__':
+#    execfile('mcss_results_widget.py')

@@ -275,7 +275,7 @@ class McssResultsWidget(QWidget):
         ui.to_spin_box.set_interval(interval)
 
         ui.every_spin_box.setRange(1, simulation._runs_list[0].number_of_timepoints)
-        ui.every_spin_box.setValue(ui.every_spin_box.minimum()) #TODO make this so if gives roughly one-thousand timepoints
+        ui.every_spin_box.setValue(ui.every_spin_box.minimum())
 
         ui.log_interval_label.setText(str(interval))
 
@@ -323,7 +323,19 @@ class McssResultsWidget(QWidget):
             enable_widgets(ui.select_all_compartments_check_box)
         
         # timepoints
-        self.ui.every_spin_box.setValue(self.ui.to_spin_box.value() // 100) 
+        # choosing some sensible defaults for 'every' to reduce initial number of data points
+        timepoints_data_units = self.ui.timepoints_data_units_combo_box.currentText() 
+        if timepoints_data_units in ('seconds', 'minutes') and to >= 300: # 5 minutes in seconds or 5 hours in minutes
+            self.ui.every_spin_box.setValue(60)
+        elif timepoints_data_units in ('hours') and to >= 168: # a week in hours -> days
+            self.ui.every_spin_box.setValue(24)
+        elif timepoints_data_units in ('days'):
+            if to < 30:
+                self.ui.every_spin_box.setValue(7)
+            elif 30 < to <= 365:
+                self.ui.every_spin_box.setValue(30)
+#        else:
+#            self.ui.every_spin_box.setValue(to // 100) 
 
         # volumes
 #        i = self.ui.quantities_display_type_combo_box.findText('concentrations')
@@ -489,11 +501,15 @@ class McssResultsWidget(QWidget):
         averaging = self.ui.average_over_selected_runs_check_box.isChecked()
         return from_, to, every, averaging
 
-    def units(self):
+    def volume(self):
+        return self.ui.volume_spin_box.value()
+
+    def units(self): 
         ''' Usage: timepoints_data_units, timepoints_display_units, 
         quantities_data_units, quantities_display_type, 
         quantities_display_units, volume, volumes_data_units, 
-        volumes_display_units = self.units() 
+        volumes_display_units = self.units()
+        #TODO return a dictionary rather than a tuple, then we can just do **units 
         
         '''
         timepoints_data_units = str(self.ui.timepoints_data_units_combo_box.currentText())
@@ -510,7 +526,25 @@ class McssResultsWidget(QWidget):
         volumes_data_units = str(self.ui.volumes_data_units_combo_box.currentText()) 
         volumes_display_units = str(self.ui.volumes_display_units_combo_box.currentText())
         return timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units 
-#        timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units = self.units()
+
+    def units_dict(self):
+        units = {}
+        units['timepoints_data_units'] = self.ui.timepoints_data_units_combo_box.currentText()
+        units['timepoints_display_units'] = self.ui.timepoints_display_units_combo_box.currentText()
+        units['quantities_data_units'] = self.ui.quantities_data_units_combo_box.currentText()
+        quantities_display_type = self.ui.quantities_display_type_combo_box.currentText()
+        units['quantities_display_type'] = quantities_display_type
+        if quantities_display_type == 'molecules':
+            quantities_display_units = 'molecules'
+        elif quantities_display_type == 'concentrations':
+            quantities_display_units = self.ui.concentrations_display_units_combo_box.currentText()
+        elif quantities_display_type == 'moles':
+            quantities_display_units = self.ui.moles_display_units_combo_box.currentText()
+        units['quantities_display_units'] = quantities_display_units
+#        units['volume'] = self.ui.volume_spin_box.value()
+        units['volumes_data_units'] = self.ui.volumes_data_units_combo_box.currentText()
+        units['volumes_display_units'] = self.ui.volumes_display_units_combo_box.currentText()
+        return units
 
     def selected_items_results(self, type=float):
         ''' Usage:
@@ -518,21 +552,22 @@ class McssResultsWidget(QWidget):
         '''
         run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
         from_, to, every, _ = self.options()
-        timepoints_data_units, _, quantities_data_units, _, _, _, volumes_data_units, _ = self.units()
+#        timepoints_data_units, _, quantities_data_units, _, _, _, volumes_data_units, _ = self.units()
         return McssResults(
             filename=self.filename,
             simulation=self.simulation,
             type=type,
             from_=from_,
-            end=to,
+            to=to,
             step=every,
             run_indices=run_indices,
             species_indices=species_indices,
             compartment_indices=compartment_indices,
             parent=self,
-            timepoints_data_units=timepoints_data_units,
-            quantities_data_units=quantities_data_units,
-            volumes_data_units=volumes_data_units,
+#            timepoints_data_units=timepoints_data_units,
+#            quantities_data_units=quantities_data_units,
+#            volumes_data_units=volumes_data_units,
+            **self.units_dict()
         )
 
 
@@ -576,11 +611,11 @@ class McssResultsWidget(QWidget):
 #        print results
 
 
-    #FIXME migrate export functionality to McssResults 
     # remember these within this instance
     csv_precision = 3
     csv_delimiter = ','
     @wait_cursor
+    #FIXME migrate export functionality to McssResults 
     def export_data_as(self, file_name='',
         open_after_save=True, copy_file_name_to_clipboard=True,
         csv_precision=None, csv_delimiter=None,

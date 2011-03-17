@@ -1,5 +1,4 @@
-class Compartment(object):
-    """An mcss compartment dataset as a Python object."""
+class Compartment(object): # TODO rename McssCompartment
 
 #    def __init__(self, index, id, name, x_position, y_position, template_index, creation_time, destruction_time, run, simulation):
     def __init__(self, index, id, name, x_position, y_position, template_index, run, simulation):
