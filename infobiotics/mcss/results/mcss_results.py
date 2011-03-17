@@ -284,16 +284,16 @@ class McssResults(object):
 
     @property
     def from_(self):
-        return float(self.timepoints[0])
-#        return self.timepoints[0]
+#        return float(self.timepoints[0])
+        return self.timepoints[0] # is a Quantity
     @from_.setter
     def from_(self, from_):
         self.start = int(from_ // self.simulation.log_interval)
     
     @property
     def to(self):
-        return float(self.timepoints[-1])
-#        return self.timepoints[-1]
+#        return float(self.timepoints[-1])
+        return self.timepoints[-1] # is a Quantity
     @to.setter
     def to(self, to):
         self.stop = int((to // self.simulation.log_interval) + 1)
@@ -322,7 +322,7 @@ class McssResults(object):
     
     def validate_time_units(self, time_units_):
         if time_units_ not in time_units.keys():
-            raise ValueError
+            raise ValueError("time_units must be in %s" % tuple(time_units.keys())) #TODO test
     
     @property
     def timepoints_display_units(self):
@@ -345,7 +345,7 @@ class McssResults(object):
         
     def validate_quantities_display_type(self, quantities_display_type):
         if quantities_display_type not in ('molecules', 'concentrations', 'moles'):
-            raise ValueError
+            raise ValueError("quantities_display_type must be in ('molecules', 'concentrations', 'moles')")
         
     @property
     def quantities_data_units(self):
@@ -358,7 +358,7 @@ class McssResults(object):
 
     def validate_quantities_units(self, quantities_units):
         if quantities_units not in substance_units.keys() + concentration_units.keys():
-            raise ValueError
+            raise ValueError("quantities_units must be in %s" % tuple(substance_units.keys() + concentration_units.keys())) #TODO test
     
     @property
     def quantities_display_units(self):
@@ -380,7 +380,7 @@ class McssResults(object):
 
     def validate_volumes_units(self, volumes_units):
         if volumes_units not in volume_units.keys():
-            raise ValueError
+            raise ValueError("volumes_units must be in %s" % tuple(volume_units.keys())) #TODO test 
     
     @property
     def volumes_display_units(self):
@@ -408,12 +408,8 @@ class McssResults(object):
             return
         return array
 
+
     def volumes(self, volumes_display_units=None, **ignored_kwargs):
-        # create array for extracted 'results', printing error if too big for memory
-        
-        if volumes_display_units is None:
-            volumes_display_units = self.volumes_display_units
-        self.validate_volumes_units(volumes_display_units)
         
         volumes = self.allocate_array(
             (
@@ -436,8 +432,12 @@ class McssResults(object):
                 volumes[ri, ci, :] = volumes_for_one_run[c, :]
         h5.close()
     
-        # adjust scale of volumes to match volumes_display_units
         volumes = Quantity(volumes, volume_units[self.volumes_data_units])
+
+        # adjust scale of volumes to match volumes_display_units
+        if volumes_display_units is None:
+            volumes_display_units = self.volumes_display_units
+        self.validate_volumes_units(volumes_display_units)
         volumes.units = volume_units[volumes_display_units]
 
         return volumes
@@ -513,6 +513,8 @@ class McssResults(object):
                 _concentration_units = concentration_units['molar']
                 concentrations = np.zeros(amounts.shape) * _concentration_units
                 np.seterr(divide='ignore') # ignore divide by zero errors - will replace values with np.inf instead
+#                print amounts.shape
+#                print volumes.shape
                 for si, _ in enumerate(self.species_indices):
                     concentrations[:, si, :, :] = amounts[:, si, :, :] / volumes # divide amount by volume
                 concentrations[concentrations == np.inf] = 0 # replace all occurences of np.inf with 0
@@ -612,7 +614,7 @@ class McssResults(object):
         return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
         
 
-    def get_functions_over_runs(self, functions, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
+    def get_functions_over_runs(self, functions):#, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
         '''Returns a 4D array of floats with the shape (functions, species, 
         compartments, timepoint).'''
         results = self.allocate_array(# outputs error message if anything goes wrong
@@ -695,9 +697,13 @@ class McssResults(object):
             iteration(remainder)
 
         h5.close()
-        
+    
         results = Quantity(results, substance_units[self.quantities_data_units])
-        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
+        # would be nice to be to convert quantities but shapes don't match 
+        # and perhaps not all of the output of the functions are quantities
+#        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
+
+        return results
 
 
     def get_surfaces(self):
