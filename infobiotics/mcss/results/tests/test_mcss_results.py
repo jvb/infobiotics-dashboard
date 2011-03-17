@@ -25,21 +25,76 @@ class TestMcssResults(unittest.TestCase):
 #                                   quantities_display_units='attomolar',
 #                                   volume=1)
 
-    def test_McssResults_get_functions_over_runs(self):
+    def test_concentrations(self):
         file_name = 'germination_09.h5'
         results = McssResults(file_name)
-        results.run_indices = [0]
-        results.species_indices = [27]
-        results.compartment_indices = [27]
-        results.to = 300
-        print results.volumes()
-        results.quantities_data_units = 'micromolar'
-        amounts = results.amounts(quantities_display_type='concentrations', quantities_display_units='micromolar')
-#        print amounts.shape
-        print amounts
-#        print mcss_postprocess('-l -x -C 27 -t 1 -s SIG1', file_name)[2][0]
         
-    def _test_McssResults_get_functions_over_runs(self):
+        # germination_09.h5 seems to have quantities in *moles and volumes in litres 
+#        results.volumes_data_units = 'microlitres' # breaks it
+        results.quantities_data_units = 'micromoles'
+        amounts = results.amounts(
+            quantities_display_type='concentrations',
+            quantities_display_units='micromolar'
+        )
+        
+        # test concentration of SIG1 in compartment 27 [0,28] of run 1
+        assert_array_almost_equal(
+            mcss_postprocess('-l -x -C 27 -t 1 -s SIG1', file_name)[2][0],
+            amounts[0, 27, 27].magnitude,
+            verbose=True
+        )
+
+        # test concentration of all species in all compartments of run 1 
+
+        # concentrations
+        m = mcss_postprocess('-l -x -t 1', file_name)[2]
+        
+        # molecules
+#        m = mcss_postprocess('-l -t 1', file_name)[2]
+#        results.quantities_data_units = 'molecules'
+#        amounts = results.amounts(
+#            quantities_display_type='molecules',
+#            quantities_display_units='molecules'
+#        )
+        
+        # mcss-postprocess prints all compartments sorted by x,y coordinate 
+        # *not* index
+
+        # in germination_09.h5 [0,0] has index 1 and [0,1] has index 0
+        # also [0,25] has index 38
+
+        # swap data for compartments with indices 0 and 1
+        m0 = np.copy(m[40 * 0:40 * 1])
+        m1 = np.copy(m[40 * 1:40 * 2])
+        m[40 * 0:40 * 1] = m1
+        m[40 * 1:40 * 2] = m0
+
+        # move data for compartment with index 38 at position 25 to 38 and 
+        # everything else down to 25
+        m25 = np.copy(m[40 * 25:40 * 26])
+        m26to38 = np.copy(m[40 * 26:])#40 * 39)
+        m[40 * 25:40 * 38] = m26to38 
+        m[40 * 38:40 * 39] = m25 
+
+        ri = 0
+#        si = 1
+#        ci = 25
+#        assert_array_almost_equal(m[(40 * ci) + si], amounts[ri, si, ci].magnitude)
+##        for i in range(len(m[(40 * ci) + si])):
+##            print m[(40 * ci) + si][i] - amounts[ri, si, ci][i].magnitude
+##        exit()
+
+        for ci in range(39):
+            for si in range(40):
+#                print si, ci
+                assert_array_almost_equal(
+                    amounts[ri, si, ci].magnitude,
+                    m[(40 * ci) + si],
+                    verbose=True
+                )
+            
+            
+    def test_McssResults_get_functions_over_runs(self):
         
 #        print self.results.amounts().shape
 #        print np.mean(self.results.amounts(), axis=0)
@@ -64,7 +119,7 @@ class TestMcssResults(unittest.TestCase):
                 verbose=True
             )        
     
-    def _test_McssResults(self):
+    def test_McssResults(self):
         results = self.results
         
         # get all amounts
@@ -87,7 +142,8 @@ class TestMcssResults(unittest.TestCase):
 #            )    
 
         #TODO move amounts_axes from McssResults to mcss_results?
-        array_axes = McssResults.amounts_axes # ('runs', 'species', 'compartments', 'timepoints')
+#        array_axes = McssResults.amounts_axes # ('runs', 'species', 'compartments', 'timepoints')
+        array_axes = ('runs', 'species', 'compartments', 'timepoints')
 
         # as above using functions_of_values_over_axis with sum function
         functions = (

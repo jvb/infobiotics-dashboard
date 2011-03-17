@@ -138,7 +138,7 @@ class McssResults(object):
         parent=None,
         timepoints_data_units='seconds',
         quantities_data_units='molecules',
-        volumes_data_units='microlitres',
+        volumes_data_units='litres',
         quantities_display_type=None, #'molecules',
         timepoints_display_units=None,
         quantities_display_units=None,
@@ -511,7 +511,7 @@ class McssResults(object):
                     _volume_units = volume_units[self.volumes_data_units]
                     volumes = volumes * _volume_units
                 _concentration_units = concentration_units['molar']
-                concentrations = np.zeros(amounts.shape)# * _concentration_units
+                concentrations = np.zeros(amounts.shape) * _concentration_units
                 np.seterr(divide='ignore') # ignore divide by zero errors - will replace values with np.inf instead
                 for si, _ in enumerate(self.species_indices):
                     concentrations[:, si, :, :] = amounts[:, si, :, :] / volumes # divide amount by volume
