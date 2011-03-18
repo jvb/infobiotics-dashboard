@@ -573,7 +573,7 @@ class McssResultsWidget(QWidget):
 
     # actions slots
     
-    def calculate(self):
+    def calculate(self): #TODO do something useful with array like PModelCheckerResults
         from axes_order_traits import AxesOrder
         ao = AxesOrder()
         result = ao.edit_traits(kind='modal')
@@ -582,7 +582,7 @@ class McssResultsWidget(QWidget):
             functions = [axis.function for axis in ao.order]
             
             results = self.selected_items_results()
-            array, axes = results.functions_over_successive_axes(axes, functions) 
+            array, axes = results.functions_over_successive_axes(axes, functions)
 
     def histogram(self):
         raise NotImplementedError
@@ -846,7 +846,7 @@ class McssResultsWidget(QWidget):
 
 
     @wait_cursor
-    def plot(self):
+    def plot(self): #TODO move most of this to McssResults
         '''Plot selected data. '''
 
         runs, species, compartments = self.selected_items()

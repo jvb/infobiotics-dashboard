@@ -127,34 +127,6 @@ class TestMcssResults(unittest.TestCase):
 #                verbose=True
 #            )        
             
-    def _test_McssResults_get_functions_over_runs(self):
-        
-#        print self.results.amounts().shape
-#        print np.mean(self.results.amounts(), axis=0)
-
-        functions = (
-            mcss_results.mean,
-            mcss_results.std,
-        )
-        f = self.results.get_functions_over_runs(functions)
-        
-        m = mcss_postprocess('-l')[2]
-        
-        # compare mean and std of each species in only compartment of all runs at each timepoint
-        
-        for i in range(0, 4):
-            # mean
-            assert_array_almost_equal(
-                m[i * 3], # 2 is outputs, 0 is 1st output array
-                f[0, i, 0, :].magnitude,
-                verbose=True
-            )
-            # std
-            assert_array_almost_equal(
-                m[i * 3 + 1], # 2 is outputs, 0 is 1st output array
-                f[1, i, 0, :].magnitude,
-                verbose=True
-            )        
     
     def _test_McssResults(self):
         amounts = self.results.amounts()
@@ -234,6 +206,42 @@ class TestMcssResults(unittest.TestCase):
                 verbose=True
             )
         
+
+    def _test_McssResults_get_functions_over_runs(self):
+        
+#        print self.results.amounts().shape
+#        print np.mean(self.results.amounts(), axis=0)
+
+        functions = (
+            mcss_results.mean,
+            mcss_results.std,
+        )
+        f = self.results.get_functions_over_runs(functions)
+        
+        m = mcss_postprocess('-l')[2]
+        
+        # compare mean and std of each species in only compartment of all runs at each timepoint
+        
+        for i in range(0, 4):
+            # mean
+            assert_array_almost_equal(
+                m[i * 3], # 2 is outputs, 0 is 1st output array
+                f[0, i, 0, :].magnitude,
+                verbose=True
+            )
+            # std
+            assert_array_almost_equal(
+                m[i * 3 + 1], # 2 is outputs, 0 is 1st output array
+                f[1, i, 0, :].magnitude,
+                verbose=True
+            )        
+
+
+    def test_compare_output_of_get_functions_over_runs_and_functions_of_values_over_axis(self):
+        assert_array_almost_equal(
+            mcss_results.functions_of_values_over_axis(self.results.amounts(), ('runs', 'species', 'compartments', 'timepoints'), 'runs', (mcss_results.mean, mcss_results.std)),
+            self.results.get_functions_over_runs((mcss_results.mean, mcss_results.std))
+        )
 
 #    def test_functions_of_values_over_axis(self):
 #        from mcss_results import functions_of_values_over_axis

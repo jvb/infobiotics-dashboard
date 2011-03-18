@@ -2,6 +2,9 @@
 and functions for applying NumPy ufuncs multi-dimensional arrays.'''
 
 import sip
+from quantities.units.time import hour, minute
+import operator
+from table import indent
 sip.setapi('QString', 2)
 from PyQt4.QtGui import QMessageBox
 
@@ -24,7 +27,7 @@ sum_compartments_at_same_xy_lattice_position = True
 mean = lambda array, axis: np.mean(array, axis, dtype=np.float64)
 #std = lambda array, axis: np.std(array, axis, ddof=1, dtype=np.float64)
 std = lambda array, axis: Quantity(np.std(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.std(array, axis, ddof=1, dtype=np.float64) # work around Quantity.std not having 'ddof' keyword argument
-var = lambda array, axis: Quantity(np.var(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.var(array, axis, ddof=1, dtype=np.float64) # work around Quantity.std not having 'ddof' keyword argument
+var = lambda array, axis: Quantity(np.var(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.var(array, axis, ddof=1, dtype=np.float64) # work around Quantity.var not having 'ddof' keyword argument
 sum = lambda array, axis: np.sum(array, axis, dtype=np.float64)
 
 def functions_of_values_over_axis(array, array_axes, axis, functions): 
@@ -186,16 +189,11 @@ class McssResults(object):
         
         self.filename = filename
         
-        number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
-        
-        log_interval = self.simulation.log_interval
-        
-#        max_time = number_of_timepoints * log_interval
-#        print max_time, self.simulation.max_time
-#        assert max_time == self.simulation.max_time
         max_time = self.simulation.max_time
-        
+        number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
         self._timepoints = Quantity(np.linspace(0, max_time, number_of_timepoints), time_units[self.timepoints_data_units])
+
+        self._timestep = Quantity(self.simulation.log_interval, time_units[self.timepoints_data_units])
 
         self._start = 0 
         self._stop = len(self._timepoints)
@@ -220,8 +218,6 @@ class McssResults(object):
             self.stop = len(self._timepoints)
 
         self.max_chunk_size = self.stop - self.start #TODO determine based on any axis not just timepoints
-
-        self.timestep = log_interval
 
         self.step = step # uses step.setter
 
@@ -289,7 +285,12 @@ class McssResults(object):
         return self.timepoints[0] # is a Quantity
     @from_.setter
     def from_(self, from_):
-        self.start = int(from_ // self.simulation.log_interval)
+        if isinstance(from_, Quantity):
+            from_.units = time_units[self.timepoints_data_units]
+            self.start = int(from_ // self._timestep)
+        else:
+            self.start = int(from_ // self._timestep.magnitude)
+            
     
     @property
     def to(self):
@@ -297,14 +298,22 @@ class McssResults(object):
         return self.timepoints[-1] # is a Quantity
     @to.setter
     def to(self, to):
-        self.stop = int((to // self.simulation.log_interval) + 1)
+        if isinstance(to, Quantity):
+            to.units = time_units[self.timepoints_data_units]
+            self.stop = int(to // self._timestep) + 1
+        else:
+            self.stop = int(to // self._timestep.magnitude) + 1
         
     @property
     def timestep(self):
-        return self.step * self.simulation.log_interval
+        return self.step * self._timestep
     @timestep.setter
     def timestep(self, timestep):
-        self.step = timestep // self.simulation.log_interval
+        if isinstance(timestep, Quantity):
+            timestep.units = time_units[self.timepoints_data_units]
+            self.step = int(timestep // self._timestep)
+        else:
+            self.step = int(timestep // self._timestep.magnitude)
 
     
     @property
@@ -392,11 +401,11 @@ class McssResults(object):
         self._volumes_display_units = volumes_display_units    
     
     
-    def allocate_array(self, shape, failed_message):
+    def _allocate_array(self, shape, failed_message):
         '''
         
         >>> million = 1000 * 1000
-        >>> results = allocate_array(million, million, million), 'Should raise a MemoryError')
+        >>> results = _allocate_array(million, million, million), 'Should raise a MemoryError')
         
         '''
         try:
@@ -412,7 +421,7 @@ class McssResults(object):
 
     def volumes(self, volumes_display_units=None, **ignored_kwargs):
         
-        volumes = self.allocate_array(
+        volumes = self._allocate_array(
             (
                 len(self.run_indices),
                 len(self.compartment_indices),
@@ -475,6 +484,50 @@ class McssResults(object):
 #        pass
 
 
+
+    
+
+#    @profile # use profile(results.get_amounts) instead - won't raise "'profile' not found" error
+    def amounts(self, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
+#        ''' Returns a tuple of (timepoints, results) where timepoints is an 1 - D
+#        array of floats and results is a list of 3-D arrays of ints with the 
+#        shape (species, compartments, timepoint) for each run. '''
+        '''
+        
+        'volume' is used when self.simulation.log_volumes != 1 to fill an array 
+        that is the same shape as volumes would be, allowing concentrations to
+        be calculated for models without volumes information. 
+        
+        '''
+        
+        results = self._allocate_array(
+            (
+                len(self.run_indices),
+                len(self.species_indices),
+                len(self.compartment_indices),
+                len(self.timepoints)
+            ),
+            'Could not allocate memory for amounts.\n' \
+            'Try selecting fewer runs, a shorter time window or a bigger time interval multipler.'
+        )
+        if results is None:
+            return
+            
+        h5 = tables.openFile(self.filename)
+        for ri, r in enumerate(self.run_indices):
+            where = '/run%s' % (r + 1)
+            amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.stop:self.step]
+            for si, s in enumerate(self.species_indices):
+                for ci, c in enumerate(self.compartment_indices):
+                    results[ri, si, ci, :] = amounts[s, c, :]
+#                    results[ri, si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.stop:self.step] # about 10 times slower!
+        h5.close()
+
+        results = Quantity(results, substance_units[self.quantities_data_units])
+
+        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
+#        
+#
     def convert_amounts_quantities(self, amounts, quantities_display_type=None, quantities_display_units=None, volume=None):
         if quantities_display_type is None:
             quantities_display_type = self.quantities_display_type
@@ -525,100 +578,10 @@ class McssResults(object):
         return amounts
     
 
-#    @profile # use profile(results.get_amounts) instead - won't raise "'profile' not found" error
-    def amounts(self, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
-#        ''' Returns a tuple of (timepoints, results) where timepoints is an 1 - D
-#        array of floats and results is a list of 3-D arrays of ints with the 
-#        shape (species, compartments, timepoint) for each run. '''
-        '''
-        
-        'volume' is used when self.simulation.log_volumes != 1 to fill an array 
-        that is the same shape as volumes would be, allowing concentrations to
-        be calculated for models without volumes information. 
-        
-        '''
-#        if quantities_display_type is None:
-#            quantities_display_type = self.quantities_display_type
-#        self.validate_quantities_display_type(quantities_display_type)
-#        
-#        if quantities_display_units is None:
-#            quantities_display_units = self.quantities_display_units
-#        self.validate_quantities_units(quantities_display_units)
-#        
-#        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1 and volume is None:
-#            message = 'Cannot calculate concentrations without volumes dataset, rerun mcss with log_volumes=1' 
-#            if self.parent is not None:
-#                QMessageBox.warning('Error', message) #TODO test
-#            else:
-#                print message, 'or provide volume argument in %s' % self.volumes_data_units
-#            return
-        
-        results = self.allocate_array(
-            (
-                len(self.run_indices),
-                len(self.species_indices),
-                len(self.compartment_indices),
-                len(self.timepoints)
-            ),
-            'Could not allocate memory for amounts.\n' \
-            'Try selecting fewer runs, a shorter time window or a bigger time interval multipler.'
-        )
-        if results is None:
-            return
-            
-        h5 = tables.openFile(self.filename)
-        for ri, r in enumerate(self.run_indices):
-            where = '/run%s' % (r + 1)
-            amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.stop:self.step]
-            for si, s in enumerate(self.species_indices):
-                for ci, c in enumerate(self.compartment_indices):
-                    results[ri, si, ci, :] = amounts[s, c, :]
-#                    results[ri, si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.stop:self.step] # about 10 times slower!
-        h5.close()
-
-        results = Quantity(results, substance_units[self.quantities_data_units])
-
-#        if self.quantities_data_units != quantities_display_units:
-#            
-#            # convert to moles
-#            results.units = substance_units['moles']
-#
-#            # convert from moles to whatever
-#            if quantities_display_type == 'concentrations':
-#                
-#                if self.simulation.log_volumes == 1:
-#                    volumes = self.volumes(self.volumes_data_units)
-#                else:
-#                    assert volume is not None
-#                    volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
-#                    volumes.fill(volume)
-#                _volume_units = volume_units[self.volumes_data_units]
-#                _concentration_units = concentration_units[quantities_display_units]
-#
-#                concentrations = np.zeros(results.shape)
-#                for ri, r in enumerate(self.run_indices):
-#                    for ci, c in enumerate(self.compartment_indices):
-#                        for ti, _ in enumerate(self.timepoints):
-#                            # can't replace results in-place as it raises a dimensionality error
-#                            volume = volumes[ri, ci, ti]
-#                            if volume <= 0:
-#                                concentrations[ri, :, ci, ti] = np.zeros(results[ri, :, ci, ti].shape) 
-#                            else:
-#                                concentrations[ri, :, ci, ti] = (results[ri, :, ci, ti] / (volume * _volume_units)).rescale(_concentration_units)
-#                results = Quantity(concentrations, _concentration_units)
-#
-#            else:
-#                results.units = substance_units[quantities_display_units]
-#
-#        return results
-        
-        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
-        
-
     def get_functions_over_runs(self, functions):#, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
         '''Returns a 4D array of floats with the shape (functions, species, 
         compartments, timepoint).'''
-        results = self.allocate_array(# outputs error message if anything goes wrong
+        results = self._allocate_array(# outputs error message if anything goes wrong
             (
                 len(functions),
                 len(self.species_indices),
@@ -700,12 +663,29 @@ class McssResults(object):
         h5.close()
     
         results = Quantity(results, substance_units[self.quantities_data_units])
-        # would be nice to be to convert quantities but shapes don't match 
+        # would be nice to be to convert quantities to concentrations, etc but shapes don't match 
         # and perhaps not all of the output of the functions are quantities
-#        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
 
         return results
 
+
+#    def timeseries(self):
+#        pass
+#    
+#    def plot_timeseries(self):
+#        pass
+#    
+#    def timeseries_plots(self):
+#        pass
+#
+#    def histograms(self):
+#        pass
+#    
+#    def export_data(self):
+#        pass
+#
+#    def surfaces(self):
+#        pass
 
     def get_surfaces(self):
         ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
@@ -750,5 +730,243 @@ class McssResults(object):
         return (self.timepoints, results, xmin, xmax, ymin, ymax)
 
 
-#if __name__ == '__main__':
+    def select_species(self, *names):
+        '''Select species with names in 'names'.
+        
+        if len(names) == 0: select all species
+        
+        '''
+        if len(names) == 0:
+            self.species_indices = xrange(self.simulation.number_of_species)
+        else:
+            self.species_indices = [species.index for species in self.simulation._species_list if species.name in names]
+    
+    def xy_coordinates(self, min_x, max_x, min_y, max_y):
+        '''Returns pairs of (x,y) where min_x <= x <= max_x and min_y <= y <= max_y'''
+        return [(x, y) for x in xrange(min_x, max_x + 1) for y in xrange(min_y, max_y + 1)]
+    
+    def select_compartments(self, names=None, xy_coordinates=None):
+        '''Select compartments with names in 'names' and (x,y) coordinates in xy_coordinates.
+        
+        if names is None and xy_coordinates is None: 
+            select all compartments
+        elif names is None and xy_coordinates is not None: 
+            select compartments for (x,y) in 'xy_coordinates'
+        elif names is not None and xy_coordinates is None: 
+            select compartments for name in 'names'
+        else: 
+            select compartments for name in 'names' for (x,y) in 'xy_coordinates'
+
+        '''
+        compartments = self.simulation._runs_list[0]._compartments_list
+        if names is None and xy_coordinates is None: 
+            # select all compartments
+            self.compartment_indices = [compartment.index for compartment in compartments]
+        elif names is None and xy_coordinates is not None: 
+            # select compartments for (x,y) in 'xy_coordinates'
+            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates]
+        elif names is not None and xy_coordinates is None: 
+            # select compartments for name in 'names'
+            self.compartment_indices = [compartment.index for compartment in compartments if compartment.name in names]
+        else:
+            # select compartments for name in 'names' for (x, y) in 'xy_coordinates'
+            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates and compartment.name in names]
+
+    def select_runs(self, runs=None, from_=None, to=None, random=None):
+        '''Select runs in 'runs', or from 'from_' to 'to', or randomly where 0 < 'random' < len(self.run_indices).'''
+        max_runs = self.simulation.number_of_runs
+        run_indices = xrange(max_runs)
+        if runs is not None:
+            run_indices = [i - 1 for i in runs if i > 0 and i <= max_runs]
+            if len(run_indices) < len(runs):
+                print 'McssResults.select_runs: the following runs are invalid: %s' % [i for i in runs if i <= 0 or i > max_runs] #TODO use logger
+        elif from_ is not None:
+            if to is not None:
+                run_indices = xrange(from_ - 1, to)
+            else:
+                run_indices = xrange(from_ - 1, max_runs)
+        elif to is not None:
+            run_indices = xrange(to)
+        elif random is not None:
+            if not random > len(run_indices):
+                import random as rand
+                run_indices = rand.sample(run_indices, random)
+            else:
+                print 'McssResults.select_runs: random > len(run_indices)' #TODO use logger
+        self.run_indices = run_indices
+
+    def select_timepoints(self, from_=None, to=None, timestep=None):
+        '''Select every 'timestep' timepoints from 'from_' to 'to'.'''
+        if from_ is not None:
+            self.from_ = from_
+        else:
+            self.from_ = self._timepoints[0]
+        if to is not None:
+            self.to = to
+        else:
+            self.to = self._timepoints[-1]
+        if timestep is not None:
+            self.timestep = timestep
+        else:
+            self.timestep = self._timepoints[1] - self._timepoints[0]
+             
+        
+        
+    '''
+    results = mcss(...)
+    #TODO have units parameters in McssParams and write them to the H5 file so that they can be automatically set for McssResults but overridden in McssResultsWidget  
+#    results.time_data_units = 'seconds'
+#    results.quantities_data_units = 'molecules'
+#    results.volumes_data_units = 'litres'
+#    results.volumes_display_units = 'microlitres'
+#    results.quantities_display_type = 'concentrations'
+#    results.quantities_display_units = 'micromolar'
+#    results.species_indices = [1,3,2,3]
+#    results._species_indices = [1,3,2,3]
+#    results.select_species('a', 'b')
+#    results.select_compartments((x,y),(x,y),*((x,y) for x in range(2,10) for y in range(3,8))))
+#    results.select_runs(2, 7, 8, from_=1, to=10, random=5, all=True)
+#    print results.runs_information()
+#    print results.species_information()
+#    print results.compartments_information()
+#    results.from_ = 100
+#    results.to = 300
+#    results.timestep = 20
+#    results.select_timepoints(10,20,30, from_=10, to=30)
+    print results.timepoints
+    print results.selection()
+    amounts = results.amounts()
+    volumes = results.volumes()
+    surfaces = results.surfaces()
+    mean_runs = results.get_functions_over_runs((mcss_results.mean))
+    assert mean_runs == mcss_results.functions_of_values_axis(amounts, ('runs', 'species', 'compartments', 'timepoints'), 'runs', (mcss_results.mean,)))
+    assert mean_runs == results.mean_over_runs()
+    # same for std, var, sum, min, max
+    
+    '''
+
+
+    def runs_information(self, truncate=True):
+        '''
+        Run # | # compartments | # timepoints | Simulated time
+        ------------------------------------------------------
+        1     | 1              | 601          | 6000.0        
+        ...
+        200   | 1              | 601          | 6000.0        
+        '''
+        labels = ('Run #', '# compartments', '# timepoints', 'Simulated time')
+        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.simulation._runs_list]
+        table = indent([labels] + rows, hasHeader=True)
+        if truncate and self.simulation.number_of_runs > 1:
+            s = table.split('\n')
+            return '\n'.join((s[0], s[1], s[2], '...', s[-2], s[-1]))
+        return table
+        
+    def species_information(self, sort_column_index=0, reverse=False):
+        '''
+        Name           | Index
+        ----------------------
+        gene1          | 0    
+        protein1       | 1    
+        protein1_gene1 | 2    
+        rna1           | 3    
+        '''
+        labels = ('Name', 'Index')
+        rows = [[str(s) for s in (species.name, species.index)] for species in self.simulation._species_list]
+        rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
+        table = indent([labels] + rows, hasHeader=True)
+        return table
+
+    def compartments_information(self, sort_column_index=0, reverse=False):
+        '''
+        Name         | Index | X | Y
+        ----------------------------
+        NARbacterium | 0     | 0 | 0
+        '''
+        labels = ('Name', 'Index', 'X', 'Y')
+        rows = [[str(s) for s in (compartment.name, compartment.index, compartment.x_position, compartment.y_position)] for compartment in self.simulation._runs_list[0]._compartments_list]
+        rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
+        table = indent([labels] + rows, hasHeader=True)
+        return table
+
+    def reset_selection(self):
+        self.select_runs()
+        self.select_species()
+        self.select_compartments()
+        self.select_timepoints()
+        
+
+def test():
+    results = McssResults('tests/NAR_simulation.h5')
+    exit()
+#    print results.runs_information()
+#    print results.species_information(1, True)
+#    print results.compartments_information()
+    
+    assert len(results.run_indices) == 200
+    assert len(results.compartment_indices) == 1
+    assert len(results._timepoints) == 601
+    assert len(results.species_indices) == 4
+
+    # select 2 species
+    results.select_species('gene1', 'protein1')
+    assert len(results.species_indices) == 2
+    
+    # select species with name
+    results.select_compartments(names=['NARbacterium'])
+    assert len(results.compartment_indices) == 1
+    results.select_compartments()
+
+    # select species with xy_coordinate
+    results.select_compartments(xy_coordinates=[(0, 0)])
+    assert len(results.compartment_indices) == 1
+    results.select_compartments()
+
+    # select species with name and xy_coordinate
+    results.select_compartments(xy_coordinates=[(0, 0)], names=['NARbacterium'])
+    assert len(results.compartment_indices) == 1
+    results.select_compartments()
+
+    # negative test (only compartment is named 'NARbacterium')
+    results.select_compartments(names=['PARbacterium'])
+    assert len(results.compartment_indices) == 0
+    results.select_compartments()
+    
+    # negative test (only compartment is at (0,0))
+    results.select_compartments(xy_coordinates=[(1, 0)])
+    assert len(results.compartment_indices) == 0
+    results.select_compartments()
+
+#    # select all species
+#    results.select_species()
+#    assert len(results.species_indices) == 4
+#    
+#    # select all compartments
+#    results.select_compartments()
+#    assert len(results.compartment_indices) == 1
+    
+    results.select_timepoints(100, 200, 20)
+    assert len(results.timepoints) == 6
+    
+    results.select_timepoints(timestep=1 * minute)
+    assert len(results.timepoints) == 101
+
+#    results.select_timepoints(5 * minute, 10 * minute, 2 * minute)
+#    results.select_timepoints(5 * minute, 10 * minute)
+    
+    results.select_timepoints()
+    assert len(results.timepoints) == 601
+
+    # ........
+    
+    results.select_species('gene1', 'protein1')
+    results.select_compartments(names=['NARbacterium'])
+    results.select_timepoints(timestep=1 * minute)
+    results.select_runs([1, 7, 6, 20])
+    assert results.amounts().shape == (4, 2, 1, 101)
+    
+
+
+if __name__ == '__main__':
+    test()
 #    execfile('mcss_results_widget.py')
