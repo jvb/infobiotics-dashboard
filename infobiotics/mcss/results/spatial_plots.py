@@ -323,7 +323,24 @@ class Surface(HasTraits):
     scene = Instance(MlabSceneModel, ())
     surf = Instance(PipelineBase) # surf = plot
 
-    def _surf_default(self):
+    def __init__(self, array, warp_scale, extent, species_name, quantities_display_units, timepoints):
+        HasTraits.__init__(self)
+        self.array = array
+        self.warp_scale = warp_scale
+        self.extent = extent
+        self.species_name = species_name
+        self.quantities_display_units = quantities_display_units
+        self.timepoints = timepoints
+        # create a 'position' trait that enables us to choose the frame
+        self.add_trait('position', Range(0, len(timepoints) - 1, 0))
+
+    view = View(Item('scene', show_label=False, editor=SceneEditor(scene_class=MayaviScene)),
+                VGroup('position'#, 'sync_positions'
+                ),
+                kind='panel', resizable=True)
+
+#    def _surf_default(self):
+    def surf_default(self):
         """ (Called after initialisation) \
             Plots a surface with the shape of the first two indicies in \ 
             self.array and the height of the value in the third index.
@@ -332,9 +349,9 @@ class Surface(HasTraits):
         surf = self.scene.mlab.surf(self.array[:, :, 0], warp_scale=self.warp_scale)#, figure=self.scene.mayavi_scene)
 
         # create a title and get handle to it
-        self.title = self.scene.mlab.title("Molecules of %s at 0" % self.species_name, size=0.5, height=0.91)#, figure=self.scene.mayavi_scene)
+        self.title = self.scene.mlab.title("%s at 0" % self.species_name, size=0.5, height=0.91)#, figure=self.scene.mayavi_scene)
         self.title.x_position = 0.03
-        self.title.actor.width = 0.94
+        self.title.actor.width = 0.8#0.94
 
         # create axes showing compartment x,y coordinates and fix text formatting
         axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y") #, figure=self.scene.mayavi_scene)
@@ -342,10 +359,10 @@ class Surface(HasTraits):
         #axes.axes.print_traits()
         axes.axes.number_of_labels = 3
         axes.axes.z_axis_visibility = 0
-        axes.axes.z_label = ""
+        axes.axes.z_label = ''#self.quantities_display_units
 
         # create and get a handle to the scalarbar
-        scalarbar = self.scene.mlab.scalarbar(None, "", "vertical", 5, None, '%.f')#, figure=self.scene.mayavi_scene)
+        scalarbar = self.scene.mlab.scalarbar(None, self.quantities_display_units, "vertical", 5, None, '%.f')#, figure=self.scene.mayavi_scene)
         # set scalarbar title and label fonts
         scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
         scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
@@ -360,24 +377,10 @@ class Surface(HasTraits):
 
         return surf
 
-    def __init__(self, array, warp_scale, extent, species_name, timepoints):
-        HasTraits.__init__(self)
-        self.array = array
-        self.warp_scale = warp_scale
-        self.extent = extent
-        self.species_name = species_name
-        self.timepoints = timepoints
-        # create a 'position' trait that enables us to choose the frame
-        self.add_trait('position', Range(0, len(timepoints) - 1, 0))
-
-    view = View(Item('scene', show_label=False, editor=SceneEditor(scene_class=MayaviScene)),
-                VGroup('position'#, 'sync_positions'
-                ),
-                kind='panel', resizable=True)
-
     @on_trait_change('scene.activated')
     def create_pipeline(self):
         """ set traits for items in figure """
+        self.surf = self.surf_default()
         # some things need to activated here otherwise it crashes
 
         # doing this somehow fixes the overlapping figures problem in MayaVi2 3.1 that "figure=self.scene.mayavi_scene)" fixes in 3.3
@@ -386,13 +389,18 @@ class Surface(HasTraits):
 #        # set position and size of scalarbar
 #        # since VTK-5.2 the actual scalarbar widget is accessed through the scalar_bar_widget's representation property 
 #        # (see https://mail.enthought.com/pipermail/enthought-dev/2009-May/021342.html)
-#        scalar_bar_widget.representation.set(position=[0.827,0.0524], position2=[0.1557,0.42])
+        scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
 
-        f = self.scene.mlab.gcf()
-        camera = f.scene.camera
-        camera.focal_point = (-0.5, -0.5, 0)
-        camera.position = (36.0146, 67.4237, 77.1612)
-        camera.distance = 100
+#        f = self.scene.mlab.gcf()
+#        camera = f.scene.camera
+#        camera.focal_point = (-0.5, -0.5, 0)
+#        camera.position = (36.0146, 67.4237, 77.1612)
+#        camera.distance = 100
+#        self.scene.isometric_view()
+
+    def __del__(self):
+        del self.surf
+
 
     # PyQt4 slot
     def set_position(self, position):
@@ -401,11 +409,11 @@ class Surface(HasTraits):
     @on_trait_change('position')
     def update_plot(self):
         self.surf.mlab_source.set(scalars=self.array[:, :, self.position])
-        self.title.text = "Molecules of %s at %s" % (self.species_name, round(self.timepoints[self.position]))
+        self.title.text = "%s at %s" % (self.species_name, round(self.timepoints[self.position]))
 
     def arrayAtPosition(self, position):
         return self.array[:, :, position]
 
 
 if __name__ == '__main__':
-    execfile('simulator_results_dialog.py')
+    execfile('mcss_results_widget.py')

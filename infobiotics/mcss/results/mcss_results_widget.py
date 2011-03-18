@@ -324,18 +324,18 @@ class McssResultsWidget(QWidget):
         
         # timepoints
         # choosing some sensible defaults for 'every' to reduce initial number of data points
-        timepoints_data_units = self.ui.timepoints_data_units_combo_box.currentText() 
-        if timepoints_data_units in ('seconds', 'minutes') and to >= 300: # 5 minutes in seconds or 5 hours in minutes
-            self.ui.every_spin_box.setValue(60)
-        elif timepoints_data_units in ('hours') and to >= 168: # a week in hours -> days
-            self.ui.every_spin_box.setValue(24)
-        elif timepoints_data_units in ('days'):
-            if to < 30:
-                self.ui.every_spin_box.setValue(7)
-            elif 30 < to <= 365:
-                self.ui.every_spin_box.setValue(30)
-#        else:
-#            self.ui.every_spin_box.setValue(to // 100) 
+#        timepoints_data_units = self.ui.timepoints_data_units_combo_box.currentText() 
+#        if timepoints_data_units in ('seconds', 'minutes') and to >= 300: # 5 minutes in seconds or 5 hours in minutes
+#            self.ui.every_spin_box.setValue(60 // float(self.ui.log_interval_label.text()))
+#        elif timepoints_data_units in ('hours') and to >= 168: # a week in hours -> days
+#            self.ui.every_spin_box.setValue(24)
+#        elif timepoints_data_units in ('days'):
+#            if to < 30:
+#                self.ui.every_spin_box.setValue(7)
+#            elif 30 < to <= 365:
+#                self.ui.every_spin_box.setValue(30)
+##        else:
+##            self.ui.every_spin_box.setValue(to // 100) 
 
         # volumes
 #        i = self.ui.quantities_display_type_combo_box.findText('concentrations')
@@ -440,7 +440,8 @@ class McssResultsWidget(QWidget):
                 self.ui.plot_timeseries_button,
                 self.ui.plot_histogram_button,
             )
-            if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
+#            if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
+            if num_selected_species >= 1 and num_selected_compartments > 1:
                 enable_widgets(self.ui.visualise_population_button)
             else:
                 disable_widgets(self.ui.visualise_population_button)
@@ -823,25 +824,27 @@ class McssResultsWidget(QWidget):
 
         return file_name
 
-
+    #TODO 
     @wait_cursor
     def surfacePlot(self):
         results = self.selected_items_results()
         surfaces = results.surfaces()
-        surfaces = mcss_results.mean(surfaces, 0)
+        runs = surfaces.shape[0]
+        surfaces = mcss_results.mean(surfaces, 0) # do mean across all runs
         if surfaces is None:
             return
         (xmin, xmax), (ymin, ymax) = results.xy_min_max()
         surfaces_ = []
         species = self.selected_species()
         for si, s in enumerate(species):
-            surface = surfaces[0, si]
+#            surface = surfaces[0, si] # if we haven't taken the mean
+            surface = surfaces[si] # if we've taken the mean
             zmax = np.max(surface)
 #            if zmax == 0: print "%s never amounts to anything." % s.name
             extent = [xmin, xmax, ymin, ymax, 0, zmax]
 #            warp_scale = 'auto' # doesn't work
             warp_scale = (1 / zmax) * 10 #FIXME 10 is magic number
-            surface = Surface(surface, warp_scale, extent, s.text(), results.timepoints)
+            surface = Surface(surface, warp_scale, extent, s.text() if runs == 1 else s.text() + ' (mean)', self.units_dict()['quantities_display_units'], results.timepoints)
             surfaces_.append(surface)
         self.spatial_plots_window = SpatialPlotsWindow(surfaces_, self)
         self.spatial_plots_window.show()
@@ -963,7 +966,8 @@ class McssResultsWidget(QWidget):
 def main():
     argv = qApp.arguments()
 #    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5')
-    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-simulator_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
+#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-simulator_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
+    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-simulator_results/infobiotics/mcss/results/tests/pulsePropagation-2_runs.h5') # has volumes dataset
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)
