@@ -269,11 +269,61 @@ class TestMcssResults(unittest.TestCase):
 #        array = McssResults('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5').amounts()
 #
 #    def test_functions_of_values_over_axis_generator(self):
-#        from mcss_results import functions_of_values_over_axis_generator
+#        functions_of_values_over_axis_generator = mcss_results.functions_of_values_over_axis_generator
 #
-#    def test_functions_of_values_over_successive_axes(self):
-#        from mcss_results import functions_of_values_over_successive_axes
-#
+    def _test_functions_of_values_over_successive_axes_one_axis(self):
+        functions_of_values_over_successive_axes = mcss_results.functions_of_values_over_successive_axes 
+        results = McssResults('germination_09.h5')
+        amounts = results.amounts()
+        volumes = results.volumes()
+        amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
+        volumes_axes = ['runs', 'compartments', 'timepoints']    
+
+        def _test(array, original_axes):
+            for axis in original_axes:
+                f, axes = functions_of_values_over_successive_axes(array, original_axes, (axis,), (mcss_results.mean,))
+                # shape
+                shape = list(array.shape)
+                shape.pop(original_axes.index(axis))
+                self.assertEqual(tuple(shape), f.shape)
+                # axes
+                original_axes_copy = original_axes[:]
+                original_axes_copy.remove(axis)
+                self.assertEqual(tuple(original_axes_copy), axes)
+
+        _test(amounts, amounts_axes)
+        _test(volumes, volumes_axes)
+    
+    def _test_functions_of_values_over_successive_axes_all_axes_randomly(self):
+        functions_of_values_over_successive_axes = mcss_results.functions_of_values_over_successive_axes 
+        results = McssResults('germination_09.h5')
+        amounts = results.amounts()
+        volumes = results.volumes()
+        amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
+        volumes_axes = ['runs', 'compartments', 'timepoints']    
+        
+        array = amounts
+        original_axes = amounts_axes
+        functions = [mcss_results.mean, mcss_results.std, mcss_results.sum, mcss_results.var]
+        import random
+        random.shuffle(functions)
+        for i in range(1, len(original_axes)):
+            original_axes_slice = original_axes[:]
+            random.shuffle(original_axes_slice)
+            original_axes_slice = original_axes_slice[:i]
+            f, axes = functions_of_values_over_successive_axes(array, original_axes, original_axes_slice, functions[:i])
+            # shape
+            shape = list(array.shape)
+            for i in [array.shape[original_axes.index(axis)] for axis in original_axes_slice]:
+                shape.remove(i)
+            self.assertEqual(tuple(shape), f.shape)
+            # axes
+            original_axes_copy = original_axes[:]
+            for axis in original_axes_slice:
+                original_axes_copy.remove(axis)
+            self.assertEqual(tuple(original_axes_copy), axes)
+        
+        
 #    def test_McssResults_allocate_array(self):
 #        pass
 #
@@ -281,7 +331,7 @@ class TestMcssResults(unittest.TestCase):
 #        pass
 #
 
-    def test_McssResults_volumes(self):
+    def _test_McssResults_volumes(self):
         results = McssResults('germination_09.h5') 
         
         # one run

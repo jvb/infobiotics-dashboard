@@ -24,7 +24,8 @@ sum_compartments_at_same_xy_lattice_position = True
 mean = lambda array, axis: np.mean(array, axis, dtype=np.float64)
 #std = lambda array, axis: np.std(array, axis, ddof=1, dtype=np.float64)
 std = lambda array, axis: Quantity(np.std(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.std(array, axis, ddof=1, dtype=np.float64) # work around Quantity.std not having 'ddof' keyword argument
-
+var = lambda array, axis: Quantity(np.var(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.var(array, axis, ddof=1, dtype=np.float64) # work around Quantity.std not having 'ddof' keyword argument
+sum = lambda array, axis: np.sum(array, axis, dtype=np.float64)
 
 def functions_of_values_over_axis(array, array_axes, axis, functions): 
     ''' Returns an array similar in shape to 'array' but with the dimension 
