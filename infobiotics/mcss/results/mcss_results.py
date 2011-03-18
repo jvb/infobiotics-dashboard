@@ -669,67 +669,6 @@ class McssResults(object):
         return results
 
 
-#    def timeseries(self):
-#        pass
-#    
-#    def plot_timeseries(self):
-#        pass
-#    
-#    def timeseries_plots(self):
-#        pass
-#
-#    def histograms(self):
-#        pass
-#    
-#    def export_data(self):
-#        pass
-#
-#    def surfaces(self):
-#        pass
-
-    def get_surfaces(self):
-        ''' Returns a tuple of (timepoints, results) where timepoints is an 1-D
-        array of floats and results is a list of 3-D arrays of floats with the 
-        shape (x_position, y_position, timepoint) for each species. '''
-
-        selected_compartments = [compartment for compartment in self.simulation._runs_list[self.run_indices[0]]._compartments_list]
-        selected_species = [self.simulation._species_list[i] for i in self.species_indices]
-
-        # create 3D array [x,y,t] for amounts data, x and y dimensions should represent total space
-        all_compartments = selected_compartments[0].run._compartments_list
-        xmax = max([compartment.x_position for compartment in all_compartments])
-        xmin = min([compartment.x_position for compartment in all_compartments])
-        ymax = max([compartment.y_position for compartment in all_compartments])
-        ymin = min([compartment.y_position for compartment in all_compartments])
-
-        h5 = tables.openFile(self.filename)
-        results = []
-        for s in selected_species:
-            surface = np.zeros(((xmax - xmin) + 1, (ymax - ymin) + 1, len(self.timepoints)), self.type)
-
-            # fill surface with amounts
-            for r in self.run_indices: # only one for now, see SimulationResultsDialog.update_ui()
-                where = '/run%s' % (r + 1)
-                try:
-                    amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.stop:self.step]
-                except MemoryError:
-                    message = 'Could not allocate memory for amounts.\nTry selecting fewer species, a shorter time window or a bigger time interval multipler.'
-                    if self.parent is not None:
-                        QMessageBox.warning('Out of memory', message)
-                    else:
-                        print message
-                    return (self.timepoints, [], None, None, None, None)
-                if sum_compartments_at_same_xy_lattice_position:
-                    for c in selected_compartments:
-                        surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :] + surface[c.x_position, c.y_position, :]
-                else:
-                    for c in selected_compartments:
-                        surface[c.x_position, c.y_position, :] = amounts[s.index, c.index, :]
-            results.append(surface)
-        h5.close()
-        return (self.timepoints, results, xmin, xmax, ymin, ymax)
-
-
     def select_species(self, *names):
         '''Select species with names in 'names'.
         
@@ -809,7 +748,13 @@ class McssResults(object):
             self.timestep = timestep
         else:
             self.timestep = self._timepoints[1] - self._timepoints[0]
-             
+
+
+    def reset_selection(self):
+        self.select_runs()
+        self.select_species()
+        self.select_compartments()
+        self.select_timepoints()             
         
         
     '''
@@ -884,21 +829,104 @@ class McssResults(object):
         NARbacterium | 0     | 0 | 0
         '''
         labels = ('Name', 'Index', 'X', 'Y')
-        rows = [[str(s) for s in (compartment.name, compartment.index, compartment.x_position, compartment.y_position)] for compartment in self.simulation._runs_list[0]._compartments_list]
+#        rows = [[str(s) for s in (compartment.name, compartment.index, compartment.x_position, compartment.y_position)] for compartment in self.simulation._runs_list[0]._compartments_list]
+        rows = [(compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.simulation._runs_list[0]._compartments_list]
         rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
         table = indent([labels] + rows, hasHeader=True)
         return table
 
-    def reset_selection(self):
-        self.select_runs()
-        self.select_species()
-        self.select_compartments()
-        self.select_timepoints()
+
+#    def timeseries(self):
+#        pass
+#    
+#    def plot_timeseries(self):
+#        pass
+#    
+#    def timeseries_plots(self):
+#        pass
+#
+#    def histograms(self):
+#        pass
+#    
+#    def export_data(self):
+#        pass
+#
+    @property
+    def compartment_indices(self):
+        return self._compartment_indices
+
+    @compartment_indices.setter
+    def compartment_indices(self, compartment_indices):
+        _compartment_indices = xrange(self.simulation._runs_list[0].number_of_compartments)
+        self._compartment_indices = [i for i in compartment_indices if i in _compartment_indices]
+
+    def surfaces(self):
+        '''Returns a 5D array (runs, species, x_position, y_position, timepoints) of the amounts
+        of each species in all the selected compartments at each (x,y) position.
+        
+        The surface of the second species in the third run at timepoint 0 is 
+        surfaces()[2,1,:,:,0].
+        
+        The points that defined the area of the surface are retrievable with
+        xy_min_max().
+        
+        surfaces = results.surfaces() 
+        >>> print surfaces.shape
+        (3, 2, 1, 15, 17)
+        
+        # the mean over runs of each species
+        >>> print mean(surfaces, 0).shape 
+        (2, 1, 15, 17)
+        
+        # the mean over runs of the sum of the species amounts
+        >>> print mean(sum(surfaces, 1), 0).shape
+        (1, 15, 17)
+        
+        '''
+
+#        all_compartments = self.simulation._runs_list[self.run_indices[0]]._compartments_list
+        all_compartments = self.simulation._runs_list[0]._compartments_list
+        
+        selected_compartments = [all_compartments[i] for i in self.compartment_indices]
+        
+        # create 3D array [x,y,t] for amounts data, x and y dimensions should represent total space
+##        x_positions = [compartment.x_position for compartment in all_compartments]
+##        y_positions = [compartment.y_position for compartment in all_compartments]
+#        x_positions = [compartment.x_position for compartment in selected_compartments]
+#        y_positions = [compartment.y_position for compartment in selected_compartments]
+#        xmax = max(x_positions)
+#        xmin = min(x_positions)
+#        ymax = max(y_positions)
+#        ymin = min(y_positions)
+        (xmin, xmax), (ymin, ymax) = self.xy_min_max()
+
+        # fill surfaces with amounts
+        surfaces = self._allocate_array((len(self.run_indices), len(self.species_indices), (xmax - xmin) + 1, (ymax - ymin) + 1, len(self.timepoints)), 'Could not allocate memory for amounts.\nTry selecting a shorter time window or a longer time step.')
+        amounts = self.amounts()
+        for ri, r in enumerate(self.run_indices): # only one for now, see SimulationResultsDialog.update_ui()
+            for si, s in enumerate(self.species_indices):
+                for ci, c in enumerate(self.compartment_indices):
+                    compartment = selected_compartments[ci]
+#                    print ri, si, compartment.x_position, compartment.y_position, '=', ri, si, ci
+                    surfaces[ri, si, compartment.x_position - xmin, compartment.y_position - ymin, :] += amounts[ri, si, ci, :]
+        return surfaces
+    
+    def x_min_max(self):
+        x_positions = [self.simulation._runs_list[0]._compartments_list[i].x_position for i in self.compartment_indices]
+        return min(x_positions), max(x_positions)
+        
+    def y_min_max(self):
+        y_positions = [self.simulation._runs_list[0]._compartments_list[i].y_position for i in self.compartment_indices]
+        return min(y_positions), max(y_positions)
+        
+    def xy_min_max(self):
+        return self.x_min_max(), self.y_min_max()
+
         
 
-def test():
+def test1():
     results = McssResults('tests/NAR_simulation.h5')
-    exit()
+
 #    print results.runs_information()
 #    print results.species_information(1, True)
 #    print results.compartments_information()
@@ -966,7 +994,27 @@ def test():
     assert results.amounts().shape == (4, 2, 1, 101)
     
 
+def test2():
+    results = McssResults('tests/germination_09.h5')
+    results.select_species('SIG1', 'P1')
+#    print results.runs_information()
+#    print results.species_information(sort_column_index=0)
+#    print results.compartments_information(sort_column_index=1)
+#    print results.compartments_information(sort_column_index=3)
+    results.timestep = 1 * hour
+    results.timepoints_display_units = 'minutes'
+#    print results.timepoints
+    results.select_runs([1, 2, 3])
+#    print results.amounts().shape # (3, 2, 39, 17)
+    results.select_compartments(xy_coordinates=[(0, y) for y in range(15, 30)])
+#    print results.compartment_indices
+    surfaces = results.surfaces() 
+    print surfaces.shape
+    print mean(surfaces, 0).shape # the mean over runs of each species 
+    print mean(sum(surfaces, 1), 0).shape # the mean over runs of the sum of the species amounts
+
 
 if __name__ == '__main__':
-    test()
+    test1()
+    test2()
 #    execfile('mcss_results_widget.py')

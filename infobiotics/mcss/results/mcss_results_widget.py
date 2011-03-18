@@ -827,21 +827,23 @@ class McssResultsWidget(QWidget):
     @wait_cursor
     def surfacePlot(self):
         results = self.selected_items_results()
-        timepoints, results, xmin, xmax, ymin, ymax = results.get_surfaces()
-        if len(results) == 0:
+        surfaces = results.surfaces()
+        surfaces = mcss_results.mean(surfaces, 0)
+        if surfaces is None:
             return
-        surfaces = []
+        (xmin, xmax), (ymin, ymax) = results.xy_min_max()
+        surfaces_ = []
         species = self.selected_species()
         for si, s in enumerate(species):
-            surface = results[si]
+            surface = surfaces[0, si]
             zmax = np.max(surface)
 #            if zmax == 0: print "%s never amounts to anything." % s.name
             extent = [xmin, xmax, ymin, ymax, 0, zmax]
 #            warp_scale = 'auto' # doesn't work
             warp_scale = (1 / zmax) * 10 #FIXME 10 is magic number
-            surface = Surface(surface, warp_scale, extent, s.text(), timepoints)
-            surfaces.append(surface)
-        self.spatial_plots_window = SpatialPlotsWindow(surfaces, self)
+            surface = Surface(surface, warp_scale, extent, s.text(), results.timepoints)
+            surfaces_.append(surface)
+        self.spatial_plots_window = SpatialPlotsWindow(surfaces_, self)
         self.spatial_plots_window.show()
 
 
@@ -960,8 +962,8 @@ class McssResultsWidget(QWidget):
 
 def main():
     argv = qApp.arguments()
-    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5')
-#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/germination_09.h5') # has volumes dataset
+#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5')
+    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-simulator_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)
