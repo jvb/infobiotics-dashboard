@@ -1,3 +1,6 @@
+#TODO refactor tests
+#TODO rename TestCase class McssResultsTestCase
+
 import unittest2 as unittest
 
 import numpy as np
@@ -8,10 +11,31 @@ from mcss_postprocess import mcss_postprocess
 from infobiotics.mcss.results.mcss_results import McssResults
 import infobiotics.mcss.results.mcss_results as mcss_results
 
-class TestMcssResults(unittest.TestCase):
 
-#    def test(self):
-#        pass
+def fix_mcss_postprocess_germination_09_h5_output(m, step=1):
+    # mcss-postprocess prints all compartments sorted by x,y coordinate 
+    # *not* index
+
+    # in germination_09.h5 [0,0] has index 1 and [0,1] has index 0
+    # also [0,25] has index 38
+
+    # swap data for compartments with indices 0 and 1
+    m0 = np.copy(m[step * 0:step * 1])
+    m1 = np.copy(m[step * 1:step * 2])
+    m[step * 0:step * 1] = m1
+    m[step * 1:step * 2] = m0
+
+    # move data for compartment with index 38 at position 25 to 38 and 
+    # everything else down to 25
+    m25 = np.copy(m[step * 25:step * 26])
+    m26to38 = np.copy(m[step * 26:])#step * 39)
+    m[step * 25:step * 38] = m26to38 
+    m[step * 38:step * 39] = m25         
+    
+    return m
+
+
+class TestMcssResults(unittest.TestCase):
 
     def setUp(self):        
         self.results = McssResults('NAR_simulation.h5')
@@ -25,7 +49,8 @@ class TestMcssResults(unittest.TestCase):
 #                                   quantities_display_units='attomolar',
 #                                   volume=1)
 
-    def _test_concentrations(self):
+#    @skip
+    def test_concentrations(self):
         file_name = 'germination_09.h5'
         results = McssResults(file_name)
         
@@ -95,7 +120,8 @@ class TestMcssResults(unittest.TestCase):
                     verbose=True
                 )
             
-    def _test_functions_of_concentrations(self):
+#    @skip
+    def test_functions_of_concentrations(self):
         functions = (
             mcss_results.mean,
             mcss_results.std,
@@ -127,8 +153,38 @@ class TestMcssResults(unittest.TestCase):
 #                verbose=True
 #            )        
             
+#    @skip
+    def test_McssResults_get_functions_over_runs(self):
+        
+#        print self.results.amounts().shape
+#        print np.mean(self.results.amounts(), axis=0)
+
+        functions = (
+            mcss_results.mean,
+            mcss_results.std,
+        )
+        f = self.results.get_functions_over_runs(functions)
+        
+        m = mcss_postprocess('-l')[2]
+        
+        # compare mean and std of each species in only compartment of all runs at each timepoint
+        
+        for i in range(0, 4):
+            # mean
+            assert_array_almost_equal(
+                m[i * 3], # 2 is outputs, 0 is 1st output array
+                f[0, i, 0, :].magnitude,
+                verbose=True
+            )
+            # std
+            assert_array_almost_equal(
+                m[i * 3 + 1], # 2 is outputs, 0 is 1st output array
+                f[1, i, 0, :].magnitude,
+                verbose=True
+            )        
     
-    def _test_McssResults(self):
+#    @skip
+    def test_McssResults(self):
         amounts = self.results.amounts()
         self.assertEqual(amounts.shape, (200, 4, 1, 601))
 
@@ -145,7 +201,8 @@ class TestMcssResults(unittest.TestCase):
 #            )    
 
 
-    def _test_functions_of_values_over_axis_sum(self):
+#    @skip
+    def test_functions_of_values_over_axis_sum(self):
         amounts = self.results.amounts()
 
         #TODO move amounts_axes from McssResults to mcss_results?
@@ -168,7 +225,8 @@ class TestMcssResults(unittest.TestCase):
             verbose=True
         )
         
-    def _test_functions_of_values_over_axis_mean_and_std(self): #TODO extend to c_i
+#    @skip
+    def test_functions_of_values_over_axis_mean_and_std(self): #TODO extend to c_i
         amounts = self.results.amounts()
 
         # mean and std
@@ -207,42 +265,6 @@ class TestMcssResults(unittest.TestCase):
             )
         
 
-    def _test_McssResults_get_functions_over_runs(self):
-        
-#        print self.results.amounts().shape
-#        print np.mean(self.results.amounts(), axis=0)
-
-        functions = (
-            mcss_results.mean,
-            mcss_results.std,
-        )
-        f = self.results.get_functions_over_runs(functions)
-        
-        m = mcss_postprocess('-l')[2]
-        
-        # compare mean and std of each species in only compartment of all runs at each timepoint
-        
-        for i in range(0, 4):
-            # mean
-            assert_array_almost_equal(
-                m[i * 3], # 2 is outputs, 0 is 1st output array
-                f[0, i, 0, :].magnitude,
-                verbose=True
-            )
-            # std
-            assert_array_almost_equal(
-                m[i * 3 + 1], # 2 is outputs, 0 is 1st output array
-                f[1, i, 0, :].magnitude,
-                verbose=True
-            )        
-
-
-    def test_compare_output_of_get_functions_over_runs_and_functions_of_values_over_axis(self):
-        assert_array_almost_equal(
-            mcss_results.functions_of_values_over_axis(self.results.amounts(), ('runs', 'species', 'compartments', 'timepoints'), 'runs', (mcss_results.mean, mcss_results.std)),
-            self.results.get_functions_over_runs((mcss_results.mean, mcss_results.std))
-        )
-
 #    def test_functions_of_values_over_axis(self):
 #        from mcss_results import functions_of_values_over_axis
 #        import numpy as np
@@ -275,71 +297,22 @@ class TestMcssResults(unittest.TestCase):
 ##                tuple([len(functions)] + [len(array) for j, ax in enumerate(array_axes) if not ax == axis]))#(2, 2, 3, 4))
 #        from mcss_results import McssResults
 #        array = McssResults('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5').amounts()
-#
+
+
 #    def test_functions_of_values_over_axis_generator(self):
-#        functions_of_values_over_axis_generator = mcss_results.functions_of_values_over_axis_generator
+#        from mcss_results import functions_of_values_over_axis_generator
 #
-    def _test_functions_of_values_over_successive_axes_one_axis(self):
-        functions_of_values_over_successive_axes = mcss_results.functions_of_values_over_successive_axes 
-        results = McssResults('germination_09.h5')
-        amounts = results.amounts()
-        volumes = results.volumes()
-        amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
-        volumes_axes = ['runs', 'compartments', 'timepoints']    
-
-        def _test(array, original_axes):
-            for axis in original_axes:
-                f, axes = functions_of_values_over_successive_axes(array, original_axes, (axis,), (mcss_results.mean,))
-                # shape
-                shape = list(array.shape)
-                shape.pop(original_axes.index(axis))
-                self.assertEqual(tuple(shape), f.shape)
-                # axes
-                original_axes_copy = original_axes[:]
-                original_axes_copy.remove(axis)
-                self.assertEqual(tuple(original_axes_copy), axes)
-
-        _test(amounts, amounts_axes)
-        _test(volumes, volumes_axes)
-    
-    def _test_functions_of_values_over_successive_axes_all_axes_randomly(self):
-        functions_of_values_over_successive_axes = mcss_results.functions_of_values_over_successive_axes 
-        results = McssResults('germination_09.h5')
-        amounts = results.amounts()
-        volumes = results.volumes()
-        amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
-        volumes_axes = ['runs', 'compartments', 'timepoints']    
-        
-        array = amounts
-        original_axes = amounts_axes
-        functions = [mcss_results.mean, mcss_results.std, mcss_results.sum, mcss_results.var]
-        import random
-        random.shuffle(functions)
-        for i in range(1, len(original_axes)):
-            original_axes_slice = original_axes[:]
-            random.shuffle(original_axes_slice)
-            original_axes_slice = original_axes_slice[:i]
-            f, axes = functions_of_values_over_successive_axes(array, original_axes, original_axes_slice, functions[:i])
-            # shape
-            shape = list(array.shape)
-            for i in [array.shape[original_axes.index(axis)] for axis in original_axes_slice]:
-                shape.remove(i)
-            self.assertEqual(tuple(shape), f.shape)
-            # axes
-            original_axes_copy = original_axes[:]
-            for axis in original_axes_slice:
-                original_axes_copy.remove(axis)
-            self.assertEqual(tuple(original_axes_copy), axes)
-        
-        
+#    def test_functions_of_values_over_successive_axes(self):
+#        from mcss_results import functions_of_values_over_successive_axes
+#
 #    def test_McssResults_allocate_array(self):
 #        pass
 #
 #    def test_McssResults_timepoints(self):
 #        pass
-#
 
-    def _test_McssResults_volumes(self):
+#    @skip
+    def test_McssResults_volumes(self):
         results = McssResults('germination_09.h5') 
         
         # one run
@@ -371,36 +344,14 @@ class TestMcssResults(unittest.TestCase):
         )
 
 
-def fix_mcss_postprocess_germination_09_h5_output(m, step=1):
-    # mcss-postprocess prints all compartments sorted by x,y coordinate 
-    # *not* index
-
-    # in germination_09.h5 [0,0] has index 1 and [0,1] has index 0
-    # also [0,25] has index 38
-
-    # swap data for compartments with indices 0 and 1
-    m0 = np.copy(m[step * 0:step * 1])
-    m1 = np.copy(m[step * 1:step * 2])
-    m[step * 0:step * 1] = m1
-    m[step * 1:step * 2] = m0
-
-    # move data for compartment with index 38 at position 25 to 38 and 
-    # everything else down to 25
-    m25 = np.copy(m[step * 25:step * 26])
-    m26to38 = np.copy(m[step * 26:])#step * 39)
-    m[step * 25:step * 38] = m26to38 
-    m[step * 38:step * 39] = m25         
-    
-    return m
-
-
-
 #    def test_McssResults_amounts(self):
 #        pass
 #
 #    def test_McssResults_get_surfaces(self):
 #        pass
+
     
 
 if __name__ == '__main__':
-    unittest.main()
+#    unittest.main()
+    unittest.main(defaultTest='TestMcssResults.test_McssResults_volumes')
