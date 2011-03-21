@@ -37,7 +37,6 @@ if xmax - xmin > ymax - ymin:
 else:
     longest = 'y'
     zmax = xmax + xmin
-#print longest
 
 zmin = 0
 
@@ -85,7 +84,6 @@ for i, species in enumerate(species):
 
 quantities_display_units = 'molecules'
 mlab.title(quantities_display_units)
-
-#mlab.view(142, -72, 32)
-
+mlab.orientation_axes()
+mlab.view(45.0, 65, 115, np.array([ 15., 25., 5.]))
 mlab.show()
