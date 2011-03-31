@@ -123,9 +123,10 @@ class MyModel(HasTraits):
 
     @on_trait_change('time')
     def update_plot(self, time):
+        time_index = int(self.from_ - self.to_)
 #        print time #TODO
         for surface in self.surfaces:
-            surface.surf.mlab_source.scalars = surface.data[:, :, time]
+            surface.surf.mlab_source.scalars = surface.data[:, :, time_index]
 
 #    @on_trait_change('scene.activated')
 #    def create_plot(self):
