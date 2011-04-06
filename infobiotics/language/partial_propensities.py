@@ -1,3 +1,4 @@
+from __future__ import division
 from math import log
 from random import random
 from multiset import multiset
@@ -12,20 +13,22 @@ class reaction(object):
         self.products = multiset(products)
         self.constant = float(constant)
     def __str__(self):
-        return '"%s -> %s"' % (self.reactants, self.products)
+        return '%s -> %s' % (self.reactants, self.products)
     def __repr__(self):
         return str(self)
     
 
 def PDM(reactions, state, t_f):
-    '''Initialize compartment where reactions is a list of reaction objects
-    and state is a dictionary of species amounts.'''
+    '''Initialize compartment where reactions is a list of reaction objects,
+    state is a dictionary of species amounts and t_f is the maximum simulated
+    time (in whatever units the reactions stochastic rate constants are).'''
     
-    print
 #    print 'reactions ='
     for i, r in enumerate(reactions):
-        print 'R_%s =' % i, r
+        print 'R_%s =' % (i), r
     print
+    
+    M = len(reactions)
     
     # add missing species to state
     for r in reactions:
@@ -43,11 +46,13 @@ def PDM(reactions, state, t_f):
 
     # initialize n
     species = sorted(state.keys())
+    N = len(species)
     n = [state[s] for s in species]
 
-    U3 = [[] for _ in range(len(species) + 1)]
-    Pi = [[] for _ in range(len(species) + 1)]
-    L = [[] for _ in range(len(species) + 1)]
+    U3 = [[] for _ in range(N)]
+    Pi = [[] for _ in range(N + 1)]
+    from copy import deepcopy
+    L = deepcopy(Pi)
 
     # initialize Pi and L
     for i, r in enumerate(reactions):
@@ -78,7 +83,7 @@ def PDM(reactions, state, t_f):
         Pi[Pi_index].append(pi)
         L[Pi_index].append(i)
         if cardinality == 2: 
-            U3[dependant_index + 1].append((Pi_index, len(Pi[Pi_index]) - 1))
+            U3[dependant_index].append((Pi_index, len(Pi[Pi_index]) - 1))
     
     # initialize Lambda
     Lambda = [sum(pies) if len(pies) > 0 else 0 for pies in Pi]
@@ -91,6 +96,39 @@ def PDM(reactions, state, t_f):
     assert Lambda[0] == Sigma[0]
     Sigma_0_max = Lambda_0_max = Sigma[0]
 
+    def print_Sigma_n_Lambda_Pi():
+        print 'i  Sigma  <- n    <-   Lambda <- Pi'
+        for i in range(len(Pi)):
+            Sigma_i = str(Sigma[i]).ljust(10)
+            Lambda_i = str(Lambda[i]).ljust(10)
+            if i > 0:
+                n_i = str(n[i - 1]).ljust(10)
+            else:
+                n_i = '-'.ljust(10)
+            print '%s%s%s%s%s' % (str(i).ljust(3), Sigma_i, n_i, Lambda_i, ', '.join(str(pi) for pi in Pi[i]))
+        print
+
+    def DM_a0():
+        a0 = 0
+        for r in reactions:
+            cardinality = r.reactants.cardinality()
+            c = r.constant
+            if cardinality == 0:
+                a0 += c
+                continue
+            reactants = r.reactants.keys()
+            if cardinality == 1:
+                a0 += c * n[species.index(reactants[0])]
+            elif cardinality == 2:
+                n_i = n[species.index(reactants[0])]
+                if len(reactants) == 1:
+                    # homo
+                    a0 += c * 0.5 * n_i * (n_i - 1)
+                else:
+                    # hetero
+                    a0 += c * n_i * n[species.index(reactants[1])]
+        return a0
+
     a = sum(Sigma)
     
     delta_a = 0
@@ -99,28 +137,31 @@ def PDM(reactions, state, t_f):
 
     U2 = [[r.products[s] - r.reactants[s] for s in sorted(r.reactants.keys() + r.products.keys())] for r in reactions]
     
-#    print 'L = '
+    print 'L = look-up table of reaction indicies of partial propensities (Pi)'
     for i, outer in enumerate(L):
         print 'L_%s' % i,
         for inner in outer:
             print inner,
         print
     print
-#    print 'U1 ='
+    print 'U1 is an array of M arrays, where the ith array contains the indices of all species involved in the ith reaction'
     for i, outer in enumerate(U1):
         print 'U1_%s =' % i,
         for inner in outer:
             print inner,
         print
     print
-#    print 'U2 ='
+    print 'U2 is an array of M arrays contains the corresponding stoichiometry (change in population of each species upon reaction) of the species references by U1'
     for i, outer in enumerate(U2):
         print 'U2_%s =' % i,
         for inner in outer:
             print inner,
         print
     print
-#    print 'U3 ='
+    print 'U1 and U2 are sparse representations of the stoichometric matrix'
+    print
+    print
+    print 'U3 is an array of N arrays, where the ith array contains the indices of all entries in Pi that depend on n_i'
     for i, outer in enumerate(U3):
         print 'U3_%s =' % i,
         if len(outer) == 0:
@@ -129,32 +170,47 @@ def PDM(reactions, state, t_f):
             print inner,
         print
     print
-
+    print 'U3 is the dependency graph over species'
+    print
+#    print
+#    print_Sigma_n_Lambda_Pi()
+#    print
     reactions_performed = 0
-    while a > 0 and t < t_f and reactions_performed < 10:
-        
+    while a > 0 and t < t_f:# and reactions_performed < 3:
         print '---------------------------------------'
+
         print
-        print 'time %f' % t, n
+        print 'time %f' % t
+        for i, s in enumerate(species):
+            print s, '=', n[i]
         print
-#        print 'Pi ='
-        for i, outer in enumerate(Pi):
-            print 'Pi_%s =' % i,
-            for inner in outer:
-                print inner,
-            print
-        print
-#        print 'Lambda ='
-        for i, outer in enumerate(Lambda):
-            print 'Lambda_%s =' % i, outer
-        print
-#        print 'Sigma:'
-        for i, outer in enumerate(Sigma):
-            print 'Sigma_%s =' % i, outer
-        print
-        print 'a = %s' % a
-        print 'delta_a = %s' % delta_a
-        print
+##        print 'Pi ='
+#        for i, outer in enumerate(Pi):
+#            print 'Pi_%s =' % i,
+#            for inner in outer:
+#                print inner,
+#            print
+#        print
+##        print 'Lambda ='
+#        for i, outer in enumerate(Lambda):
+#            print 'Lambda_%s =' % i, outer
+#        print
+##        print 'Sigma:'
+#        for i, outer in enumerate(Sigma):
+#            print 'Sigma_%s =' % i, outer
+#        print
+#        print 'a = %s' % a
+#        print 'delta_a = %s' % delta_a
+#        print
+        print_Sigma_n_Lambda_Pi()
+
+        a0 = DM_a0()
+        print a, a0
+#        if t > 0:
+#            print reactions[mu], n
+        assert a == a0
+
+#        exit()
 
         '''
         2. Sample mu: generate a uniform random number r_1 between 0 and 1 and 
@@ -163,56 +219,53 @@ def PDM(reactions, state, t_f):
         '''
         r_1 = random()
         r_1a = r_1 * a
-        print 'r_1a = %s' % r_1a,
+#        print 'r_1a = %s' % r_1a,
         cumulative_sum = 0
-        print Sigma,
+#        print Sigma,
         for i, sigma in enumerate(Sigma):
             I = i
             cumulative_sum += sigma
             if cumulative_sum > r_1a:
                 break
-        if debug:
-            print 'I = %s' % I
+#        print 'I = %s' % I
         
         Phi = sum(Sigma[:I + 1])
-        print 'Phi = %s' % Phi,
+#        print 'Phi = %s' % Phi,
         if I > 0: # avoid divide by zero (not mentioned in paper!)
             Psi = (r_1a - Phi + Sigma[I]) / n[I - 1]
         else:
             Psi = (r_1a - Phi + Sigma[I])
-        print 'Psi = %s' % Psi, Pi[I],
+#        print 'Psi = %s' % Psi, Pi[I],
         cumulative_sum = 0
         for j in range(len(Pi[I])):
             J = j
             cumulative_sum += Pi[I][j]
             if cumulative_sum > Psi:
                 break
-        if debug:
-            print 'J = %s' % J
-        
+#        print 'J = %s' % J
         
         mu = L[I][J]
-        print 'mu = %s' % mu, '(%s)' % reactions[mu], I, Sigma[I]
+#        print 'mu = %s' % mu, '(%s)' % reactions[mu], I, Sigma[I]
         
         '''
         Sample tau: generate a uniform random number r_2 between 0 and 1 and compute
         the time to the next reaction tau as tau <- a^-1 * ln(r_2^-1)
         '''
         r_2 = random()
-        print 'a = %s, r_2=%s' % (a, r_2)
+#        print 'a = %s, r_2=%s' % (a, r_2)
         tau = a ** -1 * log(r_2 ** -1)
         if tau <= 0:
             raise ValueError
-#            if debug:
-#                print 'tau:', tau
+#        print 'tau:', tau
         
         '''
         4. Update n: for each index k of U1_mu, l <- U1_u,k and n_l <- n_l+U2_u,k
         '''
+        print reactions[mu],
+        print n, '->',
         for k, l in enumerate(U1[mu]):
-            print n, '->',
             n[l] += U2[mu][k]
-            print n
+        print n
         # break on negative population
         for n_i in n:
             if n_i < 0:
@@ -224,7 +277,7 @@ def PDM(reactions, state, t_f):
             For each index k of U1_mu, do:
         '''
         for k, l in enumerate(U1[mu]): # 5.1
-            print 'l = %s' % l, '# index of species in reaction %s' % mu  
+#            print 'l = %s' % l, '# index of species in reaction %s' % mu  
             
             # 5.2. For each index m of U3_l, do:
             for i, j in U3[l]: # 5.2.1
@@ -232,37 +285,47 @@ def PDM(reactions, state, t_f):
                     raise ValueError
                 
                 # skips zeroth and first order reactions because they are not in U3
-                print '(i, j) = %s' % ((i, j),), '# major and minor indices of partial propensity in Pi'
+#                print '(i, j) = %s' % ((i, j),), '# major and minor indices of partial propensity in Pi'
 
                 # 5.2.2 and 5.2.3
-                delta_Pi_i_j = reactions[mu].constant * U2[mu][k] if l != i else 0.5 * reactions[mu].constant * U2[mu][k] 
+#                print
+#                print 'U2[%d][%d] = %s' % (mu, k, U2[mu][k])
+#                print 'Pi[%d][%d] = %s, Lambda[%d] = %s' % (i, j, Pi[i][j], i, Lambda[i]) 
+                if l != i:
+                    delta_Pi_i_j = reactions[mu].constant * U2[mu][k]
+                else:
+                    delta_Pi_i_j = 0.5 * reactions[mu].constant * U2[mu][k] 
+#                print 'delta_Pi_i_j = %s, l != i = %s' % (delta_Pi_i_j, l != i) 
                 Pi[i][j] += delta_Pi_i_j
                 Lambda[i] += delta_Pi_i_j
+#                print 'Pi[%d][%d] = %s, Lambda[%d] = %s' % (i, j, Pi[i][j], i, Lambda[i]) 
+                
                 
                 # 5.2.4
                 Sigma_temp = Sigma[i]
-                print 'Sigma_temp = %s' % Sigma_temp
+#                print 'Sigma_temp = %s' % Sigma_temp
                 
                 # 5.2.5
                 Sigma[i] = n[i - 1] * Lambda[i]
-                print 'Sigma[i] = %s' % Sigma[i]
+#                print 'Sigma[i] = %s' % Sigma[i]
                 
                 # 5.2.6
                 delta_a += Sigma[i] - Sigma_temp
-                if debug:
-                    print 'delta_a = %s' % delta_a
+#                print 'delta_a = %s' % delta_a
+                    
+#                print_Sigma_n_Lambda_Pi()
             
             # 5.3
-            print 'l = %s' % l
-            print 'n[l] = %s' % n[l]
-            print 'Lambda[l] = %s' % Lambda[l]
-            print 'Sigma[l] = %s' % Sigma[l]
+#            print 'l = %s' % l
+#            print 'n[l] = %s' % n[l]
+#            print 'Lambda[l] = %s' % Lambda[l]
+#            print 'Sigma[l] = %s' % Sigma[l]
             # fails here with only source reactions because there is no
             # Lambda or Sigma group indexed by l 
-            delta_a += n[l] * Lambda[l] - Sigma[l]
-            print 'delta_a = %s' % delta_a
-            Sigma[l] = n[l] * Lambda[l]
-            print 'Sigma[l] = %s' % Sigma[l]
+            delta_a += n[l] * Lambda[l + 1] - Sigma[l + 1]
+#            print 'delta_a = %s' % delta_a
+            Sigma[l + 1] = n[l] * Lambda[l + 1]
+#            print 'Sigma[l] = %s' % Sigma[l]
         
         assert Lambda[0] == Lambda_0_max
         assert Sigma[0] == Sigma_0_max
@@ -274,8 +337,10 @@ def PDM(reactions, state, t_f):
             t <- t + tau
         '''
         a += delta_a
-        print 'a = %s' % a
+#        print 'a = %s' % a
+
         delta_a = 0
+        
         t += tau
 
         '''
@@ -283,7 +348,7 @@ def PDM(reactions, state, t_f):
         '''
 
         reactions_performed += 1
-        print '%d reactions performed' % reactions_performed
+#        print '%d reactions performed' % reactions_performed
             
         
     print '============================'
