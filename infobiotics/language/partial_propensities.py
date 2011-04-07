@@ -23,7 +23,6 @@ def PDM(reactions, state, t_f):
     state is a dictionary of species amounts and t_f is the maximum simulated
     time (in whatever units the reactions stochastic rate constants are).'''
     
-#    print 'reactions ='
     for i, r in enumerate(reactions):
         print 'R_%s =' % (i), r
     print
@@ -49,54 +48,71 @@ def PDM(reactions, state, t_f):
     N = len(species)
     n = [state[s] for s in species]
 
-    U3 = [[] for _ in range(N)]
-    Pi = [[] for _ in range(N + 1)]
-    from copy import deepcopy
-    L = deepcopy(Pi)
-
-    # initialize Pi and L
-    for i, r in enumerate(reactions):
-        cardinality = r.reactants.cardinality()
-        if cardinality == 0:
-            Pi[0].append(r.constant)
-            L[0].append(i)
-            continue
-        else:
-            reactants = r.reactants.keys()
-        if cardinality == 1:
-            reactant_index = species.index(reactants[0])
-            pi = r.constant
-        elif cardinality == 2:
-            if len(reactants) == 2:
-                # heterogenous
-                reactant_indices = [species.index(s) for s in reactants] 
-                reactant_index = min(reactant_indices)
-                dependant_index = max(reactant_indices)
-                pi = r.constant * n[dependant_index]
-                
+    def initialize_Pi_L_U3_Lambda_Sigma():
+        U3 = [[] for _ in range(N)]
+        Pi = [[] for _ in range(N + 1)]
+        L = [[] for _ in range(N + 1)]
+        for i, r in enumerate(reactions):
+            cardinality = r.reactants.cardinality()
+            if cardinality == 0:
+                Pi[0].append(r.constant)
+                L[0].append(i)
+                continue
             else:
-                # homogenous
+                reactants = r.reactants.keys()
+            if cardinality == 1:
                 reactant_index = species.index(reactants[0])
-                dependant_index = reactant_index
-                pi = r.constant * 0.5 * (n[dependant_index] - 1)
-        Pi_index = reactant_index + 1 
-        Pi[Pi_index].append(pi)
-        L[Pi_index].append(i)
-        if cardinality == 2: 
-            U3[dependant_index].append((Pi_index, len(Pi[Pi_index]) - 1))
+                pi = r.constant
+            elif cardinality == 2:
+                if len(reactants) == 2:
+                    # heterogenous
+                    reactant_indices = [species.index(s) for s in reactants] 
+                    reactant_index = min(reactant_indices)
+                    dependant_index = max(reactant_indices)
+                    pi = r.constant * n[dependant_index]
+                    
+                else:
+                    # homogenous
+                    reactant_index = species.index(reactants[0])
+                    dependant_index = reactant_index
+                    pi = r.constant * 0.5 * (n[dependant_index] - 1)
+            Pi_index = reactant_index + 1 
+            Pi[Pi_index].append(pi)
+            L[Pi_index].append(i)
+            if cardinality == 2: 
+                U3[dependant_index].append((Pi_index, len(Pi[Pi_index]) - 1))
+        
+        Lambda = [sum(pies) if len(pies) > 0 else 0 for pies in Pi]
+
+        Sigma = [Lambda[0]]
+        for i, n_i in enumerate(n):
+            Sigma.append(n_i * Lambda[i + 1])
+        
+        assert Lambda[0] == Sigma[0]
+        
+        return Pi, L, U3, Lambda, Sigma
     
-    # initialize Lambda
-    Lambda = [sum(pies) if len(pies) > 0 else 0 for pies in Pi]
+    Pi, L, U3, Lambda, Sigma = initialize_Pi_L_U3_Lambda_Sigma()
+    
+    Sigma_0 = Lambda_0 = Sigma[0]
 
-    # initialize Sigma
-    Sigma = [Lambda[0]]
-    for i, n_i in enumerate(n):
-        Sigma.append(n_i * Lambda[i + 1])
-
-    assert Lambda[0] == Sigma[0]
-    Sigma_0_max = Lambda_0_max = Sigma[0]
-
-    def print_Sigma_n_Lambda_Pi():
+    def compare_Pi(Pi1=Pi):
+        Pi2, L, U3, Lambda, Sigma = initialize_Pi_L_U3_Lambda_Sigma()
+        try:
+            for i, Pi1_i in enumerate(Pi1):
+                for j, Pi1_i_j in enumerate(Pi1_i):
+                    assert Pi1_i_j == Pi2[i][j]
+        except AssertionError:
+            print 'actual:'
+            print_Sigma_n_Lambda_Pi(Sigma, Lambda, Pi1)
+            print 'correct:'
+            print_Sigma_n_Lambda_Pi(Sigma, Lambda, Pi2)
+            print 'problem:'
+            print i, j, Pi1_i_j, Pi2[i][j]
+            
+    compare_Pi()
+    
+    def print_Sigma_n_Lambda_Pi(Sigma=Sigma, Lambda=Lambda, Pi=Pi):
         print 'i  Sigma  <- n    <-   Lambda <- Pi'
         for i in range(len(Pi)):
             Sigma_i = str(Sigma[i]).ljust(10)
@@ -106,7 +122,7 @@ def PDM(reactions, state, t_f):
             else:
                 n_i = '-'.ljust(10)
             print '%s%s%s%s%s' % (str(i).ljust(3), Sigma_i, n_i, Lambda_i, ', '.join(str(pi) for pi in Pi[i]))
-        print
+#        print
 
     def DM_a0():
         a0 = 0
@@ -202,13 +218,8 @@ def PDM(reactions, state, t_f):
 #        print 'a = %s' % a
 #        print 'delta_a = %s' % delta_a
 #        print
-        print_Sigma_n_Lambda_Pi()
 
-        a0 = DM_a0()
-        print a, a0
-#        if t > 0:
-#            print reactions[mu], n
-        assert a == a0
+#        print_Sigma_n_Lambda_Pi()
 
 #        exit()
 
@@ -291,7 +302,7 @@ def PDM(reactions, state, t_f):
 #                print
 #                print 'U2[%d][%d] = %s' % (mu, k, U2[mu][k])
 #                print 'Pi[%d][%d] = %s, Lambda[%d] = %s' % (i, j, Pi[i][j], i, Lambda[i]) 
-                if l != i:
+                if l + 1 != i: #XXX l needed incrementing, not i!
                     delta_Pi_i_j = reactions[mu].constant * U2[mu][k]
                 else:
                     delta_Pi_i_j = 0.5 * reactions[mu].constant * U2[mu][k] 
@@ -327,8 +338,8 @@ def PDM(reactions, state, t_f):
             Sigma[l + 1] = n[l] * Lambda[l + 1]
 #            print 'Sigma[l] = %s' % Sigma[l]
         
-        assert Lambda[0] == Lambda_0_max
-        assert Sigma[0] == Sigma_0_max
+        assert Lambda[0] == Lambda_0
+        assert Sigma[0] == Sigma_0
         
         '''
         6. Update a and increment time: 
@@ -349,6 +360,14 @@ def PDM(reactions, state, t_f):
 
         reactions_performed += 1
 #        print '%d reactions performed' % reactions_performed
+
+        compare_Pi()
+        
+        a0 = DM_a0()
+        print a, a0
+#        if t > 0:
+#            print reactions[mu], n
+        assert a == a0
             
         
     print '============================'
@@ -365,9 +384,9 @@ def main():
     ]
     
     state = {
-        'S1':1,
-        'S2':1,
-        'S3':1,
+        'S1':10,
+        'S2':10,
+        'S3':10,
     }
     
 #    reactions = [
@@ -380,7 +399,7 @@ def main():
 #    simulation = PDM()
 #    simulation.initialize(reactions, state)
 #    simulation.run()
-    simulation = PDM(reactions, state, t_f=10)
+    simulation = PDM(reactions, state, t_f=100)
 
 debug = True
 if __name__ == '__main__':
