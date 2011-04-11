@@ -1,65 +1,67 @@
-from infobiotics.commons.counter import Counter
+try:
+    Counter #@UndefinedVariable
+except NameError:
+    from infobiotics.commons.counter import Counter
+
 
 class multiset(Counter):
     def __str__(self):
-        '''Returns 'a + b + b' for {'a':1,'b':2}.'''
+        '''Returns the members of the multiset, expanded and concatenate with 
+        '+'.
+        
+        >>> m = multiset('abb')
+        >>> print m
+        a + b + b
+        '''
         return ' + '.join([k for k, v in sorted(self.items()) for _ in range(v)])
 
     def __len__(self):
-        '''
+        '''Returns the total number of members, excluding repeated elements.
         
-        >>> m = multiset({'a':1, 'b':2})
+        >>> m = multiset('abb')
         >>> len(m)
         2
-        
         '''
         return super(multiset, self).__len__()
 
     def cardinality(self):
-        ''' The total number of elements in a multiset, including repeated memberships, is the cardinality of the multiset. 
+        '''Returns the total number of elements in a multiset, including 
+        repeated memberships. 
         
         >>> m = multiset({'a':1, 'b':2})
         >>> m.cardinality()
         3
-        
         '''
         return len(list(self.elements()))
 
-    def multiplicity(self, key):
-        '''
+    def multiplicity(self, member):
+        '''Returns the number of elements of 'member'. 
         
-        >>> m = multiset({'a':1, 'b':2})
+        >>> m = multiset('abb')
         >>> m.multiplicity('a')
         1
         >>> m.multiplicity('b')
         2
         >>> m.multiplicity('c')
         0
-        
         '''
-        return self[key]
+        return self[member]
 
 
-#class frozenmultiset(multiset):
-#    try:
-#        frozenset
-#    except NameError:
-#        from sets import ImmutableSet as frozenset
-#    __slots__ = ('_hash',)
-#    def __hash__(self):
-#        rval = getattr(self, '_hash', None)
-#        if rval is None:
-#            rval = self._hash = hash(frozenset(self.iteritems()))
-#        return rval
+class frozenmultiset(multiset):
+    '''Hashable but mutable.'''
+    try:
+        frozenset
+    except NameError:
+        from sets import ImmutableSet as frozenset
+    __slots__ = ('_hash',)
+    def __hash__(self):
+        memo = getattr(self, '_hash', None)
+        if memo is None:
+            memo = self._hash = hash(frozenset(self.iteritems()))
+        return memo
+
 
 if __name__ == '__main__':
     import doctest
-    print doctest.testmod()
-
-
-    m = multiset({'a':1, 'b':2})
-    print m.__str__()
-    print m.__repr__()
-
-    n = multiset(m + m)
-    print 'cardinality =', n.cardinality(), 'len =', len(n)
+    doctest.testmod()
