@@ -2,7 +2,7 @@ from infobiotics.commons.counter import Counter
 
 class multiset(Counter):
     def __str__(self):
-        ''' Returns 'a + b + b' for {'a':1,'b':2}. '''
+        '''Returns 'a + b + b' for {'a':1,'b':2}.'''
         return ' + '.join([k for k, v in sorted(self.items()) for _ in range(v)])
 
     def __len__(self):
@@ -39,6 +39,18 @@ class multiset(Counter):
         '''
         return self[key]
 
+
+#class frozenmultiset(multiset):
+#    try:
+#        frozenset
+#    except NameError:
+#        from sets import ImmutableSet as frozenset
+#    __slots__ = ('_hash',)
+#    def __hash__(self):
+#        rval = getattr(self, '_hash', None)
+#        if rval is None:
+#            rval = self._hash = hash(frozenset(self.iteritems()))
+#        return rval
 
 if __name__ == '__main__':
     import doctest
