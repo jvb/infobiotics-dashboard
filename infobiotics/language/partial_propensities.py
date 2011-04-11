@@ -32,6 +32,8 @@ def PDM(reactions, state, t_f):
     quantities and t_f is the maximum simulated time (in same time units as the 
     reactions stochastic rate constants).'''
     
+    #TODO remove duplicate reactions
+    
     def print_reactions():
         for i, r in enumerate(reactions):
             print 'R_%s =' % (i), r
@@ -65,29 +67,29 @@ def PDM(reactions, state, t_f):
         Pi = [[] for _ in range(N + 1)]
         L = [[] for _ in range(N + 1)]
         for i, r in enumerate(reactions):
+            c = r.constant
             cardinality = r.reactants.cardinality()
             if cardinality == 0:
-                Pi[0].append(r.constant)
+                Pi[0].append(c)
                 L[0].append(i)
                 continue
             else:
                 reactants = r.reactants.keys()
             if cardinality == 1:
                 reactant_index = species.index(reactants[0])
-                pi = r.constant
+                pi = c
             elif cardinality == 2:
                 if len(reactants) == 2:
                     # heterogenous
                     reactant_indices = [species.index(s) for s in reactants] 
                     reactant_index = min(reactant_indices)
                     dependant_index = max(reactant_indices)
-                    pi = r.constant * n[dependant_index]
-                    
+                    pi = c * n[dependant_index]
                 else:
                     # homogenous
                     reactant_index = species.index(reactants[0])
                     dependant_index = reactant_index
-                    pi = r.constant * 0.5 * (n[dependant_index] - 1)
+                    pi = c * 0.5 * (n[reactant_index] - 1)
             Pi_index = reactant_index + 1 
             Pi[Pi_index].append(pi)
             L[Pi_index].append(i)
@@ -110,18 +112,25 @@ def PDM(reactions, state, t_f):
         Sigma_0 = Lambda_0 = Sigma[0]
 
     def compare_Pi(Pi1=Pi):
-        Pi2, _, _, Lambda, Sigma = initialize_Pi_L_U3_Lambda_Sigma()
+        Pi2 = initialize_Pi_L_U3_Lambda_Sigma()[0]
+        differences = []
         try:
             for i, Pi1_i in enumerate(Pi1):
                 for j, Pi1_i_j in enumerate(Pi1_i):
-                    assert Pi1_i_j == Pi2[i][j]
+                    if not Pi1_i_j == Pi2[i][j]:
+                        differences.append((i, j))
+            if len(differences) > 0:
+                raise AssertionError
         except AssertionError:
             print 'actual:'
-            print_Sigma_n_Lambda_Pi(Sigma, Lambda, Pi1)
+            print_Sigma_n_Lambda_Pi()
             print 'correct:'
+            _, _, _, Lambda, Sigma = initialize_Pi_L_U3_Lambda_Sigma()
             print_Sigma_n_Lambda_Pi(Sigma, Lambda, Pi2)
-            print 'difference:'
-            print 'i = %s, j = %s, actual = %s, correct = %s' % (i, j, Pi1_i_j, Pi2[i][j])
+            for i, j in differences:
+                print 'difference:'
+                print 'i = %s, j = %s, actual = %s, correct = %s' % (i, j, Pi1[i][j], Pi2[i][j])
+            raise AssertionError, e
             
     if __debug__:
         compare_Pi()
@@ -153,23 +162,27 @@ def PDM(reactions, state, t_f):
     def DM_a0():
         '''Calculates total propensity using Gillespie's Direct Method'''
         a0 = 0
+        p = 0
         for r in reactions:
-            cardinality = r.reactants.cardinality()
+            a0 += p
             c = r.constant
+            cardinality = r.reactants.cardinality()
             if cardinality == 0:
-                a0 += c
+                p = c
                 continue
             reactants = r.reactants.keys()
             if cardinality == 1:
-                a0 += c * n[species.index(reactants[0])]
+                p = c * n[species.index(reactants[0])]
             elif cardinality == 2:
                 n_i = n[species.index(reactants[0])]
                 if len(reactants) == 1:
                     # homo
-                    a0 += c * 0.5 * n_i * (n_i - 1)
+                    p = c * 0.5 * n_i * (n_i - 1)
                 else:
                     # hetero
-                    a0 += c * n_i * n[species.index(reactants[1])]
+                    p = c * n_i * n[species.index(reactants[1])]
+#            print n, reactants, c, p
+        a0 += p
         return a0
 
     a = sum(Sigma)
@@ -217,11 +230,24 @@ def PDM(reactions, state, t_f):
         print 'U3 is the dependency graph over species'
         print
 
+    # debugging Daven's example
+    print_L_U1_U2_U3()
+    print
+    print_Sigma_n_Lambda_Pi()
+
+    print
+    print 'reactions time     state'
     reactions_performed = 0
-    while a > 0 and t < t_f:
-        print 'time %f' % t, n,
+    while a > 0:
+        iteration = '%s%f %s' % (str(reactions_performed).ljust(10), t, n)
+        if t > 0:
+            print '%s\t%s' % (iteration, reactions[mu])
+        else:
+            print iteration
+        reactions_performed += 1
 
         # 2
+        # I
         r_1 = random()
         r_1a = r_1 * a
         cumulative_sum = 0
@@ -230,9 +256,9 @@ def PDM(reactions, state, t_f):
             cumulative_sum += sigma
             if cumulative_sum > r_1a:
                 break
-        
+        # J
         Phi = sum(Sigma[:I + 1])
-        if I > 0: # avoid divide by zero (not mentioned in paper!)
+        if I > 0: # avoid divide by zero for source reactions (not in paper!)
             Psi = (r_1a - Phi + Sigma[I]) / n[I - 1]
         else:
             Psi = (r_1a - Phi + Sigma[I])
@@ -242,16 +268,19 @@ def PDM(reactions, state, t_f):
             cumulative_sum += Pi[I][j]
             if cumulative_sum > Psi:
                 break
-        
+        # mu (the index of the next reaction to apply)
         mu = L[I][J]
         
-        '''
-        Sample tau: generate a uniform random number r_2 between 0 and 1 and compute
-        the time to the next reaction tau as tau <- a^-1 * ln(r_2^-1)
-        '''
+#        mu = 2
+        
+        # 3
         r_2 = random()
         tau = a ** -1 * log(r_2 ** -1)
         assert tau > 0
+        t += tau
+        if t > t_f:
+            # finish before applying reaction because time is up
+            break
         
         # 4
         for k, l in enumerate(U1[mu]):
@@ -263,16 +292,29 @@ def PDM(reactions, state, t_f):
             
             # 5.1 
             #l = U1[mu][k] # done above 
+#            print 'k =', k 
+#            print 'l =', l, '(l + 1 = %s)' % (l + 1) 
+#            print 'mu =', mu 
+#            print 'reactions[mu].constant =', reactions[mu].constant
             
             # 5.2
             for i, j in U3[l]: # 5.2.1
                 assert i != 0
                 
+#                c = reactions[mu].constant
+                c = reactions[L[i][j]].constant # not mentioned in paper, fixes algorithm
+                
                 # 5.2.2 and 5.2.3
                 if l + 1 != i: # l needed incrementing, not i, because
-                    delta_Pi_i_j = reactions[mu].constant * U2[mu][k]
+                    delta_Pi_i_j = c * U2[mu][k]
                 else:
-                    delta_Pi_i_j = 0.5 * reactions[mu].constant * U2[mu][k] 
+                    delta_Pi_i_j = 0.5 * c * U2[mu][k] 
+#                print
+#                print 'l + 1 == i =', l + 1 == i
+#                print 'i =', i 
+#                print 'j =', j 
+#                print 'U2[mu][k] =', U2[mu][k] 
+#                print 'delta_Pi_i_j =', delta_Pi_i_j
                 Pi[i][j] += delta_Pi_i_j
                 Lambda[i] += delta_Pi_i_j
                 
@@ -291,62 +333,45 @@ def PDM(reactions, state, t_f):
         
         assert Lambda[0] == Lambda_0 # Lambda[0] should never change
         assert Sigma[0] == Sigma_0 # Sigma[0] should never change
-        assert Lambda[0] == Sigma[0] # Lamda[0] and Sigma[0] should be equal 
+        assert Lambda[0] == Sigma[0] # Lambda[0] and Sigma[0] should be equal 
         
         # 6
         a += delta_a
         delta_a = 0
-        t += tau
+        #t += tau # done in 3
         
         if __debug__:
+            # compare total propensities to Direct Method
             a0 = DM_a0()
             try:
                 assert a == DM_a0()
             except AssertionError, e:
+                print '^'
                 print 'Total propensity (a) = %s' % a
                 print 'DM propensity (a0) = %s' % a0
                 compare_Pi()
-                raise AssertionError, e
-
-        reactions_performed += 1
-        if t > 0:
-            print 'reaction %s: %s' % (reactions_performed, reactions[mu])
+                
 
         # 7
         # loop
-            
-    print 'time %f' % t, n
-    print 'done'
-    
 
-def main():
-  
-    reactions = [
-        reaction(['S1', 'S2'], ['S3'], 1),
-        reaction([], ['S1'], 1),
-        reaction(['S2', 'S2'], ['S1'], 1),
-        reaction(['S3'], [], 1),
-        reaction(['S1', 'S3'], ['S2'], 1),
-    ]
-    
-    state = multiset({
-        'S1':10,
-        'S2':10,
-        'S3':10,
-    })
-    
-#    reactions = [
-#        reaction([], ['a'], 1),
-#        reaction(['a'], ['a'], 1),
-#        reaction([], ['b'], 1),
-#        reaction([], ['c'], 1),
-#    ]
-    
-#    simulation = PDM()
-#    simulation.initialize(reactions, state)
-#    simulation.run()
-    PDM(reactions, state, t_f=100)
+#        print_Sigma_n_Lambda_Pi()
+#        exit()
 
+    
+# run on example in paper
+reactions = [
+    reaction(['S1', 'S2'], ['S3'], 1),
+    reaction([], ['S1'], 2),
+    reaction(['S2', 'S2'], ['S1'], 3),
+    reaction(['S3'], [], 4),
+    reaction(['S1', 'S3'], ['S2'], 5),
+]
 
-if __name__ == '__main__':
-    main()
+state = multiset({
+    'S1':10,
+    'S2':20,
+    'S3':30,
+})
+
+PDM(reactions, state, t_f=10)
