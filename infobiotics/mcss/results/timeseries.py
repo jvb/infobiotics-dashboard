@@ -85,6 +85,8 @@ class Timeseries(HasTraits):
 #        red, green, blue = value
 #        return QColor(int(red * 256), int(green * 255), int(blue * 255))
 
+    marker = Str
+
 
     def pixmap(self, width=4, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)

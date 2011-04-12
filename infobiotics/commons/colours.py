@@ -17,3 +17,20 @@ colours = ['blue', 'red', 'gold', 'green', 'darkorchid', 'darkorange',
 
 def colour(i):
     return colours[int(i) % len(colours)]
+
+
+markers = [
+#    '.',',',
+    'o',
+    'v', '^', '<', '>',
+#    '1','2','3','4',
+    's', 'p', '*', 'h',
+    'H',
+    '+', 'x',
+    'D',
+    'd',
+#    '|','_',
+]
+
+def marker(i):
+    return markers[int(i) % len(markers)]

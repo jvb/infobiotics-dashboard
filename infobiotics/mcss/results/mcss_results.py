@@ -843,6 +843,47 @@ class McssResults(object):
 #        pass
 #    def timeseries_plots(self):
 #        pass
+
+    def len_timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
+        len_runs = len(self.runs)
+        len_species = len(self.species)
+        len_compartments = len(self.compartments)
+        if len_runs > 1 and mean_over_runs:
+            if amounts and volumes:
+                return (len_species * len_compartments) + len_compartments
+            elif amounts:
+                return len_species * len_compartments
+            elif volumes:
+                return len_compartments
+            else:
+                return 0
+        else:
+            if amounts and volumes:
+                return (len_runs * len_species * len_compartments) + (len_runs * len_compartments)
+            elif amounts:
+                return len_runs * len_species * len_compartments
+            elif volumes:
+                return len_runs * len_compartments
+            else:
+                return 0
+            
+    def timeseries_information(self, sort_column_index=6, reverse=False):
+        labels = ('# species', '# compartments', '#runs', 'amounts', 'volumes', 'mean over runs', '# timeseries') 
+        len_runs = len(self.runs)
+        len_species = len(self.species)
+        len_compartments = len(self.compartments)
+        rows = []
+        for mean_over_runs in True, False:
+            for amounts in True, False:
+                for volumes in True, False:
+                    if not (volumes or amounts):
+                        continue
+                    len_timeseries = self.len_timeseries(amounts, volumes, mean_over_runs)
+                    rows.append([len_species, len_compartments, len_runs, amounts, volumes, mean_over_runs, len_timeseries])
+        rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
+        table = indent([labels] + rows, hasHeader=True)
+        return table
+
     def timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
         '''Return Timeseries objects for current selection.'''
         
@@ -860,6 +901,7 @@ class McssResults(object):
         
         from timeseries import Timeseries
         from infobiotics.commons import colours
+        
         from species import Species
 
         if volumes:
@@ -868,10 +910,11 @@ class McssResults(object):
                 name='Volumes',
                 simulation=self.simulation,
             )
-        
+
         timeseries = []
         num_species = len(self.species)
         runs = self.runs
+
         if len(runs) > 1 and mean_over_runs:
             if amounts:
                 mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
@@ -889,6 +932,7 @@ class McssResults(object):
                                 errors=std_amounts_over_runs[si, ci, :],
                                 values_units=self.quantities_display_units,
                                 _colour=colours.colour(si), #TODO rechoose colours based on different strategy for stacked, etc in timeseries plot
+                                marker=colours.marker(ci),
                             ),
                         )
             if volumes:
@@ -906,6 +950,7 @@ class McssResults(object):
                             errors=std_volumes_over_runs[ci, :],
                             values_units=self.volumes_display_units,
                             _colour=colours.colour(num_species + ci),
+                            marker=colours.marker(ci),
                         )
                     )
         
@@ -926,6 +971,7 @@ class McssResults(object):
                                     values=amounts[ri, si, ci, :],
                                     values_units=self.quantities_display_units,
                                     _colour=colours.colour(si),
+                                    marker=colours.marker(ci),
                                 )
                             )
             if volumes:
@@ -943,6 +989,7 @@ class McssResults(object):
                                 values=volumes[ri, ci, :],
                                 values_units=self.volumes_display_units,
                                 _colour=colours.colour(num_species + ci),
+                                marker=colours.marker(ci),
                             )
                         )
         return timeseries
@@ -1139,6 +1186,8 @@ def test_surfaces():
 def test_timeseries():
     file_name = 'tests/germination_09.h5'
     results = McssResults(file_name)
+    print results.timeseries_information()
+    exit()
     results.select_species('SIG1')#, 'P1')
     results.timestep = 1 * hour # 961 -> 17
     results.timepoints_display_units = 'minutes'
@@ -1149,9 +1198,8 @@ def test_timeseries():
 #    print results.quantities_data_units, results.quantities_display_type, results.quantities_display_units
 #    print results.volumes_data_units, results.volumes_display_units
 #    print results.amounts().units
-#    exit()
-#    results.select_runs([1, 2, 3])
-    results.select_runs([1])
+    results.select_runs([1, 2, 3])
+#    results.select_runs([1])
 #    print results.compartments_information(); exit()
     results.select_compartments(['receiver'], [(0, i) for i in range(10, 13)])
     timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=True)

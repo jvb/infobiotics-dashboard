@@ -369,10 +369,9 @@ class TimeseriesPlot(HasTraits):
 
 
     def _plot_timeseries(self, axes, timeseries):
-        self._plot_line(axes, timeseries)
-#        if self.averaging: #TODO
         if len(timeseries.errors) > 0:
             self._plot_errorbars(axes, timeseries)
+        self._plot_line(axes, timeseries)
     
     def _plot_errorbars(self, axes, timeseries):
         step = 1
@@ -382,6 +381,7 @@ class TimeseriesPlot(HasTraits):
             yerr=timeseries.errors[::step],
             linestyle='None',
             color=timeseries.colour,
+            marker=timeseries.marker,
         ) 
 
 
@@ -394,6 +394,8 @@ class TimeseriesPlot(HasTraits):
             timeseries.values,
             label=timeseries.title,
             color=timeseries.colour,
+            linestyle='--' if timeseries.values_type == 'Volume' else '-',
+            marker=timeseries.marker,
         )
         line = lines[0]
 #        print line
@@ -606,7 +608,6 @@ class TimeseriesPlot(HasTraits):
     def _concentrations_units_changed(self):
         for timeseries in self._amounts:
             if timeseries.values_type == 'Concentration':
-                print timeseries.values.units, '***'
                 timeseries.values = timeseries.values.rescale(concentration_units[self.concentrations_units])
                 timeseries.values_units = self.concentrations_units
             
