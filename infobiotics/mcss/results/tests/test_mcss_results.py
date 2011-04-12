@@ -129,7 +129,7 @@ class TestMcssResults(unittest.TestCase):
         file_name = 'germination_09.h5'
         results = McssResults(file_name)
         results.quantities_data_units = 'micromoles'
-        f = self.results.get_functions_over_runs(
+        f = self.results.functions_of_amounts_over_runs(
             functions,
 #            quantities_display_type='concentrations',
 #            quantities_display_units='micromolar',
@@ -154,7 +154,7 @@ class TestMcssResults(unittest.TestCase):
 #            )        
             
 #    @skip
-    def test_McssResults_get_functions_over_runs(self):
+    def test_McssResults_functions_of_amounts_over_runs(self):
         
 #        print self.results.amounts().shape
 #        print np.mean(self.results.amounts(), axis=0)
@@ -163,7 +163,7 @@ class TestMcssResults(unittest.TestCase):
             mcss_results.mean,
             mcss_results.std,
         )
-        f = self.results.get_functions_over_runs(functions)
+        f = self.results.functions_of_amounts_over_runs(functions)
         
         m = mcss_postprocess('-l')[2]
         
@@ -350,8 +350,29 @@ class TestMcssResults(unittest.TestCase):
 #    def test_McssResults_get_surfaces(self):
 #        pass
 
+    def test_not_has_volumes(self):
+        results = McssResults('NAR_simulation.h5')
+        self.assertEqual(results.has_volumes, False)
+        self.assertRaises(ValueError, results.volumes)
+        self.assertRaises(ValueError, results.timeseries)
+        self.assertRaises(AssertionError, results.timeseries, amounts=False, volumes=False)
+
+    def test_timeseries(self):
+        results = McssResults('germination_09.h5')
+        results.select_species('SIG1', 'P1')
+        from infobiotics.commons.quantities import hour
+        results.timestep = 1 * hour # 961 -> 17
+        results.timepoints_display_units = 'minutes'
+        results.select_runs([1, 2, 3])
+        self.assertEqual(len(results.timeseries(amounts=True, volumes=True, mean_over_runs=True)), 1 * (2 + 1) * 39) 
+        self.assertEqual(len(results.timeseries(amounts=True, volumes=False, mean_over_runs=True)), 1 * 2 * 39)
+        self.assertEqual(len(results.timeseries(amounts=False, volumes=True, mean_over_runs=True)), 1 * 1 * 39)
+        self.assertEqual(len(results.timeseries(amounts=True, volumes=True, mean_over_runs=False)), 3 * (2 + 1) * 39) 
+        self.assertEqual(len(results.timeseries(amounts=True, volumes=False, mean_over_runs=False)), 3 * 2 * 39)
+        self.assertEqual(len(results.timeseries(amounts=False, volumes=True, mean_over_runs=False)), 3 * 1 * 39)
+
     
 
 if __name__ == '__main__':
-#    unittest.main()
-    unittest.main(defaultTest='TestMcssResults.test_McssResults_volumes')
+    unittest.main()
+#    unittest.main(defaultTest='TestMcssResults.test_McssResults_volumes')

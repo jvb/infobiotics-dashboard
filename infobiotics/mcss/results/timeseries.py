@@ -11,6 +11,7 @@ from enthought.traits.ui.api import View, HGroup, Item
 
 class Timeseries(HasTraits):
 
+    errors = Array #TODO
     runs = List(Run)
     run = Instance(Run)
     species = Instance(Species) # None == Volume?
@@ -24,7 +25,6 @@ class Timeseries(HasTraits):
     values_units = Str
     
     abbreviated_units = Bool(True)
-
 
     xlabel = Property(Str, depends_on='timepoints, abbreviated_units, timepoints_units')
 

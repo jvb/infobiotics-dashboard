@@ -116,9 +116,9 @@ def functions_of_values_over_successive_axes(array, array_axes, axes, functions)
 
 class McssResults(object):
 
-#    amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
+    amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
     
-#    volumes_axes = ['runs', 'compartments', 'timepoints']    
+    volumes_axes = ['runs', 'compartments', 'timepoints']    
     
 #    timepoints_data_units = 'seconds'
 #    quantities_data_units = 'molecules'
@@ -187,6 +187,8 @@ class McssResults(object):
         else:
             self.simulation = simulation#load_h5(filename) # why do all that object creation again?
         
+        self._has_volumes = True if self.simulation.log_volumes == 1 else False
+        
         self.filename = filename
         
         max_time = self.simulation.max_time
@@ -217,8 +219,6 @@ class McssResults(object):
             # make stop the index of the final timepoint + 1
             self.stop = len(self._timepoints)
 
-        self.max_chunk_size = self.stop - self.start #TODO determine based on any axis not just timepoints
-
         self.step = step # uses step.setter
 
         if species_indices is None:
@@ -233,7 +233,6 @@ class McssResults(object):
             self.run_indices = range(0, self.simulation.number_of_runs)
         else:
             self.run_indices = run_indices
-
 
     # indices
 
@@ -421,6 +420,9 @@ class McssResults(object):
 
     def volumes(self, volumes_display_units=None, **ignored_kwargs):
         
+        if not self.has_volumes:
+            raise ValueError("mcss simulation '%s' has no volumes dataset." % self.filename)
+        
         volumes = self._allocate_array(
             (
                 len(self.run_indices),
@@ -494,7 +496,7 @@ class McssResults(object):
 #        shape (species, compartments, timepoint) for each run. '''
         '''
         
-        'volume' is used when self.simulation.log_volumes != 1 to fill an array 
+        'volume' is used when not self.has_volumes to fill an array 
         that is the same shape as volumes would be, allowing concentrations to
         be calculated for models without volumes information. 
         
@@ -514,20 +516,22 @@ class McssResults(object):
             return
             
         h5 = tables.openFile(self.filename)
-        for ri, r in enumerate(self.run_indices):
-            where = '/run%s' % (r + 1)
-            amounts = h5.getNode(where, 'amounts')[:, :, self.start:self.stop:self.step]
-            for si, s in enumerate(self.species_indices):
-                for ci, c in enumerate(self.compartment_indices):
-                    results[ri, si, ci, :] = amounts[s, c, :]
-#                    results[ri, si, ci, :] = h5.getNode(where, 'amounts')[s, c, self.start:self.stop:self.step] # about 10 times slower!
+
+        self._extract_amounts(h5, results, self.start, self.stop)
+        
         h5.close()
 
-        results = Quantity(results, substance_units[self.quantities_data_units])
+        results, _ = self.convert_amounts_quantities(Quantity(results, substance_units[self.quantities_data_units]), quantities_display_type, quantities_display_units, volume) 
+        
+        return results
+        
+    def _extract_amounts(self, h5, destination_array, start, stop):
+        for ri, r in enumerate(self.run_indices):
+            amounts = h5.getNode('/run%s' % (r + 1), 'amounts')[:, :, start:stop:self.step]
+            for si, s in enumerate(self.species_indices):
+                for ci, c in enumerate(self.compartment_indices):
+                    destination_array[ri, si, ci, :] = amounts[s, c, :]
 
-        return self.convert_amounts_quantities(results, quantities_display_type, quantities_display_units, volume)
-#        
-#
     def convert_amounts_quantities(self, amounts, quantities_display_type=None, quantities_display_units=None, volume=None):
         if quantities_display_type is None:
             quantities_display_type = self.quantities_display_type
@@ -540,7 +544,7 @@ class McssResults(object):
         if quantities_display_type == 'concentrations' and not quantities_display_units.endswith('molar'):
             quantities_display_units = 'molar'
         
-        if quantities_display_type == 'concentrations' and self.simulation.log_volumes != 1 and volume is None:
+        if quantities_display_type == 'concentrations' and not self.has_volumes and volume is None:
             message = 'Cannot calculate concentrations without volumes dataset, rerun mcss with log_volumes=1' 
             if self.parent is not None:
                 QMessageBox.warning('Error', message) #TODO test
@@ -549,14 +553,10 @@ class McssResults(object):
             return
         
         if self.quantities_data_units != quantities_display_units:
-            
-            # convert to moles
-            amounts.units = substance_units['moles']
-
+            amounts.units = substance_units['moles'] # convert to moles
             # convert from moles to whatever
             if quantities_display_type == 'concentrations':
-                
-                if self.simulation.log_volumes == 1:
+                if self.has_volumes:
                     volumes = self.volumes()#self.volumes_data_units)
                 else:
                     assert volume is not None
@@ -567,18 +567,16 @@ class McssResults(object):
                 _concentration_units = concentration_units['molar']
                 concentrations = np.zeros(amounts.shape) * _concentration_units
                 np.seterr(divide='ignore') # ignore divide by zero errors - will replace values with np.inf instead
-#                print amounts.shape
-#                print volumes.shape
                 for si, _ in enumerate(self.species_indices):
                     concentrations[:, si, :, :] = amounts[:, si, :, :] / volumes # divide amount by volume
                 concentrations[concentrations == np.inf] = 0 # replace all occurences of np.inf with 0
                 amounts = concentrations.rescale(quantities_display_units) # rescale to display units
             else:
                 amounts.units = substance_units[quantities_display_units]
-        return amounts
+        return amounts, quantities_display_units
     
 
-    def get_functions_over_runs(self, functions):#, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
+    def functions_of_amounts_over_runs(self, functions, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
         '''Returns a 4D array of floats with the shape (functions, species, 
         compartments, timepoint).'''
         results = self._allocate_array(# outputs error message if anything goes wrong
@@ -595,7 +593,7 @@ class McssResults(object):
             return        
 
         # create biggest possible buffer
-        chunk_size = self.max_chunk_size
+        chunk_size = len(self.timepoints)
         buffer = None
         while buffer == None:
             try:
@@ -616,33 +614,30 @@ class McssResults(object):
                     else:
                         print message
                         return
-                # progressively halve chunkSize until buffer fits into memory
+                # progressively halve chunk_size until buffer fits into memory
                 chunk_size = chunk_size // 2
                 buffer = None
                 continue
 
-        def iteration():
+        h5 = tables.openFile(self.filename)
+        
+        def iteration(chunk_size=chunk_size, buffer=buffer, quantities_display_units=quantities_display_units):
             '''Fills buffer with amounts for all runs and updates results with outcome of functions applied to runs.'''
             self.amounts_chunk_stop = amounts_chunk_start + (chunk_size * self.step)
-            for ri, r in enumerate(self.run_indices):
-                where = '/run%s' % (r + 1)
-                amounts = h5.getNode(where, 'amounts')[:, :, amounts_chunk_start:self.amounts_chunk_stop:self.step]
-                for si, s in enumerate(self.species_indices):
-                    for ci, c in enumerate(self.compartment_indices):
-                        buffer[ri, si, ci, :] = amounts[s, c, :] #FIXME works but surely buffer[:, :, :, ri] = amounts[self.species_indices, self.compartment_indices, :] could work too, no?
+            self._extract_amounts(h5, buffer, amounts_chunk_start, self.amounts_chunk_stop)
+            buffer, quantities_display_units = self.convert_amounts_quantities(Quantity(buffer, substance_units[self.quantities_data_units]), quantities_display_type, quantities_display_units, volume)
             self.stat_chunk_stop = stat_chunk_start + chunk_size
             for fi, f in enumerate(functions):
                 stat = results[fi] # stat is a 'view' on results so change stat changes results
                 stat[:, :, stat_chunk_start:self.stat_chunk_stop] = f(buffer, axis=0) # axis 0 is runs
-
-        h5 = tables.openFile(self.filename)
+            return quantities_display_units
 
         amounts_chunk_start = self.start
         stat_chunk_start = 0
         # for each whole chunk
         quotient = len(self.timepoints) // chunk_size
         for _ in range(quotient):
-            iteration()#chunk_size)
+            quantities_display_units = iteration()#chunk_size, buffer)
             amounts_chunk_start = self.amounts_chunk_stop
             stat_chunk_start = self.stat_chunk_stop
 
@@ -658,22 +653,17 @@ class McssResults(object):
                 ),
                 self.type
             )
-            iteration(remainder)
+            quantities_display_units = iteration(remainder, buffer)
 
         h5.close()
     
-        results = Quantity(results, substance_units[self.quantities_data_units])
-        # would be nice to be to convert quantities to concentrations, etc but shapes don't match 
-        # and perhaps not all of the output of the functions are quantities
-
+        results = Quantity(results, quantities_display_units)
         return results
-
 
     def select_species(self, *names):
         '''Select species with names in 'names'.
         
         if len(names) == 0: select all species
-        
         '''
         if len(names) == 0:
             self.species_indices = xrange(self.simulation.number_of_species)
@@ -695,9 +685,9 @@ class McssResults(object):
             select compartments for name in 'names'
         else: 
             select compartments for name in 'names' for (x,y) in 'xy_coordinates'
-
         '''
         compartments = self.simulation._runs_list[0]._compartments_list
+#        compartments = self.compartments
         if names is None and xy_coordinates is None: 
             # select all compartments
             self.compartment_indices = [compartment.index for compartment in compartments]
@@ -709,7 +699,7 @@ class McssResults(object):
             self.compartment_indices = [compartment.index for compartment in compartments if compartment.name in names]
         else:
             # select compartments for name in 'names' for (x, y) in 'xy_coordinates'
-            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates and compartment.name in names]
+            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates and any(map(lambda name: name in compartment.name, names))]
 
     def select_runs(self, runs=None, from_=None, to=None, random=None):
         '''Select runs in 'runs', or from 'from_' to 'to', or randomly where 0 < 'random' < len(self.run_indices).'''
@@ -749,7 +739,6 @@ class McssResults(object):
         else:
             self.timestep = self._timepoints[1] - self._timepoints[0]
 
-
     def reset_selection(self):
         self.select_runs()
         self.select_species()
@@ -783,13 +772,12 @@ class McssResults(object):
     amounts = results.amounts()
     volumes = results.volumes()
     surfaces = results.surfaces()
-    mean_runs = results.get_functions_over_runs((mcss_results.mean))
+    mean_runs = results.functions_of_amounts_over_runs((mcss_results.mean))
     assert mean_runs == mcss_results.functions_of_values_axis(amounts, ('runs', 'species', 'compartments', 'timepoints'), 'runs', (mcss_results.mean,)))
     assert mean_runs == results.mean_over_runs()
     # same for std, var, sum, min, max
     
     '''
-
 
     def runs_information(self, truncate=True):
         '''
@@ -800,7 +788,8 @@ class McssResults(object):
         200   | 1              | 601          | 6000.0        
         '''
         labels = ('Run #', '# compartments', '# timepoints', 'Simulated time')
-        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.simulation._runs_list]
+#        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.simulation._runs_list]
+        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.runs]
         table = indent([labels] + rows, hasHeader=True)
         if truncate and self.simulation.number_of_runs > 1:
             s = table.split('\n')
@@ -817,7 +806,8 @@ class McssResults(object):
         rna1           | 3    
         '''
         labels = ('Name', 'Index')
-        rows = [[str(s) for s in (species.name, species.index)] for species in self.simulation._species_list]
+#        rows = [[str(s) for s in (species.name, species.index)] for species in self.simulation._species_list]
+        rows = [[str(s) for s in (species.name, species.index)] for species in self.species]
         rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
         table = indent([labels] + rows, hasHeader=True)
         return table
@@ -830,32 +820,142 @@ class McssResults(object):
         '''
         labels = ('Name', 'Index', 'X', 'Y')
 #        rows = [[str(s) for s in (compartment.name, compartment.index, compartment.x_position, compartment.y_position)] for compartment in self.simulation._runs_list[0]._compartments_list]
-        rows = [(compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.simulation._runs_list[0]._compartments_list]
+#        rows = [(compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.simulation._runs_list[0]._compartments_list]
+        rows = [(compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.compartments]
         rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
         table = indent([labels] + rows, hasHeader=True)
         return table
+    
+    @property
+    def runs(self):
+        return [self.simulation._runs_list[i] for i in self.run_indices]
+
+    @property
+    def compartments(self):
+        return [self.runs[0]._compartments_list[i] for i in self.compartment_indices]
+
+    @property
+    def species(self):
+        return [self.simulation._species_list[i] for i in self.species_indices]
 
 
-#    def timeseries(self):
-#        pass
-#    
 #    def plot_timeseries(self):
 #        pass
-#    
 #    def timeseries_plots(self):
 #        pass
-#
-    def histogram(self):
-        '''Returns histograms for (the sum of all selected/each) species
-        averaging over runs or compartments at time t.
-        '''
-        pass
+    def timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
+        '''Return Timeseries objects for current selection.'''
+        
+        assert amounts or volumes
+        
+        if volumes and not self.has_volumes:
+            raise ValueError("mcss simulation '%s' has no volumes dataset." % self.filename)
+
+        assert len(self.run_indices) > 0
+        assert len(self.species_indices) > 0
+        assert len(self.compartment_indices) > 0
+        
+        timepoints = self.timepoints
+        assert len(timepoints) > 0
+        
+        from timeseries import Timeseries
+        from infobiotics.commons import colours
+        from species import Species
+
+        if volumes:
+            volumes_species = Species(
+                index=None, #TODO hack
+                name='Volumes',
+                simulation=self.simulation,
+            )
+        
+        timeseries = []
+        num_species = len(self.species)
+        runs = self.runs
+        if len(runs) > 1 and mean_over_runs:
+            if amounts:
+                mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
+                for ci, c in enumerate(self.compartments):
+                    for si, s in enumerate(self.species):
+                        timeseries.append(
+                            Timeseries(
+                                runs=runs,
+                                species=s,
+                                compartment=c,
+                                timepoints=timepoints,
+                                timepoints_units=self.timepoints_display_units,
+                                values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
+                                values=mean_amounts_over_runs[si, ci, :],
+                                errors=std_amounts_over_runs[si, ci, :],
+                                values_units=self.quantities_display_units,
+                                _colour=colours.colour(si), #TODO rechoose colours based on different strategy for stacked, etc in timeseries plot
+                            ),
+                        )
+            if volumes:
+                mean_volumes_over_runs, std_volumes_over_runs = functions_of_values_over_axis(self.volumes(), self.volumes_axes, 'runs', (mean, std)) 
+                for ci, c in enumerate(self.compartments):
+                    timeseries.append(
+                        Timeseries(
+                            runs=runs,
+                            species=volumes_species,
+                            compartment=c,
+                            timepoints=timepoints,
+                            timepoints_units=self.timepoints_display_units,
+                            values_type='Volume',
+                            values=mean_volumes_over_runs[ci, :],
+                            errors=std_volumes_over_runs[ci, :],
+                            values_units=self.volumes_display_units,
+                            _colour=colours.colour(num_species + ci),
+                        )
+                    )
+        
+        else: # not mean_over_runs
+            if amounts:
+                amounts = self.amounts()
+                for ri, r in enumerate(runs):
+                    for ci, c in enumerate(self.compartments):
+                        for si, s in enumerate(self.species):
+                            timeseries.append(
+                                Timeseries(
+                                    run=r,
+                                    species=s,
+                                    compartment=c,
+                                    timepoints=timepoints,
+                                    timepoints_units=self.timepoints_display_units,
+                                    values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
+                                    values=amounts[ri, si, ci, :],
+                                    values_units=self.quantities_display_units,
+                                    _colour=colours.colour(si),
+                                )
+                            )
+            if volumes:
+                volumes = self.volumes()
+                for ri, r in enumerate(self.runs):
+                    for ci, c in enumerate(self.compartments):
+                        timeseries.append(
+                            Timeseries(
+                                run=r,
+                                species=volumes_species,
+                                compartment=c,
+                                timepoints=timepoints,
+                                timepoints_units=self.timepoints_display_units,
+                                values_type='Volume',
+                                values=volumes[ri, ci, :],
+                                values_units=self.volumes_display_units,
+                                _colour=colours.colour(num_species + ci),
+                            )
+                        )
+        return timeseries
     
-    
-#    
 #    def export_data(self):
 #        pass
-#
+    
+#    def histogram(self):
+#        '''Returns histograms for (the sum of all selected/each) species
+#        averaging over runs or compartments at time t.
+#        '''
+#        pass
+
     @property
     def compartment_indices(self):
         return self._compartment_indices
@@ -942,7 +1042,10 @@ class McssResults(object):
         '''
         return self.x_min_max(), self.y_min_max()
 
-        
+    @property
+    def has_volumes(self):
+        return self._has_volumes
+    
 
 def test1():
     results = McssResults('tests/NAR_simulation.h5')
@@ -1014,7 +1117,7 @@ def test1():
     assert results.amounts().shape == (4, 2, 1, 101)
     
 
-def test2():
+def test_surfaces():
     results = McssResults('tests/germination_09.h5')
     results.select_species('SIG1', 'P1')
 #    print results.runs_information()
@@ -1033,8 +1136,40 @@ def test2():
     print mean(surfaces, 0).shape # the mean over runs of each species 
     print mean(sum(surfaces, 1), 0).shape # the mean over runs of the sum of the species amounts
 
+def test_timeseries():
+    file_name = 'tests/germination_09.h5'
+    results = McssResults(file_name)
+    results.select_species('SIG1')#, 'P1')
+    results.timestep = 1 * hour # 961 -> 17
+    results.timepoints_display_units = 'minutes'
+    results.quantities_display_type = 'concentrations'
+    results.quantities_display_units = 'molar'
+    results.volumes_data_units = 'microlitres'
+    results.volumes_display_units = 'femtolitres'
+#    print results.quantities_data_units, results.quantities_display_type, results.quantities_display_units
+#    print results.volumes_data_units, results.volumes_display_units
+#    print results.amounts().units
+#    exit()
+#    results.select_runs([1, 2, 3])
+    results.select_runs([1])
+#    print results.compartments_information(); exit()
+    results.select_compartments(['receiver'], [(0, i) for i in range(10, 13)])
+    timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=True)
+#    timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
+#    timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=True)
+#    timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=False) 
+#    timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=False)
+#    timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=False)
+    from timeseries_plot import TimeseriesPlot
+    TimeseriesPlot(
+        timeseries=timeseries,
+        window_title='Timeseries Plot(s) for %s' % file_name,
+    ).configure_traits()
+    
+    
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
 ###    execfile('mcss_results_widget.py')
 ##    test1()
-#    test2()
+#    test_surfaces()
+    test_timeseries()

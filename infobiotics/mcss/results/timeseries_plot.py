@@ -1,3 +1,4 @@
+import infobiotics
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
@@ -370,7 +371,19 @@ class TimeseriesPlot(HasTraits):
     def _plot_timeseries(self, axes, timeseries):
         self._plot_line(axes, timeseries)
 #        if self.averaging: #TODO
-#            self._plot_errorbars(axes, timeseries)
+        if len(timeseries.errors) > 0:
+            self._plot_errorbars(axes, timeseries)
+    
+    def _plot_errorbars(self, axes, timeseries):
+        step = 1
+        axes.errorbar(
+            timeseries.timepoints[::step],
+            timeseries.values[::step],
+            yerr=timeseries.errors[::step],
+            linestyle='None',
+            color=timeseries.colour,
+        ) 
+
 
 #    lines = List(Tuple(Line2D, Str))
     _timeseries_to_line_map = Dict(Timeseries, Line2D)
@@ -386,9 +399,6 @@ class TimeseriesPlot(HasTraits):
 #        print line
 #        self.lines.append((line, timeseries.label))
         self._timeseries_to_line_map[timeseries] = line
-
-    def _plot_errorbars(self, axes, timeseries): #TODO
-        raise NotImplementedError
 
 
     def combine(self):
@@ -596,6 +606,7 @@ class TimeseriesPlot(HasTraits):
     def _concentrations_units_changed(self):
         for timeseries in self._amounts:
             if timeseries.values_type == 'Concentration':
+                print timeseries.values.units, '***'
                 timeseries.values = timeseries.values.rescale(concentration_units[self.concentrations_units])
                 timeseries.values_units = self.concentrations_units
             
@@ -717,7 +728,7 @@ class TimeseriesPlot(HasTraits):
         self.edit_traits(
             view=View(
                 VGroup(
-                    'separate_volumes',
+                    HGroup('separate_volumes'),
                     Item('_timeseries',
                         editor=SetEditor(
 #                            values=dict([(timeseries, ':%s' % timeseries.title) for timeseries in self.timeseries]),
@@ -791,7 +802,7 @@ timeseries_table_editor = TableEditor(
         
 def main():
     from PyQt4.QtGui import qApp
-    from simulator_results_dialog import SimulatorResultsDialog as SimulationResultsDialog
+    from mcss_results_widget import McssResultsWidget
     from PyQt4.QtCore import Qt
     
     argv = qApp.arguments()
@@ -802,9 +813,9 @@ def main():
         sys.exit(2)
     if len(argv) == 1:
 #        shared.settings.register_infobiotics_settings()
-        self = SimulationResultsDialog()
+        self = McssResultsWidget()
     elif len(argv) == 2:
-        self = SimulationResultsDialog(filename=argv[1])
+        self = McssResultsWidget(filename=argv[1])
 
     self.ui.runs_list_widget.select(0)
     self.ui.runs_list_widget.select(1)
