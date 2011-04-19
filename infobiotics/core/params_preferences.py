@@ -12,30 +12,30 @@ Directory = RelativeDirectory(absolute=True, auto_set=True, writable=True, reada
 class ParamsPreferencesHelper(PreferencesHelper):
     
     def _preferences_default(self):
-        ''' Needed to override this method in PreferencesHelper because it was
-        picking up the wrong preferences even after set_default_preferences()! '''
+        '''Overridden because it was picking up the wrong preferences even 
+        after set_default_preferences().'''
         from infobiotics.preferences import preferences
         return preferences
     
     def _preferences_path(self):
         raise NotImplementedError('ParamsPreferencesHelper subclasses must provide a preferences_path, probably via a module-level constant such as PREFERENCES_PATH.')
     
-    executable = Executable 
+    executable = Executable
     directory = Directory
 
 class ParamsPreferencesPage(PreferencesPage):
     
     def _preferences_default(self):
-        ''' Must override this method in PreferencesHelper or else it picks up 
-        the wrong preferences even after set_default_preferences()! '''
+        '''Overridden because it was picking up the wrong preferences even 
+        after set_default_preferences().'''
         from infobiotics.preferences import preferences
         return preferences
 
     def _preferences_path_default(self):
         raise NotImplementedError('ParamsPreferencesPage subclasses must provide a preferences_path, probably via a module-level constant such as PREFERENCES_PATH.')
 
-    def _category_default(self):
-        return '' # default to a top-level page
+#    def _category_default(self):
+#        return '' # default to a top-level page
     
     def _name_default(self):
         raise NotImplementedError('ParamsPreferencesPage subclasses must provide a name, which might be the same as the preferences_path.')

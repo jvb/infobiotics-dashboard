@@ -25,10 +25,10 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
     
     def _about_dialog_default(self):
         return AboutDialog(
-            parent = self.workbench.active_window.control,
+            parent=self.workbench.active_window.control,
 #            image = ImageResource('logo/infobiotics_logo-1'), #TODO
 #            image = ImageResource('logo/infobiotics_logo-2'),
-            additions = [
+            additions=[
                 self.name,
                 'by',
                 'Jonathan Blakes',
@@ -52,9 +52,9 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
 #        return splash_screen
         return None
 
-    def run(self):
-#        print 'running' #TODO logger
-        super(InfobioticsDashboardWorkbenchApplication, self).run()
+#    def run(self):
+##        print 'running' #TODO logger
+#        super(InfobioticsDashboardWorkbenchApplication, self).run()
 
 #    def _started_fired(self):
 #        print 'started' #TODO logger

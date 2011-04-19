@@ -1,6 +1,6 @@
 from infobiotics.shared.traits_imports import *
-from infobiotics.dashboard.plugins.mcss_results.mcss_results_views import *
-from infobiotics.dashboard.plugins.mcss_results.mcss_results_plots import *
+from infobiotics.dashboard.mcss_results.mcss_results_views import *
+from infobiotics.dashboard.mcss_results.mcss_results_plots import *
 
 
 class McssResultsSpecies(HasTraits):

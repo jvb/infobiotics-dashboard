@@ -163,46 +163,46 @@ if False: # guard
     import infobiotics.dashboard.mcss.mcss_dashboard_experiment
     import infobiotics.dashboard.mcss.api
     import infobiotics.dashboard.mcss.mcss_dashboard_experiment_handler
-    import infobiotics.dashboard.plugins.simulator_results.axes_order_traits
-    import infobiotics.dashboard.plugins.simulator_results.editor
-    import infobiotics.dashboard.plugins.simulator_results.compartments_list_widget
-    import infobiotics.dashboard.plugins.simulator_results.simulator_results
-    import infobiotics.dashboard.plugins.simulator_results.axes_order_qt
-    import infobiotics.dashboard.plugins.simulator_results.structure
-    import infobiotics.dashboard.plugins.simulator_results.QListWidget_insert
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.SimulationDatasets
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.EnhancedListWidget
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.Workbench
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.md5sum
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.functions
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.actions
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.HistogramWidget
-    import infobiotics.dashboard.plugins.simulator_results.histograms2.SimulationWidgets
-    import infobiotics.dashboard.plugins.simulator_results.test_get_results_for_functions_over_axes
-    import infobiotics.dashboard.plugins.simulator_results.ui_plugin
-    import infobiotics.dashboard.plugins.simulator_results.actions
-    import infobiotics.dashboard.plugins.simulator_results.icons_rc
-    import infobiotics.dashboard.plugins.simulator_results.FromToDoubleSpinBox
-    import infobiotics.dashboard.plugins.simulator_results.ui_plots_preview_dialog
-    import infobiotics.dashboard.plugins.simulator_results.npz_info
-    import infobiotics.dashboard.plugins.simulator_results.PlotsListWidget
-    import infobiotics.dashboard.plugins.simulator_results.ui_simulation_results_dialog
-    import infobiotics.dashboard.plugins.simulator_results.test_generic_function
-    import infobiotics.dashboard.plugins.simulator_results.histograms.qt_mpl_bars
-    import infobiotics.dashboard.plugins.simulator_results.histograms.polys3d_demo
-    import infobiotics.dashboard.plugins.simulator_results.histograms.qt_mpl_bars_histogram_simulation
-    import infobiotics.dashboard.plugins.simulator_results.histograms.hist3d_demo
-    import infobiotics.dashboard.plugins.simulator_results.action_set
-    import infobiotics.dashboard.plugins.simulator_results.ui_player_control_widget
+    import infobiotics.dashboard.mcss.results.axes_order_traits
+    import infobiotics.dashboard.mcss.results.editor
+    import infobiotics.dashboard.mcss.results.compartments_list_widget
+    import infobiotics.dashboard.mcss.results.simulator_results
+    import infobiotics.dashboard.mcss.results.axes_order_qt
+    import infobiotics.dashboard.mcss.results.structure
+    import infobiotics.dashboard.mcss.results.QListWidget_insert
+    import infobiotics.dashboard.mcss.results.histograms2.SimulationDatasets
+    import infobiotics.dashboard.mcss.results.histograms2.EnhancedListWidget
+    import infobiotics.dashboard.mcss.results.histograms2.Workbench
+    import infobiotics.dashboard.mcss.results.histograms2.md5sum
+    import infobiotics.dashboard.mcss.results.histograms2.functions
+    import infobiotics.dashboard.mcss.results.histograms2.actions
+    import infobiotics.dashboard.mcss.results.histograms2.HistogramWidget
+    import infobiotics.dashboard.mcss.results.histograms2.SimulationWidgets
+    import infobiotics.dashboard.mcss.results.test_get_results_for_functions_over_axes
+    import infobiotics.dashboard.mcss.results.ui_plugin
+    import infobiotics.dashboard.mcss.results.actions
+    import infobiotics.dashboard.mcss.results.icons_rc
+    import infobiotics.dashboard.mcss.results.FromToDoubleSpinBox
+    import infobiotics.dashboard.mcss.results.ui_plots_preview_dialog
+    import infobiotics.dashboard.mcss.results.npz_info
+    import infobiotics.dashboard.mcss.results.PlotsListWidget
+    import infobiotics.dashboard.mcss.results.ui_simulation_results_dialog
+    import infobiotics.dashboard.mcss.results.test_generic_function
+    import infobiotics.dashboard.mcss.results.histograms.qt_mpl_bars
+    import infobiotics.dashboard.mcss.results.histograms.polys3d_demo
+    import infobiotics.dashboard.mcss.results.histograms.qt_mpl_bars_histogram_simulation
+    import infobiotics.dashboard.mcss.results.histograms.hist3d_demo
+    import infobiotics.dashboard.mcss.results.action_set
+    import infobiotics.dashboard.mcss.results.ui_player_control_widget
     import infobiotics.dashboard.plugins.core.ui_plugin
     import infobiotics.dashboard.plugins.core.actions
     import infobiotics.dashboard.plugins.core.action_set
     import infobiotics.dashboard.plugins.core.preferences_page
-    import infobiotics.dashboard.plugins.pmodelchecker.editor
-    import infobiotics.dashboard.plugins.pmodelchecker.ui_plugin
-    import infobiotics.dashboard.plugins.pmodelchecker.actions
-    import infobiotics.dashboard.plugins.pmodelchecker.action_set
-    import infobiotics.dashboard.plugins.pmodelchecker.preferences_page
+    import infobiotics.dashboard.pmodelchecker.editor
+    import infobiotics.dashboard.pmodelchecker.ui_plugin
+    import infobiotics.dashboard.pmodelchecker.actions
+    import infobiotics.dashboard.pmodelchecker.action_set
+    import infobiotics.dashboard.pmodelchecker.preferences_page
     import infobiotics.dashboard.plugins.file_editors.abstract_file_editor_action_set
     import infobiotics.dashboard.plugins.file_editors.test_app_run
     import infobiotics.dashboard.plugins.file_editors.api
@@ -220,12 +220,12 @@ if False: # guard
     import infobiotics.dashboard.plugins.text_editor.editor.text_editor_handler
     import infobiotics.dashboard.plugins.text_editor.editor.text_editor
     import infobiotics.dashboard.plugins.text_editor.text_editor_action_set
-    import infobiotics.dashboard.plugins.mcss.ui_plugin
-    import infobiotics.dashboard.plugins.mcss.actions
-    import infobiotics.dashboard.plugins.mcss.action_set
-    import infobiotics.dashboard.plugins.poptimizer.ui_plugin
-    import infobiotics.dashboard.plugins.poptimizer.actions
-    import infobiotics.dashboard.plugins.poptimizer.action_set
+    import infobiotics.dashboard.mcss.ui_plugin
+    import infobiotics.dashboard.mcss.actions
+    import infobiotics.dashboard.mcss.action_set
+    import infobiotics.dashboard.poptimizer.ui_plugin
+    import infobiotics.dashboard.poptimizer.actions
+    import infobiotics.dashboard.poptimizer.action_set
     import infobiotics.dashboard.poptimizer.poptimizer_dashboard_experiment_progress_handler
     import infobiotics.dashboard.poptimizer.api
     import infobiotics.dashboard.poptimizer.poptimizer_dashboard_experiment_handler

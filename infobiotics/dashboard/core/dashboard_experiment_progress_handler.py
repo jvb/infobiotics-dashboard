@@ -1,4 +1,0 @@
-from has_infobiotics_dashboard_workbench_application import HasInfobioticsDashboardWorkbenchApplication
-
-class DashboardExperimentProgressHandler(HasInfobioticsDashboardWorkbenchApplication):
-    pass    

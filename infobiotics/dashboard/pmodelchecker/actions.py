@@ -1,5 +1,6 @@
 from enthought.pyface.action.api import Action
-from infobiotics.dashboard.pmodelchecker.api import PRISMDashboardExperiment, MC2DashboardExperiment
+from infobiotics.dashboard.pmodelchecker.prism_dashboard_experiment import PRISMDashboardExperiment
+from infobiotics.dashboard.pmodelchecker.mc2_dashboard_experiment import MC2DashboardExperiment
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 from enthought.pyface.api import FileDialog, OK
 from editor import PModelCheckerResultsEditor 
@@ -21,11 +22,11 @@ class MC2ExperimentAction(Action):
 
 class PModelCheckerResultsAction(Action):
 #    name = 'PModelChecker Results'
-    name='Open &model checking results...'
+    name = 'Open &model checking results...'
     tooltip = 'Visualise checked properties.'
     def perform(self, event=None):
         fd = FileDialog(
-            wildcard=FileDialog.create_wildcard('PModelChecker results files', ['*.psm','*.mc2']),
+            wildcard=FileDialog.create_wildcard('PModelChecker results files', ['*.psm', '*.mc2']),
             title='Select a PModelChecker results file',
         )
         if fd.open() != OK:
@@ -63,9 +64,9 @@ class PModelCheckerResultsAction(Action):
 #    def perform(self, event=None):
 #        preferences = self.window.application.preferences
 #        print preferences.dump()
-##        print preferences.get('infobiotics.dashboard.plugins.pmodelchecker.path_to_pmodelchecker')
-##        print preferences.get('infobiotics.dashboard.plugins.pmodelchecker.path_to_mc2')
-##        print preferences.get('infobiotics.dashboard.plugins.pmodelchecker.path_to_prism')
+##        print preferences.get('infobiotics.dashboard.pmodelchecker.path_to_pmodelchecker')
+##        print preferences.get('infobiotics.dashboard.pmodelchecker.path_to_mc2')
+##        print preferences.get('infobiotics.dashboard.pmodelchecker.path_to_prism')
 #        
 #        ui = self.edit_traits(kind='modal')
 #        if not ui.result:

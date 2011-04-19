@@ -67,7 +67,7 @@ class TimeseriesPlot(HasTraits):
     scientific_volume_ticklabels = Bool(True)
 
 
-    figure_title = Str #TODO get from SimulatorResultsDialog
+    figure_title = Str #TODO get from McssResultsDialog
 
 #    def _figure_title_default(self):
 #        return 'figure\ntitle'

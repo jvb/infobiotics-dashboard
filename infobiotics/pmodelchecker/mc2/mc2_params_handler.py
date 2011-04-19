@@ -6,11 +6,14 @@ from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelChecker
 from mc2_params_group import mc2_params_group
 from mc2_mcss_experiment import MC2McssExperiment
 from mc2_mcss_experiment_group import mc2_mcss_experiment_group
-from infobiotics.mcss.api import McssExperiment
+from infobiotics.mcss.mcss_experiment import McssExperiment
 from infobiotics.commons.files import can_read_file
 import tables
+from mc2_preferences import MC2ParamsPreferencesPage
 
 class MC2ParamsHandler(PModelCheckerParamsHandler):
+
+    preferences_page = MC2ParamsPreferencesPage()
 
     def _params_group_default(self):
         return mc2_params_group

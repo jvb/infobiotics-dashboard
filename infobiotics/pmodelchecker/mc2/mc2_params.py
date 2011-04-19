@@ -6,6 +6,10 @@ class MC2Params(PModelCheckerParams):
         from infobiotics.pmodelchecker.mc2.api import MC2ParamsHandler
         return MC2ParamsHandler(model=self)
 
+    def _preferences_helper_default(self):
+        from infobiotics.pmodelchecker.mc2.mc2_preferences import MC2ParamsPreferencesHelper
+        return MC2ParamsPreferencesHelper()
+
     _parameter_set_name = 'mc2'
     
     model_checker = 'MC2'

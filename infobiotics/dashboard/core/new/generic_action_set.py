@@ -36,13 +36,13 @@ class GenericActionSet(WorkbenchActionSet):
         # Edit menu
         Action(path='MenuBar/Edit', name='Undo',  
           group='UndoRedoGroup',
-          class_name='infobiotics.dashboard.plugins.mcss.actions:UndoAction'),
+          class_name='infobiotics.dashboard.mcss.actions:UndoAction'),
         Action(path='MenuBar/Edit', name='Redo',
           group='UndoRedoGroup',
-          class_name='infobiotics.dashboard.plugins.mcss.actions:RedoAction'),
+          class_name='infobiotics.dashboard.mcss.actions:RedoAction'),
         
 #        # Experiment toolbar
 #        Action(path='ToolBar/Experiment', name='Simulation (mcss)',
 ##            group='McssGroup',
-#            class_name='infobiotics.dashboard.plugins.mcss.actions:McssExperimentAction'),
+#            class_name='infobiotics.dashboard.mcss.actions:McssExperimentAction'),
     ]

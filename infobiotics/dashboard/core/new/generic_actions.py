@@ -17,7 +17,7 @@ class UndoAction(Action):
 #                elif #TODO establish Undo pattern for non-TraitUIEditors
                             
 class RedoAction(Action):
-    id = 'infobiotics.dashboard.plugins.mcss.actions.RedoAction'
+    id = 'infobiotics.dashboard.mcss.actions.RedoAction'
     name = '&Redo'
     tooltip = 'Redo the previous undo action'
     accelerator = 'Ctrl-y'

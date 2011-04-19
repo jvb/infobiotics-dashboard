@@ -1,5 +1,5 @@
 from enthought.preferences.ui.api import PreferencesPage
-from enthought.traits.api import File
+from infobiotics.core.params_preferences import Executable 
 from enthought.traits.ui.api import View, Item
 
 class PModelCheckerPreferencesPage(PreferencesPage):
@@ -12,14 +12,14 @@ class PModelCheckerPreferencesPage(PreferencesPage):
 
     # 'PreferencesPage' interface
     name = 'Model checking' # The page name (this is what is shown in the preferences dialog)
-    preferences_path = 'plugins.pmodelchecker' #TODO The path to the preference node that contains the preferences
+    preferences_path = 'dashboard.pmodelchecker' #TODO The path to the preference node that contains the preferences
     category = 'Experiments' # The page's category (e.g. 'General/Appearance'). The empty string means that this is a top-level page.
     help_id = '' #TODO The page's help identifier (optional). If a help Id *is* provided then there will be a 'Help' button shown on the preference page.
 
     # Preferences
-    path_to_pmodelchecker = File('/usr/bin/pmodelchecker') #TODO
-    path_to_prism = File('/usr/bin/prism') #TODO   
-    path_to_mc2 = File('/usr/bin/MC2.jar') #TODO
+    path_to_pmodelchecker = Executable('/usr/bin/pmodelchecker') #TODO
+    path_to_prism = Executable('/usr/bin/prism') #TODO   
+    path_to_mc2 = Executable('/usr/bin/MC2.jar') #TODO
 
 #    def _path_to_mc2_changed(self):
 #        pass

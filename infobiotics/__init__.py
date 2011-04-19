@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 # allowing overriding of infobiotics package modules and subpackages 
 try:
     __import__('pkg_resources').declare_namespace(__name__)

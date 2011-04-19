@@ -1,7 +1,7 @@
 #def test():
-##    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
-##    w = SimulationResultsDialog(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
-#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
+##    w = McssResultsWidget(filename='/home/jvb/dashboard/examples/NAR-poptimizer/NAR_output.h5')
+##    w = McssResultsWidget(filename='/home/jvb/phd/eclipse/infobiotics/dashboard/tests/NAR-ok/simulation.h5')
+#    w = McssResultsWidget(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
 #
 #    if w.loaded:
 ##        w.ui.species_list_widget.selectAll()
@@ -36,8 +36,8 @@
 #
 #
 #def test_SimulatorResults_export_data_as():
-##    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/modules/module1.h5')
-#    w = SimulationResultsDialog(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
+##    w = McssResultsWidget(filename='/home/jvb/dashboard/examples/modules/module1.h5')
+#    w = McssResultsWidget(filename='/home/jvb/dashboard/examples/autoregulation/autoregulation_simulation.h5')
 #    for widget in (w.ui.species_list_widget, w.ui.compartments_list_widget, w.ui.runs_list_widget):
 #        widget.item(0).setSelected(True)
 #        widget.item(widget.count() - 1).setSelected(True)

@@ -1,6 +1,6 @@
 from infobiotics.shared.traits_imports import * 
-from infobiotics.dashboard.plugins.mcss_results.mcss_results_groups import * 
-from infobiotics.dashboard.plugins.mcss_results.mcss_results_actions import *
+from infobiotics.dashboard.mcss_results.mcss_results_groups import * 
+from infobiotics.dashboard.mcss_results.mcss_results_actions import *
 
 
 mcss_results_view = View(

@@ -1,18 +1,19 @@
-from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
+#from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
 from enthought.pyface.action.api import Action as PyFaceAction #TODO
-from simulator_results import SimulationResultsDialog
-from editor import SimulatorResultsEditor
+from infobiotics.mcss.results.mcss_results_widget import McssResultsWidget
+from editor import McssResultsEditor
 
-class SimulatorResultsAction(PyFaceAction): #TODO
+class McssResultsAction(PyFaceAction): #TODO
     name = 'mcss'
     tooltip = 'Visualise mcss simulations.'
     
     def perform(self, event=None):
-        obj = SimulationResultsDialog()
+        obj = McssResultsWidget()
         if not obj.loaded:
+            # user cancelled load
             return
         self.window.workbench.edit(
             obj=obj,
-            kind=SimulatorResultsEditor,
+            kind=McssResultsEditor,
             use_existing=False
         )

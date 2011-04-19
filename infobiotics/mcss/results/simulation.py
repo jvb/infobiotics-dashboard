@@ -62,7 +62,7 @@ def load_h5(h5_file):
     # propensities in Simulation._propensities_list
     # reactions in Simulation._reactions_list
     
-    # volumes to be done in SimulationResultsDialog
+    # volumes to be done in McssResults
     
     # positions not used yet
 

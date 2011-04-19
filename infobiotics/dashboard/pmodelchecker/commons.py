@@ -4,7 +4,7 @@ plugins (<here>/../plugins/pmodelchecker).
 '''
 
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
-from infobiotics.dashboard.plugins.pmodelchecker.editor import PModelCheckerResultsEditor
+from infobiotics.dashboard.pmodelchecker.editor import PModelCheckerResultsEditor
 
 def edit_pmodelchecker_results_file(file, application=None):
     if application is not None:

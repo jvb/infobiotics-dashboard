@@ -3,19 +3,19 @@ from enthought.envisage.ui.action.api import Group, Action
             
 class PModelCheckerActionSet(WorkbenchActionSet):
     
-    id = 'infobiotics.dashboard.plugins.pmodelchecker.action_set'
+    id = 'infobiotics.dashboard.pmodelchecker.action_set'
 
     actions = [
         Action(
 #            name='Open &PModelChecker results...', 
-            class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PModelCheckerResultsAction',
+            class_name='infobiotics.dashboard.pmodelchecker.actions:PModelCheckerResultsAction',
             group='ResultsGroup',
             path='MenuBar/File', 
         ),
 
-        Action(path='MenuBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
-        Action(path='ToolBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:PRISMExperimentAction'),
+        Action(path='MenuBar/Experiments', class_name='infobiotics.dashboard.pmodelchecker.actions:PRISMExperimentAction'),
+        Action(path='ToolBar/Experiments', class_name='infobiotics.dashboard.pmodelchecker.actions:PRISMExperimentAction'),
 
-        Action(path='MenuBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
-        Action(path='ToolBar/Experiments', class_name='infobiotics.dashboard.plugins.pmodelchecker.actions:MC2ExperimentAction'),
+        Action(path='MenuBar/Experiments', class_name='infobiotics.dashboard.pmodelchecker.actions:MC2ExperimentAction'),
+        Action(path='ToolBar/Experiments', class_name='infobiotics.dashboard.pmodelchecker.actions:MC2ExperimentAction'),
     ]

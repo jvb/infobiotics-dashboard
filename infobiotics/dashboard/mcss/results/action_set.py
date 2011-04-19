@@ -1,25 +1,23 @@
 from enthought.envisage.ui.workbench.api import WorkbenchActionSet
 from enthought.envisage.ui.action.api import Group, Action
             
-class SimulatorResultsActionSet(WorkbenchActionSet):
+class McssResultsActionSet(WorkbenchActionSet):
 
-    id = 'infobiotics.dashboard.plugins.simulator_results.action_set'
+    id = 'infobiotics.dashboard.mcss.results.action_set'
 
-## in mcss/action_set.py
-#    groups = [
-#        Group(
-#            id='ResultsGroup',
-#            path='MenuBar/File',
-#            after='TextFileGroup', #TODO enthought.plugins.text_editor.text_editor_action_set
-#        ),
-#    ]
-#
-#    
-#    actions = [
-#        Action(
-#            name='Open &mcss results...', 
-#            class_name='infobiotics.dashboard.plugins.simulator_results.actions:SimulatorResultsAction', 
-#            group='ResultsGroup',
-#            path='MenuBar/File', 
-#        ),
-#    ]
+    groups = [
+        Group(
+            id='ResultsGroup',
+            path='MenuBar/File',
+            after='TextFileGroup', #TODO enthought.plugins.text_editor.text_editor_action_set
+        ),
+    ]
+    
+    actions = [
+        Action(
+            name='Open &mcss results...',
+            class_name='infobiotics.dashboard.mcss.results.actions:McssResultsAction',
+            group='ResultsGroup',
+            path='MenuBar/File',
+        ),
+    ]

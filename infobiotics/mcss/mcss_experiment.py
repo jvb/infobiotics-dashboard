@@ -6,7 +6,7 @@ from enthought.traits.api import Int, Float
 class McssExperiment(McssParams, Experiment):
     
     def __handler_default(self):
-        from infobiotics.mcss.api import McssExperimentHandler
+        from infobiotics.mcss.mcss_experiment_handler import McssExperimentHandler
         return McssExperimentHandler(model=self)
     
     executable_kwargs = [
@@ -52,7 +52,7 @@ def test():
     
 #    experiment.directory = '/home/jvb/src/mcss-0.0.41/examples'#/models'
 
-    experiment.runs = 1
+#    experiment.runs = 1
 #    experiment.max_time = 3
 
     # test erroneous input for mcss

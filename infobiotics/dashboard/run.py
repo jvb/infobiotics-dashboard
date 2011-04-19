@@ -5,14 +5,26 @@ if __name__ == '__main__':
     import setproctitle
     setproctitle.setproctitle('Infobiotics Dashboard')
     
-    # set TraitsUI backend
-    from enthought.etsconfig.api import ETSConfig
-    ETSConfig.toolkit = 'qt4'
+    import infobiotics
+    # done in import infobiotics
+#    # set TraitsUI backend
+#    from enthought.etsconfig.api import ETSConfig
+#    ETSConfig.toolkit = 'qt4'
 
 # fixes 'no handlers could be found for logger "enthought.envisage.plugin"'
-import logging, os
-logger = logging.getLogger('enthought.envisage.plugin')
-logger.addHandler(logging.StreamHandler(os.devnull))
+import logging
+class NullHandler(logging.Handler): # http://docs.python.org/library/logging.html#library-config
+    def emit(self, record):
+        pass
+null_handler = NullHandler()
+loggers = [
+#    '',
+    'enthought.pyface.workbench.workbench_window',
+    'enthought.envisage.plugin',
+]
+for logger in loggers:
+#    logging.getLogger(logger).addHandler(null_handler)#NullHandler())
+    logging.getLogger(logger).addHandler(logging.StreamHandler())
 
 # import plugins
 from enthought.envisage.core_plugin import CorePlugin
@@ -21,16 +33,19 @@ from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
 #from enthought.envisage.developer.ui.developer_ui_plugin import DeveloperUIPlugin
 from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
 #from enthought.plugins.ipython_shell.ipython_shell_plugin import IPythonShellPlugin # IPythonShellPlugin is not supported by Qt backend, yet.
-from infobiotics.dashboard.plugins.text_editor.text_editor_plugin import TextEditorPlugin #from enthought.plugins.text_editor.text_editor_plugin import TextEditorPlugin
+
+#from infobiotics.dashboard.plugins.text_editor.text_editor_plugin import TextEditorPlugin
+from enthought.plugins.text_editor.text_editor_plugin import TextEditorPlugin
+
 #from enthought.envisage.ui.single_project.project_plugin import ProjectPlugin #TODO
-from infobiotics.dashboard.plugins.core.ui_plugin import CoreUIPlugin
+from infobiotics.dashboard.core.ui_plugin import CoreUIPlugin
 #from infobiotics.dashboard.plugins.example.ui_plugin import ExampleUIPlugin
 #from infobiotics.dashboard.plugins.unified_open_action.unified_open_action_ui_plugin import UnifiedOpenActionUIPlugin
 #from infobiotics.dashboard.plugins.bnf.ui_plugin import BNFUIPlugin
-from infobiotics.dashboard.plugins.mcss.ui_plugin import McssUIPlugin
-from infobiotics.dashboard.plugins.simulator_results.ui_plugin import SimulatorResultsUIPlugin
-from infobiotics.dashboard.plugins.pmodelchecker.ui_plugin import PModelCheckerUIPlugin
-from infobiotics.dashboard.plugins.poptimizer.ui_plugin import POptimizerUIPlugin
+from infobiotics.dashboard.mcss.ui_plugin import McssUIPlugin
+from infobiotics.dashboard.mcss.results.ui_plugin import McssResultsUIPlugin
+from infobiotics.dashboard.pmodelchecker.ui_plugin import PModelCheckerUIPlugin
+from infobiotics.dashboard.poptimizer.ui_plugin import POptimizerUIPlugin
 
 from infobiotics.dashboard.app import InfobioticsDashboardWorkbenchApplication
 
@@ -54,7 +69,7 @@ plugin_factories = [
 #    UnifiedOpenActionUIPlugin,
 #    BNFUIPlugin,
     McssUIPlugin,
-    SimulatorResultsUIPlugin,
+    McssResultsUIPlugin,
     PModelCheckerUIPlugin,
     POptimizerUIPlugin,
 ]

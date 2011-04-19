@@ -1060,7 +1060,7 @@ class McssResults(object):
         amounts = self.amounts()
         
         # fill surfaces with amounts
-        for ri, _ in enumerate(self.run_indices): # only one for now, see SimulationResultsDialog.update_ui()
+        for ri, _ in enumerate(self.run_indices): # only one for now, see McssResultsWidget.update_ui()
             for si, _ in enumerate(self.species_indices):
                 for ci, _ in enumerate(self.compartment_indices):
                     compartment = selected_compartments[ci]

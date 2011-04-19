@@ -4,7 +4,7 @@ from action_set import POptimizerActionSet
 from infobiotics.poptimizer.poptimizer_preferences import POptimizerParamsPreferencesPage
 
 class POptimizerUIPlugin(Plugin):
-    id = 'infobiotics.dashboard.plugins.poptimizer.ui_plugin'
+    id = 'infobiotics.dashboard.poptimizer.ui_plugin'
     name = 'POptimizer'
 
     action_sets = List(contributes_to='enthought.envisage.ui.workbench.action_sets')

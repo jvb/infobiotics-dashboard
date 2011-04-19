@@ -1,5 +1,0 @@
-from infobiotics.mcss.api import McssExperimentProgressHandler
-from infobiotics.dashboard.core.api import DashboardExperimentProgressHandler
-
-class McssDashboardExperimentProgressHandler(McssExperimentProgressHandler, DashboardExperimentProgressHandler):
-    pass

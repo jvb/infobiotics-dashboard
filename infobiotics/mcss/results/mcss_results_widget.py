@@ -122,9 +122,17 @@ class McssResultsWidget(QWidget):
         settings.beginGroup(self.settings_group)
         settings.setValue("current_directory", QVariant(unicode(self.current_directory)))
         #TODO save options and units
+        
+#        # save filename specific options and units
+#        settings.setValue(self.filename)
+        
         settings.endGroup()
 
     def load(self, filename=None):
+        
+#        if getattr(self, 'filename', '') != '':
+#            self.save_settings()
+        
         if filename is None:
             filename = QFileDialog.getOpenFileName(self,
                                                    self.tr("Open HDF5 simulation data file"),
@@ -182,15 +190,18 @@ class McssResultsWidget(QWidget):
             ui.timepoints_data_units_combo_box,
             ui.timepoints_display_units_combo_box,
             
-            ui.quantities_data_units_combo_box,
-            ui.quantities_display_type_combo_box,
-            ui.molecules_display_units_label,
-            ui.moles_display_units_combo_box,
-            ui.concentrations_display_units_combo_box,
+            ui._data_group_box,
+#            ui.quantities_data_units_combo_box,
+#            ui.quantities_display_type_combo_box,
+##            ui.molecules_display_units_label,
+#            ui.moles_display_units_combo_box,
+#            ui.concentrations_display_units_combo_box,
             
 #            ui.volumes_data_units_combo_box,
 #            ui.volumes_display_units_combo_box,
             ui.volumes_widget,
+
+#            ui._actions_layout, # not possible because QLayouts don't have a setVisible method
         )
 
         clear_widgets(
@@ -351,7 +362,7 @@ class McssResultsWidget(QWidget):
         else:
 #            hide_widgets(ui.volumes_widget)
             hide_widgets(ui.in_label)
-            show_widgets(ui.volume_spin_box)
+            show_widgets(ui.volume_spin_box) #TODO switch on quantities_display_type_combo_box.currrentItem() == 'concentrations'  
         
 #        check_widgets(
 #            ui.select_all_runs_check_box,
@@ -760,7 +771,7 @@ class McssResultsWidget(QWidget):
             try:
                 ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
             except:
-                ws = wb.add_sheet('SimulatorResults')
+                ws = wb.add_sheet('McssResults')
             ws.write(0, 0, header[0])
             for ti in range(len(timepoints)):
                 ws.write(1 + ti, 0, timepoints[ti])
@@ -854,109 +865,122 @@ class McssResultsWidget(QWidget):
     def plot(self): #TODO move most of this to McssResults
         '''Plot selected data. '''
 
-        runs, species, compartments = self.selected_items()
-#        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
-        _, _, _, averaging = self.options()
-        timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units = self.units()
-        results = self.selected_items_results()
-
-        if averaging:
-#            timepoints, amounts = results.get_amounts_mean_over_runs()
-            timepoints, amounts = results.get_functions_over_runs((mcss_results.mean, mcss_results.std))
-            mean_index = 0
-            std_index = 1
+#        # old 
+#        runs, species, compartments = self.selected_items()
+##        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
+#        _, _, _, averaging = self.options()
+#        timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units = self.units()
+#        results = self.selected_items_results()
+#
+#        if averaging:
+##            timepoints, amounts = results.get_amounts_mean_over_runs()
+#            timepoints, amounts = results.get_functions_over_runs((mcss_results.mean, mcss_results.std))
+#            mean_index = 0
+#            std_index = 1
+##            if self.volumes_selected:
+##                timepoints, volumes = results.get_volumes_mean_over_runs() #TODO
+#        else:
+##            timepoints = results.timepoints(timepoints_display_units=timepoints_display_units)
+#            timepoints = results.timepoints
+#            timepoints.units = time_units[timepoints_display_units]
+#            amounts = results.amounts(
+#                quantities_display_type=quantities_display_type,
+#                quantities_display_units=quantities_display_units,
+#                volume=volume if self.simulation.log_volumes != 1 else None,
+#            )
 #            if self.volumes_selected:
-#                timepoints, volumes = results.get_volumes_mean_over_runs() #TODO
-        else:
-#            timepoints = results.timepoints(timepoints_display_units=timepoints_display_units)
-            timepoints = results.timepoints
-            timepoints.units = time_units[timepoints_display_units]
-            amounts = results.amounts(
-                quantities_display_type=quantities_display_type,
-                quantities_display_units=quantities_display_units,
-                volume=volume if self.simulation.log_volumes != 1 else None,
-            )
-            if self.volumes_selected:
-                _, volumes = results.get_volumes(
-                    volumes_display_units=volumes_display_units,
-                )
-        if len(amounts) == 0 and (self.volumes_selected and len(volumes) == 0):
-            return
-
-        from timeseries_plot import Timeseries, TimeseriesPlot
-
-        timeseries = []
-
-        volumes_species = Species(
-            index=None, #TODO hack
-            name='Volumes',
-            simulation=self.simulation,
-        )
-
-        if averaging:
-#            raise NotImplementedError
-            for ci, c in enumerate(compartments):
-                for si, s in enumerate(species):
-                    timeseries.append(
-                        Timeseries(
-                            runs=[run.data for run in runs],
-                            species=s.data,
-                            compartment=c.data,
-                            timepoints=timepoints,
-                            timepoints_units=timepoints_display_units,
-                            values_type='Concentration' if quantities_display_type == 'concentrations' else 'Amount',
-                            values=amounts[ri, si, ci, :], #FIXME ri should be fi
-                            values_units=quantities_display_units,
-                            _colour=colours.colour(si),
-                        )                                          
-                    )
-                if self.volumes_selected:
-                    timeseries.append(
-                        Timeseries(
-                            runs=[run.data for run in runs],
-                            species=volumes_species,
-                            compartment=c.data,
-                            timepoints=timepoints,
-                            timepoints_units=timepoints_display_units,
-                            values_type='Volume',
-                            values=volumes[ri, ci, :], #FIXME don't know what ri should be
-                            values_units=volumes_display_units,
-                            _colour=colours.colour(len(species) + ci),
-                        )                                          
-                    )
-        else:
-            for ri, r in enumerate(runs):
-                for ci, c in enumerate(compartments):
-                    for si, s in enumerate(species):
-                        timeseries.append(
-                            Timeseries(
-                                run=r.data,
-                                species=s.data,
-                                compartment=c.data,
-                                timepoints=timepoints,
-                                timepoints_units=timepoints_display_units,
-                                values_type='Concentration' if quantities_display_type == 'concentrations' else 'Amount',
-                                values=amounts[ri, si, ci, :],
-                                values_units=quantities_display_units,
-                                _colour=colours.colour(si),
-                            )
-                        )
-                        
-                    if self.volumes_selected:
-                        timeseries.append(
-                            Timeseries(
-                                run=r.data,
-                                species=volumes_species,
-                                compartment=c.data,
-                                timepoints=timepoints,
-                                timepoints_units=timepoints_display_units,
-                                values_type='Volume',
-                                values=volumes[ri, ci, :],
-                                values_units=volumes_display_units,
-                                _colour=colours.colour(len(species) + ci),
-                            )                                          
-                        )
+#                _, volumes = results.get_volumes(
+#                    volumes_display_units=volumes_display_units,
+#                )
+#        if len(amounts) == 0 and (self.volumes_selected and len(volumes) == 0):
+#            return
+#        from timeseries import Timeseries
+#        timeseries = []
+#
+#        volumes_species = Species(
+#            index=None, #TODO hack
+#            name='Volumes',
+#            simulation=self.simulation,
+#        )
+#
+#        if averaging:
+##            raise NotImplementedError
+#            for ci, c in enumerate(compartments):
+#                for si, s in enumerate(species):
+#                    timeseries.append(
+#                        Timeseries(
+#                            runs=[run.data for run in runs],
+#                            species=s.data,
+#                            compartment=c.data,
+#                            timepoints=timepoints,
+#                            timepoints_units=timepoints_display_units,
+#                            values_type='Concentration' if quantities_display_type == 'concentrations' else 'Amount',
+#                            values=amounts[ri, si, ci, :], #FIXME ri should be fi
+#                            values_units=quantities_display_units,
+#                            _colour=colours.colour(si),
+#                        )                                          
+#                    )
+#                if self.volumes_selected:
+#                    timeseries.append(
+#                        Timeseries(
+#                            runs=[run.data for run in runs],
+#                            species=volumes_species,
+#                            compartment=c.data,
+#                            timepoints=timepoints,
+#                            timepoints_units=timepoints_display_units,
+#                            values_type='Volume',
+#                            values=volumes[ri, ci, :], #FIXME don't know what ri should be
+#                            values_units=volumes_display_units,
+#                            _colour=colours.colour(len(species) + ci),
+#                        )                                          
+#                    )
+#        else:
+#            for ri, r in enumerate(runs):
+#                for ci, c in enumerate(compartments):
+#                    for si, s in enumerate(species):
+#                        timeseries.append(
+#                            Timeseries(
+#                                run=r.data,
+#                                species=s.data,
+#                                compartment=c.data,
+#                                timepoints=timepoints,
+#                                timepoints_units=timepoints_display_units,
+#                                values_type='Concentration' if quantities_display_type == 'concentrations' else 'Amount',
+#                                values=amounts[ri, si, ci, :],
+#                                values_units=quantities_display_units,
+#                                _colour=colours.colour(si),
+#                            )
+#                        )
+#                        
+#                    if self.volumes_selected:
+#                        timeseries.append(
+#                            Timeseries(
+#                                run=r.data,
+#                                species=volumes_species,
+#                                compartment=c.data,
+#                                timepoints=timepoints,
+#                                timepoints_units=timepoints_display_units,
+#                                values_type='Volume',
+#                                values=volumes[ri, ci, :],
+#                                values_units=volumes_display_units,
+#                                _colour=colours.colour(len(species) + ci),
+#                            )                                          
+#                        )
             
+        results = self.selected_items_results()
+        print results.timeseries_information()
+        timeseries = results.timeseries(
+            amounts=True,
+            volumes=True if results.has_volumes else False,
+            mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False,
+        )
+#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
+#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=True)
+#        timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=False) 
+#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=False)
+#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=False)
+        
+        from timeseries_plot import TimeseriesPlot
         TimeseriesPlot(
             timeseries=timeseries,
             window_title='Timeseries Plot(s) for %s' % self.filename,
@@ -966,8 +990,8 @@ class McssResultsWidget(QWidget):
 def main():
     argv = qApp.arguments()
 #    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5')
-#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-simulator_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
-    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-simulator_results/infobiotics/mcss/results/tests/pulsePropagation-2_runs.h5') # has volumes dataset
+#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
+    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)
@@ -985,7 +1009,7 @@ def main():
 if __name__ == "__main__":
     main()
 #    test()
-#    test_SimulatorResults_export_data_as()
+#    test_McssResults_export_data_as()
 #    test_volumes()
-#    profile_SimulatorResults_get_amounts()
+#    profile_McssResults_get_amounts()
     exit(qApp.exec_())

@@ -5,7 +5,7 @@ from action_set import PModelCheckerActionSet
 from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesPage
 
 class PModelCheckerUIPlugin(Plugin):
-    id = 'infobiotics.dashboard.plugins.pmodelchecker.ui_plugin.PModelCheckerUIPlugin'
+    id = 'infobiotics.dashboard.pmodelchecker.ui_plugin.PModelCheckerUIPlugin'
     name = 'pmodelchecker'
 
     action_sets = List(contributes_to='enthought.envisage.ui.workbench.action_sets')
@@ -27,6 +27,6 @@ class PModelCheckerUIPlugin(Plugin):
 
     #TODO plugin-local preferences?
 #    preferences = List(
-#        ['pkgfile://infobiotics.dashboard.plugins.pmodelchecker/preferences.ini'], 
+#        ['pkgfile://infobiotics.dashboard.pmodelchecker/preferences.ini'], 
 #        contributes_to='enthought.envisage.preferences'
 #    )

@@ -2,7 +2,7 @@ from enthought.pyface.action.api import Action
 #from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
 #from mcss_experiment_editor import McssExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
-from infobiotics.dashboard.mcss.api import McssDashboardExperiment
+from infobiotics.dashboard.mcss.mcss_dashboard_experiment import McssDashboardExperiment
 
 class McssExperimentAction(Action):
 #    name = 'mcss'
@@ -18,27 +18,11 @@ class McssExperimentAction(Action):
 #        )
         obj.edit()
 
-## in simulator_results/actions.py
-#from simulator_results import SimulationResultsDialog #TODO
-#from editor import SimulatorResultsEditor
-#
-#class SimulatorResultsAction(Action):
-#    name = 'mcss'
-#    tooltip = 'Visualise mcss simulations.' #TODO
-#    
-#    def perform(self, event=None):
-#        obj = SimulationResultsDialog()
-#        if not obj.loaded: return # user cancelled load
-#        self.window.workbench.edit(
-#            obj=obj,
-#            kind=SimulatorResultsEditor,
-#            use_existing=False
-#        )
 
 #class LoadMcssParametersAction(PyFaceAction): #TODO
 #    ''' ... 
 #    '''
-#    id = 'infobiotics.dashboard.plugins.mcss.actions.LoadMcssParametersAction'
+#    id = 'infobiotics.dashboard.mcss.actions.LoadMcssParametersAction'
 #    name = 'Load mcss parameters'
 #    tooltip = ''
 #    
@@ -49,7 +33,7 @@ class McssExperimentAction(Action):
 #class SaveMcssParametersAction(PyFaceAction): #TODO
 #    ''' ... 
 #    '''
-#    id = 'infobiotics.dashboard.plugins.mcss.actions.SaveMcssParametersAction'
+#    id = 'infobiotics.dashboard.mcss.actions.SaveMcssParametersAction'
 #    name = 'Save mcss parameters'
 #    tooltip = ''
 #    
@@ -58,7 +42,7 @@ class McssExperimentAction(Action):
 
 
 #class UndoAction(Action):
-#    id = 'infobiotics.dashboard.plugins.mcss.actions.UndoAction'
+#    id = 'infobiotics.dashboard.mcss.actions.UndoAction'
 #    name = '&Undo'
 #    tooltip = 'Undo the last change'
 #    accelerator = 'Ctrl-z'
@@ -73,7 +57,7 @@ class McssExperimentAction(Action):
 #            
 #            
 #class RedoAction(Action):
-#    id = 'infobiotics.dashboard.plugins.mcss.actions.RedoAction'
+#    id = 'infobiotics.dashboard.mcss.actions.RedoAction'
 #    name = '&Redo'
 #    tooltip = 'Redo the previous undo action'
 #    accelerator = 'Ctrl-y'

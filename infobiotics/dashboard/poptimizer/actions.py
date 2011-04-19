@@ -1,5 +1,5 @@
 from enthought.pyface.action.api import Action
-from infobiotics.dashboard.poptimizer.api import POptimizerDashboardExperiment
+from infobiotics.dashboard.poptimizer.poptimizer_dashboard_experiment import POptimizerDashboardExperiment
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
 
 class POptimizerExperimentAction(Action):

@@ -9,8 +9,8 @@ import logging
 class NullHandler(logging.Handler): # http://docs.python.org/library/logging.html#library-config
     def emit(self, record):
         pass
+    logging.getLogger('enthought.pyface.workbench.workbench_window').addHandler(NullHandler())
 logging.getLogger('enthought.envisage.plugin').addHandler(NullHandler())
-logging.getLogger('enthought.pyface.workbench.workbench_window').addHandler(NullHandler())
 logging.getLogger('enthought.pyface.workbench.i_view').addHandler(NullHandler())
 logging.getLogger('enthought.pyface.ui.qt4.workbench.workbench_window_layout').addHandler(logging.StreamHandler())#NullHandler())
 

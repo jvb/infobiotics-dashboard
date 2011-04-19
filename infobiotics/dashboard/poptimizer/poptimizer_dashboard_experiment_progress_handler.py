@@ -1,5 +1,0 @@
-from infobiotics.poptimizer.api import POptimizerExperimentProgressHandler
-from infobiotics.dashboard.core.api import DashboardExperimentProgressHandler
-
-class POptimizerDashboardExperimentProgressHandler(POptimizerExperimentProgressHandler, DashboardExperimentProgressHandler):
-    pass

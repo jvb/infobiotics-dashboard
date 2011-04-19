@@ -1,5 +1,5 @@
 from infobiotics.shared.traits_imports import * 
-from infobiotics.dashboard.plugins.mcss_results.mcss_results_editors import *
+from infobiotics.dashboard.mcss_results.mcss_results_editors import *
 
 
 data_group = VGroup(

@@ -20,7 +20,7 @@ def _id_generator():
 
 _id_generator = _id_generator()
 
-class SimulatorResultsEditor(Editor):
+class McssResultsEditor(Editor):
 
     obj_filename_change_notifier = Instance(QObject)
 
@@ -28,7 +28,7 @@ class SimulatorResultsEditor(Editor):
         self.name = os.path.basename(filename)        
 
     def _obj_changed(self, obj):
-        self.id   = self._get_unique_id()
+        self.id = self._get_unique_id()
         if hasattr(obj, 'filename'):
             self.name = os.path.basename(obj.filename) 
         else:
