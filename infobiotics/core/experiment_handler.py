@@ -1,7 +1,6 @@
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
 from infobiotics.core.views import ExperimentView
-from enthought.pyface.timer.do_later import do_later
 
 class ExperimentHandler(ParamsHandler):
     

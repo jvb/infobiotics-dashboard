@@ -282,7 +282,7 @@ class ParamsHandler(HelpfulController):
             if not os.path.isfile(self.model.executable):
 #                print 'not os.path.isfile(self.model.executable)'
                 return False
-            if self.model.running:
+            if hasattr(self.model, 'running') and self.model.running:
 #                print 'self.model.running', self.model.running
                 return False
 #        print 'True'

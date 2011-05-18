@@ -3,7 +3,7 @@
 Infobiotics Dashboard
 =====================
 
-Copyright 2008, 2009, 2010 Jonathan Blakes, jvb@cs.nott.ac.uk
+Copyright 2008, 2009, 2010, 2011 Jonathan Blakes, jvb@cs.nott.ac.uk
 Released under GNU GPL version 3.
 
 
@@ -78,4 +78,4 @@ Running
 
 To run the Infobiotics Dashboard at the terminal type:
 
-$ infobiotics-dashboard.py
+$ infobiotics-dashboard
