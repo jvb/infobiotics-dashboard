@@ -19,9 +19,10 @@ from infobiotics.__version__ import __version__, __version_info__
 version = VERSION = __version__
 version_info = VERSION_INFO = __version_info__ # __version_info__ is a tuple of int(major, minor, micro) 
 
-# use PyQt4's QString API 2
+# set PyQt4's QString API
 import sip
-sip.setapi('QString', 2)
+#sip.setapi('QString', 2) # EPD > 3.6?
+sip.setapi('QString', 1) # EPD <= 3.6?
 
 # set toolkit to 'qt4' (TraitsBackendQt) before any Traits imports; os.environ['ETS_TOOLKIT']='qt4' also works
 from enthought.etsconfig.api import ETSConfig
@@ -35,7 +36,4 @@ ETSConfig.toolkit = 'qt4'#TODO PySide
 ETSConfig.company = 'Infobiotics'
 # use ~/.infobiotics (or "Application Data\\Infobiotics" on Windows) instead of
 # ~/.enthought for preferences.ini
-#
 # used by ETSConfig.get_application_data() for persistence (preferences)
-
-

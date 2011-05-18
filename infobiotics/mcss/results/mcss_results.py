@@ -1,11 +1,9 @@
 '''Provides the McssResults class for getting simulation data out of h5 files
 and functions for applying NumPy ufuncs multi-dimensional arrays.'''
 
-import sip
 from quantities.units.time import hour, minute
 import operator
 from table import indent
-sip.setapi('QString', 2)
 from PyQt4.QtGui import QMessageBox
 
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units

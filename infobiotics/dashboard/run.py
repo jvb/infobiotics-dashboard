@@ -21,10 +21,11 @@ loggers = [
 #    '',
     'enthought.pyface.workbench.workbench_window',
     'enthought.envisage.plugin',
+    'enthought.pyface.workbench.i_view',
 ]
 for logger in loggers:
-#    logging.getLogger(logger).addHandler(null_handler)#NullHandler())
-    logging.getLogger(logger).addHandler(logging.StreamHandler())
+    logging.getLogger(logger).addHandler(null_handler)#NullHandler())
+#    logging.getLogger(logger).addHandler(logging.StreamHandler())
 
 # import plugins
 from enthought.envisage.core_plugin import CorePlugin

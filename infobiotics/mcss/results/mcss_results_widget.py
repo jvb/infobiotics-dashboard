@@ -1,7 +1,5 @@
-import sip
 from infobiotics.mcss.results import mcss_results
 from infobiotics.commons.quantities.units.time import time_units
-sip.setapi('QString', 2)
 
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
@@ -146,7 +144,10 @@ class McssResultsWidget(QWidget):
                     return False
 
         self.current_directory = QFileInfo(filename).absolutePath()
-#        filename = unicode(filename) # must convert QString into unicode
+
+#        if sip.getapi('QString') == 1:
+        filename = unicode(filename) # must convert QString into unicode
+
         simulation = None
         try:
             simulation = load_h5(filename)
@@ -990,8 +991,8 @@ class McssResultsWidget(QWidget):
 def main():
     argv = qApp.arguments()
 #    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5')
-#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
-    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
+    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
+#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)

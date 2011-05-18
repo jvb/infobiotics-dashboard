@@ -1,5 +1,5 @@
 from __future__ import division
-import sip; sip.setapi('QString', 2)
+#import sip; sip.setapi('QString', 2)
 from enthought.etsconfig.api import ETSConfig; ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import HasTraits, Instance, Float, Range, on_trait_change
 from enthought.traits.ui.api import View, Item, VGroup

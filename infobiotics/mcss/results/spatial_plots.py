@@ -1,5 +1,5 @@
-import sip
-sip.setapi('QString', 2)
+#import sip
+#sip.setapi('QString', 2)
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import *
