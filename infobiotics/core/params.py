@@ -8,12 +8,14 @@ from infobiotics.core.params_handler import ParamsHandler
 from infobiotics.core.traits.params_relative_file import ParamsRelativeFile
 from infobiotics.commons.api import key_from_value, can_access, read, write, can_execute
 from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
+from infobiotics.core.params_preferences import Executable, Directory
 import os, sys
 from xml import sax
 from infobiotics.thirdparty.which import which, WhichError
 
 from infobiotics.commons.api import logging
 log = logging.getLogger(name='Params', level=logging.WARN)
+log.setLevel(logging.ERROR)
 
 from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
@@ -58,10 +60,6 @@ def bind_preference(obj, trait_name, preference_path, preferences=None):
         traits['preferences'] = preferences
     return ParamsPreferenceBinding(**traits)
 
-
-from infobiotics.core.params_preferences import Executable, Directory
-
-
 class Params(HasTraits): 
 
     _parameters_name = Str(Undefined, desc='the name attribute of the parameter tag in the params XML file')
@@ -84,6 +82,9 @@ class Params(HasTraits):
     executable = Executable
 
     directory = Directory # infinite recursion if ParamsRelativeDirectory because directory='directory'
+    
+#    def _directory_changed(self, directory):
+#        os.chdir(directory)
     
     def __init__(self, file=None, **traits):
         self.bind_preferences() # now done in configure() or edit() so that scripts and terminal can rely on defaults not preferences
@@ -150,7 +151,15 @@ class Params(HasTraits):
     _dirty_parameters = Property(Dict(Str, Any))
     
     def _get__dirty_parameters(self):
-        return dict([(name, value) for name, value in self.parameter_name_values_dict().items() if value != self._clean_parameters[name]]) 
+#        return dict([(name, value) for name, value in self.parameter_name_values_dict().items() if value != self._clean_parameters[name]])
+        list_of_name_value_tuples = []
+        for name, value in self.parameter_name_values_dict().items():
+            try:
+                if value != self._clean_parameters[name]:
+                    list_of_name_value_tuples.append((name, value))
+            except KeyError:
+                pass
+        return dict(list_of_name_value_tuples) 
     
     _dirty = Bool(False)
 

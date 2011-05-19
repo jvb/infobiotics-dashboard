@@ -7,7 +7,7 @@ from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThan
 class McssParams(Params):
 
     def __handler_default(self):
-        from infobiotics.mcss.api import McssParamsHandler
+        from infobiotics.mcss.mcss_params_handler import McssParamsHandler
         return McssParamsHandler(model=self)
 
     def _preferences_helper_default(self):
@@ -18,6 +18,22 @@ class McssParams(Params):
     
     _parameters_name = 'mcss'
     _parameter_set_name = 'SimulationParameters'
+
+    def _model_file_changed(self):
+        from enthought.traits.api import TraitError
+        import os.path
+        directory, model_file = os.path.split(self.model_file_)
+        try:
+            self.directory = directory
+            # problem: model_specification is appearing relative to the previous
+            # directory
+            # solution (avoiding infinite loop):
+            # first set it without notifying change handlers
+            self.trait_setq(model_file=model_file)
+            # second notify change handlers by setting it
+            self.model_file = model_file
+        except TraitError:
+            self.model_file = model_file 
         
     model_file = ParamsRelativeFile(desc='the model file to simulate',
         exists=True,

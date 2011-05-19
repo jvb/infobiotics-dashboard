@@ -20,6 +20,25 @@ class PModelCheckerParams(Params):
     model_checker = Enum(['PRISM', 'MC2'], desc='the name of the model checker to use, PRISM or MC2')
 
     model_specification = ParamsRelativeFile(readable=True, filter=['Lattice Population P systems (*.lpp)', 'All files (*)'], desc='name of the file containing the model specification as an LPP-system')
+    
+    @on_trait_change('model_specification', 'PRISM_model')
+    def update_directory(self, object, name, old, new):
+        from enthought.traits.api import TraitError
+        directory, model_specification = os.path.split(self.model_specification_)
+        try:
+            self.directory = directory
+            # problem: model_specification is appearing relative to the previous
+            # directory
+            # solution (avoiding infinite loop):
+            # first set it without notifying change handlers
+            self.trait_setq(model_specification=model_specification)
+            # second notify change handlers by setting it
+            self.model_specification = model_specification
+        except TraitError:
+            self.model_specification = model_specification 
+        if self.model_checker == 'PRISM':
+            self.translate_model_specification(name)
+            
     positions = Str('all', desc="a string stating the positions of the P systems under study.\nThe format of the string is the following: 'x_1,y_1:x_2,y_2: ... :x_n,y_n'")
     molecular_species = Str('all', desc="a string stating the name of the molecular species under study.\nThe format of the string is the following: 'moleculeName_1,moleculeName_2, ...,moleculeName_n'")
 
@@ -88,5 +107,6 @@ class PModelCheckerParams(Params):
 
 
 if __name__ == '__main__':
-    execfile('prism/prism_experiment.py')
+#    execfile('prism/prism_experiment.py')
+    execfile('prism/prism_params.py')
             

@@ -5,7 +5,7 @@ Adapted from qt4/extras/bounds_editor.py, qt4/file_editor.py, and qt4/html_edito
 from enthought.traits.ui.qt4.text_editor import SimpleEditor as SimpleTextEditor, ReadonlyEditor
 from enthought.traits.ui.api import FileEditor
 from enthought.traits.api import Str, Bool, TraitError, on_trait_change
-from infobiotics.commons.strings import wrap
+#from infobiotics.commons.strings import wrap
 import os
 from PyQt4 import QtCore, QtGui
 
@@ -99,6 +99,7 @@ class SimpleEditor(SimpleTextEditor):
 
     def _update(self, file_name):
         ''' Updates the editor value with a specified file name. '''
+        width = 80
         try:
             if self.factory.truncate_ext:
                 file_name = os.path.splitext(file_name)[0]
@@ -108,11 +109,14 @@ class SimpleEditor(SimpleTextEditor):
                 self.ui.errors -= 1
             self.set_error_state(False)
             if not self.set_tooltip(self._file_name): # restore desc over excp
-                self._file_name.setToolTip(wrap(self.object.base_trait(self.name).full_info(self.object, self.name, self.value))) # set tooltip over excp using traits info
+#                self._file_name.setToolTip(wrap(self.object.base_trait(self.name).full_info(self.object, self.name, self.value))) # set tooltip over excp using traits info
+                self._file_name.setToolTip(textwrap.fill(self.object.base_trait(self.name).full_info(self.object, self.name, self.value), width=width)) # set tooltip over excp using traits info
         except TraitError, excp:
-            self._file_name.setToolTip(wrap(unicode(excp), 80)) # fix tooltip line lengths
+#            self._file_name.setToolTip(wrap(unicode(excp), 80)) # fix tooltip line lengths
+            self._file_name.setToolTip(textwrap.fill(unicode(excp), width=width)) # fix tooltip line lengths
             self.error(excp)
 
+import textwrap
 
 class RelativeFileEditor(FileEditor): # EditorFactory
     

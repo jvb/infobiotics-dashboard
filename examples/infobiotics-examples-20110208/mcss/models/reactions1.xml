@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level2" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner" level="2" version="1">
-<model id="reactions1">
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner" level="2" version="4">
+<model metaid="reactions1" id="reactions1">
 <notes>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <body>
@@ -10,22 +10,25 @@ examples of reactions
 </html>
 </notes>
 <annotation>
-<celldesigner:modelVersion>2.5</celldesigner:modelVersion>
+<celldesigner:extension>
+<celldesigner:modelVersion>4.0</celldesigner:modelVersion>
 <celldesigner:modelDisplay sizeX="600" sizeY="500"/>
 <celldesigner:listOfCompartmentAliases>
 <celldesigner:compartmentAlias id="ca1" compartment="c1">
 <celldesigner:class>SQUARE</celldesigner:class>
 <celldesigner:bounds x="26.0" y="20.0" w="554.0" h="460.0"/>
+<celldesigner:namePoint x="240.0" y="444.5"/>
 <celldesigner:doubleLine thickness="12.0" outerWidth="2.0" innerWidth="1.0"/>
 <celldesigner:paint color="ffcccc00" scheme="Color"/>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:compartmentAlias>
 </celldesigner:listOfCompartmentAliases>
-<celldesigner:listOfComplexSpeciesAliases>
-</celldesigner:listOfComplexSpeciesAliases>
+<celldesigner:listOfComplexSpeciesAliases/>
 <celldesigner:listOfSpeciesAliases>
 <celldesigner:speciesAlias id="sa1" species="s1" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="105.0" y="57.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="79.0" y="37.5"/>
@@ -39,10 +42,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa2" species="s2" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="225.0" y="57.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="199.0" y="37.5"/>
@@ -56,10 +61,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa3" species="s1" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="315.0" y="97.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="289.0" y="77.5"/>
@@ -73,10 +80,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa4" species="s3" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="465.0" y="67.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="439.0" y="47.5"/>
@@ -90,10 +99,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa5" species="s4" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="465.0" y="127.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="439.0" y="107.5"/>
@@ -107,10 +118,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa6" species="s3" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="85.0" y="227.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="59.0" y="207.5"/>
@@ -124,10 +137,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa7" species="s2" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="85.0" y="277.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="59.0" y="257.5"/>
@@ -141,10 +156,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa8" species="s1" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="235.0" y="257.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="209.0" y="237.5"/>
@@ -158,10 +175,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa9" species="s3" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="135.0" y="147.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="109.0" y="127.5"/>
@@ -175,10 +194,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa11" species="s6" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="265.0" y="145.0" w="30.0" h="30.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="239.0" y="125.0"/>
@@ -192,10 +213,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa14" species="s1" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="325.0" y="217.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="299.0" y="197.5"/>
@@ -209,10 +232,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa15" species="s2" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="355.0" y="287.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="329.0" y="267.5"/>
@@ -226,10 +251,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa16" species="s3" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="475.0" y="197.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="449.0" y="177.5"/>
@@ -243,10 +270,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa17" species="s4" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="475.0" y="257.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="449.0" y="237.5"/>
@@ -260,10 +289,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa18" species="s1" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="55.0" y="387.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="29.0" y="367.5"/>
@@ -277,10 +308,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa19" species="s2" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="345.0" y="417.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="319.0" y="397.5"/>
@@ -294,10 +327,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa20" species="s1" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="325.0" y="357.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="299.0" y="337.5"/>
@@ -311,10 +346,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa21" species="s3" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="175.0" y="347.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="149.0" y="327.5"/>
@@ -328,10 +365,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa22" species="s4" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="195.0" y="387.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="169.0" y="367.5"/>
@@ -345,10 +384,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa23" species="s7" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="165.0" y="427.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="139.0" y="407.5"/>
@@ -362,10 +403,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa24" species="s7" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="465.0" y="427.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="439.0" y="407.5"/>
@@ -379,10 +422,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa25" species="s4" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="475.0" y="387.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="449.0" y="367.5"/>
@@ -396,10 +441,12 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 <celldesigner:speciesAlias id="sa26" species="s3" compartmentAlias="ca1">
 <celldesigner:activity>inactive</celldesigner:activity>
 <celldesigner:bounds x="465.0" y="337.5" w="70.0" h="25.0"/>
+<celldesigner:font size="12"/>
 <celldesigner:view state="usual"/>
 <celldesigner:usualView>
 <celldesigner:innerPosition x="439.0" y="317.5"/>
@@ -413,6 +460,7 @@ examples of reactions
 <celldesigner:singleLine width="1.0"/>
 <celldesigner:paint color="3fff0000" scheme="Color"/>
 </celldesigner:briefView>
+<celldesigner:info state="empty" angle="-1.5707963267948966"/>
 </celldesigner:speciesAlias>
 </celldesigner:listOfSpeciesAliases>
 <celldesigner:listOfGroups/>
@@ -420,76 +468,119 @@ examples of reactions
 <celldesigner:listOfGenes/>
 <celldesigner:listOfRNAs/>
 <celldesigner:listOfAntisenseRNAs/>
-<celldesigner:listOfBlockDiagrams>
-</celldesigner:listOfBlockDiagrams>
+<celldesigner:listOfLayers/>
+<celldesigner:listOfBlockDiagrams/>
+</celldesigner:extension>
 </annotation>
+<listOfUnitDefinitions>
+<unitDefinition metaid="substance" id="substance" name="substance">
+<listOfUnits>
+<unit metaid="CDMT00033" kind="mole"/>
+</listOfUnits>
+</unitDefinition>
+<unitDefinition metaid="volume" id="volume" name="volume">
+<listOfUnits>
+<unit metaid="CDMT00034" kind="litre"/>
+</listOfUnits>
+</unitDefinition>
+<unitDefinition metaid="area" id="area" name="area">
+<listOfUnits>
+<unit metaid="CDMT00035" kind="metre" exponent="2"/>
+</listOfUnits>
+</unitDefinition>
+<unitDefinition metaid="length" id="length" name="length">
+<listOfUnits>
+<unit metaid="CDMT00036" kind="metre"/>
+</listOfUnits>
+</unitDefinition>
+<unitDefinition metaid="time" id="time" name="time">
+<listOfUnits>
+<unit metaid="CDMT00037" kind="second"/>
+</listOfUnits>
+</unitDefinition>
+</listOfUnitDefinitions>
 <listOfCompartments>
-<compartment id="default"/>
-<compartment id="c1" name="compartment:1::0,0" outside="default">
+<compartment metaid="default" id="default" size="1" units="volume"/>
+<compartment metaid="CDMT00032" id="c1" name="compartment:1::0,0" size="1" units="volume" outside="default">
 <annotation>
+<celldesigner:extension>
 <celldesigner:name>compartment:1::0,0</celldesigner:name>
+</celldesigner:extension>
 </annotation>
 </compartment>
 </listOfCompartments>
 <listOfSpecies>
-<species id="s1" name="A" compartment="c1" initialAmount="100" charge="0" constant="true">
+<species metaid="s1" id="s1" name="A" compartment="c1" initialAmount="100" charge="0" constant="true">
 <annotation>
+<celldesigner:extension>
 <celldesigner:positionToCompartment>inside</celldesigner:positionToCompartment>
 <celldesigner:speciesIdentity>
 <celldesigner:class>SIMPLE_MOLECULE</celldesigner:class>
 <celldesigner:name>A</celldesigner:name>
 </celldesigner:speciesIdentity>
+</celldesigner:extension>
 </annotation>
 </species>
-<species id="s3" name="C" compartment="c1" initialAmount="0">
+<species metaid="s3" id="s3" name="C" compartment="c1" initialAmount="0">
 <annotation>
+<celldesigner:extension>
 <celldesigner:positionToCompartment>inside</celldesigner:positionToCompartment>
 <celldesigner:speciesIdentity>
 <celldesigner:class>SIMPLE_MOLECULE</celldesigner:class>
 <celldesigner:name>C</celldesigner:name>
 </celldesigner:speciesIdentity>
+</celldesigner:extension>
 </annotation>
 </species>
-<species id="s4" name="D" compartment="c1" initialAmount="0">
+<species metaid="s4" id="s4" name="D" compartment="c1" initialAmount="0">
 <annotation>
+<celldesigner:extension>
 <celldesigner:positionToCompartment>inside</celldesigner:positionToCompartment>
 <celldesigner:speciesIdentity>
 <celldesigner:class>SIMPLE_MOLECULE</celldesigner:class>
 <celldesigner:name>D</celldesigner:name>
 </celldesigner:speciesIdentity>
+</celldesigner:extension>
 </annotation>
 </species>
-<species id="s6" name="sa9_degraded" compartment="c1" initialAmount="0">
+<species metaid="s6" id="s6" name="sa9_degraded" compartment="c1" initialAmount="0">
 <annotation>
+<celldesigner:extension>
 <celldesigner:positionToCompartment>inside</celldesigner:positionToCompartment>
 <celldesigner:speciesIdentity>
 <celldesigner:class>DEGRADED</celldesigner:class>
 <celldesigner:name>sa9_degraded</celldesigner:name>
 </celldesigner:speciesIdentity>
+</celldesigner:extension>
 </annotation>
 </species>
-<species id="s7" name="E" compartment="c1" initialAmount="0">
+<species metaid="s7" id="s7" name="E" compartment="c1" initialAmount="0">
 <annotation>
+<celldesigner:extension>
 <celldesigner:positionToCompartment>inside</celldesigner:positionToCompartment>
 <celldesigner:speciesIdentity>
 <celldesigner:class>SIMPLE_MOLECULE</celldesigner:class>
 <celldesigner:name>E</celldesigner:name>
 </celldesigner:speciesIdentity>
+</celldesigner:extension>
 </annotation>
 </species>
-<species id="s2" name="B:gaussian:50:10" compartment="c1" initialAmount="0">
+<species metaid="s2" id="s2" name="B:gaussian:50:10" compartment="c1" initialAmount="0">
 <annotation>
+<celldesigner:extension>
 <celldesigner:positionToCompartment>inside</celldesigner:positionToCompartment>
 <celldesigner:speciesIdentity>
 <celldesigner:class>SIMPLE_MOLECULE</celldesigner:class>
 <celldesigner:name>B:gaussian:50:10</celldesigner:name>
 </celldesigner:speciesIdentity>
+</celldesigner:extension>
 </annotation>
 </species>
 </listOfSpecies>
 <listOfReactions>
-<reaction id="re1" name="r1" reversible="false" fast="false">
+<reaction metaid="re1" id="re1" name="r1" reversible="false" fast="false">
 <annotation>
+<celldesigner:extension>
 <celldesigner:name>r1</celldesigner:name>
 <celldesigner:reactionType>STATE_TRANSITION</celldesigner:reactionType>
 <celldesigner:baseReactants>
@@ -502,38 +593,44 @@ examples of reactions
 <celldesigner:linkAnchor position="W"/>
 </celldesigner:baseProduct>
 </celldesigner:baseProducts>
-<celldesigner:connectScheme connectPolicy="direct">
+<celldesigner:connectScheme connectPolicy="direct" rectangleIndex="0">
 <celldesigner:listOfLineDirection>
 <celldesigner:lineDirection index="0" value="unknown"/>
 </celldesigner:listOfLineDirection>
 </celldesigner:connectScheme>
 <celldesigner:line width="1.0" color="ff000000"/>
+</celldesigner:extension>
 </annotation>
 <listOfReactants>
-<speciesReference species="s1">
+<speciesReference metaid="CDMT00002" species="s1">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa1</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfReactants>
 <listOfProducts>
-<speciesReference species="s2">
+<speciesReference metaid="CDMT00003" species="s2">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa2</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfProducts>
-<kineticLaw>
+<kineticLaw metaid="CDMT00004">
 <math xmlns="http://www.w3.org/1998/Math/MathML">
 <ci> c1 </ci>
 </math>
 <listOfParameters>
-<parameter id="c1" value="0.5"/>
+<parameter metaid="c1" id="c1" value="0.5"/>
 </listOfParameters>
 </kineticLaw>
 </reaction>
-<reaction id="re2" name="r2" reversible="false" fast="false">
+<reaction metaid="re2" id="re2" name="r2" reversible="false" fast="false">
 <annotation>
+<celldesigner:extension>
 <celldesigner:name>r2</celldesigner:name>
 <celldesigner:reactionType>DISSOCIATION</celldesigner:reactionType>
 <celldesigner:baseReactants>
@@ -556,39 +653,47 @@ examples of reactions
 <celldesigner:lineDirection arm="2" index="0" value="unknown"/>
 </celldesigner:listOfLineDirection>
 </celldesigner:connectScheme>
-<celldesigner:editPoints num0="0" num1="0" num2="0">0.2333333333333335,0.2333333333333334</celldesigner:editPoints>
+<celldesigner:editPoints num0="0" num1="0" num2="0" tShapeIndex="0">0.2333333333333335,0.2333333333333334</celldesigner:editPoints>
 <celldesigner:line width="1.0" color="ff000000"/>
+</celldesigner:extension>
 </annotation>
 <listOfReactants>
-<speciesReference species="s1">
+<speciesReference metaid="CDMT00005" species="s1">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa3</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfReactants>
 <listOfProducts>
-<speciesReference species="s3">
+<speciesReference metaid="CDMT00006" species="s3">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa4</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s4">
+<speciesReference metaid="CDMT00007" species="s4">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa5</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfProducts>
-<kineticLaw>
+<kineticLaw metaid="CDMT00008">
 <math xmlns="http://www.w3.org/1998/Math/MathML">
 <ci> c2 </ci>
 </math>
 <listOfParameters>
-<parameter id="c2" value="0.4"/>
+<parameter metaid="c2" id="c2" value="0.4"/>
 </listOfParameters>
 </kineticLaw>
 </reaction>
-<reaction id="re3" name="r3" reversible="false" fast="false">
+<reaction metaid="re3" id="re3" name="r3" reversible="false" fast="false">
 <annotation>
+<celldesigner:extension>
 <celldesigner:name>r3</celldesigner:name>
 <celldesigner:reactionType>HETERODIMER_ASSOCIATION</celldesigner:reactionType>
 <celldesigner:baseReactants>
@@ -611,39 +716,47 @@ examples of reactions
 <celldesigner:lineDirection arm="2" index="0" value="unknown"/>
 </celldesigner:listOfLineDirection>
 </celldesigner:connectScheme>
-<celldesigner:editPoints num0="0" num1="0" num2="0">0.3200000000000003,0.4666666666666668</celldesigner:editPoints>
+<celldesigner:editPoints num0="0" num1="0" num2="0" tShapeIndex="0">0.3200000000000003,0.4666666666666668</celldesigner:editPoints>
 <celldesigner:line width="1.0" color="ff000000"/>
+</celldesigner:extension>
 </annotation>
 <listOfReactants>
-<speciesReference species="s3">
+<speciesReference metaid="CDMT00009" species="s3">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa6</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s2">
+<speciesReference metaid="CDMT00010" species="s2">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa7</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfReactants>
 <listOfProducts>
-<speciesReference species="s1">
+<speciesReference metaid="CDMT00011" species="s1">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa8</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfProducts>
-<kineticLaw>
+<kineticLaw metaid="CDMT00012">
 <math xmlns="http://www.w3.org/1998/Math/MathML">
 <ci> c3 </ci>
 </math>
 <listOfParameters>
-<parameter id="c3" name="gaussian:0.3:0.01" value="0" constant="false"/>
+<parameter metaid="c3" id="c3" name="gaussian:0.3:0.01" value="0" constant="false"/>
 </listOfParameters>
 </kineticLaw>
 </reaction>
-<reaction id="re5" name="r4" reversible="false" fast="false">
+<reaction metaid="re5" id="re5" name="r4" reversible="false" fast="false">
 <annotation>
+<celldesigner:extension>
 <celldesigner:name>r4</celldesigner:name>
 <celldesigner:reactionType>STATE_TRANSITION</celldesigner:reactionType>
 <celldesigner:baseReactants>
@@ -652,38 +765,44 @@ examples of reactions
 <celldesigner:baseProducts>
 <celldesigner:baseProduct species="s6" alias="sa11"/>
 </celldesigner:baseProducts>
-<celldesigner:connectScheme connectPolicy="direct">
+<celldesigner:connectScheme connectPolicy="direct" rectangleIndex="0">
 <celldesigner:listOfLineDirection>
 <celldesigner:lineDirection index="0" value="unknown"/>
 </celldesigner:listOfLineDirection>
 </celldesigner:connectScheme>
 <celldesigner:line width="1.0" color="ff000000"/>
+</celldesigner:extension>
 </annotation>
 <listOfReactants>
-<speciesReference species="s3">
+<speciesReference metaid="CDMT00013" species="s3">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa9</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfReactants>
 <listOfProducts>
-<speciesReference species="s6">
+<speciesReference metaid="CDMT00014" species="s6">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa11</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfProducts>
-<kineticLaw>
+<kineticLaw metaid="CDMT00015">
 <math xmlns="http://www.w3.org/1998/Math/MathML">
 <ci> c4 </ci>
 </math>
 <listOfParameters>
-<parameter id="c4" value="0.01"/>
+<parameter metaid="c4" id="c4" value="0.01"/>
 </listOfParameters>
 </kineticLaw>
 </reaction>
-<reaction id="re8" name="r5" reversible="false" fast="false">
+<reaction metaid="re8" id="re8" name="r5" reversible="false" fast="false">
 <annotation>
+<celldesigner:extension>
 <celldesigner:name>r5</celldesigner:name>
 <celldesigner:reactionType>DISSOCIATION</celldesigner:reactionType>
 <celldesigner:baseReactants>
@@ -700,9 +819,9 @@ examples of reactions
 </celldesigner:baseProduct>
 </celldesigner:baseProducts>
 <celldesigner:listOfReactantLinks>
-<celldesigner:reactantLink reactant="s2" alias="sa15" targetLineIndex="0,0">
+<celldesigner:reactantLink reactant="s2" alias="sa15" targetLineIndex="-1,0">
 <celldesigner:linkAnchor position="E"/>
-<celldesigner:line width="1.0" color="ff000000"/>
+<celldesigner:line width="1.0" color="ff000000" type="Curve"/>
 </celldesigner:reactantLink>
 </celldesigner:listOfReactantLinks>
 <celldesigner:connectScheme connectPolicy="direct">
@@ -712,44 +831,54 @@ examples of reactions
 <celldesigner:lineDirection arm="2" index="0" value="unknown"/>
 </celldesigner:listOfLineDirection>
 </celldesigner:connectScheme>
-<celldesigner:editPoints num0="0" num1="0" num2="0">0.35555555555555585,0.17777777777777626</celldesigner:editPoints>
+<celldesigner:editPoints num0="0" num1="0" num2="0" tShapeIndex="0">0.35555555555555585,0.17777777777777626</celldesigner:editPoints>
 <celldesigner:line width="1.0" color="ff000000"/>
+</celldesigner:extension>
 </annotation>
 <listOfReactants>
-<speciesReference species="s1">
+<speciesReference metaid="CDMT00016" species="s1">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa14</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s2">
+<speciesReference metaid="CDMT00017" species="s2">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa15</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfReactants>
 <listOfProducts>
-<speciesReference species="s3">
+<speciesReference metaid="CDMT00018" species="s3">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa16</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s4">
+<speciesReference metaid="CDMT00019" species="s4">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa17</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfProducts>
-<kineticLaw>
+<kineticLaw metaid="CDMT00020">
 <math xmlns="http://www.w3.org/1998/Math/MathML">
 <ci> c5 </ci>
 </math>
 <listOfParameters>
-<parameter id="c5" value="0.02"/>
+<parameter metaid="c5" id="c5" value="0.02"/>
 </listOfParameters>
 </kineticLaw>
 </reaction>
-<reaction id="re9" reversible="false" fast="false">
+<reaction metaid="re9" id="re9" reversible="false" fast="false">
 <annotation>
+<celldesigner:extension>
 <celldesigner:reactionType>DISSOCIATION</celldesigner:reactionType>
 <celldesigner:baseReactants>
 <celldesigner:baseReactant species="s1" alias="sa18">
@@ -765,9 +894,9 @@ examples of reactions
 </celldesigner:baseProduct>
 </celldesigner:baseProducts>
 <celldesigner:listOfProductLinks>
-<celldesigner:productLink product="s7" alias="sa23" targetLineIndex="0,0">
+<celldesigner:productLink product="s7" alias="sa23" targetLineIndex="-1,1">
 <celldesigner:linkAnchor position="WNW"/>
-<celldesigner:line width="1.0" color="ff000000"/>
+<celldesigner:line width="1.0" color="ff000000" type="Curve"/>
 </celldesigner:productLink>
 </celldesigner:listOfProductLinks>
 <celldesigner:connectScheme connectPolicy="direct">
@@ -777,44 +906,54 @@ examples of reactions
 <celldesigner:lineDirection arm="2" index="0" value="unknown"/>
 </celldesigner:listOfLineDirection>
 </celldesigner:connectScheme>
-<celldesigner:editPoints num0="0" num1="0" num2="0">0.25,0.21428571428571885</celldesigner:editPoints>
+<celldesigner:editPoints num0="0" num1="0" num2="0" tShapeIndex="0">0.25,0.21428571428571885</celldesigner:editPoints>
 <celldesigner:line width="1.0" color="ff000000"/>
+</celldesigner:extension>
 </annotation>
 <listOfReactants>
-<speciesReference species="s1">
+<speciesReference metaid="CDMT00021" species="s1">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa18</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfReactants>
 <listOfProducts>
-<speciesReference species="s3">
+<speciesReference metaid="CDMT00022" species="s3">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa21</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s4">
+<speciesReference metaid="CDMT00023" species="s4">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa22</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s7">
+<speciesReference metaid="CDMT00024" species="s7">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa23</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfProducts>
-<kineticLaw>
+<kineticLaw metaid="CDMT00025">
 <math xmlns="http://www.w3.org/1998/Math/MathML">
 <ci> c6 </ci>
 </math>
 <listOfParameters>
-<parameter id="c6" value="0.25"/>
+<parameter metaid="c6" id="c6" value="0.25"/>
 </listOfParameters>
 </kineticLaw>
 </reaction>
-<reaction id="re10" reversible="false" fast="false">
+<reaction metaid="re10" id="re10" reversible="false" fast="false">
 <annotation>
+<celldesigner:extension>
 <celldesigner:reactionType>DISSOCIATION</celldesigner:reactionType>
 <celldesigner:baseReactants>
 <celldesigner:baseReactant species="s1" alias="sa20">
@@ -830,15 +969,15 @@ examples of reactions
 </celldesigner:baseProduct>
 </celldesigner:baseProducts>
 <celldesigner:listOfReactantLinks>
-<celldesigner:reactantLink reactant="s2" alias="sa19" targetLineIndex="0,0">
+<celldesigner:reactantLink reactant="s2" alias="sa19" targetLineIndex="-1,0">
 <celldesigner:linkAnchor position="NE"/>
-<celldesigner:line width="1.0" color="ff000000"/>
+<celldesigner:line width="1.0" color="ff000000" type="Curve"/>
 </celldesigner:reactantLink>
 </celldesigner:listOfReactantLinks>
 <celldesigner:listOfProductLinks>
-<celldesigner:productLink product="s7" alias="sa24" targetLineIndex="0,0">
+<celldesigner:productLink product="s7" alias="sa24" targetLineIndex="-1,1">
 <celldesigner:linkAnchor position="W"/>
-<celldesigner:line width="1.0" color="ff000000"/>
+<celldesigner:line width="1.0" color="ff000000" type="Curve"/>
 </celldesigner:productLink>
 </celldesigner:listOfProductLinks>
 <celldesigner:connectScheme connectPolicy="direct">
@@ -848,44 +987,55 @@ examples of reactions
 <celldesigner:lineDirection arm="2" index="0" value="unknown"/>
 </celldesigner:listOfLineDirection>
 </celldesigner:connectScheme>
-<celldesigner:editPoints num0="0" num1="0" num2="0">0.06250000000000089,0.3749999999999982</celldesigner:editPoints>
+<celldesigner:editPoints num0="0" num1="0" num2="0" tShapeIndex="0">0.06250000000000089,0.3749999999999982</celldesigner:editPoints>
 <celldesigner:line width="1.0" color="ff000000"/>
+</celldesigner:extension>
 </annotation>
 <listOfReactants>
-<speciesReference species="s1">
+<speciesReference metaid="CDMT00026" species="s1">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa20</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s2">
+<speciesReference metaid="CDMT00027" species="s2">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa19</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfReactants>
 <listOfProducts>
-<speciesReference species="s3">
+<speciesReference metaid="CDMT00028" species="s3">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa26</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s4">
+<speciesReference metaid="CDMT00029" species="s4">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa25</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
-<speciesReference species="s7">
+<speciesReference metaid="CDMT00030" species="s7">
 <annotation>
+<celldesigner:extension>
 <celldesigner:alias>sa24</celldesigner:alias>
+</celldesigner:extension>
 </annotation>
 </speciesReference>
 </listOfProducts>
-<kineticLaw>
+<kineticLaw metaid="CDMT00031">
 <math xmlns="http://www.w3.org/1998/Math/MathML">
 <ci> c7 </ci>
 </math>
 <listOfParameters>
-<parameter id="c7" value="0.35"/>
+<parameter metaid="c7" id="c7" value="0.35"/>
 </listOfParameters>
 </kineticLaw>
 </reaction>

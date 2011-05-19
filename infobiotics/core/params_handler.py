@@ -71,8 +71,13 @@ class ParamsHandler(HelpfulController):
     def traits_view(self): # overridden in ExperimentHandler
         return self.get_traits_view(ParamsView)
 
-    status = Str
-    
+    _status = Str
+    status = Property(Str)
+    def _get_status(self):
+        return textwrap.TextWrapper(width=120, break_long_words=True).fill(self._status)
+    def _set_status(self, status):
+        self._status = status 
+
     def init(self, info):
 #        self.status = "Please ensure the current working directory is correct." #TODO
         info.ui.title = self.title
@@ -297,8 +302,12 @@ class ParamsHandler(HelpfulController):
         if self.info.initialized:
             if self.info.ui is None:
                 return
-            self.status = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
-            #TODO shorten these!
+            error = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
+#            self.status = wrap_paths(error) # doesn't shorten long paths
+#            self.status = textwrap.TextWrapper(width=80, break_long_words=True).fill(error)
+            self.status = error
+#from infobiotics.commons.strings import wrap, wrap_paths
+import textwrap
         
 if __name__ == '__main__':
     execfile('params.py')

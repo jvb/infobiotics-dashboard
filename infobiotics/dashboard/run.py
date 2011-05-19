@@ -91,7 +91,7 @@ def main(plugin_factories=plugin_factories):
 #    print window
 #    window.active_perspective = window.get_perspective_by_id('infobiotics.dashboard.plugins.experiments.ui_plugin.ExperimentsPerspective') 
     
-    application.run()
+    return application.run()
     # This starts the application, starts the GUI event loop, and when that 
     # terminates, stops the application.
 

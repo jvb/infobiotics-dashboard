@@ -3,7 +3,7 @@ from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import (
     HasTraits, Str, Float, Int, Undefined, Range, Enum, Property, List, Tuple,
-    Instance, Dict, cached_property
+    Instance, Dict, cached_property, TraitError
 ) 
 from enthought.traits.ui.api import (
     View, Item, HGroup, VGroup, TableEditor, TextEditor, Group, VSplit,

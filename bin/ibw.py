@@ -2,53 +2,121 @@ import sys
 import os.path
 import infobiotics.__version__
 
+#workbench = 'workbench'#TODO?
+simulate = 'mcss'#'simulate'
+check_mc2 = 'pmodelchecker-mc2'#'check-mc2'
+check_prism = 'pmodelchecker-prism'#'check-prism'
+optimise = 'poptimizer'#optimise
+experiments = (simulate, check_mc2, check_prism, optimise)
+
 def help():
     return '''Infobiotics Workbench %s
 
-Usage: ibw <experiment>
+Usage: infobiotics <experiment> (<model/params>)
 
 Available experiments are:
- mcss
- pmodelchecker
- poptimizer
  
-''' % (infobiotics.__version__)
-
-simulate = 'mcss'#'simulate'
-check = 'pmodelchecker'#'check'
-optimise = 'poptimizer'#optimise
+ %s
+''' % (infobiotics.__version__, '\n '.join(experiments))
 
 def fail():
-    sys.exit(help())
+#    sys.exit(help())
+    from infobiotics.dashboard import run
+    sys.exit(run.main())
     
 
-def main():
-    path, filename = os.path.split(sys.argv[0])
-    args = sys.argv[1:]
-#    print path, filename, args
-    if len(args) == 0:
+def main(argv):
+    args = argv[1:]
+    if len(args) == 0 or len(args) > 2:
+        # expecting command (experiment) and model or params file only
         fail()
-    if len(args) > 2:
-        fail()
-    experiment = args[0].lower()
-    if experiment not in (simulate, check, optimise):
+    command = args[0].lower()
+    if command.lower() not in experiments:
         fail()
     if len(args) == 2:
-        model = args[1]
-        if not os.path.exists(model):
-            sys.exit("The model file '%s' does not exist" % model)
-    if experiment == simulate:
-        from infobiotics.mcss.mcss_experiment import McssExperiment
-        if len(model)
-        McssExperiment.configure()
-    elif experiment == check:
-        print check
-    elif experiment == optimise:
-        print optimise
-    else:
-        fail()
+        args1 = args[1]
+        if not os.path.exists(args1):
+            sys.exit("The file '%s' does not exist" % args1)
+        if not os.path.isabs(args1):
+            args1 = os.path.normpath(os.path.join(os.getcwd(), args1))
 
+    # use params or model    
+    params = ''
+    model = ''
+    if args1.lower().endswith('.params'):
+        params = args1
+    elif args1.lower().endswith('.lpp'):
+        model = args1
+    elif command == simulate and args1.lower().endswith('.sbml'):
+        # mcss accepts SBML models too
+        model = args1
+    if model != '':
+        directory, model = os.path.split(model)
+    
+    experiment = None
+    
+    if command == simulate:
+        from infobiotics.mcss.mcss_experiment import McssExperiment
+        experiment = McssExperiment()
+        if model != '':
+            experiment.directory = directory
+            experiment.model_file = model
+
+    elif command in (check_mc2, check_prism):
+        if command == check_mc2:
+            from infobiotics.pmodelchecker.mc2.mc2_experiment import MC2Experiment as CheckExperiment
+        elif command == check_prism:
+            from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment as CheckExperiment
+        experiment = CheckExperiment()
+        if model != '':
+            experiment.directory = directory
+            experiment.model_specification = model
+
+    elif command == optimise:
+        from infobiotics.poptimizer.poptimizer_experiment import POptimizerExperiment
+        # mcss accepts SBML models too
+        if args1.lower().endswith('.sbml'):
+            model = args1
+        experiment = POptimizerExperiment()
+
+    assert experiment is not None
+    if params != '':
+        experiment.load(params)
+    experiment.configure()
+    sys.exit(0)
+
+
+def test_relative_path_to_model():
+    main(sys.argv + ['mcss', '../examples/infobiotics-examples-20110208/mcss/models/module1.sbml'])
+
+def test_absolute_path_to_model():
+    main(sys.argv + ['mcss', '/home/jvb/workspaces/workspace/dashboard/examples/infobiotics-examples-20110208/mcss/models/module1.sbml'])
+
+def test_relative_path_to_params():
+    main(sys.argv + ['pmodelchecker-mc2', '../examples/infobiotics-examples-20110208/pmodelchecker/pulsePropagation/pulse_MC2.params'])
+
+def test_absolute_path_to_params():
+    main(sys.argv + ['poptimizer', '/home/jvb/workspaces/workspace/dashboard/examples/infobiotics-examples-20110208/poptimizer/fourinitial/four_initial_inputpara.params'])
+
+def test_wrong_params_for_experiment():
+    main(sys.argv + ['poptimizer', '../examples/infobiotics-examples-20110208/mcss/models/reactions1.params'])
+
+def test_absolute_path_to_model2():
+    main(sys.argv + ['pmodelchecker-prism', '/home/jvb/workspaces/workspace/dashboard/examples/infobiotics-examples-20110208/pmodelchecker/pulsePropagation/pulsePropagation.lpp'])
+    
+def test_absolute_path_to_params2():
+    main(sys.argv + ['pmodelchecker-prism', '/home/jvb/workspaces/workspace/dashboard/examples/infobiotics-examples-20110208/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params'])
+    
+# "Application asked to unregister timer 0x1c000011 which is not registered in this thread. Fix application."
+# This is a bug in Qt 4.7 under Ubuntu that will be fixed in Qt 4.8 
 
 if __name__ == '__main__':
-    sys.argv += ['mcss', 'model']
-    main()
+    main(sys.argv) #TODO uncomment
+    #TODO comment
+#    test_relative_path_to_model()
+#    test_absolute_path_to_model()
+#    test_relative_path_to_params()
+#    test_absolute_path_to_params()
+#    test_wrong_params_for_experiment()
+#    test_absolute_path_to_model2()
+#    test_absolute_path_to_params2()

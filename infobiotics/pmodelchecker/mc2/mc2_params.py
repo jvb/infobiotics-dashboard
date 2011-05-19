@@ -1,9 +1,10 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
+import os
 
 class MC2Params(PModelCheckerParams):
     
-    def _handler_default(self):
-        from infobiotics.pmodelchecker.mc2.api import MC2ParamsHandler
+    def __handler_default(self):
+        from mc2_params_handler import MC2ParamsHandler
         return MC2ParamsHandler(model=self)
 
     def _preferences_helper_default(self):
@@ -15,6 +16,10 @@ class MC2Params(PModelCheckerParams):
     model_checker = 'MC2'
     task = 'Approximate' # for PModelCheckerExperimentHandler.show_results
     temporal_formulas = 'temporal_formulas.pltl'
+
+    def _simulations_file_MC2_changed(self):
+        if os.path.exists(self.simulations_file_MC2):
+            self.simulations_generatedMC2 = True
 
     def parameter_names(self): #TODO make Property?
         ''' Returns the subset of PModelChecker parameter names required for a 

@@ -5,7 +5,7 @@ import sys
 import os
 import tempfile
 from threading import Thread
-from enthought.pyface.timer.api import do_later
+#from enthought.pyface.timer.api import do_later
 
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
@@ -217,7 +217,7 @@ class Experiment(Params):
                 
         self._finished_without_output = True if stdout_patterns_matched + stderr_patterns_matched == 0 else False
             
-        self._child.close() # close file descriptors
+        self._child.close() # close file descriptors and store exitstatus and signalstatus
 #        if self._child.exitstatus is not None:
 #            print 'exitstatus == %s' % self._child.exitstatus
 #        if self._child.signalstatus is not None:
@@ -259,7 +259,24 @@ class Experiment(Params):
 #            error_log.write(error)
 #            error_log.close()
 
-        self._finished(True if self._child.exitstatus == 0 else False) # success
+        error = ''
+        if self._child.exitstatus is None:
+            # exited with a signal
+            error = '%s exited with signal: %s' % (self.executable_name, self._child.signalstatus)
+        elif self._child.exitstatus != 0:
+            error = '%s exited with exit code: %s' % (self.executable_name, self._child.exitstatus)
+            error += self._child.before
+        if error != '':
+            if self._interaction_mode == 'script':
+                log.error(error)
+            elif self._interaction_mode == 'terminal':
+#                print error
+                pass
+            elif self._interaction_mode == 'gui':
+                self._handler.status = self._child.before 
+
+            
+        self._finished(True if self._child.exitstatus == 0 else False) # success or failure
 #        do_later(self._finished, True if self._child.exitstatus == 0 else False) # success
 
         self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread

@@ -12,7 +12,7 @@
 	<parameter name="data_file" value="reactions1.h5"/>
 	<parameter name="log_type" value="levels"/>
 	<parameter name="log_interval" value="1.0"/>
-	<parameter name="duplicate_initial_amounts" value="1"/>
+	<parameter name="duplicate_initial_amounts" value="0"/>
 	<parameter name="log_degraded" value="1"/>
 </parameterSet>
 

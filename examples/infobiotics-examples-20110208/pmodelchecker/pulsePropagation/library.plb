@@ -118,7 +118,6 @@ libraryOfModules promoterLibrary
 
 	pulseGenerator({X},{c_1,c_2,c_3,c_4,c_5},{l}) =
 		{
-			rules: # TODO should this be modules #
 				Pconst({LuxR},{0.1},{l}) from this 
 				PostTransc({LuxR},{3.2,0.3,0.04,3.6,0.075},{l}) from this
 				DimSig({LuxR,3OC12,LuxR2},{1,0.0154,1,0.0154},{l}) from this

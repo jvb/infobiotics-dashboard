@@ -38,6 +38,6 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = MC2Experiment()
-#    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_mc2.params')
+    experiment.load('../../../examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_mc2.params')
 #    experiment.perform()
     experiment.configure()
