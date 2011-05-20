@@ -29,9 +29,11 @@ class ExperimentHandler(ParamsHandler):
 #            info.ui.control.setVisible(False) 
             self._progress_handler.info.ui.dispose()
 
+        print 'got here'
         if success:
             pass
-#            self.show_results() #TODO
+            print 'got here too'
+            self.show_results() #TODO
 
 
 if __name__ == '__main__':

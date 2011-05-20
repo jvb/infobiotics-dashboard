@@ -276,7 +276,7 @@ class ParamsHandler(HelpfulController):
         # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
         if not self.info:
 #            print 'not self.info'
-            return
+            return False
         if self.info.initialized:
             if self.info.ui is None:
 #                print 'self.info.ui is None'
@@ -294,9 +294,9 @@ class ParamsHandler(HelpfulController):
         return True
     
     def _has_valid_parameters_changed(self, value):
-        if value:
-            self.status = ''
-            return
+#        if value:
+#            self.status = ''
+#            return
         if not self.info:
             return
         if self.info.initialized:

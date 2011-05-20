@@ -3,9 +3,6 @@ from infobiotics.core.api import ParamsRelativeFile
 from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property, cached_property
 from infobiotics.commons.traits.api import LongGreaterThanZero
 from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
-import tempfile
-import sys
-import os.path
 
 class PModelCheckerParams(Params):
     ''' Base class for PRISMParams and MC2Params. '''
@@ -22,20 +19,23 @@ class PModelCheckerParams(Params):
     model_specification = ParamsRelativeFile(readable=True, filter=['Lattice Population P systems (*.lpp)', 'All files (*)'], desc='name of the file containing the model specification as an LPP-system')
     
     @on_trait_change('model_specification', 'PRISM_model')
-    def update_directory(self, object, name, old, new):
-        from enthought.traits.api import TraitError
+    def change_directory__make_model_specification_relative__translate_to_PRISM_model(self, object, name, old, new):
+        import os.path
         directory, model_specification = os.path.split(self.model_specification_)
-        try:
-            self.directory = directory
-            # problem: model_specification is appearing relative to the previous
-            # directory
-            # solution (avoiding infinite loop):
-            # first set it without notifying change handlers
-            self.trait_setq(model_specification=model_specification)
-            # second notify change handlers by setting it
-            self.model_specification = model_specification
-        except TraitError:
-            self.model_specification = model_specification 
+        self.preferences_helper
+#        from enthought.traits.api import TraitError
+#        try:
+        self.directory = directory
+        # problem: model_specification is appearing relative to the previous
+        # directory
+        # solution (avoiding infinite loop):
+        # first set it without notifying change handlers
+        self.trait_setq(model_specification=model_specification)
+        # second notify change handlers by setting it
+        self.model_specification = model_specification
+#        except TraitError:
+#            self.model_file = model_file
+#            self.trait_setq(model_file=model_file)
         if self.model_checker == 'PRISM':
             self.translate_model_specification(name)
             

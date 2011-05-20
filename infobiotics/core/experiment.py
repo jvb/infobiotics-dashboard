@@ -129,6 +129,7 @@ class Experiment(Params):
         and the match until EOF whereupon it calls the 'finished' hook.
          
         '''
+        self.success = False
         if sys.platform.startswith('win'):
             self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         else:
@@ -270,22 +271,25 @@ class Experiment(Params):
             if self._interaction_mode == 'script':
                 log.error(error)
             elif self._interaction_mode == 'terminal':
-#                print error
-                pass
+                print error
             elif self._interaction_mode == 'gui':
-                self._handler.status = self._child.before 
-
+                self._handler.status = self._child.before + match
             
-        self._finished(True if self._child.exitstatus == 0 else False) # success or failure
-#        do_later(self._finished, True if self._child.exitstatus == 0 else False) # success
+        self.success = True if self._child.exitstatus == 0 else False
 
         self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
 
+
+    success = Bool
+
     finished = Event
+    
     def _finished_changed(self):
         '''Sets self.running to False in the main thread'''
         self.running = False
-        
+        if self._interaction_mode == 'gui':
+            self._handler._finished(self.success)
+
 
     _stdout_pattern_list = ListStr
     _stderr_pattern_list = ListStr([
@@ -352,8 +356,8 @@ class Experiment(Params):
                 self._progress_bar.finish()
             if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
                 print
-        else:
-            self._handler._finished(success)
+#        else:
+#            self._handler._finished(success) # needs to happen in main thread so using finished Event
         
         del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
         if sys.platform.startswith('win'):

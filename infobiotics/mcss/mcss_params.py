@@ -23,17 +23,19 @@ class McssParams(Params):
         from enthought.traits.api import TraitError
         import os.path
         directory, model_file = os.path.split(self.model_file_)
-        try:
-            self.directory = directory
-            # problem: model_specification is appearing relative to the previous
-            # directory
-            # solution (avoiding infinite loop):
-            # first set it without notifying change handlers
-            self.trait_setq(model_file=model_file)
-            # second notify change handlers by setting it
-            self.model_file = model_file
-        except TraitError:
-            self.model_file = model_file 
+        self.preferences_helper
+#        try:
+        self.directory = directory
+        # problem: model_specification is appearing relative to the previous
+        # directory
+        # solution (avoiding infinite loop):
+        # first set it without notifying change handlers
+        self.trait_setq(model_file=model_file)
+        # second notify change handlers by setting it
+        self.model_file = model_file
+#        except TraitError:
+#            self.model_file = model_file
+#            self.trait_setq(model_file=model_file)
         
     model_file = ParamsRelativeFile(desc='the model file to simulate',
         exists=True,
@@ -94,6 +96,11 @@ if __name__ == '__main__':
 #    from infobiotics.preferences import preferences
 #    preferences.set('mcss.directory', '/usr')
     parameters = McssParams()#executable='/usr/bin/mcs')
+#    print parameters.directory
+    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/PAR/positiveAutoregulationModel.lpp'
+#    print parameters.directory
+    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/NAR/negativeAutoregulationModel.lpp'
+#    print parameters.directory
     
     # import that Params never changes cwd
     
