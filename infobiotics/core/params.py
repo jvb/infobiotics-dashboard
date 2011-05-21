@@ -13,9 +13,11 @@ import os, sys
 from xml import sax
 from infobiotics.thirdparty.which import which, WhichError
 
-from infobiotics.commons.api import logging
-log = logging.getLogger(name='Params', level=logging.WARN)
-log.setLevel(logging.ERROR)
+#from infobiotics.commons.api import logging
+#log = logging.getLogger(name='Params', level=logging.WARN)
+#log.setLevel(logging.ERROR)
+import logging
+logger = logging.getLogger(__name__)#level=logging.WARN)
 
 from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
@@ -34,7 +36,7 @@ class ParamsPreferenceBinding(PreferenceBinding):
         try:
             self._set_trait(notify=False)
         except TraitError, e:
-            print 'ParamsPreferenceBinding.__init__', e
+            logger.exception(e)
 #            validated = handler.get_default_value()[1]
 
         # Wire-up trait change handlers etc.
@@ -130,7 +132,7 @@ class Params(HasTraits):
 #                warning = "Value of preference %s in '%s' ('%s') is invalid. %s Using default ('%s')." % (preferences_path, preferences.filename, value, e, default)
                 warning = "Value of preference %s in '%s' ('%s') is invalid. Removing and using default ('%s') instead." % (preferences_path, preferences.filename, value, default)
                 if self._interaction_mode == 'script':
-                    log.warn(warning)
+                    logger.warn(warning)
                 elif self._interaction_mode == 'terminal':
                     print warning
                 elif self._interaction_mode == 'gui':
@@ -206,7 +208,7 @@ class Params(HasTraits):
                 if len(answer.strip()) == 0 or answer.upper().startswith('Y'):
                     self.save() # will prompt for file name with self._params_file as default
             elif self._interaction_mode == 'script':
-                log.warn('Overwriting unsaved parameters: %s' % ','.join(['%s=%s' % (name, value) for name, value in self._dirty_parameters.items()]))
+                logger.warn('Overwriting unsaved parameters: %s' % ','.join(['%s=%s' % (name, value) for name, value in self._dirty_parameters.items()]))
 
         # open and parse params file with ParamsXMLReader
         # reporting errors or responding to success 
@@ -229,7 +231,7 @@ class Params(HasTraits):
             elif len(parameters_dictionary) == 0:
                 error = "No parameters in file '%s'." % file
             if error is not None:
-                log.error(error)
+                logger.error(error)
 #                auto_close_message(message=error) #TODO is this desirable when scripting?...might not happen, as with ProgressDialog
                 return False
         # read parameters ok
@@ -238,7 +240,7 @@ class Params(HasTraits):
         # the file we are loading
         self._unresetable = self.reset(self.parameter_names()) #FIXME reverts to default values not preferences!
         if len(self._unresetable) > 0:
-            log.warn("Some parameters were not reset: %s", ', '.join(self._unresetable))
+            logger.warn("Some parameters were not reset: %s", ', '.join(self._unresetable))
 
         # change directory here so that relative paths don't trigger TraitError
         if not os.path.isabs(file):
@@ -253,7 +255,7 @@ class Params(HasTraits):
                 pass
             
         # success!
-#        log.debug("Loaded '%s'." % file)
+#        logger.debug("Loaded '%s'." % file)
         self._params_file = file
         self._dirty = False
         return True
@@ -330,12 +332,12 @@ class Params(HasTraits):
             with write(file) as fh:
                 fh.write(self.params_file_string()) # important bit
         except IOError, e:
-            log.exception(e)
+            logger.exception(e)
             raise e #TODO replace with something useful?
             return False
             
         # success!
-#        log.debug("Saved '%s'." % file)
+#        logger.debug("Saved '%s'." % file)
         if update_object:
             self.directory = os.path.dirname(file)
             self._params_file = file
@@ -498,7 +500,7 @@ def set_trait_value_from_parameter_value(self, name, value):
 #            # The second form is consistent with __repr__ and reset in 
 #            # ParamsExperiment.
 #        except TraitError, e:
-#            log.debug('%s.%s=%s; %s' % (self.experiment, name, value, e))
+#            logger.debug('%s.%s=%s; %s' % (self.experiment, name, value, e))
 
 def trait_value_from_parameter_value(self, name, value): # change name to 'trait_value_from_param_value'?
     ''' Return parameter trait value from a parameter value string. '''
@@ -553,7 +555,7 @@ def trait_value_from_parameter_value(self, name, value): # change name to 'trait
     elif type in ('Enum', 'File', 'Directory', 'ParamsRelativeFile', 'ParamsRelativeDirectory', 'RelativeFile', 'RelativeDirectory'):
         return str(value)    
     else:
-        log.warn('Unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
+        logger.warn('Unswitched type in trait_value_from_parameter_value: type=%s, name=%s, value=%s' % (type, name, value))
         return value
 
 #TODO could replace name with trait.metadata.parameter_name and return (new_name, value)

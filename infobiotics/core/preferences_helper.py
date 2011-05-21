@@ -151,7 +151,7 @@ class PreferencesHelper(HasTraits):
             try:
                 validated = handler.validate(self, trait_name, value)
             except TraitError, e:
-                print 'PreferencesHelper._get_value', e
+                logger.exception(e)
                 validated = handler.get_default_value()[1] 
         else:
             validated = value
