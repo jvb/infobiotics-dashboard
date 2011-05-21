@@ -1,6 +1,7 @@
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
 from infobiotics.core.views import ExperimentView
+from enthought.pyface.timer.api import do_later
 
 class ExperimentHandler(ParamsHandler):
     
@@ -9,7 +10,6 @@ class ExperimentHandler(ParamsHandler):
     
     def perform(self, info):
         info.object.perform(thread=True)
-#        info.object.perform()
         
     def _starting(self):
         self._progress_dialog_started = False
@@ -20,20 +20,13 @@ class ExperimentHandler(ParamsHandler):
             if not self._progress_dialog_started:
                 self._progress_dialog_started = True
                 self._progress_handler.edit_traits(kind='live', parent=info.ui.control) # must be live to receive progress updates
-        # do nothing else as self._progress_dialog should update based on self.percentage
+        # don't need to do anything else as self._progress_dialog should update 
+        # based on changes to self.percentage
 
     def _finished(self, success):
         if self._progress_handler.info is not None and self._progress_handler.info.ui is not None:
-#    #        if self.close(info, True):
-#    #            self._on_close(info)
-#            # if we do self._on_close(info) then subclasses can't catch events 
-#            info.ui.control.setVisible(False) 
             self._progress_handler.info.ui.dispose()
-
         if success:
-            pass
-#            self.show_results()
-            from enthought.pyface.timer.api import do_later
             do_later(self.show_results)
 
 

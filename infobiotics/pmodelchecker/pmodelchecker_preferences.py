@@ -1,7 +1,7 @@
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, RelativeFile
 import sys
 
-PREFERENCES_PATH = 'pmodelchecker' #TODO
+PREFERENCES_PATH = 'prism' #TODO
 
 #TODO copy this pattern for all ParamsPreferences (and maybe Params) subclasses
 name = 'pmodelchecker.exe' if sys.platform.startswith('win') else 'pmodelchecker' 

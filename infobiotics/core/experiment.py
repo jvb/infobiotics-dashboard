@@ -4,8 +4,7 @@ from infobiotics.core.params import Params
 import sys 
 import os
 import tempfile
-#from threading import Thread
-#from enthought.pyface.timer.api import do_later
+from enthought.pyface.timer.api import do_later
 
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
@@ -33,8 +32,6 @@ from progressbar import ProgressBar, Percentage as Percent, Bar, RotatingMarker,
     
 from infobiotics.commons.api import logging
 log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
-log.setLevel(logging.WARN)
-log.setLevel(logging.DEBUG)
 
 class Experiment(Params):
 #    ''' Abstract base class of all Infobiotics Dashboard experiments.
@@ -61,7 +58,7 @@ class Experiment(Params):
 #    '''
     executable_kwargs = ListStr
 
-    def perform(self, thread=False):#TODO make thread True by default?
+    def perform(self, thread=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
         # save to temporary file in the same directory
         kwargs = dict(
@@ -88,32 +85,24 @@ class Experiment(Params):
             self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
         self.save(self.temp_params_file.name, force=True, update_object=False)
 
+        # catch SIGINT signals (Ctrl-C)
         if self._interaction_mode in ('terminal', 'script'):
             def terminate(signum, frame):
                 '''Signal handler that terminates child processes elegantly.'''
                 if self._child.isalive():
                     self._child.terminate(force=True)
-            # catch SIGINT signals (Ctrl-C)
             import signal
             signal.signal(signal.SIGINT, terminate)   
         
+        # actually perform the experiment
         if not thread or self._interaction_mode in ('terminal', 'script'):
             self._perform()
-            #TODO call serial progress function from here
         else:
-#            from threading import Thread
-#            thread = Thread(target=self._perform)
-##            thread.daemon = True # kills threads on exit
-#            thread.start()
-            from enthought.pyface.timer.api import do_later
-            do_later(self._perform)
-#        self._perform() # not using threads for now
+            do_later(self._perform) # run in thread
 
+        # restore default SIGINT handler that raises KeyboardInterrupt 
         if self._interaction_mode in ('terminal', 'script'):
-            # restore default SIGINT handler that raises KeyboardInterrupt 
             signal.signal(signal.SIGINT, signal.default_int_handler)
-
-#        return True
 
 
     def _perform(self):
@@ -273,10 +262,9 @@ class Experiment(Params):
             elif self._interaction_mode == 'terminal':
                 print error
             elif self._interaction_mode == 'gui':
-                self._handler.status = self._child.before + match
+                self._handler.status = self._child.before + match #TODO 
             
         self.success = True if self._child.exitstatus == 0 else False
-        self._finished(self.success)
         self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
 
 
@@ -287,8 +275,26 @@ class Experiment(Params):
     def _finished_changed(self):
         '''Sets self.running to False in the main thread'''
         self.running = False
-#        if self._interaction_mode == 'gui':
-#            self._handler._finished(self.success)
+        if self._interaction_mode in ('script', 'terminal'):
+            if self.success and not self._finished_without_output:
+                self._progress_bar.finish()
+            if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
+                print
+        elif self._interaction_mode == 'gui':
+            self._handler._finished(self.success)
+        
+        del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
+        if sys.platform.startswith('win'):
+            os.remove(self.temp_params_file.name) # deletes file on Windows
+        
+        self._reset_progress_traits()
+
+    def _reset_progress_traits(self):
+        self._progress_percentage = 0
+
+    def cancel(self):
+        self._child.terminate()
+
 
 
     _stdout_pattern_list = ListStr
@@ -310,6 +316,8 @@ class Experiment(Params):
         if self._interaction_mode == 'terminal':
             print self._error_string
         elif self._interaction_mode == 'script':
+            log.error(self._error_string)
+        elif self._interaction_mode == 'gui':
             log.error(self._error_string)
 
     def _starting(self):
@@ -346,29 +354,6 @@ class Experiment(Params):
 #        else:
 #            self._handler.update_progress_dialog(self._progress_percentage)
         # done automatically
-
-    def cancel(self):
-        self._child.terminate()
-
-    def _finished(self, success):
-        if self._interaction_mode in ('script', 'terminal'):
-            if success and not self._finished_without_output:
-                self._progress_bar.finish()
-            if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
-                print
-        #FIXME
-        else:
-            self._handler._finished(success) # needs to happen in main thread so using finished Event
-        
-        
-        del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
-        if sys.platform.startswith('win'):
-            os.remove(self.temp_params_file.name) # deletes file on Windows
-        
-        self._reset_progress_traits()
-    
-    def _reset_progress_traits(self):
-        self._progress_percentage = 0
             
 #from enthought.traits.ui.api import Group, Item
 #

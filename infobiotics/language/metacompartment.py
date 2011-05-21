@@ -5,10 +5,12 @@ from reactions import reaction
 from species import species
 from infobiotics.commons.sequences import iterable, flatten
 #import sys
-import logging
-log = logging.getLogger('metacompartment')
-log.addHandler(logging.StreamHandler())
-log.setLevel(logging.WARN)
+#import logging
+#log = logging.getLogger('metacompartment')
+#log.addHandler(logging.StreamHandler())
+#log.setLevel(logging.WARN)
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 class metacompartment(type, compartmentmixin):
 

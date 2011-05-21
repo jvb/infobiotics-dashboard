@@ -7,10 +7,12 @@ from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import Matplotli
 from infobiotics.commons.matplotlib.matplotlib_figure_size import MatplotlibFigureSize, resize_and_save_matplotlib_figure
 from poptimizer_experiment import POptimizerExperiment
 
-import logging
-logger = logging.getLogger(__file__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.ERROR)
+#import logging
+#logger = logging.getLogger(__file__)
+#logger.addHandler(logging.StreamHandler())
+#logger.setLevel(logging.ERROR)
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 class POptimizerResults(HasTraits):
     figure = Instance(Figure, ())

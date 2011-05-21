@@ -21,13 +21,15 @@ repr = long_repr
 # change how float attributes are handled by compartments
 warn_about_floats = True
 
-# a shared logger, e.g. >>> from config import log; log.error('Help!')
-import logging
-log = logging.getLogger('main')
-log.addHandler(logging.StreamHandler())
-#log.setLevel(logging.DEBUG)
-log.setLevel(logging.WARN)
-#log.setLevel(logging.ERROR)
+## a shared logger, e.g. >>> from config import log; log.error('Help!')
+#import logging
+#log = logging.getLogger('main')
+#log.addHandler(logging.StreamHandler())
+##log.setLevel(logging.DEBUG)
+#log.setLevel(logging.WARN)
+##log.setLevel(logging.ERROR)
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 # time_units is unit quantity used to rescale reaction rates 
 #time_units = millseconds

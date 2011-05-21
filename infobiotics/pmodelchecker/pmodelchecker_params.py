@@ -7,7 +7,7 @@ from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerPar
 class PModelCheckerParams(Params):
     ''' Base class for PRISMParams and MC2Params. '''
 
-    preferences_helper = PModelCheckerParamsPreferencesHelper()
+#    preferences_helper = PModelCheckerParamsPreferencesHelper()
 
     executable_name = 'pmodelchecker'
     
@@ -22,7 +22,6 @@ class PModelCheckerParams(Params):
     def change_directory__make_model_specification_relative__translate_to_PRISM_model(self, object, name, old, new):
         import os.path
         directory, model_specification = os.path.split(self.model_specification_)
-        self.preferences_helper
 #        from enthought.traits.api import TraitError
 #        try:
         self.directory = directory

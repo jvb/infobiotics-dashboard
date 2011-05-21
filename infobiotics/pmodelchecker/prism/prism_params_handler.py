@@ -9,10 +9,13 @@ from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelChecker
 from infobiotics.pmodelchecker.model_parameters import ModelParameters
 from prism_params_group import prism_params_group
 
-import logging
-logger = logging.getLogger(__file__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.ERROR)
+#import logging
+#logger = logging.getLogger(__file__)
+#logger.addHandler(logging.StreamHandler())
+#logger.setLevel(logging.ERROR)
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
+
 
 class PRISMParamsHandler(PModelCheckerParamsHandler):
 

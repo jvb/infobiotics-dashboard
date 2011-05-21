@@ -9,7 +9,11 @@ from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelChe
 class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler):
     '''_params_group from PRISMParamsHandler and 
     perform functionality from PModelCheckerExperimentHandler'''
-    pass
+    
+    def show_results(self):
+        if self.model.task in ('Approximate', 'Verify'):
+            PModelCheckerExperimentHandler.show_results(self)
+
 
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 

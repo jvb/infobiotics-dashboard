@@ -30,7 +30,7 @@ import infobiotics.__version__
 # set default log level for all loggers that use infobiotics.commons.api.logging (infobiotics.commons.unified_logging)  
 from infobiotics.commons.api import logging
 logging.level = logging.ERROR
-logging.level = logging.DEBUG #TODO comment out in release
+#logging.level = logging.DEBUG #TODO comment out in release
 
 simulate = 'mcss'#'simulate'
 check_mc2 = 'pmodelchecker-mc2'#'check-mc2'
@@ -53,11 +53,9 @@ def main(argv):
     args = argv[1:]
     
     if len(args) == 0:
-#        print 'Running Infobiotics Dashboard'
         setproctitle.setproctitle('Infobiotics Dashboard')        
         from infobiotics.dashboard import run
         exitcode = run.main()
-#        print 'Stopped Infobiotics Dashboard'
         sys.exit(exitcode)
     
     command = args[0].lower()
@@ -98,7 +96,6 @@ def main(argv):
     experiment = Experiment()
 
     setproctitle.setproctitle(experiment.executable_name)
-
     
     if command == simulate:
         if model != '':
@@ -113,9 +110,7 @@ def main(argv):
     if params != '':
         experiment.load(params)
 
-    experiment.configure()
-    # event loop started
-    print 'exiting'
+    experiment.configure() # starts event loop
 
 
 def test_relative_path_to_model():
@@ -141,8 +136,8 @@ def test_absolute_path_to_params2():
     
 
 if __name__ == '__main__':
-#    main(sys.argv) #TODO uncomment
-    main(sys.argv + ['mcss'])
+    main(sys.argv) #TODO uncomment
+#    main(sys.argv + ['mcss'])
     #TODO comment
 #    test_relative_path_to_model()
 #    test_absolute_path_to_model()

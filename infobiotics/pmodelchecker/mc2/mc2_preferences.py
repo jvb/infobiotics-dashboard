@@ -6,7 +6,9 @@ name = 'mc2.exe' if sys.platform.startswith('win') else 'mc2'
 MC2Executable = RelativeFile(name, filter=name, absolute=True, auto_set=True, executable=True) # executable=True implies exists=True
 
 class MC2ParamsPreferencesHelper(PModelCheckerParamsPreferencesHelper):
+    preferences_path = 'mc2'
     mc2_executable = MC2Executable 
 
 class MC2ParamsPreferencesPage(PModelCheckerParamsPreferencesPage):
+    preferences_path = 'mc2'
     mc2_executable = MC2Executable

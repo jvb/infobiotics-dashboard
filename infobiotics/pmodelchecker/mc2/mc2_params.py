@@ -1,5 +1,6 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
 import os
+from enthought.traits.api import Str
 
 class MC2Params(PModelCheckerParams):
     
@@ -10,6 +11,8 @@ class MC2Params(PModelCheckerParams):
     def _preferences_helper_default(self):
         from infobiotics.pmodelchecker.mc2.mc2_preferences import MC2ParamsPreferencesHelper
         return MC2ParamsPreferencesHelper()
+
+    _preferences_path = Str('mc2')
 
     _parameter_set_name = 'mc2'
     

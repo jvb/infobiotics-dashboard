@@ -29,6 +29,8 @@ from enthought.traits.api import Any
 #import logging
 #logger = logging.getLogger(__name__)
 #logger.setLevel(logging.DEBUG)
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 def untitled_text_file(window):
     window.workbench.edit(

@@ -1,11 +1,16 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
-from enthought.traits.api import on_trait_change
+from enthought.traits.api import Str
 
 class PRISMParams(PModelCheckerParams):
 
     def __handler_default(self):
         from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler
         return PRISMParamsHandler(model=self)
+
+#    def _get__preferences_path(self):
+#        '''Overrides Params._get__preferences_path'''
+#        return 'prism'
+    _preferences_path = Str('prism')
 
     _parameter_set_name = 'prism'
 

@@ -33,9 +33,8 @@ class ParamsPreferenceBinding(PreferenceBinding):
         try:
             self._set_trait(notify=False)
         except TraitError, e:
-            logger.exception(e)
-            pass
-#            traits[obj].
+#            logger.exception(e)
+            logger.warn(e)
         
         # Wire-up trait change handlers etc.
         self._initialize()
@@ -58,16 +57,20 @@ class ParamsPreferenceBinding(PreferenceBinding):
         try:
             return handler.validate(self.obj, trait_name, value) # validate with self.obj instead of self
         except TraitError, e:
-            logger.exception(e)
-            return ''
+#            logger.exception(e)
+            logger.warn(e)
+        except TypeError, e:
+            logger.warn(e)
+        return ''
+            
 
     def _on_trait_changed(self, obj, trait_name, old, new):
         try:
             self.preferences.set(self.preference_path, new)
         except TraitError, e:
-            logger.exception(e)
-            pass # don't worry about readable RelativeFiles becoming '' 
-        return
+            # don't worry about readable RelativeFiles becoming '' 
+#            logger.exception(e)
+            logger.warn(e)
         
 def bind_preference(obj, trait_name, preference_path, preferences=None):
     traits = {
@@ -422,27 +425,22 @@ class Params(HasTraits):
         raise NotImplementedError
     
     def configure(self, **args):
+        '''Starts GUI event loop.'''
         interaction_mode = self._interaction_mode # remember previous mode of interaction
-        self.init_gui()
+        self._interaction_mode = 'gui' # set mode of interaction
         self._handler.configure_traits(**args)
         self._interaction_mode = interaction_mode # restore previous mode of interaction
 
     def edit(self, **args):
-        interaction_mode = self._interaction_mode # remember previous mode of interaction
-        self.init_gui()
-        ui = self._handler.edit_traits(**args)
-        self._interaction_mode = interaction_mode # restore previous mode of interaction
-        return ui.result
-
-    def init_gui(self):
+        '''Used when GUI event loop has already been started by an unfinished
+        call to something.configure_traits(), ((Params) something).configure()
+        or ((WorkbenchApplication) application.start()).'''
+        # no point remembering or restoring previous model of interaction 
+        # and by edit returns immediately means that progress was sent to stdout
+        # when configure() finishes it will set it back 
         self._interaction_mode = 'gui' # set mode of interaction
-#        dirty_parameters = self._dirty_parameters
-#        print dirty_parameters
-#        self.bind_preferences()
-#        self.trait_set(**dirty_parameters)
-        
-
-
+        ui = self._handler.edit_traits(**args)
+        return ui.result
 
 
     

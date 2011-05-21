@@ -5,7 +5,6 @@ from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 class PModelCheckerExperimentHandler(ExperimentHandler):
 
     def show_results(self):
-#        if self.model.task in ('Approximate', 'Verify'): # PRISM only?
         if os.path.exists(self.model.results_file_):
             PModelCheckerResults(self.model.results_file_).configure()
         else:

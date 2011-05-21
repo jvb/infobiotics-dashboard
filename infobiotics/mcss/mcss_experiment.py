@@ -31,7 +31,8 @@ class McssExperiment(McssParams, Experiment):
             try:
                 self._progress_percentage = int((((time_in_run) + ((run - 1) * self.max_time)) / (self.runs * self.max_time)) * 100)
             except TraitError, e:
-                logger.exception(e)
+#                logger.exception(e)
+                logger.warn(e)
         else:
             Experiment._stdout_pattern_matched(self, pattern_index, match)
             

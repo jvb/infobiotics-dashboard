@@ -19,12 +19,14 @@ shouldn't be set directly), or maybe not if all addition happens in __init__
 from compartments import compartment
 from species import species
 
-import logging
-log = logging.getLogger('language.sequences')
-log.addHandler(logging.StreamHandler())
-#log.setLevel(logging.INFO)
-#log.setLevel(logging.DEBUG)
-log.setLevel(logging.WARN)
+#import logging
+#log = logging.getLogger('language.sequences')
+#log.addHandler(logging.StreamHandler())
+##log.setLevel(logging.INFO)
+##log.setLevel(logging.DEBUG)
+#log.setLevel(logging.WARN)
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 
 #def mangled(self, name):

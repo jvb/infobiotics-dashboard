@@ -10,6 +10,8 @@ from enthought.traits.ui.api import View, Group, Item
 #logger = logging.getLogger(__name__)
 #logger.setLevel(logging.WARN)
 #logger.addHandler(logging.StreamHandler())
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 Executable = RelativeFile(auto_set=True, absolute=True, executable=True) # executable=True implies exists=True
 Directory = RelativeDirectory(absolute=True, auto_set=True, writable=True, readable=True, desc='the location file paths can be relative to.') # readable=True implies exists=True
@@ -27,7 +29,7 @@ class ParamsPreferencesHelper(PreferencesHelper):
         from infobiotics.preferences import preferences
         return preferences
     
-    def _preferences_path(self):
+    def _preferences_path_default(self):
         raise NotImplementedError('ParamsPreferencesHelper subclasses must provide a preferences_path, probably via a module-level constant such as PREFERENCES_PATH.')
     
     # copied from PreferencesHelper and added TraitError exception handling
@@ -67,6 +69,7 @@ class ParamsPreferencesHelper(PreferencesHelper):
                 validated = handler.validate(self, trait_name, value)
             except TraitError, e:
 #                logger.exception(e)
+                logger.warn(e)
                 validated = handler.get_default_value()[1] 
 #                validated = handler.validate(self, trait_name, handler.get_default_value()[1])
 #                if hasattr(handler, 'post_setattr'):
