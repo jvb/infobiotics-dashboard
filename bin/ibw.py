@@ -5,6 +5,14 @@
 
 import sys
 import os.path
+
+import setproctitle
+
+# http://www.py2exe.org/index.cgi/MatPlotLib
+import matplotlib
+matplotlib.use('qt4agg') # overrule configuration
+import pylab #TODO remove?
+
 import infobiotics.__version__
 
 simulate = 'mcss'#'simulate'
@@ -28,10 +36,11 @@ def main(argv):
     args = argv[1:]
     
     if len(args) == 0:
-        print 'Running Infobiotics Dashboard'
+#        print 'Running Infobiotics Dashboard'
+        setproctitle.setproctitle('Infobiotics Dashboard')        
         from infobiotics.dashboard import run
         exitcode = run.main()
-        print 'Stopped Infobiotics Dashboard'
+#        print 'Stopped Infobiotics Dashboard'
         sys.exit(exitcode)
     
     command = args[0].lower()
@@ -60,6 +69,7 @@ def main(argv):
     else:
         directory = os.getcwd()
 
+
     if command == simulate:
         from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment
     elif command == check_mc2:
@@ -69,6 +79,8 @@ def main(argv):
     elif command == optimise:
         from infobiotics.poptimizer.poptimizer_experiment import POptimizerExperiment as Experiment
     
+    setproctitle.setproctitle(experiment.executable_name)
+
     experiment = Experiment()
     experiment.directory = directory
     
