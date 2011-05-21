@@ -227,6 +227,7 @@ INSTALL_REQUIRES = [
     'libsbml',
     'progessbar',
     'quantities',
+    'setproctitle',
 ]
 INSTALL_REQUIRES += ['winpexpect>=1.3'] if sys.platform.startswith('win') else ['pexpect'] # winpexpect is preferred over wexpect on Windows
 INSTALL_REQUIRES += ['pytables>=2.1.2'] if sys.platform.startswith('darwin') else ['tables>=2.1.2'] # tables is called 'pytables' on Mac (at least it is in EPD)
