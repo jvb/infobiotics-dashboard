@@ -24,6 +24,23 @@ from enthought.preferences.api import PreferenceBinding
 
 class ParamsPreferenceBinding(PreferenceBinding):
     '''Overrides a couple of methods that raise errors for RelativeFile traits.'''
+
+    def __init__(self, **traits):
+        """ Constructor. """
+
+        super(PreferenceBinding, self).__init__(**traits)
+
+        # Initialize the object's trait from the preference value.
+        try:
+            self._set_trait(notify=False)
+        except TraitError, e:
+            print 'ParamsPreferenceBinding.__init__', e
+#            validated = handler.get_default_value()[1]
+
+        # Wire-up trait change handlers etc.
+        self._initialize()
+        
+        return
     
     def _get_value(self, trait_name, value):
         # fixme: This method is mostly duplicated in 'PreferencesHelper' (the only
