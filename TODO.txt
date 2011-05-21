@@ -1,3 +1,10 @@
+ibw.py -> infobiotics-dashboard(.py(w))
+test_frozen_matplotlib_images_setup.py
+README
+tutorial examples on infobiotics.org
+setup.py
+py2imports.py
+
 =================================================
 Things to do, bugs to fix, feature requests, etc.
 =================================================
