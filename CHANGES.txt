@@ -7,10 +7,3 @@ v0.0.8, 20100723
 * can choose figure size (pixels/inches and dpi) when saving matplotlib plots in
   simulation and model checking results
 
-v0.0.9, 20100729
-
-* TODO
-
-v0.0.10, TODO
-
-* TODO
