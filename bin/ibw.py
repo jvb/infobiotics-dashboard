@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+'''
+Single entry-point for Infobiotics Workbench.
+
+With zero arguments it launches the Infobiotics Workbench/Dashboard (Envisage Workbench), 
+with one argument it launches the individual experiment/command GUI (e.g. 'McssExperiment().configure()') and
+with two arguments it launches the experiment and either sets the model_file/model_specification trait or loads the parameters from the second argument.
+
+Having a single entry-point means it can be frozen (py2exe, py2app, etc.) and
+called from Eclipse...
+'''
 
 # "Application asked to unregister timer 0x1c000011 which is not registered in this thread. Fix application."
 # This is a bug in Qt 4.7 under Ubuntu that will be fixed in Qt 4.8 
@@ -8,12 +18,19 @@ import os.path
 
 import setproctitle
 
-# http://www.py2exe.org/index.cgi/MatPlotLib
-import matplotlib
-matplotlib.use('qt4agg') # overrule configuration
-import pylab #TODO remove?
-
+# fix matplotlib backend problems on Windows
+if sys.platform.startswith('win'):
+    # http://www.py2exe.org/index.cgi/MatPlotLib
+    import matplotlib
+    matplotlib.use('qt4agg') # overrule configuration
+    import pylab #TODO remove?
+    
 import infobiotics.__version__
+
+# set default log level for all loggers that use infobiotics.commons.api.logging (infobiotics.commons.unified_logging)  
+from infobiotics.commons.api import logging
+logging.level = logging.ERROR
+logging.level = logging.DEBUG #TODO comment out in release
 
 simulate = 'mcss'#'simulate'
 check_mc2 = 'pmodelchecker-mc2'#'check-mc2'
@@ -66,9 +83,8 @@ def main(argv):
             model = args1
     if model != '':
         directory, model = os.path.split(model)
-    else:
-        directory = os.getcwd()
-
+#    else:
+#        directory = os.getcwd()
 
     if command == simulate:
         from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment
@@ -79,17 +95,19 @@ def main(argv):
     elif command == optimise:
         from infobiotics.poptimizer.poptimizer_experiment import POptimizerExperiment as Experiment
     
+    experiment = Experiment()
+
     setproctitle.setproctitle(experiment.executable_name)
 
-    experiment = Experiment()
-    experiment.directory = directory
     
     if command == simulate:
         if model != '':
+            experiment.directory = directory
             experiment.model_file = model
 
     elif command in (check_mc2, check_prism):
         if model != '':
+            experiment.directory = directory
             experiment.model_specification = model
 
     if params != '':
@@ -97,6 +115,7 @@ def main(argv):
 
     experiment.configure()
     # event loop started
+    print 'exiting'
 
 
 def test_relative_path_to_model():
@@ -122,8 +141,8 @@ def test_absolute_path_to_params2():
     
 
 if __name__ == '__main__':
-    main(sys.argv) #TODO uncomment
-#    main(sys.argv + ['mcss'])
+#    main(sys.argv) #TODO uncomment
+    main(sys.argv + ['mcss'])
     #TODO comment
 #    test_relative_path_to_model()
 #    test_absolute_path_to_model()

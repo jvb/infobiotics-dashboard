@@ -9,6 +9,7 @@ class ExperimentHandler(ParamsHandler):
     
     def perform(self, info):
         info.object.perform(thread=True)
+#        info.object.perform()
         
     def _starting(self):
         self._progress_dialog_started = False
@@ -29,11 +30,11 @@ class ExperimentHandler(ParamsHandler):
 #            info.ui.control.setVisible(False) 
             self._progress_handler.info.ui.dispose()
 
-        print 'got here'
         if success:
             pass
-            print 'got here too'
-            self.show_results() #TODO
+#            self.show_results()
+            from enthought.pyface.timer.api import do_later
+            do_later(self.show_results)
 
 
 if __name__ == '__main__':

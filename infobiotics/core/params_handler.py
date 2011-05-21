@@ -164,7 +164,7 @@ class ParamsHandler(HelpfulController):
             wildcard=self.wildcard,
             title=title,
             default_filename=self.model._params_file,
-            default_directory=self.model.directory_ # note extra '_' in directory_, this means that it uses the shadow value of the trait 'directory' which is the full path
+            default_directory=self.model.directory
         )
         if fd.open() == OK:
             return fd.path
@@ -201,7 +201,7 @@ class ParamsHandler(HelpfulController):
         fd = FileDialog(
             action='save as',
             default_filename=self.model._params_file,
-            default_directory=self.model.directory_,
+            default_directory=self.model.directory,
             wildcard=self.wildcard,
             title=title,
         )

@@ -22,11 +22,11 @@ class SimulationListWidgetItem(QListWidgetItem):
             self.amounts_index = data._run_number - 1
             # recolour item if run is truncated #TODO useful?
 #            if data._run_number == data._simulation_number_of_runs: # last run only
-            if data.simulated_time < data._simulation.max_time:
-                brush = self.foreground()
-                brush.setColor(Qt.red)
-                self.setForeground(brush)
-                self.setToolTip('Run truncated at %s' % data.simulated_time)
+#            if data.simulated_time < data._simulation.max_time:
+#                brush = self.foreground()
+#                brush.setColor(Qt.red)
+#                self.setForeground(brush)
+#                self.setToolTip('Run truncated at %s' % data.simulated_time)
 
         elif isinstance(data, Simulation):
             text = "%s %s" % (data.model_input_file, data.simulation_start_time)
@@ -35,7 +35,7 @@ class SimulationListWidgetItem(QListWidgetItem):
         else:
             raise TypeError("type of data is not recognised")
 
-        QListWidgetItem.__init__(self, text, parent, QListWidgetItem.UserType)
+        QListWidgetItem.__init__(self, text, parent, QListWidgetItem.UserType) # QObject::startTimer: QTimer can only be used with threads started with QThread
         
         if isinstance(self.amounts_index, int):
             self.setToolTip('%d' % self.amounts_index)

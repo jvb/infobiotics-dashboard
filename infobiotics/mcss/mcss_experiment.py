@@ -1,7 +1,10 @@
 from __future__ import division
 from mcss_params import McssParams
 from infobiotics.core.experiment import Experiment
-from enthought.traits.api import Int, Float
+from enthought.traits.api import Int, Float, TraitError
+
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 class McssExperiment(McssParams, Experiment):
     
@@ -25,7 +28,10 @@ class McssExperiment(McssParams, Experiment):
             time_in_run = float(time_in_run)
             if run == 0 or time_in_run == 0:
                 return
-            self._progress_percentage = int((((time_in_run) + ((run - 1) * self.max_time)) / (self.runs * self.max_time)) * 100)
+            try:
+                self._progress_percentage = int((((time_in_run) + ((run - 1) * self.max_time)) / (self.runs * self.max_time)) * 100)
+            except TraitError, e:
+                logger.exception(e)
         else:
             Experiment._stdout_pattern_matched(self, pattern_index, match)
             
@@ -68,8 +74,8 @@ def test():
 ##    exit()
 
 #    experiment.perform(thread=True)
-#    experiment.perform(thread=False)
-    experiment.configure()
+    experiment.perform(thread=False)
+#    experiment.configure()
 
 
 

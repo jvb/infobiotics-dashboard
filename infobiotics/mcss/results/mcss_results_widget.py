@@ -6,6 +6,7 @@ ETSConfig.toolkit = 'qt4'
 
 from enthought.traits.api import HasTraits, Range, String
 from enthought.traits.ui.api import View, VGroup, HGroup, Item
+
 from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow
 
 from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, Qt
@@ -54,7 +55,7 @@ class McssResultsWidget(QWidget):
         QWidget.__init__(self) # initialize base class
 
         self.ui = Ui_McssResultsWidget()
-        self.ui.setupUi(self)
+        self.ui.setupUi(self) # QPixmap: It is not safe to use pixmaps outside the GUI thread
 
         self.ui.compartments_list_widget.setToolTip('')
 

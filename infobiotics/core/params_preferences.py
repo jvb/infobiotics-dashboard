@@ -68,6 +68,9 @@ class ParamsPreferencesHelper(PreferencesHelper):
             except TraitError, e:
 #                logger.exception(e)
                 validated = handler.get_default_value()[1] 
+#                validated = handler.validate(self, trait_name, handler.get_default_value()[1])
+#                if hasattr(handler, 'post_setattr'):
+#                    ...
         else:
             validated = value
 

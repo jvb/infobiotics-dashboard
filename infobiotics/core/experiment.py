@@ -4,7 +4,7 @@ from infobiotics.core.params import Params
 import sys 
 import os
 import tempfile
-from threading import Thread
+#from threading import Thread
 #from enthought.pyface.timer.api import do_later
 
 if sys.platform.startswith('win'):    
@@ -88,37 +88,35 @@ class Experiment(Params):
             self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
         self.save(self.temp_params_file.name, force=True, update_object=False)
 
-        def terminate(signum, frame):
-            '''Signal handler that terminates child processes elegantly.'''
-            if self._child.isalive():
-                self._child.terminate(force=True)
-
-        # catch SIGINT signals (Ctrl-C)
-        import signal
-        signal.signal(signal.SIGINT, terminate)   
+        if self._interaction_mode in ('terminal', 'script'):
+            def terminate(signum, frame):
+                '''Signal handler that terminates child processes elegantly.'''
+                if self._child.isalive():
+                    self._child.terminate(force=True)
+            # catch SIGINT signals (Ctrl-C)
+            import signal
+            signal.signal(signal.SIGINT, terminate)   
         
         if not thread or self._interaction_mode in ('terminal', 'script'):
             self._perform()
             #TODO call serial progress function from here
         else:
-            thread = Thread(target=self._perform)
-            thread.daemon = True # kills threads on exit
-            thread.start()
+#            from threading import Thread
+#            thread = Thread(target=self._perform)
+##            thread.daemon = True # kills threads on exit
+#            thread.start()
+            from enthought.pyface.timer.api import do_later
+            do_later(self._perform)
 #        self._perform() # not using threads for now
 
-        # restore default SIGINT handler that raises KeyboardInterrupt 
-        signal.signal(signal.SIGINT, signal.default_int_handler)
+        if self._interaction_mode in ('terminal', 'script'):
+            # restore default SIGINT handler that raises KeyboardInterrupt 
+            signal.signal(signal.SIGINT, signal.default_int_handler)
 
 #        return True
 
 
     def _perform(self):
-#        '''Might be running in a thread.'''
-#        self.starting = True
-#        self.__expect()
-#        self.finished = True
-
-#        self._child = pexpect.spawn('python process.py')
         ''' Start the program and try to match output.
         
         Spawns the program (starting it in self.cwd),
@@ -127,6 +125,8 @@ class Experiment(Params):
         calls 'started' hook,
         loops calling the '_output_pattern_matched' hook with the index of the pattern
         and the match until EOF whereupon it calls the 'finished' hook.
+         
+        **Might be running in thread.**
          
         '''
         self.success = False
@@ -276,7 +276,7 @@ class Experiment(Params):
                 self._handler.status = self._child.before + match
             
         self.success = True if self._child.exitstatus == 0 else False
-
+        self._finished(self.success)
         self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
 
 
@@ -287,8 +287,8 @@ class Experiment(Params):
     def _finished_changed(self):
         '''Sets self.running to False in the main thread'''
         self.running = False
-        if self._interaction_mode == 'gui':
-            self._handler._finished(self.success)
+#        if self._interaction_mode == 'gui':
+#            self._handler._finished(self.success)
 
 
     _stdout_pattern_list = ListStr
@@ -356,8 +356,10 @@ class Experiment(Params):
                 self._progress_bar.finish()
             if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
                 print
-#        else:
-#            self._handler._finished(success) # needs to happen in main thread so using finished Event
+        #FIXME
+        else:
+            self._handler._finished(success) # needs to happen in main thread so using finished Event
+        
         
         del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
         if sys.platform.startswith('win'):

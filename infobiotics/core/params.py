@@ -13,11 +13,8 @@ import os, sys
 from xml import sax
 from infobiotics.thirdparty.which import which, WhichError
 
-#from infobiotics.commons.api import logging
-#log = logging.getLogger(name='Params', level=logging.WARN)
-#log.setLevel(logging.ERROR)
-import logging
-logger = logging.getLogger(__name__)#level=logging.WARN)
+from infobiotics.commons.api import logging
+logger = logging.getLogger(name='Params', level=logging.WARN)
 
 from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
@@ -37,8 +34,9 @@ class ParamsPreferenceBinding(PreferenceBinding):
             self._set_trait(notify=False)
         except TraitError, e:
             logger.exception(e)
-#            validated = handler.get_default_value()[1]
-
+            pass
+#            traits[obj].
+        
         # Wire-up trait change handlers etc.
         self._initialize()
         
@@ -59,13 +57,15 @@ class ParamsPreferenceBinding(PreferenceBinding):
                 pass
         try:
             return handler.validate(self.obj, trait_name, value) # validate with self.obj instead of self
-        except:
+        except TraitError, e:
+            logger.exception(e)
             return ''
 
     def _on_trait_changed(self, obj, trait_name, old, new):
         try:
             self.preferences.set(self.preference_path, new)
-        except TraitError:
+        except TraitError, e:
+            logger.exception(e)
             pass # don't worry about readable RelativeFiles becoming '' 
         return
         
@@ -101,7 +101,7 @@ class Params(HasTraits):
     executable = Executable
 
     directory = Directory # infinite recursion if ParamsRelativeDirectory because directory='directory'
-    
+
 #    def _directory_changed(self, directory):
 #        os.chdir(directory)
     
