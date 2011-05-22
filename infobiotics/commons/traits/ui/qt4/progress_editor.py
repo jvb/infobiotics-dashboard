@@ -145,24 +145,24 @@ class _ProgressEditor(Editor):
         if self.factory.min <= self.value <= self.factory.max:
             if self.value == self.factory.min:
                 self.reset()
-            self._progress_bar.setValue(self.value)
-
-        if self.factory.show_time:
-            if (self.factory.max != self.factory.min):
-                percent = (float(self.value) - self.factory.min) / (self.factory.max - self.factory.min)
-                # if float(<undefined>) raises an error here then probably the
-                # name of the trait this is editing is mispelled or owned by
-                # the handler, e.g. 'handler.progress' instead of 'progress'. 
-            else:
-                percent = 1.0
-            if self.factory.show_time and (percent != 0):
-                current_time = time.time()
-                elapsed = current_time - self._start_time
-                estimated = elapsed / percent
-                remaining = estimated - elapsed
-                self._set_time_label(elapsed, self._elapsed_control)
-                self._set_time_label(estimated, self._estimated_control)
-                self._set_time_label(remaining, self._remaining_control)            
+            if self.value != Undefined: 
+                self._progress_bar.setValue(self.value)
+            if self.factory is not None and self.factory.show_time:
+                if (self.factory.max != self.factory.min):
+                    percent = (float(self.value) - self.factory.min) / (self.factory.max - self.factory.min)
+                    # if float(<undefined>) raises an error here then probably the
+                    # name of the trait this is editing is mispelled or owned by
+                    # the handler, e.g. 'handler.progress' instead of 'progress'. 
+                else:
+                    percent = 1.0
+                if self.factory.show_time and (percent != 0):
+                    current_time = time.time()
+                    elapsed = current_time - self._start_time
+                    estimated = elapsed / percent
+                    remaining = estimated - elapsed
+                    self._set_time_label(elapsed, self._elapsed_control)
+                    self._set_time_label(estimated, self._estimated_control)
+                    self._set_time_label(remaining, self._remaining_control)            
 
     def reset(self):
         self._progress_bar.reset()
