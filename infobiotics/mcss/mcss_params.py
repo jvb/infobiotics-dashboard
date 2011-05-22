@@ -3,6 +3,9 @@ from infobiotics.core.params import Params
 from enthought.traits.api import Enum, Bool, Range, Long, Property, Float
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
+logging.level = logging.DEBUG
 
 class McssParams(Params):
 
@@ -24,18 +27,21 @@ class McssParams(Params):
         import os.path
         directory, model_file = os.path.split(self.model_file_)
         self.preferences_helper
-#        try:
-        self.directory = directory
-        # problem: model_specification is appearing relative to the previous
-        # directory
-        # solution (avoiding infinite loop):
-        # first set it without notifying change handlers
-        self.trait_setq(model_file=model_file)
-        # second notify change handlers by setting it
-        self.model_file = model_file
-#        except TraitError:
-#            self.model_file = model_file
-#            self.trait_setq(model_file=model_file)
+        try:
+            if directory != '':
+                self.directory = directory #TODO os.path.normpath(directory)
+        except TraitError, e:
+            logger.warn(e)
+        try:
+            # problem: model_specification is appearing relative to the previous
+            # directory
+            # solution (avoiding infinite loop):
+            # first set it without notifying change handlers
+            self.trait_setq(model_file=model_file)
+            # second notify change handlers by setting it
+            self.model_file = model_file
+        except TraitError, e:
+            logger.warn(e)
         
     model_file = ParamsRelativeFile(desc='the model file to simulate',
         exists=True,

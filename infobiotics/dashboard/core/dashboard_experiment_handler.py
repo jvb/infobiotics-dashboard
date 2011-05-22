@@ -3,6 +3,8 @@ from enthought.traits.api import on_trait_change
 
 class DashboardExperimentHandler(HasInfobioticsDashboardWorkbenchApplication):
 
+    _imported_results_modules = True 
+
     @on_trait_change('application:stopped')
     def close_on_exit(self, event):
         if self.info.ui is not None: # guard against window have already been closed

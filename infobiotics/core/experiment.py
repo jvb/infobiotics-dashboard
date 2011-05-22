@@ -1,11 +1,14 @@
-from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change
+from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change, Instance
 from infobiotics.commons.traits.percentage import Percentage
 from infobiotics.core.params import Params
 import sys 
 import os
 import tempfile
+import re
 from enthought.pyface.timer.api import do_later
 from PyQt4.QtCore import QThread
+from PyQt4.QtGui import QWidget
+from enthought.pyface.api import error as error, GUI
 
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
@@ -32,7 +35,7 @@ import pexpect # provided by pexpect or winpexpect PyPI packages
 from progressbar import ProgressBar, Percentage as Percent, Bar, RotatingMarker, ETA
     
 from infobiotics.commons.api import logging
-log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
+logger = logging.getLogger(name=__name__, format="%(message)s [%(levelname)s]")
 
 class Experiment(Params):
     ''' Abstract base class of all Infobiotics Dashboard experiments.
@@ -101,8 +104,8 @@ class Experiment(Params):
                 def run(self):
                     self.experiment._perform()
                     self.exec_() # vital
-            self.__thread = Thread(self)
-            do_later(self.__thread.start) # vital
+            self._thread = Thread(self)
+            do_later(self._thread.start) # vital
 
         # restore default SIGINT handler that raises KeyboardInterrupt 
         if self._interaction_mode in ('terminal', 'script'):
@@ -122,7 +125,6 @@ class Experiment(Params):
         **Might be running in thread.**
          
         '''
-        self.success = False
         if sys.platform.startswith('win'):
             self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         else:
@@ -145,20 +147,16 @@ class Experiment(Params):
         compiled_pattern_list.append(pexpect.TIMEOUT)
         timeout_index = compiled_pattern_list.index(pexpect.TIMEOUT)        
         
-#        self._starting()
-#        do_later(self._starting)
-        self.started = True
+        self.success = False
+        self.error = '' # public error
+        self._errors = '' # private errors
+        self.started = True # Event
         self.running = True
-
-        import re, os
-
-        # expect loop
-#        patterns_matched = 0
+        self._was_cancelled = False
         stdout_patterns_matched = 0
         stderr_patterns_matched = 0
         
-        self._error_string = ''
-        
+        # expect loop
         while True:
             pattern_index = self._child.expect_list(
                 compiled_pattern_list,
@@ -168,7 +166,7 @@ class Experiment(Params):
             if pattern_index == eof_index:
                 if stdout_patterns_matched + stderr_patterns_matched == 0:
                     if self._child.before != '':
-#                        self._error_string = self._child.before
+#                        self._errors = self._child.before
                         # scour before for error messages
                         for line in self._child.before.split(os.linesep):
                             for i, pattern in enumerate(self._stderr_pattern_list):
@@ -220,64 +218,55 @@ class Experiment(Params):
 #            print 'signalstatus == %s' % self._child.signalstatus
 #        print 'status == %s' % self._child.status
 
-#        if self._child.exitstatus == 0: # returncode is set by communicate() 
-#            self.finished_successfully = True # trigger ExperimentHandler.show_results()
-#        else:
-#            error_log = open(self.error_log_file_name, 'w')
-#            if self._child.exitstatus == 1:
-#                # get last non-empty line of stdout or None
-#                if len(stderr_output) > 0:#stderr_output != '':
-#                    stdout_output_error = stdout_output.strip()#last_non_empty_line(stdout_output.split(os.linesep))
-#                    stderr_output_error = stderr_output.strip()#last_non_empty_line(stderr_output.split(os.linesep))
-#                    if stdout_output_error is not None:
-#                        if stderr_output_error is not None:
-#                            error = os.linesep.join((stdout_output_error, stderr_output_error))
-#                        else:
-#                            error = stdout_output_error
-#                    else:
-#                        if stderr_output_error is not None:
-#                            error = stderr_output_error
-#                        else:
-#                            error = '%s exited with return code %s' % (arg_string, self._child.exitstatus)
-#            elif self._child.exitstatus == -2:
-#                error = '%s was cancelled by the user before data could be written.' % arg_string
-#            elif self._child.exitstatus == -9:
-#                error = '%s was terminated by the user.' % arg_string
-#            elif self._child.exitstatus == -11:
-#                error = '%s caused a segmentation fault and was terminated by the operating system.' % arg_string
-#            elif self._child.exitstatus == -15:
-#                error = '%s was terminated by the dashboard.' % arg_string
-#            elif self._child.exitstatus == 127:
-#                error = 'shared library error'
-#            else:
-#                error = '%s exited with returncode %s' % (arg_string, self._child.exitstatus)
-##            self.log.error(error)
-#            error_log.write(error)
-#            error_log.close()
-
-        error = ''
         if self._child.exitstatus is None:
-            # exited with a signal
-            error = '%s exited with signal: %s' % (self.executable_name, self._child.signalstatus)
+            self.error = self._interpret_exitcode(self._child.signalstatus)
         elif self._child.exitstatus != 0:
-            error = '%s exited with exit code: %s' % (self.executable_name, self._child.exitstatus)
-            error += self._child.before
-        if error != '':
-            if self._interaction_mode == 'script':
-                log.error(error)
-            elif self._interaction_mode == 'terminal':
-                print error
-            elif self._interaction_mode == 'gui':
-#                self._handler.status = self._child.before + match #TODO
-                print error 
+            self.error = self._interpret_exitcode(self._child.exitstatus)
             
-        self.success = True if self._child.exitstatus == 0 else False
-        self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
+        self.success = True if self._child.exitstatus == 0 and not self._was_cancelled else False
+#        self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
+        do_later(setattr, self, 'finished', True) # setting an Event trait like 'finished' triggers change handlers in the main thread
 
+    def _error_changed(self):
+        if self.error != '':
+            if self._interaction_mode == 'script':
+                logger.error(self.error)
+            elif self._interaction_mode == 'terminal':
+                logger.error(self.error)
+            elif self._interaction_mode == 'gui':
+#                logger.error(error)
+#                pass
+                GUI.invoke_later(error, self._parent_widget, self.error, 'Experiment failed') # error here is enthought.pyface.api.error
+                self._handler.status = self.error #TODO remove?
 
+    def _interpret_exitcode(self, exitcode):
+        error = self.executable_name
+        if exitcode == 2:
+            error += ' was cancelled by the user before data could be written.'
+        elif exitcode == 9:
+            error += ' was terminated by the user.'
+        elif self._child.signalstatus == 11:
+            error += ' caused a segmentation fault and was terminated by the operating system.'
+        elif exitcode == 15:
+            error += ' was terminated by the dashboard.'
+        elif exitcode == 127:
+            error += ': shared library error'
+        else:
+            error += ' exited with returncode %s' % exitcode
+        error += self._errors
+        error += '\n(exitcode = %s)' % exitcode
+        return error
+
+    error = Str
     success = Bool
     started = Event
     finished = Event
+
+    _parent_widget = Property(Instance(QWidget))
+
+    def _get__parent_widget(self):
+#        return None
+        return self._handler.info.ui.control
 
     def _started_fired(self):
         self._progress_percentage = 0
@@ -300,7 +289,7 @@ class Experiment(Params):
             self._progress_bar_started = False
 
     def cancel(self):
-        self._child.terminate()
+        self._was_cancelled = self._child.terminate(force=True)
     
     def _finished_fired(self):
         '''Sets self.running to False in the main thread'''
@@ -310,19 +299,22 @@ class Experiment(Params):
                 self._progress_bar.finish()
             if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
                 print
-        elif self._interaction_mode == 'gui':
+        else:#elif self._interaction_mode == 'gui':
             do_later(self._handler._finished, self.success) # do_later is essential to stop crash due to threads
-            if not self.success:
-                from enthought.pyface.api import error, GUI
-                GUI.invoke_later(error, None, "Experiment failed")
-
+#            if self.success:
+#                if not hasattr(self, '_imported_results_modules') or not self._imported_results_modules: # have we done the long import yet?
+#                    #TODO auto close message loading (if first time, otherwise it will be fast)
+#                    from enthought.traits.ui.message import auto_close_message
+##                    GUI.invoke_later(auto_close_message(message='Loading results', time=1))#, parent=self.info.ui.control))
+#                    do_later(auto_close_message(message='Loading results', time=1))#, parent=self.info.ui.control))
+#                    self._imported_results_modules = True
         
         del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
         if sys.platform.startswith('win'):
             os.remove(self.temp_params_file.name) # deletes file on Windows
         
         self._reset_progress_traits()
-
+        
     def _reset_progress_traits(self):
         self._progress_percentage = 0
 
@@ -340,16 +332,16 @@ class Experiment(Params):
     def _stdout_pattern_matched(self, pattern_index, match):
         raise ValueError('Experiment._stdout_pattern_matched called with unrecognised pattern_index %s' % pattern_index)
 
-    _error_string = Str(desc='the error the executable exited with')
+    _errors = Str(desc='the error the executable exited with')
             
     def _stderr_pattern_matched(self, pattern_index, match):
-        self._error_string = match.strip()
-        if self._interaction_mode == 'terminal':
-            print self._error_string
-        elif self._interaction_mode == 'script':
-            log.error(self._error_string)
-        elif self._interaction_mode == 'gui':
-            log.error(self._error_string)
+        self._errors += match.strip()
+#        if self._interaction_mode == 'terminal':
+#            print self._errors
+#        elif self._interaction_mode == 'script':
+#            logger.error(self._errors)
+#        elif self._interaction_mode == 'gui':
+#            logger.error(self._errors)
 
 
     _progress_percentage = Percentage

@@ -144,11 +144,10 @@ class ParamsHandler(HelpfulController):
 
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
-        
-        from enthought.traits.ui.message import auto_close_message, error, message
+        from enthought.pyface.api import YES, NO, confirm
         if info.object._dirty:
-            if message(str('Save current parameters before loading?'), title='Unsaved parameters', buttons=['OK', 'Cancel']):
-                self.save(info)        
+            if confirm(self.info.ui.control, 'Save current parameters before loading?', title='Unsaved parameters') == YES:
+                self.save(info)
 
         params = info.object
         title = 'Load %s parameters' % params._parameters_name

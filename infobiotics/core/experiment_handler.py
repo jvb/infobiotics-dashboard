@@ -1,7 +1,8 @@
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
 from infobiotics.core.views import ExperimentView
-from enthought.pyface.api import GUI, error
+from enthought.pyface.api import GUI
+import time
 
 class ExperimentHandler(ParamsHandler):
     
@@ -27,8 +28,48 @@ class ExperimentHandler(ParamsHandler):
     def _finished(self, success):
         if self._progress_handler.info is not None and self._progress_handler.info.ui is not None:
             self._progress_handler.info.ui.dispose()
+        self.model._thread.exit()
         if success:
+            if not hasattr(self, '_imported_results_modules') or not self._imported_results_modules: # have we done the long import yet?
+                # show 'Loading results message' (if first time, otherwise it will be fast)
+                GUI.invoke_later(auto_close_message, message='Loading results', time=1, parent=self.info.ui.control)
+                self._imported_results_modules = True
+            time.sleep(0.5)
             GUI.invoke_later(self.show_results) # essential
-#        else: # done in Experiment._finished
-#            GUI.invoke_later(error, None, "Experiment failed")
+
+
+# copied from enthought.traits.ui.message to tweak layout 
+
+from enthought.pyface.timer.api import do_after
+from enthought.traits.api import HasPrivateTraits, Str, Float
+from enthought.traits.ui.api import View, HGroup, Item, spring
+
+class AutoCloseMessage(HasPrivateTraits):
+    message = Str('Please wait')
+    time = Float(2.0) # The time (in seconds) to show the message
+
+    def show(self, parent = None, title = ''):
+        view = View(
+            spring,
+            HGroup(
+                spring,
+                Item('message',
+                    show_label=False,
+                    style='readonly',
+                ),
+                spring,
+            ),
+            spring,
+            width=150,
+            height=60,
+            title=title,
+        )
+        do_after(
+            int(1000.0 * self.time), 
+            self.edit_traits(parent=parent, view=view).dispose
+        )
+
+def auto_close_message(message = 'Please wait', time=2.0, title='Please wait', parent=None):
+    msg = AutoCloseMessage( message = message, time = time )
+    msg.show( parent = parent, title = title )
             
