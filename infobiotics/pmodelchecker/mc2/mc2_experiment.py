@@ -11,6 +11,7 @@ class MC2ExperimentHandler(MC2ParamsHandler, PModelCheckerExperimentHandler):
     pass
 
 class MC2Experiment(MC2Params, PModelCheckerExperiment):
+    '''TODO'''
 
     def __handler_default(self):
         return MC2ExperimentHandler(model=self)

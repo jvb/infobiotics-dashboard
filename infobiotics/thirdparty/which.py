@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2002-2005 ActiveState Corp.
+# Copyright (c) 2002-2007 ActiveState Software Inc.
 # See LICENSE.txt for license details.
 # Author:
 #   Trent Mick (TrentM@ActiveState.com)
@@ -65,9 +65,10 @@ _cmdlnUsage = """
     files without executable access.
 """
 
-__revision__ = "$Id: which.py 430 2005-08-20 03:11:58Z trentm $"
-__version_info__ = (1, 1, 0)
+__revision__ = "$Id: which.py 1448 2007-02-28 19:13:06Z trentm $"
+__version_info__ = (1, 1, 3)
 __version__ = '.'.join(map(str, __version_info__))
+__all__ = ["which", "whichall", "whichgen", "WhichError"]
 
 import os
 import sys
@@ -126,7 +127,8 @@ def _cull(potential, matches, verbose=0):
         if not stat.S_ISREG(os.stat(potential[0]).st_mode):
             if verbose:
                 sys.stderr.write("not a regular file: %s (%s)\n" % potential)
-        elif not os.access(potential[0], os.X_OK):
+        elif sys.platform != "win32" \
+             and not os.access(potential[0], os.X_OK):
             if verbose:
                 sys.stderr.write("no executable access: %s (%s)\n"\
                                  % potential)
@@ -188,7 +190,12 @@ def whichgen(command, path=None, verbose=0, exts=None):
     # File name cannot have path separators because PATH lookup does not
     # work that way.
     if os.sep in command or os.altsep and os.altsep in command:
-        pass
+        if os.path.exists(command):
+            match = _cull((command, "explicit path given"), matches, verbose)
+            if verbose:
+                yield match
+            else:
+                yield match[0]
     else:
         for i in range(len(path)):
             dirName = path[i]
@@ -331,5 +338,4 @@ def main(argv):
 
 if __name__ == "__main__":
     sys.exit( main(sys.argv) )
-
 

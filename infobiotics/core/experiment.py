@@ -5,6 +5,7 @@ import sys
 import os
 import tempfile
 from enthought.pyface.timer.api import do_later
+from PyQt4.QtCore import QThread
 
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
@@ -34,28 +35,23 @@ from infobiotics.commons.api import logging
 log = logging.getLogger(name='Experiment', level=logging.ERROR, format="%(message)s [%(levelname)s]")
 
 class Experiment(Params):
-#    ''' Abstract base class of all Infobiotics Dashboard experiments.
-#    
-#    ParamsExperiments are performed by external programs with parameters from
-#    files with the extension '.params' (hence forth called 'params files'). 
-#    Params files are XML in nature with 'parameters', 'parameterSet' 
-#    and 'parameter' elements. Only one 'parameters' element is present and 
-#    its name attribute is supposed to correlate to the program that parsers the
-#    file. Generally only one 'parameterSet' element is present in each params 
-#    file and its name attribute is supposed to correlate to a type of 
-#    experiment that the program performs. For example in a PModelChecker 
-#    experiment <parameters name="pmodelchecker"> and 
-#    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
-#    element has 'name' and 'value' attributes that are used by the experiment
-#    performing program to parameterise and perform an experiment.    
-#
-#    ParamsExperiment implements usable load(), save() and reset() methods from 
-#    the IParamsExperiment interface. has_valid_parameters() and 
-#    parameter_names() are left to subclasses to implement: in ParamsExperiment 
-#    they each raise a NotImplementedError when called, as does perform() from 
-#    the Experiment superclass.    
-#    
-#    '''
+    ''' Abstract base class of all Infobiotics Dashboard experiments.
+    
+    Experiments are performed by external programs with parameters from
+    files with the extension '.params' (hence forth called 'params files'). 
+    Params files are XML in nature with 'parameters', 'parameterSet' 
+    and 'parameter' elements. Only one 'parameters' element is present and 
+    its name attribute is supposed to correlate to the program that parsers the
+    file. Generally only one 'parameterSet' element is present in each params 
+    file and its name attribute is supposed to correlate to a type of 
+    experiment that the program performs. For example in a PModelChecker 
+    experiment <parameters name="pmodelchecker"> and 
+    <parameterSet name="PRISM"> or <parameterSet name="MC2">. Each 'parameter'
+    element has 'name' and 'value' attributes that are used by the experiment
+    performing program to parameterise and perform an experiment.
+    
+    ...    
+    '''
     executable_kwargs = ListStr
 
     def perform(self, thread=False):
@@ -98,7 +94,15 @@ class Experiment(Params):
         if not thread or self._interaction_mode in ('terminal', 'script'):
             self._perform()
         else:
-            do_later(self._perform) # run in thread
+            class Thread(QThread):
+                def __init__(self, experiment):
+                    QThread.__init__(self)
+                    self.experiment = experiment
+                def run(self):
+                    self.experiment._perform()
+                    self.exec_() # vital
+            self.__thread = Thread(self)
+            do_later(self.__thread.start) # vital
 
         # restore default SIGINT handler that raises KeyboardInterrupt 
         if self._interaction_mode in ('terminal', 'script'):
@@ -141,7 +145,9 @@ class Experiment(Params):
         compiled_pattern_list.append(pexpect.TIMEOUT)
         timeout_index = compiled_pattern_list.index(pexpect.TIMEOUT)        
         
-        self._starting()
+#        self._starting()
+#        do_later(self._starting)
+        self.started = True
         self.running = True
 
         import re, os
@@ -262,17 +268,41 @@ class Experiment(Params):
             elif self._interaction_mode == 'terminal':
                 print error
             elif self._interaction_mode == 'gui':
-                self._handler.status = self._child.before + match #TODO 
+#                self._handler.status = self._child.before + match #TODO
+                print error 
             
         self.success = True if self._child.exitstatus == 0 else False
         self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
 
 
     success = Bool
-
+    started = Event
     finished = Event
+
+    def _started_fired(self):
+        self._progress_percentage = 0
+        if self._interaction_mode == 'gui':
+            self._handler._starting()
+        else:
+            self._progress_bar = ProgressBar(
+                fd=sys.stdout,
+                widgets=[
+                    self.executable_name, #' '.join((self.executable_name, os.path.split(self._params_file)[1])),
+                    ' ',
+                    Percent(),
+                    ' ',
+                    Bar(), #marker=RotatingMarker()),
+                    ' ',
+                    ETA()
+                ],
+                maxval=100,
+            )
+            self._progress_bar_started = False
+
+    def cancel(self):
+        self._child.terminate()
     
-    def _finished_changed(self):
+    def _finished_fired(self):
         '''Sets self.running to False in the main thread'''
         self.running = False
         if self._interaction_mode in ('script', 'terminal'):
@@ -281,7 +311,11 @@ class Experiment(Params):
             if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'
                 print
         elif self._interaction_mode == 'gui':
-            self._handler._finished(self.success)
+            do_later(self._handler._finished, self.success) # do_later is essential to stop crash due to threads
+            if not self.success:
+                from enthought.pyface.api import error, GUI
+                GUI.invoke_later(error, None, "Experiment failed")
+
         
         del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
         if sys.platform.startswith('win'):
@@ -291,9 +325,6 @@ class Experiment(Params):
 
     def _reset_progress_traits(self):
         self._progress_percentage = 0
-
-    def cancel(self):
-        self._child.terminate()
 
 
 
@@ -320,32 +351,12 @@ class Experiment(Params):
         elif self._interaction_mode == 'gui':
             log.error(self._error_string)
 
-    def _starting(self):
-#        print 'starting in %s' % self._interaction_mode
-        self._progress_percentage = 0
-        if self._interaction_mode not in ('script', 'terminal'):
-            self._handler._starting()
-        else:
-            self._progress_bar = ProgressBar(
-                widgets=[
-                    self.executable_name, #' '.join((self.executable_name, os.path.split(self._params_file)[1])),
-                    ' ',
-                    Percent(),
-                    ' ',
-                    Bar(), #marker=RotatingMarker()),
-                    ' ',
-                    ETA()
-                ],
-                maxval=100,
-            )
-            self._progress_bar_started = False
-
 
     _progress_percentage = Percentage
     
     @on_trait_change('_progress_percentage')    
     def _update_progress_bar(self):
-#    def __progress_percentage_changed(self, value): # doesn't work, maybe because of double underscore ...
+#    def __progress_percentage_changed(self, value): # doesn't work, maybe because of threads...
         if self._interaction_mode in ('script', 'terminal'):
             if not self._progress_bar_started and self._progress_percentage > 0:
                 self._progress_bar_started = True
@@ -367,13 +378,3 @@ class Experiment(Params):
 #    enabled_when='len(object.error_string) > 0',
 #    label='Error(s)',
 #)
-
-
-def test():
-#    from infobiotics.mcss.mcss_experiment import McssExperiment
-#    McssExperiment().configure()
-    from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment
-    PRISMExperiment().configure()
-     
-if __name__ == '__main__':
-    test()

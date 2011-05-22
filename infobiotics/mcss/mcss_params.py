@@ -55,7 +55,7 @@ class McssParams(Params):
     max_run_time = Range(low=0, desc='the maximum execution time for all runs')
     log_interval = FloatGreaterThanZero(1.0, desc='the time interval between which to log data') 
     runs = LongGreaterThanZero(1, desc='the number of simulation runs to perform')
-    data_file = ParamsRelativeFile('simulation.h5', writable=True, desc='the file to save simulation data to')
+    data_file = ParamsRelativeFile('simulation.h5', writable=True, filter=['HDF5 files (*.h5)'], desc='the file to save simulation data to')
     seed = Long(0, desc='the random number seed (0=randomly generated)')
     compress = Bool(True, desc='whether to compress HDF5 output')
     compression_level = Range(low=0, high=9, value=9, desc='the HDF5 compression level (0-9; 9=best)')
@@ -97,9 +97,9 @@ if __name__ == '__main__':
 #    preferences.set('mcss.directory', '/usr')
     parameters = McssParams()#executable='/usr/bin/mcs')
 #    print parameters.directory
-    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/PAR/positiveAutoregulationModel.lpp'
+#    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/PAR/positiveAutoregulationModel.lpp'
 #    print parameters.directory
-    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/NAR/negativeAutoregulationModel.lpp'
+#    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/NAR/negativeAutoregulationModel.lpp'
 #    print parameters.directory
     
     # import that Params never changes cwd

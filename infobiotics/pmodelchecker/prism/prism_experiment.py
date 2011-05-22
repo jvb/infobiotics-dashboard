@@ -16,6 +16,7 @@ class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler)
 
 
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
+    '''TODO'''
 
     def __handler_default(self):
         return PRISMExperimentHandler(model=self)

@@ -3,17 +3,20 @@ from enthought.traits.api import List
 from enthought.pyface.workbench.api import Perspective, PerspectiveItem
 
 from action_set import CoreActionSet
-from preferences_page import CorePreferencesPage
 
-import os
-from enthought.etsconfig.api import ETSConfig
+#from preferences_page import CorePreferencesPage
+#import os
+#from enthought.etsconfig.api import ETSConfig
+
+from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
+import infobiotics.__version__
+from infobiotics.api import *
+
 
 class CoreUIPlugin(Plugin):
 
-    id = 'infobiotics.dashboard.core.ui_plugin.CoreUIPlugin' # The plugin's unique identifier
-    name = 'Core' # The plugin's name (suitable for displaying to the user)
-
-    # Contributions to extension points made by this plugin
+    id = 'infobiotics.dashboard.core.ui_plugin.CoreUIPlugin'
+    name = 'Core'
 
     action_sets = List(contributes_to='enthought.envisage.ui.workbench.action_sets')
     def _action_sets_default(self):
@@ -46,3 +49,30 @@ class CoreUIPlugin(Plugin):
 #    preferences = List(contributes_to='enthought.envisage.preferences')
 #    def _preferences_default(self):
 #        return ['file://%s' % os.path.join(ETSConfig.application_data, 'preferences.ini')]
+
+
+    # Contributions to PythonShellPlugin 
+
+    bindings = List(contributes_to=PythonShellPlugin.BINDINGS)
+    def _bindings_default(self):
+        return [
+            {
+                'version':infobiotics.__version__,
+                'mcss':mcss,
+                'mcss_results':mcss_results,
+                'prism':prism,
+                'mc2':mc2,
+                'poptimizer':poptimizer,
+                
+            },
+        ]
+
+    # doesn't work because 'execute_source' method not found
+#    commands = List(contributes_to=PythonShellPlugin.COMMANDS)
+#    def _commands_default(self):
+#        return [
+#            'from infobiotics.api import *',
+#            'import infobiotics',
+#            'print infobiotics.__version__',
+#            'print version'
+#        ]

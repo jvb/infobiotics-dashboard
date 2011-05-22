@@ -14,7 +14,7 @@ from xml import sax
 from infobiotics.thirdparty.which import which, WhichError
 
 from infobiotics.commons.api import logging
-logger = logging.getLogger(name='Params', level=logging.WARN)
+logger = logging.getLogger(name='Params')
 
 from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
@@ -110,8 +110,8 @@ class Params(HasTraits):
     
     def __init__(self, file=None, **traits):
         self.bind_preferences() # now done in configure() or edit() so that scripts and terminal can rely on defaults not preferences
-        if self._interaction_mode == 'terminal':
-            self.directory = os.getcwd()
+#        if self._interaction_mode == 'terminal':
+#            self.directory = os.getcwd()
         super(Params, self).__init__(**traits) # do this after binding preferences so that we can override executable and directory 
         self.on_trait_change(self.update_repr, self.parameter_names()) #TODO
         if file is not None:
@@ -261,7 +261,7 @@ class Params(HasTraits):
 #        logger.debug("Loaded '%s'." % file)
         self._params_file = file
         self._dirty = False
-        return True
+#        return True
 
     def save(self, file='', force=False, copy=False, update_object=True):
         from infobiotics.commons.files import can_read, can_write_file

@@ -1,9 +1,10 @@
 from infobiotics.mcss.mcss_params_handler import McssParamsHandler
 from infobiotics.core.experiment_handler import ExperimentHandler
+from enthought.pyface.api import error 
 
 class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
-    def show_results(self):
+    def show_results(self): # called by ExperimentHandler._finished
         import os.path
         if os.path.exists(self.model.data_file_):
             from infobiotics.mcss.results.mcss_results_widget import McssResultsWidget, centre_window
@@ -12,10 +13,4 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
             centre_window(w)
             w.show()
         else:
-            print "Results file '%s' does not exist, plotting aborted." % self.model.data_file_
-            #TODO show message box instead
-
-
-if __name__ == '__main__':
-    execfile('mcss_experiment.py')
-    
+            error(self.info.ui, "Results file '%s' does not exist, plotting aborted." % self.model.data_file_)

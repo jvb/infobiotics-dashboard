@@ -222,7 +222,7 @@ INSTALL_REQUIRES = [
     'configobj', # for enthought.preferences
     'numpy', #>=1.3.0', 
 #    'matplotlib',#,==0.99.1', 
-#    'which==1.1.0', # in infobiotics.thirdparty - is that the same as this? http://code.google.com/p/which/
+#    'which==1.1.0', # in infobiotics.thirdparty as there is no python-which package in Debian (also available from http://code.google.com/p/which/)
     'xlwt',
     'libsbml',
     'progessbar',

@@ -14,6 +14,7 @@ from enthought.traits.api import HasTraits, Str, DictStrStr, List, Float, Instan
 #    parameters_str = Str
     
 class POptimizerExperiment(POptimizerParams, Experiment):
+    '''TODO'''
 
     def __handler_default(self):
         from infobiotics.poptimizer.api import POptimizerExperimentHandler

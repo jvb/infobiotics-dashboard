@@ -136,10 +136,10 @@ def test_absolute_path_to_params2():
     
 
 if __name__ == '__main__':
-    main(sys.argv) #TODO uncomment
+#    main(sys.argv) #TODO uncomment
 #    main(sys.argv + ['mcss'])
     #TODO comment
-#    test_relative_path_to_model()
+    test_relative_path_to_model()
 #    test_absolute_path_to_model()
 #    test_relative_path_to_params()
 #    test_absolute_path_to_params()

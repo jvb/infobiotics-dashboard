@@ -7,7 +7,8 @@ from infobiotics.commons.api import logging
 logger = logging.getLogger(__name__)
 
 class McssExperiment(McssParams, Experiment):
-    
+    '''TODO'''
+
     def __handler_default(self):
         from infobiotics.mcss.mcss_experiment_handler import McssExperimentHandler
         return McssExperimentHandler(model=self)
@@ -75,8 +76,8 @@ def test():
 ##    exit()
 
 #    experiment.perform(thread=True)
-    experiment.perform(thread=False)
-#    experiment.configure()
+#    experiment.perform(thread=False)
+    experiment.configure()
 
 
 

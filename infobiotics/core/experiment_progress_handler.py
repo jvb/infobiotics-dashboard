@@ -15,10 +15,12 @@ class ExperimentProgressHandler(Controller):
     cancel = Button
     
     def init(self, info):
-        pass
-#        info.ui.title = 'Running experiment' 
+#        info.ui.title = info.object._handler.title
+        info.ui.title = 'Running experiment' 
 #        self.title = self.model.executable_name
 #        self.message = self.model.params_file
+        self.title = 'object.executable_name'
+        self.message = 'object.params_file'
     
     def _cancel_changed(self):
         #TODO are you sure?
@@ -34,8 +36,6 @@ class ExperimentProgressHandler(Controller):
                     message_name='message',
                     min=0,
                     max=100,
-#                    show_title=True,
-#                    show_message=True,
                     show_text=True,
                     show_percent=False,
                     show_time=True,
@@ -50,9 +50,6 @@ class ExperimentProgressHandler(Controller):
         width=250,
     )
 
-#    def init(self, info):
-#        info.ui.title = info.object._handler.title
-        
 #    def object_finished_changed(self, info): # sometimes this isn't called
 #        ''' Triggered when experiment's expect loop finishes. '''
 ##        print self

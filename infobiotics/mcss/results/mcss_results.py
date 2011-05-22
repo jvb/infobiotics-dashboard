@@ -113,6 +113,7 @@ def functions_of_values_over_successive_axes(array, array_axes, axes, functions)
 
 
 class McssResults(object):
+    '''TODO'''
 
     amounts_axes = ['runs', 'species', 'compartments', 'timepoints']
     

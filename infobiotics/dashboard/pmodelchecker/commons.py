@@ -1,8 +1,3 @@
-'''
-Methods shared by Dashboard classes (dashboard/pmodelchecker, <here>) and 
-plugins (<here>/../plugins/pmodelchecker).
-'''
-
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 from infobiotics.dashboard.pmodelchecker.editor import PModelCheckerResultsEditor
 

@@ -4,9 +4,8 @@ import commons
 
 class PRISMDashboardExperimentHandler(PRISMExperimentHandler, DashboardExperimentHandler):
 
-    def show_results(self):
-        ''' Called by PModelCheckerExperimentHandler.object_finished_changed. ''' #TODO?
+    def show_results(self): # called by ExperimentHandler._finished
         commons.edit_pmodelchecker_results_file(
-            file=self.model.results_file_,
-#            application=self.application,
+            self.model.results_file_,
+            self.application
         )
