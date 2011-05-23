@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<parameters name="POptimizerParameters" xmlns="http://www.cpib.ac.uk/~jpt"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+    <!-- parameter definitions -->
+    <parameterSet name="POptimizerParameters">
+        <parameter name="target_file" value="target_data_threegene"/>
+        <parameter name="target_obj_num" value="6"/>
+        <parameter name="initial_file" value="initial_values_threegene"/>
+        <parameter name="num_initials" value="1"/>
+        <parameter name="nonfix_module_lib_file" value="threegene_module_library.xml"/>
+        <parameter name="fix_module_lib_file" value="Null"/>
+        <parameter name="molecules" value="1:2:3"/>
+        <parameter name="seednum" value="4123"/>
+        <parameter name="maxtime" value="118.0"/>
+        <parameter name="interval" value="1.0"/>
+        <parameter name="maxmodulesno" value="4"/>
+        <parameter name="simu_runs" value="20"/>
+        <parameter name="fitness_func_type" value="RandomWeightedSum"/>
+        <parameter name="para_opti_algo" value="DE"/>
+        <parameter name="percent_paraopti" value="0.1"/>
+        <parameter name="maxgeno" value="10"/>
+        <parameter name="popsize" value="20"/>
+        <parameter name="DE_psize" value="20"/>
+        <parameter name="DE_maxgeno" value="10"/>
+        <parameter name="GA_psize" value="30"/>
+        <parameter name="GA_maxxo" value="10"/>
+        <parameter name="EDA_psize" value="30"/>
+        <parameter name="EDA_maxgeno" value="2"/>
+        <parameter name="CMAES_maxgeno" value="20"/>
+    </parameterSet>
+</parameters>
