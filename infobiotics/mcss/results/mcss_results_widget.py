@@ -449,9 +449,9 @@ class McssResultsWidget(QWidget):
             )
         else:
             enable_widgets(
-                self.ui.export_data_as_button,
+#                self.ui.export_data_as_button,
                 self.ui.plot_timeseries_button,
-                self.ui.plot_histogram_button,
+#                self.ui.plot_histogram_button,
             )
 #            if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
             if num_selected_species >= 1 and num_selected_compartments > 1:

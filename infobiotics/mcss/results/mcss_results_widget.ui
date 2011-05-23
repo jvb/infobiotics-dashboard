@@ -1210,6 +1210,9 @@
      </item>
      <item>
       <widget class="QCommandLinkButton" name="export_data_as_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="toolTip">
         <string>Save timeseries data for selected runs, species and compartments</string>
        </property>

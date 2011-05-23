@@ -19,9 +19,14 @@ Build Debian package:
 '''
 
 # bootstrap install Distribute
-import setuptools #TODO bit suspicious about this but Jamie said it was OK.
+#import setuptools #TODO bit suspicious about this but Jamie said it was OK.
 from distribute_setup import use_setuptools
 use_setuptools()
+
+from setuptools import setup, find_packages
+import glob
+import sys
+import os.path
 
 # packages that might get bundled by modulefinder by aren't ever used
 EXCLUDES = [
@@ -43,14 +48,11 @@ EXCLUDES = [
 #    'doctest', 
     'test',
     'sqlite3'
-
     'mayavi.html',
 ]
 
-import matplotlib
-import glob
-import sys
 if sys.platform.startswith('darwin'):
+    import matplotlib
     extra_options = dict(
         setup_requires=['py2app', 'pexpect'],
         app=['bin/infobiotics-dashboard.py'],
@@ -100,9 +102,9 @@ if sys.platform.startswith('darwin'):
 #            ("images", glob.glob("images/*.png")), #TODO
 #            ("enthought/pyface/images", glob.glob("/Library/Frameworks/.framework/Versions/Current/lib/python26/site-packages/enthought/pyface/images/*.png")), #FIXME
         ] + matplotlib.get_py2exe_datafiles(), # http://www.py2exe.org/index.cgi/MatPlotLib
-)
+     )
 elif sys.platform.startswith('win'):
-
+    import matplotlib
     # http://markmail.org/thread/qkdwu7gbwrmop6so
     try:
         import py2exe
@@ -200,7 +202,6 @@ else: # assume sys.platform.startswith('linux'):
     extra_options = dict(
         scripts=[
             'bin/infobiotics-dashboard',
-            'bin/npz_info', #TODO add for Windows and Mac also
         ],
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
@@ -211,40 +212,27 @@ else: # assume sys.platform.startswith('linux'):
 
 # dependencies when doing 'python setup.py install' 
 INSTALL_REQUIRES = [
+    'numpy>=1.4.1',
     'EnthoughtBase>=3.0.4',
-    'AppTools>=3.3.1',
-    'Traits>=3.3.0',
+    'AppTools>=3.3.2',
+    'Traits>=3.4.0',
+    'TraitsGUI>=3.4.0',
     'EnvisageCore>=3.1.2',
-    'TraitsGUI>=3.3.0',
     'EnvisagePlugins>=3.1.2',
-    'TraitsBackendQt>=3.3.0',
-    'Mayavi', #TODO >=3.4.0',
+    'TraitsBackendQt>=3.4.0',
+    'Mayavi>=3.4.0',
     'configobj', # for enthought.preferences
-    'numpy', #>=1.3.0', 
-#    'matplotlib',#,==0.99.1', 
+    'matplotlib', #,==0.99.1', 
+    'progressbar',
 #    'which==1.1.0', # in infobiotics.thirdparty as there is no python-which package in Debian (also available from http://code.google.com/p/which/)
-    'xlwt',
-    'libsbml',
-    'progessbar',
-    'quantities',
     'setproctitle',
+    'xlwt',
+    'quantities',
+#    'libsbml', #TODO
 ]
 INSTALL_REQUIRES += ['winpexpect>=1.3'] if sys.platform.startswith('win') else ['pexpect'] # winpexpect is preferred over wexpect on Windows
 INSTALL_REQUIRES += ['pytables>=2.1.2'] if sys.platform.startswith('darwin') else ['tables>=2.1.2'] # tables is called 'pytables' on Mac (at least it is in EPD)
 
-CLASSIFIERS = [ # http://pypi.python.org/pypi?%3Aaction=list_classifiers
-    'Development Status :: 4 - Beta',
-    'Environment :: X11 Applications :: Qt',
-    'Intended Audience :: Education',
-    'Intended Audience :: Science/Research',
-    'Natural Language :: English',
-    'License :: OSI Approved :: GNU General Public License (GPL)',
-    'Operating System :: POSIX :: Linux',
-    'Programming Language :: Python :: 2.5',
-    'Topic :: Scientific/Engineering :: Bio-Informatics',
-    'Topic :: Scientific/Engineering :: Visualization',
-    'Topic :: Text Editors :: Integrated Development Environments (IDE)',
-]
 
 # get version from VERSION.txt just like other Infobiotics Workbench components
 VERSION = open('VERSION.txt').read().strip('\n')
@@ -275,7 +263,7 @@ if __name__ == '__main__':
 """ % VERSION
 open('infobiotics/__version__.py', 'w').write(__version__py)
 
-from setuptools import setup, find_packages
+
 setup(
     # PyPI metadata
     version=VERSION,
@@ -287,24 +275,32 @@ setup(
     description='Infobiotics Dashboard is a graphical front-end to the Infobiotics Workbench, a suite of tools for modelling and designing multi-cellular biological systems.',
     long_description=open('README.txt').read(),
     keywords='biology, modelling, modeling, simulation',
-    classifiers=CLASSIFIERS,
+    classifiers=[ # http://pypi.python.org/pypi?%3Aaction=list_classifiers
+        'Development Status :: 4 - Beta',
+        'Environment :: X11 Applications :: Qt',
+        'Intended Audience :: Education',
+        'Intended Audience :: Science/Research',
+        'Natural Language :: English',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 2.5',
+        'Topic :: Scientific/Engineering :: Bio-Informatics',
+        'Topic :: Scientific/Engineering :: Visualization',
+        'Topic :: Text Editors :: Integrated Development Environments (IDE)',
+    ],
     platforms='any',
 
     packages=find_packages(
         exclude=[
-#            '*.tests', '*.tests.*', 'tests.*', 'tests', # http://packages.python.org/distribute/setuptools.html#using-find-packages
-#            'infobiotics.tests',
+            '*.tests', '*.tests.*', 'tests.*', 'tests', # http://packages.python.org/distribute/setuptools.html#using-find-packages
+            'infobiotics.language',
+            'infobiotics.mcss.results.histograms',
+            'infobiotics.mcss.results.histograms2',
         ]
     ),
 
     install_requires=INSTALL_REQUIRES,
 #    requires=[''],
-#    provides=[
-#        ('InfobioticsDashboard','') #TODO
-#    ],
-#    obseletes=[
-#        ('InfobioticsDashboard','') #TODO
-#    ],
 
     **extra_options
 )
