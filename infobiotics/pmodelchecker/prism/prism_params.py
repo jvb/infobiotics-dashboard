@@ -56,9 +56,9 @@ class PRISMParams(PModelCheckerParams):
             PRISM_model=self.PRISM_model_, # must set PRISM_model with PRISM_model_ as trait_setq doesn't trigger creation of shadow trait 
             task='Translate',
         ) 
-        translate.perform(thread=False)
+        if translate.perform(thread=False):
+            self._translated = True
 #        self._model_specification_changed = True if name == 'model_specification' else False # needed by PModelCheckerParamsHandler.model_specification_changed
-        self._translated = True
         
         
 

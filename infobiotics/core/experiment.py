@@ -111,6 +111,8 @@ class Experiment(Params):
         if self._interaction_mode in ('terminal', 'script'):
             signal.signal(signal.SIGINT, signal.default_int_handler)
 
+        if not thread:
+            return True
 
     def _perform(self):
         ''' Start the program and try to match output.
@@ -170,8 +172,9 @@ class Experiment(Params):
                         # scour before for error messages
                         for line in self._child.before.split(os.linesep):
                             for i, pattern in enumerate(self._stderr_pattern_list):
-                                if re.match(pattern, line) is not None:
-                                    self._stderr_pattern_matched(len(self._stdout_pattern_list) + i, line)
+                                match = re.match(pattern, line) 
+                                if match is not None:
+                                    self._stderr_pattern_matched(len(self._stdout_pattern_list) + i, match)
                                     break # out of inner for loop
                             else:
                                 continue # don't break out of outer loop yet
@@ -184,27 +187,20 @@ class Experiment(Params):
                             break # out of outer for loop
                         else:
 #                            self._stdout_pattern_matched(-1, self._child.before)
-                            print '-1', self._child.before
+                            print 'Unmatched pattern in %s output: "%s"' % (self.executable_name, self._child.before) 
                     else:
-#                        self.finished_without_output = True #TODO
-#                        print 'finished without output'
-                        pass
+                        self._errors += '\nFinished without output.'
                     break # out of while loop
                 break
                 # process has finished, perhaps prematurely, but can't tell so call it a success
             elif pattern_index == timeout_index:
-#                self.timed_out = True #TODO
-                print 'timed out'
+                self._errors += '\nTimed out.'
                 break
             elif pattern_index in stdout_pattern_range:
-                match = self._child.match.group()
-                self._stdout_pattern_matched(pattern_index, match)
-#                do_later(self._stdout_pattern_matched, pattern_index, match)
+                self._stdout_pattern_matched(pattern_index, self._child.match)
                 stdout_patterns_matched += 1
             elif pattern_index in stderr_pattern_range:
-                match = self._child.match.group()
-                self._stderr_pattern_matched(pattern_index - len(self._stdout_pattern_list), match)
-#                do_later(self._stderr_pattern_matched, pattern_index - len(self._stdout_pattern_list), match)
+                self._stderr_pattern_matched(pattern_index - len(self._stdout_pattern_list), self._child.match)
                 stderr_patterns_matched += 1
 
         # gather information before finishing
@@ -212,20 +208,13 @@ class Experiment(Params):
         self._finished_without_output = True if stdout_patterns_matched + stderr_patterns_matched == 0 else False
             
         self._child.close() # close file descriptors and store exitstatus and signalstatus
-#        if self._child.exitstatus is not None:
-#            print 'exitstatus == %s' % self._child.exitstatus
-#        if self._child.signalstatus is not None:
-#            print 'signalstatus == %s' % self._child.signalstatus
-#        print 'status == %s' % self._child.status
-
         if self._child.exitstatus is None:
             self.error = self._interpret_exitcode(self._child.signalstatus)
         elif self._child.exitstatus != 0:
             self.error = self._interpret_exitcode(self._child.exitstatus)
             
         self.success = True if self._child.exitstatus == 0 and not self._was_cancelled else False
-#        self.finished = True # setting an Event trait like 'finished' triggers change handlers in the main thread
-        do_later(setattr, self, 'finished', True) # setting an Event trait like 'finished' triggers change handlers in the main thread
+        do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread 
 
     def _error_changed(self):
         if self.error != '':
@@ -254,7 +243,7 @@ class Experiment(Params):
         else:
             error += ' exited with returncode %s' % exitcode
         error += self._errors
-        error += '\n(exitcode = %s)' % exitcode
+#        error += '\n(exitcode = %s)' % exitcode
         return error
 
     error = Str
@@ -319,7 +308,6 @@ class Experiment(Params):
         self._progress_percentage = 0
 
 
-
     _stdout_pattern_list = ListStr
     _stderr_pattern_list = ListStr([
         '^[eE]rror:.*', # mcss 'error: unknown parameter how_progress'
@@ -327,21 +315,22 @@ class Experiment(Params):
         '^[eE]rror[^:].*', # Fran 'error ...'
         '^.+: command not found', # bash
         '^I/O warning : failed to load external entity ".+"', # libxml++
+        '^Parsing of file (?P<file>.*) according to BNF failed in line: (?P<line>[0-9]*)',
+        '^Exception in thread "main" java',
     ])
     
     def _stdout_pattern_matched(self, pattern_index, match):
         raise ValueError('Experiment._stdout_pattern_matched called with unrecognised pattern_index %s' % pattern_index)
 
+
     _errors = Str(desc='the error the executable exited with')
             
     def _stderr_pattern_matched(self, pattern_index, match):
-        self._errors += match.strip()
-#        if self._interaction_mode == 'terminal':
-#            print self._errors
-#        elif self._interaction_mode == 'script':
-#            logger.error(self._errors)
-#        elif self._interaction_mode == 'gui':
-#            logger.error(self._errors)
+        pattern = match.group()
+        self._errors += ':\n%s' % pattern.strip()
+#        if pattern_index == 5:
+#            d = match.groupdict()
+#            print 'file="%s" line=%s' % (d['file'], d['line'])
 
 
     _progress_percentage = Percentage

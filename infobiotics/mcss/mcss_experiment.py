@@ -23,8 +23,9 @@ class McssExperiment(McssParams, Experiment):
     ] 
 
     def _stdout_pattern_matched(self, pattern_index, match):
+        pattern = match.group()
         if pattern_index == 0:
-            time_in_run, run = match.split(' ')
+            time_in_run, run = pattern.split(' ')
             run = int(run)
             time_in_run = float(time_in_run)
             if run == 0 or time_in_run == 0:

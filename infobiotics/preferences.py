@@ -12,6 +12,8 @@ assert preferences == get_default_preferences()
 DEFAULT_MCSS_EXECUTABLE = 'default/mcss.executable'
 DEFAULT_MCSSCMAES_EXECUTABLE = 'default/mcsscmaes.executable'
 DEFAULT_PMODELCHECKER_EXECUTABLE = 'default/pmodelchecker.executable'
+DEFAULT_PMODELCHECKER_MC2_EXECUTABLE = 'default/mc2.executable'
+DEFAULT_PMODELCHECKER_PRISM_EXECUTABLE = 'default/prism.executable'
 DEFAULT_POPTIMIZER_EXECUTABLE = 'default/poptimizer.executable'
 
 if sys.platform.startswith('win'):
@@ -25,6 +27,8 @@ else:
     preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss'),
     preferences.set(DEFAULT_MCSSCMAES_EXECUTABLE, 'mcss-cmaes'),
     preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'pmodelchecker'),
+    preferences.set(DEFAULT_PMODELCHECKER_MC2_EXECUTABLE, 'pmodelchecker'),
+    preferences.set(DEFAULT_PMODELCHECKER_PRISM_EXECUTABLE, 'pmodelchecker'),
     preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'poptimizer'),
 
 #default_directory = os.getcwd()

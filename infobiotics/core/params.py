@@ -7,11 +7,9 @@ from enthought.traits.api import (
 from infobiotics.core.params_handler import ParamsHandler
 from infobiotics.core.traits.params_relative_file import ParamsRelativeFile
 from infobiotics.commons.api import key_from_value, can_access, read, write, can_execute
-from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
 from infobiotics.core.params_preferences import Executable, Directory
 import os, sys
 from xml import sax
-from infobiotics.thirdparty.which import which, WhichError
 
 from infobiotics.commons.api import logging
 logger = logging.getLogger(name='Params')
@@ -92,14 +90,13 @@ class Params(HasTraits):
     executable_name = Str
 
     _preferences_path = Property(depends_on='executable_name')
-
     @cached_property
     def _get__preferences_path(self):
         return self.executable_name
 
-    preferences_helper = Instance(ParamsPreferencesHelper) #TODO 'ParamsPreferencesHelper'
-    def _preferences_helper_default(self):
-        raise NotImplementedError('Params subclasses must provide a _get_preferences_helper methods that returns an instance of (a subclass of) ParamsPreferencesHelper.')
+#    preferences_helper = Instance(ParamsPreferencesHelper)
+#    def _preferences_helper_default(self):
+#        raise NotImplementedError('Params subclasses must provide a preferences_helper that is an instance of (a subclass of) ParamsPreferencesHelper.')
 
     executable = Executable
 
@@ -127,7 +124,7 @@ class Params(HasTraits):
             try:
 #                bound_preference = bind_preference(self, preference, preferences_path, preferences)
                 bind_preference(self, preference, preferences_path, preferences)
-            except TraitError:#, e:
+            except TraitError:
                 value = preferences.get(preferences_path)
                 preferences.remove(preferences_path)
                 preferences.flush()

@@ -54,14 +54,15 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
     _property_index = Int(0)
 
     def _stdout_pattern_matched(self, pattern_index, match):
+        pattern = match.group()
         if pattern_index == 0:
-            self._max_properties = int(match.split(' properties:')[0])
+            self._max_properties = int(pattern.split(' properties:')[0])
         elif pattern_index == 1:
-            self._current_property = match.split('Simulating: ')[1].strip()
+            self._current_property = pattern.split('Simulating: ')[1].strip()
         elif pattern_index == 2:
             self._property_index += 1
         elif pattern_index == 3:
-            property_progress = int(match.strip('%'))
+            property_progress = int(pattern.strip('%'))
             subtotal = property_progress + (100 * (self._property_index))
             total = 100 * self._max_properties
             self._progress_percentage = (subtotal / total) * 100
@@ -71,11 +72,11 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 #            self.error_string = match
 #            print self.error_string
 
-    _stderr_pattern_list = [
-        'Exception in thread "main" java',
-#        ''' Error: parameters with same name and different ranges: 
-#0:10:3000:10:100''',
-    ] 
+#    _stderr_pattern_list = [
+#        'Exception in thread "main" java',
+##        ''' Error: parameters with same name and different ranges: 
+##0:10:3000:10:100''',
+#    ] 
     
 #    message = Str
 #

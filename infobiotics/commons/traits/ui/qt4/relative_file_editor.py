@@ -8,6 +8,7 @@ from enthought.traits.api import Str, Bool, TraitError, on_trait_change
 #from infobiotics.commons.strings import wrap
 import os
 from PyQt4 import QtCore, QtGui
+import textwrap
 
 class SimpleEditor(SimpleTextEditor):
 
@@ -55,14 +56,15 @@ class SimpleEditor(SimpleTextEditor):
         ''' Handles the user changing the contents of the edit control. '''
         if self.control is not None:
             self._update(unicode(self._file_name.text()))
-
+            
     def update_editor(self, value=None):
         ''' Updates the editor when the object trait changes externally to the editor. ''' 
         if value is not None:
             self._file_name.setText(value)
         else: 
             self._file_name.setText(self.value)
-        self.update_object() 
+
+        self.update_object()
         # needed to refresh invalid state when a valid value is set while the 
         # editor is in an invalid state
 
@@ -109,14 +111,11 @@ class SimpleEditor(SimpleTextEditor):
                 self.ui.errors -= 1
             self.set_error_state(False)
             if not self.set_tooltip(self._file_name): # restore desc over excp
-#                self._file_name.setToolTip(wrap(self.object.base_trait(self.name).full_info(self.object, self.name, self.value))) # set tooltip over excp using traits info
                 self._file_name.setToolTip(textwrap.fill(self.object.base_trait(self.name).full_info(self.object, self.name, self.value), width=width)) # set tooltip over excp using traits info
         except TraitError, excp:
-#            self._file_name.setToolTip(wrap(unicode(excp), 80)) # fix tooltip line lengths
             self._file_name.setToolTip(textwrap.fill(unicode(excp), width=width)) # fix tooltip line lengths
             self.error(excp)
 
-import textwrap
 
 class RelativeFileEditor(FileEditor): # EditorFactory
     

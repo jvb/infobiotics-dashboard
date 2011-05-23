@@ -8,6 +8,7 @@ from enthought.pyface.ui.qt4.file_dialog import FileDialog
 from enthought.traits.ui.api import Group#, View, Item, 
 from infobiotics.commons.traits.ui.api import HelpfulController
 from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
+import textwrap
 
 #from enthought.traits.ui.fixed_file_dialog import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
@@ -74,6 +75,7 @@ class ParamsHandler(HelpfulController):
     _status = Str
     status = Property(Str)
     def _get_status(self):
+        print self._status
         return textwrap.TextWrapper(width=120, break_long_words=True).fill(self._status)
     def _set_status(self, status):
         self._status = status 
@@ -118,8 +120,8 @@ class ParamsHandler(HelpfulController):
     
     preferences_page = Instance(PreferencesPage)
     def _preferences_page_default(self):
-#        raise NotImplementedError('e.g. return McssParamsPreferencesPage')
-        return None
+#        return None
+        raise NotImplementedError('e.g. return McssParamsPreferencesPage')
     
     _preferences_pages = Property(depends_on='preferences_pages', desc='filters instances of None from preferences_pages for enabled_when in Preferences Action')
     def _get__preferences_pages(self):
@@ -271,6 +273,7 @@ class ParamsHandler(HelpfulController):
     has_valid_parameters = Property(Bool, depends_on='info.ui.errors, model.executable, model.running')
 #    @cached_property
     def _get_has_valid_parameters(self):
+#        print
 #        print '_get_has_valid_parameters',
         # adapted from TraitsBackendQt/enthought/traits/ui/qt4/ui_base.py:BaseDialog._on_error() and ui_modal.py:_ModalDialog.init():ui.on_trait_change(self._on_error, 'errors', dispatch='ui') 
         if not self.info:
@@ -281,10 +284,12 @@ class ParamsHandler(HelpfulController):
 #                print 'self.info.ui is None'
                 return False
             if self.info.ui.errors > 0:
-#                print 'self.info.ui.errors > 0'
+#                print 'self.info.ui.errors ==', self.info.ui.errors 
+                error = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
+                self.status = textwrap.TextWrapper(width=80, break_long_words=True).fill(error)
                 return False
             if not os.path.isfile(self.model.executable):
-#                print 'not os.path.isfile(self.model.executable)'
+#                print 'not os.path.isfile(self.model.executable); self.model.executable == "%s"' % self.model.executable, self.model
                 return False
             if hasattr(self.model, 'running') and self.model.running:
 #                print 'self.model.running', self.model.running
@@ -292,21 +297,15 @@ class ParamsHandler(HelpfulController):
 #        print 'True'
         return True
     
-    def _has_valid_parameters_changed(self, value):
-#        if value:
-#            self.status = ''
+#    def _has_valid_parameters_changed(self, value):
+#        if not self.info:
 #            return
-        if not self.info:
-            return
-        if self.info.initialized:
-            if self.info.ui is None:
-                return
-            error = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
-#            self.status = wrap_paths(error) # doesn't shorten long paths
+#        if self.info.initialized:
+#            if self.info.ui is None:
+#                return
+#            error = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
 #            self.status = textwrap.TextWrapper(width=80, break_long_words=True).fill(error)
-            self.status = error
-#from infobiotics.commons.strings import wrap, wrap_paths
-import textwrap
+
         
 if __name__ == '__main__':
     execfile('params.py')

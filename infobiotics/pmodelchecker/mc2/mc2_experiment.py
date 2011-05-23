@@ -23,15 +23,16 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
     ]
         
     def _stdout_pattern_matched(self, pattern_index, match):
+        pattern = match.group()
         if pattern_index == 0:
-            self.message = match
+            self.message = pattern
         elif pattern_index == 1:
-            head, tail = match.split(' of ')
+            head, tail = pattern.split(' of ')
             max_simulation = int(tail)
             simulation = int(head.split('Simulation number ')[1])
             self._progress_percentage = (100 / max_simulation) * simulation
         elif pattern_index == 2:
-            self.message = match
+            self.message = pattern
         else:
             super(MC2Experiment, self)._stdout_pattern_matched(self, pattern_index, match)
         

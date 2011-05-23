@@ -13,7 +13,7 @@ from enthought.traits.ui.api import View, Group, Item
 from infobiotics.commons.api import logging
 logger = logging.getLogger(__name__)
 
-Executable = RelativeFile(auto_set=True, absolute=True, executable=True) # executable=True implies exists=True
+Executable = RelativeFile(auto_set=True, absolute=False, executable=True) # executable=True implies exists=True
 Directory = RelativeDirectory(absolute=True, auto_set=True, writable=True, readable=True, desc='the location file paths can be relative to.') # readable=True implies exists=True
 
 # names of preferences traits must be public, i.e. not begin with '_'

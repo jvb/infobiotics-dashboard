@@ -1,12 +1,8 @@
 from __future__ import with_statement
-from infobiotics.core.views import ParamsView
-from enthought.traits.api import Int, Range, Property, Instance, on_trait_change, Button, Bool
+from enthought.traits.api import Int, Instance, on_trait_change, Button, Bool
 from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelCheckerParamsHandler
-#from infobiotics.pmodelchecker.mc2.api import MC2Params
 from mc2_params_group import mc2_params_group
 from mc2_mcss_experiment import MC2McssExperiment
-from mc2_mcss_experiment_group import mc2_mcss_experiment_group
-from infobiotics.mcss.mcss_experiment import McssExperiment
 from infobiotics.commons.files import can_read_file
 import tables
 from mc2_preferences import MC2ParamsPreferencesPage

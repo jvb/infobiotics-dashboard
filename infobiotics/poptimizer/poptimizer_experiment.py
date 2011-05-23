@@ -69,15 +69,16 @@ initialization
 9 120.80 UnReg(X=1) NegReg(X=1,Y=1) 
 simulate final model
         '''
+        pattern = match.group()
         if pattern_index == 0:
             self.message = 'Initialising...'
         elif pattern_index == 1:
             self.status = 'Optimizing parameters'
-            split = match.split(' ')[2].split('/')
+            split = pattern.split(' ')[2].split('/')
             self.parameter_optimization_subtotal = int(split[0]) 
             self.parameter_optimization_total = int(split[1])
         elif pattern_index == 2:
-            split = match.split(' ')
+            split = pattern.split(' ')
             self.current_generation = int(split[0]) + 1 
             self.current_best_fitness = float(split[1])
         elif pattern_index == 3:

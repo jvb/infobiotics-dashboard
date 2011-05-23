@@ -1,13 +1,17 @@
 from infobiotics.core.params import Params
 from infobiotics.core.api import ParamsRelativeFile
-from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property, cached_property
+from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property, cached_property, TraitError
+import os.path
 from infobiotics.commons.traits.api import LongGreaterThanZero
-from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
+#from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
+
+from infobiotics.commons.api import logging
+logger = logging.getLogger(__name__)
 
 class PModelCheckerParams(Params):
     ''' Base class for PRISMParams and MC2Params. '''
 
-#    preferences_helper = PModelCheckerParamsPreferencesHelper()
+#    preferences_helper = PModelCheckerParamsPreferencesHelper() #TODO
 
     executable_name = 'pmodelchecker'
     
@@ -20,21 +24,22 @@ class PModelCheckerParams(Params):
     
     @on_trait_change('model_specification', 'PRISM_model')
     def change_directory__make_model_specification_relative__translate_to_PRISM_model(self, object, name, old, new):
-        import os.path
         directory, model_specification = os.path.split(self.model_specification_)
-#        from enthought.traits.api import TraitError
-#        try:
-        self.directory = directory
-        # problem: model_specification is appearing relative to the previous
-        # directory
-        # solution (avoiding infinite loop):
-        # first set it without notifying change handlers
-        self.trait_setq(model_specification=model_specification)
-        # second notify change handlers by setting it
-        self.model_specification = model_specification
-#        except TraitError:
-#            self.model_file = model_file
-#            self.trait_setq(model_file=model_file)
+        try:
+            if directory != '':
+                self.directory = directory #TODO os.path.normpath(directory)
+        except TraitError, e:
+            logger.warn(e)
+        try:
+            # problem: model_specification is appearing relative to the previous
+            # directory
+            # solution (avoiding infinite loop):
+            # first set it without notifying change handlers
+            self.trait_setq(model_specification=model_specification)
+            # second notify change handlers by setting it
+            self.model_specification = model_specification
+        except TraitError, e:
+            logger.warn(e)
         if self.model_checker == 'PRISM':
             self.translate_model_specification(name)
             

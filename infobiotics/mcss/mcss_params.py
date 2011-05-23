@@ -1,11 +1,12 @@
 from infobiotics.core.api import ParamsRelativeFile
 from infobiotics.core.params import Params
-from enthought.traits.api import Enum, Bool, Range, Long, Property, Float
+from enthought.traits.api import Enum, Bool, Range, Long, Float
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
+from enthought.traits.api import TraitError
+import os.path
 
 from infobiotics.commons.api import logging
 logger = logging.getLogger(__name__)
-logging.level = logging.DEBUG
 
 class McssParams(Params):
 
@@ -23,10 +24,7 @@ class McssParams(Params):
     _parameter_set_name = 'SimulationParameters'
 
     def _model_file_changed(self):
-        from enthought.traits.api import TraitError
-        import os.path
         directory, model_file = os.path.split(self.model_file_)
-        self.preferences_helper
         try:
             if directory != '':
                 self.directory = directory #TODO os.path.normpath(directory)

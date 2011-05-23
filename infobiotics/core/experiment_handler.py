@@ -60,8 +60,8 @@ class AutoCloseMessage(HasPrivateTraits):
                 spring,
             ),
             spring,
-            width=150,
-            height=60,
+            width=160,
+            height=50,
             title=title,
         )
         do_after(

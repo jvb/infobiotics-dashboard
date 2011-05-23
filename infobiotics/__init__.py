@@ -33,7 +33,8 @@ ETSConfig.toolkit = 'qt4'#TODO PySide
 #QtCore.Slot = QtCore.pyqtSlot
 
 # set company to 'Infobiotics'
-ETSConfig.company = 'Infobiotics'
+#ETSConfig.company = 'Infobiotics'
 # use ~/.infobiotics (or "Application Data\\Infobiotics" on Windows) instead of
 # ~/.enthought for preferences.ini
 # used by ETSConfig.get_application_data() for persistence (preferences)
+import preferences
