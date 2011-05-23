@@ -3,13 +3,18 @@ from infobiotics.dashboard.core.dashboard_experiment_handler import DashboardExp
 
 class POptimizerDashboardExperimentHandler(DashboardExperimentHandler, POptimizerExperimentHandler):
 
-    def show_results(self): #TODO
+    def show_results(self):
         ''' Called by POptimizerExperimentHandler.object_finished_changed '''
-#        from infobiotics.mcss.results.mcss_results_widget import McssResultsWidget
-#        from infobiotics.dashboard.mcss.results.editor import McssResultsEditor
-#        self.application.workbench.edit(
-#            obj=McssResultsWidget(filename=self.model.data_file_),
-#            kind=McssResultsEditor,
-#            use_existing=False,
-#        )
-        print 'POptimizerDashboardExperimentHandler.show_results'
+        self.application.workbench.edit(
+            obj=self.model,
+            kind=POptimizerResultsEditor,
+            use_existing=False,
+        )
+
+
+from infobiotics.dashboard.core.dashboard_experiment_editor import DashboardExperimentEditor
+from infobiotics.poptimizer.poptimizer_results import POptimizerResults
+
+class POptimizerResultsEditor(DashboardExperimentEditor):
+    def create_ui(self, parent):
+        return POptimizerResults(experiment=self.obj).edit_traits(kind='panel', parent=parent)

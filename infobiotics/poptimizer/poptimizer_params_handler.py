@@ -2,11 +2,14 @@ from infobiotics.core.params_handler import ParamsHandler
 from poptimizer_params_group import poptimizer_params_group
 from enthought.traits.api import Trait, on_trait_change, Str
 from infobiotics.commons.traits.api import IntGreaterThanZero
+from poptimizer_preferences import POptimizerParamsPreferencesPage
 
 class POptimizerParamsHandler(ParamsHandler):
 
     def _params_group_default(self):
         return poptimizer_params_group
+    
+    preferences_page = POptimizerParamsPreferencesPage()
     
     id = 'POptimizerParamsHandler'
 
@@ -14,11 +17,11 @@ class POptimizerParamsHandler(ParamsHandler):
         ('Quick start', 'http://www.infobiotics.org/infobiotics-workbench/quickStart/optimization.html'),
         ('Tutorial', 'http://www.infobiotics.org/infobiotics-workbench/tutorial/optimisation.html'),
         ('Automatic Discovery of Pulse Generators example', 'http://www.infobiotics.org/infobiotics-workbench/models/IFFL/FFLpulse.html'),
-        ('Documentation','http://www.infobiotics.org/infobiotics-workbench/optimisation/optimisation_Claudio.html'),
+        ('Documentation', 'http://www.infobiotics.org/infobiotics-workbench/optimisation/optimisation_Claudio.html'),
     ]
     
     filters = [ # used to create wildcard and filter traits for FileDialog and OpenFileDialog respectively
-        ('Experiment parameters', ['*.params','*.xml']), 
+        ('Experiment parameters', ['*.params', '*.xml']),
         ('All files', ['*']),
     ]
 
@@ -29,8 +32,8 @@ class POptimizerParamsHandler(ParamsHandler):
     def warn_about_prefix(self, name, old, new):
         if '.' in new: 
             from enthought.traits.ui.message import auto_close_message
-            auto_close_message("\n   Please ensure '%s' is only a prefix for a file name   \n   that ends in 1.txt or similar, e.g. prefix1.txt   \n" % new, 
-                title='Caution', 
+            auto_close_message("\n   Please ensure '%s' is only a prefix for a file name   \n   that ends in 1.txt or similar, e.g. prefix1.txt   \n" % new,
+                title='Caution',
                 time=5.0,
             )
 

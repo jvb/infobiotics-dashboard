@@ -8,6 +8,5 @@ class POptimizerExperimentHandler(POptimizerParamsHandler, ExperimentHandler):
         POptimizerResults(experiment=self.model).edit_traits()
 
 
-
 if __name__ == '__main__':
     execfile('poptimizer_experiment.py')

@@ -14,3 +14,6 @@ class POptimizerExperimentAction(Action):
             use_existing=False
         )
 #        obj.edit()
+    
+#        # testing POptimizerDashboardExperimentHandler.show_results()
+#        obj._handler.show_results()
