@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+In this file we wish to express the parameters which will be passed
+to the property builder application. Note however that this simply 
+illustrates the format in which the parameters will be represented; they
+will be used in the command line directly, when called from an external 
+application (your tool). The command can be something like:
+java -jar propertybuilder.jar -params "<params><modelVariables><variable... ".
+The important thing is to exclude line end characters.
+
+If you wish to modify these manually, we can always use the "file in the middle"
+approach where you first generate this file from your application and then 
+simply call our application with another parameter that indicates this file:
+java -jar propertybuilder.jar -paramsFile "params.xml".
+Obviously there is no problem with line ends in this case and you can create a 
+nicely structured XML which is good for readability.
+
+In this file, the params consist of a set of variable declarations with their
+names and  descriptions, the constant definitions with names, values, types and 
+descriptions, the list of pattern files to use for property building and also an
+example of how to specify the daikon trace file for property extraction.
+Also I have included an id attribute for variables and constants but if you see
+no use for it we'll just eliminate it.
+
+-->
+
+<params>
+
+<!-- The variables of the model -->
+<modelVariables>
+	<variable id="v1">
+		<name>a_bact_0_0</name>
+		<description>Molecule a in compartment bact in position (0,0)</description>
+	</variable>
+	<variable id="v2">
+		<name>b_bact_0_0</name>
+		<description>Molecule b in compartment bact in position (0,0)</description>
+	</variable>
+	<variable id="v3">
+		<name>c_bact_0_0</name>
+		<description>Molecule c in compartment bact in position (0,0)</description>
+	</variable>
+	<variable id="v3">
+		<name>c_bact_0_0</name>
+		<description>Molecule c in compartment bact in position (0,0)</description>
+	</variable>
+</modelVariables>
+
+<!-- The constants in the model -->
+<modelConstants>
+	<constant id="const_1">
+		<name>default_lower_bound</name>
+		<value>0</value>
+		<type>int</type>
+		<description>The default lower bound of variables in the model.</description>
+	</constant>
+	<constant id="const_2">
+		<name>default_upper_bound</name>
+		<value>100</value>
+		<type>int</type>
+		<description>The default upper bound of variables in the model.</description>
+	</constant>
+	<!-- an alternative to shorten the declaration -->
+	<constant id="const_3" name="probability1" value="0.025" type="double">
+		<description>The default upper bound of variables in the model.</description>
+	</constant>
+</modelConstants>
+
+<!-- The list of pattern files which will be used in the Property Builder application -->
+<listOfPatternSources>
+	<patternFile src="defaultPatterns.xml" />
+	<patternFile src="ext1Patterns.xml" />
+	<patternFile src="statePatterns.xml" />
+	<patternFile src="rewardPatterns.xml" />
+</listOfPatternSources>
+
+<!-- The daikon trace file to extract patterns from -->
+<dtrace src="dtrace_01.dtr" />
+
+<!-- Options regarding the output of the property builder. Of course these could also
+be adjusted from inside the Application in the GUI, but these would be the default values.
+This section is obviously not mandatory.
+-->
+<output>
+	<defaultPropertyFile value="properties.csl" />
+	<defaultRewardsFile value="rewards.csl" />
+	<dumpOutput toFile="false" toStandardOutput="true" />
+</output>
+
+</params>

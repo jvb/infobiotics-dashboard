@@ -2,7 +2,7 @@ from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperimentHand
 from infobiotics.dashboard.core.dashboard_experiment_handler import DashboardExperimentHandler
 import commons
 
-class PRISMDashboardExperimentHandler(PRISMExperimentHandler, DashboardExperimentHandler):
+class PRISMDashboardExperimentHandler(DashboardExperimentHandler, PRISMExperimentHandler):
 
     def show_results(self): # called by ExperimentHandler._finished
         commons.edit_pmodelchecker_results_file(

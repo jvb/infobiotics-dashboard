@@ -22,7 +22,7 @@ version_info = VERSION_INFO = __version_info__ # __version_info__ is a tuple of 
 # set PyQt4's QString API
 import sip
 #sip.setapi('QString', 2) # EPD > 3.6?
-sip.setapi('QString', 1) # EPD <= 3.6?
+sip.setapi('QString', 1) # EPD <= 3.6? (Ubuntu Maverick and Natty use 3.4.1)
 
 # set toolkit to 'qt4' (TraitsBackendQt) before any Traits imports; os.environ['ETS_TOOLKIT']='qt4' also works
 from enthought.etsconfig.api import ETSConfig
@@ -33,8 +33,9 @@ ETSConfig.toolkit = 'qt4'#TODO PySide
 #QtCore.Slot = QtCore.pyqtSlot
 
 # set company to 'Infobiotics'
-#ETSConfig.company = 'Infobiotics'
+ETSConfig.company = 'Infobiotics'
 # use ~/.infobiotics (or "Application Data\\Infobiotics" on Windows) instead of
 # ~/.enthought for preferences.ini
 # used by ETSConfig.get_application_data() for persistence (preferences)
-import preferences
+
+#import preferences # fails on weasel

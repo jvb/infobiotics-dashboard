@@ -13,3 +13,7 @@ class DashboardExperimentHandler(HasInfobioticsDashboardWorkbenchApplication):
 #    def _show_progress(self):
 #        #TODO maybe raise experiments queue view here (moved to new class DashboardExperimentHandler)
 #        super(PRISMDashboardExperimentHandler, self)._show_progress()
+
+#    def perform(self, info):
+#        print 'DashboardExperimentHandler'
+#        info.object.perform(thread=True)

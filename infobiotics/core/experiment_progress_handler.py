@@ -19,7 +19,6 @@ class ExperimentProgressHandler(Controller):
     
     def _cancel_changed(self):
         if confirm(None, 'Are you sure you want to stop the experiment?', title='Really cancel?') == YES:
-            self.print_traits(show_help=False)
             self.model.cancel()
             self.info.ui.dispose()
 

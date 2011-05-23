@@ -28,7 +28,7 @@ class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):
             parent=self.workbench.active_window.control,
 #            image = ImageResource('logo/infobiotics_logo-1'), #TODO
 #            image = ImageResource('logo/infobiotics_logo-2'),
-            image = None,
+#            image = None, # crashes
             additions=[
                 self.name,
                 'by',

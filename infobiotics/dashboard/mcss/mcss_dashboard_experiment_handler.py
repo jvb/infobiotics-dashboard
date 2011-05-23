@@ -1,7 +1,7 @@
 from infobiotics.mcss.mcss_experiment_handler import McssExperimentHandler
 from infobiotics.dashboard.core.dashboard_experiment_handler import DashboardExperimentHandler
 
-class McssDashboardExperimentHandler(McssExperimentHandler, DashboardExperimentHandler):
+class McssDashboardExperimentHandler(DashboardExperimentHandler, McssExperimentHandler):
 
     def show_results(self):
         ''' Called by McssExperimentHandler.object_finished_changed '''

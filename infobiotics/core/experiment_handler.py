@@ -22,8 +22,8 @@ class ExperimentHandler(ParamsHandler):
                 if info.object._progress_percentage > 0:
                     self._progress_dialog_started = True
                     self._progress_handler.edit_traits(
-                        kind='live', 
-                        parent=info.ui.control, 
+                        kind='live',
+                        parent=info.ui.control,
 #                        context={
 #                            'object':self.model,
 #                            'model':self.model,
@@ -36,12 +36,12 @@ class ExperimentHandler(ParamsHandler):
 
     def _finished(self, success):
         if self._progress_handler.info is not None and self._progress_handler.info.ui is not None:
-            self._progress_handler.info.ui.dispose()
+            GUI.invoke_later(self._progress_handler.info.ui.dispose) # vital
         self.model._thread.exit()
         if success:
             if not hasattr(self, '_imported_results_modules') or not self._imported_results_modules: # have we done the long import yet?
                 # show 'Loading results message' (if first time, otherwise it will be fast)
-                GUI.invoke_later(auto_close_message, message='Loading results', time=1, parent=self.info.ui.control)
+                GUI.invoke_later(auto_close_message, message='Loading results interface\n(only happens once)', time=1, parent=self.info.ui.control)
                 self._imported_results_modules = True
             time.sleep(0.5)
             GUI.invoke_later(self.show_results) # essential
@@ -57,7 +57,7 @@ class AutoCloseMessage(HasPrivateTraits):
     message = Str('Please wait')
     time = Float(2.0) # The time (in seconds) to show the message
 
-    def show(self, parent = None, title = ''):
+    def show(self, parent=None, title='', width=200, height=80):
         view = View(
             spring,
             HGroup(
@@ -69,16 +69,16 @@ class AutoCloseMessage(HasPrivateTraits):
                 spring,
             ),
             spring,
-            width=160,
-            height=50,
+            width=width,
+            height=height,
             title=title,
         )
         do_after(
-            int(1000.0 * self.time), 
+            int(1000.0 * self.time),
             self.edit_traits(parent=parent, view=view).dispose
         )
 
-def auto_close_message(message = 'Please wait', time=2.0, title='Please wait', parent=None):
-    msg = AutoCloseMessage( message = message, time = time )
-    msg.show( parent = parent, title = title )
+def auto_close_message(message='Please wait', time=2.0, title='Please wait', parent=None):
+    msg = AutoCloseMessage(message=message, time=time)
+    msg.show(parent=parent, title=title)
             

@@ -1,6 +1,10 @@
 from has_infobiotics_dashboard_workbench_application import HasInfobioticsDashboardWorkbenchApplication
 from enthought.traits.api import Str, Property, Instance
 from PyQt4.QtGui import QWidget
+from enthought.plugins.text_editor.editor.text_editor import TextEditor
+from enthought.io.api import File
+import os.path
+from enthought.pyface.api import GUI
 
 class DashboardExperiment(HasInfobioticsDashboardWorkbenchApplication):
     
@@ -9,12 +13,21 @@ class DashboardExperiment(HasInfobioticsDashboardWorkbenchApplication):
     _parent_widget = Property(Instance(QWidget))
 
     def _get__parent_widget(self):
-        return self.application.workbench.active_window.control
+#        return self.application.workbench.active_window.control
+        return None
     
     def _stderr_pattern_matched(self, pattern_index, match):
         pattern = match.group()
-        self._errors += ':\n%s' % pattern.strip()
+        self._errors += '\n%s' % pattern.strip()
         if pattern_index == 5:
-            d = match.groupdict()
-            print 'file="%s" line=%s' % (d['file'], d['line']) #TODO open editor at this line
+            groupdict = match.groupdict()
+            GUI.invoke_later(self.open_file_at_erroneous_line, groupdict)
+
+    def open_file_at_erroneous_line(self, groupdict):
+        text_editor = self.application.workbench.active_window.edit(
+            obj=File(os.path.normpath(os.path.join(self.directory, groupdict['file']))),
+            kind=TextEditor,
+            use_existing=True
+        )
+        text_editor.select_line(int(groupdict['line']))
             
