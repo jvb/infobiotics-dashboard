@@ -11,14 +11,29 @@ class PRISMExperimentAction(Action):
     name = 'Model checking (PRISM)'
     tooltip = 'Check properties of a model using PRISM.'
     def perform(self, event=None):
-        PRISMDashboardExperiment(application=self.window.workbench.application).edit()
+        obj = PRISMDashboardExperiment(application=self.window.workbench.application)
+        from infobiotics.dashboard.core.dashboard_experiment_editor import DashboardExperimentEditor
+        self.window.workbench.edit(
+            obj=obj,
+            kind=DashboardExperimentEditor,
+            use_existing=False
+        )
+#        obj.edit()
 
 class MC2ExperimentAction(Action):
 #    name = 'PModelChecker: MC2'
     name = 'Model checking (MC2)'
     tooltip = 'Check properties of a model using MC2.'
     def perform(self, event=None):
-        MC2DashboardExperiment(application=self.window.workbench.application).edit()
+        obj = MC2DashboardExperiment(application=self.window.workbench.application)
+        from infobiotics.dashboard.core.dashboard_experiment_editor import DashboardExperimentEditor
+        self.window.workbench.edit(
+            obj=obj,
+            kind=DashboardExperimentEditor,
+            use_existing=False
+        )
+#        obj.edit()
+
 
 class PModelCheckerResultsAction(Action):
 #    name = 'PModelChecker Results'
@@ -35,7 +50,7 @@ class PModelCheckerResultsAction(Action):
             file=fd.path,
 #            application=self.application,
 #            application=self.window.application,
-#            application=self.window.workbench.application,
+            application=self.window.workbench.application,
         )
         # if application is not None: application.workbench.edit(
         

@@ -437,7 +437,7 @@ class Params(HasTraits):
         # when configure() finishes it will set it back 
         self._interaction_mode = 'gui' # set mode of interaction
         ui = self._handler.edit_traits(**args)
-        return ui.result
+        return ui#.result
 
 
     
