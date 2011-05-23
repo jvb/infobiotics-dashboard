@@ -14,14 +14,23 @@ class ExperimentHandler(ParamsHandler):
         
     def _starting(self):
         self._progress_dialog_started = False
-        self._progress_handler = ExperimentProgressHandler(model=self.model, title=self.title)
+        self._progress_handler = ExperimentProgressHandler(model=self.model)
         
     def object__progress_percentage_changed(self, info):
         if info.object._interaction_mode == 'gui':
             if not self._progress_dialog_started:
                 if info.object._progress_percentage > 0:
                     self._progress_dialog_started = True
-                    self._progress_handler.edit_traits(kind='live', parent=info.ui.control) # must be live to receive progress updates
+                    self._progress_handler.edit_traits(
+                        kind='live', 
+                        parent=info.ui.control, 
+#                        context={
+#                            'object':self.model,
+#                            'model':self.model,
+#                            'controller':self._progress_handler,
+#                            'handler':self
+#                        },
+                    ) # must be live to receive progress updates
             # don't need to do anything else as self._progress_dialog should update 
             # based on changes to self.percentage
 

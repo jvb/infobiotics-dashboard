@@ -5,13 +5,7 @@ from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
 class PModelCheckerExperimentHandler(ExperimentHandler):
 
     def show_results(self):
-        if os.path.exists(self.model.results_file_):
+        if hasattr(self.model, 'results_file_') and os.path.exists(self.model.results_file_):
             PModelCheckerResults(self.model.results_file_).configure()
         else:
-            print "Results file '%s' does not exist, plotting aborted." % self.model.results_file_
-
-
-if __name__ == '__main__':
-    from prism.prism_experiment import PRISMExperiment
-    PRISMExperiment('../../tests/workbench_examples/motifs/NAR/pmodelchecker_example/NAR_PRISM.params').configure()
-                
+            print "Results file '%s' does not exist, plotting aborted." % self.model.results_file

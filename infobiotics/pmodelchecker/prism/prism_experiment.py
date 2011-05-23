@@ -37,6 +37,8 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
         'Simulating: .+\]',
         'Sampling complete: [0-9]+ iterations in [0-9]+[.][0-9]+ seconds \(average [0-9]+[.][0-9]+\)', # 'Sampling complete: 10000 iterations in 234.15 seconds (average 0.023415)',
         '[0-9]+%',
+        'Error:.*', # PRISM gets errors on stdout
+        'Exception in thread "main" java',
 #        'Parsing model file ".+"...', # 'Parsing model file "constitutive.sm"...',
 #        'Parsing properties file ".+"...', # 'Parsing properties file "formulas.temp"...',
 #        'Exporting results to file ".+"...', # 'Exporting results to file "Const_results.psm"...',
@@ -67,10 +69,7 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
             total = 100 * self._max_properties
             self._progress_percentage = (subtotal / total) * 100
         elif pattern_index > 3:
-            super(PRISMExperiment, self).pattern_matched(self, pattern_index, match)
-#        elif pattern_index == 4:
-#            self.error_string = match
-#            print self.error_string
+            self._stderr_pattern_matched(-1, match)
 
 #    _stderr_pattern_list = [
 #        'Exception in thread "main" java',
@@ -78,22 +77,22 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 ##0:10:3000:10:100''',
 #    ] 
     
-#    message = Str
+    message = Str
 #
-#    def _message_default(self):
-#        if self.task == 'Approximate':
-#            return 'Approximating %s' % self._current_property if self._current_property != '' else ''
-#        elif self.task == 'Verify':
-#            return 'Verifying %s' % self._current_property
-#        elif self.task == 'Build':
-#            return 'Building PRISM model %s' % self.PRISM_model
-#        elif self.task == 'Translate':
-#            return 'Translating PRISM model %s' % self.PRISM_model
+    def _message_default(self):
+        if self.task == 'Approximate':
+            return 'Approximating %s' % self._current_property if self._current_property != '' else ''
+        elif self.task == 'Verify':
+            return 'Verifying %s' % self._current_property
+        elif self.task == 'Build':
+            return 'Building PRISM model %s' % self.PRISM_model
+        elif self.task == 'Translate':
+            return 'Translating PRISM model %s' % self.PRISM_model
 #            
-#    @on_trait_change('_current_property')
-#    def update_message(self):
-##        print 'got here'
-#        self.message = self._message_default()
+    @on_trait_change('_current_property')
+    def update_message(self):
+        self.message = self._message_default()
+#        print self.message
 ##        print self.message
 #    def _message_changed(self, value):
 ##        print 'got here too'
@@ -102,7 +101,7 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = PRISMExperiment()
-#    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_prism.params')
+    experiment.load('/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/infobiotics-examples-20110208/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params')
 #    experiment._interaction_mode = 'gui'
 #    experiment.perform(thread=True)
 #    experiment.perform(thread=False)

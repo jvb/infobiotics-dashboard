@@ -3,6 +3,7 @@
 from enthought.traits.ui.api import Controller, View, VGroup, Item
 from enthought.traits.api import Str, Button 
 from infobiotics.commons.traits.ui.qt4.progress_editor import ProgressEditor                
+from enthought.pyface.api import YES, NO, confirm
 
 class ExperimentProgressHandler(Controller):
     '''
@@ -10,41 +11,36 @@ class ExperimentProgressHandler(Controller):
     '''
 
     # traits used by ProgressEditor 
-    title = Str('title')
-    message = Str('message')
     cancel = Button
     
     def init(self, info):
-#        info.ui.title = info.object._handler.title
-        info.ui.title = 'Running experiment' 
-#        self.title = self.model.executable_name
-#        self.message = self.model.params_file
-        self.title = 'object.executable_name'
-        self.message = 'object.params_file'
+        self.info = info
+        info.ui.title = 'Experiment in progress' 
     
     def _cancel_changed(self):
-        #TODO are you sure?
-        self.info.ui.dispose()
-        self.model.cancel()
-    
+        if confirm(None, 'Are you sure you want to stop the experiment?', title='Really cancel?') == YES:
+            self.print_traits(show_help=False)
+            self.model.cancel()
+            self.info.ui.dispose()
+
     traits_view = View(
         VGroup(
             Item('object._progress_percentage',
                 show_label=False,
                 editor=ProgressEditor(
-                    title_name='title',
-                    message_name='message',
+                    title_name='object.executable_name',
+                    message_name='object.message',
                     min=0,
                     max=100,
                     show_text=True,
-                    show_percent=False,
+                    show_percent=True,
                     show_time=True,
                     show_max=True,
                     show_value=True,
-                    prefix_message=True,
+                    prefix_message=False,
                 ),
             ),
-            Item('handler.cancel', show_label=False),
+            Item('controller.cancel', show_label=False),
             show_border=True,
         ),
         width=250,

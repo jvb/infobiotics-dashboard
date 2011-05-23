@@ -83,8 +83,8 @@ An example target timeseries file with 2 objects should look like:
             'fitness_func_type',
             'para_opti_algo',
             'percent_paraopti',
-#            'show_progress',
-#            'debug_mode',
+            'show_progress',
+            'debug_mode',
             'maxgeno',
             'popsize',
         ]

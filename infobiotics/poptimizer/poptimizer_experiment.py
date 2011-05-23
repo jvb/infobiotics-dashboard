@@ -22,7 +22,7 @@ class POptimizerExperiment(POptimizerParams, Experiment):
 
     executable_kwargs = [
         'show_progress=true',
-#        'debug_mode=true'
+        'debug_mode=false'
     ]
     
 #    best_fitnesses = List(Float)
@@ -73,7 +73,7 @@ simulate final model
         if pattern_index == 0:
             self.message = 'Initialising...'
         elif pattern_index == 1:
-            self.status = 'Optimizing parameters'
+            self.message = 'Optimizing parameters'
             split = pattern.split(' ')[2].split('/')
             self.parameter_optimization_subtotal = int(split[0]) 
             self.parameter_optimization_total = int(split[1])
@@ -208,7 +208,7 @@ simulate final model
 
 if __name__ == '__main__':
     experiment = POptimizerExperiment()
-    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/optimisation.params')
-    experiment.perform()
-#    experiment.configure()
+#    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/optimisation.params')
+#    experiment.perform()
+    experiment.configure()
     

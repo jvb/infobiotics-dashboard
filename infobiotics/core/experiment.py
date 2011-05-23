@@ -57,7 +57,7 @@ class Experiment(Params):
     '''
     executable_kwargs = ListStr
 
-    def perform(self, thread=False):
+    def perform(self, thread=False, expecting_no_output=False):
         ''' Spawns an expect process and handles it in a separate thread. '''
         # save to temporary file in the same directory
         kwargs = dict(
@@ -114,7 +114,7 @@ class Experiment(Params):
         if not thread:
             return True
 
-    def _perform(self):
+    def _perform(self, expecting_no_output=False):
         ''' Start the program and try to match output.
         
         Spawns the program (starting it in self.cwd),
@@ -158,12 +158,16 @@ class Experiment(Params):
         stdout_patterns_matched = 0
         stderr_patterns_matched = 0
         
+#        print 'reading lines'
+#        print self._child.readlines()
+#        print 'finished'
+#        return
         # expect loop
         while True:
             pattern_index = self._child.expect_list(
                 compiled_pattern_list,
                 searchwindowsize=2000, # at least 2000 is required to catch some pmodelchecker output
-                timeout=60,
+                timeout=300,
             )
             if pattern_index == eof_index:
                 if stdout_patterns_matched + stderr_patterns_matched == 0:
@@ -178,18 +182,21 @@ class Experiment(Params):
                                     break # out of inner for loop
                             else:
                                 continue # don't break out of outer loop yet
-#                            for i, pattern in enumerate(self._stdout_pattern_list):
-#                                if re.match(pattern, line) is not None:
-#                                    self._stdout_pattern_matched(i, line)
-#                                    break # out of inner for loop
-#                            else:
-#                                continue # don't break out of outer loop yet
+                            for i, pattern in enumerate(self._stdout_pattern_list):
+                                match = re.match(pattern, line)
+                                print pattern, match.group()
+                                if match is not None:
+                                    self._stdout_pattern_matched(i, match)
+                                    self._stderr_pattern_matched(i, match)
+                                    break # out of inner for loop
+                            else:
+                                continue # don't break out of outer loop yet
                             break # out of outer for loop
                         else:
 #                            self._stdout_pattern_matched(-1, self._child.before)
                             print 'Unmatched pattern in %s output: "%s"' % (self.executable_name, self._child.before) 
-                    else:
-                        self._errors += '\nFinished without output.'
+#                    elif not expecting_no_output:
+#                        self._errors += '\nFinished without output.'
                     break # out of while loop
                 break
                 # process has finished, perhaps prematurely, but can't tell so call it a success
@@ -210,10 +217,11 @@ class Experiment(Params):
         self._child.close() # close file descriptors and store exitstatus and signalstatus
         if self._child.exitstatus is None:
             self.error = self._interpret_exitcode(self._child.signalstatus)
-        elif self._child.exitstatus != 0:
+        else:#elif self._child.exitstatus != 0: # it might appear to have finished normally but we could have found some errors
             self.error = self._interpret_exitcode(self._child.exitstatus)
             
-        self.success = True if self._child.exitstatus == 0 and not self._was_cancelled else False
+#        self.success = True if self._child.exitstatus == 0 and not self._was_cancelled else False
+        self.success = True if self.error == '' and not self._was_cancelled else False
         do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread 
 
     def _error_changed(self):
@@ -229,19 +237,20 @@ class Experiment(Params):
                 self._handler.status = self.error #TODO remove?
 
     def _interpret_exitcode(self, exitcode):
-        error = self.executable_name
+        error = ''
         if exitcode == 2:
-            error += ' was cancelled by the user before data could be written.'
+            error = '%s was cancelled by the user before data could be written.' % self.executable_name
         elif exitcode == 9:
-            error += ' was terminated by the user.'
+#            error = '%s was terminated by the user.' % self.executable_name
+            pass
         elif self._child.signalstatus == 11:
-            error += ' caused a segmentation fault and was terminated by the operating system.'
+            error = '%s caused a segmentation fault and was terminated by the operating system.' % self.executable_name
         elif exitcode == 15:
-            error += ' was terminated by the dashboard.'
+            error = '%s was terminated by this program.' % self.executable_name
         elif exitcode == 127:
-            error += ': shared library error'
-        else:
-            error += ' exited with returncode %s' % exitcode
+            error = '%s triggered a shared library error.' % self.executable_name
+        elif exitcode != 0:
+            error = '%s exited with returncode %s' % (self.executable_name, exitcode)
         error += self._errors
 #        error += '\n(exitcode = %s)' % exitcode
         return error
@@ -326,8 +335,9 @@ class Experiment(Params):
     _errors = Str(desc='the error the executable exited with')
             
     def _stderr_pattern_matched(self, pattern_index, match):
+#        print 'got here'
         pattern = match.group()
-        self._errors += ':\n%s' % pattern.strip()
+        self._errors += '\n%s' % pattern.strip()
 #        if pattern_index == 5:
 #            d = match.groupdict()
 #            print 'file="%s" line=%s' % (d['file'], d['line'])
