@@ -362,7 +362,7 @@ class Surface(HasTraits):
         axes.axes.z_label = ''#self.quantities_display_units
 
         # create and get a handle to the scalarbar
-        scalarbar = self.scene.mlab.scalarbar(None, self.quantities_display_units, "vertical", 5, None, '%.f')#, figure=self.scene.mayavi_scene)
+        scalarbar = self.scene.mlab.scalarbar(None, str(self.quantities_display_units), "vertical", 5, None, '%.f')#, figure=self.scene.mayavi_scene)
         # set scalarbar title and label fonts
         scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
         scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)

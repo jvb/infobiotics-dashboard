@@ -159,7 +159,8 @@ class TimeseriesPlot(HasTraits):
     
     def _create_individual_legends(self):        
         for timeseries, line in self._timeseries_to_line_map.iteritems():
-            DraggableLegend(line.axes.legend(loc='best', prop=self.font_properties))
+#            DraggableLegend(line.axes.legend(loc='best', prop=self.font_properties))
+            line.axes.legend(loc='best', prop=self.font_properties)
         
     
     @on_trait_change('style, figure_legend')

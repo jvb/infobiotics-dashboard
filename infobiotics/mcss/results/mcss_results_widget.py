@@ -1,7 +1,9 @@
 from infobiotics.mcss.results import mcss_results
 from infobiotics.commons.quantities.units.time import time_units
+from infobiotics.commons.quantities.units.volume import volume_units
 
 from enthought.etsconfig.api import ETSConfig
+from quantities.quantity import Quantity
 ETSConfig.toolkit = 'qt4'
 
 from enthought.traits.api import HasTraits, Range, String
@@ -9,7 +11,7 @@ from enthought.traits.ui.api import View, VGroup, HGroup, Item
 
 from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow
 
-from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, Qt
+from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, Qt, QString
 from PyQt4.QtGui import QWidget, QListWidgetItem, QItemSelectionModel, QFileDialog, QMessageBox
 
 from infobiotics.commons import colours
@@ -153,18 +155,18 @@ class McssResultsWidget(QWidget):
         try:
             simulation = load_h5(filename)
         except IOError, e:
-#            QMessageBox.warning(self, "Error", "There was an error reading %s\n%s" % (filename, e))
+#            QMessageBox.warning(self, QString("Error"), QString("There was an error reading %s\n%s") % (filename, e))
             if os.path.exists('mcss-error.log'):
                 error_log = open("mcss-error.log", 'r')
                 error_message = error_log.read()
                 error_log.close()
                 os.remove('mcss-error.log')
-                QMessageBox.warning(self, "Error", "Unable to execute model:\n\n%s" % (error_message.replace('error: ', '', 1)))
+                QMessageBox.warning(self, QString("Error"), QString("Unable to execute model:\n\n%s") % (error_message.replace('error: ', '', 1)))
             else:
-                QMessageBox.warning(self, "Error", str(e).replace('`', ''))
+                QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')))
         except AttributeError, e:
             e = e + "\nDid you use a old version of mcss (<0.0.19)?"
-            QMessageBox.warning(self, "Error", str(e).replace('`', ''))
+            QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')))
         if simulation == None:
             if self.loaded:
                 return # continue with previously loaded file
@@ -518,46 +520,23 @@ class McssResultsWidget(QWidget):
     def volume(self):
         return self.ui.volume_spin_box.value()
 
-    def units(self): 
-        ''' Usage: timepoints_data_units, timepoints_display_units, 
-        quantities_data_units, quantities_display_type, 
-        quantities_display_units, volume, volumes_data_units, 
-        volumes_display_units = self.units()
-        #TODO return a dictionary rather than a tuple, then we can just do **units 
-        
-        '''
-        timepoints_data_units = str(self.ui.timepoints_data_units_combo_box.currentText())
-        timepoints_display_units = str(self.ui.timepoints_display_units_combo_box.currentText())
-        quantities_data_units = str(self.ui.quantities_data_units_combo_box.currentText())
+    def units_dict(self):
+        '''McssResults(..., **self.units_dict())'''
+        units = {}
+        units['timepoints_data_units'] = str(self.ui.timepoints_data_units_combo_box.currentText())
+        units['timepoints_display_units'] = str(self.ui.timepoints_display_units_combo_box.currentText())
+        units['quantities_data_units'] = str(self.ui.quantities_data_units_combo_box.currentText())
         quantities_display_type = str(self.ui.quantities_display_type_combo_box.currentText())
+        units['quantities_display_type'] = str(quantities_display_type)
         if quantities_display_type == 'molecules':
             quantities_display_units = 'molecules'
         elif quantities_display_type == 'concentrations':
             quantities_display_units = str(self.ui.concentrations_display_units_combo_box.currentText())
         elif quantities_display_type == 'moles':
             quantities_display_units = str(self.ui.moles_display_units_combo_box.currentText())
-        volume = self.ui.volume_spin_box.value()
-        volumes_data_units = str(self.ui.volumes_data_units_combo_box.currentText()) 
-        volumes_display_units = str(self.ui.volumes_display_units_combo_box.currentText())
-        return timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units 
-
-    def units_dict(self):
-        units = {}
-        units['timepoints_data_units'] = self.ui.timepoints_data_units_combo_box.currentText()
-        units['timepoints_display_units'] = self.ui.timepoints_display_units_combo_box.currentText()
-        units['quantities_data_units'] = self.ui.quantities_data_units_combo_box.currentText()
-        quantities_display_type = self.ui.quantities_display_type_combo_box.currentText()
-        units['quantities_display_type'] = quantities_display_type
-        if quantities_display_type == 'molecules':
-            quantities_display_units = 'molecules'
-        elif quantities_display_type == 'concentrations':
-            quantities_display_units = self.ui.concentrations_display_units_combo_box.currentText()
-        elif quantities_display_type == 'moles':
-            quantities_display_units = self.ui.moles_display_units_combo_box.currentText()
-        units['quantities_display_units'] = quantities_display_units
-#        units['volume'] = self.ui.volume_spin_box.value()
-        units['volumes_data_units'] = self.ui.volumes_data_units_combo_box.currentText()
-        units['volumes_display_units'] = self.ui.volumes_display_units_combo_box.currentText()
+        units['quantities_display_units'] = str(quantities_display_units)
+        units['volumes_data_units'] = str(self.ui.volumes_data_units_combo_box.currentText())
+        units['volumes_display_units'] = str(self.ui.volumes_display_units_combo_box.currentText())
         return units
 
     def selected_items_results(self, type=float):
@@ -566,7 +545,7 @@ class McssResultsWidget(QWidget):
         '''
         run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
         from_, to, every, _ = self.options()
-#        timepoints_data_units, _, quantities_data_units, _, _, _, volumes_data_units, _ = self.units()
+        units_dict = self.units_dict()
         return McssResults(
             filename=self.filename,
             simulation=self.simulation,
@@ -578,10 +557,8 @@ class McssResultsWidget(QWidget):
             species_indices=species_indices,
             compartment_indices=compartment_indices,
             parent=self,
-#            timepoints_data_units=timepoints_data_units,
-#            quantities_data_units=quantities_data_units,
-#            volumes_data_units=volumes_data_units,
-            **self.units_dict()
+            default_volume=Quantity(self.ui.volume_spin_box.value(), volume_units[units_dict['volumes_data_units']]),
+            **units_dict
         )
 
 
@@ -970,10 +947,10 @@ class McssResultsWidget(QWidget):
 #                        )
             
         results = self.selected_items_results()
-        print results.timeseries_information()
+#        print results.timeseries_information() #TODO
         timeseries = results.timeseries(
             amounts=True,
-            volumes=True if results.has_volumes else False,
+            volumes=True if results.has_volumes else False, # plot volumes using TODO
             mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False,
         )
 #        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
@@ -992,8 +969,8 @@ class McssResultsWidget(QWidget):
 def main():
     argv = qApp.arguments()
 #    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5')
-    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
-#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
+#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
+    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)

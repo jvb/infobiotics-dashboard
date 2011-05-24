@@ -5,6 +5,7 @@ from quantities.units.time import hour, minute
 import operator
 from table import indent
 from PyQt4.QtGui import QMessageBox
+from PyQt4.QtCore import QString
 
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
 
@@ -17,6 +18,7 @@ import math
 import numpy as np
 
 import tables
+from infobiotics.commons.quantities.units.volume import microlitre
 
 
 sum_compartments_at_same_xy_lattice_position = True
@@ -146,8 +148,12 @@ class McssResults(object):
         timepoints_display_units=None,
         quantities_display_units=None,
         volumes_display_units=None,
+        default_volume=0.01 * microlitre,
         **ignored_kwargs
     ):
+    
+        self.default_volume = default_volume
+         
         # these can all raise ValueErrors
         self.timepoints_data_units = str(timepoints_data_units)
         self.quantities_data_units = str(quantities_data_units)
@@ -185,8 +191,6 @@ class McssResults(object):
             self.simulation = load_h5(filename)
         else:
             self.simulation = simulation#load_h5(filename) # why do all that object creation again?
-        
-        self._has_volumes = True if self.simulation.log_volumes == 1 else False
         
         self.filename = filename
         
@@ -410,7 +414,7 @@ class McssResults(object):
             array = np.zeros(shape, self.type)
         except MemoryError:
             if self.parent is not None:
-                QMessageBox.warning('Out of memory', failed_message)
+                QMessageBox.warning(self.parent, QString('Out of memory'), QString(failed_message))
             else:
                 print failed_message
             return
@@ -543,12 +547,12 @@ class McssResults(object):
         if quantities_display_type == 'concentrations' and not quantities_display_units.endswith('molar'):
             quantities_display_units = 'molar'
         
-        if quantities_display_type == 'concentrations' and not self.has_volumes and volume is None:
+        if quantities_display_type == 'concentrations' and not self.has_volumes and not self.has_default_volume and volume is None:
             message = 'Cannot calculate concentrations without volumes dataset, rerun mcss with log_volumes=1' 
             if self.parent is not None:
-                QMessageBox.warning('Error', message) #TODO test
+                QMessageBox.warning(self.parent, QString('Error'), QString(message)) #TODO test
             else:
-                print message, 'or provide volume argument in %s' % self.volumes_data_units
+                print message, 'or provide volume argument'# in %s' % self.volumes_data_units
             return
         
         if self.quantities_data_units != quantities_display_units:
@@ -558,6 +562,8 @@ class McssResults(object):
                 if self.has_volumes:
                     volumes = self.volumes()#self.volumes_data_units)
                 else:
+                    if volume is None:
+                        volume = self.default_volume
                     assert volume is not None
                     volumes = np.empty((len(self.run_indices), len(self.compartment_indices), len(self.timepoints)))
                     volumes.fill(volume)
@@ -609,7 +615,7 @@ class McssResults(object):
                 if chunk_size == 0:
                     if self.parent is not None:
                         message = 'Could not allocate memory for chunk.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
-                        QMessageBox.warning('Out of memory', message)
+                        QMessageBox.warning(self.parent, QString('Out of memory'), QString(message))
                     else:
                         print message
                         return
@@ -1090,7 +1096,16 @@ class McssResults(object):
 
     @property
     def has_volumes(self):
-        return self._has_volumes
+        return True if self.simulation.log_volumes == 1 else False #TODO
+    
+    @property
+    def has_default_volume(self):
+        try:
+            self.default_volume.rescale(volume_units[self.volumes_display_units])
+            return True
+        except AttributeError:
+            return False
+        
     
 
 def test1():
