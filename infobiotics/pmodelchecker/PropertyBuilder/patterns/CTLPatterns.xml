@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<listOfPatterns>
+
+<pattern name="occurance pattern" type="property" class="Occurance/Exclusion" id="pp1">
+<description>This Pattern is used to generate a property indicating that a specific state will finally happen</description>
+<question>It is possible for a state s1 to occur.</question>
+<template>State #s1 will finally occur.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL</description>
+		<value>EF(#s1)</value>
+	</translation>
+	<translation target="MC2">
+		<description>This is the translation to PLTL and can be used by MC2</description>
+		<value>F(#s1)</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>EF(#s1)</value>
+	</translation>
+	
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+</variables>
+</pattern>
+
+<pattern name="Exclusion pattern" type="property" class="Occurance/Exclusion" id="pp2">
+<description>This Pattern is used to generate a property indicating that a specific state never happens</description>
+<question>It is not possible for a state s1 to occur.</question>
+<template>State #s1 never happens.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL</description>
+		<value>EF(#s1)</value>
+	</translation>
+	<translation target="MC2">
+		<description>This is the translation to PLTL and can be used by MC2</description>
+		<value>G(!#s1)</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>AG(!#s1)</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+</variables>
+</pattern>
+
+
+<pattern name="general consequence pattern" type="property" class="Consequence" id="pp12">
+<description>This Pattern is used to generate a property indicating that if a specific state happens, it will be followed by another specific state</description>
+<question>If a state s1 occurs, then it is followed by a state s2.</question>
+<template>IF state #s1 occurs, then it is followed by a state #s2.</template>
+<translations>
+	<translation target="MC2">
+		<description>This is the translation to PLTL and can be used by MC2</description>
+		<value>G(#s1=&gt;F(#s2))</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+	<var id="s2" type="state" initValue="0" description="this is the state s2"/>
+</variables>
+</pattern>
+
+<pattern name="possible consequence pattern" type="property" class="Consequence" id="pp3">
+<description>This Pattern is used to generate a property indicating that if a specific state happens, it will possibly be followed by another specific state</description>
+<question>If a state s1 occurs, then it is possibly followed by a state s2.</question>
+<template>IF state #s1 occurs, then it will be followed by a state #s2.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL </description>
+		<value>AG(#s1=&gt;EF(#s2))</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>AG(#s1-&gt;EF(#s2))</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+	<var id="s2" type="state" initValue="0" description="this is the state s2"/>
+</variables>
+</pattern>
+
+<pattern name="neccessary consequence pattern" type="property" class="Consequence" id="pp4">
+<description>This Pattern is used to generate a property indicating that if a specific state happens, it will always be followed by another specific state</description>
+<question>If a state s1 occurs, then it is definitely followed by a state s2.</question>
+<template>IF state #s1 occurs, then it is definitely by a state #s2.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL</description>
+		<value>AG(#s1=&gt;AF(#s2))</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>AG(#s1-&gt;AF(#s2))</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+	<var id="s2" type="state" initValue="0" description="this is the state s2"/>
+</variables>
+</pattern>
+
+<pattern name="possible sometime sequence pattern" type="property" class="Sequence" id="pp5">
+<description>This Pattern is used to generate a property indicating that a specific state is possible and happens at some time step before another specific state</description>
+<question>A state s1 is reachable and is possibly preceded at some time by a state s2.</question>
+<template>A state #s1 is reachable and is possibly preceded at some time by a state #s2.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL</description>
+		<value>EF(#s1^EF(#s2))</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>EF(#s1&amp;EF(#s2))</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+	<var id="s2" type="state" initValue="0" description="this is the state s2"/>
+</variables>
+</pattern>
+
+<pattern name="possible alltime sequence pattern" type="property" class="Sequence" id="pp6">
+<description>This Pattern is used to generate a property indicating that a specific state is possible and if it happens, it must be preceded by another specific state</description>
+<question>A state s1 is reachable and is possibly preceded all the time by a state s2.</question>
+<template>A state #s1 is reachable and is possibly preceded all the time by a state #s2.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL</description>
+		<value>E(#s1U#s2)</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>E[#s1U#s2]</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+	<var id="s2" type="state" initValue="0" description="this is the state s2"/>
+</variables>
+</pattern>
+
+<pattern name="necessary sometime sequence pattern" type="property" class="Sequence" id="pp7">
+<description>This Pattern is used to generate a property indicating that a specific state is possible and will necessary preceded by some other specific state in some times before</description>
+<question>A state s1 is reachable and is necessarily preceded at some time by a state s2.</question>
+<template>A state #s1 is reachable and is necessarily preceded at some time by a state #s2.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL</description>
+		<value>EF(#s1)^E(#s2U#s1)</value>
+	</translation>
+		<translation target="CTL">
+		<description>This is the translation to NuSMV</description>
+		<value>EF(#s1)&amp;G(#s2U!#s1)</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+	<var id="s2" type="state" initValue="0" description="this is the state s2"/>
+</variables>
+</pattern>
+
+<pattern name="necessary alltime sequence pattern" type="property" class="Sequence" id="pp8">
+<description>This Pattern is used to generate a property indicating that a specific state is possible and will necessary preceded by some other specific state alltimes before</description>
+<question>A state s1 is reachable and is necessarily preceded all the time by a state s2.</question>
+<template>A state #s1 is reachable and is necessarily preceded all the time by a state #s2.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL and can be used by NuSMV</description>
+		<value>EF(#s1)^AG(#s2=&gt;AG(#s1))</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>EF(#s1)&amp;AG(!#s2-&gt;AG(!#s1))</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+	<var id="s2" type="state" initValue="0" description="this is the state s2"/>
+</variables>
+</pattern>
+
+<pattern name="general invariance pattern" type="property" class="Invariance" id="pp11">
+<description>This Pattern is used to generate a property indicating that a specific state globally happens</description>
+<question>A state s1  persists indefinitely.</question>
+<template>A state #s1 persists indefinitely.</template>
+<translations>
+	<translation target="MC2">
+		<description>This is the translation to PLTL and can be used by MC2</description>
+		<value>G(#s1)</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+</variables>
+</pattern>
+
+
+<pattern name="possible invariance pattern" type="property" class="Invariance" id="pp9">
+<description>This Pattern is used to generate a property indicating that a specific state may globally happen</description>
+<question>A state s1 can persist indefinitely.</question>
+<template>A state #s1 can persist indefinitely.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL </description>
+		<value>EG(#s1)</value>
+	</translation>
+		<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>EG(#s1)</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+</variables>
+</pattern>
+
+<pattern name="necessary invariance pattern" type="property" class="Invariance" id="pp10">
+<description>This Pattern is used to generate a property indicating that a specific state must globally happen</description>
+<question>A state s1 must persist indefinitely.</question>
+<template>A state #s1 must persist indefinitely.</template>
+<translations>
+	<translation target="CTL">
+		<description>This is the translation to CTL</description>
+		<value>AG(#s1)</value>
+	</translation>
+	<translation target="NuSMV">
+		<description>This is the translation to NuSMV</description>
+		<value>AG(#s1)</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is the state s1"/>
+</variables>
+</pattern>
+
+</listOfPatterns>

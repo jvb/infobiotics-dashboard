@@ -1,3 +1,29 @@
+def __execute_PropertyBuilder_jar_using_QProcess(cwd, path_to_PropertyBuilder_jar, *args):
+    from PyQt4.QtCore import QProcess, QString 
+    process = QProcess()
+    process.setWorkingDirectory(QString(cwd))
+    process.start(QString('java -jar ' + path_to_PropertyBuilder_jar + ' ' + ' '.join(args)))
+    process.waitForFinished(-1)
+    
+def __execute_PropertyBuilder_jar_using_subprocess(cwd, path_to_PropertyBuilder_jar, *args):
+    import subprocess
+    process = subprocess.Popen(
+        ['java', '-jar', path_to_PropertyBuilder_jar] + list(args), cwd=cwd)
+    process.wait()
+
+def _execute_PropertyBuilder():
+    import os
+    cwd = os.path.dirname(__file__)
+    path_to_PropertyBuilder_jar = os.path.join(cwd, 'PropertyBuilder/dist/PropertyBuilder.jar')
+    args = [
+        '-settings config/settings.xml',
+        '-paramsFile modelParameters.xml',
+    ]
+    __execute_PropertyBuilder_jar_using_QProcess(cwd, path_to_PropertyBuilder_jar, *args)
+#    __execute_PropertyBuilder_jar_using_subprocess(cwd, path_to_PropertyBuilder_jar, *args)
+    print 'TODO'
+    
+
 from enthought.traits.api import (
     HasTraits, Str, Float, Int, List, Button, Any, Enum, Unicode, Any, Property,
     on_trait_change,
@@ -11,11 +37,11 @@ from infobiotics.commons.traits.ui.api import HelpfulController, help_action
 #from infobiotics.commons.traits.float_with_minimum import FloatWithMinimum
 
 temporal_formulas_group = VGroup(
-    HGroup(   
-        Item('temporal_formulas'),#, label='File'),
+    HGroup(
+        Item('temporal_formulas'), #, label='File'),
     ),
-    Item('handler.temporal_formulas', 
-        label='Temporal formulas', 
+    Item('handler.temporal_formulas',
+        label='Temporal formulas',
         show_label=False,
         editor=TableEditor(
             columns=[
@@ -23,8 +49,8 @@ temporal_formulas_group = VGroup(
                     width=0.5,
                     editable=False,
                 ),
-                ObjectColumn(name='parameters_string', 
-                    label='Parameters (name=lower:step:upper)', 
+                ObjectColumn(name='parameters_string',
+                    label='Parameters (name=lower:step:upper)',
                     width=0.5,
                     editable=False,
                 ),
@@ -91,7 +117,7 @@ def evaluate_temporal_formula_parameter_range(value):
     except:
         raise TraitError()
 
-temporal_formula_parameter_range_editor=TextEditor(evaluate=evaluate_temporal_formula_parameter_range)
+temporal_formula_parameter_range_editor = TextEditor(evaluate=evaluate_temporal_formula_parameter_range)
 
 class TemporalFormulaParameterItem(Item):
     editor = temporal_formula_parameter_range_editor
@@ -113,18 +139,18 @@ class TemporalFormulaHandler(HelpfulController):
 temporal_formula_view = View(
     VGroup(
         Item(label='Formula:'),
-        Item('formula', 
+        Item('formula',
             show_label=False,
-            style='custom', 
+            style='custom',
             editor=CodeEditor(
-                lexer='null', 
-                show_line_numbers=False, 
-                auto_set=True, 
-                line='line', 
+                lexer='null',
+                show_line_numbers=False,
+                auto_set=True,
+                line='line',
                 column='column',
                 selected_text='selected_text',
-            ), 
-            tooltip='Multiple lines will be concatenated.'), 
+            ),
+            tooltip='Multiple lines will be concatenated.'),
         HGroup(
             Spring(),
             Item('model_parameter_name_to_insert', label='Model parameters:'), #FIXME descriptions (EnumEditor?)
@@ -134,13 +160,13 @@ temporal_formula_view = View(
         Item(label='Formula parameters:'),
         Item('parameters',
             show_label=False,
-            style='custom', 
+            style='custom',
             editor=ListEditor(
                 style='custom',
                 use_notebook=True,
                 page_name='.name',
-                view = View(
-                    Group(    
+                view=View(
+                    Group(
                         Item('name'),
                         HGroup(
 #                            Item('lower'),
@@ -161,18 +187,18 @@ temporal_formula_view = View(
         ),
         HGroup(
             Spring(),
-            Item('add_new_parameter', show_label=False), 
+            Item('add_new_parameter', show_label=False),
             Item('remove_current_parameter', show_label=False, enabled_when='len(object.parameters) > 1'),
             Spring(),
         ),
-        show_border = True,
+        show_border=True,
     ),
-    buttons = ['Undo', 'Cancel', 'OK', help_action],#, 'Revert'],
-    resizable = True,
-    title = 'Edit temporal formula',
-    handler = TemporalFormulaHandler(),
+    buttons=['Undo', 'Cancel', 'OK', help_action], #, 'Revert'],
+    resizable=True,
+    title='Edit temporal formula',
+    handler=TemporalFormulaHandler(),
     height=100,
-    id = 'temporal_formula_view',
+    id='temporal_formula_view',
 )
 
 
@@ -194,7 +220,7 @@ class TemporalFormula(HasTraits):
             return
         lines = self.formula.split('\n')
         line = lines[self.line]
-        col = self.column-len(self.selected_text)
+        col = self.column - len(self.selected_text)
         line = line[:col] + self.model_parameter_name_to_insert + line[self.column:]
         lines[self.line] = line
         self.formula = '\n'.join(lines)

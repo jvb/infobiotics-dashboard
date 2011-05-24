@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<params>
+  <modelVariables>
+    <variable id="v1">
+      <name>gene1_0_0_Constbacterium</name>
+      <description>Molecule gene1 in compartment Constbacterium in position (0,0)</description>
+    </variable>
+    <variable id="v2">
+      <name>protein1_0_0_Constbacterium</name>
+      <description>Molecule protein1 in compartment Constbacterium in position (0,0)</description>
+    </variable>
+    <variable id="v3">
+      <name>rna1_0_0_Constbacterium</name>
+      <description>Molecule rna1 in compartment Constbacterium in position (0,0)</description>
+    </variable>
+  </modelVariables>
+  <ruleConstants/>
+  <moleculeConstants>
+    <constant id="c1">
+      <name>lb_gene1_0_0_Constbacterium</name>
+      <description>Lower bound for gene1 in compartment Constbacterium at position (0,0)</description>
+    </constant>
+    <constant id="c2">
+      <name>ub_gene1_0_0_Constbacterium</name>
+      <description>Upper bound for gene1 in compartment Constbacterium at position (0,0)</description>
+    </constant>
+    <constant id="c3">
+      <name>lb_protein1_0_0_Constbacterium</name>
+      <description>Lower bound for protein1 in compartment Constbacterium at position (0,0)</description>
+    </constant>
+    <constant id="c4">
+      <name>ub_protein1_0_0_Constbacterium</name>
+      <description>Upper bound for protein1 in compartment Constbacterium at position (0,0)</description>
+    </constant>
+    <constant id="c5">
+      <name>lb_rna1_0_0_Constbacterium</name>
+      <description>Lower bound for rna1 in compartment Constbacterium at position (0,0)</description>
+    </constant>
+    <constant id="c6">
+      <name>ub_rna1_0_0_Constbacterium</name>
+      <description>Upper bound for rna1 in compartment Constbacterium at position (0,0)</description>
+    </constant>
+  </moleculeConstants>
+  <rewardConstants>
+    <constant>
+      <name>molecule</name>
+      <value>1</value>
+      <description>A reward corresponding to the number of molecules of gene1_0_0_Constbacterium is associated with every state</description>
+    </constant>
+    <constant>
+      <name>molecule</name>
+      <value>2</value>
+      <description>A reward corresponding to the number of molecules of protein1_0_0_Constbacterium is associated with every state</description>
+    </constant>
+    <constant>
+      <name>molecule</name>
+      <value>3</value>
+      <description>A reward corresponding to the number of molecules of rna1_0_0_Constbacterium is associated with every state</description>
+    </constant>
+  </rewardConstants>
+</params>
