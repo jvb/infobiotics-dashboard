@@ -102,8 +102,8 @@ libraryOfModules promoterLibrary
 		}
 
 	Diffusion({X},{c_1},{l}) = 
-		{
-			rules:
+    	{
+            rules:
 		      	r1: [ signalX ]_l =(1,0)=[ ] -c_1-> [ ]_l =(1,0)=[ signalX ]
 		      	r2: [ signalX ]_l =(-1,0)=[ ] -c_1-> [ ]_l =(-1,0)=[ signalX ]
 		      	r3: [ signalX ]_l =(0,1)=[ ] -c_1-> [ ]_l =(0,1)=[ signalX ]
@@ -118,7 +118,8 @@ libraryOfModules promoterLibrary
 
 	pulseGenerator({X},{c_1,c_2,c_3,c_4,c_5},{l}) =
 		{
-				Pconst({LuxR},{0.1},{l}) from this 
+			rules:
+                Pconst({LuxR},{0.1},{l}) from this 
 				PostTransc({LuxR},{3.2,0.3,0.04,3.6,0.075},{l}) from this
 				DimSig({LuxR,3OC12,LuxR2},{1,0.0154,1,0.0154},{l}) from this
 	
