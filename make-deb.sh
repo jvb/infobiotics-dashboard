@@ -1,12 +1,21 @@
 #!/bin/sh
 
-PKGBASE=$(cat NAME.txt)
+#jvb
 VERSION=$(cat VERSION.txt)
+PYPINAME=InfobioticsDashboard-$VERSION
+./clean.sh
+python setup.py sdist &&
+cd dist &&
+tar -xzvf $PYPINAME.tar.gz &&
+cd $PYPINAME
+
+#jpt
+PKGBASE=$(cat NAME.txt)
 PKGNAME=$PKGBASE-$VERSION
 MAINTAINER="Jonathan Blakes <jvb@cs.nott.ac.uk>"
 PYPKGNAME=${PKGNAME}
 PYPKGBASE=${PKGBASE}
-PYDEPS="python-vtk, python-qt4, python-qscintilla2, python-numpy (>= 1.4.1), python-matplotlib, python-pexpect, mcss, poptimizer, pmodelchecker, python-apptools (>=3.3.2), python-traitsbackendqt (>=3.4.0), python-traits (>=3.4.0), python-traitsgui (>=3.4.0), python-enthoughtbase(>=3.0.6), python-envisagecore(>=3.1.2), python-envisageplugins(>=3.1.2), python-tables(>=2.1.2), mayavi2, python-configobj, python-xlwt, python-qt4-gl, python-progressbar, python-setproctitle"
+PYDEPS="python-vtk, python-qt4, python-qscintilla2, python-numpy (>= 1.4.1), python-matplotlib, python-pexpect, mcss, poptimizer, pmodelchecker, python-apptools (>=3.3.2), python-traitsbackendqt (=3.4.0-1), python-traits (=3.4.0-2) | python-traits (=3.4.0-2build1), python-traitsgui (=3.4.0-1), python-enthoughtbase (>=3.0.6), python-envisagecore(>=3.1.2), python-envisageplugins(>=3.1.2), python-tables(>=2.1.2), mayavi2, python-configobj, python-xlwt, python-qt4-gl, python-progressbar, python-setproctitle, python-quantities(>=0.9.0)"
 LASTVERSION=$(echo $VERSION | cut -f 3 -d '.')
 LASTVERSION=$(echo "${LASTVERSION}-1" | bc)
 LASTVERSION="$(echo $VERSION | cut -f1,2 -d '.').${LASTVERSION}"
@@ -110,3 +119,8 @@ fi
 
 # all done
 echo "all ${PKGBASE} packages built ok"
+
+
+#jvb
+echo "scp $PYPINAME\_$VERSION\_all.deb jpt@fingal:"
+
