@@ -1,48 +1,16 @@
-POptimizerDashboardExperimentHandler.show_results
-ibw.py -> infobiotics-dashboard(.py(w))
-test_frozen_matplotlib_images_setup.py
-README
-tutorial examples on infobiotics.org
-setup.py
-py2imports.py
-
 =================================================
 Things to do, bugs to fix, feature requests, etc.
 =================================================
 
-Unsorted
+
+Priority
 --------
 
-histograms
+Tidy bin/
 
-volumes
+PModelChecker accepts SBML
 
-get_surfaces to multiple runs
-
-plots preview dialog hide invariants check box does nothing and is permanently disabled
-
-rename simulation results to mcss results
-
-test mcss results with some very large models
-
-disable legend in plots
-
-test matplotlib images by 'got here'
-
-CLI progress bars for mcss, etc using pexpect as proof of concept
-
-
-RelativeFile validation should respect filters.
-
-RelativeDirectory should not descend from RelativeFile because this makes it harder to subclass RelativeFile and make Directory equivalent that works the same.
-
-Test simpler pexpect example, especially for PRISM output, and see what gets passed when spawning 'mcss' using logging (try Popen.communicate)
-
-change CorePlugin to DashboardPlugin *
-
-Project management (using Single Project plugin?)
-
-Results management using Sumatra
+Export mcss results data
 
 Make size of Mayavi screenshots adjustable
 
@@ -50,54 +18,24 @@ Make Mayavi videos on Debian using ffmpeg
 
 Sync Mayavi cameras http://code.enthought.com/projects/mayavi/docs/development/html/mayavi/auto/mlab_figure.html?highlight=sync#sync-camera
 
-code coverage
+Histograms
 
-unit tests (before refactoring!)
-
-decouple writable, readable from RelativeFile
-
-decouple directory trait of file editors?
-
-FIXMEs
-
-TODOs
-
-
-
-
-General
--------
-
-Use open lpp file for model parameter for each experiment. * 
+Use open lpp file for model parameter for each experiment -> Eclipse 
 
 Help URLS for Dashboard main window - requires altered actions strategy to HelpController
     link to issue tracker http://bitbucket.org/jvb/infobiotics-dashboard/issues?status=new&status=open
 
 Welcome perspective *
 
-Splash screen
-
-Delete temporary files: NamedTemporaryFile(delete-False) means I have to do this manually. *
-
-Perform should *always* prompt to save parameters and only perform when saved - only true of interactive mode?
-
 Disabled 'Perform' button should have helpful tooltip populated by has_invalid_parameters()
 
-README, etc.
 
-Unified 'Open File...' service/action
+Freezing
+--------
 
-Parse command line arguments to Dashboard using argparse, file names to Unified file opener service 
+png2icns
 
-Adding Dashboard progress bars (with Experiment and Results buttons) to view list
-
-Introduce notion of sessions (interactive/unattended, GUI/non-GUI)
-
-
-
-
-Frozen
-------
+test_frozen_matplotlib_images_setup.py
 
 IBW should install shortcuts to All Users when 'Run as...' Administrator on University computers - alternative is to not install in Program Files (probably more natural) - maybe suggest this on running the installer - still can't add to path though!
 
@@ -106,12 +44,24 @@ Matplotlib and Mayavi2 toolbar icons not rendering properly in frozen builds, wh
 py2exe log error dialog fix in root
 
 
-PModelChecker
--------------
+LPP systems language
+--------------------
 
-BoundsEditor for PModelCheckerResults axes
+Lexing of P system files -> Xtext/Eclipse
+
+Autocompletion from parsed data structure -> Xtext/Eclipse 
 
 
+McssResultsWidget
+-----------------
+
+BoundsEditor for time start/stop?
+
+
+PModelCheckerResults
+--------------------
+
+BoundsEditor for axes
 
 
 POptimizer
@@ -124,29 +74,41 @@ need to expect not just prefix1.txt but prefix?.txt where ? is num_initials
 [set to undefined?] make maximum number of modules in a model '' by default but erroneous using TextEditor(evaluate-evaluate_function)
 
 
+General
+-------
+
+Splash screen
+
+Tidy up setup.py
+
+Generate py2imports.py in py2app.sh and py2exe.sh
+
+Rewrite README
+
+Update tutorial examples on infobiotics.org
+
+FIXMEs
+
+TODOs
+
+Code coverage
+
+Unit tests (before refactoring!)
 
 
-SimulatorResults
-----------------
+Future
+------
 
-Stacked plots should have only one molecules label, grid lines and only one time axis (see POptimizerResults)
+RelativeFile validation should respect filters.
 
-Grid lines and legends should be switchable: add to matplotlib_.py? (and rename that to something more explicit)
+change CorePlugin to DashboardPlugin *
 
-Plots in PlotsPreviewDialog of SimulatorResults for 'NAR' but not 'modules'.
+Project management (using Single Project plugin?) -> Eclipse
 
-BoundsEditor for Simulation Results time start/stop
+Results management using Sumatra
 
+Parse command line arguments to Dashboard using argparse, file names to Unified file opener service 
 
+Unified 'Open File...' service/action
 
-
-Language
---------
-
-Lexing of P system files *
-
-Autocompletion from parsed data structure 
-
-
-
-
+Adding Dashboard progress bars (with Experiment and Results buttons) to view list

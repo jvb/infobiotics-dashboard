@@ -189,8 +189,10 @@ manifestVersion="1.0">
         ),
         data_files=[
 #            ("images", glob.glob("images/*.png")), #TODO
-#            ("Microsoft.VC90.CRT",glob.glob("Microsoft.VC90.CRT/*")),
-#            ("",glob.glob("Microsoft.VC90.CRT/*")), # removed from MANIFEST.in
+##            ("Microsoft.VC90.CRT",glob.glob("Microsoft.VC90.CRT/*")),
+#            ("Microsoft.VC90.CRT",glob.glob("py2exe/Microsoft.VC90.CRT/*")),
+##            ("",glob.glob("Microsoft.VC90.CRT/*")), # removed from MANIFEST.in
+#            ("",glob.glob("py2exe/Microsoft.VC90.CRT/*")), # removed from MANIFEST.in
             ("enthought/pyface/images", glob.glob(os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\pyface\\images\\*.png'))),
             ('enthought/mayavi/preferences', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\mayavi\\preferences\\preferences.ini')]),
             ('enthought/tvtk/plugins/scene', [os.path.join(sys.prefix, 'Lib\\site-packages\\enthought\\tvtk\\plugins\\scene\\preferences.ini')]),
