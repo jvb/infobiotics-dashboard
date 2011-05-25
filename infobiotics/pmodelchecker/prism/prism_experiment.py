@@ -1,9 +1,7 @@
 from __future__ import division
-from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExperiment
-from infobiotics.pmodelchecker.prism.prism_params import PRISMParams
-from enthought.traits.api import Str, Int, Range, on_trait_change#, Enum, Property, Bool 
 
-from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler#, PRISMExperimentProgressHandler 
+
+from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler 
 from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
 
 class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler):
@@ -15,22 +13,19 @@ class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler)
             PModelCheckerExperimentHandler.show_results(self)
 
 
+from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExperiment
+from infobiotics.pmodelchecker.prism.prism_params import PRISMParams
+from enthought.traits.api import Str, Int, on_trait_change 
+
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
     '''TODO'''
 
     def __handler_default(self):
         return PRISMExperimentHandler(model=self)
 
-#    def perform(self, thread=True):
-#        # if prism model doesn't exist quickly do a Translate to create it
-#        import os.path
-#        if hasattr(self, 'PRISM_model_') and not os.path.exists(self.PRISM_model_) and not self.task == 'Translate':
-#            print 'Translating model specification in PRISMExperiment.perform()'
-#            self.translate_model_specification()
-##        if self.message:
-##            print self.message
-#        super(PRISMExperiment, self).perform(thread)
-
+    _current_property = Str
+    _max_properties = Int(1) # pmodelchecker treats properties that are the same as one, which can cause problems in update_progress
+    _property_index = Int(0)
 
     _stdout_pattern_list = [
         '[0-9]+ properties:', # '2 properties:',
@@ -44,16 +39,28 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
 #        'Exporting results to file ".+"...', # 'Exporting results to file "Const_results.psm"...',
     ] 
 
+    message = Str
+
+    def _message_default(self):
+        if self.task == 'Approximate':
+            return 'Approximating %s' % self._current_property if self._current_property != '' else ''
+        elif self.task == 'Verify':
+            return 'Verifying %s' % self._current_property
+        elif self.task == 'Build':
+            return 'Building PRISM model %s' % self.PRISM_model
+        elif self.task == 'Translate':
+            return 'Translating PRISM model %s' % self.PRISM_model
+            
+    @on_trait_change('_current_property')
+    def update_message(self):
+        self.message = self._message_default()
+
     def _reset_progress_traits(self):
         '''Prevent TraitError where _progress_percentage is calculated to be > 100'''
         self._current_property = ''
         self._max_properties = 1
         self._property_index = 0
         PModelCheckerExperiment._reset_progress_traits(self) # resets _progress_percentage
-
-    _current_property = Str
-    _max_properties = Int(1) # pmodelchecker treats properties that are the same as one, which can cause problems in update_progress
-    _property_index = Int(0)
 
     def _stdout_pattern_matched(self, pattern_index, match):
         pattern = match.group()
@@ -71,39 +78,7 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
         elif pattern_index > 3:
             self._stderr_pattern_matched(-1, match)
 
-#    _stderr_pattern_list = [
-#        'Exception in thread "main" java',
-##        ''' Error: parameters with same name and different ranges: 
-##0:10:3000:10:100''',
-#    ] 
     
-    message = Str
-#
-    def _message_default(self):
-        if self.task == 'Approximate':
-            return 'Approximating %s' % self._current_property if self._current_property != '' else ''
-        elif self.task == 'Verify':
-            return 'Verifying %s' % self._current_property
-        elif self.task == 'Build':
-            return 'Building PRISM model %s' % self.PRISM_model
-        elif self.task == 'Translate':
-            return 'Translating PRISM model %s' % self.PRISM_model
-#            
-    @on_trait_change('_current_property')
-    def update_message(self):
-        self.message = self._message_default()
-#        print self.message
-##        print self.message
-#    def _message_changed(self, value):
-##        print 'got here too'
-#        print self.message
-
-
 if __name__ == '__main__':
     experiment = PRISMExperiment()
-    experiment.load('/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/infobiotics-examples-20110208/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params')
-#    experiment._interaction_mode = 'gui'
-#    experiment.perform(thread=True)
-#    experiment.perform(thread=False)
-#    experiment.perform(thread=False)
     experiment.configure()

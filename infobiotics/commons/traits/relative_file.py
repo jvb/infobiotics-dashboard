@@ -255,6 +255,15 @@ class RelativeFile(BaseStr):
         
         abspath = self._abspath(value) # used later
         
+        # filters are for RelativeFileEditor only
+#        # value against filter
+#        if len(self.filter) > 0:
+#            for filter in self.filter:
+#                if abspath.endswith(filter):
+#                    break
+#            else:
+#                self.error(object, name, value)
+        
         # coerce value to be absolute if necessary
         if self.absolute:
             value = abspath
@@ -271,19 +280,19 @@ class RelativeFile(BaseStr):
                 if self.writable: # we care that it can be written
                     if function == os.path.isfile and not self.empty_ok: #FIXME? value should be a file if it is not empty
                         if can_write_file(abspath): # can we write the file?
-                            return value # we can write it
+                            return self.success(object, name, value) # we can write it
                         # we can't write it so drop through to self.error()
                     else: # function == os.path.isdir # it should be a directory
                         if can_write(abspath): # can we write the directory?
-                            return value # we can write it
+                            return self.success(object, name, value) # we can write it
                         # we can't write it so drop through to self.error()
                 else: # we care that it can't be written
                     #TODO need to switch on function as above?
                     if not can_write(abspath): 
-                        return value # we can't write it
+                        return self.success(object, name, value) # we can't write it
                     # we can write it so drop through to self.error()
             else: # we don't care whether it can be written
-                return value
+                return self.success(object, name, value)
         
         elif function(abspath): # we care whether it exists (isfile implies exists)
             if self.readable is not None: # we care whether it can be read
@@ -310,8 +319,14 @@ class RelativeFile(BaseStr):
                 else: # we care that it can't be executed
                     if can_execute(abspath): # we can execute it
                         self.error(object, name, value)
-            return value # it does exist and we can/can't read/write/execute it appropriately
+            return self.success(object, name, value) # it does exist and we can/can't read/write/execute it appropriately
         self.error(object, name, value) # function returned False
+
+    def success(self, object, name, value):
+        '''Ensures shadow value is set after
+        _relative_file_trait_name_default methods.'''
+        self.post_setattr(object, name, value)
+        return value
 
     def post_setattr(self, object, name, value):
         '''Creates a shadow value (name + '_') with absolute path.'''

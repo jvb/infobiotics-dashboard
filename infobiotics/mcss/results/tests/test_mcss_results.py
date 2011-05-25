@@ -296,7 +296,7 @@ class TestMcssResults(unittest.TestCase):
 ##                functions_of_values_over_axis_shape(axis=axis),
 ##                tuple([len(functions)] + [len(array) for j, ax in enumerate(array_axes) if not ax == axis]))#(2, 2, 3, 4))
 #        from mcss_results import McssResults
-#        array = McssResults('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5').amounts()
+#        array = McssResults('/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/quickstart-NAR/NAR_simulation.h5').amounts()
 
 
 #    def test_functions_of_values_over_axis_generator(self):

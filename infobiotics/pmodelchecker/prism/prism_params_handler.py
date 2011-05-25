@@ -37,10 +37,18 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
 
     _prism_model_str = Str
 
+    view_prism_model = Button
+    
+    def init(self, info): 
+        super(PRISMParamsHandler, self).init(info)
+        if not os.path.exists(self.model.PRISM_model_):
+            self.model.translate_model_specification()
+        self.load_translated_model()
+    
     @on_trait_change('model._translated')
-    def load_translated_model(self, translated):
-        if not translated:
-            return
+    def load_translated_model(self):#, translated):
+#        if not translated:
+#            return
         self._prism_model_str = ''
         if self.model.PRISM_model != '':
             try:
@@ -51,13 +59,12 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                 logger.error(e)
 #            from infobiotics.commons.strings import shorten_path
 #            self.status = "Translated '%s' to '%s'." % (shorten_path(self.model.model_specification, 30), shorten_path(self.model.PRISM_model, 30))
-            self.status = "Translated '%s' to '%s'." % (self.model.model_specification, self.model.PRISM_model)
+            self.status = "Translated '%s' to '%s'." % (self.model.model_specification, self.model.PRISM_model) #TODO
         else:
             self._prism_model_str = ''
 
-    view_prism_model = Button
     def _view_prism_model_fired(self):
-        class ViewPRISMModelHandler(Controller):
+        class ViewPRISMModelHandler(Controller): #TODO why is needed, can't I just use edit PRISMParamsHandler with the view and the right context?
             _prism_model_str = Str
             PRISM_model = Str
         ViewPRISMModelHandler(model=self.model, _prism_model_str=self._prism_model_str).edit_traits(
@@ -70,17 +77,21 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                     ),
                     Item('handler._prism_model_str',
                         show_label=False,
-                        style='readonly', #TODO style = 'custom',
+#                        style='readonly',
+                        style='custom',
                         editor=CodeEditor(lexer='null'),
                     ),
                     show_border=True,
                 ),
-                buttons=['OK'], #,'Revert','Undo'], # not when "style = 'readonly'"
+#                buttons=['OK'], # when Item('handler._prism_model_str', style='readonly'
+                buttons=['OK', 'Revert', 'Undo'], # when Item('handler._prism_model_str', style='custom'
                 width=640, height=480,
                 resizable=True,
                 id='view_prism_model_view',
             )
         )
+
+#    def #TODO write changes in prism_model_str to model.PRISM_model_
 
     confidence = Trait(
         '90% (0.1)',
@@ -102,17 +113,6 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
         else:
             self.sync_trait('_custom_confidence', self.model, alias='confidence', mutual=False, remove=True)
             self.sync_trait('confidence_', self.model, alias='confidence', mutual=False)
-
-
-    model_parameters = DelegatesTo('model_parameters_object') # i.e. self.model_parameters_object.model_parameters (model_parameters_object is defined in PModelCheckerHandler)
-    @on_trait_change('model_parameters')
-    def forward_changes_in_model_parameters_to_model(self):
-        self.model.model_parameters = self.model_parameters
-
-    def load(self, info):
-        super(PRISMParamsHandler, self).load(info)
-        if self.model_parameters_object is not None:
-            self.model_parameters_object.model_parameters = self.model.model_parameters # the reverse of forward_changes_in_model_parameters_to_model
 
 
 if __name__ == '__main__':

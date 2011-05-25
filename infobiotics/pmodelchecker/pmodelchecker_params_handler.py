@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from infobiotics.commons.api import read, write
 from infobiotics.core.params_handler import ParamsHandler
-from enthought.traits.api import List, Unicode, Button, Instance, Int, Enum, on_trait_change, Bool, Str
+from enthought.traits.api import List, Unicode, Button, Instance, Enum, on_trait_change, Str, DelegatesTo
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 import os.path
@@ -11,22 +11,40 @@ class PModelCheckerParamsHandler(ParamsHandler):
 
     task = Enum(['Approximate', 'Build', 'Verify'], desc="the task to perform:\n'Approximate' or 'Verify' the input properties\n'Build' the corresponding Markov chain")
     
-    def init(self, info): 
-        super(PModelCheckerParamsHandler, self).init(info)
-        self.sync_trait('task', info.object, mutual=False) # see POptimizerParamsHandler.init()
-
+    temporal_formulas = List(TemporalFormula)
+    selected_temporal_formula = Instance(TemporalFormula)
+    add_temporal_formula = Button
+    edit_temporal_formula = Button
+    remove_temporal_formula = Button
+    default_temporal_formula = Str
 
     model_parameters_object = Instance(ModelParameters)
     model_parameter_names = List(Unicode) # used in TemporalFormula for model_parameter_name_to_insert Enum
+    model_parameters = DelegatesTo('model_parameters_object') # i.e. self.model_parameters_object.model_parameters
+    
+    def init(self, info): 
+        super(PModelCheckerParamsHandler, self).init(info)
+        self.sync_trait('task', info.object, mutual=False) # see POptimizerParamsHandler.init()
+        self.forward_changes_in_model_to_model_parameters()
+
+    def load(self, info):
+        super(PModelCheckerParamsHandler, self).load(info)
+        self.forward_changes_in_model_to_model_parameters()
+
+    def forward_changes_in_model_to_model_parameters(self):
+        '''The reverse of forward_changes_in_model_parameters_to_model.'''
+        if self.model_parameters_object is not None:
+            self.model_parameters_object.model_parameters = self.model.model_parameters
+
+    @on_trait_change('model_parameters')
+    def forward_changes_in_model_parameters_to_model(self):
+        self.model.model_parameters = self.model_parameters
 
     @on_trait_change('model._translated')
     def model_specification_changed(self):
-#        if self.model._translated and self.model._model_specification_changed:
-        #FIXME removed guards and passing IOError in ModelParameters._directory_changed 
+#        if self.model._translated and self.model._model_specification_changed: # removed guards and passing IOError in ModelParameters._directory_changed
         self.model_parameters_object = ModelParameters(directory=self.model.directory)
         self.model_parameter_names = [modelVariable.name for modelVariable in self.model_parameters_object.modelVariables]
-
-    temporal_formulas = List(TemporalFormula)
     
     def object_temporal_formulas_changed(self, info):
         if not os.path.isfile(info.object.temporal_formulas_):
@@ -79,20 +97,12 @@ class PModelCheckerParamsHandler(ParamsHandler):
 #        for temporal_formula in self.temporal_formulas:
 #            print '"' + temporal_formula.formula + '" {' + temporal_formula.parameters_string + '}'
     
-    selected_temporal_formula = Instance(TemporalFormula)
-
-    add_temporal_formula = Button
-    edit_temporal_formula = Button
-    remove_temporal_formula = Button
-    
     def __edit_temporal_formula(self, temporal_formula):
         result = temporal_formula.edit_traits(kind='livemodal').result 
         if result:
             temporal_formula.formula = temporal_formula.formula.replace('\n', '')
             temporal_formula.update_parameters_string()
         return result 
-    
-    default_temporal_formula = Str
     
     def _add_temporal_formula_fired(self):
         temporal_formula = TemporalFormula(
@@ -133,7 +143,9 @@ Formulas:
         with write(self.model.temporal_formulas_) as f:
             f.writelines(['Formulas:\n'] + ['"' + temporal_formula.formula + '" {' + temporal_formula.parameters_string + '}\n' for temporal_formula in self.temporal_formulas])
         
+
+def test():
+    execfile('pmodelchecker_params.py')
         
 if __name__ == '__main__':
-    execfile('pmodelchecker_params.py')
-    
+    test()

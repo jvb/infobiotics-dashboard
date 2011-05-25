@@ -44,23 +44,6 @@ class PRISMParams(PModelCheckerParams):
                 'number_samples',
             ]    
 
-    def translate_model_specification(self, name):#, object, name, old, new):
-        ''' Performs an experiment with task='Translate' to generate the 
-        PRISM model and modelParameters.xml from self.model_specification. '''
-        self._translated = False
-        if self.model_specification == '': return # guard
-        from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment # avoids circular import    
-        translate = PRISMExperiment(directory=self.directory)
-        translate.trait_setq(# set quietly otherwise this triggers _model_specification_changed above
-            model_specification=self.model_specification_,
-            PRISM_model=self.PRISM_model_, # must set PRISM_model with PRISM_model_ as trait_setq doesn't trigger creation of shadow trait 
-            task='Translate',
-        ) 
-        if translate.perform(thread=False, expecting_no_output=True):
-            self._translated = True
-#        self._model_specification_changed = True if name == 'model_specification' else False # needed by PModelCheckerParamsHandler.model_specification_changed
-        
-        
 
 if __name__ == '__main__':
     parameters = PRISMParams()

@@ -21,7 +21,7 @@
 	<parameter name="simu_runs" value="20"/>
 	<parameter name="seednum" value="12345"/>	
 	<parameter name="show_progress" value="true"/>
-   	<parameter name="debug_mode" value="no"/>
+   	<parameter name="debug_mode" value="false"/>
 	<parameter name="popsize" value="5"/>
 	<parameter name="maxgeno" value="10"/>
 	<parameter name="percent_paraopti" value="0"/>

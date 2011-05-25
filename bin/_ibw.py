@@ -114,26 +114,28 @@ def main(argv):
 #    experiment.perform() # useful for debugging without threads
 
 
+dir = os.path.dirname(__file__)
+
 def test_relative_path_to_model():
-    main(sys.argv + ['mcss', '../examples/infobiotics-examples-20110208/mcss/models/module1.sbml'])
+    main(sys.argv + ['mcss', '../examples/mcss/models/module1.sbml'])
 
 def test_absolute_path_to_model():
-    main(sys.argv + ['mcss', '/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/infobiotics-examples-20110208/mcss/models/module1.sbml'])
+    main(sys.argv + ['mcss', dir + '../examples/mcss/models/module1.sbml'])
 
 def test_relative_path_to_params():
-    main(sys.argv + ['pmodelchecker-mc2', '../examples/infobiotics-examples-20110208/pmodelchecker/pulsePropagation/pulse_MC2.params'])
+    main(sys.argv + ['pmodelchecker-mc2', '../examples/pmodelchecker/pulsePropagation/pulse_MC2.params'])
 
 def test_absolute_path_to_params():
-    main(sys.argv + ['poptimizer', '/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/infobiotics-examples-20110208/poptimizer/fourinitial/four_initial_inputpara.params'])
+    main(sys.argv + ['poptimizer', dir + '../examples/poptimizer/fourinitial/four_initial_inputpara.params'])
 
 def test_wrong_params_for_experiment():
-    main(sys.argv + ['poptimizer', '../examples/infobiotics-examples-20110208/mcss/models/reactions1.params'])
+    main(sys.argv + ['poptimizer', '../examples/mcss/models/reactions1.params'])
 
 def test_absolute_path_to_model2():
-    main(sys.argv + ['pmodelchecker-prism', '/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/infobiotics-examples-20110208/pmodelchecker/pulsePropagation/pulsePropagation.lpp'])
+    main(sys.argv + ['pmodelchecker-prism', dir + '../examples/pmodelchecker/pulsePropagation/pulsePropagation.lpp'])
     
 def test_absolute_path_to_params2():
-    main(sys.argv + ['pmodelchecker-prism', '/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/infobiotics-examples-20110208/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params'])
+    main(sys.argv + ['pmodelchecker-prism', dir + '../examples/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params'])
     
 
 if __name__ == '__main__':

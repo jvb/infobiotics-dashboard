@@ -11,3 +11,4 @@ from params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
 
 from traits.params_relative_file import ParamsRelativeFile
 from traits.params_relative_directory import ParamsRelativeDirectory
+from traits.model_file import ModelFile

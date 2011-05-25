@@ -25,11 +25,11 @@ def _execute_PropertyBuilder():
     
 
 from enthought.traits.api import (
-    HasTraits, Str, Float, Int, List, Button, Any, Enum, Unicode, Any, Property,
-    on_trait_change,
+    HasTraits, Str, Float, Int, List, Button, Enum, Unicode, Property,
+    on_trait_change, Any, TraitError
 )
 from enthought.traits.ui.api import (
-    View, Item, HGroup, VGroup, Group, Spring, ListEditor, TableEditor,
+    View, Item, HGroup, VGroup, Group, ListEditor, TableEditor,
     CodeEditor, Spring, TextEditor
 )
 from enthought.traits.ui.table_column import ObjectColumn
@@ -112,10 +112,10 @@ def evaluate_temporal_formula_parameter_range(value):
     try:
         f = float(eval(value))
         if f < 0:
-            raise TraitError()
+            raise TraitError
         return f 
     except:
-        raise TraitError()
+        raise TraitError
 
 temporal_formula_parameter_range_editor = TextEditor(evaluate=evaluate_temporal_formula_parameter_range)
 
@@ -153,9 +153,10 @@ temporal_formula_view = View(
             tooltip='Multiple lines will be concatenated.'),
         HGroup(
             Spring(),
-            Item('model_parameter_name_to_insert', label='Model parameters:'), #FIXME descriptions (EnumEditor?)
+            Item('model_parameter_name_to_insert', label='Model parameters:'), #TODO descriptions (EnumEditor?)
             Item('insert', show_label=False, enabled_when='object.model_parameter_name_to_insert is not None'),
             Spring(),
+            defined_when='len(object.model_parameter_names) > 0', #TODO?
         ),
         Item(label='Formula parameters:'),
         Item('parameters',
@@ -209,7 +210,7 @@ class TemporalFormula(HasTraits):
     line = Int
     column = Int
     selected_text = Str
-    params_handler = Any#Instance(PModelCheckerParamsHandler)
+    params_handler = Any#Instance('PModelCheckerParamsHandler') # using Any avoids this exception: enthought.traits.trait_errors.TraitError: The 'params_handler' trait of a TemporalFormula instance must be a PModelCheckerParamsHandler or None, but a value of "class '__main__.PRISMExperimentHandler' (i.e. <__main__.PRISMExperimentHandler object at 0x8c5b4d0>)" <type 'str'> was specified.
     model_parameter_names = Property(List(Unicode), depends_on='params_handler.model_parameter_names')
     def _get_model_parameter_names(self):
         return self.params_handler.model_parameter_names 

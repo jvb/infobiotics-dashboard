@@ -1,4 +1,4 @@
-from infobiotics.core.api import ParamsRelativeFile
+from infobiotics.core.api import ParamsRelativeFile, ModelFile
 from infobiotics.core.params import Params
 from enthought.traits.api import Enum, Bool, Range, Long, Float
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
@@ -41,19 +41,9 @@ class McssParams(Params):
         except TraitError, e:
             logger.warn(e)
         
-    model_file = ParamsRelativeFile(desc='the model file to simulate',
-        exists=True,
-        filter=[
-            'All model files (*.lpp *.sbml)',
-            'Lattice population P system files (*.lpp)',
-            'P system XML files (*.xml)',
-            'Systems Biology Markup Language files (*.sbml)',
-            'All files (*)'
-        ],
-        entries=10,
-    )
+    model_file = ModelFile
     model_format = Enum(['sbml', 'xml', 'lpp'], desc='the model specification format')
-    duplicate_initial_amounts = Bool(False, desc='whether to duplicate initial amounts for all templates in the SBML model')
+    duplicate_initial_amounts = Bool(True, desc='whether to duplicate initial amounts for all templates in the SBML model')
 #    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
     max_time = FloatGreaterThanZero(desc='the maximum simulated time')
     max_run_time = Range(low=0, desc='the maximum execution time for all runs')
@@ -97,28 +87,6 @@ class McssParams(Params):
 
 
 if __name__ == '__main__':
-#    from infobiotics.preferences import preferences
-#    preferences.set('mcss.directory', '/usr')
     parameters = McssParams()#executable='/usr/bin/mcs')
-#    print parameters.directory
-#    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/PAR/positiveAutoregulationModel.lpp'
-#    print parameters.directory
-#    parameters.model_file = '/home/jvb/workspaces/runtime-LPPsystems.product/lppsystems-test/infobiotics-examples-20110208/pmodelchecker/NAR/negativeAutoregulationModel.lpp'
-#    print parameters.directory
-    
-    # import that Params never changes cwd
-    
-#    parameters.load('../../tests/workbench_examples/modules/module1.params')
-
-#    parameters.load('/home/jvb/src/mcss-0.0.41/examples/models/module1.params')
-
-#    import os
-#    print 0, os.getcwd() # same directory as this file
-#    os.chdir('/home/jvb/src/mcss-0.0.41/examples/models/')
-##    print 1, os.getcwd() # as above
-##    print 2, parameters.directory # as 0
-#    parameters.load('module1.params') # 1 + name
-#    print 3, parameters.directory # as 1
     parameters.configure()
-#    parameters.edit()
             

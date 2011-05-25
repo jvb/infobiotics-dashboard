@@ -208,7 +208,7 @@ simulate final model
 
 if __name__ == '__main__':
     experiment = POptimizerExperiment()
-#    experiment.load('/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/optimisation.params')
+    experiment.load('../../examples/quickstart-NAR/optimisation.params')
 #    experiment.perform()
     experiment.configure()
     

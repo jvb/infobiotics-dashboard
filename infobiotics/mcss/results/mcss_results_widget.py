@@ -968,9 +968,9 @@ class McssResultsWidget(QWidget):
 
 def main():
     argv = qApp.arguments()
-#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard/examples/infobiotics-examples-20110208/quickstart-NAR/NAR_simulation.h5')
-#    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
-    argv.insert(1, '/home/jvb/phd/eclipse/infobiotics/dashboard-mcss_results/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
+#    argv.insert(1, '/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/quickstart-NAR/NAR_simulation.h5')
+#    argv.insert(1, '/home/jvb/workspaces/workspace/infobiotics-dashboard/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
+#    argv.insert(1, '/home/jvb/workspaces/workspace/infobiotics-dashboard/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)

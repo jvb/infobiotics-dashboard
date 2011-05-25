@@ -8,4 +8,4 @@ class PModelCheckerExperimentHandler(ExperimentHandler):
         if hasattr(self.model, 'results_file_') and os.path.exists(self.model.results_file_):
             PModelCheckerResults(self.model.results_file_).configure()
         else:
-            print "Results file '%s' does not exist, plotting aborted." % self.model.results_file
+            print "Results file '%s' does not exist, plotting aborted." % self.model.results_file #TODO log

@@ -326,6 +326,9 @@ class Experiment(Params):
         '^I/O warning : failed to load external entity ".+"', # libxml++
         '^Parsing of file (?P<file>.*) according to BNF failed in line: (?P<line>[0-9]*)',
         '^Exception in thread "main" java',
+#        'Exception in thread "main" java',
+##        ''' Error: parameters with same name and different ranges: 
+##0:10:3000:10:100''',
     ])
     
     def _stdout_pattern_matched(self, pattern_index, match):

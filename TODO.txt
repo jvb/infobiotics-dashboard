@@ -6,9 +6,9 @@ Things to do, bugs to fix, feature requests, etc.
 Priority
 --------
 
-Tidy bin/
+ParamsHandler.status
 
-PModelChecker accepts SBML
+Tidy bin/
 
 Export mcss results data
 

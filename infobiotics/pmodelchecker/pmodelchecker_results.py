@@ -288,6 +288,8 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
                 HGroup(
                     Item('detach', show_label=False),
                     Spring(),
+                    'legend',
+                    Spring(),
                     Item('save_resized', show_label=False),
                 ),
                 show_border=True,

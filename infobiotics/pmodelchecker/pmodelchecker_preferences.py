@@ -1,9 +1,7 @@
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, RelativeFile
 import sys
 
-PREFERENCES_PATH = 'pmodelchecker' #TODO
-
-#TODO copy this pattern for all ParamsPreferences (and maybe Params) subclasses
+PREFERENCES_PATH = 'pmodelchecker'
 name = 'pmodelchecker.exe' if sys.platform.startswith('win') else 'pmodelchecker' 
 PModelCheckerExecutable = RelativeFile(name, filter=name, absolute=False, auto_set=True, executable=True) # executable=True implies exists=True
 

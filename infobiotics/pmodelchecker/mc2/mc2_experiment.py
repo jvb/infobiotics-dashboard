@@ -1,6 +1,5 @@
 from __future__ import division
-from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExperiment
-from mc2_params import MC2Params
+
 
 from mc2_params_handler import MC2ParamsHandler
 from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
@@ -9,6 +8,10 @@ class MC2ExperimentHandler(MC2ParamsHandler, PModelCheckerExperimentHandler):
     '''_params_group from MC2ParamsHandler and 
     perform functionality from PModelCheckerExperimentHandler'''
     pass
+
+
+from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExperiment
+from mc2_params import MC2Params
 
 class MC2Experiment(MC2Params, PModelCheckerExperiment):
     '''TODO'''
@@ -37,9 +40,8 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
             super(MC2Experiment, self)._stdout_pattern_matched(self, pattern_index, match)
         
 
-
 if __name__ == '__main__':
     experiment = MC2Experiment()
-    experiment.load('../../../examples/infobiotics-examples-20110208/quickstart-NAR/model_checking_mc2.params')
+#    experiment.load('../../../examples/quickstart-NAR/model_checking_mc2.params')
 #    experiment.perform()
     experiment.configure()
