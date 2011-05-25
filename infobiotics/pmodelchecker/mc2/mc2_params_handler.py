@@ -35,7 +35,7 @@ class MC2ParamsHandler(PModelCheckerParamsHandler):
     edit_mc2_mcss_experiment = Button(label='Edit')
     
     def _edit_mc2_mcss_experiment_fired(self):
-        self._mc2_mcss_experiment.edit()
+        self._mc2_mcss_experiment.edit(parent=self.info.ui.control)
     
     @on_trait_change('model:simulations_file_hdf5, model:simulations_generatedHDF5')
     def update_number_of_runs_read(self, info):
