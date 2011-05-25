@@ -45,6 +45,9 @@ tools_menu = Menu(
 )
 
 class ParamsHandler(HelpfulController):
+
+    def _status_changed(self, status):
+        print 'ParamsHandler._status_changed', status
     
     params_group = Instance(Group)
     

@@ -82,6 +82,10 @@ def bind_preference(obj, trait_name, preference_path, preferences=None):
 
 class Params(HasTraits): 
 
+    @on_trait_change('_handler.status')
+    def _handler_status_changed(self, status):
+        print 'Params._handler_status_changed', status
+
     _parameters_name = Str(Undefined, desc='the name attribute of the parameter tag in the params XML file')
     _parameter_set_name = Str(Undefined, desc='the name attribute of the parameterSet tag in the params XML file')
 
