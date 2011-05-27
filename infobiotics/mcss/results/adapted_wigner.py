@@ -3,9 +3,13 @@ from __future__ import division
 from enthought.etsconfig.api import ETSConfig; ETSConfig.toolkit = 'qt4'
  
 import mcss_results
-results = mcss_results.McssResults('tests/pulsePropagation-2_runs.h5')
+#results = mcss_results.McssResults('tests/pulsePropagation-2_runs.h5')
+results = mcss_results.McssResults('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
+
 #print results.species_information(); exit()
-species = 'proteinGFP', 'proteinCI', 'proteinLuxI'
+#species = 'proteinGFP', 'proteinCI', 'proteinLuxI'
+species = 'protein1', 'rna1', 'signal1'
+
 results.select_species(*species)
 surfaces = results.surfaces()
 #print surfaces.shape

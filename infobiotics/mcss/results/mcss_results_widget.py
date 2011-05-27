@@ -1,10 +1,5 @@
-from infobiotics.mcss.results import mcss_results
-from infobiotics.commons.quantities.units.time import time_units
-from infobiotics.commons.quantities.units.volume import volume_units
-
-from enthought.etsconfig.api import ETSConfig
+import infobiotics
 from quantities.quantity import Quantity
-ETSConfig.toolkit = 'qt4'
 
 from enthought.traits.api import HasTraits, Range, String
 from enthought.traits.ui.api import View, VGroup, HGroup, Item
@@ -26,13 +21,14 @@ import xlwt
 
 import numpy as np
 
-
 from simulation import load_h5
 from simulation_list_widget_item import SimulationListWidgetItem
 from species import Species
 
-
+from infobiotics.mcss.results import mcss_results
 from mcss_results import McssResults
+from infobiotics.commons.quantities.units.time import time_units
+from infobiotics.commons.quantities.units.volume import volume_units
 
 # for QSettings
 import infobiotics
@@ -305,7 +301,7 @@ class McssResultsWidget(QWidget):
             SimulationListWidgetItem(i, ui.runs_list_widget)
         for i in simulation._species_list:
             SimulationListWidgetItem(i, ui.species_list_widget)
-        for i in simulation._runs_list[0]._compartments_list: #TODO can't rely on run1 alone if _compartments_list divide
+        for i in simulation._runs_list[0]._compartments_list: #FIXME can't rely on run1 alone if compartments divide
             SimulationListWidgetItem(i, ui.compartments_list_widget)
         
         # runs
@@ -321,6 +317,7 @@ class McssResultsWidget(QWidget):
             ui.runs_list_widget.selectAll() # should check select_all_runs_check_box automatically
         else:
             enable_widgets(ui.select_all_runs_check_box)
+            ui.average_over_selected_runs_check_box.setChecked(True) # check average over runs
 
         # species
         species = self.ui.species_list_widget.count()
@@ -567,7 +564,7 @@ class McssResultsWidget(QWidget):
     def calculate(self): #TODO do something useful with array like PModelCheckerResults
         from axes_order_traits import AxesOrder
         ao = AxesOrder()
-        result = ao.edit_traits(kind='modal')
+        result = ao.edit_traits(kind='modal').result
         if result:
             axes = [axis.name.lower() for axis in ao.order]
             functions = [axis.function for axis in ao.order]
@@ -839,138 +836,26 @@ class McssResultsWidget(QWidget):
         self.spatial_plots_window = SpatialPlotsWindow(surfaces_, self)
         self.spatial_plots_window.show()
 
-
     @wait_cursor
     def plot(self): #TODO move most of this to McssResults
         '''Plot selected data. '''
-
-#        # old 
-#        runs, species, compartments = self.selected_items()
-##        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
-#        _, _, _, averaging = self.options()
-#        timepoints_data_units, timepoints_display_units, quantities_data_units, quantities_display_type, quantities_display_units, volume, volumes_data_units, volumes_display_units = self.units()
-#        results = self.selected_items_results()
-#
-#        if averaging:
-##            timepoints, amounts = results.get_amounts_mean_over_runs()
-#            timepoints, amounts = results.get_functions_over_runs((mcss_results.mean, mcss_results.std))
-#            mean_index = 0
-#            std_index = 1
-##            if self.volumes_selected:
-##                timepoints, volumes = results.get_volumes_mean_over_runs() #TODO
-#        else:
-##            timepoints = results.timepoints(timepoints_display_units=timepoints_display_units)
-#            timepoints = results.timepoints
-#            timepoints.units = time_units[timepoints_display_units]
-#            amounts = results.amounts(
-#                quantities_display_type=quantities_display_type,
-#                quantities_display_units=quantities_display_units,
-#                volume=volume if self.simulation.log_volumes != 1 else None,
-#            )
-#            if self.volumes_selected:
-#                _, volumes = results.get_volumes(
-#                    volumes_display_units=volumes_display_units,
-#                )
-#        if len(amounts) == 0 and (self.volumes_selected and len(volumes) == 0):
-#            return
-#        from timeseries import Timeseries
-#        timeseries = []
-#
-#        volumes_species = Species(
-#            index=None, #TODO hack
-#            name='Volumes',
-#            simulation=self.simulation,
-#        )
-#
-#        if averaging:
-##            raise NotImplementedError
-#            for ci, c in enumerate(compartments):
-#                for si, s in enumerate(species):
-#                    timeseries.append(
-#                        Timeseries(
-#                            runs=[run.data for run in runs],
-#                            species=s.data,
-#                            compartment=c.data,
-#                            timepoints=timepoints,
-#                            timepoints_units=timepoints_display_units,
-#                            values_type='Concentration' if quantities_display_type == 'concentrations' else 'Amount',
-#                            values=amounts[ri, si, ci, :], #FIXME ri should be fi
-#                            values_units=quantities_display_units,
-#                            _colour=colours.colour(si),
-#                        )                                          
-#                    )
-#                if self.volumes_selected:
-#                    timeseries.append(
-#                        Timeseries(
-#                            runs=[run.data for run in runs],
-#                            species=volumes_species,
-#                            compartment=c.data,
-#                            timepoints=timepoints,
-#                            timepoints_units=timepoints_display_units,
-#                            values_type='Volume',
-#                            values=volumes[ri, ci, :], #FIXME don't know what ri should be
-#                            values_units=volumes_display_units,
-#                            _colour=colours.colour(len(species) + ci),
-#                        )                                          
-#                    )
-#        else:
-#            for ri, r in enumerate(runs):
-#                for ci, c in enumerate(compartments):
-#                    for si, s in enumerate(species):
-#                        timeseries.append(
-#                            Timeseries(
-#                                run=r.data,
-#                                species=s.data,
-#                                compartment=c.data,
-#                                timepoints=timepoints,
-#                                timepoints_units=timepoints_display_units,
-#                                values_type='Concentration' if quantities_display_type == 'concentrations' else 'Amount',
-#                                values=amounts[ri, si, ci, :],
-#                                values_units=quantities_display_units,
-#                                _colour=colours.colour(si),
-#                            )
-#                        )
-#                        
-#                    if self.volumes_selected:
-#                        timeseries.append(
-#                            Timeseries(
-#                                run=r.data,
-#                                species=volumes_species,
-#                                compartment=c.data,
-#                                timepoints=timepoints,
-#                                timepoints_units=timepoints_display_units,
-#                                values_type='Volume',
-#                                values=volumes[ri, ci, :],
-#                                values_units=volumes_display_units,
-#                                _colour=colours.colour(len(species) + ci),
-#                            )                                          
-#                        )
-            
+#        print results.timeseries_information()
         results = self.selected_items_results()
-#        print results.timeseries_information() #TODO
-        timeseries = results.timeseries(
-            amounts=True,
-            volumes=True if results.has_volumes else False, # plot volumes using TODO
-            mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False,
-        )
-#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
-#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=True)
-#        timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=False) 
-#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=False)
-#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=False)
-        
-        from timeseries_plot import TimeseriesPlot
-        TimeseriesPlot(
-            timeseries=timeseries,
-            window_title='Timeseries Plot(s) for %s' % self.filename,
-        ).edit_traits()
+        return results.timeseries_plot(mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False)
 
+
+def test():
+    w = McssResultsWidget(filename='../../../examples/quickstart-NAR/NAR_simulation.h5')
+#    w = McssResultsWidget(filename='../../../examples/germination_09.h5')
+    centre_window(w)
+    w.ui.select_all_runs_check_box.setChecked(True)
+    w.ui.select_all_species_check_box.setChecked(True)
+    w.ui.select_all_compartments_check_box.setChecked(True)
+#    w.ui.compartments_list_widget.select(7)
+    w.plot()
 
 def main():
     argv = qApp.arguments()
-#    argv.insert(1, '/home/jvb/workspaces/workspace/infobiotics-dashboard/examples/quickstart-NAR/NAR_simulation.h5')
-#    argv.insert(1, '/home/jvb/workspaces/workspace/infobiotics-dashboard/infobiotics/mcss/results/tests/germination_09.h5') # has volumes dataset
-#    argv.insert(1, '/home/jvb/workspaces/workspace/infobiotics-dashboard/infobiotics/mcss/results/tests/NAR_simulation.h5') # has no volumes dataset
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)

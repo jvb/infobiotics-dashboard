@@ -574,7 +574,7 @@ class McssResults(object):
                 np.seterr(divide='ignore') # ignore divide by zero errors - will replace values with np.inf instead
                 for si, _ in enumerate(self.species_indices):
                     concentrations[:, si, :, :] = amounts[:, si, :, :] / volumes # divide amount by volume
-                concentrations[concentrations == np.inf] = 0 # replace all occurences of np.inf with 0
+                concentrations[concentrations == np.inf] = 0 * _concentration_units # replace all occurences of np.inf with 0
                 amounts = concentrations.rescale(quantities_display_units) # rescale to display units
             else:
                 amounts.units = substance_units[quantities_display_units]
@@ -889,6 +889,15 @@ class McssResults(object):
         table = indent([labels] + rows, hasHeader=True)
         return table
 
+    def ci_factor(self, ci_degree=0.95):
+        assert 0 <= ci_degree <= 1
+        num_runs = len(self.run_indices)
+#        from scipy.special import stdtrit
+#        ci_factor = stdtrit(num_runs - 1, 1.0 - (1.0 - ci_degree) / 2.0) / math.sqrt(num_runs)
+        from infobiotics.thirdparty.statistics import InverseStudentT
+        ci_factor = InverseStudentT(num_runs - 1, 1.0 - (1.0 - ci_degree) / 2.0) / math.sqrt(num_runs)
+        return ci_factor
+
     def timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
         '''Return Timeseries objects for current selection.'''
         
@@ -934,7 +943,7 @@ class McssResults(object):
                                 timepoints_units=self.timepoints_display_units,
                                 values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
                                 values=mean_amounts_over_runs[si, ci, :],
-                                errors=std_amounts_over_runs[si, ci, :],
+                                std=std_amounts_over_runs[si, ci, :],
                                 values_units=self.quantities_display_units,
                                 _colour=colours.colour(si), #TODO rechoose colours based on different strategy for stacked, etc in timeseries plot
                                 marker=colours.marker(ci),
@@ -952,7 +961,7 @@ class McssResults(object):
                             timepoints_units=self.timepoints_display_units,
                             values_type='Volume',
                             values=mean_volumes_over_runs[ci, :],
-                            errors=std_volumes_over_runs[ci, :],
+                            std=std_volumes_over_runs[ci, :],
                             values_units=self.volumes_display_units,
                             _colour=colours.colour(num_species + ci),
                             marker=colours.marker(ci),
@@ -998,6 +1007,25 @@ class McssResults(object):
                             )
                         )
         return timeseries
+
+    def timeseries_plot(self, mean_over_runs):
+#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
+#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=True)
+#        timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=False) 
+#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=False)
+#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=False)
+        from timeseries_plot import TimeseriesPlot
+        import os.path
+        self.timeseries_plot = TimeseriesPlot(
+            results=self,
+            window_title='Timeseries from %s' % os.path.basename(self.filename),
+            timeseries=self.timeseries(
+                amounts=True,
+                volumes=True if self.has_volumes else False,
+                mean_over_runs=mean_over_runs,
+            ),
+        ).edit_traits(kind='modal')
+        return self.timeseries_plot
     
 #    def export_data(self):
 #        pass

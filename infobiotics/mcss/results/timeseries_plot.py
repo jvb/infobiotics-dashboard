@@ -1,9 +1,10 @@
 import infobiotics
 from enthought.etsconfig.api import ETSConfig
+from mcss_results import McssResults
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
     Button, on_trait_change, Tuple, Dict, Array, Enum, Property, Range, Any, Button,
-    cached_property)
+    cached_property, Int)
 from enthought.traits.ui.api import (View, VGroup, Item, HGroup, Spring,
     ListEditor, InstanceEditor, SetEditor, RangeEditor)
 from infobiotics.commons import colours
@@ -46,11 +47,11 @@ class TimeseriesPlot(HasTraits):
     _figure = Instance(Figure, ())
 
     def __init__(self, **traits):
-        ''' Call _update_figure only once during initialisation. '''
         HasTraits.__init__(self)
         self.trait_setq(**traits)
         self._timeseries_changed()
         self._update_units()
+        # call _update_figure only once during initialisation. 
 #        self._update_figure()
     
     font_size = Range(1, 20, 12)
@@ -211,10 +212,10 @@ class TimeseriesPlot(HasTraits):
         timepoints_units, \
         volumes_units, \
         substances_units, \
-        concentrations_units')
+        concentrations_units, \
+        marker_interval, errorbars, ci_degree')
     def _update_figure(self):
         
-
         # start from scratch
         self._figure.clear()
         
@@ -237,15 +238,23 @@ class TimeseriesPlot(HasTraits):
             
         if len(self.figure_title) > 0:
             self._figure.suptitle(self.figure_title)
+
+        # don't allow negative x (time) or y (values)
+        for axes in self.axes:
+            axes.set_xlim(0, self.results.timepoints[-1].magnitude)
+            ymin, ymax = axes.get_ylim() 
+            if ymin < 0:
+                axes.set_ylim(0, ymax)
             
-        # remove excess labels            
-        
+
+        # set volumes_label for first volumes timeseries ylabel        
         volumes_label = ''
         for timeseries in self.timeseries:
             if timeseries.values_type == 'Volume':
                 volumes_label = timeseries.ylabel
                 break
         
+        # remove excess labels            
         if not self.individual_time_labels:
             self._figure.text(0.4, 0.02, self._timeseries[0].xlabel, ha='center', va='bottom') # made Time text off-centre so as not to clash with offset  
             # remove individual time labels
@@ -368,21 +377,35 @@ class TimeseriesPlot(HasTraits):
         if (timeseries.values_type != 'Volume' and self.scientific_amounts_ticklabels) or (timeseries.values_type == 'Volume' and self.scientific_volume_ticklabels):
             axes.yaxis.set_major_formatter(get_scientific_formatter())
 
+    marker_interval = Int(10, auto_set=True, desc='the number of timepoints between markers (and errorbars if available)')
+    def _marker_interval_default(self):
+        return len(self.results.timepoints) // 10
+
+    errorbars = Enum(['Confidence interval', 'Standard deviation of the sample', 'None'], desc='the statistic to show in errorbars')
+    ci_degree = Range(0.5, 0.999, 0.95)
+    ci_factor = Property(Float, depends_on='results,ci_degree')
+    results = Instance(McssResults)
+    
+    @cached_property
+    def _get_ci_factor(self):
+        if self.ci_degree > 0.999:
+            return 0.999
+        return self.results.ci_factor(self.ci_degree)
 
     def _plot_timeseries(self, axes, timeseries):
-        if len(timeseries.errors) > 0:
+        if self.errorbars != 'None' and len(timeseries.std) > 0:
             self._plot_errorbars(axes, timeseries)
         self._plot_line(axes, timeseries)
     
     def _plot_errorbars(self, axes, timeseries):
-        step = 1
+        step = self.marker_interval
         axes.errorbar(
             timeseries.timepoints[::step],
             timeseries.values[::step],
-            yerr=timeseries.errors[::step],
+            yerr=timeseries.std[::step] if self.errorbars != 'Confidence interval' else timeseries.std[::step] * self.ci_factor,
             linestyle='None',
             color=timeseries.colour,
-            marker=timeseries.marker,
+#            marker=timeseries.marker,
         ) 
 
 
@@ -397,6 +420,7 @@ class TimeseriesPlot(HasTraits):
             color=timeseries.colour,
             linestyle='--' if timeseries.values_type == 'Volume' else '-',
             marker=timeseries.marker,
+            markevery=self.marker_interval
         )
         line = lines[0]
 #        print line
@@ -512,66 +536,28 @@ class TimeseriesPlot(HasTraits):
 #                        label.set_visible(False)
 ##                    axes.xaxis.get_major_formatter().hide_offset = True
                     self.__hide_xinfo(axes)
-                if (i + 1) % cols != 1:
-#                    axes.set_ylabel('')
-#                    for label in axes.get_yticklabels():
-#                        label.set_visible(False)
-#                    axes.yaxis.set_major_formatter(NullFormatter())
-                    self.__hide_yinfo(axes)
+                # don't hide ylabels
+#                if (i + 1) % cols != 1:
+##                    axes.set_ylabel('')
+##                    for label in axes.get_yticklabels():
+##                        label.set_visible(False)
+##                    axes.yaxis.set_major_formatter(NullFormatter())
+#                    self.__hide_yinfo(axes)
                 try:
                     volumes = self._amounts_to_volumes_map[amounts]
                     axes = self._create_axes_twinx(axes, volumes)
                     self._plot_timeseries(axes, volumes)
-                    if (i + 1) % cols != 0 and (i + 1) != len(self._amounts):
-#                        axes.set_ylabel('')
-#                        for label in axes.get_yticklabels():
-#                            label.set_visible(False)
-#                        axes.yaxis.set_major_formatter(NullFormatter())
-                        self.__hide_yinfo(axes)
+                    # don't hide ylabels
+#                    if (i + 1) % cols != 0 and (i + 1) != len(self._amounts):
+##                        axes.set_ylabel('')
+##                        for label in axes.get_yticklabels():
+##                            label.set_visible(False)
+##                        axes.yaxis.set_major_formatter(NullFormatter())
+#                        self.__hide_yinfo(axes)
                     if (i + 1) < len(self._amounts) - (cols - 1):
                         axes.xaxis.get_major_formatter().hide_offset = True # need to do this because the twin axes x axis formatter overwrites the true axes x axis formatters
 #                        self.__hide_xinfo(axes)
                 except KeyError: pass # clever way of making this work regardless of _some_volumes
-
-#    def _options_fired(self):
-#        self.edit_traits(
-#            view=View(
-#                VGroup(
-#                    HGroup(
-#                        Item('style', style='custom'),
-#                    ),
-#                    HGroup(
-#                        Item('separate_volumes', visible_when='object._some_volumes and not object.style=="Combined"'),
-#                    ),
-#                    HGroup(
-#                        'gridlines',
-#                    ),
-#                    HGroup(
-#                        'figure_legend',
-#                        Item('individual_legends', visible_when='not object.style=="Combined"'),
-#                    ),
-#                    HGroup(
-#                        Item('individual_volume_labels', visible_when='len(object.volumes) > 0) and not object.style=="Combined"'),
-#                        Item('individual_amounts_labels', visible_when='len(object.amounts) > 0 and not object.style=="Combined"'),
-#                        Item('individual_time_labels', visible_when='not object.style=="Combined"'),
-#                    ),
-#                    Item('_timeseries',
-#                        show_label=False,
-##                        style='readonly',
-##                        editor=ListEditor(
-##                            style='custom',
-##                            editor=InstanceEditor(),
-##                        ),
-#                        style='custom',
-#                        editor=timeseries_table_editor,
-#                    ),
-#                    show_border=True,
-#                ),
-#                title='Configure timeseries plot',
-#            )
-#        )
-#
-#    options = Button
 
     timepoints_units = TimeUnit
     volumes_units = VolumeUnit
@@ -612,7 +598,6 @@ class TimeseriesPlot(HasTraits):
                 timeseries.values = timeseries.values.rescale(concentration_units[self.concentrations_units])
                 timeseries.values_units = self.concentrations_units
             
-
     def traits_view(self):
         return View(
             VGroup(
@@ -621,6 +606,14 @@ class TimeseriesPlot(HasTraits):
                     Item('style', style='custom'),
                     Item('separate_volumes', enabled_when='object._some_volumes and not object.style=="Combined"'),
 #                    Item('plot_volumes', visible_when='len([timeseries for timeseries in object.timeseries if timeseries.values_type=="Volume"]) > 0'),
+                ),
+                HGroup(
+                    'marker_interval',
+                    'errorbars',
+                    Item('ci_degree',
+                        label='Confidence interval degree',
+                        enabled_when='object.errorbars=="Confidence interval"',
+                    ),
                 ),
                 HGroup(
                     Item('timepoints_units',
@@ -651,9 +644,13 @@ class TimeseriesPlot(HasTraits):
 #                       visible_when='len(object.volumes) > 0'),
 #                ),
                 HGroup(
+                    Spring(),
                     'gridlines',
+                    Spring(),
                     'figure_legend',
+                    Spring(),
                     Item('individual_legends', visible_when='not object.style=="Combined"'),
+                    Spring(),
                     Item('font_size',
                         editor=RangeEditor(mode='text')
                     ),
@@ -683,7 +680,7 @@ class TimeseriesPlot(HasTraits):
 #                    Item('options', show_label=False),
                     Spring(),
                     Item('save_resized'),
-#                    Item('list_widget'),
+#                    Item('list_widget'), #TODO
 #                    'print_SubplotParams',
                     show_labels=False,
                 ),
@@ -694,7 +691,102 @@ class TimeseriesPlot(HasTraits):
             width=1024, height=768,
             resizable=True,
             title=self.window_title,
+            id='TimeseriesPlot',
         )
+
+#    data_settings = Button
+#    display_settings = Button
+
+    options = Button
+
+    def _options_fired(self):
+        self.edit_traits(
+            view=View(
+                VGroup(
+                HGroup(
+                    Item('edit_timeseries', show_label=False),
+                    Item('style', style='custom'),
+                    Item('separate_volumes', enabled_when='object._some_volumes and not object.style=="Combined"'),
+#                    Item('plot_volumes', visible_when='len([timeseries for timeseries in object.timeseries if timeseries.values_type=="Volume"]) > 0'),
+                ),
+                HGroup(
+                    'marker_interval',
+                    'errorbars',
+                    Item('ci_degree',
+                        label='Confidence interval degree',
+                        enabled_when='object.errorbars=="Confidence interval"',
+                    ),
+                ),
+                HGroup(
+                    Item('timepoints_units',
+                        editor=time_units_editor,
+                        visible_when='len(object._timeseries) > 0'
+                    ),
+                    Item('substances_units',
+                        editor=substance_units_editor,
+                        visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Amount"]'
+                    ),
+                    Item('concentrations_units',
+                        editor=concentration_units_editor,
+                        visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Concentration"]'
+                    ),
+                    Item('volumes_units',
+                        editor=volume_units_editor,
+                        visible_when='len(object._volumes) > 0'
+                    ),
+                    'abbreviated_units',
+                ),
+#                HGroup(
+#                   'amounts_type', #TODO remove
+#                   Item('concentration_units',
+#                       editor=EnumEditor(values={'M':'1:M', 'mM':'2:mM', 'uM':'3:uM', 'pM':'4:pM', 'fM':'5:fM'}),
+#                       visible_when='object.amounts_type=="Concentration"'),
+#                   Item('volume_units',
+#                       editor=EnumEditor(values={'L':'1:L', 'mL':'2:mL', 'uL':'3:uL', 'pL':'4:pL', 'fL':'5:fL'}),
+#                       visible_when='len(object.volumes) > 0'),
+#                ),
+                HGroup(
+                    Spring(),
+                    'gridlines',
+                    Spring(),
+                    'figure_legend',
+                    Spring(),
+                    Item('individual_legends', visible_when='not object.style=="Combined"'),
+                    Spring(),
+                    Item('font_size',
+                        editor=RangeEditor(mode='text')
+                    ),
+                    Spring(),
+                ),
+                HGroup(
+                    Item(label='Show individual axis labels'),
+                    Item('individual_time_labels', label='time', visible_when='not object.style=="Combined"'),
+                    Item('individual_amounts_labels', label='amounts', visible_when='len(object.amounts) > 0 and not object.style=="Combined"'),
+                    Item('individual_volume_labels', label='volume', visible_when='len(object.volumes) > 0 and not object.style=="Combined"'),
+                ),
+                HGroup(
+                    'scientific_time_ticklabels',
+                    'scientific_amounts_ticklabels',
+                    'scientific_volume_ticklabels',
+                ),
+               Item('_timeseries',
+                        show_label=False,
+#                        style='readonly',
+#                        editor=ListEditor(
+#                            style='custom',
+#                            editor=InstanceEditor(),
+#                        ),
+                        style='custom',
+                        editor=timeseries_table_editor,
+                    ),
+                    show_border=True,
+                ),
+                title='Configure timeseries plot',
+            )
+        )
+
+
+
 
 #    print_SubplotParams = Button
 #    def _print_SubplotParams_fired(self):
@@ -806,12 +898,12 @@ def main():
     from PyQt4.QtGui import qApp
     from mcss_results_widget import McssResultsWidget
     from PyQt4.QtCore import Qt
-    
     argv = qApp.arguments()
 #    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
-    argv.insert(1, '/home/jvb/dashboard/examples/germination_09.h5')
+    argv.insert(1, '../../../examples/germination_09.h5')
     if len(argv) > 2:
         print 'usage: python timeseries_plot.py [h5file]'
+        import sys
         sys.exit(2)
     if len(argv) == 1:
 #        shared.settings.register_infobiotics_settings()
@@ -872,6 +964,7 @@ def main():
 #    print volumes_display_units
     
     self.plot()
+    qApp.exec_()
     
 
 if __name__ == '__main__':

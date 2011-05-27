@@ -1,8 +1,10 @@
 from __future__ import division # essential for _get_colour
-from enthought.traits.api import HasTraits, Float, Str, Color, Enum, Property, cached_property, Array, Instance, Tuple, Bool, List
+from enthought.traits.api import HasTraits, Float, Str, Color, Enum, Property, \
+    cached_property, Array, Instance, Tuple, Bool, List
 from run import Run
 from species import Species
 from compartment import Compartment
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 import StringIO
@@ -11,12 +13,13 @@ from enthought.traits.ui.api import View, HGroup, Item
 
 class Timeseries(HasTraits):
 
-    errors = Array #TODO
+    std = Array(desc='the standard deviations of the timeseries values')
+
     runs = List(Run)
     run = Instance(Run)
-    species = Instance(Species) # None == Volume?
+    species = Instance(Species) # None == Volume
     compartment = Instance(Compartment)
-    
+
     timepoints = Array
     timepoints_units = Str
     

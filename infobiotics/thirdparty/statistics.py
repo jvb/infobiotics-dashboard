@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#TODO use inverse cumulative distribution function (cdf) for confidence intervals
+# we use inverse cumulative distribution function (cdf) for confidence intervals
 
 """Basic statistics utility functions.
 
