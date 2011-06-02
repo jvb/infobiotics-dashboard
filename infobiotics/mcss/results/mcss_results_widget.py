@@ -478,9 +478,15 @@ class McssResultsWidget(QWidget):
     def selected_species(self):
         ''' Return selected species after removing volumes. '''
         selected_species = self.ui.species_list_widget.selectedItems()
-        if self.simulation.log_volumes and self.volumes_list_widget_item in selected_species:
-            selected_species.remove(self.volumes_list_widget_item)
-            self.volumes_selected = True
+        if self.simulation.log_volumes < 1:
+            self.volumes_selected = False
+        if self.simulation.log_volumes:
+            if self.simulation.log_volumes < 1:
+                self.volumes_selected = False
+                return selected_species
+            if self.volumes_list_widget_item in selected_species:
+                selected_species.remove(self.volumes_list_widget_item)
+                self.volumes_selected = True
         else:
             self.volumes_selected = False
         return selected_species
@@ -845,8 +851,10 @@ class McssResultsWidget(QWidget):
 
 
 def test():
-    w = McssResultsWidget(filename='../../../examples/quickstart-NAR/NAR_simulation.h5')
 #    w = McssResultsWidget(filename='../../../examples/germination_09.h5')
+#    w = McssResultsWidget(filename='../../../examples/quickstart-NAR/NAR_simulation.h5')
+    w = McssResultsWidget(filename='/home/jvb/phd/dated/20091130 histograms (runnable) and simulation results/for Giordano/colonyModel.h5')
+
     centre_window(w)
     w.ui.select_all_runs_check_box.setChecked(True)
     w.ui.select_all_species_check_box.setChecked(True)

@@ -95,7 +95,7 @@ class Experiment(Params):
         
         # actually perform the experiment
         if not thread or self._interaction_mode in ('terminal', 'script'):
-            self._perform()
+            self._perform(expecting_no_output)
         else:
             class Thread(QThread):
                 def __init__(self, experiment):

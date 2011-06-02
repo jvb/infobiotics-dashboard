@@ -112,3 +112,7 @@ Parse command line arguments to Dashboard using argparse, file names to Unified 
 Unified 'Open File...' service/action
 
 Adding Dashboard progress bars (with Experiment and Results buttons) to view list
+
+McssResults: composite species (sum of all species in composite), composite runs (e.g. all runs) and composite compartments... 
+
+
