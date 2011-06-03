@@ -214,7 +214,7 @@ else: # assume sys.platform.startswith('linux'):
 
 # dependencies when doing 'python setup.py install' 
 INSTALL_REQUIRES = [
-    'numpy>=1.4.1',
+    'numpy>=1.4.0',
     'EnthoughtBase>=3.0.4',
     'AppTools>=3.3.2',
     'Traits>=3.4.0',
@@ -222,7 +222,7 @@ INSTALL_REQUIRES = [
     'EnvisageCore>=3.1.2',
     'EnvisagePlugins>=3.1.2',
     'TraitsBackendQt>=3.4.0',
-    'Mayavi>=3.4.0',
+    'Mayavi',
     'configobj', # for enthought.preferences
     'matplotlib', #,==0.99.1', 
     'progressbar',

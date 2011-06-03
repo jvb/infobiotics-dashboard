@@ -46,9 +46,12 @@ class TimeseriesPlot(HasTraits):
 
     _figure = Instance(Figure, ())
 
-    def __init__(self, **traits):
+    def __init__(self, results, **traits):
         HasTraits.__init__(self)
         self.trait_setq(**traits)
+        self.results = results
+        if len(self.results.run_indices) < 2:
+            self.errorbars = 'None'
         self._timeseries_changed()
         self._update_units()
         # call _update_figure only once during initialisation. 
@@ -388,12 +391,15 @@ class TimeseriesPlot(HasTraits):
     
     @cached_property
     def _get_ci_factor(self):
-        if self.ci_degree > 0.999:
-            return 0.999
+	if len(self.results.run_indices) < 2:
+            return 1
+#        if self.ci_degree > 0.999:
+#            return 0.999
         return self.results.ci_factor(self.ci_degree)
 
     def _plot_timeseries(self, axes, timeseries):
-        if self.errorbars != 'None' and len(timeseries.std) > 0:
+        if self.errorbars != 'None' and len(timeseries.runs) > 0 and len(timeseries.std) > 0:
+#            print timeseries.std, timeseries.xlabel
             self._plot_errorbars(axes, timeseries)
         self._plot_line(axes, timeseries)
     
@@ -609,10 +615,13 @@ class TimeseriesPlot(HasTraits):
                 ),
                 HGroup(
                     'marker_interval',
-                    'errorbars',
-                    Item('ci_degree',
-                        label='Confidence interval degree',
-                        enabled_when='object.errorbars=="Confidence interval"',
+                    HGroup(
+                        'errorbars',
+                        Item('ci_degree',
+                            label='Confidence interval degree',
+                            enabled_when='object.errorbars=="Confidence interval"',
+                        ),
+                        visible_when='object.errorbars!="None"',
                     ),
                 ),
                 HGroup(

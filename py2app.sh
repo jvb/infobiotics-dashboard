@@ -49,6 +49,10 @@ cp /Library/Frameworks/Python.framework/Versions/Current/lib/libhdf5.6.dylib dis
 #install_name_tool -change "@rpath/libfreetype.6.dylib" "@loader_path/../../../../Frameworks/libfreetype.6.dylib" dist/Infobiotics\ Dashboard.app/Contents/Resources/lib/python2.6/matplotlib/ft2font.so
 
 
+# copy missing modules
+#quantities/markup.pyc
+cp -r /Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/quantities/* ~/workspace/infobiotics-dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages/quantities/ 
+
 # copy missing libraries
 cp /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_*.dylib /Library/Frameworks/Python.framework/Versions/6.2/lib/libiomp5.dylib /Library/Frameworks/Python.framework/Versions/6.2/lib/libpng12.0.dylib  dist/InfobioticsDashboard.app/Contents/Frameworks/
 
@@ -73,4 +77,4 @@ echo "all built ok"
 #echo "dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard" &&
 #echo &&
 #echo "Running now" &&
-#dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard
+dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard
