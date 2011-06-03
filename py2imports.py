@@ -37,6 +37,8 @@ if False: # guard
     
     from enthought.pyface.ui.qt4 import about_dialog, application_window, clipboard, confirmation_dialog, dialog, directory_dialog, file_dialog, gui, heading_text, image_cache, image_resource, init, message_dialog, progress_dialog, python_editor, python_shell, resource_manager, splash_screen, split_widget, system_metrics, widget, window
     from enthought.pyface.ui.qt4.workbench import editor, split_tab_widget, view, workbench_window_layout
+    from enthought.pyface.timer import do_later
+    from enthought.pyface.ui.qt4.timer import do_later
     
     from enthought.envisage.ui.workbench.action import api
     

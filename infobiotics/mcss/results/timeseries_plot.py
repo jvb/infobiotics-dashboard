@@ -621,7 +621,7 @@ class TimeseriesPlot(HasTraits):
                             label='Confidence interval degree',
                             enabled_when='object.errorbars=="Confidence interval"',
                         ),
-                        visible_when='object.errorbars!="None"',
+                        visible_when='len(object.results.run_indices) > 1',
                     ),
                 ),
                 HGroup(
