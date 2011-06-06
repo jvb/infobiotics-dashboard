@@ -1,16 +1,7 @@
 #!/bin/sh
 
-#jvb
-VERSION=$(cat VERSION.txt)
-PYPINAME=InfobioticsDashboard-$VERSION
-./clean.sh
-python setup.py sdist &&
-cd dist &&
-tar -xzvf $PYPINAME.tar.gz &&
-cd $PYPINAME
-
-#jpt
 PKGBASE=$(cat NAME.txt)
+VERSION=$(cat VERSION.txt)
 PKGNAME=$PKGBASE-$VERSION
 MAINTAINER="Jonathan Blakes <jvb@cs.nott.ac.uk>"
 PYPKGNAME=${PKGNAME}
@@ -119,8 +110,4 @@ fi
 
 # all done
 echo "all ${PKGBASE} packages built ok"
-
-
-#jvb
-#echo "scp $PYPINAME\_$VERSION\_all.deb jpt@fingal:"
 

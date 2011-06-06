@@ -21,7 +21,6 @@ chmod +x bin/infobiotics-dashboard.py
 easy_install pip
 pip install py2app pexpect
 # is it really necessary to install pexpect?
-
 ${PYTHON} setup.py py2app $* &&
 #--no-strip
 
@@ -46,17 +45,19 @@ echo "copying libhdf5.6.dylib (can't do this using 'py2app --frameworks')" &&
 cp /Library/Frameworks/Python.framework/Versions/Current/lib/libhdf5.6.dylib dist/InfobioticsDashboard.app/Contents/MacOS/../Frameworks/libhdf5.6.dylib &&
 
 # Tiger-specific
+#echo "fixing Tiger (Mac OSX 10.4) libs"
 #install_name_tool -change "@rpath/libfreetype.6.dylib" "@loader_path/../../../../Frameworks/libfreetype.6.dylib" dist/Infobiotics\ Dashboard.app/Contents/Resources/lib/python2.6/matplotlib/ft2font.so
-
 
 # copy missing modules
 #quantities/markup.pyc
-cp -r /Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/quantities/* ~/workspace/infobiotics-dashboard/dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages/quantities/ 
+echo "copying quantities source, bytecode and data"
+cp -r /Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/quantities/* dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages/quantities/ 
 
 # copy missing libraries
 cp /Library/Frameworks/Python.framework/Versions/6.2/lib/libmkl_*.dylib /Library/Frameworks/Python.framework/Versions/6.2/lib/libiomp5.dylib /Library/Frameworks/Python.framework/Versions/6.2/lib/libpng12.0.dylib  dist/InfobioticsDashboard.app/Contents/Frameworks/
 
 # fix path
+echo "fixing paths"
 install_name_tool -change @rpath/libmkl_lapack.dylib @executable_path/../Frameworks/libmkl_lapack.dylib dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/linalg/lapack_lite.so
 install_name_tool -change @rpath/libmkl_intel.dylib @executable_path/../Frameworks/libmkl_intel.dylib dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/linalg/lapack_lite.so
 install_name_tool -change @rpath/libmkl_intel_thread.dylib @executable_path/../Frameworks/libmkl_intel_thread.dylib dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/numpy/linalg/lapack_lite.so
@@ -77,4 +78,4 @@ echo "all built ok"
 #echo "dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard" &&
 #echo &&
 #echo "Running now" &&
-dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard
+#dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard
