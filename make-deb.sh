@@ -122,5 +122,5 @@ echo "all ${PKGBASE} packages built ok"
 
 
 #jvb
-echo "scp $PYPINAME\_$VERSION\_all.deb jpt@fingal:"
+#echo "scp $PYPINAME\_$VERSION\_all.deb jpt@fingal:"
 
