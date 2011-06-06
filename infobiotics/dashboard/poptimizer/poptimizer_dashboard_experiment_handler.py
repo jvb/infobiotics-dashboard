@@ -1,4 +1,4 @@
-from infobiotics.poptimizer.api import POptimizerExperimentHandler
+from infobiotics.poptimizer.poptimizer_experiment_handler import POptimizerExperimentHandler
 from infobiotics.dashboard.core.dashboard_experiment_handler import DashboardExperimentHandler
 
 class POptimizerDashboardExperimentHandler(DashboardExperimentHandler, POptimizerExperimentHandler):

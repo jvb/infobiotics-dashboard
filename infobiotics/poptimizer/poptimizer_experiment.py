@@ -17,7 +17,7 @@ class POptimizerExperiment(POptimizerParams, Experiment):
     '''TODO'''
 
     def __handler_default(self):
-        from infobiotics.poptimizer.api import POptimizerExperimentHandler
+        from infobiotics.poptimizer.poptimizer_experiment_handler import POptimizerExperimentHandler
         return POptimizerExperimentHandler(model=self)
 
     executable_kwargs = [
