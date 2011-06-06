@@ -1,16 +1,16 @@
-'''
-Explicit imports for modules and packages that not automatically picked up by
+'''Explicit imports for modules and packages that not automatically picked up by
 modulefinder when running py2app and py2exe, in particular this includes 
 Enthought's TraitsUI backend modules that are dynamically loaded.
 
 The infobiotics modules import statements can be generated using the command:
 find infobiotics *.py | grep '.py$' | grep -v -E 'setup.py|py2imports.py|.__init__|.svn' | sed 's/\//./g' | sed 's/.py$//' | sed 's/[.]*/    import &/' | grep -v '\._[^_]'
-
+#> py2imports.txt
+but some files have been excluded manually with comments. 
 '''
 
-if False: # guard
-    # py2exe and py2app modulefinder uses lexical analysis so this still works
+if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this still works
 
+    # PyQt4
     import sip
     import PyQt4
     from PyQt4 import QtCore
@@ -19,34 +19,85 @@ if False: # guard
     from PyQt4 import QtNetwork
     from PyQt4 import QtXml # supposed to fix matplotlib SVG icons http://groups.google.com/group/pyinstaller/browse_thread/thread/834bea87c7afcdff # it doesn't as far as I can tell
     from PyQt4 import QtSvg
-    
+#    import qt
+    import PyQt4._qt
+
+    # progressbar
+    import progressbar
+
+    # NumPy
     import numpy
+    import numpy.core
+    from numpy import *
+    from numpy.core import *
     
+    # matplotlib
     import matplotlib
     
-    import vtk
+    # quantities
+    import quantities
+    from quantities import *
+    import quantities.markup # might need a datafile too
+    import quantities.units
+    from quantities.units import *
+    import quantities.quantity
+    import quantities.unitquantity
+    import quantities.units
+    import quantities.units.prefixes
+    import quantities.units.substance
+    import quantities.units.time
+    import quantities.units.volume
     
+    # setproctitle
+    import setproctitle
+    
+    # vtk
+    import vtk
+    import vtk.vtkVersion
+    from vtk import *
+    from vtk import libvtkCommonPython
+    from vtk import libvtkFilteringPython
+    from vtk import libvtkGenericFilteringPython
+    from vtk import libvtkGeovisPython
+    from vtk import libvtkGraphicsPython
+    from vtk import libvtkHybridPython
+    from vtk import libvtkIOPython
+    from vtk import libvtkImagingPython
+    from vtk import libvtkInfovisPython
+    from vtk import libvtkParallelPython
+    from vtk import libvtkRenderingPython
+    from vtk import libvtkViewsPython
+    from vtk import libvtkVolumeRenderingPython
+    from vtk import libvtkWidgetsPython
+    
+    # traitsbackendqt
+    from enthought.pyface.ui.qt4 import about_dialog, application_window, clipboard, confirmation_dialog, dialog, directory_dialog, file_dialog, gui, heading_text, image_cache, image_resource, init, message_dialog, progress_dialog, python_editor, python_shell, resource_manager, splash_screen, split_widget, system_metrics, widget, window
+    from enthought.pyface.ui.qt4.action import action_item, menu_manager, menu_bar_manager, status_bar_manager, tool_bar_manager
+    from enthought.pyface.ui.qt4.workbench import editor, split_tab_widget, view, workbench_window_layout
     import enthought.traits.ui.qt4
     
-    from enthought.pyface.ui.qt4.action import action_item, menu_manager, menu_bar_manager, status_bar_manager, tool_bar_manager
-    
-    import enthought.tvtk.vtk_module
-    import enthought.tvtk.pyface.ui.qt4.init
-    import enthought.tvtk.pyface.ui.qt4
-    from enthought.tvtk.pyface.ui.qt4.scene_editor import *
-    
-    from enthought.pyface.ui.qt4 import about_dialog, application_window, clipboard, confirmation_dialog, dialog, directory_dialog, file_dialog, gui, heading_text, image_cache, image_resource, init, message_dialog, progress_dialog, python_editor, python_shell, resource_manager, splash_screen, split_widget, system_metrics, widget, window
-    from enthought.pyface.ui.qt4.workbench import editor, split_tab_widget, view, workbench_window_layout
-    
+    # envisage
     from enthought.envisage.ui.workbench.action import api
-    
     import enthought.plugins.ipython_shell.actions
     import enthought.plugins.ipython_shell.actions.ipython_shell_actions
     import enthought.plugins.refresh_code.actions
     import enthought.plugins.remote_editor.actions
     import enthought.plugins.text_editor.actions
-    import enthought.tvtk.plugins.scene.ui.actions
+    
+    # TVTK
+    import enthought.tvtk.plugins.scene.ui.actions # Envisage actions
 
+    import enthought.tvtk
+    import enthought.tvtk.vtk_module
+    import enthought.tvtk.pyface.ui.qt4.init
+    import enthought.tvtk.pyface.ui.qt4
+    from enthought.tvtk.pyface.ui.qt4.scene_editor import *
+
+    import enthought.tvtk.tvtk_classes # unzipped in py2exe/py2app.sh
+    import enthought.tvtk.tvtk_classes.vtk_version
+    from enthought.tvtk.tvtk_classes import * 
+
+    # infobiotics-dashboard
 #    find infobiotics *.py | grep '.py$' | grep -v -E 'setup.py|py2imports.py|.__init__|.svn' | sed 's/\//./g' | sed 's/.py$//' | sed 's/[.]*/    import &/' | grep -v '\._[^_]'
     '''
     find infobiotics *.py # find files and directories including *.py under (and including) infobiotics 
@@ -58,6 +109,7 @@ if False: # guard
     grep -v '\._[^_]' # remove file names starting with an underscore but not 2 underscores
     '''    
     # use this command to create the list of infobiotics files below
+    import infobiotics.core.traits.model_file
     import infobiotics.core.traits.params_relative_directory
     import infobiotics.core.traits.params_relative_file
     import infobiotics.core.experiment
@@ -238,7 +290,6 @@ if False: # guard
     import infobiotics.dashboard.pmodelchecker.mc2_dashboard_experiment_handler
     import infobiotics.dashboard.pmodelchecker.editor
     import infobiotics.dashboard.pmodelchecker.prism_dashboard_experiment
-    import infobiotics.dashboard.pmodelchecker.prism_dashboard_experiment_progress_handler
     import infobiotics.dashboard.pmodelchecker.ui_plugin
     import infobiotics.dashboard.pmodelchecker.actions
     import infobiotics.dashboard.pmodelchecker.commons
@@ -281,6 +332,7 @@ if False: # guard
     import infobiotics.dashboard.poptimizer.action_set
     import infobiotics.__version__
     import infobiotics.thirdparty.which
+    import infobiotics.thirdparty.statistics
     import infobiotics.mcsscmaes.mcsscmaes_params_group
     import infobiotics.mcsscmaes.mcsscmaes_preferences
     import infobiotics.mcsscmaes.api
@@ -296,17 +348,16 @@ if False: # guard
     import infobiotics.mcss.results.compartments_list_widget
     import infobiotics.mcss.results.compartment
     import infobiotics.mcss.results.run
-    import infobiotics.mcss.results.statistics
     import infobiotics.mcss.results.surfaces_widget
     import infobiotics.mcss.results.species
-    import infobiotics.mcss.results.histograms2.SimulationDatasets
-    import infobiotics.mcss.results.histograms2.EnhancedListWidget
-    import infobiotics.mcss.results.histograms2.Workbench
-    import infobiotics.mcss.results.histograms2.md5sum
-    import infobiotics.mcss.results.histograms2.functions
-    import infobiotics.mcss.results.histograms2.actions
-    import infobiotics.mcss.results.histograms2.HistogramWidget
-    import infobiotics.mcss.results.histograms2.SimulationWidgets
+#    import infobiotics.mcss.results.histograms2.SimulationDatasets
+#    import infobiotics.mcss.results.histograms2.EnhancedListWidget
+#    import infobiotics.mcss.results.histograms2.Workbench
+#    import infobiotics.mcss.results.histograms2.md5sum
+#    import infobiotics.mcss.results.histograms2.functions
+#    import infobiotics.mcss.results.histograms2.actions
+#    import infobiotics.mcss.results.histograms2.HistogramWidget
+#    import infobiotics.mcss.results.histograms2.SimulationWidgets
     import infobiotics.mcss.results.simulation_list_widget_item
     import infobiotics.mcss.results.icons_rc
     import infobiotics.mcss.results.FromToDoubleSpinBox
@@ -349,7 +400,6 @@ if False: # guard
     import infobiotics.mcss.mcss_preferences
     import infobiotics.mcss.mcss_experiment_handler
     import infobiotics.mcss.mcss_params_handler
-    import infobiotics.poptimizer.api
     import infobiotics.poptimizer.poptimizer_experiment_handler
     import infobiotics.poptimizer.poptimizer_params_handler
     import infobiotics.poptimizer.poptimizer_experiment

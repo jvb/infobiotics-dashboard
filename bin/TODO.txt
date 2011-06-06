@@ -1,0 +1,6 @@
+in make_bin.sh:
+	consume _ibw.py instead of ibw.py
+	produce ibw, ibw.py and ibw.pyw instead of infobiotics-dashboard...
+
+add mcss-results and pmodelchecker-results to _ibw.py
+	

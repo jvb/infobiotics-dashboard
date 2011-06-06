@@ -50,21 +50,272 @@ EXCLUDES = [
     'sqlite3'
     'mayavi.html',
 ]
+''' more potential EXCLUDES: #TODO
+AppKit
+Carbon
+Carbon.Files
+DLFCN
+ExtensionClass
+Foundation
+ICCProfile
+IronPython.Runtime.Exceptions
+IronPythonConsole
+Numeric
+PyObjCTools
+System
+System.Windows.Forms.Clipboard
+_conditions_pro
+_imaging_gif
+_imagingagg
+_scproxy
+_transforms
+_wxagg
+builtins
+cairo
+cairo.gtk
+clr
+config
+core.abs
+core.max
+core.min
+core.round
+dl
+dnd_editor
+fastnumpy
+fastnumpy.mklfft
+fltk
+gobject
+gtk
+gtk.glade
+hexdump
+infobiotics.commons.traits.tests.test_relative_directory_and_params_relative_file.test_relative_directory_and_params_relative_file
+infobiotics.dashboard.core.api
+infobiotics.mcss.results.histograms2.EnhancedListWidget
+infobiotics.mcss.results.histograms2.HistogramWidget
+infobiotics.mcss.results.histograms2.SimulationDatasets
+infobiotics.mcss.results.histograms2.SimulationWidgets
+infobiotics.mcss.results.histograms2.Workbench
+infobiotics.mcss.results.histograms2.actions
+infobiotics.mcss.results.histograms2.functions
+infobiotics.mcss.results.histograms2.md5sum
+infobiotics.mcss.results.statistics
+infobiotics.pmodelchecker.prism.api
+ipy_completers
+ipy_system_conf
+jinja2.debugrenderer
+lib.add_newdoc
+libvtkCommonPython
+libvtkFilteringPython
+libvtkGenericFilteringPython
+libvtkGeovisPython
+libvtkGraphicsPython
+libvtkHybridPython
+libvtkIOPython
+libvtkImagingPython
+libvtkInfovisPython
+libvtkParallelPython
+libvtkRenderingPython
+libvtkViewsPython
+libvtkVolumeRenderingPython
+libvtkWidgetsPython
+matplotlib.backends._backend_gdk
+matplotlib.backends._gtkagg
+matplotlib.backends._macosx
+mlab.amax
+mlab.amin
+modes.editingmodes
+mpl_toolkits.natgrid
+numarray
+numarray.generic
+numarray.records
+numarray.strings
+numpy.dft.old
+numpy.lib.mlab
+numpy.linalg.old
+objc
+ordered_set_editor
+pango
+pexpect
+plot_editor
+pretty
+progressbar
+projections.get_projection_class
+projections.get_projection_names
+projections.projection_factory
+pydb
+pydb.fns
+pyemf
+pygments.formatters.HtmlFormatter
+pygments.formatters.LatexFormatter
+pygments.formatters.TerminalFormatter
+pygments.lexers.CLexer
+pygments.lexers.PythonConsoleLexer
+pygments.lexers.PythonLexer
+pygments.lexers.RstLexer
+pygments.lexers.TextLexer
+pytz.zoneinfo
+pywin.dialogs.list
+qt
+quantities
+quantities.quantity
+quantities.unitquantity
+quantities.units
+quantities.units.prefixes
+quantities.units.substance
+quantities.units.time
+quantities.units.volume
+resource
+setproctitle
+shell_editor
+simplejson
+site_mayavi
+sitecustomize
+startup
+sysconfig
+tables._parameters_pro
+tables._table_pro
+tables.index
+tables.lrucacheExtension
+testing.Tester
+tvtk_classes
+tvtk_classes.vtk_version
+tvtk_local
+ui_wizard
+unittest.case
+unittest.runner
+user_mayavi
+usercustomize
+value_editor
+wx.aui
+wx.combo
+wx.grid
+wx.html
+wx.lib.scrolledpanel
+wx.py
+wx.wizard
+wxPython
+numpy.Complex
+numpy.Complex32
+numpy.Complex64
+numpy.Float
+numpy.Float32
+numpy.Float64
+numpy.Int
+numpy.Int16
+numpy.Int32
+numpy.Int8
+numpy.UInt16
+numpy.UInt32
+numpy.UInt8
+numpy.absolute
+numpy.arccos
+numpy.arccosh
+numpy.arcsin
+numpy.arcsinh
+numpy.arctan
+numpy.arctanh
+numpy.bitwise_and
+numpy.bitwise_or
+numpy.bitwise_xor
+numpy.bool_
+numpy.ceil
+numpy.complexfloating
+numpy.conjugate
+numpy.core.absolute
+numpy.core.add
+numpy.core.bitwise_and
+numpy.core.bitwise_or
+numpy.core.bitwise_xor
+numpy.core.cdouble
+numpy.core.complexfloating
+numpy.core.conjugate
+numpy.core.csingle
+numpy.core.divide
+numpy.core.double
+numpy.core.equal
+numpy.core.float64
+numpy.core.float_
+numpy.core.greater
+numpy.core.greater_equal
+numpy.core.inexact
+numpy.core.intc
+numpy.core.integer
+numpy.core.invert
+numpy.core.isfinite
+numpy.core.isinf
+numpy.core.isnan
+numpy.core.left_shift
+numpy.core.less
+numpy.core.less_equal
+numpy.core.ma
+numpy.core.maximum
+numpy.core.multiply
+numpy.core.not_equal
+numpy.core.number
+numpy.core.power
+numpy.core.remainder
+numpy.core.right_shift
+numpy.core.signbit
+numpy.core.sin
+numpy.core.single
+numpy.core.sqrt
+numpy.core.subtract
+numpy.cosh
+numpy.divide
+numpy.fabs
+numpy.floating
+numpy.floor
+numpy.floor_divide
+numpy.fmod
+numpy.greater
+numpy.hypot
+numpy.invert
+numpy.isinf
+numpy.left_shift
+numpy.less
+numpy.log
+numpy.logical_and
+numpy.logical_not
+numpy.logical_or
+numpy.logical_xor
+numpy.maximum
+numpy.minimum
+numpy.negative
+numpy.not_equal
+numpy.power
+numpy.random.rand
+numpy.random.randn
+numpy.remainder
+numpy.right_shift
+numpy.sign
+numpy.sinh
+numpy.tan
+numpy.tanh
+numpy.true_divide
+numpy.uint
+numpy.uint0
+numpy.uint16
+numpy.uint32
+numpy.uint64
+numpy.uintc
+numpy.uintp
+vtk.vtkVersion
+'''
 
 if sys.platform.startswith('darwin'):
     import matplotlib
     extra_options = dict(
-        setup_requires=['py2app', 'pexpect'],
+        setup_requires=['py2app'], #, 'pexpect'], # done in INSTALL_REQUIRES
         app=['bin/infobiotics-dashboard.py'],
         options=dict(
             py2app=dict(
                 argv_emulation=True, # cross-platform applications generally expect sys.argv to be used for opening files
                 includes=['py2imports'], # better than INCLUDES?
                 excludes=EXCLUDES,
-                frameworks=[
+#                frameworks=[
 #                    '/Library/Frameworks/Python.framework/Versions/6.1/lib/libfreetype.6.dylib', # done in py2app.sh as an arg to py2exe (which would override this...?)
 #                    '/Library/Frameworks/Python.framework/Versions/Current/lib/libhdf5.6.dylib', # doesn't work from here, done in py2app.sh instead
-                ],
+#                ],
                 plist=dict(
                     # http://us.pycon.org/media/2010/talkdata/PyCon2010/038/paper.html#id18
 #                    LSPrefersPPC=True,
@@ -109,7 +360,7 @@ elif sys.platform.startswith('win'):
     try:
         import py2exe
         # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
-        import sys
+#        import sys
         import pywintypes
         import pythoncom
         import win32api
@@ -126,7 +377,7 @@ elif sys.platform.startswith('win'):
     except ImportError, e:
         sys.stderr.write('%s\n' % e)
 
-    import sys # needed for sys.prefix in mayavi_preferences and data_files below
+#    import sys # needed for sys.prefix in mayavi_preferences and data_files below
 
     # touch mayavi preferences.ini #TODO should probably be in py2exe.sh but since this only happens if we call 'python setup.py py2exe' it is probably ok here.
     import os
@@ -214,6 +465,7 @@ else: # assume sys.platform.startswith('linux'):
 
 # dependencies when doing 'python setup.py install' 
 INSTALL_REQUIRES = [
+#    'distribute', # http://pypi.python.org/pypi/distribute#quick-help-for-developers
     'numpy>=1.4.1',
     'EnthoughtBase>=3.0.4',
     'AppTools>=3.3.2',
@@ -222,7 +474,7 @@ INSTALL_REQUIRES = [
     'EnvisageCore>=3.1.2',
     'EnvisagePlugins>=3.1.2',
     'TraitsBackendQt>=3.4.0',
-    'Mayavi>=3.4.0',
+    'Mayavi', #>=3.4.0',
     'configobj', # for enthought.preferences
     'matplotlib', #,==0.99.1', 
     'progressbar',

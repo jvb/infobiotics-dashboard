@@ -1,5 +1,0 @@
-from poptimizer_experiment_handler import POptimizerExperimentHandler
-from poptimizer_params import POptimizerParams
-from poptimizer_experiment import POptimizerExperiment #FIXME class Module(HasTraits):
-from poptimizer_params_group import poptimizer_params_group
-from poptimizer_params_handler import POptimizerParamsHandler
