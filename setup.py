@@ -466,7 +466,7 @@ else: # assume sys.platform.startswith('linux'):
 # dependencies when doing 'python setup.py install' 
 INSTALL_REQUIRES = [
 #    'distribute', # http://pypi.python.org/pypi/distribute#quick-help-for-developers
-    'numpy>=1.4.1',
+    'numpy>=1.4.0',
     'EnthoughtBase>=3.0.4',
     'AppTools>=3.3.2',
     'Traits>=3.4.0',

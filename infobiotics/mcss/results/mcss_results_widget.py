@@ -354,7 +354,7 @@ class McssResultsWidget(QWidget):
 #        if i != -1:
 #            self.ui.quantities_display_type_combo_box.removeItem(i)
         show_widgets(ui.volumes_widget)
-        if self.simulation.log_volumes == 1:
+        if self.simulation.log_volumes in ('true', 1):
 #            self.ui.quantities_display_type_combo_box.insertItem(1, 'concentrations')
             self.volumes_list_widget_item = QListWidgetItem('Volumes', ui.species_list_widget)
 #            show_widgets(ui.volumes_widget)
@@ -478,15 +478,9 @@ class McssResultsWidget(QWidget):
     def selected_species(self):
         ''' Return selected species after removing volumes. '''
         selected_species = self.ui.species_list_widget.selectedItems()
-        if self.simulation.log_volumes < 1:
-            self.volumes_selected = False
-        if self.simulation.log_volumes:
-            if self.simulation.log_volumes < 1:
-                self.volumes_selected = False
-                return selected_species
-            if self.volumes_list_widget_item in selected_species:
-                selected_species.remove(self.volumes_list_widget_item)
-                self.volumes_selected = True
+        if self.simulation.log_volumes in ('true', 1) and self.volumes_list_widget_item in selected_species:
+            selected_species.remove(self.volumes_list_widget_item)
+            self.volumes_selected = True
         else:
             self.volumes_selected = False
         return selected_species
@@ -874,6 +868,7 @@ def main():
         w = McssResultsWidget(filename=argv[1])
     centre_window(w)
     w.show()
+    w.activateWindow()
     return w
 #    shared.settings.restore_window_size_and_position(w)
 
