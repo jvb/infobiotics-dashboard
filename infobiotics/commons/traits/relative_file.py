@@ -252,6 +252,9 @@ class RelativeFile(BaseStr):
                 except WhichError:
                     # value is not an executable file in system path
                     pass
+                except TypeError:
+                    # whichgen(...).next() yielded None
+                    pass
         
         abspath = self._abspath(value) # used later
         

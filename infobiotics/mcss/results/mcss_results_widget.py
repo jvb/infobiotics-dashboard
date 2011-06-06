@@ -868,7 +868,8 @@ def main():
         w = McssResultsWidget(filename=argv[1])
     centre_window(w)
     w.show()
-    w.activateWindow()
+#    w.raise_()
+#    qApp.processEvents()
     return w
 #    shared.settings.restore_window_size_and_position(w)
 

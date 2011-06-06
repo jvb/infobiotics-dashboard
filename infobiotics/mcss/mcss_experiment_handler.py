@@ -1,6 +1,7 @@
 from infobiotics.mcss.mcss_params_handler import McssParamsHandler
 from infobiotics.core.experiment_handler import ExperimentHandler
-from enthought.pyface.api import error 
+from enthought.pyface.api import error
+from PyQt4.Qt import qApp 
 
 class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
 
@@ -12,5 +13,7 @@ class McssExperimentHandler(McssParamsHandler, ExperimentHandler):
             from infobiotics.commons.qt4 import centre_window
             centre_window(w)
             w.show()
+            w.raise_()
+            qApp.processEvents()
         else:
             error(self.info.ui, "Results file '%s' does not exist, plotting aborted." % self.model.data_file_)
