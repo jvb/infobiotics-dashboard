@@ -112,16 +112,22 @@ class Experiment(Params):
                     print 'quit'
                     self.quit()
             self._thread = Thread(self)
-            if True:#self._interaction_mode in ('terminal', 'script'):
+            if self._interaction_mode in ('terminal', 'script'):
                 print 'start'
                 self._thread.start() # not gui
                 print 'QThread.currentThreadId', int(QThread.currentThreadId())
                 print '_thread.exec_'
-                self._thread.exec_()
+#                self._thread.exec_()
             else:
+#                print 'start'
+#                self._thread.start() # not gui
+#                print 'GUI.invoke_later'
+#                GUI.invoke_later(self._thread.start) # vital
                 print 'do_later'
                 do_later(self._thread.start) # vital
 #                do_later(QThread.yieldCurrentThread) # vital
+#                import time
+#                time.sleep(5)
 
         # restore default SIGINT handler that raises KeyboardInterrupt 
         if self._interaction_mode in ('terminal', 'script'):

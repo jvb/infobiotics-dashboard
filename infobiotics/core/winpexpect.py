@@ -285,7 +285,7 @@ def _stub(cmd_name, stdin_name, stdout_name, stderr_name):
 
     # Pass back results and exit
     err, nbytes = WriteFile(cmd_pipe, 'status=ok\npid=%s\n\n' % pid)
-    
+#    cmd_pipe.flush()    
     ExitProcess(0)
 
 
@@ -387,6 +387,7 @@ class winspawn(spawn):
         stdin_pipe, stdin_name = _create_named_pipe(self.pipe_template, sids)
         stdout_pipe, stdout_name = _create_named_pipe(self.pipe_template, sids)
         stderr_pipe, stderr_name = _create_named_pipe(self.pipe_template, sids)
+        print 'stdout_name, stderr_name =', stdout_name, stderr_name 
 
         startupinfo = STARTUPINFO()
         startupinfo.dwFlags |= STARTF_USESHOWWINDOW
@@ -396,6 +397,7 @@ class winspawn(spawn):
         pycmd = 'import winpexpect; winpexpect._stub(r"%s", r"%s", r"%s", r"%s")' \
                     % (cmd_name, stdin_name, stdout_name, stderr_name)
         pyargs = join_command_line([python, '-c', pycmd])
+        print pyargs
 
         # Create a new token or run as the current process.
         if self.username and self.password:
@@ -413,7 +415,7 @@ class winspawn(spawn):
                                 startupinfo)
         print res
         child_handle = res[0]
-#        res[1].Close()  # don't need thread handle
+        res[1].Close()  # don't need thread handle
 
         print 'hangs here if winpexpect in subdirectory...'
 #        print ConnectNamedPipe(cmd_pipe) #, FILE_FLAG_OVERLAPPED or PyOVERLAPPED())
@@ -428,12 +430,16 @@ class winspawn(spawn):
         ConnectNamedPipe(stderr_pipe)
 
         # Tell the stub what to do and wait for it to exit
+        print command
+        print args
         WriteFile(cmd_pipe, 'command=%s\n' % command)
         WriteFile(cmd_pipe, 'args=%s\n' % args)
         if token:
             parent_sid = ConvertSidToStringSid(_get_current_sid())
             WriteFile(cmd_pipe, 'parent_sid=%s\n' % str(parent_sid))
         WriteFile(cmd_pipe, '\n')
+        from win32file import FlushFileBuffers
+        FlushFileBuffers(cmd_pipe)
 #        CloseHandle(cmd_pipe)
 #        header = _read_header(cmd_pipe)
         header = _read_header(cmd_pipe, overlapped)
@@ -542,11 +548,11 @@ class winspawn(spawn):
             if status != 'data':
                 break
 
-    def _set_eof(self, fd):
+    def _set_eof(self, handle):
         """INTERNAL: mark a file handle as end-of-file."""
-        if fd == self.stdout_handle:
+        if handle == self.stdout_handle:
             self.stdout_eof = True
-        elif fd == self.stderr_handle:
+        elif handle == self.stderr_handle:
             self.stderr_eof = True
 
     def read_nonblocking(self, size=1, timeout=-1):
@@ -570,4 +576,11 @@ class winspawn(spawn):
         elif status == 'error':
             self._set_eof(handle)
             raise OSError, data
-        return self.chunk_buffer.read(size)
+        buf = self.chunk_buffer.read(size)
+        if self.logfile is not None:
+            self.logfile.write(buf)
+            self.logfile.flush()
+        if self.logfile_read is not None:
+            self.logfile_read.write(buf)
+            self.logfile_read.flush()
+        return buf

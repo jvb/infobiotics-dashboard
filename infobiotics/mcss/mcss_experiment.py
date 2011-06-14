@@ -82,11 +82,11 @@ def test():
     
 #    import os
 #    print os.getpid(), os.getpid() / 2
-#    experiment.perform(thread=True)
-#    import time
-#    time.sleep(5)
+    experiment.perform(thread=True)
+    import time
+    time.sleep(5)
 
-    experiment.configure()
+#    experiment.configure()
 
 
 
