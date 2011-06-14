@@ -10,12 +10,12 @@
         <parameter name="duplicate_initial_amounts" value="true"/>
         <parameter name="max_time" value="3600.0"/>
         <parameter name="log_interval" value="1.0"/>
-        <parameter name="runs" value="1"/>
+        <parameter name="runs" value="10"/>
         <parameter name="data_file" value="module1.h5"/>
         <parameter name="seed" value="0"/>
         <parameter name="compress" value="true"/>
         <parameter name="compression_level" value="9"/>
-        <parameter name="simulation_algorithm" value="dm"/>
+        <parameter name="simulation_algorithm" value="dmq2"/>
         <parameter name="log_type" value="levels"/>
         <parameter name="log_memory" value="false"/>
         <parameter name="log_propensities" value="false"/>

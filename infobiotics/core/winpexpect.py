@@ -140,12 +140,21 @@ def which(command):
                 return fname
 
 
-def _read_header(handle, bufsize=4096):
+#def _read_header(handle, bufsize=4096):
+def _read_header(handle, overlapped):
     """INTERNAL: read a stub header from a handle."""
+    import win32file
+#    bufsize = win32file.AllocateReadBuffer(bufsize)
+    bufsize = win32file.AllocateReadBuffer(8)
+#    print bufsize
     header = ''
     while '\n\n' not in header:
-        err, data = ReadFile(handle, bufsize)
-        header += data
+        print '_read_header'
+#        err, data = ReadFile(handle, bufsize)
+        err, data = ReadFile(handle, bufsize, overlapped)
+#        print 'err, data =', err, data
+        header += str(data)
+    print header
     return header
 
 
@@ -276,6 +285,7 @@ def _stub(cmd_name, stdin_name, stdout_name, stderr_name):
 
     # Pass back results and exit
     err, nbytes = WriteFile(cmd_pipe, 'status=ok\npid=%s\n\n' % pid)
+    
     ExitProcess(0)
 
 
@@ -389,20 +399,29 @@ class winspawn(spawn):
 
         # Create a new token or run as the current process.
         if self.username and self.password:
+            print 'create new token'
             token = LogonUser(self.username, self.domain, self.password,
                               LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT)
             res = CreateProcessAsUser(token, python, pyargs, None, None,
                                       False, CREATE_NEW_CONSOLE, self.env,
                                       self.cwd, startupinfo)
         else:
+            print 'run as the current process'
             token = None
             res = CreateProcess(python, pyargs, None, None, False,
                                 CREATE_NEW_CONSOLE, self.env, self.cwd,
                                 startupinfo)
+        print res
         child_handle = res[0]
-        res[1].Close()  # don't need thread handle
-        print 'hangs here if winpexpect in subdirectory...',
-        ConnectNamedPipe(cmd_pipe)
+#        res[1].Close()  # don't need thread handle
+
+        print 'hangs here if winpexpect in subdirectory...'
+#        print ConnectNamedPipe(cmd_pipe) #, FILE_FLAG_OVERLAPPED or PyOVERLAPPED())
+        import pywintypes
+        overlapped = pywintypes.OVERLAPPED()
+        overlapped.hEvent = pywintypes.HANDLE()
+#        overlapped.hEvent = child_handle
+        ConnectNamedPipe(cmd_pipe, overlapped)
         print 'but not this time'
         ConnectNamedPipe(stdin_pipe)
         ConnectNamedPipe(stdout_pipe)
@@ -415,8 +434,9 @@ class winspawn(spawn):
             parent_sid = ConvertSidToStringSid(_get_current_sid())
             WriteFile(cmd_pipe, 'parent_sid=%s\n' % str(parent_sid))
         WriteFile(cmd_pipe, '\n')
-
-        header = _read_header(cmd_pipe)
+#        CloseHandle(cmd_pipe)
+#        header = _read_header(cmd_pipe)
+        header = _read_header(cmd_pipe, overlapped)
         output = _parse_header(header)
         if output['status'] != 'ok':
             m = 'Child did not start up correctly. '

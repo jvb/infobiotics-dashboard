@@ -76,8 +76,16 @@ def test():
 ##        print name, value 
 ##    exit()
 
-#    experiment.perform(thread=True)
+    experiment.runs = 1
+    
 #    experiment.perform(thread=False)
+    
+#    import os
+#    print os.getpid(), os.getpid() / 2
+#    experiment.perform(thread=True)
+#    import time
+#    time.sleep(5)
+
     experiment.configure()
 
 

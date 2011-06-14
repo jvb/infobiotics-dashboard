@@ -1,3 +1,9 @@
+'''Adapted so that no windows are opened on exit - they always will be because
+py2exe imports sets which is deprecated. However, this will obscure crashes so
+it would be better to filter the above but shown (not just point to log file)
+what went wrong.
+'''
+
 # Common py2exe boot script - executed for all target types.
 
 # When we are a windows_exe we have no console, and writing to
@@ -69,7 +75,7 @@ if sys.frozen == "windows_exe":
         def flush(self):
             if self._file is not None:
                 self._file.flush()
-#    sys.stderr = Stderr()
+#    sys.stderr = Stderr() # commented out by jvb
     del sys._MessageBox
     del Stderr
 
@@ -80,7 +86,7 @@ if sys.frozen == "windows_exe":
         def flush(self):
             pass
     sys.stdout = Blackhole()
-    sys.stderr = Blackhole()
+    sys.stderr = Blackhole() # added by jvb
     del Blackhole
 del sys
 

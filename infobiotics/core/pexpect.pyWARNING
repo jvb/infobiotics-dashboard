@@ -1,0 +1,4 @@
+Having pexpect present in this directory seems to break winpexpect here!
+Install winpexpect from source tarball and leave winpexpect.py here alone and 
+it should get used instead.
+Whether it will get bundled correctly by py2exe is another matter.

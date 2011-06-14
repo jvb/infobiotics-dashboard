@@ -94,7 +94,7 @@ class Experiment(Params):
             signal.signal(signal.SIGINT, terminate)   
         
         # actually perform the experiment
-        if not thread or self._interaction_mode in ('terminal', 'script'):
+        if not thread:# or self._interaction_mode in ('terminal', 'script'):
             self._perform(expecting_no_output)
         else:
             class Thread(QThread):
@@ -102,10 +102,26 @@ class Experiment(Params):
                     QThread.__init__(self)
                     self.experiment = experiment
                 def run(self):
+                    print self.isRunning()
+                    print 'self.currentThreadId', int(self.currentThreadId())
+                    print 'perform'
                     self.experiment._perform()
-                    self.exec_() # vital
+                    print self.isFinished()
+#                    print 'self.exec_'
+#                    self.exec_() # vital
+                    print 'quit'
+                    self.quit()
             self._thread = Thread(self)
-            do_later(self._thread.start) # vital
+            if True:#self._interaction_mode in ('terminal', 'script'):
+                print 'start'
+                self._thread.start() # not gui
+                print 'QThread.currentThreadId', int(QThread.currentThreadId())
+                print '_thread.exec_'
+                self._thread.exec_()
+            else:
+                print 'do_later'
+                do_later(self._thread.start) # vital
+#                do_later(QThread.yieldCurrentThread) # vital
 
         # restore default SIGINT handler that raises KeyboardInterrupt 
         if self._interaction_mode in ('terminal', 'script'):
@@ -127,12 +143,14 @@ class Experiment(Params):
         **Might be running in thread.**
          
         '''
+        print 'got here'
         if sys.platform.startswith('win'):
             self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         else:
             self._child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         # note that spawn doesn't like list traits so we copy them using [:] 
         # and directory is defined in Params
+        print self._child
         
         stdout_pattern_range = range(0, len(self._stdout_pattern_list))
         
@@ -214,7 +232,7 @@ class Experiment(Params):
                 
         self._finished_without_output = True if stdout_patterns_matched + stderr_patterns_matched == 0 else False
             
-        self._child.close() # close file descriptors and store exitstatus and signalstatus
+        self._child.close() # close file descriptors and store exitstatus and signalstatus        
         if self._child.exitstatus is None:
             self.error = self._interpret_exitcode(self._child.signalstatus)
         else:#elif self._child.exitstatus != 0: # it might appear to have finished normally but we could have found some errors
@@ -222,7 +240,9 @@ class Experiment(Params):
             
 #        self.success = True if self._child.exitstatus == 0 and not self._was_cancelled else False
         self.success = True if self.error == '' and not self._was_cancelled else False
-        do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread 
+        do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread
+        
+#        do_later(quit, self._thread) 
 
     def _error_changed(self):
         if self.error != '':
@@ -267,6 +287,7 @@ class Experiment(Params):
         return self._handler.info.ui.control
 
     def _started_fired(self):
+        print 'started'
         self._progress_percentage = 0
         if self._interaction_mode == 'gui':
             self._handler._starting()
@@ -307,9 +328,9 @@ class Experiment(Params):
 #                    do_later(auto_close_message(message='Loading results', time=1))#, parent=self.info.ui.control))
 #                    self._imported_results_modules = True
         
-        del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
         if sys.platform.startswith('win'):
             os.remove(self.temp_params_file.name) # deletes file on Windows
+        del self.temp_params_file # deletes file except on Windows because we set delete=False for other reasons, see perform
         
         self._reset_progress_traits()
         
