@@ -94,7 +94,7 @@ class Experiment(Params):
             signal.signal(signal.SIGINT, terminate)   
         
         # actually perform the experiment
-        if not thread:# or self._interaction_mode in ('terminal', 'script'):
+        if not thread:
             self._perform(expecting_no_output)
         else:
             class Thread(QThread):
@@ -102,33 +102,20 @@ class Experiment(Params):
                     QThread.__init__(self)
                     self.experiment = experiment
                 def run(self):
-                    print self.isRunning()
-                    print 'self.currentThreadId', int(self.currentThreadId())
-                    print 'perform'
                     self.experiment._perform()
-                    print self.isFinished()
-#                    print 'self.exec_'
-#                    self.exec_() # vital
-                    print 'quit'
-                    self.quit()
+                    self.exec_() # required to enable progress handler to dispose of its ui
             self._thread = Thread(self)
-            if self._interaction_mode in ('terminal', 'script'):
-                print 'start'
-                self._thread.start() # not gui
-                print 'QThread.currentThreadId', int(QThread.currentThreadId())
-                print '_thread.exec_'
-#                self._thread.exec_()
-            else:
+#            if self._interaction_mode in ('terminal', 'script'):
+#                self._thread.start()
+#            else:
+##                print 'do_later'
+##                do_later(self._thread.start) # vital
+##                print 'GUI.invoke_later'
+##                GUI.invoke_later(self._thread.start) # vital
 #                print 'start'
-#                self._thread.start() # not gui
-#                print 'GUI.invoke_later'
-#                GUI.invoke_later(self._thread.start) # vital
-                print 'do_later'
-                do_later(self._thread.start) # vital
-#                do_later(QThread.yieldCurrentThread) # vital
-#                import time
-#                time.sleep(5)
-
+#                self._thread.start()
+            self._thread.start()
+                
         # restore default SIGINT handler that raises KeyboardInterrupt 
         if self._interaction_mode in ('terminal', 'script'):
             signal.signal(signal.SIGINT, signal.default_int_handler)
@@ -149,14 +136,12 @@ class Experiment(Params):
         **Might be running in thread.**
          
         '''
-        print 'got here'
         if sys.platform.startswith('win'):
             self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         else:
             self._child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         # note that spawn doesn't like list traits so we copy them using [:] 
         # and directory is defined in Params
-        print self._child
         
         stdout_pattern_range = range(0, len(self._stdout_pattern_list))
         
@@ -293,7 +278,6 @@ class Experiment(Params):
         return self._handler.info.ui.control
 
     def _started_fired(self):
-        print 'started'
         self._progress_percentage = 0
         if self._interaction_mode == 'gui':
             self._handler._starting()
