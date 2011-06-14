@@ -7,6 +7,9 @@ export ETS_TOOLKIT=qt4
 
 bash clean.sh
 
+# fix build_exe deprecated sets
+cp py2exe/build_exe.py `python -c "import py2exe; print py2exe.__file__.replace('\\','/').split('__init__.pyc')[0]"`
+
 python setup.py py2exe
 
 current_drive=`python -c 'import os, sys; sys.stdout.write(os.getcwd()[0].lower())'`
