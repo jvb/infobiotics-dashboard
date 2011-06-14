@@ -84,6 +84,17 @@ class Experiment(Params):
             self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
         self.save(self.temp_params_file.name, force=True, update_object=False)
 
+        if thread:
+            class Thread(QThread):
+                def __init__(self, experiment, expecting_no_output):
+                    QThread.__init__(self)
+                    self.experiment = experiment
+                    self.expecting_no_output = expecting_no_output
+                def run(self):
+                    self.experiment._perform(self.expecting_no_output)
+                    self.exec_() # required to enable progress handler to dispose of its ui
+            self._thread = Thread(self, expecting_no_output)
+        
         # catch SIGINT signals (Ctrl-C)
         if self._interaction_mode in ('terminal', 'script'):
             def terminate(signum, frame):
@@ -92,34 +103,36 @@ class Experiment(Params):
                     self._child.terminate(force=True)
             import signal
             signal.signal(signal.SIGINT, terminate)   
-        
-        # actually perform the experiment
-        if not thread:
-            self._perform(expecting_no_output)
-        else:
-            class Thread(QThread):
-                def __init__(self, experiment):
-                    QThread.__init__(self)
-                    self.experiment = experiment
-                def run(self):
-                    self.experiment._perform()
-                    self.exec_() # required to enable progress handler to dispose of its ui
-            self._thread = Thread(self)
-#            if self._interaction_mode in ('terminal', 'script'):
-#                self._thread.start()
-#            else:
-##                print 'do_later'
-##                do_later(self._thread.start) # vital
-##                print 'GUI.invoke_later'
-##                GUI.invoke_later(self._thread.start) # vital
-#                print 'start'
-#                self._thread.start()
-            self._thread.start()
-                
-        # restore default SIGINT handler that raises KeyboardInterrupt 
-        if self._interaction_mode in ('terminal', 'script'):
+
+            if not thread:
+                self._perform(expecting_no_output)
+            else:
+                self._thread.start()
+
+            # restore default SIGINT handler that raises KeyboardInterrupt 
             signal.signal(signal.SIGINT, signal.default_int_handler)
 
+        else: # self._interaction_mode == 'gui'
+            if sys.platform.startswith('win'):
+                import subprocess
+                from win32con import STARTF_USESHOWWINDOW, SW_HIDE, SW_SHOW, SW_SHOWNOACTIVATE
+                si = subprocess.STARTUPINFO()
+                si.dwFlags |= STARTF_USESHOWWINDOW
+                si.wShowWindow = SW_SHOWNOACTIVATE
+                subprocess.Popen(
+                    [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
+                    cwd=self.directory,
+                    startupinfo=si,
+                    creationflags=subprocess.CREATE_NEW_CONSOLE
+                )
+            else:
+                if not thread:
+                    self._perform(expecting_no_output)
+                else:
+#                    do_later(self._thread.start)
+#                    GUI.invoke_later(self.perform)
+                    self._thread.start()
+                
         if not thread:
             return True
 

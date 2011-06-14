@@ -15,7 +15,7 @@ class McssExperiment(McssParams, Experiment):
     
     executable_kwargs = [
         'show_progress=true', # print time and run to stdout 
-        'progress_interval=0.1', # every 1 seconds
+        'progress_interval=0.3', # every 1 seconds
     ]
 
     _stdout_pattern_list = [
@@ -44,7 +44,6 @@ class McssExperiment(McssParams, Experiment):
 #            self.message = 'Simulating %s' % self.model.model_file
 #        else:
 #            self.message = "Loading results '%s'" % self.model.data_file
-#
 
 
 def test():
@@ -70,24 +69,12 @@ def test():
 
 #    print experiment._dirty_parameters
 
-##    print experiment._interaction_mode
-#    experiment._interaction_mode = 'terminal'
-##    for name, value in experiment._clean_parameters.items(): 
-##        print name, value 
-##    exit()
-
-    experiment.runs = 1
-    
+    experiment.configure()
+##    experiment.edit()
 #    experiment.perform(thread=False)
-    
-#    import os
-#    print os.getpid(), os.getpid() / 2
 #    experiment.perform(thread=True)
 #    import time
 #    time.sleep(5)
-
-    experiment.configure()
-
 
 
 if __name__ == '__main__':
