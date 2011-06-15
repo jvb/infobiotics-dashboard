@@ -17,8 +17,13 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     from PyQt4 import QtGui
     from PyQt4 import Qsci
     from PyQt4 import QtNetwork
-    from PyQt4 import QtXml # supposed to fix matplotlib SVG icons http://groups.google.com/group/pyinstaller/browse_thread/thread/834bea87c7afcdff # it doesn't as far as I can tell
+    # supposed to fix matplotlib SVG icons http://groups.google.com/group/pyinstaller/browse_thread/thread/834bea87c7afcdff 
+    # it doesn't as far as I can tell
     from PyQt4 import QtSvg
+    from PyQt4 import QtXml
+    # maybe this will instead
+    import PyQt4.QtXml
+    import PyQt4.QtSvg
 #    import qt
     import PyQt4._qt
 
@@ -122,7 +127,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.core.experiment_handler
     import infobiotics.core.params_handler
     import infobiotics.core.experiment_progress_handler
-    import infobiotics.core.winpexpect
+    import infobiotics.core.winpexpect # essential
 #    import infobiotics.language.dependency_graphs
 #    import infobiotics.language.partial_propensities_fixed
 #    import infobiotics.language.module1

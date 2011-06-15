@@ -655,7 +655,7 @@ class TimeseriesPlot(HasTraits):
                     Spring(),
                     'gridlines',
                     Spring(),
-                    'figure_legend',
+                    Item('figure_legend', label='Figure legend (draggable)'),
                     Spring(),
                     Item('individual_legends'), #visible_when='not object.style=="Combined"'),
                     Spring(),
@@ -903,15 +903,18 @@ timeseries_table_editor = TableEditor(
 
         
 def main():
+    execfile('mcss_results_widget.py')
+
+def test():
     from PyQt4.QtGui import qApp
     from mcss_results_widget import McssResultsWidget
     from PyQt4.QtCore import Qt
-    argv = qApp.arguments()
+    import sys
+    argv = sys.argv
 #    argv.insert(1, '/home/jvb/dashboard/examples/modules/module1.h5')
     argv.insert(1, '../../../examples/germination_09.h5')
     if len(argv) > 2:
         print 'usage: python timeseries_plot.py [h5file]'
-        import sys
         sys.exit(2)
     if len(argv) == 1:
 #        shared.settings.register_infobiotics_settings()
@@ -976,4 +979,5 @@ def main():
     
 
 if __name__ == '__main__':
+#    test()
     main()
