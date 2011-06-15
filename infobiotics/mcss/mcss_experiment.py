@@ -15,7 +15,7 @@ class McssExperiment(McssParams, Experiment):
     
     executable_kwargs = [
         'show_progress=true', # print time and run to stdout 
-        'progress_interval=0.5', # every 1 seconds
+        'progress_interval=1', # every progress_interval seconds #FIXME progress_interval doesn't seem to accept floats
     ]
 
     _stdout_pattern_list = [
@@ -74,7 +74,7 @@ def test():
 #    experiment.perform(thread=False)
 #    experiment.perform(thread=True)
 #    import time
-#    time.sleep(5)
+#    time.sleep(15)
 
 
 if __name__ == '__main__':

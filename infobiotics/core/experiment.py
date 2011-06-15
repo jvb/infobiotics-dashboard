@@ -93,23 +93,24 @@ class Experiment(Params):
             import signal
             signal.signal(signal.SIGINT, terminate)   
 
+#        thread = False #TODO remove
+
         if sys.platform.startswith('win'):
-            import subprocess
-            from win32con import STARTF_USESHOWWINDOW, SW_SHOWNOACTIVATE#, SW_SHOW, 
-            si = subprocess.STARTUPINFO()
-            si.dwFlags |= STARTF_USESHOWWINDOW
-            if expecting_no_output:
-                si.wShowWindow = subprocess.SW_HIDE
-            else:
-                si.wShowWindow = SW_SHOWNOACTIVATE
-            self._subprocess = subprocess.Popen(
-                [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
-                cwd=self.directory,
-                startupinfo=si,
-                creationflags=subprocess.CREATE_NEW_CONSOLE
-            )
             if not thread:
-                self._subprocess.wait()
+                self._perform_windows(expecting_no_output)
+            else:
+                class Thread(QThread):
+                    def __init__(self, experiment, expecting_no_output):
+                        QThread.__init__(self)
+                        self.experiment = experiment
+                        self.expecting_no_output = expecting_no_output
+                    def run(self):
+                        self.experiment._perform_windows(self.expecting_no_output)
+                        self.exec_() # required to enable progress handler to dispose of its ui
+                self._thread = Thread(self, expecting_no_output)
+#                    do_later(self._thread.start)
+#                    GUI.invoke_later(self.perform)
+                self._thread.start()
         else:
             if not thread:
                 self._perform(expecting_no_output)
@@ -133,6 +134,84 @@ class Experiment(Params):
 
         if not thread:
             return True
+
+    def _perform_windows(self, expecting_no_output=False):
+        import subprocess
+        from win32con import STARTF_USESHOWWINDOW, SW_SHOWNOACTIVATE#, SW_SHOW, 
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= STARTF_USESHOWWINDOW
+        if expecting_no_output:
+            si.wShowWindow = subprocess.SW_HIDE
+        else:
+            si.wShowWindow = SW_SHOWNOACTIVATE
+        
+        self._subprocess = subprocess.Popen(
+            ['cmd.exe', '/k', self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
+            cwd=self.directory,
+            startupinfo=si,
+            # if using stdout_data, stderr_data = self._subprocess.communicate()
+#            stdout=subprocess.PIPE,
+#            stderr=subprocess.PIPE,
+            creationflags=subprocess.CREATE_NEW_CONSOLE
+        )
+
+        self.success = False
+        self.error = '' # public error
+        self._errors = '' # private errors
+        self.started = True # Event
+        self.running = True
+        self._was_cancelled = False
+        
+        returncode = self._subprocess.wait()
+##        stderr_data = self._subprocess.communicate()[1]
+#        stdout_data, stderr_data = self._subprocess.communicate()
+#        returncode = self._subprocess.returncode
+##        returncode = self._subprocess.poll()
+##        while not returncode:
+##            import time
+##            time.sleep(1)
+##            returncode = self._subprocess.poll()
+##            #TODO recover error messages
+##            stdout_data, stderr_data = self._subprocess.communicate()
+##            returncode = self._subprocess.returncode
+##            print stdout_data, stderr_data
+#        # scour before for error messages
+#        output = stdout_data + stderr_data
+#        stdout_patterns_matched = 0
+#        stderr_patterns_matched = 0
+#        for line in output.split(os.linesep):
+#            for i, pattern in enumerate(self._stdout_pattern_list):
+#                match = re.match(pattern, line)
+##                print pattern, match.group()
+#                if match is not None:
+#                    self._stdout_pattern_matched(i, match)
+#                    stdout_patterns_matched += 1
+##                    break # out of inner for loop
+##            else:
+##                continue # don't break out of outer loop yet
+#            for i, pattern in enumerate(self._stderr_pattern_list):
+#                match = re.match(pattern, line) 
+#                if match is not None:
+#                    self._stderr_pattern_matched(len(self._stdout_pattern_list) + i, match)
+#                    stderr_patterns_matched += 1
+##                    break # out of inner for loop
+##            else:
+##                continue # don't break out of outer loop yet
+##            break # out of outer for loop
+#        else:
+##            self._stdout_pattern_matched(-1, self._child.before)
+#            if not len(line) == 0:
+#                logger.warn('Unmatched pattern in %s output: "%s"' % (self.executable_name, stderr_data)) 
+#
+#        self._finished_without_output = True if stdout_patterns_matched + stderr_patterns_matched == 0 else False
+        self._finished_without_output = True
+        
+        self.error = self._interpret_exitcode(returncode)
+        
+        self.success = True if self.error == '' and not self._was_cancelled else False
+
+        do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread
+
 
     def _perform(self, expecting_no_output=False):
         ''' Start the program and try to match output.
@@ -233,7 +312,7 @@ class Experiment(Params):
                 stderr_patterns_matched += 1
 
         # gather information before finishing
-                
+
         self._finished_without_output = True if stdout_patterns_matched + stderr_patterns_matched == 0 else False
             
         self._child.close() # close file descriptors and store exitstatus and signalstatus        
@@ -246,8 +325,6 @@ class Experiment(Params):
         self.success = True if self.error == '' and not self._was_cancelled else False
         do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread
         
-#        do_later(quit, self._thread) 
-
     def _error_changed(self):
         if self.error != '':
             if self._interaction_mode == 'script':
@@ -267,7 +344,7 @@ class Experiment(Params):
         elif exitcode == 9:
 #            error = '%s was terminated by the user.' % self.executable_name
             pass
-        elif self._child.signalstatus == 11:
+        elif exitcode == 11:
             error = '%s caused a segmentation fault and was terminated by the operating system.' % self.executable_name
         elif exitcode == 15:
             error = '%s was terminated by this program.' % self.executable_name
@@ -316,7 +393,7 @@ class Experiment(Params):
     def _finished_fired(self):
         '''Sets self.running to False in the main thread'''
         self.running = False
-        if self._interaction_mode in ('script', 'terminal'):
+        if self._interaction_mode in ('script', 'terminal'):# and not sys.platform.startswith('win'):
             if self.success and not self._finished_without_output:
                 self._progress_bar.finish()
             if getattr(self, '_progress_bar_started', False): #FIXME AttributeError: 'McssExperiment' object has no attribute '_progress_bar_started'

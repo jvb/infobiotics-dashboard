@@ -414,7 +414,7 @@ class Params(HasTraits):
 
     # interactive methods ---
         
-    _interactive = False
+#    _interactive = False #TODO remove all occurences
     
     _handler = Instance(ParamsHandler)
     def __handler_default(self):

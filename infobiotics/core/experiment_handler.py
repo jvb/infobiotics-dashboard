@@ -35,9 +35,12 @@ class ExperimentHandler(ParamsHandler):
             # based on changes to self.percentage
 
     def _finished(self, success):
+        if not hasattr(self, '_progress_handler') or self._progress_handler is None:
+            return
         if self._progress_handler.info is not None and self._progress_handler.info.ui is not None:
             GUI.invoke_later(self._progress_handler.info.ui.dispose) # vital
-        self.model._thread.exit()
+        if hasattr(self.model, '_thread'):
+            self.model._thread.exit()
         if success:
             if not hasattr(self, '_imported_results_modules') or not self._imported_results_modules: # have we done the long import yet?
                 # show 'Loading results message' (if first time, otherwise it will be fast)
