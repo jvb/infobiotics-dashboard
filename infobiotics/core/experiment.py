@@ -32,6 +32,7 @@ if sys.platform.startswith('win'):
     import winpexpect
 #    import wexpect # deprecated
 import pexpect # provided by pexpect or winpexpect PyPI packages
+
 from progressbar import ProgressBar, Percentage as Percent, Bar, RotatingMarker, ETA
     
 from infobiotics.commons.api import logging
@@ -118,12 +119,17 @@ class Experiment(Params):
                 from win32con import STARTF_USESHOWWINDOW, SW_HIDE, SW_SHOW, SW_SHOWNOACTIVATE
                 si = subprocess.STARTUPINFO()
                 si.dwFlags |= STARTF_USESHOWWINDOW
-                si.wShowWindow = SW_SHOWNOACTIVATE
+                kwargs = {}
+                if expecting_no_output:
+                    si.wShowWindow = SW_HIDE
+                else:
+                    si.wShowWindow = SW_SHOWNOACTIVATE
+                kwargs['creationflags'] = subprocess.CREATE_NEW_CONSOLE
                 subprocess.Popen(
                     [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
                     cwd=self.directory,
                     startupinfo=si,
-                    creationflags=subprocess.CREATE_NEW_CONSOLE
+                    **kwargs
                 )
             else:
                 if not thread:
