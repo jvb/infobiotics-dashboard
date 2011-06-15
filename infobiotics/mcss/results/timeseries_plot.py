@@ -102,7 +102,7 @@ class TimeseriesPlot(HasTraits):
     gridlines = Bool(True)
 
     figure_legend = Bool#(True)
-    individual_legends = Bool    
+    individual_legends = Bool(True)    
     
     individual_volume_labels = Bool
     individual_amounts_labels = Bool
@@ -165,8 +165,7 @@ class TimeseriesPlot(HasTraits):
         for timeseries, line in self._timeseries_to_line_map.iteritems():
 #            DraggableLegend(line.axes.legend(loc='best', prop=self.font_properties))
             line.axes.legend(loc='best', prop=self.font_properties)
-        
-    
+
     @on_trait_change('style, figure_legend')
     def _change_figure_legend_visibility(self):
         if self.figure_legend:
@@ -229,7 +228,7 @@ class TimeseriesPlot(HasTraits):
         if not hasattr(self, 'axes'):
             self.axes = []
         del self.axes[:]
-#        self._timeseries_to_line_map.clear() # legends?
+        self._timeseries_to_line_map.clear() # legends?
         
         # create axes and plot timeseries on them
         if self.style == 'Combined':
@@ -244,7 +243,7 @@ class TimeseriesPlot(HasTraits):
 
         # don't allow negative x (time) or y (values)
         for axes in self.axes:
-            axes.set_xlim(0, self.results.timepoints[-1].magnitude)
+            axes.set_xlim(0, self._timeseries[0].timepoints[-1].magnitude)
             ymin, ymax = axes.get_ylim() 
             if ymin < 0:
                 axes.set_ylim(0, ymax)
@@ -287,8 +286,8 @@ class TimeseriesPlot(HasTraits):
         
         self._figure.set_facecolor('white')
         
-#        self._figure_legend_changed() #TODO
-#        self._individual_legends_changed() #TODO
+        self._change_individual_legends_visibility()
+        self._change_figure_legend_visibility()
         
         self._redraw_figure()
 
@@ -391,7 +390,7 @@ class TimeseriesPlot(HasTraits):
     
     @cached_property
     def _get_ci_factor(self):
-	if len(self.results.run_indices) < 2:
+        if len(self.results.run_indices) < 2:
             return 1
 #        if self.ci_degree > 0.999:
 #            return 0.999
@@ -658,7 +657,7 @@ class TimeseriesPlot(HasTraits):
                     Spring(),
                     'figure_legend',
                     Spring(),
-                    Item('individual_legends', visible_when='not object.style=="Combined"'),
+                    Item('individual_legends'), #visible_when='not object.style=="Combined"'),
                     Spring(),
                     Item('font_size',
                         editor=RangeEditor(mode='text')
