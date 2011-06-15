@@ -902,9 +902,6 @@ timeseries_table_editor = TableEditor(
 ) 
 
         
-def main():
-    execfile('mcss_results_widget.py')
-
 def test():
     from PyQt4.QtGui import qApp
     from mcss_results_widget import McssResultsWidget
@@ -978,6 +975,5 @@ def test():
     qApp.exec_()
     
 
-if __name__ == '__main__':
-#    test()
-    main()
+#if __name__ == '__main__':
+##    test()
