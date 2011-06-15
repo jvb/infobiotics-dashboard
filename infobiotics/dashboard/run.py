@@ -22,6 +22,7 @@ loggers = [
     'enthought.pyface.workbench.workbench_window',
     'enthought.envisage.plugin',
     'enthought.pyface.workbench.i_view',
+    'enthought.pyface.ui.qt4.workbench.workbench_window_layout',
 ]
 for logger in loggers:
     logging.getLogger(logger).addHandler(null_handler)#NullHandler())
