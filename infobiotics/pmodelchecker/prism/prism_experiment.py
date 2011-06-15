@@ -78,7 +78,8 @@ class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
         elif pattern_index > 3:
             self._stderr_pattern_matched(-1, match)
 
-    
+
 if __name__ == '__main__':
     experiment = PRISMExperiment()
+#    print 'executable', experiment.executable
     experiment.configure()

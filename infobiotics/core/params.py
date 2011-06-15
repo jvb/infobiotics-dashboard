@@ -103,14 +103,14 @@ class Params(HasTraits):
 #        raise NotImplementedError('Params subclasses must provide a preferences_helper that is an instance of (a subclass of) ParamsPreferencesHelper.')
 
     executable = Executable
-
+    
     directory = Directory # infinite recursion if ParamsRelativeDirectory because directory='directory'
 
 #    def _directory_changed(self, directory):
 #        os.chdir(directory)
     
     def __init__(self, file=None, **traits):
-        self.bind_preferences() # now done in configure() or edit() so that scripts and terminal can rely on defaults not preferences
+        self.bind_preferences() # essential #TODO do in configure() or edit() so that scripts and terminal can rely on defaults not preferences?
 #        if self._interaction_mode == 'terminal':
 #            self.directory = os.getcwd()
         super(Params, self).__init__(**traits) # do this after binding preferences so that we can override executable and directory 
@@ -126,8 +126,8 @@ class Params(HasTraits):
         for preference in ['executable', 'directory'] + self.parameter_names():# + preferences.node(self._preferences_path).keys():
             preferences_path = '.'.join([self._preferences_path, preference])
             try:
-#                bound_preference = bind_preference(self, preference, preferences_path, preferences)
-                bind_preference(self, preference, preferences_path, preferences)
+                bound_preference = bind_preference(self, preference, preferences_path, preferences)
+#                bind_preference(self, preference, preferences_path, preferences)
             except TraitError:
                 value = preferences.get(preferences_path)
                 preferences.remove(preferences_path)

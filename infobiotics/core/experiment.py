@@ -95,24 +95,29 @@ class Experiment(Params):
 
         if sys.platform.startswith('win'):
             import subprocess
-            from win32con import STARTF_USESHOWWINDOW, SW_HIDE, SW_SHOW, SW_SHOWNOACTIVATE
+            from win32con import STARTF_USESHOWWINDOW, SW_SHOWNOACTIVATE#, SW_SHOW, 
             si = subprocess.STARTUPINFO()
             si.dwFlags |= STARTF_USESHOWWINDOW
 #            kwargs = {}
             if expecting_no_output:
-                si.wShowWindow = SW_HIDE
+                si.wShowWindow = subprocess.SW_HIDE
             else:
                 si.wShowWindow = SW_SHOWNOACTIVATE
 #                kwargs['creationflags'] = subprocess.CREATE_NEW_CONSOLE
-            process = subprocess.Popen(
+            print 'executable', self.executable
+            print [self.executable, self.temp_params_file.name] + self.executable_kwargs[:]
+            self._subprocess = subprocess.Popen(
                 [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
+#                ['"'+self.executable+'"', '"'+self.temp_params_file.name+'"'] + self.executable_kwargs[:], 
                 cwd=self.directory,
+#                cwd='"'+self.directory+'"',
                 startupinfo=si,
                 creationflags=subprocess.CREATE_NEW_CONSOLE
 #                **kwargs
             )
             if not thread:
-                process.wait()
+                self._subprocess.wait()
+                print 'finished'
         else:
             if not thread:
                 self._perform(expecting_no_output)

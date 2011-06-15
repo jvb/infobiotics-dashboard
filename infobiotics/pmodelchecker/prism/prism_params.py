@@ -7,10 +7,11 @@ class PRISMParams(PModelCheckerParams):
         from infobiotics.pmodelchecker.prism.prism_params_handler import PRISMParamsHandler
         return PRISMParamsHandler(model=self)
 
-#    def _get__preferences_path(self):
-#        '''Overrides Params._get__preferences_path'''
-#        return 'prism'
-    _preferences_path = Str('prism')
+    def _preferences_helper_default(self):
+        from infobiotics.pmodelchecker.prism.prism_preferences import PRISMParamsPreferencesHelper
+        return PRISMParamsPreferencesHelper()
+
+    _preferences_path = Str('prism') # otherwise 'pmodelchecker' set from executable_name in Params
 
     _parameter_set_name = 'prism'
 
@@ -47,5 +48,6 @@ class PRISMParams(PModelCheckerParams):
 
 if __name__ == '__main__':
     parameters = PRISMParams()
+#    print 'executable', parameters.executable
     parameters.configure()
                         

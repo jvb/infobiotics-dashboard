@@ -3,7 +3,6 @@ from infobiotics.core.api import ParamsRelativeFile, ModelFile
 from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property, cached_property, TraitError
 import os.path
 from infobiotics.commons.traits.api import LongGreaterThanZero
-#from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
 
 from infobiotics.commons.api import logging
 logger = logging.getLogger(__name__)
@@ -11,7 +10,10 @@ logger = logging.getLogger(__name__)
 class PModelCheckerParams(Params):
     '''Base class for PRISMParams and MC2Params.'''
 
-#    preferences_helper = PModelCheckerParamsPreferencesHelper() #TODO
+    def _preferences_helper_default(self):
+        from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper
+        return PModelCheckerParamsPreferencesHelper()
+    
     executable_name = 'pmodelchecker'
     _parameters_name = 'pmodelchecker'
 

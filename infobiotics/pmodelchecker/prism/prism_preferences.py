@@ -2,7 +2,7 @@ from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerPar
 import sys
 from enthought.traits.ui.api import View, Group, Item
 
-name = 'prism.exe' if sys.platform.startswith('win') else 'prism' 
+name = 'prism.bat' if sys.platform.startswith('win') else 'prism' 
 PRISMExecutable = RelativeFile(name, filter=name, absolute=False, auto_set=True, executable=True) # executable=True implies exists=True
 
 class PRISMParamsPreferencesHelper(PModelCheckerParamsPreferencesHelper):

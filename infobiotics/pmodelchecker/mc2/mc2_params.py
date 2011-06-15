@@ -12,7 +12,7 @@ class MC2Params(PModelCheckerParams):
         from infobiotics.pmodelchecker.mc2.mc2_preferences import MC2ParamsPreferencesHelper
         return MC2ParamsPreferencesHelper()
 
-    _preferences_path = Str('mc2')
+    _preferences_path = Str('mc2') # otherwise 'pmodelchecker' set from executable_name in Params
 
     _parameter_set_name = 'mc2'
     
@@ -55,5 +55,6 @@ class MC2Params(PModelCheckerParams):
 
 if __name__ == '__main__':
     parameters = MC2Params()
+#    print 'executable', parameters.executable
     parameters.configure()
     

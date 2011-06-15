@@ -8,16 +8,14 @@ from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor, Contr
 from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelCheckerParamsHandler
 from infobiotics.pmodelchecker.model_parameters import ModelParameters
 from prism_params_group import prism_params_group
+from prism_preferences import PRISMParamsPreferencesPage
 
-#import logging
-#logger = logging.getLogger(__file__)
-#logger.addHandler(logging.StreamHandler())
-#logger.setLevel(logging.ERROR)
 from infobiotics.commons.api import logging
 logger = logging.getLogger(__name__)
 
-
 class PRISMParamsHandler(PModelCheckerParamsHandler):
+
+    preferences_page = PRISMParamsPreferencesPage()
 
     def _params_group_default(self):
         return prism_params_group

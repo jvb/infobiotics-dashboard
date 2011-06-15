@@ -2,7 +2,7 @@ from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerPar
 import sys
 from enthought.traits.ui.api import View, Group, Item
 
-name = 'mc2.exe' if sys.platform.startswith('win') else 'mc2' 
+name = 'mc2.bat' if sys.platform.startswith('win') else 'mc2' 
 MC2Executable = RelativeFile(name, filter=name, absolute=False, auto_set=True, executable=True) # executable=True implies exists=True
 
 class MC2ParamsPreferencesHelper(PModelCheckerParamsPreferencesHelper):
@@ -22,4 +22,9 @@ class MC2ParamsPreferencesPage(PModelCheckerParamsPreferencesPage):
             show_border=True,
         ),
     )
+    
+    
+if __name__ == '__main__':
+    helper = MC2ParamsPreferencesHelper()
+    print helper.executable    
     

@@ -88,5 +88,6 @@ class McssParams(Params):
 
 if __name__ == '__main__':
     parameters = McssParams()#executable='/usr/bin/mcs')
+#    print 'executable', parameters.executable
     parameters.configure()
             

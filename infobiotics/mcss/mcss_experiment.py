@@ -15,7 +15,7 @@ class McssExperiment(McssParams, Experiment):
     
     executable_kwargs = [
         'show_progress=true', # print time and run to stdout 
-        'progress_interval=0.3', # every 1 seconds
+        'progress_interval=0.5', # every 1 seconds
     ]
 
     _stdout_pattern_list = [

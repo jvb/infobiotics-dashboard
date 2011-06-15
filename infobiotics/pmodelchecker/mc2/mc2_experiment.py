@@ -42,6 +42,7 @@ class MC2Experiment(MC2Params, PModelCheckerExperiment):
 
 if __name__ == '__main__':
     experiment = MC2Experiment()
+#    print 'executable', experiment.executable
 #    experiment.load('../../../examples/quickstart-NAR/model_checking_mc2.params')
 #    experiment.perform()
     experiment.configure()

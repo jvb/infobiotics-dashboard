@@ -18,7 +18,10 @@ DEFAULT_POPTIMIZER_EXECUTABLE = 'default/poptimizer.executable'
 
 if sys.platform.startswith('win'):
     preferences.set(DEFAULT_MCSS_EXECUTABLE, 'mcss.exe'),
+    preferences.set(DEFAULT_MCSSCMAES_EXECUTABLE, 'mcss-cmaes.exe'),
     preferences.set(DEFAULT_PMODELCHECKER_EXECUTABLE, 'pmodelchecker.exe'),
+    preferences.set(DEFAULT_PMODELCHECKER_MC2_EXECUTABLE, 'pmodelchecker.exe'),
+    preferences.set(DEFAULT_PMODELCHECKER_PRISM_EXECUTABLE, 'pmodelchecker.exe'),
     preferences.set(DEFAULT_POPTIMIZER_EXECUTABLE, 'poptimizer.exe'),
 else:
     # RelativeFile traits use Which module to find files on the PATH so we don't
@@ -48,9 +51,13 @@ preferences.set('default/poptimizer.directory', default_directory)
 
 if __name__ == '__main__':
     preferences.dump()
-    print
-    print "'%s'" % preferences.get('mcsscmaes.executable')
-    print
-    name = 'mcss'
-    for key in preferences.node(name).keys():
-        print '.'.join([name, key])
+##    print
+##    print "'%s'" % preferences.get('mcsscmaes.executable')
+##    print
+##    name = 'mcss'
+##    for key in preferences.node(name).keys():
+##        print '.'.join([name, key])
+#    pmodelchecker_executable_name = "%s" % preferences.get('pmodelchecker.executable')
+#    from infobiotics.thirdparty.which import which
+#    print which(pmodelchecker_executable_name)
+    

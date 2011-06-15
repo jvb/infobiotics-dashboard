@@ -5,9 +5,12 @@ from enthought.traits.api import List, Unicode, Button, Instance, Enum, on_trait
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 import os.path
+from pmodelchecker_preferences import PModelCheckerParamsPreferencesPage
 
 class PModelCheckerParamsHandler(ParamsHandler):
     ''' Traits shared by PRISMParamsHandler and MC2ParamsHandler. '''
+
+    preferences_page = PModelCheckerParamsPreferencesPage()
 
     task = Enum(['Approximate', 'Build', 'Verify'], desc="the task to perform:\n'Approximate' or 'Verify' the input properties\n'Build' the corresponding Markov chain")
     
