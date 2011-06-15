@@ -28,6 +28,8 @@ class MC2McssExperiment(McssExperiment):
     def __handler_default(self):
         return MC2McssExperimentHandler(model=self)
     
+    _preferences_path = Str('mc2.mcss') # otherwise 'pmodelchecker' set from executable_name in Params
+    
     _mc2_experiment = Any#Instance(MC2Params) # otherwise when MC2Params(): TraitError: The '_mc2_experiment' trait of a MC2McssExperiment instance must be a MC2Params or None, but a value of MC2Params(model_specification='', model_checker='MC2', temporal_formulas='', number_samples=10000, results_file='', simulations_generatedHDF5=False, simulations_file_hdf5='', simulations_generatedMC2=False, simulations_file_MC2='', mcss_params_file='') <class '__main__.MC2Params'> was specified.
     
 #    directory = DelegatesTo('_mc2_experiment', prefix='directory', listenable=False)
