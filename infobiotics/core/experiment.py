@@ -98,26 +98,18 @@ class Experiment(Params):
             from win32con import STARTF_USESHOWWINDOW, SW_SHOWNOACTIVATE#, SW_SHOW, 
             si = subprocess.STARTUPINFO()
             si.dwFlags |= STARTF_USESHOWWINDOW
-#            kwargs = {}
             if expecting_no_output:
                 si.wShowWindow = subprocess.SW_HIDE
             else:
                 si.wShowWindow = SW_SHOWNOACTIVATE
-#                kwargs['creationflags'] = subprocess.CREATE_NEW_CONSOLE
-            print 'executable', self.executable
-            print [self.executable, self.temp_params_file.name] + self.executable_kwargs[:]
             self._subprocess = subprocess.Popen(
                 [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
-#                ['"'+self.executable+'"', '"'+self.temp_params_file.name+'"'] + self.executable_kwargs[:], 
                 cwd=self.directory,
-#                cwd='"'+self.directory+'"',
                 startupinfo=si,
                 creationflags=subprocess.CREATE_NEW_CONSOLE
-#                **kwargs
             )
             if not thread:
                 self._subprocess.wait()
-                print 'finished'
         else:
             if not thread:
                 self._perform(expecting_no_output)
@@ -142,9 +134,6 @@ class Experiment(Params):
         if not thread:
             return True
 
-    def _perform_windows(self, expecting_no_output=False):
-        pass
-
     def _perform(self, expecting_no_output=False):
         ''' Start the program and try to match output.
         
@@ -161,6 +150,7 @@ class Experiment(Params):
         if sys.platform.startswith('win'):
 #            self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
             logger.error('Should not get here.')
+            return
         else:
             self._child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         # note that spawn doesn't like list traits so we copy them using [:] 
