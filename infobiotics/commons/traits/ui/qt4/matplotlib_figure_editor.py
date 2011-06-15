@@ -10,8 +10,8 @@ import os
 
 # http://groups.google.com/group/pyinstaller/msg/64e9a5987ba102f3
 class VMToolbar(NavigationToolbar): 
-    def __init__(self, plotCanvas, parent): 
-        NavigationToolbar.__init__(self, plotCanvas, parent) 
+    def __init__(self, plotCanvas, parent, coordinates): 
+        NavigationToolbar.__init__(self, plotCanvas, parent, coordinates) 
     def _icon(self, name): 
         #dirty hack to use exclusively .png and thus avoid .svg usage 
         #because .exe generation is problematic with .svg 
