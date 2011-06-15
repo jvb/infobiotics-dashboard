@@ -857,7 +857,8 @@ def test():
     w.plot()
 
 def main():
-    argv = qApp.arguments()
+#    argv = qApp.arguments()
+    argv = sys.argv
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)
