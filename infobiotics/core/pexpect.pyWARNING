@@ -1,4 +1,9 @@
-Having pexpect present in this directory seems to break winpexpect here!
-Install winpexpect from source tarball and leave winpexpect.py here alone and 
-it should get used instead.
+Conversely to winpexpect.pyWARNING, having pexpect.py in this directory seems 
+to break winpexpect!
+
+Instead, on the freezing system install winpexpect from its source tarball:
+	http://pypi.python.org/packages/source/w/winpexpect/winpexpect-1.5.tar.gz#md5=552583220943d7c74d49056a9a17de9a
+
+Leave winpexpect.py in infobiotics.core alone and it should get used instead.
+
 Whether it will get bundled correctly by py2exe is another matter.

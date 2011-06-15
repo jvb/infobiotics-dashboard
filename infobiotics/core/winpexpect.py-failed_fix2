@@ -6,10 +6,6 @@
 # WinPexpect is copyright (c) 2008-2010 by the WinPexpect authors. See the
 # file "AUTHORS" for a complete overview.
 
-from infobiotics.commons.api import logging
-logger = logging.getLogger(name=__name__, format="%(message)s [%(levelname)s]")
-logger.setLevel(logging.DEBUG)
-
 import os
 import sys
 import pywintypes
@@ -41,10 +37,13 @@ from win32con import (HANDLE_FLAG_INHERIT, STARTF_USESTDHANDLES,
                       PIPE_ACCESS_DUPLEX, WAIT_OBJECT_0, WAIT_TIMEOUT,
                       LOGON32_PROVIDER_DEFAULT, LOGON32_LOGON_INTERACTIVE,
                       TOKEN_ALL_ACCESS, GENERIC_READ, GENERIC_WRITE,
-                      OPEN_EXISTING, PROCESS_ALL_ACCESS, MAXIMUM_ALLOWED)
+                      OPEN_EXISTING, PROCESS_ALL_ACCESS, MAXIMUM_ALLOWED,
+    PIPE_ACCESS_INBOUND, PIPE_READMODE_MESSAGE, PIPE_TYPE_MESSAGE, PIPE_WAIT,
+    FILE_ATTRIBUTE_NORMAL, SYNCHRONIZE, DUPLICATE_SAME_ACCESS)
 from winerror import (ERROR_PIPE_BUSY, ERROR_HANDLE_EOF, ERROR_BROKEN_PIPE,
                       ERROR_ACCESS_DENIED)
 from pywintypes import error as WindowsError
+from winnt import FILE_WRITE_DATA
 
 
 # Compatibility with Python < 2.6
@@ -146,6 +145,9 @@ def which(command):
 
 def _read_header(handle, bufsize=4096):
     """INTERNAL: read a stub header from a handle."""
+#    from win32file import FlushFileBuffers
+#    FlushFileBuffers(handle)
+#    header = 'status=ok\npid=3000\n\n'
     header = ''
     while '\n\n' not in header:
         err, data = ReadFile(handle, bufsize)
@@ -195,7 +197,7 @@ def _lookup_sid(domain, username):
 
 def _create_security_attributes(*sids, **kwargs):
     """INTERNAL: create a SECURITY_ATTRIBUTES structure."""
-    inherit = kwargs.get('inherit', 0)
+    inherit = True#kwargs.get('inherit', 0)
     access = kwargs.get('access', GENERIC_READ|GENERIC_WRITE)
     attr = SECURITY_ATTRIBUTES()
     attr.bInheritHandle = inherit
@@ -204,9 +206,8 @@ def _create_security_attributes(*sids, **kwargs):
     for sid in sids:
         dacl.AddAccessAllowedAce(ACL_REVISION_DS, access, sid)
     desc.SetSecurityDescriptorDacl(True, dacl, False)
-    attr.SECURITY_DESCRIPTOR = desc
+    attr.SECURITY_DESCRIPTOR = None#desc
     return attr
-
 
 def _create_named_pipe(template, sids=None):
     """INTERNAL: create a named pipe."""
@@ -219,7 +220,8 @@ def _create_named_pipe(template, sids=None):
         try:
             pipe = CreateNamedPipe(name, PIPE_ACCESS_DUPLEX,
                                    0, 1, 1, 1, 100000, sattrs)
-            SetHandleInformation(pipe, HANDLE_FLAG_INHERIT, 0)
+#            SetHandleInformation(pipe, HANDLE_FLAG_INHERIT, 0)
+            SetHandleInformation(pipe, 0, HANDLE_FLAG_INHERIT)
         except WindowsError, e:
             if e.winerror != ERROR_PIPE_BUSY:
                 raise
@@ -228,21 +230,68 @@ def _create_named_pipe(template, sids=None):
     raise ExceptionPexpect, 'Could not create pipe after 100 attempts.'
 
 
-def _stub(cmd_name, stdin_name, stdout_name, stderr_name):
+def _create_inheritable_one_way_handle_for_the_server_to_read(template):
+    sattrs = _create_security_attributes(*sids)
+    for i in range(100):
+        name = template % random.randint(0, 999999)
+        try:
+            pipe = CreateNamedPipe(name, 
+                PIPE_ACCESS_INBOUND,
+                PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+                1, 
+                4096, 
+                4096, 
+                0, 
+                sattrs)
+        except WindowsError, e:
+            if e.winerror != ERROR_PIPE_BUSY:
+                raise
+        else:
+            return pipe, name
+    raise ExceptionPexpect, 'Could not create pipe after 100 attempts.'
+    
+
+from win32api import DuplicateHandle, GetCurrentProcess
+
+
+def _stub(cmd_name, stdin_name, stdout_name, stderr_name):#, hOutputReadTmp_name):
     """INTERNAL: Stub process that will start up the child process."""
     # Open the 4 pipes (command, stdin, stdout, stderr)
     cmd_pipe = CreateFile(cmd_name, GENERIC_READ|GENERIC_WRITE, 0, None,
                           OPEN_EXISTING, 0, None)
-    SetHandleInformation(cmd_pipe, HANDLE_FLAG_INHERIT, 1)
+#    SetHandleInformation(cmd_pipe, 1, HANDLE_FLAG_INHERIT, 1)
+    SetHandleInformation(cmd_pipe, 1, HANDLE_FLAG_INHERIT)
     stdin_pipe = CreateFile(stdin_name, GENERIC_READ, 0, None,
                             OPEN_EXISTING, 0, None)
-    SetHandleInformation(stdin_pipe, HANDLE_FLAG_INHERIT, 1)
+#    SetHandleInformation(stdin_pipe, HANDLE_FLAG_INHERIT, 1)
+    SetHandleInformation(stdin_pipe, 1, HANDLE_FLAG_INHERIT)
     stdout_pipe = CreateFile(stdout_name, GENERIC_WRITE, 0, None,
                              OPEN_EXISTING, 0, None)
-    SetHandleInformation(stdout_pipe, HANDLE_FLAG_INHERIT, 1)
+#    SetHandleInformation(stdout_pipe, HANDLE_FLAG_INHERIT, 1)
+    SetHandleInformation(stdout_pipe, 1, HANDLE_FLAG_INHERIT)
     stderr_pipe = CreateFile(stderr_name, GENERIC_WRITE, 0, None,
                              OPEN_EXISTING, 0, None)
-    SetHandleInformation(stderr_pipe, HANDLE_FLAG_INHERIT, 1)
+#    SetHandleInformation(stderr_pipe, HANDLE_FLAG_INHERIT, 1)
+    SetHandleInformation(stderr_pipe, 1, HANDLE_FLAG_INHERIT)
+
+#    hOutputWrite = CreateFile(
+#        hOutputReadTmp_name, 
+#        FILE_WRITE_DATA | SYNCHRONIZE,
+#        0,
+#        _create_security_attributes(),#*sids),
+#        OPEN_EXISTING,
+#        FILE_ATTRIBUTE_NORMAL,
+#        0#None?
+#    )
+#    
+#    hErrorWrite = DuplicateHandle(GetCurrentProcess(),hOutputWrite,
+#        GetCurrentProcess(),0,True,DUPLICATE_SAME_ACCESS)
+#    
+#    # same thing for clients input?
+#    hOutputReadTmp, hOutputReadTmp_name = _create_inheritable_one_way_handle_for_the_server_to_read(winspawn.pipe_template)
+#    hOutputRead = DuplicateHandle(GetCurrentProcess(), hOutputReadTmp,
+#                                  GetCurrentProcess(), 0, False, DUPLICATE_SAME_ACCESS)
+#    CloseHandle(hOutputReadTmp)
 
     # Learn what we need to do..
     header = _read_header(cmd_pipe)
@@ -271,6 +320,8 @@ def _stub(cmd_name, stdin_name, stdout_name, stderr_name):
         res = CreateProcess(input['command'], input['args'], sattrs, None,
                             True, CREATE_NEW_CONSOLE, os.environ, os.getcwd(),
                             startupinfo)
+#        CloseHandle(res[0])
+#        CloseHandle(res[1])
     except WindowsError, e:
         message = _quote_header(str(e))
         WriteFile(cmd_pipe, 'status=error\nmessage=%s\n\n' % message)
@@ -280,7 +331,8 @@ def _stub(cmd_name, stdin_name, stdout_name, stderr_name):
 
     # Pass back results and exit
     err, nbytes = WriteFile(cmd_pipe, 'status=ok\npid=%s\n\n' % pid)
-    ExitProcess(0)
+#    ExitProcess(0)
+    ExitProcess(pid)
 
 
 class ChunkBuffer(object):
@@ -377,10 +429,15 @@ class winspawn(spawn):
         sids = [_get_current_sid()]
         if self.username and self.password:
             sids.append(_lookup_sid(self.domain, self.username))
-        cmd_pipe, cmd_name = _create_named_pipe(self.pipe_template, sids)
-        stdin_pipe, stdin_name = _create_named_pipe(self.pipe_template, sids)
-        stdout_pipe, stdout_name = _create_named_pipe(self.pipe_template, sids)
-        stderr_pipe, stderr_name = _create_named_pipe(self.pipe_template, sids)
+        cmd_pipe, cmd_name = _create_named_pipe(winspawn.pipe_template, sids)
+        stdin_pipe, stdin_name = _create_named_pipe(winspawn.pipe_template, sids)
+        stdout_pipe, stdout_name = _create_named_pipe(winspawn.pipe_template, sids)
+        stderr_pipe, stderr_name = _create_named_pipe(winspawn.pipe_template, sids)
+
+#        hOutputReadTmp, hOutputReadTmp_name = _create_inheritable_one_way_handle_for_the_server_to_read(winspawn.pipe_template)
+#        hOutputRead = DuplicateHandle(GetCurrentProcess(), hOutputReadTmp,
+#                                      GetCurrentProcess(), 0, False, DUPLICATE_SAME_ACCESS)
+#        CloseHandle(hOutputReadTmp)
 
         startupinfo = STARTUPINFO()
         startupinfo.dwFlags |= STARTF_USESHOWWINDOW
@@ -388,7 +445,7 @@ class winspawn(spawn):
 
         python = os.path.join(sys.exec_prefix, 'python.exe')
         pycmd = 'import winpexpect; winpexpect._stub(r"%s", r"%s", r"%s", r"%s")' \
-                    % (cmd_name, stdin_name, stdout_name, stderr_name)
+                    % (cmd_name, stdin_name, stdout_name, stderr_name)#hOutputReadTmp_name #TODO
         pyargs = join_command_line([python, '-c', pycmd])
 
         # Create a new token or run as the current process.
@@ -405,10 +462,12 @@ class winspawn(spawn):
                                 startupinfo)
         child_handle = res[0]
         res[1].Close()  # don't need thread handle
+        
+        print 'pid =', GetExitCodeProcess(child_handle)
 
-        logger.debug('1')
-        ConnectNamedPipe(cmd_pipe) # fails here if winpexpect.py not in infobiotics.core
-        logger.debug('2')
+        print 1
+        print ConnectNamedPipe(cmd_pipe)
+        print 2
         ConnectNamedPipe(stdin_pipe)
         ConnectNamedPipe(stdout_pipe)
         ConnectNamedPipe(stderr_pipe)
@@ -421,15 +480,16 @@ class winspawn(spawn):
             WriteFile(cmd_pipe, 'parent_sid=%s\n' % str(parent_sid))
         WriteFile(cmd_pipe, '\n')
 
-        logger.debug(3)
-        header = _read_header(cmd_pipe) # fails here when called from GUI thread
-        logger.debug(4)
+        print 3
+        header = _read_header(cmd_pipe)
+        print 4
         output = _parse_header(header)
         if output['status'] != 'ok':
             m = 'Child did not start up correctly. '
             m += output.get('message', '')
             raise ExceptionPexpect, m
         self.pid = int(output['pid'])
+        print 'self.pid =', self.pid
         self.child_handle = OpenProcess(PROCESS_ALL_ACCESS, False, self.pid)
         WaitForSingleObject(child_handle, INFINITE)
 
