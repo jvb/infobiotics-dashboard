@@ -10,6 +10,7 @@ from PyQt4.QtCore import QThread
 from PyQt4.QtGui import QWidget
 from enthought.pyface.api import error as error, GUI
 
+import pexpect # provided by pexpect or winpexpect PyPI packages
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
     # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
@@ -28,10 +29,8 @@ if sys.platform.startswith('win'):
                 modulefinder.AddPackagePath(extra, p)
     except ImportError:
         pass # no build path setup, no worries.
-
-    import winpexpect
-#    import wexpect # deprecated
-import pexpect # provided by pexpect or winpexpect PyPI packages
+    #import wexpect # deprecated
+    import winpexpect # from infobiotics.core
 
 from progressbar import ProgressBar, Percentage as Percent, Bar, RotatingMarker, ETA
     
@@ -85,17 +84,6 @@ class Experiment(Params):
             self.temp_params_file.close() # see comment http://bit.ly/gUSEh0
         self.save(self.temp_params_file.name, force=True, update_object=False)
 
-        if thread:
-            class Thread(QThread):
-                def __init__(self, experiment, expecting_no_output):
-                    QThread.__init__(self)
-                    self.experiment = experiment
-                    self.expecting_no_output = expecting_no_output
-                def run(self):
-                    self.experiment._perform(self.expecting_no_output)
-                    self.exec_() # required to enable progress handler to dispose of its ui
-            self._thread = Thread(self, expecting_no_output)
-        
         # catch SIGINT signals (Ctrl-C)
         if self._interaction_mode in ('terminal', 'script'):
             def terminate(signum, frame):
@@ -105,42 +93,52 @@ class Experiment(Params):
             import signal
             signal.signal(signal.SIGINT, terminate)   
 
+        if sys.platform.startswith('win'):
+            import subprocess
+            from win32con import STARTF_USESHOWWINDOW, SW_HIDE, SW_SHOW, SW_SHOWNOACTIVATE
+            si = subprocess.STARTUPINFO()
+            si.dwFlags |= STARTF_USESHOWWINDOW
+#            kwargs = {}
+            if expecting_no_output:
+                si.wShowWindow = SW_HIDE
+            else:
+                si.wShowWindow = SW_SHOWNOACTIVATE
+#                kwargs['creationflags'] = subprocess.CREATE_NEW_CONSOLE
+            process = subprocess.Popen(
+                [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
+                cwd=self.directory,
+                startupinfo=si,
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+#                **kwargs
+            )
+            if not thread:
+                process.wait()
+        else:
             if not thread:
                 self._perform(expecting_no_output)
             else:
-                self._thread.start()
-
-            # restore default SIGINT handler that raises KeyboardInterrupt 
-            signal.signal(signal.SIGINT, signal.default_int_handler)
-
-        else: # self._interaction_mode == 'gui'
-            if sys.platform.startswith('win'):
-                import subprocess
-                from win32con import STARTF_USESHOWWINDOW, SW_HIDE, SW_SHOW, SW_SHOWNOACTIVATE
-                si = subprocess.STARTUPINFO()
-                si.dwFlags |= STARTF_USESHOWWINDOW
-                kwargs = {}
-                if expecting_no_output:
-                    si.wShowWindow = SW_HIDE
-                else:
-                    si.wShowWindow = SW_SHOWNOACTIVATE
-                kwargs['creationflags'] = subprocess.CREATE_NEW_CONSOLE
-                subprocess.Popen(
-                    [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
-                    cwd=self.directory,
-                    startupinfo=si,
-                    **kwargs
-                )
-            else:
-                if not thread:
-                    self._perform(expecting_no_output)
-                else:
+                class Thread(QThread):
+                    def __init__(self, experiment, expecting_no_output):
+                        QThread.__init__(self)
+                        self.experiment = experiment
+                        self.expecting_no_output = expecting_no_output
+                    def run(self):
+                        self.experiment._perform(self.expecting_no_output)
+                        self.exec_() # required to enable progress handler to dispose of its ui
+                self._thread = Thread(self, expecting_no_output)
 #                    do_later(self._thread.start)
 #                    GUI.invoke_later(self.perform)
-                    self._thread.start()
+                self._thread.start()
                 
+        # restore default SIGINT handler that raises KeyboardInterrupt 
+        if self._interaction_mode in ('terminal', 'script'):
+            signal.signal(signal.SIGINT, signal.default_int_handler)
+
         if not thread:
             return True
+
+    def _perform_windows(self, expecting_no_output=False):
+        pass
 
     def _perform(self, expecting_no_output=False):
         ''' Start the program and try to match output.
@@ -156,7 +154,8 @@ class Experiment(Params):
          
         '''
         if sys.platform.startswith('win'):
-            self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+#            self._child = winpexpect.winspawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
+            logger.error('Should not get here.')
         else:
             self._child = pexpect.spawn(self.executable, [self.temp_params_file.name] + self.executable_kwargs[:], cwd=self.directory)
         # note that spawn doesn't like list traits so we copy them using [:] 
