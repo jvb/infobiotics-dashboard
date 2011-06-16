@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" version="1">
+<model id="module_test">
+<listOfCompartments>
+<compartment id="default" size="1"/>
+<compartment id="c1" name="diffusion:1::" size="1" outside="default"/>
+<compartment id="c2" name="reaction:2::" size="1" outside="default"/>
+<compartment id="c3" name="E::1,3:0,0" size="1" outside="default"/>
+<compartment id="c4" name="B::1,2:1,0" size="1" outside="default"/>
+<compartment id="c5" name="E::1:2,0" size="1" outside="default"/>
+<compartment id="c8" name="E::1:1,1" size="1" outside="default"/>
+<compartment id="c12" name="B::1,2:0,1" size="1" outside="default"/>
+<compartment id="c10" name="B::1,2:2,1" size="1" outside="default"/>
+<compartment id="c7" name="E::1:0,2" size="1" outside="default"/>
+<compartment id="c9" name="B::1,2:1,2" size="1" outside="default"/>
+<compartment id="c11" name="E::1:2,2" size="1" outside="default"/>
+</listOfCompartments>
+<listOfSpecies>
+<species id="s1" name="A" compartment="c1" initialAmount="100" charge="0"/>
+<species id="s2" name="B" compartment="c2" initialAmount="0" charge="0"/>
+<species id="s3" name="A" compartment="default" initialAmount="0" charge="0"/>
+<species id="s5" name="A" compartment="c2" initialAmount="0" charge="0"/>
+</listOfSpecies>
+<listOfReactions>
+<reaction id="re1" name="diffusion:0,-1" reversible="false" fast="false">
+<listOfReactants>
+<speciesReference species="s1"/>
+</listOfReactants>
+<listOfProducts>
+<speciesReference species="s3"/>
+</listOfProducts>
+<kineticLaw>
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+<ci> c1 </ci>
+</math>
+<listOfParameters>
+<parameter id="c1" value="0.005"/>
+</listOfParameters>
+</kineticLaw>
+</reaction>
+<reaction id="re2" name="diffusion:-1,0" reversible="false" fast="false">
+<listOfReactants>
+<speciesReference species="s1"/>
+</listOfReactants>
+<listOfProducts>
+<speciesReference species="s3"/>
+</listOfProducts>
+<kineticLaw>
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+<ci> c1 </ci>
+</math>
+<listOfParameters>
+<parameter id="c1" value="0.005"/>
+</listOfParameters>
+</kineticLaw>
+</reaction>
+<reaction id="re3" name="diffusion:1,0" reversible="false" fast="false">
+<listOfReactants>
+<speciesReference species="s1"/>
+</listOfReactants>
+<listOfProducts>
+<speciesReference species="s3"/>
+</listOfProducts>
+<kineticLaw>
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+<ci> c1 </ci>
+</math>
+<listOfParameters>
+<parameter id="c1" value="0.005"/>
+</listOfParameters>
+</kineticLaw>
+</reaction>
+<reaction id="re4" name="diffusion:0,1" reversible="false" fast="false">
+<listOfReactants>
+<speciesReference species="s1"/>
+</listOfReactants>
+<listOfProducts>
+<speciesReference species="s3"/>
+</listOfProducts>
+<kineticLaw>
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+<ci> c1 </ci>
+</math>
+<listOfParameters>
+<parameter id="c1" value="0.005"/>
+</listOfParameters>
+</kineticLaw>
+</reaction>
+<reaction id="re5" name="reaction" reversible="false" fast="false">
+<listOfReactants>
+<speciesReference species="s5"/>
+</listOfReactants>
+<listOfProducts>
+<speciesReference species="s2"/>
+</listOfProducts>
+<kineticLaw>
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+<ci> c2 </ci>
+</math>
+<listOfParameters>
+<parameter id="c2" value="0.002"/>
+</listOfParameters>
+</kineticLaw>
+</reaction>
+</listOfReactions>
+</model>
+</sbml>
