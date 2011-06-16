@@ -1,6 +1,4 @@
 from __future__ import division
-
-
 from mc2_params_handler import MC2ParamsHandler
 from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
 
