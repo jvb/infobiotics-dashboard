@@ -6,4 +6,4 @@ include bin/infobiotics-dashboard bin/infobiotics-dashboard.py bin/infobiotics-d
 include infobiotics-dashboard.desktop
 include images/infobiotics-workbench.png images/infobiotics-workbench.xpm
 include py2app/eintr.patch
-include py2exe/windows_xp_missing_dlls.txt py2exe/boot_common.py
+include py2exe/windows_xp_missing_dlls.txt py2exe/boot_common.py py2exe/build_exe.py
