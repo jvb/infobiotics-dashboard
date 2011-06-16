@@ -136,6 +136,8 @@ class Experiment(Params):
             return True
 
     def _perform_windows(self, expecting_no_output=False):
+        '''Using subprocess perform experiment in terminal, showing output. If 
+        that fails, it will fail fast and we rerun catching errors.'''
         import subprocess
         from win32con import STARTF_USESHOWWINDOW, SW_SHOWNOACTIVATE#, SW_SHOW, 
         si = subprocess.STARTUPINFO()
@@ -146,12 +148,10 @@ class Experiment(Params):
             si.wShowWindow = SW_SHOWNOACTIVATE
         
         self._subprocess = subprocess.Popen(
-            ['cmd.exe', '/k', self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
+            [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
+#            ['cmd.exe', '/k', self.executable, self.temp_params_file.name] + self.executable_kwargs[:], # keeps console window open 
             cwd=self.directory,
             startupinfo=si,
-            # if using stdout_data, stderr_data = self._subprocess.communicate()
-#            stdout=subprocess.PIPE,
-#            stderr=subprocess.PIPE,
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
 
@@ -163,53 +163,34 @@ class Experiment(Params):
         self._was_cancelled = False
         
         returncode = self._subprocess.wait()
-##        stderr_data = self._subprocess.communicate()[1]
-#        stdout_data, stderr_data = self._subprocess.communicate()
-#        returncode = self._subprocess.returncode
-##        returncode = self._subprocess.poll()
-##        while not returncode:
-##            import time
-##            time.sleep(1)
-##            returncode = self._subprocess.poll()
-##            #TODO recover error messages
-##            stdout_data, stderr_data = self._subprocess.communicate()
-##            returncode = self._subprocess.returncode
-##            print stdout_data, stderr_data
-#        # scour before for error messages
-#        output = stdout_data + stderr_data
-#        stdout_patterns_matched = 0
-#        stderr_patterns_matched = 0
-#        for line in output.split(os.linesep):
-#            for i, pattern in enumerate(self._stdout_pattern_list):
-#                match = re.match(pattern, line)
-##                print pattern, match.group()
-#                if match is not None:
-#                    self._stdout_pattern_matched(i, match)
-#                    stdout_patterns_matched += 1
-##                    break # out of inner for loop
-##            else:
-##                continue # don't break out of outer loop yet
-#            for i, pattern in enumerate(self._stderr_pattern_list):
-#                match = re.match(pattern, line) 
-#                if match is not None:
-#                    self._stderr_pattern_matched(len(self._stdout_pattern_list) + i, match)
-#                    stderr_patterns_matched += 1
-##                    break # out of inner for loop
-##            else:
-##                continue # don't break out of outer loop yet
-##            break # out of outer for loop
-#        else:
-##            self._stdout_pattern_matched(-1, self._child.before)
-#            if not len(line) == 0:
-#                logger.warn('Unmatched pattern in %s output: "%s"' % (self.executable_name, stderr_data)) 
-#
-#        self._finished_without_output = True if stdout_patterns_matched + stderr_patterns_matched == 0 else False
-        self._finished_without_output = True
         
+        stderr_patterns_matched = 0
+        if returncode != 0:
+            si = subprocess.STARTUPINFO()
+            si.dwFlags |= STARTF_USESHOWWINDOW
+            si.wShowWindow = subprocess.SW_HIDE
+            self._subprocess = subprocess.Popen(
+                [self.executable, self.temp_params_file.name] + self.executable_kwargs[:], 
+                cwd=self.directory,
+                startupinfo=si,
+                # if using stdout_data, stderr_data = self._subprocess.communicate()
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+            output = self._subprocess.communicate()[0]
+            for line in output.split(os.linesep):
+                for i, pattern in enumerate(self._stderr_pattern_list):
+                    match = re.match(pattern, line) 
+                    if match is not None:
+                        self._stderr_pattern_matched(len(self._stdout_pattern_list) + i, match)
+                        stderr_patterns_matched += 1
+            else:
+                if not len(line) == 0:
+                    logger.warn('Unmatched pattern in %s output: "%s"' % (self.executable_name, output)) 
+        self._finished_without_output = True if stderr_patterns_matched == 0 else False
         self.error = self._interpret_exitcode(returncode)
-        
         self.success = True if self.error == '' and not self._was_cancelled else False
-
         do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread
 
 
