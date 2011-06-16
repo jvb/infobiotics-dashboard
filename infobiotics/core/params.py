@@ -203,7 +203,7 @@ class Params(HasTraits):
         
     _unresetable = List(Str)
 
-    def load(self, file='', force=False):
+    def load(self, file, force=False):
         ''' Reads parameters file, 
         resets traits,
         sets traits to new parameters,
