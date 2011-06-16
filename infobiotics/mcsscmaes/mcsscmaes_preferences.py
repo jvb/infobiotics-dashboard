@@ -1,6 +1,6 @@
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
 
-PREFERENCES_PATH = 'mcsscmaes' #TODO
+PREFERENCES_PATH = 'mcsscmaes'
 
 class McssCmaesParamsPreferencesHelper(ParamsPreferencesHelper):
     preferences_path = PREFERENCES_PATH 

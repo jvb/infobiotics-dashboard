@@ -1,5 +1,6 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
 from enthought.traits.api import Str
+from prism_preferences import PREFERENCES_PATH
 
 class PRISMParams(PModelCheckerParams):
 
@@ -11,7 +12,7 @@ class PRISMParams(PModelCheckerParams):
         from infobiotics.pmodelchecker.prism.prism_preferences import PRISMParamsPreferencesHelper
         return PRISMParamsPreferencesHelper()
 
-    _preferences_path = Str('prism') # otherwise 'pmodelchecker' set from executable_name in Params
+    _preferences_path = Str(PREFERENCES_PATH) # otherwise 'pmodelchecker' set from executable_name in Params
 
     _parameter_set_name = 'prism'
 

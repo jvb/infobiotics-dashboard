@@ -2,16 +2,17 @@ from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerPar
 import sys
 from enthought.traits.ui.api import View, Group, Item
 
+PREFERENCES_PATH = 'pmodelchecker.prism'
 name = 'prism.bat' if sys.platform.startswith('win') else 'prism' 
 PRISMExecutable = RelativeFile(name, filter=name, absolute=False, auto_set=True, executable=True) # executable=True implies exists=True
 
 class PRISMParamsPreferencesHelper(PModelCheckerParamsPreferencesHelper):
-    preferences_path = 'prism'
+    preferences_path = PREFERENCES_PATH
     prism_executable = PRISMExecutable
     executable = PModelCheckerExecutable
 
 class PRISMParamsPreferencesPage(PModelCheckerParamsPreferencesPage):
-    preferences_path = 'prism'
+    preferences_path = PREFERENCES_PATH
     prism_executable = PRISMExecutable
     executable = PModelCheckerExecutable
     
@@ -22,4 +23,8 @@ class PRISMParamsPreferencesPage(PModelCheckerParamsPreferencesPage):
             show_border=True,
         ),
     )
-    
+
+if __name__ == '__main__':
+    p = PRISMParamsPreferencesHelper()
+    print p.preferences_path
+    print p.preferences.dump()

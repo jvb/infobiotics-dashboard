@@ -98,9 +98,9 @@ class Params(HasTraits):
     def _get__preferences_path(self):
         return self.executable_name
 
-#    preferences_helper = Instance(ParamsPreferencesHelper)
-#    def _preferences_helper_default(self):
-#        raise NotImplementedError('Params subclasses must provide a preferences_helper that is an instance of (a subclass of) ParamsPreferencesHelper.')
+    preferences_helper = Instance(ParamsPreferencesHelper)
+    def _preferences_helper_default(self):
+        raise NotImplementedError('Params subclasses must provide a preferences_helper that is an instance of (a subclass of) ParamsPreferencesHelper.')
 
     executable = Executable
     
@@ -109,8 +109,9 @@ class Params(HasTraits):
 #    def _directory_changed(self, directory):
 #        os.chdir(directory)
     
-    def __init__(self, file=None, **traits):
-        self.bind_preferences() # essential #TODO do in configure() or edit() so that scripts and terminal can rely on defaults not preferences?
+    def __init__(self, file=None, only_bind_executable=False, **traits):
+        # only_bind_exectuable is necessary so that PModelCheckerParams.translate_model_specification doesn't override PRISMParams directory
+        self.bind_preferences(only_bind_executable) # essential #TODO do in configure() or edit() so that scripts and terminal can rely on defaults not preferences?
 #        if self._interaction_mode == 'terminal':
 #            self.directory = os.getcwd()
         super(Params, self).__init__(**traits) # do this after binding preferences so that we can override executable and directory 
@@ -118,12 +119,16 @@ class Params(HasTraits):
         if file is not None:
             self.load(file)
 
-    def bind_preferences(self):
+    def bind_preferences(self, only_bind_executable=False):
         ''' Changes to preferences object will update bound trait value and 
         vice versa. 
         '''
 #        self._bound_preferences = [] # must assign _bound_preferences otherwise bindings are lost when this method returns
-        for preference in ['executable', 'directory'] + self.parameter_names():# + preferences.node(self._preferences_path).keys():
+        if only_bind_executable:
+            _preferences = ['executable']
+        else:
+            _preferences = ['executable', 'directory'] + self.parameter_names() # + preferences.node(self._preferences_path).keys():
+        for preference in _preferences:
             preferences_path = '.'.join([self._preferences_path, preference])
             try:
                 bound_preference = bind_preference(self, preference, preferences_path, preferences)

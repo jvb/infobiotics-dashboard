@@ -1,6 +1,7 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
 import os
 from enthought.traits.api import Str
+from mc2_preferences import PREFERENCES_PATH
 
 class MC2Params(PModelCheckerParams):
     
@@ -12,7 +13,7 @@ class MC2Params(PModelCheckerParams):
         from infobiotics.pmodelchecker.mc2.mc2_preferences import MC2ParamsPreferencesHelper
         return MC2ParamsPreferencesHelper()
 
-    _preferences_path = Str('mc2') # otherwise 'pmodelchecker' set from executable_name in Params
+    _preferences_path = Str(PREFERENCES_PATH) # otherwise 'pmodelchecker' set from executable_name in Params
 
     _parameter_set_name = 'mc2'
     

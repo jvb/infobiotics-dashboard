@@ -106,7 +106,7 @@ class PModelCheckerParams(Params):
         self._translated = False
         if self.model_specification == '': return # guard
         from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment # avoids circular import    
-        translate = PRISMExperiment(directory=self.directory)
+        translate = PRISMExperiment(only_bind_executable=True, directory=self.directory)
         if self.model_checker != 'PRISM':
             PRISM_model = '__temp__'
         else:
