@@ -77,6 +77,7 @@ toolbar = ToolBar(load_action, save_action)
 directory_group = HGroup(
     Item('directory',
         tooltip='Relative file paths will be resolved to this directory.',
+        style='readonly',
     ),
 )
 
