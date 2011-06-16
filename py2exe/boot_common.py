@@ -1,6 +1,6 @@
 '''Adapted so that no windows are opened on exit - they always will be because
 py2exe imports sets which is deprecated. However, this will obscure crashes so
-it would be better to filter the above but shown (not just point to log file)
+it would be better to filter the above but show (not just point to log file)
 what went wrong.
 '''
 
