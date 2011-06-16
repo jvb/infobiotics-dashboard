@@ -58,7 +58,7 @@ class PRISMParamsHandler(PModelCheckerParamsHandler):
                 pass
 #            from infobiotics.commons.strings import shorten_path
 #            self.status = "Translated '%s' to '%s'." % (shorten_path(self.model.model_specification, 30), shorten_path(self.model.PRISM_model, 30))
-            self.status = "Translated '%s' to '%s'." % (self.model.model_specification, self.model.PRISM_model) #TODO
+#            self.status = "Translated '%s' to '%s'." % (self.model.model_specification, self.model.PRISM_model) #TODO
         else:
             self._prism_model_str = ''
 
