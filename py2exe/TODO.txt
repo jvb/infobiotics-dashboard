@@ -1,2 +1,0 @@
-Replace boot_common.py in py2exe directory of Windows build machine with 
-boot_common.py from here, to suppress log error message on exit.

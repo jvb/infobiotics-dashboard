@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "removing .pyc files"
-find . -name "*.pyc" -delete
+/usr/bin/find . -name "*.pyc" -delete
 
 echo "removing build directories"
 rm -rf build/ dist/ debian/ tmp*/ 2&>/dev/null
@@ -22,5 +22,5 @@ echo "removing PKG-INFO"
 rm PKG-INFO 2&>/dev/null
 
 # used for comparing different builds
-rm duh duh_ 2&>/dev/null
+#rm duh duh_ 2&>/dev/null
 
