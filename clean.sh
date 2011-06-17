@@ -4,7 +4,8 @@ echo "removing .pyc files"
 /usr/bin/find . -name "*.pyc" -delete
 
 echo "removing build directories"
-rm -rf build/ dist/ debian/ tmp*/ 2&>/dev/null
+rm -rf build/ dist/ debian/ tmp*/ 
+#2&>/dev/null
 
 echo "removing debian packages"
 rm infobiotics-dashboard*.deb infobiotics-dashboard*.dsc infobiotics-dashboard*.tar.gz infobiotics-dashboard*.tar.gz.cdbs-config_list 2&>/dev/null
