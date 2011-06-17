@@ -187,7 +187,7 @@ class Experiment(Params):
                 for i, pattern in enumerate(self._stderr_pattern_list):
                     match = re.match(pattern, line) 
                     if match is not None:
-                        self._stderr_pattern_matched(len(self._stdout_pattern_list) + i, match)
+                        self._stderr_pattern_matched(i, match)
                         stderr_patterns_matched += 1
             else:
                 if not len(line) == 0:
@@ -247,10 +247,6 @@ class Experiment(Params):
         stdout_patterns_matched = 0
         stderr_patterns_matched = 0
         
-#        print 'reading lines'
-#        print self._child.readlines()
-#        print 'finished'
-#        return
         # expect loop
         while True:
             pattern_index = self._child.expect_list(
@@ -309,7 +305,6 @@ class Experiment(Params):
         else:#elif self._child.exitstatus != 0: # it might appear to have finished normally but we could have found some errors
             self.error = self._interpret_exitcode(self._child.exitstatus)
             
-#        self.success = True if self._child.exitstatus == 0 and not self._was_cancelled else False
         self.success = True if self.error == '' and not self._was_cancelled else False
         do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread
         
@@ -320,8 +315,6 @@ class Experiment(Params):
             elif self._interaction_mode == 'terminal':
                 logger.error(self.error)
             elif self._interaction_mode == 'gui':
-#                logger.error(error)
-#                pass
                 GUI.invoke_later(error, self._parent_widget, self.error, 'Experiment failed') # error here is enthought.pyface.api.error
                 self._handler.status = self.error #TODO remove?
 
@@ -421,17 +414,12 @@ class Experiment(Params):
     def _stdout_pattern_matched(self, pattern_index, match):
         raise ValueError('Experiment._stdout_pattern_matched called with unrecognised pattern_index %s' % pattern_index)
 
-
     _errors = Str(desc='the error the executable exited with')
             
     def _stderr_pattern_matched(self, pattern_index, match):
-#        print 'got here'
+        '''Overridden in infobiotics.dashboard.core.dashboard_experiment.DashboardExperiment'''
         pattern = match.group()
         self._errors += '\n%s' % pattern.strip()
-#        if pattern_index == 5:
-#            d = match.groupdict()
-#            print 'file="%s" line=%s' % (d['file'], d['line'])
-
 
     _progress_percentage = Percentage
     
