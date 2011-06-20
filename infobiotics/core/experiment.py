@@ -10,7 +10,6 @@ from PyQt4.QtCore import QThread
 from PyQt4.QtGui import QWidget
 from enthought.pyface.api import error as error, GUI
 
-import pexpect # provided by pexpect or winpexpect PyPI packages
 if sys.platform.startswith('win'):    
     # for py2exe frozen executables
     # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
@@ -30,8 +29,9 @@ if sys.platform.startswith('win'):
     except ImportError:
         pass # no build path setup, no worries.
     #import wexpect # deprecated
-    import winpexpect # from infobiotics.core
-
+#    import winpexpect # from infobiotics.core # doesn't work with GUI thread, using subprocess instead
+else:
+    import pexpect # provided by pexpect or winpexpect PyPI packages
 from progressbar import ProgressBar, Percentage as Percent, Bar, RotatingMarker, ETA
     
 from infobiotics.commons.api import logging

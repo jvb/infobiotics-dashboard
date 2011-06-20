@@ -127,7 +127,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.core.experiment_handler
     import infobiotics.core.params_handler
     import infobiotics.core.experiment_progress_handler
-    import infobiotics.core.winpexpect # essential
+#    import infobiotics.core.winpexpect # essential
 #    import infobiotics.language.dependency_graphs
 #    import infobiotics.language.partial_propensities_fixed
 #    import infobiotics.language.module1
