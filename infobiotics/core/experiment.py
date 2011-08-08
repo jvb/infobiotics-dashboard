@@ -257,7 +257,7 @@ class Experiment(Params):
             if pattern_index == eof_index:
                 if stdout_patterns_matched + stderr_patterns_matched == 0:
                     if self._child.before != '':
-#                        self._errors = self._child.before
+                        self._errors = '\n' + self._child.before # adds whatever the error message was to the failed dialog 
                         # scour before for error messages
                         for line in self._child.before.split(os.linesep):
                             for i, pattern in enumerate(self._stderr_pattern_list):
