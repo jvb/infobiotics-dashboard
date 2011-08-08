@@ -55,6 +55,11 @@ class McssResultsWidget(QWidget):
         self.ui = Ui_McssResultsWidget()
         self.ui.setupUi(self) # QPixmap: It is not safe to use pixmaps outside the GUI thread
 
+        # hide buttons that don't work
+        self.ui.export_data_as_button.setVisible(False)
+        self.ui.plot_histogram_button.setVisible(False)
+        self.ui.calculate_button.setVisible(False)
+
         self.ui.compartments_list_widget.setToolTip('')
 
         self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
@@ -161,8 +166,7 @@ class McssResultsWidget(QWidget):
             else:
                 QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')))
         except AttributeError, e:
-            e = e + "\nDid you use a old version of mcss (<0.0.19)?"
-            QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')))
+            QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')+ "\nDid you use a old version of mcss (<0.0.19)?"))
         if simulation == None:
             if self.loaded:
                 return # continue with previously loaded file
@@ -837,11 +841,11 @@ class McssResultsWidget(QWidget):
         self.spatial_plots_window.show()
 
     @wait_cursor
-    def plot(self): #TODO move most of this to McssResults
+    def plot(self, **kwargs): #TODO move most of this to McssResults
         '''Plot selected data. '''
 #        print results.timeseries_information()
         results = self.selected_items_results()
-        return results.timeseries_plot(mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False)
+        return results.timeseries_plot(mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False, **kwargs)
 
 
 def test():

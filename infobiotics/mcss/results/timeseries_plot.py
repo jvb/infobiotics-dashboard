@@ -134,9 +134,12 @@ class TimeseriesPlot(HasTraits):
     @cached_property
     def _get__volumes(self):
 #        if self.plot_volumes:
-        return [timeseries for timeseries in self._timeseries if timeseries.values_type == 'Volume']
+        return  [timeseries for timeseries in self._timeseries if timeseries.values_type == 'Volume'] 
 #        else:
 #            return []
+    
+#    def __volumes_changed(self):
+#        print len(self._volumes)
     
     @cached_property
     def _get__amounts_to_volumes_map(self):
@@ -381,6 +384,7 @@ class TimeseriesPlot(HasTraits):
 
     marker_interval = Int(10, auto_set=True, desc='the number of timepoints between markers (and errorbars if available)')
     def _marker_interval_default(self):
+        return 1
         return len(self.results.timepoints) // 10
 
     errorbars = Enum(['Confidence interval', 'Standard deviation of the sample', 'None'], desc='the statistic to show in errorbars')
@@ -602,78 +606,87 @@ class TimeseriesPlot(HasTraits):
             if timeseries.values_type == 'Concentration':
                 timeseries.values = timeseries.values.rescale(concentration_units[self.concentrations_units])
                 timeseries.values_units = self.concentrations_units
+
+    show_options = Bool(False)
             
     def traits_view(self):
         return View(
             VGroup(
                 HGroup(
-                    Item('edit_timeseries', show_label=False),
+                    Item('refine_timeseries_selection', show_label=False),
                     Item('style', style='custom'),
-                    Item('separate_volumes', enabled_when='object._some_volumes and not object.style=="Combined"'),
+#                    Item('separate_volumes', enabled_when='object._some_volumes and not object.style=="Combined"'),
 #                    Item('plot_volumes', visible_when='len([timeseries for timeseries in object.timeseries if timeseries.values_type=="Volume"]) > 0'),
+                    Spring(),
+                    Item('show_options'),
                 ),
-                HGroup(
-                    'marker_interval',
+                VGroup(
                     HGroup(
-                        'errorbars',
-                        Item('ci_degree',
-                            label='Confidence interval degree',
-                            enabled_when='object.errorbars=="Confidence interval"',
+#                        HGroup(
+                            Item('marker_interval', width=60),
+                            'errorbars',
+                            Item('ci_degree',
+                                label='Confidence interval degree',
+                                enabled_when='object.errorbars=="Confidence interval"',
+                            ),
+                            visible_when='len(object.results.run_indices) > 1',
+#                        ),
+                    ),
+                    HGroup(
+                        Item('timepoints_units',
+                            editor=time_units_editor,
+                            visible_when='len(object._timeseries) > 0'
                         ),
-                        visible_when='len(object.results.run_indices) > 1',
+                        Item('substances_units',
+                            editor=substance_units_editor,
+                            visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Amount"]'
+                        ),
+                        Item('concentrations_units',
+                            editor=concentration_units_editor,
+                            visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Concentration"]'
+                        ),
+                        Item('volumes_units',
+                            editor=volume_units_editor,
+                            visible_when='len(object._volumes) > 0'
+                        ),
+                        'abbreviated_units',
                     ),
-                ),
-                HGroup(
-                    Item('timepoints_units',
-                        editor=time_units_editor,
-                        visible_when='len(object._timeseries) > 0'
+    #                HGroup(
+    #                   'amounts_type', #TODO remove
+    #                   Item('concentration_units',
+    #                       editor=EnumEditor(values={'M':'1:M', 'mM':'2:mM', 'uM':'3:uM', 'pM':'4:pM', 'fM':'5:fM'}),
+    #                       visible_when='object.amounts_type=="Concentration"'),
+    #                   Item('volume_units',
+    #                       editor=EnumEditor(values={'L':'1:L', 'mL':'2:mL', 'uL':'3:uL', 'pL':'4:pL', 'fL':'5:fL'}),
+    #                       visible_when='len(object.volumes) > 0'),
+    #                ),
+                    HGroup(
+                        Spring(),
+                        'gridlines',
+                        Spring(),
+                        Item('figure_legend', label='Figure legend (draggable)'),
+                        Spring(),
+                        Item('individual_legends'), #visible_when='not object.style=="Combined"'),
+                        Spring(),
+                        Item('font_size',
+                            editor=RangeEditor(mode='text')
+                        ),
+                        Spring(),
                     ),
-                    Item('substances_units',
-                        editor=substance_units_editor,
-                        visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Amount"]'
+                    HGroup(
+                        Item(label='Show individual axis labels'),
+                        Item('individual_time_labels', label='time'),#, visible_when='object.show_options and not object.style=="Combined"'),
+                        Item('individual_amounts_labels', label='amounts', visible_when='len(object._amounts) > 0'),# and object.show_options and not object.style=="Combined"'),
+                        Item('individual_volume_labels', label='volume', visible_when='len(object._volumes) > 0'),# and not object.style=="Combined"'),
+                        visible_when='object.show_options and not object.style=="Combined"',
                     ),
-                    Item('concentrations_units',
-                        editor=concentration_units_editor,
-                        visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Concentration"]'
+                    HGroup(
+                        Item(label='Show scientific tick labels'),
+                        Item('scientific_time_ticklabels', label='time', ),
+                        Item('scientific_amounts_ticklabels', label='amounts'),
+                        Item('scientific_volume_ticklabels', label='volume'),
                     ),
-                    Item('volumes_units',
-                        editor=volume_units_editor,
-                        visible_when='len(object._volumes) > 0'
-                    ),
-                    'abbreviated_units',
-                ),
-#                HGroup(
-#                   'amounts_type', #TODO remove
-#                   Item('concentration_units',
-#                       editor=EnumEditor(values={'M':'1:M', 'mM':'2:mM', 'uM':'3:uM', 'pM':'4:pM', 'fM':'5:fM'}),
-#                       visible_when='object.amounts_type=="Concentration"'),
-#                   Item('volume_units',
-#                       editor=EnumEditor(values={'L':'1:L', 'mL':'2:mL', 'uL':'3:uL', 'pL':'4:pL', 'fL':'5:fL'}),
-#                       visible_when='len(object.volumes) > 0'),
-#                ),
-                HGroup(
-                    Spring(),
-                    'gridlines',
-                    Spring(),
-                    Item('figure_legend', label='Figure legend (draggable)'),
-                    Spring(),
-                    Item('individual_legends'), #visible_when='not object.style=="Combined"'),
-                    Spring(),
-                    Item('font_size',
-                        editor=RangeEditor(mode='text')
-                    ),
-                    Spring(),
-                ),
-                HGroup(
-                    Item(label='Show individual axis labels'),
-                    Item('individual_time_labels', label='time', visible_when='not object.style=="Combined"'),
-                    Item('individual_amounts_labels', label='amounts', visible_when='len(object.amounts) > 0 and not object.style=="Combined"'),
-                    Item('individual_volume_labels', label='volume', visible_when='len(object.volumes) > 0 and not object.style=="Combined"'),
-                ),
-                HGroup(
-                    'scientific_time_ticklabels',
-                    'scientific_amounts_ticklabels',
-                    'scientific_volume_ticklabels',
+                    visible_when='object.show_options',
                 ),
                 HGroup(
                     Item('_figure',
@@ -685,7 +698,6 @@ class TimeseriesPlot(HasTraits):
                     ),
                 ),
                 HGroup(
-#                    Item('options', show_label=False),
                     Spring(),
                     Item('save_resized'),
 #                    Item('list_widget'), #TODO
@@ -705,97 +717,6 @@ class TimeseriesPlot(HasTraits):
 #    data_settings = Button
 #    display_settings = Button
 
-    options = Button
-
-    def _options_fired(self):
-        self.edit_traits(
-            view=View(
-                VGroup(
-                HGroup(
-                    Item('edit_timeseries', show_label=False),
-                    Item('style', style='custom'),
-                    Item('separate_volumes', enabled_when='object._some_volumes and not object.style=="Combined"'),
-#                    Item('plot_volumes', visible_when='len([timeseries for timeseries in object.timeseries if timeseries.values_type=="Volume"]) > 0'),
-                ),
-                HGroup(
-                    'marker_interval',
-                    'errorbars',
-                    Item('ci_degree',
-                        label='Confidence interval degree',
-                        enabled_when='object.errorbars=="Confidence interval"',
-                    ),
-                ),
-                HGroup(
-                    Item('timepoints_units',
-                        editor=time_units_editor,
-                        visible_when='len(object._timeseries) > 0'
-                    ),
-                    Item('substances_units',
-                        editor=substance_units_editor,
-                        visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Amount"]'
-                    ),
-                    Item('concentrations_units',
-                        editor=concentration_units_editor,
-                        visible_when='[timeseries for timeseries in object._amounts if timeseries.values_type == "Concentration"]'
-                    ),
-                    Item('volumes_units',
-                        editor=volume_units_editor,
-                        visible_when='len(object._volumes) > 0'
-                    ),
-                    'abbreviated_units',
-                ),
-#                HGroup(
-#                   'amounts_type', #TODO remove
-#                   Item('concentration_units',
-#                       editor=EnumEditor(values={'M':'1:M', 'mM':'2:mM', 'uM':'3:uM', 'pM':'4:pM', 'fM':'5:fM'}),
-#                       visible_when='object.amounts_type=="Concentration"'),
-#                   Item('volume_units',
-#                       editor=EnumEditor(values={'L':'1:L', 'mL':'2:mL', 'uL':'3:uL', 'pL':'4:pL', 'fL':'5:fL'}),
-#                       visible_when='len(object.volumes) > 0'),
-#                ),
-                HGroup(
-                    Spring(),
-                    'gridlines',
-                    Spring(),
-                    'figure_legend',
-                    Spring(),
-                    Item('individual_legends', visible_when='not object.style=="Combined"'),
-                    Spring(),
-                    Item('font_size',
-                        editor=RangeEditor(mode='text')
-                    ),
-                    Spring(),
-                ),
-                HGroup(
-                    Item(label='Show individual axis labels'),
-                    Item('individual_time_labels', label='time', visible_when='not object.style=="Combined"'),
-                    Item('individual_amounts_labels', label='amounts', visible_when='len(object.amounts) > 0 and not object.style=="Combined"'),
-                    Item('individual_volume_labels', label='volume', visible_when='len(object.volumes) > 0 and not object.style=="Combined"'),
-                ),
-                HGroup(
-                    'scientific_time_ticklabels',
-                    'scientific_amounts_ticklabels',
-                    'scientific_volume_ticklabels',
-                ),
-               Item('_timeseries',
-                        show_label=False,
-#                        style='readonly',
-#                        editor=ListEditor(
-#                            style='custom',
-#                            editor=InstanceEditor(),
-#                        ),
-                        style='custom',
-                        editor=timeseries_table_editor,
-                    ),
-                    show_border=True,
-                ),
-                title='Configure timeseries plot',
-            )
-        )
-
-
-
-
 #    print_SubplotParams = Button
 #    def _print_SubplotParams_fired(self):
 #        p = self._figure.subplotpars
@@ -808,7 +729,7 @@ class TimeseriesPlot(HasTraits):
         resize_and_save_matplotlib_figure(self._figure)
 
 
-    edit_timeseries = Button
+    refine_timeseries_selection = Button
 
     _timeseries_mapping = Property(List(Timeseries), depends_on='separate_volumes, timeseries')
     
@@ -826,11 +747,13 @@ class TimeseriesPlot(HasTraits):
         else:
             return dict([(timeseries, ':%s' % timeseries.title) for timeseries in self.timeseries if timeseries.values_type != 'Volume'])
 
-    def _edit_timeseries_fired(self):
+    def _refine_timeseries_selection_fired(self):
         self.edit_traits(
             view=View(
                 VGroup(
-                    HGroup('separate_volumes'),
+                    HGroup(
+                        Item('separate_volumes', visible_when='object._some_volumes and not object.style=="Combined"'),
+                    ),
                     Item('_timeseries',
                         editor=SetEditor(
 #                            values=dict([(timeseries, ':%s' % timeseries.title) for timeseries in self.timeseries]),
@@ -844,7 +767,7 @@ class TimeseriesPlot(HasTraits):
                     ),
                     show_border=True,
                 ),
-                title='Edit timeseries',
+                title='Refine timeseries selection',
                 resizable=True,
                 buttons=['OK', 'Cancel']
             ),
@@ -902,7 +825,7 @@ timeseries_table_editor = TableEditor(
 ) 
 
         
-def test():
+def test_old():
     from PyQt4.QtGui import qApp
     from mcss_results_widget import McssResultsWidget
     from PyQt4.QtCore import Qt
@@ -973,7 +896,60 @@ def test():
     
     self.plot()
     qApp.exec_()
-    
 
-#if __name__ == '__main__':
-##    test()
+
+def test():
+    from PyQt4.QtGui import qApp
+    from mcss_results_widget import McssResultsWidget
+    from PyQt4.QtCore import Qt
+    import sys
+    argv = sys.argv
+    argv.insert(1, '../../../examples/quickstart-NAR/NAR_simulation.h5')
+    if len(argv) > 2:
+        print 'usage: python timeseries_plot.py [h5file]'
+        sys.exit(2)
+    if len(argv) == 1:
+#        shared.settings.register_infobiotics_settings()
+        self = McssResultsWidget()
+    elif len(argv) == 2:
+        self = McssResultsWidget(filename=argv[1])
+
+    self.ui.runs_list_widget.select(0)
+    self.ui.runs_list_widget.select(1)
+    for item in self.ui.species_list_widget.findItems("protein1", Qt.MatchWildcard):
+        item.setSelected(True)
+    for item in self.ui.species_list_widget.findItems("rna1", Qt.MatchWildcard):
+        item.setSelected(True)
+#    self.volumes_list_widget_item.setSelected(True)
+#    self.ui.compartments_list_widget.select(-1)
+
+    self.ui.every_spin_box.setValue(10);
+
+    self.ui.timepoints_data_units_combo_box.setCurrentIndex(self.ui.timepoints_data_units_combo_box.findText('seconds'))
+    
+    self.ui.timepoints_display_units_combo_box.setCurrentIndex(self.ui.timepoints_display_units_combo_box.findText('minutes'))
+
+#    self.ui.quantities_data_units_combo_box.setCurrentIndex(self.ui.quantities_data_units_combo_box.findText('molecules'))
+    
+#    self.ui.quantities_display_type_combo_box.setCurrentIndex(self.ui.quantities_display_type_combo_box.findText('molecules'))
+
+#    self.ui.quantities_display_type_combo_box.setCurrentIndex(self.ui.quantities_display_type_combo_box.findText('concentrations'))
+#    self.ui.concentrations_display_units_combo_box.setCurrentIndex(self.ui.concentrations_display_units_combo_box.findText('femtomolar'))
+#    self.ui.concentrations_display_units_combo_box.setCurrentIndex(self.ui.concentrations_display_units_combo_box.findText('nanomolar'))
+
+#    self.ui.quantities_display_type_combo_box.setCurrentIndex(self.ui.quantities_display_type_combo_box.findText('moles'))
+#    self.ui.moles_display_units_combo_box.setCurrentIndex(self.ui.moles_display_units_combo_box.findText('femtomoles'))
+    
+#    self.ui.volumes_data_units_combo_box.setCurrentIndex(self.ui.volumes_data_units_combo_box.findText('microlitres'))
+    
+#    self.ui.volumes_display_units_combo_box.setCurrentIndex(self.ui.volumes_display_units_combo_box.findText('microlitres'))
+#    self.ui.volumes_display_units_combo_box.setCurrentIndex(self.ui.volumes_display_units_combo_box.findText('attolitres'))
+    
+    self.ui.average_over_selected_runs_check_box.setChecked(True)
+    
+    self.show()
+    self.plot(show_options=True)
+    qApp.exec_()
+
+if __name__ == '__main__':
+    test()

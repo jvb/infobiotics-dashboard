@@ -1008,7 +1008,7 @@ class McssResults(object):
                         )
         return timeseries
 
-    def timeseries_plot(self, mean_over_runs):
+    def timeseries_plot(self, mean_over_runs, **kwargs):
 #        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
 #        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=True)
 #        timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=False) 
@@ -1024,6 +1024,7 @@ class McssResults(object):
                 volumes=True if self.has_volumes else False,
                 mean_over_runs=mean_over_runs,
             ),
+            **kwargs
         ).edit_traits(kind='modal')
         return self.timeseries_plot
     
