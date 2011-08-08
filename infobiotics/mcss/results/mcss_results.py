@@ -5,7 +5,7 @@ from quantities.units.time import hour, minute
 import operator
 from table import indent
 from PyQt4.QtGui import QMessageBox
-from PyQt4.QtCore import QString
+from PyQt4.QtCore import QString, Qt, SIGNAL, SLOT
 
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
 
@@ -844,11 +844,6 @@ class McssResults(object):
         return [self.simulation._species_list[i] for i in self.species_indices]
 
 
-#    def plot_timeseries(self):
-#        pass
-#    def timeseries_plots(self):
-#        pass
-
     def len_timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
         len_runs = len(self.runs)
         len_species = len(self.species)
@@ -1008,7 +1003,7 @@ class McssResults(object):
                         )
         return timeseries
 
-    def timeseries_plot(self, mean_over_runs, **kwargs):
+    def timeseries_plot(self, mean_over_runs, parent=None, **kwargs):
 #        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
 #        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=True)
 #        timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=False) 
@@ -1016,7 +1011,7 @@ class McssResults(object):
 #        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=False)
         from timeseries_plot import TimeseriesPlot
         import os.path
-        self.timeseries_plot = TimeseriesPlot(
+        timeseries_plot = TimeseriesPlot(
             results=self,
             window_title='Timeseries from %s' % os.path.basename(self.filename),
             timeseries=self.timeseries(
@@ -1025,8 +1020,16 @@ class McssResults(object):
                 mean_over_runs=mean_over_runs,
             ),
             **kwargs
-        ).edit_traits(kind='modal')
-        return self.timeseries_plot
+        )
+        ui = timeseries_plot.edit_traits(kind='live')
+        return ui
+#        widget = ui.control
+#        widget.setAttribute(Qt.WA_DeleteOnClose)
+#        if parent:
+#            widget.connect(parent, SIGNAL("destroyed(QObject*)"), SLOT("close()"))
+#        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
+#        widget.show()
+#        return timeseries_plot
     
 #    def export_data(self):
 #        pass

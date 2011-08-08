@@ -106,24 +106,24 @@ def test_resize_and_save_matplotlib_figure():
         
         def traits_view(self):
             return View(
-                VGroup(
+#                VGroup(
                     Item('figure',
                         show_label=False,
                         editor=MatplotlibFigureEditor(
-#                            toolbar=True
+                            toolbar=True
                         ),
                     ),
-                    HGroup(
-                        Spring(),
-                        Item('save_resized', show_label=False),
-                    ),
-                ),
+#                    HGroup(
+#                        Spring(),
+#                        Item('save_resized', show_label=False),
+#                    ),
+#                ),
                 resizable=True,
             )
-            
-        save_resized = Button
-        def _save_resized_fired(self):
-            resize_and_save_matplotlib_figure(self.figure)
+        # use 'Save resized' button on MatplotlibFigureEditor toolbar instead
+#        save_resized = Button
+#        def _save_resized_fired(self):
+#            resize_and_save_matplotlib_figure(self.figure)
     
     example = Example()
     fig = example.figure

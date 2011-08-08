@@ -44,7 +44,10 @@ def get_scientific_formatter():
 
 class TimeseriesPlot(HasTraits):
 
-    _figure = Instance(Figure, Figure(figsize=(24,10)))
+    _figure = Instance(Figure)
+    
+    def __figure_default(self):
+        return Figure(figsize=(12,10))
 
     def __init__(self, results, **traits):
         HasTraits.__init__(self)
@@ -301,7 +304,7 @@ class TimeseriesPlot(HasTraits):
 
     def maximise_plot_area(self):
 #        subplot_params = dict(left=0.075, right=0.925, top=0.955, bottom=0.1, hspace=0.25, wspace=0.10) # good general spacing for 6 plots combined, tiled or stacked 
-        subplot_params = dict(left=0.1, right=0.925, top=0.955, bottom=0.075, hspace=0.10, wspace=0.125) # good general spacing for 6 plots combined, tiled or stacked 
+        subplot_params = dict(left=0.1, right=0.925, top=0.955, bottom=0.1, hspace=0.10, wspace=0.125) # good general spacing for 6 plots combined, tiled or stacked 
 
         if len(self.figure_title) > 0:
             subplot_params.update(top=0.9)
@@ -387,10 +390,9 @@ class TimeseriesPlot(HasTraits):
         if (timeseries.values_type != 'Volume' and self.scientific_amounts_ticklabels) or (timeseries.values_type == 'Volume' and self.scientific_volume_ticklabels):
             axes.yaxis.set_major_formatter(get_scientific_formatter())
 
-    marker_interval = Int(10, auto_set=True, desc='the number of timepoints between markers (and errorbars if available)')
-    def _marker_interval_default(self):
-        return 1
-        return len(self.results.timepoints) // 10
+    marker_interval = Int(1, auto_set=True, desc='the number of timepoints between markers (and errorbars if available)')
+#    def _marker_interval_default(self):
+#        return len(self.results._timepoints) // 10
 
     errorbars = Enum(
         [
@@ -641,7 +643,7 @@ class TimeseriesPlot(HasTraits):
    |                            |                               |
    +----------------------------+-------------------------------+
         '''
-        return View(
+        view = View(
 #            'print_SubplotParams', #TODO
             VGroup(
                 HGroup(
@@ -664,24 +666,9 @@ class TimeseriesPlot(HasTraits):
                         springy=True,
                     ),
                     VGroup(
-                        'gridlines',
-                        VGroup(
-                            HGroup(
-                                Item('figure_title', 
-                                    show_label=False, 
-                                    style='custom',
-                                    height=64,
-                                ),
-                            ),
-                            label='Title',     
-                            springy=False,
-                        ),
                         VGroup(
                             Item('marker_interval',
-                                editor=TextEditor(
-                                    auto_set=True,
-                                ),
-                                springy=False,
+#                                springy=False,
                                 label='Interval'),
                             label='Markers'
                         ),
@@ -693,7 +680,8 @@ class TimeseriesPlot(HasTraits):
                                 springy=False,
                             ),
                             visible_when='len(object.results.run_indices) > 1',
-                            label='Error bars'
+                            label='Error bars',
+                            springy=True
                         ),
                         VGroup(
                             Item('timepoints_units',
@@ -727,7 +715,7 @@ class TimeseriesPlot(HasTraits):
                         VGroup(
                             Item('figure_legend', label='Figure', tooltip='Draggable. Switching resets position'),
                             Item('individual_legends', label='Individual'), #visible_when='not object.style=="Combined"'),
-                            Item('legend_font_size'),
+                            Item('legend_font_size', label='Font size'),
                             label='Legends',
                         ),
                         VGroup(
@@ -738,12 +726,25 @@ class TimeseriesPlot(HasTraits):
                         ),
                         VGroup(
                             Item('individual_time_labels', label='Time', visible_when='object.style=="Tiled"'),
-                            Item('individual_amounts_labels', label='Amounts', visible_when='len(object._amounts) > 0 and not object.style=="Combined"'),
-                            Item('individual_volume_labels', label='Volume', visible_when='len(object._volumes) > 0 and not object.style=="Combined"'),
-                            visible_when='not object.style=="Combined"',
+                            Item('individual_amounts_labels', label='Amounts', visible_when='object._amounts and not object.style=="Combined"'),
+                            Item('individual_volume_labels', label='Volume', visible_when='object._volumes and not object.style=="Combined"'),
+                            visible_when='object.style!="Combined"',
                             label='Individual axis labels',
                         ),
-                        springy=False,
+                        VGroup(
+                            Item('gridlines', label='On?'),
+                            label='Gridlines',
+                        ),
+                        VGroup(
+                            Item('figure_title', 
+                                show_label=False, 
+                                style='custom',
+                                height=64,
+                            ),
+                            Spring(),
+                            label='Title', 
+                        ),
+#                        springy=False,
                         scrollable=True,
                     ),
                     show_labels=True,
@@ -754,8 +755,9 @@ class TimeseriesPlot(HasTraits):
             width=800, height=600,
             resizable=True,
             title=self.window_title,
-#            id='TimeseriesPlot',
+            id='TimeseriesPlot',
         )
+        return view
 
 
 #    print_SubplotParams = Button
@@ -985,7 +987,7 @@ def test():
     self.ui.average_over_selected_runs_check_box.setChecked(True)
     
     self.show()
-    self.plot(show_options=True)
+#    self.plot()
     qApp.exec_()
 
 if __name__ == '__main__':

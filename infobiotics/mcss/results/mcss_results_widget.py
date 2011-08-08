@@ -108,6 +108,8 @@ class McssResultsWidget(QWidget):
         self.update_ui()
 
     def closeEvent(self, event):
+        if hasattr(self, 'timeseries_plot'):
+            self.timeseries_plot.dispose()
 #        shared.settings.save_window_size_and_position(self, self.settings_group)
         self.save_settings()
         event.accept()
@@ -841,12 +843,14 @@ class McssResultsWidget(QWidget):
         self.spatial_plots_window.show()
 
     @wait_cursor
-    def plot(self, **kwargs): #TODO move most of this to McssResults
+    def plot(self, **kwargs):
         '''Plot selected data. '''
-#        print results.timeseries_information()
         results = self.selected_items_results()
-        return results.timeseries_plot(mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False, **kwargs)
-
+#        print results.timeseries_information()
+        self.timeseries_plot = results.timeseries_plot(parent=self, mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False, **kwargs) 
+        widget = self.timeseries_plot.control
+        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
+        widget.show()
 
 def test():
 #    w = McssResultsWidget(filename='../../../examples/germination_09.h5')

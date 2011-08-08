@@ -7,6 +7,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 from enthought.traits.ui.basic_editor_factory import BasicEditorFactory
 from enthought.traits.api import Bool
 import os
+from infobiotics.commons.matplotlib.matplotlib_figure_size import resize_and_save_matplotlib_figure
 
 # http://groups.google.com/group/pyinstaller/msg/64e9a5987ba102f3
 class VMToolbar(NavigationToolbar): 
@@ -18,6 +19,15 @@ class VMToolbar(NavigationToolbar):
         name = name.replace('.svg','.png') 
         return QIcon(os.path.join(self.basedir, name)) 
 
+class VMToolbarWithSaveResizedAction(VMToolbar):
+    def __init__(self, plotCanvas, parent, coordinates):
+        VMToolbar.__init__(self, plotCanvas, parent, coordinates)
+        a = self.addAction(self._icon('filesave.svg'), 'Save resized', self.resize_and_save)
+        a.setIconText('Save resized')
+        a.setToolTip('Save the figure resized in inches or pixels')
+    def resize_and_save(self):
+        resize_and_save_matplotlib_figure(self.canvas.figure)
+
 class _MatplotlibFigureEditor(Editor):
 #    scrollable = True
     
@@ -26,14 +36,15 @@ class _MatplotlibFigureEditor(Editor):
 
         figure = self.value
         canvas = FigureCanvas(figure)
+        canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
-        widget = QWidget()
+        widget = QWidget(parent.parent()) # might break if Traits UI changes Editor parent in future releases
         widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         layout = QGridLayout(widget)
         
         if self.factory.toolbar:
-            toolbar = VMToolbar(canvas, widget, coordinates=True)
+            toolbar = VMToolbarWithSaveResizedAction(canvas, widget, coordinates=True)
             if self.factory.toolbar_above:
                 layout.addWidget(toolbar)
                 layout.addWidget(canvas)
