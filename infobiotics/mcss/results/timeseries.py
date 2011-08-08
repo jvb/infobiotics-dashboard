@@ -27,7 +27,7 @@ class Timeseries(HasTraits):
     values = Array
     values_units = Str
     
-    abbreviated_units = Bool(True)
+    abbreviated_units = Bool(False)
 
     xlabel = Property(Str, depends_on='timepoints, abbreviated_units, timepoints_units')
 
