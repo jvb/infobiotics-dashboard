@@ -321,7 +321,12 @@ class SpatialPlotsControlsWidget(ControlsWidget):
 
     def record_button_toggled(self, recording):
         if recording:
-            self.movie = mayavi_movies.start_movie(default_filename=unicode(self.surfaces[0].species_name)) #TODO default_filename that isn't just one species
+            self.movie = mayavi_movies.start_movie(
+                template='%012d.bmp', 
+                frame_rate=15, 
+                default_filename=unicode(self.surfaces[0].species_name),
+                
+            ) #TODO default_filename that isn't just one species
             if self.movie is None:
                 self.record_button.setChecked(False)
                 return
@@ -355,9 +360,11 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                     filename = os.path.join(tempdir, self.movie['template'] % i)
                     frame.save(filename)
             
+            else:
+                self.movie['template'] = self.templates[0]
+            
             #TODO 'Processing'
             
-#            self.movie['template'] = self.templates[0]#1]#2]
             success = mayavi_movies.finish_movie(self.movie)
             if success:
                 pass # 'success'
