@@ -1,3 +1,14 @@
+'''Bag/multiset class for convenient tallying of hashable objects.
+
+Created by Raymond Hettinger on Mon, 12 Jan 2009
+
+This recipe was added to the collections module in Python 2.7. It has been 
+modified here so that it runs on Python 2.5 or later.
+
+http://code.activestate.com/recipes/576611/
+
+'''
+
 from operator import itemgetter
 from heapq import nlargest
 from itertools import repeat, ifilter
@@ -91,11 +102,11 @@ class Counter(dict):
             self.update(kwds)
 
     def copy(self):
-        'Like dict.copy() but returns a Counter instance instead of a dict.'
+        '''Like dict.copy() but returns a Counter instance instead of a dict.'''
         return Counter(self)
 
     def __delitem__(self, elem):
-        'Like dict.__delitem__() but does not raise KeyError for missing values.'
+        '''Like dict.__delitem__() but does not raise KeyError for missing values.'''
         if elem in self:
             dict.__delitem__(self, elem)
 
@@ -132,7 +143,7 @@ class Counter(dict):
         return result
 
     def __sub__(self, other):
-        ''' Subtract count, but keep only results with positive counts.
+        '''Subtract count, but keep only results with positive counts.
 
         >>> Counter('abbbc') - Counter('bccd')
         Counter({'b': 2, 'a': 1})
@@ -165,7 +176,7 @@ class Counter(dict):
         return result
 
     def __and__(self, other):
-        ''' Intersection is the minimum of corresponding counts.
+        '''Intersection is the minimum of corresponding counts.
 
         >>> Counter('abbb') & Counter('bcc')
         Counter({'b': 1})
