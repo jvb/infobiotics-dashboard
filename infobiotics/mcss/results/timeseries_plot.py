@@ -253,7 +253,7 @@ class TimeseriesPlot(HasTraits):
 
         # don't allow negative x (time) or y (values)
         for axes in self.axes:
-            axes.set_xlim(0, self._timeseries[0].timepoints[-1].magnitude)
+            axes.set_xlim(self.results.from_.magnitude, self._timeseries[0].timepoints[-1].magnitude)
             ymin, ymax = axes.get_ylim() 
             if ymin < 0:
                 axes.set_ylim(0, ymax)
@@ -710,7 +710,7 @@ class TimeseriesPlot(HasTraits):
                                 visible_when='len(object._volumes) > 0'
                             ),
 #                            Item('abbreviated_units', label='Abbreviated?'),
-                            label='Units (display)',
+                            label='Units',
                         ),
                         VGroup(
                             Item('figure_legend', label='Figure', tooltip='Draggable. Switching resets position'),
