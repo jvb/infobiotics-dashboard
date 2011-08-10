@@ -324,8 +324,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
             self.movie = mayavi_movies.start_movie(
                 template='%012d.bmp', 
                 frame_rate=15, 
-                default_filename=unicode(self.surfaces[0].species_name),
-                
+                default_filename=unicode(' vs '.join(str(surface.species_name) for surface in self.surfaces)),
             ) #TODO default_filename that isn't just one species
             if self.movie is None:
                 self.record_button.setChecked(False)
@@ -380,7 +379,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         for i, surface in enumerate(self.surfaces):
             path = os.path.join(self.movie['tempdir'],  self.templates[i] % self.frame)
 #            path = os.path.join(self.movie['tempdir'],  self.movie['template'] % self.frame)
-            surface.scene.mlab.savefig(path)
+            surface.scene.mlab.savefig(path, figure=surface.surf)
             
 
     def update_surfaces(self):
@@ -393,7 +392,10 @@ class SpatialPlotsControlsWidget(ControlsWidget):
 
 
 class Surface(HasTraits):
-    scene = Instance(MlabSceneModel, ())
+    scene = Instance(MlabSceneModel)
+    def _scene_default(self):
+        return MlabSceneModel()
+    
     surf = Instance(PipelineBase) # surf = plot
 
     def __init__(self, array, warp_scale, extent, species_name, quantities_display_units, timepoints):
