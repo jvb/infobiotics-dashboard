@@ -1,4 +1,4 @@
-from multiset import multiset
+from infobiotics.commons.multiset import multiset
 import re
 from infobiotics.commons.quantities import *
 import config

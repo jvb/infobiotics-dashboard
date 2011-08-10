@@ -5,7 +5,7 @@ asserts can be excluded by running script with 'python -O script_name.py'
 from __future__ import division # because Python 2.x does floor-division by default!
 from math import log # tau
 import random # r_1 and r_2
-from multiset import multiset#, frozenmultiset # reactants and products in reaction class
+from infobiotics.commons.multiset import multiset # reactants and products in reaction class
 from infobiotics.commons.orderedset import OrderedSet
 
 class reaction(object):

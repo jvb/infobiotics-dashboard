@@ -6,7 +6,7 @@ from __future__ import division # because Python 2.x does floor-division by defa
 from math import log # tau
 import random; random.seed(1)
 from random import random # r_1 and r_2
-from multiset import multiset # reactants and products in reaction class
+from infobiotics.commons.multiset import multiset # reactants and products in reaction class
 
 # demonstrate difference between len and cardinality of multiset
 m = multiset({'S1': 2}) # multiset created from dictionary

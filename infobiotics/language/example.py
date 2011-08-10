@@ -12,6 +12,7 @@ class products(specieslist): pass
 # builtin modules
 
 from infobiotics.language import *
+from infobiotics.commons.multiset import multiset
 
 def rxn(reactants=reactants(), products=products(), rate=zero):
     '''A factory function for reaction object.

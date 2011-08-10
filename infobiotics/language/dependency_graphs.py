@@ -5,7 +5,7 @@ Answers the question:
     propensities for?
 
 '''
-from multiset import multiset
+from infobiotics.commons.multiset import multiset
 from pprint import pprint
 
 def id_generator(prefix):

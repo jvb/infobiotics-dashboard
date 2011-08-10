@@ -1,17 +1,29 @@
-try:
-    Counter #@UndefinedVariable
-except NameError:
-    from infobiotics.commons.counter import Counter
+'''multiset class that augments Counter with cardinality and multiplicity. 
 
+Also overrides __str__ for alternative representation and __len__ to add
+illustrative doctest.
+
+Requires counter.Counter from accompanying module if Python < 2.7
+
+'''
+
+try:
+    from collections import Counter
+    # Python >= 2.7
+except ImportError:
+    # Python < 2.7
+#    from counter import Counter  # Python >= 2.5 
+    from counter import Counter2 # Python >= 2.6
 
 class multiset(Counter):
     def __str__(self):
-        '''Returns the members of the multiset, expanded and concatenate with 
-        '+'.
+        '''Returns the members of the multiset expanded, sorted and concatenated
+        with ' + '.
         
         >>> m = multiset('abb')
         >>> print m
         a + b + b
+        
         '''
         return ' + '.join([k for k, v in sorted(self.items()) for _ in range(v)])
 
@@ -21,8 +33,9 @@ class multiset(Counter):
         >>> m = multiset('abb')
         >>> len(m)
         2
+        
         '''
-        return super(multiset, self).__len__()
+        return Counter.__len__(self)
 
     def cardinality(self):
         '''Returns the total number of elements in a multiset, including 
@@ -31,6 +44,7 @@ class multiset(Counter):
         >>> m = multiset({'a':1, 'b':2})
         >>> m.cardinality()
         3
+        
         '''
         return len(list(self.elements()))
 
@@ -44,24 +58,11 @@ class multiset(Counter):
         2
         >>> m.multiplicity('c')
         0
+        
         '''
         return self[member]
 
 
-class frozenmultiset(multiset):
-    '''Hashable but mutable.'''
-    try:
-        frozenset
-    except NameError:
-        from sets import ImmutableSet as frozenset
-    __slots__ = ('_hash',)
-    def __hash__(self):
-        memo = getattr(self, '_hash', None)
-        if memo is None:
-            memo = self._hash = hash(frozenset(self.iteritems()))
-        return memo
-
-
 if __name__ == '__main__':
     import doctest
-    doctest.testmod()
+    print doctest.testmod()
