@@ -3,7 +3,7 @@
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import *
-from enthought.traits.ui.api import *
+from enthought.traits.ui.api import View, Item, VGroup
 from enthought.mayavi.core.pipeline_base import PipelineBase
 from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
 from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
@@ -15,6 +15,7 @@ from infobiotics.commons.qt4 import centre_window
 import cStringIO as StringIO
 from ui_player_control_widget import Ui_ControlsWidget
 from infobiotics.commons.sequences import arrange
+import os.path
 
 class SpatialPlotsWindow(QWidget):
     def __init__(self, surfaces, parent=None):
@@ -25,7 +26,7 @@ class SpatialPlotsWindow(QWidget):
         self.connect(parent, SIGNAL("destroyed(QObject*)"), self.close)
         self.filename = parent.filename
 
-        self.setWindowTitle('Surface plots for %s' % self.filename)
+        self.setWindowTitle('Surface plots for %s' % os.path.basename(unicode(self.filename)))
 
         self.surfaces = surfaces
         h = QHBoxLayout()
@@ -33,30 +34,28 @@ class SpatialPlotsWindow(QWidget):
         self.widgets = []
         for surface in self.surfaces:
             self.widgets.append(surface.edit_traits().control)
-#        for widget in self.widgets:
-#            h.addWidget(widget)
-        rows, cols = arrange(self.surfaces)
-#        print rows, cols
         gridLayout = QGridLayout()
-        for i, widget in enumerate(self.widgets):
-#            print widget
-#            print (i // rows), (i % rows)
-            gridLayout.addWidget(widget, i // rows, i % rows) #FIXME 
+        gridLayout.setHorizontalSpacing(6)
+        gridLayout.setVerticalSpacing(6)
+        rows, cols = arrange(self.surfaces)
+        if len(self.widgets) == 3:
+            for i, widget in enumerate(self.widgets):
+                gridLayout.addWidget(widget, i, 0) #TODO check with 3 species
+        else:
+            for i, widget in enumerate(self.widgets):
+                gridLayout.addWidget(widget, i // rows, i % rows) 
         v = QVBoxLayout()
         v.setSpacing(0)
-#        v.addLayout(h)
         v.addLayout(gridLayout)
 
-        compareButton = QPushButton('Compare')
-        self.connect(compareButton, SIGNAL('clicked()'), self.createSurfacesListWidget)
-
         self.controls = SpatialPlotsControlsWidget(surfaces)
-
         h2 = QHBoxLayout()
         h2.addWidget(self.controls)
-        h2.addWidget(compareButton)
+        if len(self.surfaces) > 1:
+            compareButton = QPushButton('Compare')
+            self.connect(compareButton, SIGNAL('clicked()'), self.createSurfacesListWidget)
+            h2.addWidget(compareButton)
         v.addLayout(h2)
-
         self.setLayout(v)
 
     def createSurfacesListWidget(self):
@@ -237,7 +236,8 @@ def save_array_as_image(filename, array, colourmap=None, vmin=None, vmax=None, f
     from matplotlib import cm
 
     figure = Figure(figsize=array.shape[::-1], dpi=1, frameon=False)
-    canvas = FigureCanvas(figure) # essential even though it isn't used
+#    canvas = FigureCanvas(figure) # essential even though it isn't used
+    FigureCanvas(figure) # essential even though it isn't used
     figure.figimage(array, cmap=cm.get_cmap(colourmap), vmin=vmin, vmax=vmax, origin=origin)
     figure.savefig(filename, dpi=1, format=format)
 
@@ -300,6 +300,8 @@ class ControlsWidget(QWidget):
             self.play() if self.paused else self.pause()
 
 
+import mayavi_movies
+
 class SpatialPlotsControlsWidget(ControlsWidget):
 
     def __init__(self, surfaces):
@@ -311,9 +313,73 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         self.ui.positionSlider.setTickPosition(QSlider.TicksBelow)
         self.ui.spinBox.setMaximum(self.maximum)
 
+        self.record_button = QPushButton('Record')
+        self.record_button.setCheckable(True)
+        self.ui.horizontalLayout.insertWidget(0, self.record_button)
+        self.connect(self.record_button, SIGNAL('toggled(bool)'), self.record_button_toggled)
+        self.recording = False
+
+    def record_button_toggled(self, recording):
+        if recording:
+            self.movie = mayavi_movies.start_movie(default_filename=unicode(self.surfaces[0].species_name)) #TODO default_filename that isn't just one species
+            if self.movie is None:
+                self.record_button.setChecked(False)
+                return
+            self.recording = True
+            self.record_button.setText('Stop')
+            self.frame = 0
+            self.connect(self, SIGNAL('surfaces_position_changed'), self.record_frame)
+            self.templates = ['%s-%%012d.bmp' % unicode(surface.species_name) for surface in self.surfaces]
+            self.record_frame() # snap first frame
+        else:
+            self.disconnect(self, SIGNAL('surfaces_position_changed'), self.record_frame)
+            if self.movie is None:
+                return
+#            self.pause()
+            
+            if len(self.templates) > 1:
+                # join surfaces together
+                import Image
+                tempdir = self.movie['tempdir']
+                image = Image.open(os.path.join(tempdir, self.templates[0] % 1))
+                width, height = image.size
+                mode = image.mode
+                for i in range(1, self.frame + 1):
+                    frames = [os.path.join(tempdir, template % i) for template in self.templates]
+                    frame = Image.new(mode, ((width * len(frames)) + (6 * (len(frames) - 1)), height))
+                    x = 0
+                    for f in frames:
+                        image = Image.open(f)
+                        frame.paste(image, (x, 0))
+                        x += width + 6
+                    filename = os.path.join(tempdir, self.movie['template'] % i)
+                    frame.save(filename)
+            
+            #TODO 'Processing'
+            
+#            self.movie['template'] = self.templates[0]#1]#2]
+            success = mayavi_movies.finish_movie(self.movie)
+            if success:
+                pass # 'success'
+                from infobiotics.commons.qt4 import open_file
+                open_file(self.movie['filename'])
+            else:
+                pass # 'failed'
+            self.recording = False
+            self.record_button.setText('Record')
+
+    def record_frame(self):
+        self.frame += 1
+        for i, surface in enumerate(self.surfaces):
+            path = os.path.join(self.movie['tempdir'],  self.templates[i] % self.frame)
+#            path = os.path.join(self.movie['tempdir'],  self.movie['template'] % self.frame)
+            surface.scene.mlab.savefig(path)
+            
+
     def update_surfaces(self):
         for surface in self.surfaces:
             surface.set_position(self.position)
+        self.emit(SIGNAL('surfaces_position_changed'))
 
     def getPosition(self):
         return self.ui.positionSlider.value()
@@ -334,10 +400,18 @@ class Surface(HasTraits):
         # create a 'position' trait that enables us to choose the frame
         self.add_trait('position', Range(0, len(timepoints) - 1, 0))
 
-    view = View(Item('scene', show_label=False, editor=SceneEditor(scene_class=MayaviScene)),
-                VGroup('position'#, 'sync_positions'
-                ),
-                kind='panel', resizable=True)
+    view = View(
+        Item(
+            'scene', 
+            show_label=False, 
+            editor=SceneEditor(scene_class=MayaviScene)
+        ),
+#        VGroup(
+#            'position'#, 'sync_positions'
+#        ),
+        kind='panel', 
+        resizable=True,
+    )
 
 #    def _surf_default(self):
     def surf_default(self):
