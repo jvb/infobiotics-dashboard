@@ -86,12 +86,12 @@ if not format:
     else:
         raise ValueError("Default format not in (%s)" % ', '.join("'%s'" % f for f in preferred_extensions))
 
+
 def QFileDialog_filter_from_available_formats():
     '''If you want to use multiple filters, separate each one with two semicolons. For example:
     Images (*.png *.xpm *.jpg);;Text files (*.txt);;XML files (*.xml)'''
     # formats == [('*.asf', 'ASF format'), ...]
-    return ';;'.join(['%s (%s)' % (format[1], format[0]) for format in formats])
-
+    return ';;'.join(['%s %s (%s)' % (format[1], format[0], format[0]) for format in formats])
 
 
 #def filename_from_traits_FileDialog():

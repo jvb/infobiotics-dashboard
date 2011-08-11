@@ -375,18 +375,18 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 parent, 
                 'Specify a filename to save data to', 
                 unicode(' vs '.join(str(surface.species_name) for surface in self.surfaces)), 
-                movie.QFileDialog_filter_from_available_formats())
+                movie.QFileDialog_filter_from_available_formats(),
+                'AVI format *.avi (*.avi)'
+            )
             filename = str(filename)
             if filename == '':
-                return
+                self.record_button.setChecked(False)
+                return 
             self.movie = movie.movie(
                 filename,
                 10, #TODO make frame rate an option
                 '%012d.bmp' 
             )
-            if self.movie is None:
-                self.record_button.setChecked(False)
-                return
             self.recording = True
             self.record_button.setText('Stop')
             self.connect(self, SIGNAL('surfaces_position_changed'), self.record_frame)
@@ -395,8 +395,6 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         else:
             parent.setMaximumSize(self.parentmaxsize)
             self.disconnect(self, SIGNAL('surfaces_position_changed'), self.record_frame)
-            if self.movie is None:
-                return
             self.pause()
             
             progressDialog = QProgressDialog(
