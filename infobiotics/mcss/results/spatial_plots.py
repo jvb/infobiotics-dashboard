@@ -482,6 +482,7 @@ class Surface(HasTraits):
         self.timepoints = timepoints
         # create a 'position' trait that enables us to choose the frame
         self.add_trait('position', Range(0, len(timepoints) - 1, 0))
+        print '__init__'
 
     view = View(
         Item(
@@ -501,16 +502,19 @@ class Surface(HasTraits):
             Plots a surface with the shape of the first two indicies in \ 
             self.array and the height of the value in the third index.
         """
+        
+        figure=self.scene.mayavi_scene
+        
         # create the surf trait, our surface
-        surf = self.scene.mlab.surf(self.array[:, :, 0], warp_scale=self.warp_scale)#, figure=self.scene.mayavi_scene)
+        surf = self.scene.mlab.surf(self.array[:, :, 0], warp_scale=self.warp_scale, figure=figure)
 
         # create a title and get handle to it
-        self.title = self.scene.mlab.title("%s at 0" % self.species_name, size=0.5, height=0.91)#, figure=self.scene.mayavi_scene)
+        self.title = self.scene.mlab.title("%s at 0" % self.species_name, size=0.5, height=0.91, figure=figure)
         self.title.x_position = 0.03
         self.title.actor.width = 0.8#0.94 #FIXME set title to last timepoint then set width, then set title to first timepoint (not just 0) # actually these are indices in the time axis ('position') 
 
         # create axes showing compartment x,y coordinates and fix text formatting
-        axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y") #, figure=self.scene.mayavi_scene)
+        axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure)
         axes.label_text_property.set(italic=0, bold=0)
         #axes.axes.print_traits()
         axes.axes.number_of_labels = 3
@@ -518,7 +522,7 @@ class Surface(HasTraits):
         axes.axes.z_label = ''#self.quantities_display_units
 
         # create and get a handle to the scalarbar
-        scalarbar = self.scene.mlab.scalarbar(None, str(self.quantities_display_units), "vertical", 5, None, '%.f')#, figure=self.scene.mayavi_scene)
+        scalarbar = self.scene.mlab.scalarbar(None, str(self.quantities_display_units), "vertical", 5, None, '%.f')
         # set scalarbar title and label fonts
         scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
         scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
@@ -541,7 +545,7 @@ class Surface(HasTraits):
 
         # doing this somehow fixes the overlapping figures problem in MayaVi2 3.1 that "figure=self.scene.mayavi_scene)" fixes in 3.3
         scalar_bar_widget = self.surf.module_manager.scalar_lut_manager.scalar_bar_widget
-#        # vtk (>= 5.2)
+        # vtk (>= 5.2)
 #        # set position and size of scalarbar
 #        # since VTK-5.2 the actual scalarbar widget is accessed through the scalar_bar_widget's representation property 
 #        # (see https://mail.enthought.com/pipermail/enthought-dev/2009-May/021342.html)
@@ -554,8 +558,8 @@ class Surface(HasTraits):
 #        camera.distance = 100
 #        self.scene.isometric_view()
 
-    def __del__(self):
-        del self.surf
+#    def __del__(self):
+#        del self.surf
 
 
     # PyQt4 slot
