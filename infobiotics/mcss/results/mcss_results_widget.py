@@ -4,7 +4,8 @@ from quantities.quantity import Quantity
 from enthought.traits.api import HasTraits, Range, String
 from enthought.traits.ui.api import View, VGroup, HGroup, Item
 
-from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow
+from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow,\
+    RedVsGreen
 
 from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, Qt, QString
 from PyQt4.QtGui import QWidget, QListWidgetItem, QItemSelectionModel, QFileDialog, QMessageBox
@@ -831,6 +832,7 @@ class McssResultsWidget(QWidget):
     #TODO 
     @wait_cursor
     def surfacePlot(self):
+        return self.redVsGreenPlot()
         results = self.selected_items_results()
         surfaces = results.surfaces()
         runs = surfaces.shape[0]
@@ -862,6 +864,41 @@ class McssResultsWidget(QWidget):
             )
 
     @wait_cursor
+    def redVsGreenPlot(self):
+        results = self.selected_items_results()
+        surfaces = results.surfaces()
+        runs = surfaces.shape[0]
+        surfaces = mcss_results.mean(surfaces, 0) # do mean across all runs
+        (xmin, xmax), (ymin, ymax) = results.xy_min_max()
+        species = self.selected_species()
+        species_names = []
+        warp_scales = []
+        zmaxs = []
+        for si, s in enumerate(species):
+            species_names.append(s.text())
+            zmax = np.max(surfaces[si])
+            zmaxs.append(zmax)
+            warp_scales.append((1 / zmax) * 10) #FIXME 10 is magic number
+        extent = np.array([xmin, xmax, ymin, ymax, 0, np.max(zmax)])
+        surface = RedVsGreen(
+            surfaces, 
+            warp_scales, 
+            extent, 
+            species_names, 
+            self.units_dict()['quantities_display_units'], 
+            results.timepoints, 
+            suffix=' (mean)' if runs > 1 else '') #TODO mean of X runs
+        self.spatial_plots_window = SpatialPlotsWindow([surface], self)
+        try:
+            self.spatial_plots_window.show()
+        except RuntimeError, e:
+            QMessageBox.critical(
+                self, 
+                QString('Surface plotting failed'), 
+                QString(str(e))
+            )
+            
+    @wait_cursor
     def plot(self, **kwargs):
         '''Plot selected data. '''
         results = self.selected_items_results()
@@ -871,41 +908,31 @@ class McssResultsWidget(QWidget):
         widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
         widget.show()
 
-def test():
-#    w = McssResultsWidget(filename='../../../examples/germination_09.h5')
-#    w = McssResultsWidget(filename='../../../examples/quickstart-NAR/NAR_simulation.h5')
-    w = McssResultsWidget(filename='/home/jvb/phd/dated/20091130 histograms (runnable) and simulation results/for Giordano/colonyModel.h5')
-
-    centre_window(w)
-    w.ui.select_all_runs_check_box.setChecked(True)
-    w.ui.select_all_species_check_box.setChecked(True)
-    w.ui.select_all_compartments_check_box.setChecked(True)
-#    w.ui.compartments_list_widget.select(7)
-    w.plot()
 
 def main():
+    '''see spatial_splot.test for how to automate selections, etc.'''
 #    argv = qApp.arguments()
     argv = sys.argv
+    
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
         sys.exit(2)
     if len(argv) == 1:
 #        shared.settings.register_infobiotics_settings()
-        w = McssResultsWidget()
+        self = McssResultsWidget()
     elif len(argv) == 2:
-        w = McssResultsWidget(filename=argv[1])
-    centre_window(w)
-    w.show()
-#    w.raise_()
+        self = McssResultsWidget(filename=argv[1])
+    centre_window(self)
+    self.show()
+    
+#    self.raise_()
 #    qApp.processEvents()
-    return w
-#    shared.settings.restore_window_size_and_position(w)
+    
+#    shared.settings.restore_window_size_and_position(self)
+
+    return self
 
 
 if __name__ == "__main__":
     main()
-#    test()
-#    test_McssResults_export_data_as()
-#    test_volumes()
-#    profile_McssResults_get_amounts()
     exit(qApp.exec_())

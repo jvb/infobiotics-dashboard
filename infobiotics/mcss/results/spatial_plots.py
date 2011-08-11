@@ -574,6 +574,76 @@ class Surface(HasTraits):
         return self.array[:, :, position]
 
 
+class RedVsGreen(Surface):
+    
+    surfaces = List(Instance(PipelineBase))
+
+    def __init__(self, arrays, extent, warp_scales, species_names, quantities_display_units, timepoints, suffix=None):
+        HasTraits.__init__(self)
+        self.arrays = arrays
+        self.warp_scales = warp_scales
+        self.extent = extent
+        self.species_names = species_names
+        self.quantities_display_units = quantities_display_units
+        self.timepoints = timepoints
+        self.suffix = suffix
+        
+        self.add_trait('position', Range(0, len(timepoints) - 1, 0))
+
+    def surf_default(self, arrayindex):
+        figure=self.scene.mayavi_scene
+        surf = self.scene.mlab.surf(self.arrays[arrayindex][:, :, 0], warp_scale=self.warp_scales[arrayindex], figure=figure)
+
+        lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()
+        if arrayindex == 0:
+            lut[:, 0] = np.linspace(0, 255, 256) # red
+            lut[:, 1] = np.linspace(0, 0, 256) # alpha
+            lut[:, 2] = np.linspace(255, 0, 256) # blue
+#            lut[:, 3] = np.linspace(0, 255, 256) # alpha
+        else:
+            lut[:, 0] = np.linspace(0, 0, 256) # red
+            lut[:, 1] = np.linspace(0, 255, 256) # alpha
+            lut[:, 2] = np.linspace(255, 0, 256) # blue
+#            lut[:, 3] = np.linspace(0, 255, 256) # alpha
+        surf.module_manager.scalar_lut_manager.lut.table = lut
+        self.scene.mlab.draw()
+
+        if arrayindex == 0:
+            self.title = self.scene.mlab.title("%s (red) vs %s (green) at 0" % (self.species_names[0], self.species_names[1]), size=0.5, height=0.91, figure=figure)
+            self.title.x_position = 0.03
+            self.title.actor.width = 0.8#0.94 #FIXME set title to last timepoint then set width, then set title to first timepoint (not just 0) # actually these are indices in the time axis ('position') 
+
+            axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure)
+            axes.label_text_property.set(italic=0, bold=0)
+            axes.axes.number_of_labels = 3
+            axes.axes.z_axis_visibility = 0
+            axes.axes.z_label = ''#self.quantities_display_units
+
+        for surface in self.surfaces:
+            scalarbar = self.scene.mlab.scalarbar(surface, str(self.quantities_display_units), "vertical", 5, None, '%.f')
+            scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
+            scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
+
+        self.scene.scene_editor.isometric_view() #WARNING removing this line causes the surface not to display and the axes to rotate 90 degrees vertically!
+
+        return surf
+
+    @on_trait_change('scene.activated')
+    def create_pipeline(self):
+        for i in range(len(self.arrays)): 
+            self.surfaces.append(self.surf_default(i))
+            scalar_bar_widget = self.surfaces[i].module_manager.scalar_lut_manager.scalar_bar_widget
+            if i == 0:
+                scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
+            else:
+                scalar_bar_widget.representation.set(position=[0.173, 0.0524], position2=[0.1557, 0.42])
+                
+    @on_trait_change('position')
+    def update_plot(self):
+        for i, surface in enumerate(self.surfaces):
+            surface.mlab_source.set(scalars=self.arrays[i][:, :, self.position])
+#            self.title.text = "%s at %s" % (self.species_name, round(self.timepoints[self.position]))        
+        
 def test():
     from mcss_results_widget import McssResultsWidget
     from PyQt4.QtGui import qApp
@@ -581,7 +651,8 @@ def test():
 
     argv = sys.argv
     
-    argv.insert(1, '/home/jvb/Desktop/pulseInverter.h5')
+#    argv.insert(1, '/home/jvb/Desktop/pulseInverter.h5')
+    argv.insert(1, '/home/jvb/tmp/ThreeLayers.h5')
     
     if len(argv) > 2:
         print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
@@ -595,16 +666,21 @@ def test():
     self.show()
     
     self.ui.select_all_runs_check_box.setChecked(True)
-    self.ui.select_all_compartments_check_box.setChecked(True)
+#    self.ui.select_all_compartments_check_box.setChecked(True)
+    for item in self.ui.compartments_list_widget.findItems('*Central*', Qt.MatchWildcard):
+        item.setSelected(True)
+
 #    self.ui.from_spin_box.setValue(600);
 #    self.ui.to_spin_box.setValue(800);
     
-    def select_species(name):
-        for item in self.ui.species_list_widget.findItems(name, Qt.MatchWildcard):
-            item.setSelected(True)
+    def select_species(*names):
+        for name in names:
+            for item in self.ui.species_list_widget.findItems(name, Qt.MatchWildcard):
+                item.setSelected(True)
 
-    select_species("proteinGFP")
-    select_species("proteinCI")
+#    select_species("proteinGFP")
+#    select_species("proteinCI")
+    select_species("FP1", "FP2")
     
 #    self.ui.visualise_population_button.click()
     

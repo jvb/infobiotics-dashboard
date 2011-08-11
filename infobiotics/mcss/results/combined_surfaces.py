@@ -17,7 +17,6 @@ from enthought.pyface.ui.qt4.gui import GUI
 class Surfaces(HasTraits):
     scene = Instance(MlabSceneModel, ())
     surfaces = List(Instance(PipelineBase))
-    surf = Instance(PipelineBase) # surf = plot
     
     def __init__(self, arrays, **traits):
         HasTraits.__init__(self, **traits)
