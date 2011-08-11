@@ -24,10 +24,10 @@ from infobiotics.commons.qt4 import open_file
 
 can_record = False
 try:
-    import mayavi_movies
+    import movie
     can_record = True
 except EnvironmentError, e:
-    '''Enables mayavi_movies to quit prematurely without taking us down too'''
+    '''Enables movie module to quit prematurely without taking us down too'''
     pass
 if can_record:
     import Image
@@ -362,7 +362,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         self.recording = False
         
         # disable recording if ffmpeg not found
-        if not can_record: # find 'import mayavi_movies'
+        if not can_record: # find 'import movie'
             self.record_button.setEnabled(False)
             self.record_button.setToolTip("Requires 'ffmpeg' to be installed and in system path.")
 
@@ -371,17 +371,24 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         if recording:
             self.parentmaxsize = parent.maximumSize()
             parent.setFixedSize(parent.size())
-            self.movie = mayavi_movies.start_movie(
-                template='%012d.bmp', 
-                frame_rate=15, 
-                default_filename=unicode(' vs '.join(str(surface.species_name) for surface in self.surfaces)),
+            filename = QFileDialog.getSaveFileName(
+                parent, 
+                'Specify a filename to save data to', 
+                unicode(' vs '.join(str(surface.species_name) for surface in self.surfaces)), 
+                movie.QFileDialog_filter_from_available_formats())
+            filename = str(filename)
+            if filename == '':
+                return
+            self.movie = movie.movie(
+                filename,
+                10, #TODO make frame rate an option
+                '%012d.bmp' 
             )
             if self.movie is None:
                 self.record_button.setChecked(False)
                 return
             self.recording = True
             self.record_button.setText('Stop')
-            self.frame = 0
             self.connect(self, SIGNAL('surfaces_position_changed'), self.record_frame)
             self.templates = ['%s-%%012d.bmp' % unicode(surface.species_name) for surface in self.surfaces]
             self.record_frame() # snap first frame
@@ -405,11 +412,11 @@ class SpatialPlotsControlsWidget(ControlsWidget):
             if len(self.templates) > 1:
                 progressDialog.setLabelText(QString('Joining surface images into frames'))
                 # join surfaces together
-                tempdir = self.movie['tempdir']
+                tempdir = self.movie.tempdir
                 image = Image.open(os.path.join(tempdir, self.templates[0] % 1))
                 width, height = image.size
                 mode = image.mode
-                for i in range(1, self.frame + 1):
+                for i in range(1, self.movie.frames + 1):
                     frames = [os.path.join(tempdir, template % i) for template in self.templates]
                     frame = Image.new(mode, ((width * len(frames)) + (6 * (len(frames) - 1)), height))
                     x = 0
@@ -417,15 +424,14 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                         image = Image.open(f)
                         frame.paste(image, (x, 0))
                         x += width + 6
-                    filename = os.path.join(tempdir, self.movie['template'] % i)
+                    filename = os.path.join(tempdir, self.movie.template % i)
                     frame.save(filename)
-                progressDialog.setValue(1)
             else:
-                self.movie['template'] = self.templates[0]
+                self.movie.template = self.templates[0]
             
-            progressDialog.setLabelText("Encoding movie '%s'" % self.movie['filename'])
+            progressDialog.setLabelText("Encoding movie:\n'%s'" % self.movie.filename)
             progressDialog.setValue(1)
-            success = mayavi_movies.finish_movie(self.movie)
+            success = self.movie.encode()
             if success:
                 progressDialog.setValue(2)
                 if QMessageBox.Yes == QMessageBox.question(
@@ -435,22 +441,21 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                     buttons=QMessageBox.Yes|QMessageBox.No,
                     defaultButton=QMessageBox.No
                 ):
-                    open_file(self.movie['filename'])
+                    open_file(self.movie.filename)
             else:
                 progressDialog.close()
                 QMessageBox.critical(
                     self.parent(),
                     QString('Recording failed'),
-                    QString(mayavi_movies.output), 
+                    QString(self.movie.output), 
                     buttons=QMessageBox.Ok)
+            del self.movie
             self.recording = False
             self.record_button.setText('Record')
 
     def record_frame(self):
-        self.frame += 1
         for i, surface in enumerate(self.surfaces):
-            path = os.path.join(self.movie['tempdir'],  self.templates[i] % self.frame)
-            surface.scene.mlab.savefig(path, figure=surface.surf)
+            surface.scene.mlab.savefig(self.movie.next_frame(self.templates[i]), figure=surface.surf)
             
 
     def update_surfaces(self):

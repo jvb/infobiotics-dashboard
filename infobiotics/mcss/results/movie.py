@@ -27,7 +27,7 @@ import os.path
 # helper function
 def ext(filename): #MV file_name
     '''Returns the file's extension without the dot.'''
-    return os.path.splitext(filename)[1].strip('.').strip()
+    return os.path.splitext(str(filename))[1].strip('.').strip()
 
 
 from subprocess import Popen, PIPE, STDOUT
@@ -85,52 +85,64 @@ if not format:
             break
     else:
         raise ValueError("Default format not in (%s)" % ', '.join("'%s'" % f for f in preferred_extensions))
-        
 
-#TODO delegate file choosing to calling application
-from enthought.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'qt4'
-from enthought.pyface.api import FileDialog, OK
+def QFileDialog_filter_from_available_formats():
+    '''If you want to use multiple filters, separate each one with two semicolons. For example:
+    Images (*.png *.xpm *.jpg);;Text files (*.txt);;XML files (*.xml)'''
+    # formats == [('*.asf', 'ASF format'), ...]
+    return ';;'.join(['%s (%s)' % (format[1], format[0]) for format in formats])
+
+
+
+#def filename_from_traits_FileDialog():
+#    from enthought.etsconfig.api import ETSConfig
+#    ETSConfig.toolkit = 'qt4'
+#    from enthought.pyface.api import FileDialog, OK
+#    fd = FileDialog(
+#        action='save as',
+#        wildcard=''.join([FileDialog.create_wildcard(f[1], f[0]) for f in formats]), # formats == [('*.asf', 'ASF format'), ...]
+#        title='Save movie',
+#        default_filename=default_filename,
+##        default_directory=os.getcwd(), # default behaviour 
+#        wildcard_index=extensions.index(format)
+#    )
+#    if fd.open() == OK:
+#        ext_ = ext(fd.path)
+#        if not ext_ or ext_ not in extensions:
+#            available_format = extensions[fd.wildcard_index]
+#            print "Format '%s (%s)' not available, using '%s' instead." % (dict(available_formats)[ext_], ext_, available_format)
+#            fd.path += '.%s' % available_format
+#    return fd.path
+        
 
 import tempfile
 import shutil
 
 class movie(object):
     
-    def _filename(self):
-        fd = FileDialog(
-            action='save as',
-            wildcard=''.join([FileDialog.create_wildcard(f[1], f[0]) for f in formats]), # formats == [('*.asf', 'ASF format'), ...]
-            title='Save movie',
-            default_filename=self.default_filename,
-#            default_directory=os.getcwd(), # default behaviour 
-            wildcard_index=extensions.index(format)
-        )
-        if fd.open() == OK:
-            ext_ = ext(fd.path)
-            if not ext_ or ext_ not in extensions:
-                available_format = extensions[fd.wildcard_index]
-                print "Format '%s (%s)' not available, using '%s' instead." % (dict(available_formats)[ext_], ext_, available_format)
-                fd.path += '.%s' % available_format
-        return fd.path
-    
-    def __init__(self, template=template, frame_rate=frame_rate, default_filename=default_filename):
-        if not ext(default_filename):
-            default_filename += '.%s' % format
-        self.default_filename = default_filename
-        self.frame_rate=frame_rate
-        self.tempdir=tempfile.mkdtemp()
-        self.template=template
-        self.frames=0
+    def __init__(self, filename=default_filename, frame_rate=frame_rate, template=template):
+        assert filename
+        extension = ext(filename)
+        if not extension:
+            if extension and extension not in extensions:
+                print "Format '%s' not available, using '%s' instead." % (dict(available_formats)[extension], extension, format)
+            filename += '.%s' % format
+        self.filename = filename
+        self.frame_rate = frame_rate
+        self.template = template
+        self.tempdir = tempfile.mkdtemp()
+        self.frames = 0
 
-    def next_frame(self):
+    def next_frame(self, template=None):
+        if not template:
+            template = self.template
         '''Returns a suitable file name for the next frame, based on template.'''
         self.frames += 1
-        return os.path.join(self.tempdir, self.template % self.frames)
+        return os.path.join(self.tempdir, template % self.frames)
     
     def encode(self, filename=None, frame_rate=None):
         if not filename:
-            filename = self._filename()
+            filename = self.filename
         if not filename:
             print 'Aborted'
             return
@@ -157,9 +169,11 @@ class movie(object):
             stderr=STDOUT
         )
         self.output = p.communicate()[0]
-        shutil.rmtree(self.tempdir, ignore_errors=True)
         return p.returncode == 0
-
+    
+    def __del__(self):
+        shutil.rmtree(self.tempdir, ignore_errors=True)
+    
 
 def example():
     # setup movie
@@ -178,12 +192,17 @@ def example():
         mlab.savefig(m.next_frame(), figure=f)
     
     # encode frames
-    if m.encode():
-        # exit with output
+    encoded = m.encode()
+
+    # remove tempdir
+    del m
+    
+    if not encoded:
+        # report error
         exit(m.output)
 
 
 if __name__ == '__main__':
-#    example()
-    execfile('spatial_plots.py')
+    example()
+#    execfile('spatial_plots.py')
     
