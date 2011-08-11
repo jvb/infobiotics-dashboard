@@ -454,17 +454,28 @@ class McssResultsWidget(QWidget):
             )
         else:
             enable_widgets(
-#                self.ui.export_data_as_button,
+#                self.ui.export_data_as_button, #TODO
                 self.ui.plot_timeseries_button,
-#                self.ui.plot_histogram_button,
+#                self.ui.plot_histogram_button, #TODO
             )
-#            if num_selected_runs == 1 and num_selected_species >= 1 and num_selected_compartments > 1:
             if num_selected_species >= 1 and num_selected_compartments > 1:
                 enable_widgets(self.ui.visualise_population_button)
             else:
                 disable_widgets(self.ui.visualise_population_button)
             if num_selected_runs > 1:
                 enable_widgets(self.ui.calculate_button)
+
+            # no more than 4 surfaces
+            if num_selected_species > 4:
+                disable_widgets(self.ui.visualise_population_button)
+            else:
+                enable_widgets(self.ui.visualise_population_button)
+                
+            # no more than 10 timeseries (per species)
+            if num_selected_compartments > 10:
+                disable_widgets(self.ui.plot_timeseries_button)
+            else:
+                enable_widgets(self.ui.plot_timeseries_button)
 
 
     # slots
@@ -837,16 +848,18 @@ class McssResultsWidget(QWidget):
             extent = [xmin, xmax, ymin, ymax, 0, zmax]
 #            warp_scale = 'auto' # doesn't work
             warp_scale = (1 / zmax) * 10 #FIXME 10 is magic number
+            #TODO mean of X runs
             surface = Surface(surface, warp_scale, extent, s.text() if runs == 1 else s.text() + ' (mean)', self.units_dict()['quantities_display_units'], results.timepoints)
             surfaces_.append(surface)
-        try:
-            kwargs = dict((str(s.species_name).replace(' (mean)','_mean'),s.array) for s in surfaces_)
-#            print kwargs
-            np.savez(self.filename+'_surfaces.npz', **kwargs)
-        except Exception, e:
-            print e
         self.spatial_plots_window = SpatialPlotsWindow(surfaces_, self)
-        self.spatial_plots_window.show()
+        try:
+            self.spatial_plots_window.show()
+        except RuntimeError, e:
+            QMessageBox.critical(
+                self, 
+                QString('Surface plotting failed'), 
+                QString(str(e))
+            )
 
     @wait_cursor
     def plot(self, **kwargs):

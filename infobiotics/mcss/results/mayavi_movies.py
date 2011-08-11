@@ -7,9 +7,9 @@ from infobiotics.thirdparty.which import which, WhichError
 try:
     ffmpeg = which('ffmpeg')
 except WhichError:
-    raise WhichError('ffmpeg not found, aborting.')
+    raise EnvironmentError(1, 'ffmpeg not found, aborting.')
 
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 import re
 from operator import itemgetter
 import os.path
@@ -22,7 +22,7 @@ import tempfile
 def ext(filename):
     return os.path.splitext(filename)[1].strip('.').strip()
 
-available_formats = Popen('{ffmpeg} -formats'.format(**locals()), shell=True, stdout=PIPE, stderr=PIPE).communicate()[0]
+available_formats = Popen([ffmpeg, '-formats'], stdout=PIPE, stderr=PIPE).communicate()[0]
 available_formats = [match for match in re.findall(' .E ([0-9A-Za-z]+)\s*(.*)', available_formats)] 
 
 formats = [ #TODO improve descriptions
@@ -80,6 +80,7 @@ def start_movie(template='%012d.bmp', frame_rate=10, default_filename='movie'):
         default_filename += '.%s' % format
     fd = FileDialog(
         action='save as',
+        # formats[:5] == [('*.asf', 'ASF format'), ('*.avi', 'AVI format'), ('*.dvd', 'MPEG-2 PS format (DVD VOB)'), ('*.flv', 'FLV format'), ('*.h261', 'raw H.261')]
         wildcard=''.join([FileDialog.create_wildcard(f[1], f[0]) for f in formats]),
         title='Save movie',
         default_filename=default_filename,
@@ -100,16 +101,39 @@ def start_movie(template='%012d.bmp', frame_rate=10, default_filename='movie'):
     else:
         return None
 
-
+output = ''
 def finish_movie(movie):
+    global output
+    output = ''
+#    p = Popen(
+#        '{ffmpeg} -y -f image2 -i "{tempdir}/{template}" -r {frame_rate} -sameq "{filename}" -pass 2'.format(
+#            ffmpeg=which('ffmpeg'), 
+#            **movie
+#        ),
+#        shell=True
+#    )
+#    p.wait()
     p = Popen(
-        '{ffmpeg} -y -f image2 -i "{tempdir}/{template}" -r {frame_rate} -sameq "{filename}" -pass 2'.format(
-            ffmpeg=which('ffmpeg'), 
-            **movie
-        ),
-        shell=True
+        [
+#            which('ffmpeg'), # in case ffmpeg changed since we import/ran the module?
+            ffmpeg,
+            '-y',
+            '-f',
+            'image2',
+            '-i',
+#            '"{tempdir}/{template}"'.format(**movie),
+            '{tempdir}/{template}'.format(**movie),
+            '-r',
+            str(movie['frame_rate']),
+            '-sameq',
+#            '"%s"' % movie['filename'],
+            '%s' % movie['filename'],
+            '-pass 2'
+        ],
+        stdout=PIPE,
+        stderr=STDOUT
     )
-    p.wait()
+    output = p.communicate()[0]
     shutil.rmtree(movie['tempdir'], ignore_errors=True)
     return p.returncode == 0
     
@@ -135,5 +159,6 @@ def main():
     exit(finish_movie(movie))
 
 if __name__ == '__main__':
-    main()
+#    main()
+    execfile('spatial_plots.py')
     
