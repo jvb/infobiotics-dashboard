@@ -424,25 +424,25 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 self.movie['template'] = self.templates[0]
             
             progressDialog.setLabelText("Encoding movie '%s'" % self.movie['filename'])
+            progressDialog.setValue(1)
             success = mayavi_movies.finish_movie(self.movie)
-            progressDialog.setValue(2)
             if success:
+                progressDialog.setValue(2)
                 if QMessageBox.Yes == QMessageBox.question(
                     self.parent(), 
                     QString('Recording succeeded'),
-                    QString('Attempt to open recording?'),
+                    QString('Play recording now?'),
                     buttons=QMessageBox.Yes|QMessageBox.No,
                     defaultButton=QMessageBox.No
                 ):
                     open_file(self.movie['filename'])
             else:
-                print mayavi_movies.output
+                progressDialog.close()
                 QMessageBox.critical(
                     self.parent(),
                     QString('Recording failed'),
                     QString(mayavi_movies.output), 
                     buttons=QMessageBox.Ok)
-                pass # 'failed'
             self.recording = False
             self.record_button.setText('Record')
 
