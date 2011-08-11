@@ -94,13 +94,13 @@ class SpatialPlotsWindow(QWidget):
                     str(s.species_name).replace(' (mean)','_mean'), 
                     s.array
                 ) for s in self.surfaces)
-                np.savez(file, **kwargs)
+                np.savez(str(file), **kwargs)
                 self.saveDataButton.setText('Saved')
                 self.saveDataButton.setToolTip(file)
                 self.saveDataButton.setEnabled(False)
         except Exception, e:
             self.saveDataButton.setText('Failed')
-            self.saveDataButton.setToolTip(e)
+            self.saveDataButton.setToolTip(QString(str(e)))
             self.saveDataButton.setEnabled(False)
             
 class SurfacesListWidget(QWidget):
@@ -482,7 +482,6 @@ class Surface(HasTraits):
         self.timepoints = timepoints
         # create a 'position' trait that enables us to choose the frame
         self.add_trait('position', Range(0, len(timepoints) - 1, 0))
-        print '__init__'
 
     view = View(
         Item(
@@ -575,5 +574,47 @@ class Surface(HasTraits):
         return self.array[:, :, position]
 
 
-if __name__ == '__main__':
-    execfile('mcss_results_widget.py')
+def test():
+    from mcss_results_widget import McssResultsWidget
+    from PyQt4.QtGui import qApp
+    import sys
+
+    argv = sys.argv
+    
+    argv.insert(1, '/home/jvb/Desktop/pulseInverter.h5')
+    
+    if len(argv) > 2:
+        print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
+        sys.exit(2)
+    if len(argv) == 1:
+#        shared.settings.register_infobiotics_settings()
+        self = McssResultsWidget()
+    elif len(argv) == 2:
+        self = McssResultsWidget(filename=argv[1])
+    centre_window(self)
+    self.show()
+    
+    self.ui.select_all_runs_check_box.setChecked(True)
+    self.ui.select_all_compartments_check_box.setChecked(True)
+#    self.ui.from_spin_box.setValue(600);
+#    self.ui.to_spin_box.setValue(800);
+    
+    def select_species(name):
+        for item in self.ui.species_list_widget.findItems(name, Qt.MatchWildcard):
+            item.setSelected(True)
+
+    select_species("proteinGFP")
+    select_species("proteinCI")
+    
+#    self.ui.visualise_population_button.click()
+    
+    self.raise_()
+    qApp.processEvents()
+    
+    exit(qApp.exec_())
+
+
+if __name__ == "__main__":
+#    execfile('mcss_results_widget.py')
+    test()
+    
