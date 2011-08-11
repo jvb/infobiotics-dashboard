@@ -98,37 +98,26 @@ def start_movie(template='%012d.bmp', frame_rate=10, default_filename='movie'):
             tempdir=tempdir,
             template=template,
         )
-    else:
-        return None
 
 output = ''
 def finish_movie(movie):
     global output
     output = ''
-#    p = Popen(
-#        '{ffmpeg} -y -f image2 -i "{tempdir}/{template}" -r {frame_rate} -sameq "{filename}" -pass 2'.format(
-#            ffmpeg=which('ffmpeg'), 
-#            **movie
-#        ),
-#        shell=True
-#    )
-#    p.wait()
     p = Popen(
         [
-#            which('ffmpeg'), # in case ffmpeg changed since we import/ran the module?
             ffmpeg,
             '-y',
             '-f',
             'image2',
             '-i',
-#            '"{tempdir}/{template}"'.format(**movie),
             '{tempdir}/{template}'.format(**movie),
             '-r',
             str(movie['frame_rate']),
             '-sameq',
-#            '"%s"' % movie['filename'],
             '%s' % movie['filename'],
-            '-pass 2'
+##            '-pass 2'
+#            '-pass'
+#            '2',
         ],
         stdout=PIPE,
         stderr=STDOUT
@@ -136,8 +125,7 @@ def finish_movie(movie):
     output = p.communicate()[0]
     shutil.rmtree(movie['tempdir'], ignore_errors=True)
     return p.returncode == 0
-    
-    
+
 def main():
     # setup movie
     movie = start_movie()
@@ -153,10 +141,10 @@ def main():
         f.scene.camera.azimuth(10) #TODO remove
         f.scene.render()
         mlab.savefig(os.path.join(movie['tempdir'], movie['template'] % (i + 1)))
-#        arr = mlab.screenshot() #TODO when more than one surface
     
     # process frames
     exit(finish_movie(movie))
+
 
 if __name__ == '__main__':
 #    main()
