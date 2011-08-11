@@ -5,6 +5,7 @@ from run import Run
 from species import Species
 from compartment import Compartment
 import tables
+import numpy as np
 
 class Simulation(object): #TODO rename McssSimulation
 
@@ -15,6 +16,22 @@ class Simulation(object): #TODO rename McssSimulation
 #        self._rulesets_list = []
         self._runs_list = []
         self._species_list = []
+
+        # handle older versions of mcss that stored attributes as arrays
+        _attributes = {}
+#        print type(attributes) # <class 'tables.attributeset.AttributeSet'>
+        for key in attributes._v_attrnames:
+            value = getattr(attributes, key)
+            if isinstance(value, np.ndarray):
+                _attributes[key] = value[0]
+            else:
+                _attributes[key] = value
+        class obj(dict):
+            '''dictionary with all keys accessible as object attributes'''
+            def __init__(self, data):
+                self.update(data)
+                self.__dict__.update(data)
+        attributes = obj(_attributes)
 
         self.data_file = attributes.data_file
 #        self.division_direction = attributes.division_direction
@@ -28,7 +45,13 @@ class Simulation(object): #TODO rename McssSimulation
         self.log_interval = attributes.log_interval
 #        self.log_propensities = attributes.log_propensities
         self.log_type = attributes.log_type
-        self.log_volumes = attributes.log_volumes
+        
+        # handle older versions of mcss without log_volumes attribute
+        try:
+            self.log_volumes = attributes.log_volumes
+        except AttributeError:
+            self.log_volumes = False
+        
         self.max_time = attributes.max_time
 #        self.mcss_version = attributes.mcss_version
 #        self.model_format = attributes.model_format

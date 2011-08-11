@@ -1,7 +1,7 @@
 template = '%012d.png'
 frame_rate = 25
 default_filename = 'movie'
-preferred_extensions = 'gif', 'flv', 'avi', 'mpeg', 'mov'
+preferred_extensions = 'gif', 'avi', 'mpeg', 'mov', 'flv'
 
 from infobiotics.thirdparty.which import which, WhichError
 try:
@@ -75,7 +75,7 @@ if not format:
 #        exit("Default format not in (%s)" % ', '.join("'%s'" % f for f in preferred_extensions))
 
 
-def start_movie(template='%012d.bmp', frame_rate=15, default_filename='movie'):
+def start_movie(template='%012d.bmp', frame_rate=10, default_filename='movie'):
     if not ext(default_filename):
         default_filename += '.%s' % format
     fd = FileDialog(
@@ -110,7 +110,7 @@ def finish_movie(movie):
         shell=True
     )
     p.wait()
-#    shutil.rmtree(movie['tempdir'], ignore_errors=True)
+    shutil.rmtree(movie['tempdir'], ignore_errors=True)
     return p.returncode == 0
     
     

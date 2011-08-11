@@ -33,7 +33,7 @@ class SpatialPlotsWindow(QWidget):
         h.setSpacing(0)
         self.widgets = []
         for surface in self.surfaces:
-            self.widgets.append(surface.edit_traits().control)
+            self.widgets.append(surface.edit_traits(kind='subpanel').control) #TODO edit_traits(kind='panel')?
         gridLayout = QGridLayout()
         gridLayout.setHorizontalSpacing(6)
         gridLayout.setVerticalSpacing(6)
@@ -422,7 +422,6 @@ class Surface(HasTraits):
         resizable=True,
     )
 
-#    def _surf_default(self):
     def surf_default(self):
         """ (Called after initialisation) \
             Plots a surface with the shape of the first two indicies in \ 
@@ -434,7 +433,7 @@ class Surface(HasTraits):
         # create a title and get handle to it
         self.title = self.scene.mlab.title("%s at 0" % self.species_name, size=0.5, height=0.91)#, figure=self.scene.mayavi_scene)
         self.title.x_position = 0.03
-        self.title.actor.width = 0.8#0.94
+        self.title.actor.width = 0.8#0.94 #FIXME set title to last timepoint then set width, then set title to first timepoint (not just 0) # actually these are indices in the time axis ('position') 
 
         # create axes showing compartment x,y coordinates and fix text formatting
         axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y") #, figure=self.scene.mayavi_scene)

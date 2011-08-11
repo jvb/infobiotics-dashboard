@@ -839,6 +839,12 @@ class McssResultsWidget(QWidget):
             warp_scale = (1 / zmax) * 10 #FIXME 10 is magic number
             surface = Surface(surface, warp_scale, extent, s.text() if runs == 1 else s.text() + ' (mean)', self.units_dict()['quantities_display_units'], results.timepoints)
             surfaces_.append(surface)
+        try:
+            kwargs = dict((str(s.species_name).replace(' (mean)','_mean'),s.array) for s in surfaces_)
+#            print kwargs
+            np.savez(self.filename+'_surfaces.npz', **kwargs)
+        except Exception, e:
+            print e
         self.spatial_plots_window = SpatialPlotsWindow(surfaces_, self)
         self.spatial_plots_window.show()
 
