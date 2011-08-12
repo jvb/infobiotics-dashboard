@@ -574,11 +574,23 @@ class Surface(HasTraits):
         return self.array[:, :, position]
 
 
+blue_to_red_lut_table = np.ndarray(256,4)
+blue_to_red_lut_table[:, 0] = np.linspace(0, 255, 256) # red
+blue_to_red_lut_table[:, 1] = np.linspace(0, 0, 256) # green
+blue_to_red_lut_table[:, 2] = np.linspace(255, 0, 256) # blue
+blue_to_red_lut_table[:, 3] = np.linspace(0, 255, 256) # alpha
+#TODO
+blue_to_green_lut_table = np.ndarray(256,4)
+blue_to_green_lut_table[:, 0] = np.linspace(0, 0, 256) # red
+blue_to_green_lut_table[:, 1] = np.linspace(0, 255, 256) # green
+blue_to_green_lut_table[:, 2] = np.linspace(255, 0, 256) # blue
+blue_to_green_lut_table[:, 3] = np.linspace(0, 255, 256) # alpha
+
 class RedVsGreen(Surface):
     
     surfaces = List(Instance(PipelineBase))
 
-    def __init__(self, arrays, extent, warp_scales, species_names, quantities_display_units, timepoints, suffix=None):
+    def __init__(self, arrays, warp_scales, extent, species_names, quantities_display_units, timepoints, suffix=None):
         HasTraits.__init__(self)
         self.arrays = arrays
         self.warp_scales = warp_scales
@@ -597,12 +609,12 @@ class RedVsGreen(Surface):
         lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()
         if arrayindex == 0:
             lut[:, 0] = np.linspace(0, 255, 256) # red
-            lut[:, 1] = np.linspace(0, 0, 256) # alpha
+            lut[:, 1] = np.linspace(0, 0, 256) # green
             lut[:, 2] = np.linspace(255, 0, 256) # blue
 #            lut[:, 3] = np.linspace(0, 255, 256) # alpha
         else:
             lut[:, 0] = np.linspace(0, 0, 256) # red
-            lut[:, 1] = np.linspace(0, 255, 256) # alpha
+            lut[:, 1] = np.linspace(0, 255, 256) # green
             lut[:, 2] = np.linspace(255, 0, 256) # blue
 #            lut[:, 3] = np.linspace(0, 255, 256) # alpha
         surf.module_manager.scalar_lut_manager.lut.table = lut
