@@ -390,15 +390,15 @@ class SpatialPlotsControlsWidget(ControlsWidget):
             self.movie = movie.movie(
                 filename,
                 22.5, #TODO make frame rate an option
-                '%012d.bmp' 
+                '%012d.png' 
             )
             self.recording = True
             self.record_button.setText('Stop')
             self.connect(self, SIGNAL('surfaces_position_changed'), self.record_frame)
             if hasattr(self.surfaces[0], 'species_name'):
-                self.templates = ['%s-%%012d.bmp' % unicode(surface.species_name) for surface in self.surfaces]
+                self.templates = ['%s-%%012d.png' % unicode(surface.species_name) for surface in self.surfaces]
             else:
-                self.templates = ['%s-%%012d.bmp' % unicode(' vs '.join(str(name) for name in self.surfaces[0].species_names))] 
+                self.templates = ['%s-%%012d.png' % unicode(' vs '.join(str(name) for name in self.surfaces[0].species_names))] 
             
             self.record_frame() # snap first frame
         else:

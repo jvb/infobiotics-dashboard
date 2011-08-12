@@ -887,8 +887,8 @@ class McssResultsWidget(QWidget):
         xymultiplier = 6
         tmultiplier = 10
         surfaces = np.array([interpolate(surfaces[i], xymultiplier, tmultiplier) for i in range(len(surfaces))])
-        print surfaces.shape
-        print results.timepoints.shape
+#        print surfaces.shape
+#        print results.timepoints.shape
         
         (xmin, xmax), (ymin, ymax) = results.xy_min_max()
         species = self.selected_species()
