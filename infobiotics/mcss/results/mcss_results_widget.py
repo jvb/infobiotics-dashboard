@@ -829,6 +829,18 @@ class McssResultsWidget(QWidget):
 
         return file_name
 
+            
+    @wait_cursor
+    def plot(self, **kwargs):
+        '''Plot selected data. '''
+        results = self.selected_items_results()
+#        print results.timeseries_information()
+        self.timeseries_plot = results.timeseries_plot(parent=self, mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False, **kwargs) 
+        widget = self.timeseries_plot.control
+        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
+        widget.show()
+        
+
     #TODO 
     @wait_cursor
     def surfacePlot(self):
@@ -869,24 +881,27 @@ class McssResultsWidget(QWidget):
         surfaces = results.surfaces()
         runs = surfaces.shape[0]
         surfaces = mcss_results.mean(surfaces, 0) # do mean across all runs
+        
+        xymultiplier = 4
+        tmultiplier = 5
+        surfaces = np.array([interpolate(surfaces[i], xymultiplier, tmultiplier) for i in range(len(surfaces))])
+        
         (xmin, xmax), (ymin, ymax) = results.xy_min_max()
         species = self.selected_species()
         species_names = []
-        warp_scales = []
         zmaxs = []
         for si, s in enumerate(species):
             species_names.append(s.text())
             zmax = np.max(surfaces[si])
             zmaxs.append(zmax)
-            warp_scales.append((1 / zmax) * 10) #FIXME 10 is magic number
-        extent = np.array([xmin, xmax, ymin, ymax, 0, np.max(zmax)])
+        extent = np.array([xmin, xmax, ymin, ymax, 0, np.max(zmaxs)])
         surface = RedVsGreen(
             surfaces, 
-            warp_scales, 
             extent, 
             species_names, 
             self.units_dict()['quantities_display_units'], 
-            results.timepoints, 
+            np.linspace(results.timepoints[0], results.timepoints[-1], len(results.timepoints) * tmultiplier), 
+            self.units_dict()['timepoints_display_units'], 
             suffix=' (mean)' if runs > 1 else '') #TODO mean of X runs
         self.spatial_plots_window = SpatialPlotsWindow([surface], self)
         try:
@@ -897,16 +912,26 @@ class McssResultsWidget(QWidget):
                 QString('Surface plotting failed'), 
                 QString(str(e))
             )
-            
-    @wait_cursor
-    def plot(self, **kwargs):
-        '''Plot selected data. '''
-        results = self.selected_items_results()
-#        print results.timeseries_information()
-        self.timeseries_plot = results.timeseries_plot(parent=self, mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False, **kwargs) 
-        widget = self.timeseries_plot.control
-        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
-        widget.show()
+
+
+from scipy import mgrid, ndimage
+
+def interpolate(surfacearray, xymultiplier, tmultiplier, order=1):
+    '''Interpolates an array of surfaces where surfacearray.shape = (x, y, t) 
+    and surface at time t = surfacearray[:, :, t]
+    
+    xymultipler and tmultiplier must be integers greater than 1
+    
+    order must be an integer in the range 0-5
+    
+    '''
+    xmax, ymax, tmax = surfacearray.shape 
+    interpolated = np.ndarray((xmax * xymultiplier, ymax* xymultiplier, tmax * tmultiplier))
+    numx, numy, numt = (complex(i) for i in interpolated.shape) 
+    coords = mgrid[0:xmax:numx, 0:ymax:numy, 0:tmax:numt]
+    interpolated = ndimage.map_coordinates(surfacearray, coords, order=1)        
+    return interpolated
+
 
 
 def main():

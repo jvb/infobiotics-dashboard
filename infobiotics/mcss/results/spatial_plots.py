@@ -574,62 +574,77 @@ class Surface(HasTraits):
         return self.array[:, :, position]
 
 
-blue_to_red_lut_table = np.ndarray(256,4)
+#lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()
+
+blue_to_red_lut_table = np.ndarray((256,4))
 blue_to_red_lut_table[:, 0] = np.linspace(0, 255, 256) # red
 blue_to_red_lut_table[:, 1] = np.linspace(0, 0, 256) # green
 blue_to_red_lut_table[:, 2] = np.linspace(255, 0, 256) # blue
-blue_to_red_lut_table[:, 3] = np.linspace(0, 255, 256) # alpha
-#TODO
-blue_to_green_lut_table = np.ndarray(256,4)
+blue_to_red_lut_table[:, 3] = np.linspace(255, 255, 256) # alpha
+
+blue_to_green_lut_table = np.ndarray((256,4))
 blue_to_green_lut_table[:, 0] = np.linspace(0, 0, 256) # red
 blue_to_green_lut_table[:, 1] = np.linspace(0, 255, 256) # green
 blue_to_green_lut_table[:, 2] = np.linspace(255, 0, 256) # blue
-blue_to_green_lut_table[:, 3] = np.linspace(0, 255, 256) # alpha
+blue_to_green_lut_table[:, 3] = np.linspace(255, 255, 256) # alpha
+
+black_to_red_lut_table = np.ndarray((256,4))
+black_to_red_lut_table[:, 0] = np.linspace(0, 255, 256) # red
+black_to_red_lut_table[:, 1] = np.linspace(0, 0, 256) # green
+black_to_red_lut_table[:, 2] = np.linspace(0, 0, 256) # blue
+black_to_red_lut_table[:, 3] = np.linspace(255, 255, 256) # alpha
+
+black_to_green_lut_table = np.ndarray((256,4))
+black_to_green_lut_table[:, 0] = np.linspace(0, 0, 256) # red
+black_to_green_lut_table[:, 1] = np.linspace(0, 255, 256) # green
+black_to_green_lut_table[:, 2] = np.linspace(0, 0, 256) # blue
+black_to_green_lut_table[:, 3] = np.linspace(255, 255, 256) # alpha
+
+#surf.module_manager.scalar_lut_manager.lut.table = lut
+#self.scene.mlab.draw()
 
 class RedVsGreen(Surface):
     
     surfaces = List(Instance(PipelineBase))
 
-    def __init__(self, arrays, warp_scales, extent, species_names, quantities_display_units, timepoints, suffix=None):
+    def __init__(self, arrays, extent, species_names, quantities_display_units, timepoints, timepoints_display_units, suffix=None):
         HasTraits.__init__(self)
         self.arrays = arrays
-        self.warp_scales = warp_scales
         self.extent = extent
         self.species_names = species_names
         self.quantities_display_units = quantities_display_units
         self.timepoints = timepoints
+        self.timepoints_display_units = timepoints_display_units
         self.suffix = suffix
         
         self.add_trait('position', Range(0, len(timepoints) - 1, 0))
 
+    def maketitle(self, position):
+        return "%s (green) vs %s (red) at %.1f %s" % (self.species_names[0], self.species_names[1], self.timepoints[position], self.timepoints_display_units)
+        
     def surf_default(self, arrayindex):
         figure=self.scene.mayavi_scene
-        surf = self.scene.mlab.surf(self.arrays[arrayindex][:, :, 0], warp_scale=self.warp_scales[arrayindex], figure=figure)
+        surf = self.scene.mlab.surf(self.arrays[arrayindex][:, :, 0], warp_scale=(1 / np.max(self.arrays[arrayindex])) * 33, figure=figure)
 
         lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()
         if arrayindex == 0:
-            lut[:, 0] = np.linspace(0, 255, 256) # red
-            lut[:, 1] = np.linspace(0, 0, 256) # green
-            lut[:, 2] = np.linspace(255, 0, 256) # blue
-#            lut[:, 3] = np.linspace(0, 255, 256) # alpha
-        else:
-            lut[:, 0] = np.linspace(0, 0, 256) # red
-            lut[:, 1] = np.linspace(0, 255, 256) # green
-            lut[:, 2] = np.linspace(255, 0, 256) # blue
-#            lut[:, 3] = np.linspace(0, 255, 256) # alpha
+            lut = black_to_green_lut_table
+        elif arrayindex == 1:
+            lut = black_to_red_lut_table
         surf.module_manager.scalar_lut_manager.lut.table = lut
         self.scene.mlab.draw()
 
         if arrayindex == 0:
-            self.title = self.scene.mlab.title("%s (red) vs %s (green) at 0" % (self.species_names[0], self.species_names[1]), size=0.5, height=0.91, figure=figure)
+            self.title = self.scene.mlab.title(self.maketitle(-1), size=0.5, height=0.91, figure=figure)
             self.title.x_position = 0.03
-            self.title.actor.width = 0.8#0.94 #FIXME set title to last timepoint then set width, then set title to first timepoint (not just 0) # actually these are indices in the time axis ('position') 
+            self.title.actor.width = 0.94
+            self.title.text = self.maketitle(0)
 
-            axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure)
+            axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure, z_axis_visibility=False, z_label='')#self.quantities_display_units
             axes.label_text_property.set(italic=0, bold=0)
-            axes.axes.number_of_labels = 3
-            axes.axes.z_axis_visibility = 0
-            axes.axes.z_label = ''#self.quantities_display_units
+            axes.axes.number_of_labels = 5
+#            axes.axes.z_axis_visibility = 0
+#            axes.axes.z_label = ''#self.quantities_display_units
 
         for surface in self.surfaces:
             scalarbar = self.scene.mlab.scalarbar(surface, str(self.quantities_display_units), "vertical", 5, None, '%.f')
@@ -637,7 +652,8 @@ class RedVsGreen(Surface):
             scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
 
         self.scene.scene_editor.isometric_view() #WARNING removing this line causes the surface not to display and the axes to rotate 90 degrees vertically!
-
+        self.scene.camera.azimuth(90) #REMOVE?
+        
         return surf
 
     @on_trait_change('scene.activated')
@@ -648,13 +664,14 @@ class RedVsGreen(Surface):
             if i == 0:
                 scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
             else:
-                scalar_bar_widget.representation.set(position=[0.173, 0.0524], position2=[0.1557, 0.42])
+                scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
                 
     @on_trait_change('position')
     def update_plot(self):
         for i, surface in enumerate(self.surfaces):
             surface.mlab_source.set(scalars=self.arrays[i][:, :, self.position])
-#            self.title.text = "%s at %s" % (self.species_name, round(self.timepoints[self.position]))        
+            self.title.text = self.maketitle(self.position)
+
         
 def test():
     from mcss_results_widget import McssResultsWidget

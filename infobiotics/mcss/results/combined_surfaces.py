@@ -91,38 +91,24 @@ class Surfaces(HasTraits):
     )
 
 
-#npzfile = np.load('/home/jvb/Desktop/pulseInverter.h5_surfaces.npz')
-#proteinGFP = npzfile['proteinGFP']
-#proteinCI = npzfile['proteinCI']
-npzfile = np.load('/home/jvb/Desktop/ThreeLayers.h5_surfaces.npz')
-FP1 = npzfile['FP1']
-FP2 = npzfile['FP2']
-FP1 = FP1[46:86,1:-1,:]#-120:] # crop to Central cells only
-FP2 = FP2[46:86,1:-1,:]#-120:] # crop to Central cells only
-#print FP1.shape, np.max(FP1)
-#print FP2.shape, np.max(FP2)
-#print
-from interpolation import interpolatexy, interpolatet, interpolate
-tmultiplier = 5
-xymultiplier = 3
-#FP1 = interpolatet(FP1, tmultiplier)
-#FP2 = interpolatet(FP2, tmultiplier)
-##print FP1.shape, np.max(FP1)
-##print FP2.shape, np.max(FP2)
-##print
-#FP1 = interpolatexy(FP1, xymultiplier)
-#FP2 = interpolatexy(FP2, xymultiplier)
-##print FP1.shape, np.max(FP1)
-##print FP2.shape, np.max(FP2)
-##print
-FP1 = interpolate(FP1, xymultiplier, tmultiplier)
-FP2 = interpolate(FP2, xymultiplier, tmultiplier)
-arrays = np.array([FP1, FP2])    
-#arrays = np.array([FP1])
-#arrays = np.array([FP2])
-surfaces = Surfaces(arrays)
-    
 if __name__ == '__main__':
+    
+    #npzfile = np.load('/home/jvb/Desktop/pulseInverter.h5_surfaces.npz')
+    #proteinGFP = npzfile['proteinGFP']
+    #proteinCI = npzfile['proteinCI']
+    npzfile = np.load('/home/jvb/Desktop/ThreeLayers.h5_surfaces.npz')
+    FP1 = npzfile['FP1']
+    FP2 = npzfile['FP2']
+    FP1 = FP1[46:86,1:-1,:] # crop to Central cells only
+    FP2 = FP2[46:86,1:-1,:] # crop to Central cells only
+    from interpolation import interpolate
+    tmultiplier = 5
+    xymultiplier = 3
+    FP1 = interpolate(FP1, xymultiplier, tmultiplier)
+    FP2 = interpolate(FP2, xymultiplier, tmultiplier)
+    arrays = np.array([FP1, FP2])    
+    surfaces = Surfaces(arrays)
+    
     self = surfaces.edit_traits().control
     self.show()
     self.raise_()
