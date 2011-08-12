@@ -52,7 +52,8 @@ class Simulation(object): #TODO rename McssSimulation
         except AttributeError:
             self.log_volumes = False
         
-        self.max_time = attributes.max_time
+#        self.max_time = attributes.max_time # set at the end of load_h5
+
 #        self.mcss_version = attributes.mcss_version
 #        self.model_format = attributes.model_format
         self.model_input_file = attributes.model_input_file
@@ -147,6 +148,9 @@ def load_h5(h5_file):
         run._compartments_list = compartments_list
 
         simulation._runs_list.append(run)
+
+    number_of_timepoints = simulation._runs_list[0].number_of_timepoints
+    simulation.max_time = simulation.log_interval * number_of_timepoints
 
     h5.close()
     return simulation

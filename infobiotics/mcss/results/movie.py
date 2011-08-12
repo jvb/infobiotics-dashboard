@@ -177,7 +177,7 @@ class movie(object):
 
 def example():
     # setup movie
-    m = movie()
+    m = movie(frame_rate=22.5)
     
     # setup example
     from enthought.mayavi import mlab
@@ -186,7 +186,7 @@ def example():
     f = mlab.gcf() 
 
     # save frames
-    for i in range(36):
+    for i in range(36*3):
         f.scene.camera.azimuth(10) # rotate
         f.scene.render()
         mlab.savefig(m.next_frame(), figure=f)

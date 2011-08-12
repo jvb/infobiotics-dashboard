@@ -1,6 +1,8 @@
 '''Provides the McssResults class for getting simulation data out of h5 files
 and functions for applying NumPy ufuncs multi-dimensional arrays.'''
 
+from __future__ import division
+
 from quantities.units.time import hour, minute
 import operator
 from table import indent
@@ -194,11 +196,13 @@ class McssResults(object):
         
         self.filename = filename
         
-        max_time = self.simulation.max_time
+        log_interval = self.simulation.log_interval
+#        max_time = self.simulation.max_time # can't be trusted, multiply log_interval by number_of_timepoints instead
         number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
-        self._timepoints = Quantity(np.linspace(0, max_time, number_of_timepoints), time_units[self.timepoints_data_units])
+#        self._timepoints = Quantity(np.linspace(0, max_time, number_of_timepoints), time_units[self.timepoints_data_units])
+        self._timepoints = Quantity(np.linspace(0, log_interval * number_of_timepoints, number_of_timepoints), time_units[self.timepoints_data_units])
 
-        self._timestep = Quantity(self.simulation.log_interval, time_units[self.timepoints_data_units])
+        self._timestep = Quantity(log_interval, time_units[self.timepoints_data_units])
 
         self._start = 0 
         self._stop = len(self._timepoints)
@@ -1097,13 +1101,18 @@ class McssResults(object):
         amounts = self.amounts()
         
         # fill surfaces with amounts
-        for ri, _ in enumerate(self.run_indices): # only one for now, see McssResultsWidget.update_ui()
+#        for ri, _ in enumerate(self.run_indices):
+#            for si, _ in enumerate(self.species_indices):
+#                for ci, _ in enumerate(self.compartment_indices):
+#                    compartment = selected_compartments[ci]
+#                    surfaces[ri, si, compartment.x_position - xmin, compartment.y_position - ymin, :] += amounts[ri, si, ci, :]
+#        np.save('/home/jvb/Desktop/before', surfaces)
+        for ci, _ in enumerate(self.compartment_indices):
+            compartment = selected_compartments[ci]
             for si, _ in enumerate(self.species_indices):
-                for ci, _ in enumerate(self.compartment_indices):
-                    compartment = selected_compartments[ci]
-#                    print ri, si, compartment.x_position, compartment.y_position, '=', ri, si, ci
-                    surfaces[ri, si, compartment.x_position - xmin, compartment.y_position - ymin, :] += amounts[ri, si, ci, :]
-        
+                surfaces[:, si, compartment.x_position - xmin, compartment.y_position - ymin, :] += amounts[:, si, ci, :]
+#        np.save('/home/jvb/Desktop/after', surfaces)
+        np.save('/home/jvb/Desktop/next', surfaces)
         return surfaces
     
     def x_min_max(self):

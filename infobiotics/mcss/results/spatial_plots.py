@@ -1,3 +1,4 @@
+from __future__ import division
 #import sip
 #sip.setapi('QString', 2)
 from enthought.etsconfig.api import ETSConfig
@@ -358,7 +359,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         self.record_button = QPushButton('Record')
         self.record_button.setCheckable(True)
         self.ui.horizontalLayout.insertWidget(0, self.record_button)
-        self.connect(self.record_button, SIGNAL('toggled(bool)'), self.record_button_toggled)
+        self.connect(self.record_button, SIGNAL('clicked(bool)'), self.record_button_toggled)
         self.recording = False
         
         # disable recording if ffmpeg not found
@@ -371,10 +372,14 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         if recording:
             self.parentmaxsize = parent.maximumSize()
             parent.setFixedSize(parent.size())
+            if hasattr(self.surfaces[0], 'species_name'):
+                default_filename = ' vs '.join(str(surface.species_name) for surface in self.surfaces)
+            else:
+                default_filename = ' vs '.join(str(name) for name in self.surfaces[0].species_names)
             filename = QFileDialog.getSaveFileName(
                 parent, 
                 'Specify a filename to save data to', 
-                unicode(' vs '.join(str(surface.species_name) for surface in self.surfaces)), 
+                default_filename,
                 movie.QFileDialog_filter_from_available_formats(),
                 'AVI format *.avi (*.avi)'
             )
@@ -384,13 +389,17 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 return 
             self.movie = movie.movie(
                 filename,
-                10, #TODO make frame rate an option
+                22.5, #TODO make frame rate an option
                 '%012d.bmp' 
             )
             self.recording = True
             self.record_button.setText('Stop')
             self.connect(self, SIGNAL('surfaces_position_changed'), self.record_frame)
-            self.templates = ['%s-%%012d.bmp' % unicode(surface.species_name) for surface in self.surfaces]
+            if hasattr(self.surfaces[0], 'species_name'):
+                self.templates = ['%s-%%012d.bmp' % unicode(surface.species_name) for surface in self.surfaces]
+            else:
+                self.templates = ['%s-%%012d.bmp' % unicode(' vs '.join(str(name) for name in self.surfaces[0].species_names))] 
+            
             self.record_frame() # snap first frame
         else:
             parent.setMaximumSize(self.parentmaxsize)
@@ -405,6 +414,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 parent# = self.parent()
             )
             progressDialog.setWindowModality(Qt.WindowModal)
+            progressDialog.setWindowTitle('Processing recording')
             progressDialog.open()
             
             if len(self.templates) > 1:
@@ -419,7 +429,10 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                     frame = Image.new(mode, ((width * len(frames)) + (6 * (len(frames) - 1)), height))
                     x = 0
                     for f in frames:
-                        image = Image.open(f)
+                        try:
+                            image = Image.open(f)
+                        except IOError, e:
+                            break
                         frame.paste(image, (x, 0))
                         x += width + 6
                     filename = os.path.join(tempdir, self.movie.template % i)
@@ -589,14 +602,16 @@ blue_to_green_lut_table[:, 2] = np.linspace(255, 0, 256) # blue
 blue_to_green_lut_table[:, 3] = np.linspace(255, 255, 256) # alpha
 
 black_to_red_lut_table = np.ndarray((256,4))
-black_to_red_lut_table[:, 0] = np.linspace(0, 255, 256) # red
+#black_to_red_lut_table[:, 0] = np.linspace(0, 255, 256) # red
+black_to_red_lut_table[:, 0] = np.concatenate((np.linspace(0, 0, 20), np.linspace(20, 255, 236))) # red
 black_to_red_lut_table[:, 1] = np.linspace(0, 0, 256) # green
 black_to_red_lut_table[:, 2] = np.linspace(0, 0, 256) # blue
 black_to_red_lut_table[:, 3] = np.linspace(255, 255, 256) # alpha
 
 black_to_green_lut_table = np.ndarray((256,4))
 black_to_green_lut_table[:, 0] = np.linspace(0, 0, 256) # red
-black_to_green_lut_table[:, 1] = np.linspace(0, 255, 256) # green
+#black_to_green_lut_table[:, 1] = np.linspace(20, 255, 256) # green
+black_to_green_lut_table[:, 1] = np.concatenate((np.linspace(0, 0, 20), np.linspace(20, 255, 236))) # green
 black_to_green_lut_table[:, 2] = np.linspace(0, 0, 256) # blue
 black_to_green_lut_table[:, 3] = np.linspace(255, 255, 256) # alpha
 
@@ -632,24 +647,19 @@ class RedVsGreen(Surface):
         elif arrayindex == 1:
             lut = black_to_red_lut_table
         surf.module_manager.scalar_lut_manager.lut.table = lut
-        self.scene.mlab.draw()
+#        self.scene.mlab.draw()
 
         if arrayindex == 0:
             self.title = self.scene.mlab.title(self.maketitle(-1), size=0.5, height=0.91, figure=figure)
             self.title.x_position = 0.03
-            self.title.actor.width = 0.94
+            self.title.actor.width = 0.9
             self.title.text = self.maketitle(0)
 
-            axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure, z_axis_visibility=False, z_label='')#self.quantities_display_units
-            axes.label_text_property.set(italic=0, bold=0)
-            axes.axes.number_of_labels = 5
-#            axes.axes.z_axis_visibility = 0
-#            axes.axes.z_label = ''#self.quantities_display_units
-
-        for surface in self.surfaces:
-            scalarbar = self.scene.mlab.scalarbar(surface, str(self.quantities_display_units), "vertical", 5, None, '%.f')
-            scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
-            scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
+#            axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure, z_axis_visibility=False, zlabel='')#self.quantities_display_units
+#            axes.label_text_property.set(italic=0, bold=0)
+#            axes.axes.number_of_labels = 3
+##            axes.axes.z_axis_visibility = 0
+##            axes.axes.z_label = ''#self.quantities_display_units
 
         self.scene.scene_editor.isometric_view() #WARNING removing this line causes the surface not to display and the axes to rotate 90 degrees vertically!
         self.scene.camera.azimuth(90) #REMOVE?
@@ -660,20 +670,24 @@ class RedVsGreen(Surface):
     def create_pipeline(self):
         for i in range(len(self.arrays)): 
             self.surfaces.append(self.surf_default(i))
-            scalar_bar_widget = self.surfaces[i].module_manager.scalar_lut_manager.scalar_bar_widget
-            if i == 0:
-                scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
-            else:
-                scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
-                
+        scalarbar = self.scene.mlab.scalarbar(self.surfaces[1], str(self.quantities_display_units), "vertical", 5, None, '%.f')
+        scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
+        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
+        scalar_bar_widget = self.surfaces[1].module_manager.scalar_lut_manager.scalar_bar_widget
+        scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
+        self.scene.mlab.draw()
+                        
     @on_trait_change('position')
     def update_plot(self):
         for i, surface in enumerate(self.surfaces):
             surface.mlab_source.set(scalars=self.arrays[i][:, :, self.position])
             self.title.text = self.maketitle(self.position)
-
+        self.scene.camera.azimuth(1/(len(self.timepoints)/360)) # rotate
+#        self.scene.render()
+        
         
 def test():
+    
     from mcss_results_widget import McssResultsWidget
     from PyQt4.QtGui import qApp
     import sys
