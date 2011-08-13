@@ -846,7 +846,7 @@ class McssResultsWidget(QWidget):
     #TODO 
     @wait_cursor
     def surfacePlot(self):
-        return self.redVsGreenPlot()
+#        return self.redVsGreenPlot()
         results = self.selected_items_results()
         surfaces = results.surfaces()
         runs = surfaces.shape[0]
@@ -938,30 +938,34 @@ def interpolate(surfacearray, xymultiplier, tmultiplier, order=1):
 
 
 
-def main():
+def main(filename=None):
     '''see spatial_splot.test for how to automate selections, etc.'''
 #    argv = qApp.arguments()
     argv = sys.argv
     
-    if len(argv) > 2:
-        print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
-        sys.exit(2)
-    if len(argv) == 1:
-#        shared.settings.register_infobiotics_settings()
-        self = McssResultsWidget()
-    elif len(argv) == 2:
-        self = McssResultsWidget(filename=argv[1])
+    if filename is not None:
+        self = McssResultsWidget(filename=filename)
+    else:
+        if len(argv) > 2:
+            print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
+            sys.exit(2)
+        if len(argv) == 1:
+    #        shared.settings.register_infobiotics_settings()
+            self = McssResultsWidget()
+        elif len(argv) == 2:
+            self = McssResultsWidget(filename=argv[1])
     centre_window(self)
     self.show()
-    
-#    self.raise_()
-#    qApp.processEvents()
+
+    self.raise_()
+    qApp.processEvents()
     
 #    shared.settings.restore_window_size_and_position(self)
 
-    return self
+#    return self
+    exit(qApp.exec_())
 
 
 if __name__ == "__main__":
     main()
-    exit(qApp.exec_())
+#    exit(qApp.exec_())

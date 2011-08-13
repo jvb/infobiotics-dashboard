@@ -123,14 +123,6 @@ class McssResults(object):
     
     volumes_axes = ['runs', 'compartments', 'timepoints']    
     
-#    timepoints_data_units = 'seconds'
-#    quantities_data_units = 'molecules'
-#    volumes_data_units = 'litres'
-#    timepoints_display_units = 'seconds'
-#    quantities_display_type = 'molecules'
-#    quantities_display_units = 'molecules'
-#    volumes_display_units = 'litres'
-        
     def __init__(self,
         filename,
         simulation=None, # McssResultsWidget can provide pre-loaded Simulation here
@@ -1367,8 +1359,10 @@ def test_histograms():
      
 
 if __name__ == '__main__':
-###    execfile('mcss_results_widget.py')
+    import mcss_results_widget
+    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
+    
 ##    test1()
 #    test_surfaces()
 #    test_timeseries()
-    test_histograms()
+#    test_histograms()
