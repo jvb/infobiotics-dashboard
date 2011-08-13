@@ -1058,9 +1058,9 @@ class McssResults(object):
         data must be one of 'compartments' or 'runs'. From whichever it is 
         not, the mean will be taken.
 
-        This method *cannot* be used to provide data for matplotlib's hist function
+        Note: this method is *not* suitable for use with matplotlib's hist function
         as that calls numpy.histogram itself - we can only pass it the data to 
-        create the histogram from (see histograms_data method).
+        create the histogram from (look in McssResultsWidget.histograms for that).
 
         To access the histograms and bin_edges use: 
             histograms['histogram'][species_index, timepoint_index]
@@ -1089,7 +1089,7 @@ class McssResults(object):
         elif data == 'runs':
             mean_amounts_over_compartments = mean(self.amounts(), self.amounts_axes.index('compartments'))
             if sum_species:
-                sum_mean_amounts_over_compartments_over_species = sum(mean_amounts_over_compartments, 0)
+                sum_mean_amounts_over_compartments_over_species = sum(mean_amounts_over_compartments, 1)
                 histograms = np.ndarray((numtimepoints,), dtype=histogram_dtype)
                 for ti in xrange(numtimepoints):
                     histograms[ti] = np.histogram(sum_mean_amounts_over_compartments_over_species[:,ti], bins)
@@ -1101,25 +1101,6 @@ class McssResults(object):
         else:
             raise ValueError("data argument must be either 'compartments' or 'runs'")
         return histograms
-
-    def histograms_data(self):
-        '''
-        
-        matplotlib:
-            hist(x, bins=10, range=None, normed=False, cumulative=False,
-                 bottom=None, histtype='bar', align='mid',
-                 orientation='vertical', rwidth=None, log=False, **kwargs)
-            Compute and draw the histogram of x. The return value is a tuple 
-            (n, bins, patches) or ([n0, n1, ...], bins, [patches0, patches1,...]) 
-            if the input contains multiple data.
-            
-            Multiple data can be provided via x as a list of datasets of 
-            potentially different length ([x0, x1, ...]), or as a 2-D ndarray in
-            which each column is a dataset. Note that the ndarray form is 
-            transposed relative to the list form.
-        '''
-        pass
-
 
     def histogram_dtype(self, bins, dtype=np.float64):#'float64'):
         # np.zeros(3, dtype=[('x','f4'),('y',np.float32),('value','f4',(2,2))]) # http://docs.scipy.org/doc/numpy/user/basics.rec.html "Defining Structured Arrays"  3) List argument

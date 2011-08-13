@@ -1,7 +1,5 @@
 import infobiotics
-from enthought.etsconfig.api import ETSConfig
 from mcss_results import McssResults
-ETSConfig.toolkit = 'qt4'
 from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
     Button, on_trait_change, Tuple, Dict, Array, Enum, Property, Range, Any, Button,
     cached_property, Int)
@@ -9,11 +7,8 @@ from enthought.traits.ui.api import (View, VGroup, Item, HGroup, Spring,
     ListEditor, InstanceEditor, SetEditor, RangeEditor, VFold, VSplit, VGrid, VFlow, HSplit, TextEditor)
 from infobiotics.commons import colours
 from infobiotics.commons.matplotlib.draggable_legend import DraggableLegend
-from infobiotics.commons.matplotlib.matplotlib_figure_size import (
-    resize_and_save_matplotlib_figure)
 from infobiotics.commons.sequences import arrange
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import (
-    MatplotlibFigureEditor)
+from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
 from matplotlib.figure import Figure
 from matplotlib.font_manager import FontProperties
 from matplotlib.lines import Line2D
