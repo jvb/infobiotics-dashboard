@@ -587,7 +587,13 @@ class McssResults(object):
 
     def functions_of_amounts_over_runs(self, functions, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
         '''Returns a 4D array of floats with the shape (functions, species, 
-        compartments, timepoint).'''
+        compartments, timepoint). 
+        
+        '''
+        #TODO ''' or a 3D array of floats with shape (species, compartments, timepoints) if functions is a single function.'''
+        import types
+        if type(functions) in (types.FunctionType, types.LambdaType):
+            functions = (functions,)
         results = self._allocate_array(# outputs error message if anything goes wrong
             (
                 len(functions),
@@ -1034,15 +1040,115 @@ class McssResults(object):
 #        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
 #        widget.show()
 #        return timeseries_plot
+
     
 #    def export_data(self):
 #        pass
+
     
-#    def histogram(self):
-#        '''Returns histograms for (the sum of all selected/each) species
+    def histograms(self, bins=10, data='compartments', sum_species=False, dtype=np.float64):#'float64'):
+        '''Returns a 2D array of (histogram array, bin_edges array) tuples with 
+        axes (species, timepoints) unless sum_species is True, in which case it 
+        returns a 1D array of (histogram array, bin_edges array) tuples with 
+        axes (timepoints,), unless average_timepoints is True in which case ... #TODO
+
+#        Returns (array of) histograms for (the sum of all selected/each) species
 #        averaging over runs or compartments at time t.
-#        '''
-#        pass
+
+        data must be one of 'compartments' or 'runs'. From whichever it is 
+        not, the mean will be taken.
+
+        This method *cannot* be used to provide data for matplotlib's hist function
+        as that calls numpy.histogram itself - we can only pass it the data to 
+        create the histogram from (see histograms_data method).
+
+        To access the histograms and bin_edges use: 
+            histograms['histogram'][species_index, timepoint_index]
+            histograms['bin_edges'][species_index, timepoint_index]
+        
+        '''
+
+        mean = lambda array, axis: np.mean(array, axis, dtype=dtype)#np.float64)
+        sum = lambda array, axis: np.sum(array, axis, dtype=dtype)#np.float64)
+
+        numruns, numspecies, numcompartments, numtimepoints = self.amounts_shape 
+        histogram_dtype = self.histogram_dtype(bins, dtype)
+        
+        if data == 'compartments':
+            mean_amounts_over_runs = self.functions_of_amounts_over_runs(mean)[0]
+            if sum_species:
+                sum_mean_amounts_over_runs_over_species = sum(mean_amounts_over_runs, 0)
+                histograms = np.ndarray((numtimepoints,), dtype=histogram_dtype)
+                for ti in xrange(numtimepoints):
+                    histograms[ti] = np.histogram(sum_mean_amounts_over_runs_over_species[:,ti], bins)
+            else:
+                histograms = np.ndarray((numspecies,numtimepoints), dtype=histogram_dtype)
+                for si in xrange(numspecies):
+                    for ti in xrange(numtimepoints):
+                        histograms[si,ti] = np.histogram(mean_amounts_over_runs[si,:,ti], bins)
+        elif data == 'runs':
+            mean_amounts_over_compartments = mean(self.amounts(), self.amounts_axes.index('compartments'))
+            if sum_species:
+                sum_mean_amounts_over_compartments_over_species = sum(mean_amounts_over_compartments, 0)
+                histograms = np.ndarray((numtimepoints,), dtype=histogram_dtype)
+                for ti in xrange(numtimepoints):
+                    histograms[ti] = np.histogram(sum_mean_amounts_over_compartments_over_species[:,ti], bins)
+            else:
+                histograms = np.ndarray((numspecies,numtimepoints), dtype=histogram_dtype)
+                for si in xrange(numspecies):
+                    for ti in xrange(numtimepoints):
+                        histograms[si,ti] = np.histogram(mean_amounts_over_compartments[:, si, ti], bins)
+        else:
+            raise ValueError("data argument must be either 'compartments' or 'runs'")
+        return histograms
+
+    def histograms_data(self):
+        '''
+        
+        matplotlib:
+            hist(x, bins=10, range=None, normed=False, cumulative=False,
+                 bottom=None, histtype='bar', align='mid',
+                 orientation='vertical', rwidth=None, log=False, **kwargs)
+            Compute and draw the histogram of x. The return value is a tuple 
+            (n, bins, patches) or ([n0, n1, ...], bins, [patches0, patches1,...]) 
+            if the input contains multiple data.
+            
+            Multiple data can be provided via x as a list of datasets of 
+            potentially different length ([x0, x1, ...]), or as a 2-D ndarray in
+            which each column is a dataset. Note that the ndarray form is 
+            transposed relative to the list form.
+        '''
+        pass
+
+
+    def histogram_dtype(self, bins, dtype=np.float64):#'float64'):
+        # np.zeros(3, dtype=[('x','f4'),('y',np.float32),('value','f4',(2,2))]) # http://docs.scipy.org/doc/numpy/user/basics.rec.html "Defining Structured Arrays"  3) List argument
+        return np.dtype([('histogram', dtype, (bins,)),('bin_edges', dtype, (bins+1,))])
+
+    @property
+    def amounts_axes(self):
+        return ('runs','species','compartments','timepoints')
+        
+    @property
+    def amounts_shape(self):
+        return self.num_selected_runs, self.num_selected_species, self.num_selected_compartments, self.num_timepoints
+
+    @property
+    def num_selected_runs(self):
+        return len(self.run_indices)
+
+    @property
+    def num_selected_species(self):
+        return len(self.species_indices)
+    
+    @property
+    def num_selected_compartments(self):
+        return len(self.compartment_indices)
+    
+    @property
+    def num_timepoints(self):
+        return len(self.timepoints)
+    
 
     @property
     def compartment_indices(self):
@@ -1052,6 +1158,7 @@ class McssResults(object):
     def compartment_indices(self, compartment_indices):
         _compartment_indices = xrange(self.simulation._runs_list[0].number_of_compartments)
         self._compartment_indices = [i for i in compartment_indices if i in _compartment_indices]
+
 
     def surfaces(self):
         '''Returns a 5D array (runs, species, x_position, y_position, timepoints) 
@@ -1269,10 +1376,18 @@ def test_timeseries():
         window_title='Timeseries Plot(s) for %s' % file_name,
     ).configure_traits()
     
-    
+
+def test_histograms():
+    results = McssResults('../../../examples/mcss/models/module1.h5')
+    print results.histograms().shape
+    print results.histograms(sum_species=True).shape
+    print results.histograms(data='runs').shape
+    print results.histograms(data='runs', sum_species=True).shape
+     
 
 if __name__ == '__main__':
 ###    execfile('mcss_results_widget.py')
 ##    test1()
 #    test_surfaces()
-    test_timeseries()
+#    test_timeseries()
+    test_histograms()
