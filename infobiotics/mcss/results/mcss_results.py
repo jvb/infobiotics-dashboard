@@ -1066,30 +1066,32 @@ class McssResults(object):
         numruns, numspecies, numcompartments, numtimepoints = self.amounts_shape 
         histogram_dtype = self.histogram_dtype(bins, dtype)
         
+        data = data.lower()
+        range = 0, len(self.compartments) if data == 'compartments' else (0, len(self.runs))
         if data == 'compartments':
             mean_amounts_over_runs = self.functions_of_amounts_over_runs(mean)[0]
             if sum_species:
                 sum_mean_amounts_over_runs_over_species = sum(mean_amounts_over_runs, 0)
                 histograms = np.ndarray((numtimepoints,), dtype=histogram_dtype)
                 for ti in xrange(numtimepoints):
-                    histograms[ti] = np.histogram(sum_mean_amounts_over_runs_over_species[:,ti], bins)
+                    histograms[ti] = np.histogram(sum_mean_amounts_over_runs_over_species[:,ti], bins, range)
             else:
                 histograms = np.ndarray((numspecies,numtimepoints), dtype=histogram_dtype)
                 for si in xrange(numspecies):
                     for ti in xrange(numtimepoints):
-                        histograms[si,ti] = np.histogram(mean_amounts_over_runs[si,:,ti], bins)
+                        histograms[si,ti] = np.histogram(mean_amounts_over_runs[si,:,ti], bins, range)
         elif data == 'runs':
             mean_amounts_over_compartments = mean(self.amounts(), self.amounts_axes.index('compartments'))
             if sum_species:
                 sum_mean_amounts_over_compartments_over_species = sum(mean_amounts_over_compartments, 1)
                 histograms = np.ndarray((numtimepoints,), dtype=histogram_dtype)
                 for ti in xrange(numtimepoints):
-                    histograms[ti] = np.histogram(sum_mean_amounts_over_compartments_over_species[:,ti], bins)
+                    histograms[ti] = np.histogram(sum_mean_amounts_over_compartments_over_species[:,ti], bins, range)
             else:
                 histograms = np.ndarray((numspecies,numtimepoints), dtype=histogram_dtype)
                 for si in xrange(numspecies):
                     for ti in xrange(numtimepoints):
-                        histograms[si,ti] = np.histogram(mean_amounts_over_compartments[:, si, ti], bins)
+                        histograms[si,ti] = np.histogram(mean_amounts_over_compartments[:, si, ti], bins, range)
         else:
             raise ValueError("data argument must be either 'compartments' or 'runs'")
         return histograms
