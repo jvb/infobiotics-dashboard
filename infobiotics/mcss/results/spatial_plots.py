@@ -389,7 +389,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 return 
             self.movie = movie.movie(
                 filename,
-                22.5, #TODO make frame rate an option
+                25, #TODO make frame rate an option
                 '%012d.png' 
             )
             self.recording = True
@@ -635,7 +635,8 @@ class RedVsGreen(Surface):
         self.add_trait('position', Range(0, len(timepoints) - 1, 0))
 
     def maketitle(self, position):
-        return "%s (green) vs %s (red) at %.1f %s" % (self.species_names[0], self.species_names[1], self.timepoints[position], self.timepoints_display_units)
+#        return "%s (green) vs %s (red) at %.1f %s" % (self.species_names[0], self.species_names[1], self.timepoints[position], self.timepoints_display_units)
+        return "GFP and m-Strawberry fluorescence at %.1f %s" % (self.timepoints[position], self.timepoints_display_units)
         
     def surf_default(self, arrayindex):
         figure=self.scene.mayavi_scene

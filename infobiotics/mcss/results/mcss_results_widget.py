@@ -884,8 +884,8 @@ class McssResultsWidget(QWidget):
         runs = surfaces.shape[0]
         surfaces = mcss_results.mean(surfaces, 0) # do mean across all runs
         
-        xymultiplier = 6
-        tmultiplier = 10
+        xymultiplier = 5
+        tmultiplier = 11
         surfaces = np.array([interpolate(surfaces[i], xymultiplier, tmultiplier) for i in range(len(surfaces))])
 #        print surfaces.shape
 #        print results.timepoints.shape
@@ -932,7 +932,7 @@ def interpolate(surfacearray, xymultiplier, tmultiplier, order=1):
     xmax, ymax, tmax = surfacearray.shape 
     interpolated = np.ndarray((xmax * xymultiplier, ymax* xymultiplier, tmax * tmultiplier))
     numx, numy, numt = (complex(i) for i in interpolated.shape) 
-    coords = mgrid[0:xmax:numx, 0:ymax:numy, 0:tmax:numt]
+    coords = mgrid[0:xmax-1:numx, 0:ymax-1:numy, 0:tmax-1:numt]
     interpolated = ndimage.map_coordinates(surfacearray, coords, order=1)        
     return interpolated
 
