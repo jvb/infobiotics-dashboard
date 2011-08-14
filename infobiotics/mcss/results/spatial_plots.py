@@ -636,7 +636,7 @@ class RedVsGreen(Surface):
 
     def maketitle(self, position):
 #        return "%s (green) vs %s (red) at %.1f %s" % (self.species_names[0], self.species_names[1], self.timepoints[position], self.timepoints_display_units)
-        return "GFP and m-Strawberry fluorescence at %.1f %s" % (self.timepoints[position], self.timepoints_display_units)
+        return "Turing Pattern Formation in a Bacterial Population (%.1f %s)" % (self.timepoints[position], self.timepoints_display_units)
         
     def surf_default(self, arrayindex):
         figure=self.scene.mayavi_scene
@@ -671,11 +671,11 @@ class RedVsGreen(Surface):
     def create_pipeline(self):
         for i in range(len(self.arrays)): 
             self.surfaces.append(self.surf_default(i))
-        scalarbar = self.scene.mlab.scalarbar(self.surfaces[1], str(self.quantities_display_units), "vertical", 5, None, '%.f')
-        scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
-        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
-        scalar_bar_widget = self.surfaces[1].module_manager.scalar_lut_manager.scalar_bar_widget
-        scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
+#        scalarbar = self.scene.mlab.scalarbar(self.surfaces[1], str(self.quantities_display_units), "vertical", 5, None, '%.f')
+#        scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
+#        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
+#        scalar_bar_widget = self.surfaces[1].module_manager.scalar_lut_manager.scalar_bar_widget
+#        scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
         self.scene.mlab.draw()
                         
     @on_trait_change('position')

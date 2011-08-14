@@ -846,7 +846,7 @@ class McssResultsWidget(QWidget):
     #TODO 
     @wait_cursor
     def surfacePlot(self):
-        return self.redVsGreenPlot()
+#        return self.redVsGreenPlot()
         results = self.selected_items_results()
         surfaces = results.surfaces()
         runs = surfaces.shape[0]
