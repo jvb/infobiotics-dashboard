@@ -166,29 +166,34 @@ class Histograms(HasTraits):
 #        print histograms['bin_edges'].shape, # (5, 121, 11) 
 #        print histograms['histogram'].shape # (5, 121, 10)
         if self.sum_species:
-            bin_edges = histograms['bin_edges'][self.from_timepoint_index:self.to_timepoint_index]
-            arrays = histograms['histogram'][self.from_timepoint_index:self.to_timepoint_index]
+            bin_edges = histograms['bin_edges'][slice_]
+            arrays = histograms['histogram'][slice_]
         else:
-            bin_edges = histograms['bin_edges'][:, slice_, :]
-            arrays = histograms['histogram'][:, slice_, :]
-#        print self.sum_species, bin_edges.shape, arrays.shape # False (5, 60, 11) (5, 60, 10)
-        self.bin_edges = bin_edges
+            bin_edges = histograms['bin_edges'][:, slice_]
+            arrays = histograms['histogram'][:, slice_]
+        print self.sum_species, bin_edges.shape, arrays.shape # False (5, 60, 11) (5, 60, 10)
+        self.bin_edges = bin_edges[0]
         self.arrays = arrays
         
     arrays = Array
     
-    @on_trait_change('scene.activated, arrays')
+    @on_trait_change('scene.activated')#, arrays')
     def create_pipeline(self):
         xmin, xmax = self._min_max(sum(self.amounts, self.species_amounts_index)) if self.sum_species else self._min_max(self.amounts) 
-        self.extent = (
+        self.extent = [
             xmin, xmax,
             self.from_timepoint_index, self.to_timepoint_index, #TODO replace with actual timepoints
-            np.min(self.bin_edges[0]), np.max(self.bin_edges[0]) # invariant, computed in McssResults.histograms
-        )
-#        print extent
+            np.min(self.bin_edges[0]), np.max(self.bin_edges[0]), # invariant, computed in McssResults.histograms
+        ]
+        print self.extent
 
-        if self.scene is not None:
-            self.scene.mlab.clf()
+#        if self.scene is not None:
+        figure=self.scene.mayavi_scene
+#        print figure
+#        self.scene.mlab.figure(1, bgcolor=(0,0,0))
+#        print figure
+#        self.scene.mlab.clf() #TODO
+#        print figure
 
         for i in range(len(self.arrays)):
             self.surfaces.append(self.surf_default(i))
@@ -198,7 +203,6 @@ class Histograms(HasTraits):
 #        scalar_bar_widget = self.surfaces[1].module_manager.scalar_lut_manager.scalar_bar_widget
 #        scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
 
-        figure=self.scene.mayavi_scene
 
         title = self.scene.mlab.title(self.maketitle(), size=0.5, height=0.91
             , figure=figure
@@ -206,33 +210,39 @@ class Histograms(HasTraits):
         title.x_position = 0.03
         title.actor.width = 0.9
 
-        try:
-            axes = self.scene.mlab.axes(ranges=self.extent, xlabel="amounts (TODO)", ylabel="Time (TODO)", z_axis_visibility=True, zlabel='Frequency'#self.quantities_display_units
-                , figure=figure
-            )
-            axes.label_text_property.set(italic=0, bold=0)
-            axes.axes.number_of_labels = 3
-            axes.axes.z_axis_visibility =1
-    #        axes.axes.xlabel = ''#self.quantities_display_units
-        except AttributeError, e:
-            print e
+        axes = self.scene.mlab.axes(ranges=self.extent, xlabel="amounts (TODO)", ylabel="Time (TODO)", z_axis_visibility=True, zlabel='Frequency'#self.quantities_display_units
+            , figure=figure
+        )
+        axes.label_text_property.set(italic=0, bold=0)
+        axes.axes.number_of_labels = 3
+        axes.axes.z_axis_visibility = 1
+#        axes.axes.xlabel = ''#self.quantities_display_units
             
 #        self.scene.scene_editor.isometric_view() #WARNING removing this line causes the surface not to display and the axes to rotate 90 degrees vertically!
-        #TODO self.scene.mlab.view(-44.890778452007545, 86.466712805369198, 98.476018229363234, array([-0.5       , -0.5       ,  2.66666675]))
-        self.scene.mlab.draw()
+        self.scene.mlab.view(-44.890778452007545, 86.466712805369198, 98.476018229363234)#, array([-0.5       , -0.5       ,  2.66666675]))
+#        self.scene.mlab.draw()
     
     print_view = Button
     def _print_view_fired(self):
         print self.scene.mlab.view()
     
     def surf_default(self, arrayindex):
-#        figure=self.scene.mayavi_scene
+        figure=self.scene.mayavi_scene
 
+        array = self.arrays[arrayindex].T
         surf = self.scene.mlab.surf(
-            self.arrays[arrayindex][:, :].T, 
-            warp_scale=1 / min([self.extent[-3], self.extent[-1]])
-#            , figure=figure
+            array,
+#            warp_scale='auto',
+            warp_scale=1 / min([self.extent[-3] - self.extent[-4], self.extent[-1] - self.extent[-2]]),
+#            extent=self.extent,
+#            figure=figure
         )
+#        surf = self.scene.mlab.barchart(
+#            array,
+#            extent=self.extent,
+##            auto_scale=False#True
+##            figure=figure
+#        )
 
         #TODO opacities
 #        lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()
@@ -250,13 +260,13 @@ class Histograms(HasTraits):
         basename = os.path.basename(self.results.filename)
         view = View(
             HSplit(
-                Item('_figure',
-                    show_label=False,
-                    editor=MatplotlibFigureEditor(
-                        toolbar=True,
-                        toolbar_above=False,
-                    ),
-                ),
+#                Item('_figure',
+#                    show_label=False,
+#                    editor=MatplotlibFigureEditor(
+#                        toolbar=True,
+#                        toolbar_above=False,
+#                    ),
+#                ),
                 Item('scene', 
                     show_label=False, 
                     editor=SceneEditor(scene_class=MayaviScene)

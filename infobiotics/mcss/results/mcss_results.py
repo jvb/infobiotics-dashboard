@@ -1067,7 +1067,7 @@ class McssResults(object):
         histogram_dtype = self.histogram_dtype(bins, dtype)
         
         data = data.lower()
-        range = 0, len(self.compartments) if data == 'compartments' else (0, len(self.runs))
+        range = (0, len(self.compartments)) if data == 'compartments' else (0, len(self.runs))
         if data == 'compartments':
             mean_amounts_over_runs = self.functions_of_amounts_over_runs(mean)[0]
             if sum_species:
