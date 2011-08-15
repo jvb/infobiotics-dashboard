@@ -1,23 +1,19 @@
 #!/bin/sh
 
-PKGBASE=$(cat NAME.txt)
-VERSION=$(cat VERSION.txt)
-PKGNAME=$PKGBASE-$VERSION
+PKGNAME=$(cat NAME.txt)
+PKGVER=$(cat VERSION.txt)
+PKGFULL=$PKGNAME-$PKGVER
 MAINTAINER="Jonathan Blakes <jvb@cs.nott.ac.uk>"
 PYPKGNAME=${PKGNAME}
-PYPKGBASE=${PKGBASE}
 PYDEPS="python-vtk, python-qt4, python-qscintilla2, python-numpy (>= 1.4.1), python-matplotlib, python-pexpect, mcss, poptimizer, pmodelchecker, python-apptools (>=3.3.2), python-traitsbackendqt (=3.4.0-1), python-traits (=3.4.0-2) | python-traits (=3.4.0-2build1), python-traitsgui (=3.4.0-1), python-enthoughtbase (>=3.0.6), python-envisagecore(>=3.1.2), python-envisageplugins(>=3.1.2), python-tables(>=2.1.2), mayavi2, python-configobj, python-xlwt, python-qt4-gl, python-progressbar, python-setproctitle, python-quantities(>=0.9.0), python-scipy"
-LASTVERSION=$(echo $VERSION | cut -f 3 -d '.')
-LASTVERSION=$(echo "${LASTVERSION}-1" | bc)
-LASTVERSION="$(echo $VERSION | cut -f1,2 -d '.').${LASTVERSION}"
 
-echo "creating ${PKGBASE} debian packages..."
+echo "creating ${PKGFULL} debian packages..."
 
 echo "creating debian package..."
 CWD=$(pwd)
-TMPDIR=/tmp/$PKGNAME
-TMPFILE=${TMPDIR}/${PKGNAME}.tmp
-LOGFILE=${TMPDIR}/${PKGNAME}.log
+TMPDIR=/tmp/$PKGFULL
+TMPFILE=${TMPDIR}/${PKGFULL}.tmp
+LOGFILE=${TMPDIR}/${PKGFULL}.log
 ARCH="all"
 
 # debian control files
@@ -27,7 +23,7 @@ rm -rf debian
 mkdir debian
 # changelog
 cat << EOF > debian/changelog &&
-$PYPKGNAME ($VERSION) unstable; urgency=low
+$PYPKGNAME ($PKGVER) unstable; urgency=low
   * comment here.
 
  -- $MAINTAINER  $(date '+%a, %d %b %Y %T %z')
@@ -37,7 +33,6 @@ echo $(dpkg -p debhelper | egrep '^Version:' | cut -f 2 -d ' ' | cut -f 1 -d '.'
 # control
 cat << EOF > debian/control &&
 Source: ${PYPKGNAME}
-Section: science
 Priority: optional
 Maintainer: ${MAINTAINER}
 Build-Depends: debhelper (>=7.0.0), python-support (>= 0.6), cdbs (>= 0.4.49)
@@ -45,10 +40,10 @@ Standards-Version: 3.8.3.0
 
 Package: ${PYPKGNAME}
 Architecture: ${ARCH}
-Depends: \${misc:Depends}, \${python:Depends}, ${PKGNAME}, ${PYDEPS}
-Replaces: ${PYPKGBASE}-${LASTVERSION}
+Depends: \${misc:Depends}, \${python:Depends}, ${PYDEPS}
+Section: science
 Description: Graphical user interface for Infobiotics experiments.
- This package contains the ${PKGNAME}, a graphical user interface for 
+ This package contains the Infobiotics Dashboard, a graphical user interface for 
  the Infobiotics Workbench.
 EOF
 # copyright
@@ -77,31 +72,12 @@ then
 	exit 1
 fi
 
-mv ../${PKGNAME}_${VERSION}_all.deb ./ &&
-mv ../${PKGNAME}_${VERSION}.dsc ./ &&
-mv ../${PKGNAME}_${VERSION}.tar.gz ./ &&
-rm -f ../${PKGNAME}_${VERSION}_*.changes
+mv ../${PKGNAME}_${PKGVER}_all.deb ./ &&
+mv ../${PKGNAME}_${PKGVER}.dsc ./ &&
+mv ../${PKGNAME}_${PKGVER}.tar.gz ./ &&
+rm -f ../${PKGNAME}_${PKGVER}_*.changes
 
-# make meta package
-echo "making python meta package..."
-# create control file
-mkdir -p $TMPDIR/$PYPKGBASE/DEBIAN &&
-cat << EOF > $TMPDIR/$PYPKGBASE/DEBIAN/control &&
-Package: $PYPKGBASE
-Version: $VERSION
-Section: science
-Priority: optional
-Architecture: all
-Depends: $PYPKGNAME
-Replaces: $PYPKGBASE (<< $VERSION)
-Maintainer: $MAINTAINER
-Description: $PKGNAME
-EOF
-
-# make meta package
-cd $TMPDIR &&
-dpkg-deb --build $PYPKGBASE > ${LOGFILE} &&
-mv ${TMPDIR}/$PYPKGBASE.deb $CWD/${PYPKGBASE}_${VERSION}_all.deb &&
+echo "*******************************"
 cd $CWD &&
 rm -rf $TMPDIR
 if [ $? != 0 ]
@@ -111,5 +87,4 @@ then
 fi
 
 # all done
-echo "all ${PKGBASE} packages built ok"
-
+echo "all ${PKGFULL} packages built ok"
