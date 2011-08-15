@@ -1,3 +1,8 @@
+version 0.1.1 - released ??/??/11
+
+* done
+
+
 =================================================
 Things to do, bugs to fix, feature requests, etc.
 =================================================
@@ -5,6 +10,8 @@ Things to do, bugs to fix, feature requests, etc.
 
 Priority
 --------
+
+* histograms
 
 ParamsHandler.status
 
@@ -14,15 +21,11 @@ Export mcss results data
 
 Make size of Mayavi screenshots adjustable
 
-Make Mayavi videos on Debian using ffmpeg
-
 Sync Mayavi cameras http://code.enthought.com/projects/mayavi/docs/development/html/mayavi/auto/mlab_figure.html?highlight=sync#sync-camera
-
-Histograms
 
 Use open lpp file for model parameter for each experiment -> Eclipse 
 
-Help URLS for Dashboard main window - requires altered actions strategy to HelpController
+Help URLs for Dashboard main window - requires altered actions strategy to HelpController
     link to issue tracker http://bitbucket.org/jvb/infobiotics-dashboard/issues?status=new&status=open
 
 Welcome perspective *
@@ -39,7 +42,7 @@ test_frozen_matplotlib_images_setup.py
 
 IBW should install shortcuts to All Users when 'Run as...' Administrator on University computers - alternative is to not install in Program Files (probably more natural) - maybe suggest this on running the installer - still can't add to path though!
 
-Matplotlib and Mayavi2 toolbar icons not rendering properly in frozen builds, where are the images in these?
+Mayavi2 toolbar icons not rendering properly in frozen builds, where are the images in these?
 
 py2exe log error dialog fix in root
 

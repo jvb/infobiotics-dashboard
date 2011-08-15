@@ -304,6 +304,24 @@ class Histograms(HasTraits):
         return view
 
 
+# from histograms2.HistogramWidget.HistogramWidget.onDraw
+#        self.axes.set_title(self.title)
+#        
+#        self.axes.grid(self.showGridCheckBox.isChecked())
+#        
+#        self.axes.set_yscale('log' if self.logScaleCheckBox.isChecked() else 'linear',
+#                             basey=float(self.logBaseComboBox.currentText()))
+#
+#        self.axes.hist(self.data,
+#                       bins=self.binsSlider.value(),
+#                       cumulative=False,
+#                       histtype='bar', #'barstacked','step','stepfilled',
+#                       log=False)
+#        
+#        self.canvas.draw()
+
+
+
 def test():
     Histograms.fromfile('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5').configure_traits()
 

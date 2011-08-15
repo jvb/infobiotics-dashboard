@@ -1,8 +1,9 @@
 '''Describes how the TraitsUI toolkit is set by the dashboard.
 
-'infobiotics/__init__.py' does
-"from enthought.etsconfig.api import ETSConfig"
-"ETSConfig.toolkit = 'qt4'"
-before any traits imports are made.
+See infobiotics.__init__.py
+#'infobiotics/__init__.py' does
+#"from enthought.etsconfig.api import ETSConfig"
+#"ETSConfig.toolkit = 'qt4'"
+#before any traits imports are made.
 
 '''

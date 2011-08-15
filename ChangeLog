@@ -1,3 +1,18 @@
+version 0.0.11 - released 05/08/2010
+
+* poptimizer interface
+
+version 0.0.12 - released 12/01/2011
+
+* temporary fix added to report experiment errors on Mac 
+
+version 0.0.13 - released 17/06/2011
+
+* experiment error reporting on Windows 
+* opens erroneous files with erroneous BNF in Dashboard under Windows
+* matplotlib toolbar icons fixed under Mac and Windows (fine on Debian)
+
 version 0.1.0 - released 15/08/11
 
-* histograms
+* record surface visualizations using ffmpeg
+* Save resized button on far right of matplotlib toolbar

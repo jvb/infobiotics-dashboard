@@ -1,7 +1,31 @@
+'''
+Traceback (most recent call last):
+  File "/home/jvb/workspaces/workspace/infobiotics-dashboard/infobiotics/mcss/results/adapted_wigner.py", line 91, in <module>
+    mlab.show()
+  File "/usr/lib/python2.7/dist-packages/enthought/mayavi/tools/show.py", line 117, in show
+    if not is_ui_running():
+  File "/usr/lib/python2.7/dist-packages/enthought/mayavi/tools/show.py", line 26, in is_ui_running
+    return guisupport.is_event_loop_running_qt4()
+  File "/usr/lib/python2.7/dist-packages/enthought/util/guisupport.py", line 124, in is_event_loop_running_qt4
+    app = get_app_qt4([''])
+  File "/usr/lib/python2.7/dist-packages/enthought/util/guisupport.py", line 113, in get_app_qt4
+    from enthought.qt import QtGui
+  File "/usr/lib/python2.7/dist-packages/enthought/qt/__init__.py", line 22, in <module>
+    sip.setapi('QString', 2)
+ValueError: API 'QString' has already been set to version 1
+
+Solved in combined_surfaces.py: 
+    class Surfaces(HasTraits): ...
+    surfaces = Surfaces()
+    self = surfaces.edit_traits().control
+    self.show()
+    self.raise_()
+    qApp.processEvents()
+    exit(qApp.exec_())
+
+'''
 from __future__ import division
-#import sip; sip.setapi('QString', 2)
-from enthought.etsconfig.api import ETSConfig; ETSConfig.toolkit = 'qt4'
- 
+import infobiotics 
 import mcss_results
 #results = mcss_results.McssResults('tests/pulsePropagation-2_runs.h5')
 results = mcss_results.McssResults('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')

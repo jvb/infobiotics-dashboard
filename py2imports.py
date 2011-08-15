@@ -127,7 +127,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.core.experiment_handler
     import infobiotics.core.params_handler
     import infobiotics.core.experiment_progress_handler
-#    import infobiotics.core.winpexpect # essential
+#    import infobiotics.core.winpexpect
 #    import infobiotics.language.dependency_graphs
 #    import infobiotics.language.partial_propensities_fixed
 #    import infobiotics.language.module1
@@ -137,7 +137,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
 #    import infobiotics.language.module_introspection.ply
 #    import infobiotics.language.module_introspection.ply_importing_module
 #    import infobiotics.language.api
-#    import infobiotics.language.partial_propensities_
+#    import infobiotics.language.partial_propensities_backup
 #    import infobiotics.language.sbml
 #    import infobiotics.language.old.lat
 #    import infobiotics.language.old.rule
@@ -153,7 +153,6 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
 #    import infobiotics.language.model
 #    import infobiotics.language.PAO1
 #    import infobiotics.language.metacompartment
-#    import infobiotics.language.multiset
 #    import infobiotics.language.examples.todo
 #    import infobiotics.language.compartments
 #    import infobiotics.language.volumes
@@ -240,6 +239,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.commons.colours
     import infobiotics.commons.unified_logging
     import infobiotics.commons.md5sum
+    import infobiotics.commons.counter2
     import infobiotics.commons.api
     import infobiotics.commons.files
     import infobiotics.commons.metaclasses.noconflict
@@ -256,6 +256,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.commons.sequences
     import infobiotics.commons.ordereddict
 #    import infobiotics.commons.unused.silence
+    import infobiotics.commons.multiset
     import infobiotics.commons.names
     import infobiotics.commons.descriptors
     import infobiotics.commons.webbrowsing
@@ -355,33 +356,24 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.mcss.results.compartments_list_widget
     import infobiotics.mcss.results.compartment
     import infobiotics.mcss.results.run
+#    import infobiotics.mcss.results.ui_mcss_results_widget-backup
     import infobiotics.mcss.results.surfaces_widget
     import infobiotics.mcss.results.species
-#    import infobiotics.mcss.results.histograms2.SimulationDatasets
-#    import infobiotics.mcss.results.histograms2.EnhancedListWidget
-#    import infobiotics.mcss.results.histograms2.Workbench
-#    import infobiotics.mcss.results.histograms2.md5sum
-#    import infobiotics.mcss.results.histograms2.functions
-#    import infobiotics.mcss.results.histograms2.actions
-#    import infobiotics.mcss.results.histograms2.HistogramWidget
-#    import infobiotics.mcss.results.histograms2.SimulationWidgets
+    import infobiotics.mcss.results.histograms
     import infobiotics.mcss.results.simulation_list_widget_item
+    import infobiotics.mcss.results.movie
     import infobiotics.mcss.results.icons_rc
     import infobiotics.mcss.results.FromToDoubleSpinBox
-#    import infobiotics.mcss.results.older.scripting_api
-#    import infobiotics.mcss.results.older.mcss_results.mcss_results_editors
-#    import infobiotics.mcss.results.older.mcss_results.mcss_results_plots
-#    import infobiotics.mcss.results.older.mcss_results.mcss_results_views
-#    import infobiotics.mcss.results.older.mcss_results.mcss_results_handler
-#    import infobiotics.mcss.results.older.mcss_results.mcss_results_actions
-#    import infobiotics.mcss.results.older.mcss_results.mcss_results
-#    import infobiotics.mcss.results.older.mcss_results.mcss_results_groups
-#    import infobiotics.mcss.results.older.mcss_results
-#    import infobiotics.mcss.results.older.ideas
     import infobiotics.mcss.results.ui_plots_preview_dialog
-#    import infobiotics.mcss.results.old.simulator_results_plotting
-#    import infobiotics.mcss.results.old.simulator_results_testing
-#    import infobiotics.mcss.results.old.functions_over_successive_axes
+    import infobiotics.mcss.results.driver
+#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_editors
+#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_plots
+#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_views
+#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_handler
+#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_actions
+#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results
+#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_groups
+#    import infobiotics.mcss.results.old.ideas
     import infobiotics.mcss.results.table
     import infobiotics.mcss.results.timeseries
     import infobiotics.mcss.results.PlotsListWidget
@@ -391,11 +383,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.mcss.results.ui_mcss_results_widget
 #    import infobiotics.mcss.results.adapted_wigner
     import infobiotics.mcss.results.simulation
-#    import infobiotics.mcss.results.histograms.qt_mpl_bars
-#    import infobiotics.mcss.results.histograms.polys3d_demo
-#    import infobiotics.mcss.results.histograms.qt_mpl_bars_histogram_simulation
-#    import infobiotics.mcss.results.histograms.hist3d_demo
-    import infobiotics.mcss.results.error_bars
+#    import infobiotics.mcss.results.combined_surfaces
     import infobiotics.mcss.results.mcss_results_widget
 #    import infobiotics.mcss.results.tests.time_get_functions_over_runs
 #    import infobiotics.mcss.results.tests.test_mcss_results
@@ -404,6 +392,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
 #    import infobiotics.mcss.results.tests.mcss_postprocess
     import infobiotics.mcss.results.ui_player_control_widget
     import infobiotics.mcss.mcss_params_group
+#    import infobiotics.mcss.old.mcss_experiment
     import infobiotics.mcss.mcss_preferences
     import infobiotics.mcss.mcss_experiment_handler
     import infobiotics.mcss.mcss_params_handler
@@ -414,4 +403,3 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.poptimizer.poptimizer_results
     import infobiotics.poptimizer.poptimizer_preferences
     import infobiotics.poptimizer.poptimizer_params
-
