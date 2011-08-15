@@ -635,9 +635,10 @@ class RedVsGreen(Surface):
         self.add_trait('position', Range(0, len(timepoints) - 1, 0))
 
     def maketitle(self, position):
-#        return "%s (green) vs %s (red) at %.1f %s" % (self.species_names[0], self.species_names[1], self.timepoints[position], self.timepoints_display_units)
-        return "Turing Pattern Formation in a Bacterial Population (%.1f %s)" % (self.timepoints[position], self.timepoints_display_units)
-        
+        return "%s (green) vs %s (red) at %.1f %s" % (self.species_names[0], self.species_names[1], self.timepoints[position], self.timepoints_display_units)
+#        return "Turing Pattern Formation in a Bacterial Population (%.1f %s)" % (self.timepoints[position], self.timepoints_display_units)
+#        return "Pulse Inverter"# (%.1f %s)" % (self.timepoints[position], self.timepoints_display_units)
+
     def surf_default(self, arrayindex):
         figure=self.scene.mayavi_scene
         surf = self.scene.mlab.surf(self.arrays[arrayindex][:, :, 0], warp_scale=(1 / np.max(self.arrays[arrayindex])) * 33, figure=figure)
@@ -684,7 +685,10 @@ class RedVsGreen(Surface):
             surface.mlab_source.set(scalars=self.arrays[i][:, :, self.position])
             self.title.text = self.maketitle(self.position)
         self.scene.camera.azimuth(1/(len(self.timepoints)/360)) # rotate
+#        self.scene.camera.roll(1/(len(self.timepoints)/360)) # rotate
 #        self.scene.render()
+
+
         
         
 def test():

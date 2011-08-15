@@ -47,7 +47,9 @@ Package: ${PYPKGNAME}
 Architecture: ${ARCH}
 Depends: \${misc:Depends}, \${python:Depends}, ${PKGNAME}, ${PYDEPS}
 Replaces: ${PYPKGBASE}-${LASTVERSION}
-Description: ${PKGNAME}.
+Description: Graphical user interface for Infobiotics experiments.
+ This package contains the ${PKGNAME}, a graphical user interface for 
+ the Infobiotics Workbench.
 EOF
 # copyright
 cp COPYING.txt debian/copyright &&

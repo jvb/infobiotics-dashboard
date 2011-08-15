@@ -884,8 +884,13 @@ class McssResultsWidget(QWidget):
         runs = surfaces.shape[0]
         surfaces = mcss_results.mean(surfaces, 0) # do mean across all runs
         
-        xymultiplier = 5
-        tmultiplier = 11
+#        # pattern formation
+#        xymultiplier = 5
+#        tmultiplier = 11
+        # pulse inverter
+        xymultiplier = 3
+        tmultiplier = 8
+        
         surfaces = np.array([interpolate(surfaces[i], xymultiplier, tmultiplier) for i in range(len(surfaces))])
 #        print surfaces.shape
 #        print results.timepoints.shape

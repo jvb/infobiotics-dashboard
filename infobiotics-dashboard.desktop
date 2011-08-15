@@ -7,4 +7,4 @@ TryExec=infobiotics-dashboard
 Exec=infobiotics-dashboard %F
 Terminal=false
 Icon=infobiotics-workbench
-Categories=Science;
+Categories=Education;Science;

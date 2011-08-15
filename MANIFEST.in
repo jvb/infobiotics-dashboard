@@ -1,4 +1,4 @@
-include AUTHORS.txt CHANGES.txt COPYING.txt LICENSE.txt NAME.txt README.txt THANKS.txt VERSION.txt
+include AUTHORS.txt ChangeLog COPYING.txt LICENSE.txt NAME.txt README.txt THANKS.txt VERSION.txt
 include distribute_setup.py
 include clean.sh make-deb.sh py2imports.py py2exe.sh py2app.sh   
 include doc/endo.sh doc/epydoc.sh
