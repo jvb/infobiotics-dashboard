@@ -86,7 +86,8 @@ class Histograms(HasTraits):
 
     @on_trait_change('data, sum_species, bins, style, from_timepoint_index, to_timepoint_index')
     def update(self):
-        '''
+        '''Respond to parameter changes by recalculating data and calling
+        update_plot.
         
         matplotlib:
             hist(x, bins=10, range=None, normed=False, cumulative=False,
@@ -100,6 +101,7 @@ class Histograms(HasTraits):
             potentially different length ([x0, x1, ...]), or as a 2-D ndarray in
             which each column is a dataset. Note that the ndarray form is 
             transposed relative to the list form.
+            
         '''
         # 2D
         if self.data == 'Compartments':

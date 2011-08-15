@@ -1,7 +1,4 @@
-#'''
-#This package adds new trait types to Enthought Traits, TraitsUI and 
-#TraitsBackendQt.
-#'''
+'''New trait types to Enthought Traits, TraitsUI and TraitsBackendQt.'''
 ##------------------------------------------------------------------------------
 ## Copyright (c) 2007 by Enthought, Inc.
 ## All rights reserved.

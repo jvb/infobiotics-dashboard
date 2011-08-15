@@ -1,3 +1,8 @@
+'''Commonly used class or function modules named according to main usages.
+
+Not all functions are used by Infobiotics Dashboard.
+
+'''
 ##------------------------------------------------------------------------------
 ## Copyright (c) 2007 by Enthought, Inc.
 ## All rights reserved.

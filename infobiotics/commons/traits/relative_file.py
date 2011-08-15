@@ -97,7 +97,8 @@ class RelativeFile(BaseStr):
                 validate will return an error if the file cannot be executed.
             elif executable is False: 
                 validate will return an error if the file can be executed.
-        TODO empty_ok, empty_ok_name,
+        
+        TODO empty_ok, empty_ok_name
                 
         Default Value
         -------------

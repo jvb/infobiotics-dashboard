@@ -61,7 +61,7 @@ class metacompartment(type, compartmentmixin):
                             print e
                     elif isinstance(item, species): #TODO
                         raise NotImplementedError
-                    elif isinstance(item, compartment): pass #TODO
+                    elif isinstance(item, compartment): #TODO
                         raise NotImplementedError
 #            elif
             dictionary[key] = value

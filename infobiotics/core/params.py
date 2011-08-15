@@ -598,11 +598,14 @@ def traits_repr(self, *names):
      experiment object (i.e. what the user would have to script). Instances 
      that match the pattern below will be correctly represented.  
      
-     class ExampleInstanceWithRepr(HasTraits):
-         name = Str('Jon')
-         age = Int(28)
-         def __repr__(self):
-             return traits_repr(self, [name, age])
+     >>> from enthought.traits.api import HasTraits, Str, Int
+     >>> class ExampleInstanceWithRepr(HasTraits):
+     ...     name = Str('Jon')
+     ...     age = Int(30)
+     ...     def __repr__(self):
+     ...         return traits_repr(self, ('name', 'age'))
+     >>> repr(ExampleInstanceWithRepr())
+     "ExampleInstanceWithRepr(name='Jon', age=30)"
     
     '''
     from infobiotics.commons.sequences import flatten
@@ -631,5 +634,7 @@ def traits_repr(self, *names):
 
 
 if __name__ == '__main__':
-    execfile('../mcss/mcss_params.py')
+    import doctest
+    print doctest.testmod()
+#    execfile('../mcss/mcss_params.py')
     

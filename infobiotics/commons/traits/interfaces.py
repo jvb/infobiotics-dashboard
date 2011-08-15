@@ -5,7 +5,7 @@
 import enthought.traits.has_traits
 # setup a logger
 from infobiotics.commons.api import logging
-logger = logging.get_logger('enthought.traits.interface_checker')
+logger = logging.getLogger('enthought.traits.interface_checker')
 enthought.traits.has_traits.CHECK_INTERFACES = 0
 enthought.traits.has_traits.CHECK_INTERFACES = 1
 enthought.traits.has_traits.CHECK_INTERFACES = 2
