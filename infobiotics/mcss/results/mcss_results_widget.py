@@ -48,11 +48,12 @@ qApp.setApplicationName('Infobiotics Dashboard')
 qApp.setApplicationVersion(infobiotics.version)
 
 class McssResultsWidget(QWidget):
-    """Extract and plot data from mcss (version > 0.0.19) simulations"""
+    '''Extract and plot data from mcss simulations'''
+    
+    __settings_group = "McssResultsWidget"
 
     def __init__(self, filename=None):
-        """Setup widgets, connect signals to slots and attempt load."""
-        self.settings_group = "McssResultsWidget"
+        '''Setup widgets, connect signals to slots and attempt load.'''
         QWidget.__init__(self) # initialize base class
 
         self.ui = Ui_McssResultsWidget()
@@ -67,12 +68,14 @@ class McssResultsWidget(QWidget):
 
         self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
 
+
         self.ui.runs_list_widget.connect_all_selected_check_box(self.ui.select_all_runs_check_box)
         self.ui.species_list_widget.connect_all_selected_check_box(self.ui.select_all_species_check_box)
         self.ui.compartments_list_widget.connect_all_selected_check_box(self.ui.select_all_compartments_check_box)
 
         self.ui.species_list_widget.connect_filter_line_edit(self.ui.filter_species_line_edit)
         self.ui.compartments_list_widget.connect_filter_line_edit(self.ui.filter_compartments_line_edit)
+
 
         self.connect(self.ui.runs_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
         self.connect(self.ui.species_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
@@ -113,20 +116,20 @@ class McssResultsWidget(QWidget):
     def closeEvent(self, event):
         if hasattr(self, 'timeseries_plot'):
             self.timeseries_plot.dispose()
-#        shared.settings.save_window_size_and_position(self, self.settings_group)
+#        shared.settings.save_window_size_and_position(self, self.__settings_group)
         self.save_settings()
         event.accept()
 
     def load_settings(self):
         settings = QSettings()
-        settings.beginGroup(self.settings_group)
+        settings.beginGroup(self.__settings_group)
         self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
         #TODO load options and units
         settings.endGroup()
 
     def save_settings(self):
         settings = QSettings()
-        settings.beginGroup(self.settings_group)
+        settings.beginGroup(self.__settings_group)
         settings.setValue("current_directory", QVariant(unicode(self.current_directory)))
         #TODO save options and units
         
@@ -306,7 +309,6 @@ class McssResultsWidget(QWidget):
             ui.compartments_list_widget,
         )
         for i in simulation._runs_list:
-#            print i, ui.runs_list_widget
             SimulationListWidgetItem(i, ui.runs_list_widget)
         for i in simulation._species_list:
             SimulationListWidgetItem(i, ui.species_list_widget)
@@ -316,16 +318,24 @@ class McssResultsWidget(QWidget):
         # runs
         runs = ui.runs_list_widget.count()
         ui.random_runs_spin_box.setRange(1, runs)
-        if runs > 1:
-            enable_widgets(
-                ui.random_runs_spin_box,
-                ui.random_runs_label,
-                ui.average_over_selected_runs_check_box,
-            )
         if runs == 1:
             ui.runs_list_widget.selectAll() # should check select_all_runs_check_box automatically
-        else:
-            enable_widgets(ui.select_all_runs_check_box)
+            hide_widgets(
+                ui._runs_group_box,
+                ui.average_over_selected_runs_check_box,
+            )
+            ui.average_over_selected_runs_check_box.setChecked(False)
+        else: # runs > 1
+            show_widgets(
+                ui._runs_group_box,         
+                ui.average_over_selected_runs_check_box,
+            )
+#            enable_widgets(
+#                ui.random_runs_spin_box,
+#                ui.random_runs_label,
+#                ui.average_over_selected_runs_check_box,
+#            )
+#            enable_widgets(ui.select_all_runs_check_box)
             ui.average_over_selected_runs_check_box.setChecked(True) # check average over runs
 
         # species

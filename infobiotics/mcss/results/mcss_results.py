@@ -1,5 +1,6 @@
-'''Provides the McssResults class for getting simulation data out of h5 files
-and functions for applying NumPy ufuncs multi-dimensional arrays.'''
+'''McssResults class extracts simulation data from .h5 (mcss HDF5) files. Also 
+has functions for applying NumPy ufuncs along (multiple) axes of N-dimensional 
+arrays.'''
 
 from __future__ import division
 
@@ -7,7 +8,7 @@ from quantities.units.time import hour, minute
 import operator
 from table import indent
 from PyQt4.QtGui import QMessageBox
-from PyQt4.QtCore import QString, Qt, SIGNAL, SLOT
+from PyQt4.QtCore import QString#, Qt, SIGNAL, SLOT
 
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
 
@@ -178,14 +179,8 @@ class McssResults(object):
         
         
         self.parent = parent # used by McssResultsWidget for QMessageBox
-        
         self.type = type
-        
-        if simulation is None:
-            self.simulation = load_h5(filename)
-        else:
-            self.simulation = simulation#load_h5(filename) # why do all that object creation again?
-        
+        self.simulation = load_h5(filename) if simulation is None else simulation # avoids species/run/compartment object recreation
         self.filename = filename
         
         log_interval = self.simulation.log_interval

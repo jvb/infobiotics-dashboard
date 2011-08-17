@@ -25,8 +25,6 @@ class ListWidget(QListWidget):
     def __init__(self, parent=None, use_built_in_context_menu=True):
         super(ListWidget, self).__init__(parent)
         
-        self._items = [] # holds original list of items
-        
         # selection
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.selected = []
@@ -107,11 +105,6 @@ class ListWidget(QListWidget):
             for item in self.selected:
                 item.setSelected(True) 
         self.connect(self, SIGNAL('itemSelectionChanged()'), self.remember_selection)
-#        #TODO unittests
-#        self.insertItem(2, '20')
-#        self.addItem('21')
-#        self.addItems(['22', '23'])
-#        self.insertItems(2, ['22', '23'])
     
     def invert_selection(self, only_visible=True):
         if only_visible:
@@ -120,12 +113,10 @@ class ListWidget(QListWidget):
             [item.setSelected(not item.isSelected()) for item in self.all_items()]
     
     def addItem(self, item, in_original_order=True):
-        print 'got here' # never gets called!
         item = createQListWidgetItem(item)
         if in_original_order and self.is_sorted:
             self.sortItems(False, quiet=True)
         super(ListWidget, self).addItem(item) # don't replace with self.insertItem(row=self.count()) # why not?
-        self._items.append(item)
         if self.is_sorted:
             self.sortItems(quiet=True)
         return item
@@ -138,7 +129,6 @@ class ListWidget(QListWidget):
         if in_original_order and self.is_sorted:
             self.sortItems(False, quiet=True)
         super(ListWidget, self).insertItem(row, item)
-        self._items.append(item)
         if self.is_sorted:
             self.sortItems(quiet=True)
         return item
@@ -146,31 +136,34 @@ class ListWidget(QListWidget):
     def insertItems(self, row, items, in_original_order=True):
         return [self.insertItem(row, item, in_original_order) for item in items]
 
-#    def remove(self, item):
-#        '''Removes item from ListWidget and deletes it. If you want to keep it use pop(item).'''
-#        row = self.row(item)
-#        self.takeItem(row)
-#        self._items.remove(item)
-#        del item
-#        
-#    def pop(self, item_or_row):
-#        '''Removes item and returns it.'''
-#        if not isinstance(item_or_row, int):
-#            # item_or_row is (hopefully) an item
-#            item_or_row = self.row(item_or_row)
-#        # item_or_row is the row
-#        item = self.takeItem(item_or_row)
-#        print item
-#        self._items.remove(item)
-#        return item
+    def remove(self, item):
+        '''Removes item from ListWidget and deletes it. If you want to keep it use pop(item).'''
+        row = self.row(item)
+        self.takeItem(row)
+        self._items.remove(item)
+        del item
+        
+    def pop(self, item_or_row):
+        '''Removes item and returns it.'''
+        if not isinstance(item_or_row, int):
+            # item_or_row is (hopefully) an item
+            item_or_row = self.row(item_or_row)
+        # item_or_row is the row
+        item = self.takeItem(item_or_row)
+        self._items.remove(item)
+        return item
     
     def all_items(self, in_original_order=True):
+        items = [self.item(i) for i in range(self.count())]
+        if not hasattr(self, '_items'):
+            self._items = items
+        diff = set(items).difference(self._items)
+        if diff:
+            self._items.extend([item for item in items if item in diff])
         if in_original_order:
-            all_items = self._items#[:]
+            return self._items
         else:
-            all_items = [self.item(i) for i in range(self.count())]
-        print dict((self.row(item), str(item.text())) for item in all_items) #REMOVE
-        return all_items
+            return items
 
     def filter(self, text, quiet=False):
         if self._locked == True:
@@ -205,7 +198,12 @@ class ListWidget(QListWidget):
         self._locked = False
         
     def empty(self):
-        ''' Remove items but do not destroy them, as opposed to clear(). '''
+        '''Remove items but do not destroy them, as opposed to clear().'''
+        
+        # precautionary update of self._items before removing everything 
+        if not hasattr(self, '_items'):
+            self._items = self.all_items()
+        
         for i in reversed(range(self.count())): # must be reversed so that we don't change the order of the items during loop
             self.takeItem(i)
 #        for _ in range(self.count()): # or just take zeroth item each item - maybe slower?
@@ -232,10 +230,7 @@ class ListWidget(QListWidget):
         self.disconnect(self, SIGNAL('itemSelectionChanged()'), self.remember_selection)
 
         if checked:
-            self.empty()
-            
             enumerated_items = [[i, item] for i, item in enumerate(self.all_items())]
-        
             for i, item in enumerated_items:
                 matched = False
                 for regex, function in regex_functions:
@@ -248,16 +243,17 @@ class ListWidget(QListWidget):
                     enumerated_items[i].append(item.text())
             
             def add_items_sorted(reverse):
-                for _, item, _ in sorted(enumerated_items, key=operator.itemgetter(2), reverse=reverse): 
+#                print ', '.join(str(match) for _, _, match in sorted(enumerated_items, key=operator.itemgetter(2), reverse=reverse))
+                for _, item, _ in sorted(enumerated_items, key=operator.itemgetter(2), reverse=reverse):
                     super(ListWidget, self).addItem(item)
             
+            self.empty()
             if order == Qt.AscendingOrder:
                 add_items_sorted(reverse=False)
-            else: # order == Qt.DescendingOrder:
+            else:# order == Qt.DescendingOrder:
                 add_items_sorted(reverse=True)
             
             is_sorted = True
-            
             
             if order == Qt.AscendingOrder:
                 self.restoreOriginalOrderAction.setDisabled(False)
@@ -272,6 +268,7 @@ class ListWidget(QListWidget):
             self.sortAscendingAction.setDisabled(False)
             self.sortDescendingAction.setDisabled(False)
             
+            # remove all items
             self.empty()
             
             # add them back in the original order
@@ -351,12 +348,10 @@ class ListWidget(QListWidget):
     def connect_filter_line_edit(self, filter_line_edit):
         ''' Enables functionality to be add to line edit outside of factory. '''
         self.connect(filter_line_edit, SIGNAL('textChanged(QString)'), self.filter)
-
-#        #TODO move to filter_line_edit_factory?
-#        from infobiotics.commons.qt4 import version
-#        split = version.split('.')
-#        if int(split[0]) > 4 or (int(split[0]) == 4 and int(split[1]) >= 7): # doesn't work with PyQt 4.7
-#            filter_line_edit.setPlaceholderText('Filter')
+        from infobiotics.commons.qt4 import version
+        split = version.split('.')
+        if int(split[0]) > 4 or (int(split[0]) == 4 and int(split[1]) >= 7): # doesn't work with PyQt below 4.7
+            filter_line_edit.setPlaceholderText('Filter')
 
 
 def check(item, checked=True):
@@ -416,7 +411,6 @@ if __name__ == '__main__':
     for item in items:
         QListWidgetItem(item, lw)
     
-    
     l = QVBoxLayout()
     l.addWidget(lw)
     l.addWidget(lw.filter_line_edit_factory())
@@ -437,7 +431,7 @@ if __name__ == '__main__':
     self.setGeometry(600, 400, 200, 480)
     self.setWindowTitle(lw.__class__.__name__)
     self.show()
-    
+
 #    lw.select(-2)
 #    lw.select(9)
     
