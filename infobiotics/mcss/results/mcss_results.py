@@ -893,18 +893,8 @@ class McssResults(object):
     def timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
         '''Return Timeseries objects for current selection.'''
         
-        assert amounts or volumes
-        
-        if volumes and not self.has_volumes:
-            raise ValueError("mcss simulation '%s' has no volumes dataset." % self.filename)
+        self.assertions(amounts, volumes, mean_over_runs)
 
-        assert len(self.run_indices) > 0
-        assert len(self.species_indices) > 0
-        assert len(self.compartment_indices) > 0
-        
-        timepoints = self.timepoints
-        assert len(timepoints) > 0
-        
         from timeseries import Timeseries
         from infobiotics.commons import colours
         
@@ -919,19 +909,18 @@ class McssResults(object):
 
         timeseries = []
         num_species = len(self.species)
-        runs = self.runs
 
-        if len(runs) > 1 and mean_over_runs:
+        if len(self.runs) > 1 and mean_over_runs:
             if amounts:
                 mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
                 for ci, c in enumerate(self.compartments):
                     for si, s in enumerate(self.species):
                         timeseries.append(
                             Timeseries(
-                                runs=runs,
+                                runs=self.runs,
                                 species=s,
                                 compartment=c,
-                                timepoints=timepoints,
+                                timepoints=self.timepoints,
                                 timepoints_units=self.timepoints_display_units,
                                 values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
                                 values=mean_amounts_over_runs[si, ci, :],
@@ -946,10 +935,10 @@ class McssResults(object):
                 for ci, c in enumerate(self.compartments):
                     timeseries.append(
                         Timeseries(
-                            runs=runs,
+                            runs=self.runs,
                             species=volumes_species,
                             compartment=c,
-                            timepoints=timepoints,
+                            timepoints=self.timepoints,
                             timepoints_units=self.timepoints_display_units,
                             values_type='Volume',
                             values=mean_volumes_over_runs[ci, :],
@@ -963,7 +952,7 @@ class McssResults(object):
         else: # not mean_over_runs
             if amounts:
                 amounts = self.amounts()
-                for ri, r in enumerate(runs):
+                for ri, r in enumerate(self.runs):
                     for ci, c in enumerate(self.compartments):
                         for si, s in enumerate(self.species):
                             timeseries.append(
@@ -971,7 +960,7 @@ class McssResults(object):
                                     run=r,
                                     species=s,
                                     compartment=c,
-                                    timepoints=timepoints,
+                                    timepoints=self.timepoints,
                                     timepoints_units=self.timepoints_display_units,
                                     values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
                                     values=amounts[ri, si, ci, :],
@@ -989,7 +978,7 @@ class McssResults(object):
                                 run=r,
                                 species=volumes_species,
                                 compartment=c,
-                                timepoints=timepoints,
+                                timepoints=self.timepoints,
                                 timepoints_units=self.timepoints_display_units,
                                 values_type='Volume',
                                 values=volumes[ri, ci, :],
@@ -999,6 +988,289 @@ class McssResults(object):
                             )
                         )
         return timeseries
+
+
+    def assertions(self, amounts=True, volumes=True, mean_over_runs=True):
+        assert amounts or volumes
+        
+        if volumes and not self.has_volumes:
+            raise ValueError("mcss simulation '%s' has no volumes dataset." % self.filename)
+
+        assert len(self.run_indices) > 0
+        assert len(self.species_indices) > 0
+        assert len(self.compartment_indices) > 0
+        assert len(self.timepoints) > 0
+    
+        
+    # remember these within this instance
+    csv_precision = 3
+    csv_delimiter = ','
+    
+    def export_timeseries(self, 
+        file_name,
+        amounts=True, volumes=True, mean_over_runs=True,                  
+        csv_precision=None, csv_delimiter=None,
+        #TODO custom titles here?
+    ):
+        ''' Write selected data to a file in csv, xls or npz format.
+        
+        (Over?)use of inner functions here can result in crytic exceptions, e.g.
+            "UnboundLocalError: local variable 'x' referenced before assignment"
+        The actual reason for these errors is that variables inside inner 
+        functions are immutable, see:           
+            http: // stackoverflow.com / questions / 1414304 / local - functions - in - python / 1414320#1414320
+        The correct solution is, in this instance, to pass these variables as
+        arguments to the inner functions, and the neatest way to do that is as
+        default arguments, see write_csv, fix_delimited_string and write_npz. 
+        
+        '''
+        file_name = unicode(file_name)
+        from infobiotics.commons.files import writable
+        if not writable(file_name):
+            raise ValueError("'%s' is not writable." % file_name)
+
+        self.assertions()
+        
+#        timeseries = []
+        num_species = len(self.species)
+
+        if len(self.runs) > 1 and mean_over_runs:
+            if amounts:
+                mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
+#                for ci, c in enumerate(self.compartments):
+#                     for si, s in enumerate(self.species):
+
+##                        timeseries.append(
+##                            Timeseries(
+##                                runs=self.runs,
+##                                species=s,
+##                                compartment=c,
+##                                timepoints=self.timepoints,
+##                                timepoints_units=self.timepoints_display_units,
+##                                values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
+##                                values=mean_amounts_over_runs[si, ci, :],
+##                                std=std_amounts_over_runs[si, ci, :],
+##                                values_units=self.quantities_display_units,
+##                                _colour=colours.colour(si), #TODO rechoose colours based on different strategy for stacked, etc in timeseries plot
+##                                marker=colours.marker(ci),
+##                            ),
+##                        )
+            if volumes:
+                mean_volumes_over_runs, std_volumes_over_runs = functions_of_values_over_axis(self.volumes(), self.volumes_axes, 'runs', (mean, std)) 
+#                for ci, c in enumerate(self.compartments):
+##                    timeseries.append(
+##                        Timeseries(
+##                            runs=self.runs,
+##                            species=volumes_species,
+##                            compartment=c,
+##                            timepoints=self.timepoints,
+##                            timepoints_units=self.timepoints_display_units,
+##                            values_type='Volume',
+##                            values=mean_volumes_over_runs[ci, :],
+##                            std=std_volumes_over_runs[ci, :],
+##                            values_units=self.volumes_display_units,
+##                            _colour=colours.colour(num_species + ci),
+##                            marker=colours.marker(ci),
+##                        )
+##                    )
+        
+        else: # not mean_over_runs
+            if amounts:
+                amounts = self.amounts()
+#                for ri, r in enumerate(self.runs):
+#                    for ci, c in enumerate(self.compartments):
+#                        for si, s in enumerate(self.species):
+
+##                            timeseries.append(
+##                                Timeseries(
+##                                    run=r,
+##                                    species=s,
+##                                    compartment=c,
+##                                    timepoints=self.timepoints,
+##                                    timepoints_units=self.timepoints_display_units,
+##                                    values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
+##                                    values=amounts[ri, si, ci, :],
+##                                    values_units=self.quantities_display_units,
+##                                    _colour=colours.colour(si),
+##                                    marker=colours.marker(ci),
+##                                )
+##                            )
+            if volumes:
+                volumes = self.volumes()
+#                for ri, r in enumerate(self.runs):
+#                    for ci, c in enumerate(self.compartments):
+
+##                        timeseries.append(
+##                            Timeseries(
+##                                run=r,
+##                                species=volumes_species,
+##                                compartment=c,
+##                                timepoints=self.timepoints,
+##                                timepoints_units=self.timepoints_display_units,
+##                                values_type='Volume',
+##                                values=volumes[ri, ci, :],
+##                                values_units=self.volumes_display_units,
+##                                _colour=colours.colour(num_species + ci),
+##                                marker=colours.marker(ci),
+##                            )
+##                        )        
+        
+        
+        #TODO volumes like plot()
+        if averaging:
+            timepoints, results = results.get_amounts_mean_over_runs()
+            mean_index = 0
+        else:
+            timepoints, results = results.amounts()
+        if len(results) == 0:
+            return
+
+        header = ['time']# (%s)' % units]
+        #TODO move these to method signature?
+#        averaging_header_item = '%s in %s mean of %s runs'
+        def averaging_header_item(s, c, r):
+            return '%s in %s mean of %s runs' % (s, c, r) if r != 1 else '%s in %s mean of %s run' % (s, c, r)
+        header_item = '%s in %s of run %s'
+#        def header_item(s, c, r):
+#            return '%s in %s of run %s' % (s, c, r)
+
+        def write_csv(csv_precision=csv_precision, csv_delimiter=csv_delimiter, results=results):
+            # load default or remembered values
+            if csv_precision is None:
+                csv_precision = self.csv_precision
+            if csv_delimiter is None:
+                csv_delimiter = self.csv_delimiter
+
+            # data
+            if averaging:
+                indices = [(ci, si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+                results = tuple((results[mean_index][si, ci] for ci, si in indices))
+                fmt = '%%.%sf' % csv_precision
+            else:
+                indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+                results = tuple((results[ri][si, ci, :] for ri, ci, si in indices))
+                d = '%d,' * len(results); fmt = ['%.3f'] + d.split(',')[:-1] # timepoints must be floats, levels are ints
+            timepoints_and_levels = (timepoints,) + results
+            # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+            np.savetxt(file_name, np.transpose(timepoints_and_levels), fmt=fmt, delimiter=csv_delimiter)
+            # transpose converts the tuple of 1D arrays to columns
+
+            # header
+
+            # try for similar non-delimiter
+            if csv_delimiter == ',':
+                non_delimiter = ';'
+            elif csv_delimiter == ' ':
+                non_delimiter = '_'
+            else:
+                non_delimiter = ' '
+
+            # ordered list of other potential non-delimiters
+            delimiters = list(' _-,;:+&|/?!#\t')
+
+            def fix_delimited_string(s, non_delimiter=non_delimiter):
+                ''' Usage: fix_delimited_string(header_item(s.text(), c.text(), r.text()))) '''
+                if str(csv_delimiter) in s:
+                    i = 0
+                    while str(non_delimiter) in s:
+                        try:
+                            if str(delimiters[i]) not in s:
+                                non_delimiter = delimiters[i]
+                                break
+                        except IndexError:
+                            raise ValueError('All potential non-delimiters (%s) found in string "%s"' % (delimiters, s))
+                        i += 1
+                    return s.replace(csv_delimiter, non_delimiter)
+                return s
+
+            header[0] = fix_delimited_string(header[0])
+            if averaging:
+                for c in compartments:
+                    for s in species:
+#                        header.append(fix_delimited_string(averaging_header_item % (s.text(), c.text(), len(runs))))
+                        header.append(fix_delimited_string(averaging_header_item(s.text(), c.text(), len(runs))))
+            else:
+                for r in runs:
+                    for c in compartments:
+                        for s in species:
+                            header.append(fix_delimited_string(header_item % (s.text(), c.text(), r.text())))
+#                            header.append(fix_delimited_string(header_item(s.text(), c.text(), r.text())))
+            # write header at beginning of file
+            from infobiotics.commons.files import prepend_line_to_file
+            prepend_line_to_file(csv_delimiter.join(header), file_name)
+
+        def write_xls():
+            ''' https: // secure.simplistix.co.uk / svn / xlwt / trunk / README.html '''
+            wb = xlwt.Workbook()
+            try:
+                ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
+            except:
+                ws = wb.add_sheet('McssResults')
+            ws.write(0, 0, header[0])
+            for ti in range(len(timepoints)):
+                ws.write(1 + ti, 0, timepoints[ti])
+            if averaging:
+                for ci, c in enumerate(compartments):
+                    for si, s in enumerate(species):
+                        y = 1 + si + (ci * len(species))
+#                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
+                        ws.write(0, y, averaging_header_item(s.text(), c.text(), len(runs)))
+                        for ti in range(len(timepoints)):
+                            ws.write(1 + ti, y, results[mean_index][si, ci, ti])
+            else:
+                for ri, r in enumerate(runs):
+                    for ci, c in enumerate(compartments):
+                        for si, s in enumerate(species):
+                            y = 1 + si + (ci * len(species)) + (ri * len(species) * len(compartments))
+                            ws.write(0, y, header_item % (s.text(), c.text(), r.text()))
+                            for ti in range(len(timepoints)):
+                                ws.write(1 + ti, y, results[ri][si, ci, ti])
+            wb.save(file_name)
+
+        def write_npz(species_indices=species_indices, compartment_indices=compartment_indices):
+            # convert QString to str #TODO is this now unncessary with QString api version 2?
+            species_names = [str(s.text()) for s in species]
+            compartment_labels_and_positions = [str(c.text()) for c in compartments]
+            run_numbers = [str(r.text()) for r in runs]
+            kwargs = dict(
+                run_indices=np.array(run_indices),
+                run_numbers=run_numbers,
+                species_indices=species_indices,
+                species_names=species_names,
+                compartment_indices=compartment_indices,
+                compartment_labels_and_positions=compartment_labels_and_positions,
+                timepoints=timepoints,
+                model_file_name=os.path.basename(self.simulation.model_input_file),
+                data_file_name=os.path.basename(self.simulation.data_file),
+            )
+            if averaging:
+                kwargs['means'] = results[mean_index]
+                kwargs['shape'] = ('species', 'compartment', 'timepoint')
+            else:
+                kwargs['levels'] = results
+                kwargs['shape'] = ('run', 'species', 'compartment', 'timepoint')
+            np.savez(file_name, **kwargs)
+
+        if file_name.endswith('.npz'):
+            write_npz()
+        elif file_name.endswith('.xls'):
+            write_xls()
+        else:
+            write_csv()#csv_precision, csv_delimiter) # done using default values
+
+#        if copy_file_name_to_clipboard:
+#            from infobiotics.commons.qt4 import copy_to_clipboard
+#            copy_to_clipboard(file_name)
+#
+#        if open_after_save:
+##            if file_name.endswith('.csv') or file_name.endswith('.xls'):
+#            from infobiotics.commons.qt4 import open_file
+#            open_file(file_name)
+
+        return file_name        
+        
+        
+
 
     def timeseries_plot(self, mean_over_runs, parent=None, **kwargs):
 #        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
@@ -1027,11 +1299,6 @@ class McssResults(object):
 #        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
 #        widget.show()
 #        return timeseries_plot
-
-    
-#    def export_data(self):
-#        pass
-
     
     def histograms(self, bins=10, data='compartments', sum_species=False, dtype=np.float64):#'float64'):
         '''Returns a 2D array of (histogram array, bin_edges array) tuples with 

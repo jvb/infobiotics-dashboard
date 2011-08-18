@@ -88,6 +88,13 @@ def can_write(path=''):
         # the directory it should be in is writable.
         return can_write(os.path.dirname(os.path.abspath(path)))
 
+# aliases
+accessible = can_access
+readable = can_read
+writable = can_write
+executable = can_execute
+
+
 def write(file, mode='w'):
     if not can_write(file):
         raise IOError("Cannot write '%s'." % file)
@@ -114,3 +121,9 @@ def prepend_line_to_file(line, file_name):
     for line in fobj:
         sys.stdout.write("%s" % line)
     fobj.close()
+
+
+if __name__ == '__main__':
+    print accessible('/tmp/made_up_name')
+    print writable('/tmp/made_up_dir/made_up_name')
+    
