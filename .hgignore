@@ -27,3 +27,5 @@ syntax: regexp
 ^ldd_changes\.sh$
 syntax: regexp
 ^cp_libs\.sh$
+syntax: regexp
+^doc/epydoc$

@@ -17,12 +17,6 @@ from matplotlib.axes import Axes#, Subplot as AxesSubplot
 
 import os.path
 
-from enthought.mayavi import mlab
-from enthought.mayavi.core.pipeline_base import PipelineBase
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.tvtk.pyface.scene_editor import SceneEditor
-
 
 class Histograms(HasTraits):
     
@@ -41,8 +35,6 @@ class Histograms(HasTraits):
     species_amounts_index = Property(Int, depends_on='data')
 
     _figure = Instance(Figure)
-    scene = Instance(MlabSceneModel, ())
-    surfaces = List(Instance(PipelineBase))
 
 
     def _max_timepoint_index_default(self):
@@ -156,112 +148,27 @@ class Histograms(HasTraits):
         self._figure.suptitle(self.maketitle().split(' to')[0])
         return axes
 
-    def __figure_default(self):
-        return Figure(figsize=(12,10))
-    
     def maketitle(self):
         return "Histograms TODO from %.1f to %.1f" % (self.results.timepoints[self.from_timepoint_index], self.results.timepoints[self.to_timepoint_index])#, self.timepoints_display_units)
-    
-    def update_surface(self):
-        slice_ = slice(self.from_timepoint_index, self.to_timepoint_index)
-        histograms = self.results.histograms(self.bins, self.data, self.sum_species)
-#        print histograms.shape, # (5, 121)
-#        print histograms['bin_edges'].shape, # (5, 121, 11) 
-#        print histograms['histogram'].shape # (5, 121, 10)
-        if self.sum_species:
-            bin_edges = histograms['bin_edges'][slice_]
-            arrays = histograms['histogram'][slice_]
-        else:
-            bin_edges = histograms['bin_edges'][:, slice_]
-            arrays = histograms['histogram'][:, slice_]
-#        print self.sum_species, bin_edges.shape, arrays.shape # False (5, 60, 11) (5, 60, 10)
-        self.bin_edges = bin_edges[0]
-        self.arrays = arrays
-        
-    arrays = Array
-    
-#    @on_trait_change('scene.activated')
-    def create_pipeline(self, object, name, old, new):
-        
-        if name == 'arrays':
-            self.view_parameters = self.scene.mlab.view()[:3]
-        else:
-            self.on_trait_change(self.create_pipeline, 'arrays')
-        
-        xmin, xmax = self._min_max(sum(self.amounts, self.species_amounts_index)) if self.sum_species else self._min_max(self.amounts) 
-        self.extent = [
-            xmin, xmax,
-            self.from_timepoint_index, self.to_timepoint_index, #TODO replace with actual timepoints
-            np.min(self.bin_edges[0]), np.max(self.bin_edges[0]), # invariant, computed in McssResults.histograms
-        ]
-        
-        self.warp_scale = 1 / max([self.extent[-3] - self.extent[-4], self.extent[-1] - self.extent[-2]]) 
-        
-#        figure=self.scene.mayavi_scene
-#        self.scene.mlab.figure(1, bgcolor=(0,0,0))
-        self.scene.mlab.clf()
 
-#        print self.arrays.shape
-        for i in range(len(self.arrays)):
-            self.surfaces.append(self.surf_default(i))
-#        scalarbar = self.scene.mlab.scalarbar(self.surfaces[1], str(self.quantities_display_units), "vertical", 5, None, '%.f')
-#        scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
-#        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
-#        scalar_bar_widget = self.surfaces[1].module_manager.scalar_lut_manager.scalar_bar_widget
-#        scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
+# from histograms2.HistogramWidget.HistogramWidget.onDraw
+#        self.axes.set_title(self.title)
+#        
+#        self.axes.grid(self.showGridCheckBox.isChecked())
+#        
+#        self.axes.set_yscale('log' if self.logScaleCheckBox.isChecked() else 'linear',
+#                             basey=float(self.logBaseComboBox.currentText()))
+#
+#        self.axes.hist(self.data,
+#                       bins=self.binsSlider.value(),
+#                       cumulative=False,
+#                       histtype='bar', #'barstacked','step','stepfilled',
+#                       log=False)
+#        
+#        self.canvas.draw()
 
-
-        title = self.scene.mlab.title(self.maketitle(), size=0.5, height=0.91)#, figure=figure)
-        title.x_position = 0.03
-        title.actor.width = 0.9
-
-        axes = self.scene.mlab.axes(
-            ranges=self.extent, 
-            xlabel="amounts (TODO)", 
-            ylabel="Time (TODO)", 
-            z_axis_visibility=True, 
-            zlabel='Frequency')#self.quantities_display_units
-        axes.label_text_property.set(italic=0, bold=0)
-        axes.axes.number_of_labels = 3
-            
-        self.scene.scene_editor.isometric_view() # recenter
-        self.scene.mlab.view(*self.view_parameters) # restore previous perspective
-    
-    view_parameters = Tuple(Float, Float, Float)
-    def _view_parameters_default(self):
-        return -44.890778452007545, 86.466712805369198, 98.476018229363234
-    
-    reset_view = Button
-    def _reset_view_fired(self):
-        self.scene.mlab.view(*self._view_parameters_default())
-    
-    def surf_default(self, arrayindex):
-        array = self.arrays[arrayindex].T
-#        surf = self.scene.mlab.surf(
-#            array,
-#            warp_scale=self.warp_scale,
-#            opacity=0.5,
-#        )
-        surf = self.scene.mlab.barchart(
-            array,
-#            extent=self.extent,
-            auto_scale=True,
-#            lateral_scale=0.8,
-#            figure=figure
-#            reset_zoom=True,
-            scale_factor=self.warp_scale,
-        )
-
-#        lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()
-#        if arrayindex == 0:
-#            lut = black_to_green_lut_table
-#        elif arrayindex == 1:
-#            lut = black_to_red_lut_table
-#        surf.module_manager.scalar_lut_manager.lut.table = lut
-#        self.scene.mlab.draw()
-
-        return surf
-
+    def __figure_default(self):
+        return Figure(figsize=(12,10))
     
     def traits_view(self):
         basename = os.path.basename(self.results.filename)
@@ -297,7 +204,7 @@ class Histograms(HasTraits):
                     high=self.max_timepoint_index-1,
                 ),
             ),
-            Item('reset_view', show_label=False),
+#            Item('reset_view', show_label=False),
             width=800, height=600,
             resizable=True,
             title="%s histograms" % basename,
@@ -306,21 +213,119 @@ class Histograms(HasTraits):
         return view
 
 
-# from histograms2.HistogramWidget.HistogramWidget.onDraw
-#        self.axes.set_title(self.title)
-#        
-#        self.axes.grid(self.showGridCheckBox.isChecked())
-#        
-#        self.axes.set_yscale('log' if self.logScaleCheckBox.isChecked() else 'linear',
-#                             basey=float(self.logBaseComboBox.currentText()))
+#    # 3D histogram with Mayavi
 #
-#        self.axes.hist(self.data,
-#                       bins=self.binsSlider.value(),
-#                       cumulative=False,
-#                       histtype='bar', #'barstacked','step','stepfilled',
-#                       log=False)
+#    scene = Instance(MlabSceneModel, ())
+#    surfaces = List(Instance(PipelineBase))
+#    arrays = Array
+#
+#    def maketitle(self):
+#        return "Histograms TODO from %.1f to %.1f" % (self.results.timepoints[self.from_timepoint_index], self.results.timepoints[self.to_timepoint_index])#, self.timepoints_display_units)
+#    
+#    def update_surface(self):
+#        slice_ = slice(self.from_timepoint_index, self.to_timepoint_index)
+#        histograms = self.results.histograms(self.bins, self.data, self.sum_species)
+##        print histograms.shape, # (5, 121)
+##        print histograms['bin_edges'].shape, # (5, 121, 11) 
+##        print histograms['histogram'].shape # (5, 121, 10)
+#        if self.sum_species:
+#            bin_edges = histograms['bin_edges'][slice_]
+#            arrays = histograms['histogram'][slice_]
+#        else:
+#            bin_edges = histograms['bin_edges'][:, slice_]
+#            arrays = histograms['histogram'][:, slice_]
+##        print self.sum_species, bin_edges.shape, arrays.shape # False (5, 60, 11) (5, 60, 10)
+#        self.bin_edges = bin_edges[0]
+#        self.arrays = arrays
 #        
-#        self.canvas.draw()
+##    @on_trait_change('scene.activated')
+#    def create_pipeline(self, object, name, old, new):
+#        
+#        if name == 'arrays':
+#            self.view_parameters = self.scene.mlab.view()[:3]
+#        else:
+#            self.on_trait_change(self.create_pipeline, 'arrays')
+#        
+#        xmin, xmax = self._min_max(sum(self.amounts, self.species_amounts_index)) if self.sum_species else self._min_max(self.amounts) 
+#        self.extent = [
+#            xmin, xmax,
+#            self.from_timepoint_index, self.to_timepoint_index, #TODO replace with actual timepoints
+#            np.min(self.bin_edges[0]), np.max(self.bin_edges[0]), # invariant, computed in McssResults.histograms
+#        ]
+#        
+#        self.warp_scale = 1 / max([self.extent[-3] - self.extent[-4], self.extent[-1] - self.extent[-2]]) 
+#        
+##        figure=self.scene.mayavi_scene
+##        self.scene.mlab.figure(1, bgcolor=(0,0,0))
+#        self.scene.mlab.clf()
+#
+##        print self.arrays.shape
+#        for i in range(len(self.arrays)):
+#            self.surfaces.append(self.surf_default(i))
+##        scalarbar = self.scene.mlab.scalarbar(self.surfaces[1], str(self.quantities_display_units), "vertical", 5, None, '%.f')
+##        scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
+##        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
+##        scalar_bar_widget = self.surfaces[1].module_manager.scalar_lut_manager.scalar_bar_widget
+##        scalar_bar_widget.representation.set(position=[0.827, 0.0524], position2=[0.1557, 0.42])
+#
+#
+#        title = self.scene.mlab.title(self.maketitle(), size=0.5, height=0.91)#, figure=figure)
+#        title.x_position = 0.03
+#        title.actor.width = 0.9
+#
+#        axes = self.scene.mlab.axes(
+#            ranges=self.extent, 
+#            xlabel="amounts (TODO)", 
+#            ylabel="Time (TODO)", 
+#            z_axis_visibility=True, 
+#            zlabel='Frequency')#self.quantities_display_units
+#        axes.label_text_property.set(italic=0, bold=0)
+#        axes.axes.number_of_labels = 3
+#            
+#        self.scene.scene_editor.isometric_view() # recenter
+#        self.scene.mlab.view(*self.view_parameters) # restore previous perspective
+#    
+#    view_parameters = Tuple(Float, Float, Float)
+#    def _view_parameters_default(self):
+#        return -44.890778452007545, 86.466712805369198, 98.476018229363234
+#    
+#    reset_view = Button
+#    def _reset_view_fired(self):
+#        self.scene.mlab.view(*self._view_parameters_default())
+#    
+#    def surf_default(self, arrayindex):
+#        array = self.arrays[arrayindex].T
+##        surf = self.scene.mlab.surf(
+##            array,
+##            warp_scale=self.warp_scale,
+##            opacity=0.5,
+##        )
+#        surf = self.scene.mlab.barchart(
+#            array,
+##            extent=self.extent,
+#            auto_scale=True,
+##            lateral_scale=0.8,
+##            figure=figure
+##            reset_zoom=True,
+#            scale_factor=self.warp_scale,
+#        )
+#
+##        lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()
+##        if arrayindex == 0:
+##            lut = black_to_green_lut_table
+##        elif arrayindex == 1:
+##            lut = black_to_red_lut_table
+##        surf.module_manager.scalar_lut_manager.lut.table = lut
+##        self.scene.mlab.draw()
+#
+#        return surf
+#
+#
+#from enthought.mayavi import mlab
+#from enthought.mayavi.core.pipeline_base import PipelineBase
+#from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
+#from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
+#from enthought.tvtk.pyface.scene_editor import SceneEditor
 
 
 
