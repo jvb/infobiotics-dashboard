@@ -191,7 +191,7 @@ class McssResults(object):
 #        max_time = self.simulation.max_time # can't be trusted, multiply log_interval by number_of_timepoints instead
         number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
 #        self._timepoints = Quantity(np.linspace(0, max_time, number_of_timepoints), time_units[self.timepoints_data_units])
-        self._timepoints = Quantity(np.linspace(0, log_interval * (number_of_timepoints - log_interval), number_of_timepoints), time_units[self.timepoints_data_units])
+        self._timepoints = Quantity(np.linspace(0, (log_interval * number_of_timepoints) - log_interval, number_of_timepoints), time_units[self.timepoints_data_units])
 
         self._timestep = Quantity(log_interval, time_units[self.timepoints_data_units])
 
@@ -1095,27 +1095,14 @@ class McssResults(object):
             wb = xlwt.Workbook()
 
             timepointsindices = xrange(numtimepoints) 
-
-#            def uqt(timepoint): # unquantity timepoint
-#                return float(timepoint)
-#
-#            def uqa(amount): # unquantity amount
-#                if quantities_display_type == 'molecules':
-#                    return int(amount)
-#                return float(amount)
-#
-#            def uqv(volume): # unquantity volume
-#                return float(volume) 
             
             def writetimecol():
                 row = 0
                 col = 0
                 ws.write(row, col, header[0])
-                for ti in timepointsindices:
+                for ti, t in enumerate(self.timepoints.magnitude):
                     row = 1 + ti
-                    ws.write(row, col, self.timepoints.magnitude[ti])
-#                    ws.write(row, col, timepoints[ti])
-#            timepoints = [float(t) for t in self.timepoints]
+                    ws.write(row, col, t)
 
             if amounts:
                 ws = wb.add_sheet('amounts')
@@ -1173,7 +1160,6 @@ class McssResults(object):
                             ws.write(0, col, headers[ai][ci]) # 0 = row
                             for ti in timepointsindices:
                                 ws.write(1 + ti, col, array[ci, ti]) # 1 + ti = row
-
             
             wb.save(filename)            
 
@@ -1309,8 +1295,8 @@ class McssResults(object):
         self.timepoints_display_units = _timepoints_display_units
 
         # end of export_timeseries
-
-
+        
+        
     def general_assertions(self):
         assert len(self.run_indices) > 0
         assert len(self.species_indices) > 0
@@ -1769,20 +1755,15 @@ def test_histograms():
     print results.histograms(data='runs', sum_species=True).shape
      
 
-
-
-if __name__ == '__main__':
-#    import mcss_results_widget
-#    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
-
+def test_export_timeseries():
 #    McssResults('/home/jvb/simulations/module1.h5').export_timeseries(
 #        'module1.csv', 
     McssResults('/home/jvb/simulations/aba_receptor_05.h5').export_timeseries(
-        
         filename='aba_receptor_05.xls',
+#    McssResults('/home/jvb/simulations/germination_09.h5').export_timeseries(
+#        volumes=True, 
 
         amounts=True,
-#        volumes=True, 
 
 #        individualruns=True, 
 
@@ -1793,7 +1774,11 @@ if __name__ == '__main__':
 #        quantities_display_units = 'femtomoles',
         
     )
-    
+
+if __name__ == '__main__':
+#    import mcss_results_widget
+#    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
+    test_export_timeseries()
 ##    test1()
 #    test_surfaces()
 #    test_timeseries()

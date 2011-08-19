@@ -14,3 +14,7 @@ class Run(object): #TODO rename McssRun
 #        self.run_start_time = attributes.run_start_time
         self.simulated_time = attributes.simulated_time
 #        self.total_reactions_simulated = attributes.total_reactions_simulated
+
+    def __str__(self): # used by McssResults.export_timeseries
+        return 'run {_run_number}'.format(**self.__dict__)
+    

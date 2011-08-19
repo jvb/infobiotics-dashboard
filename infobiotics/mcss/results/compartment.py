@@ -20,3 +20,11 @@ class Compartment(object): # TODO rename McssCompartment
 
     def compartment_name_and_xy_coords(self):
         return "%s (%s,%s)" % (self.name, self.x_position, self.y_position)
+
+    def __str__(self): # used by McssResults.export_timeseries
+        xy_position = '{x_position},{y_position}'.format(**self.__dict__)
+        if xy_position in self.name:
+            return self.name
+        else:
+            return '{name} at ({x_position},{y_position})'.format(**self.__dict__)
+    
