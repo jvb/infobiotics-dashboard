@@ -996,7 +996,7 @@ class McssResults(object):
         return timeseries
 
 
-    def assertions(self, amounts=True, volumes=True, mean_over_runs=True):
+    def assertions(self, amounts, volumes, mean_over_runs):
         assert amounts or volumes
         
         if volumes and not self.has_volumes:
@@ -1014,7 +1014,7 @@ class McssResults(object):
     
     def export_timeseries(self, 
         file_name,
-        amounts=True, volumes=True, 
+        amounts=True, volumes=False, 
         mean_over_runs=True, ci_degree=None,                  
         csv_precision=None, csv_delimiter=None,
         #TODO custom titles here?
@@ -1039,9 +1039,14 @@ class McssResults(object):
         if not writable(file_name):
             raise ValueError("'%s' is not writable." % file_name)
 
-        self.assertions()
+        self.assertions(amounts, volumes, mean_over_runs)
         
         if len(self.runs) > 1 and mean_over_runs:
+
+            if ci_degree is None:
+                ci_degree = self.ci_degree
+            ci_factor = self.ci_factor(ci_degree)
+                        
             if amounts:
                 mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
 #                for ci, c in enumerate(self.compartments):
@@ -1062,6 +1067,9 @@ class McssResults(object):
 ##                                marker=colours.marker(ci),
 ##                            ),
 ##                        )
+                ci_amounts_over_runs = std_amounts_over_runs * ci_factor
+
+
             if volumes:
                 mean_volumes_over_runs, std_volumes_over_runs = functions_of_values_over_axis(self.volumes(), self.volumes_axes, 'runs', (mean, std)) 
 #                for ci, c in enumerate(self.compartments):
@@ -1081,16 +1089,12 @@ class McssResults(object):
 ##                            marker=colours.marker(ci),
 ##                        )
 ##                    )
+                ci_volumes_over_runs = std_volumes_over_runs * ci_factor
 
-            if ci_degree is None:
-                ci_degree = self.ci_degree
-            ci_factor = self.ci_factor(ci_degree)
-            ci_amounts_over_runs = std_amounts_over_runs * ci_factor
-            ci_volumes_over_runs = std_volumes_over_runs * ci_factor
 
         else: # not mean_over_runs
             if amounts:
-                amounts = self.amounts()
+                amounts_ = self.amounts()
 #                for ri, r in enumerate(self.runs):
 #                    for ci, c in enumerate(self.compartments):
 #                        for si, s in enumerate(self.species):
@@ -1110,7 +1114,7 @@ class McssResults(object):
 ##                                )
 ##                            )
             if volumes:
-                volumes = self.volumes()
+                volumes_ = self.volumes()
 #                for ri, r in enumerate(self.runs):
 #                    for ci, c in enumerate(self.compartments):
 
@@ -1129,25 +1133,25 @@ class McssResults(object):
 ##                            )
 ##                        )        
 
-#        self.timepoints()
 
         if len(self.runs) > 1 and mean_over_runs:
-            numspecies, numcompartments, _ = mean_amounts_over_runs.shape
-            numcompartments, _ = mean_volumes_over_runs.shape
-#            numruns = self.num_selected_runs()
-            
-            speciesindices = xrange(numspecies)
-            compartmentindices = xrange(numcompartments)
         
             if amounts:
+                numspecies, numcompartments, _ = mean_amounts_over_runs.shape
+                speciesindices = xrange(numspecies)
+                compartmentindices = xrange(numcompartments)
                 amountsindices = [(si, ci) for ci in compartmentindices for si in speciesindices]
             
             if volumes:
+                numcompartments, _ = mean_volumes_over_runs.shape
+                compartmentindices = xrange(numcompartments)
                 volumesindices = compartmentindices
         
+#            numruns = self.num_selected_runs()
+
         else:
-            numruns, numspecies, numcompartments, _ = amounts.shape
-            numruns, numcompartments, _ = volumes.shape
+            numruns, numspecies, numcompartments, _ = amounts_.shape
+            numruns, numcompartments, _ = volumes_.shape
             
             runindices = xrange(numruns)
             speciesindices = xrange(numspecies)
@@ -1161,7 +1165,7 @@ class McssResults(object):
                 volumesindices = [(ri, ci) for ri in runindices for ci in compartmentindices]
         
         
-        ext = os.path.splitext(file_name).lower()
+        ext = os.path.splitext(file_name)[1].lower()
 
         if ext == '.npz':
             if len(self.runs) > 1 and mean_over_runs:
@@ -1179,11 +1183,11 @@ class McssResults(object):
             
             else:
                 if amounts:
-                    amounts
+                    amounts_
                     pass
             
                 if volumes:
-                    volumes
+                    volumes_
                     pass
             
         elif ext == '.xls':
@@ -1202,11 +1206,11 @@ class McssResults(object):
             
             else:
                 if amounts:
-                    amounts
+                    amounts_
                     pass
             
                 if volumes:
-                    volumes
+                    volumes_
                     pass
             
         else:
@@ -1214,7 +1218,6 @@ class McssResults(object):
 
             if volumes:
                 # use a separate .csv file for volumes
-                import os.path
                 path, ext = os.path.splitext(file_name)
                 volumes_file_name = path + '_volumes' + ext # ext ~= .csv
             
@@ -1237,9 +1240,9 @@ class McssResults(object):
 #                    col = lambda si, ci: (ci * numspecies) + si + 1
             
 #                    statsindices?
-                    mean_amounts_over_runs = tuple(mean_amounts_over_runs[si, ci] for ci, si in amountsindices)
-                    std_amounts_over_runs = tuple(std_amounts_over_runs[si, ci] for ci, si in amountsindices)
-                    ci_amounts_over_runs = tuple(ci_amounts_over_runs[si, ci] for ci, si in amountsindices)
+                    mean_amounts_over_runs = tuple(mean_amounts_over_runs[si, ci] for si, ci in amountsindices)
+                    std_amounts_over_runs = tuple(std_amounts_over_runs[si, ci] for si, ci in amountsindices)
+                    ci_amounts_over_runs = tuple(ci_amounts_over_runs[si, ci] for si, ci in amountsindices)
                     
                     
                 if volumes:
@@ -1286,36 +1289,36 @@ class McssResults(object):
 #                    mcss-postprocess does amount of each species in each compartment for one run
 #                    we want the same but for all runs
                 
-#                    amounts
+#                    amounts_
 ##                    def col(ri, si, ci):
 ##                        col = (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
 ###                        print col,
 ##                        return col
 #                    col = lambda ri, si, ci: (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
 
-                    amounts = tuple(amounts[ri, si, ci] for ri, si, ci in amountsindices)
+                    amounts_ = tuple(amounts_[ri, si, ci] for ri, si, ci in amountsindices)
 
-                    fmt = ['%.%sf' % csv_precision] + ['%d'] * len(amounts - 1) # timepoints are floats, levels are ints
+                    fmt = ['%%.%sf' % csv_precision] + ['%d'] * len(amounts_) # timepoints are floats, levels are ints
 
-                    np.savetxt(file_name, np.transpose((self.timepoints,) + amounts), fmt=fmt, delimiter=csv_delimiter)                    
+                    np.savetxt(file_name, np.transpose((self.timepoints,) + amounts_), fmt=fmt, delimiter=csv_delimiter)                    
             
                 if volumes:
 
 #                    mcss-postprocess does volume of each compartment for one run
 #                    we want the same but for all runs
 
-#                    volumes
+#                    volumes_
 ##                    def col(ri, ci):
 ##                        col = (ri * numcompartments) + ci + 1
 ###                        print col,
 ##                        return col
 #                    col = lambda ri, ci: (ri * numcompartments) + ci + 1
                     
-                    volumes = tuple(volumes[ri, ci] for ri, ci in volumesindices) 
+                    volumes_ = tuple(volumes_[ri, ci] for ri, ci in volumesindices) 
 
-                    fmt = '%.%sf' % csv_precision
+                    fmt = '%%.%sf' % csv_precision
 
-                    np.savetxt(volumes_file_name, np.transpose((self.timepoints,) + volumes), fmt=fmt, delimiter=csv_delimiter)
+                    np.savetxt(volumes_file_name, np.transpose((self.timepoints,) + volumes_), fmt=fmt, delimiter=csv_delimiter)
                     
         """
         #TODO volumes like plot()
@@ -1830,10 +1833,12 @@ if __name__ == '__main__':
 #    import mcss_results_widget
 #    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
 
-    McssResults('/home/jvb/simulation/module1.h5').export_timeseries(
-        'test.csv', 
+#    McssResults('/home/jvb/simulations/module1.h5').export_timeseries(
+#        'module1.csv', 
+    McssResults('/home/jvb/simulations/aba_receptor_05.h5').export_timeseries(
+        'aba_receptor_05.csv', 
         amounts=True, 
-        volumes=True, 
+#        volumes=True, 
         mean_over_runs=True, 
         ci_degree=0.95, 
         csv_precision=3, 
