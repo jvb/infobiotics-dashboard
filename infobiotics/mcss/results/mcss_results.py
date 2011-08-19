@@ -905,9 +905,9 @@ class McssResults(object):
     csv_delimiter = ','
     
     def export_timeseries(self, 
-        file_name=None,
+        filename=None,
         amounts=True, volumes=False, 
-        mean_over_runs=True, ci_degree=None,
+        individualruns=False, ci_degree=None,
         timepoints_display_units=None,
         quantities_display_type=None, quantities_display_units=None, 
         volumes_display_units=None,              
@@ -917,22 +917,22 @@ class McssResults(object):
         '''Write selected data to a file in .csv, .xls (.xlsx not supported) 
         or .npz format.
 
-        if not file_name:
-            file_name = <simulation>-X_runs.csv if mean_over_runs else <simulation>.csv 
+        if not filename:
+            filename = <simulation>.csv if individualruns else <simulation>-X_runs.csv  
 
         '''
         numruns = len(self.run_indices)
         
-        if not file_name:
-            file_name = os.path.splitext(self.basename)[0]
-            if mean_over_runs:
-                file_name += '-%s_runs' % numruns
-            file_name += '.csv'
-        file_name = unicode(file_name)
+        if not filename:
+            filename = os.path.splitext(self.basename)[0]
+            if not individualruns:
+                filename += '-%s_runs' % numruns
+            filename += '.csv'
+        filename = unicode(filename)
         
         from infobiotics.commons.files import writable
-        if not writable(file_name):
-            raise ValueError("'%s' is not writable." % file_name)
+        if not writable(filename):
+            raise ValueError("'%s' is not writable." % filename)
 
         self.general_assertions()
         
@@ -962,12 +962,20 @@ class McssResults(object):
 #            self.validate_volumes_units(volumes_display_units) 
             # done in volumes()
 
-        if mean_over_runs and numruns == 1:
-            error = 'Cannot calculate statistics with only 1 run, '
-            error + 'try setting run_indices = range(%s)' % numruns if self.simulation.number_of_runs > 1 else 'use mean_over_runs=False instead.'
-            raise ValueError(error)
+        if not individualruns and numruns == 1:
+#            error = 'Cannot calculate statistics with only 1 run, '
+#            error + 'try setting run_indices = range(%s)' % numruns if self.simulation.number_of_runs > 1 else 'use individualruns=True instead.'
+#            raise ValueError(error)
+            individualruns = True
         
-        if mean_over_runs:
+        if individualruns:
+            if amounts:
+                amounts_ = self.amounts()
+
+            if volumes:
+                volumes_ = self.volumes()
+
+        else:
             if ci_degree is None:
                 ci_degree = self.ci_degree
             ci_factor = self.ci_factor(ci_degree)
@@ -979,13 +987,6 @@ class McssResults(object):
             if volumes:
                 mean_volumes_over_runs, std_volumes_over_runs = functions_of_values_over_axis(self.volumes(volumes_display_units=volumes_display_units), self.volumes_axes, 'runs', (mean, std)) 
                 ci_volumes_over_runs = std_volumes_over_runs * ci_factor
-
-        else: # not mean_over_runs
-            if amounts:
-                amounts_ = self.amounts()
-
-            if volumes:
-                volumes_ = self.volumes()
 
         
         if csv_precision is None:
@@ -1014,14 +1015,34 @@ class McssResults(object):
                     break
             return v
 
-        if mean_over_runs:
+
+        if individualruns:
+            if amounts:
+                numruns, numspecies, numcompartments, _ = amounts_.shape
+                runindices = xrange(numruns)
+                speciesindices = xrange(numspecies)
+                compartmentindices = xrange(numcompartments)
+                
+                # order of for loops determines order of columns in 2D array for .csv 
+                amountsindices = [(ri, si, ci) for ri in runindices for ci in compartmentindices for si in speciesindices]
+                
+                amountsheader = header + [sanitise('%s in %s of %s (%s)' % (s, c, r, quantities_display_units)) for r in self.runs for c in self.compartments for s in self.species] 
+            
+            if volumes:
+                numruns, numcompartments, _ = volumes_.shape
+                runindices = xrange(numruns)
+                compartmentindices = xrange(numcompartments)
+
+                volumesindices = [(ri, ci) for ri in runindices for ci in compartmentindices]
+                
+                volumesheader = header + [sanitise('%s of %s (%s)' % (c, r, volumes_display_units)) for r in self.runs for c in self.compartments] 
         
+        else:
             if amounts:
                 numspecies, numcompartments, _ = mean_amounts_over_runs.shape
                 speciesindices = xrange(numspecies)
                 compartmentindices = xrange(numcompartments)
                 
-                # order of for loops determines order of columns in 2D array for .csv 
                 amountsindices = [(si, ci) for ci in compartmentindices for si in speciesindices]
 
                 meanamountsheader = [sanitise('mean %s in %s (%s)' % (s, c, quantities_display_units)) for c in self.compartments for s in self.species] 
@@ -1036,28 +1057,21 @@ class McssResults(object):
                 meanvolumesheader = [sanitise('mean %s (%s)' % (c, volumes_display_units)) for c in self.compartments]
                 stdvolumesheader = [sanitise('std %s (%s)' % (c, volumes_display_units)) for c in self.compartments]
                 civolumesheader = [sanitise('ci %s (%s)' % (c, volumes_display_units)) for c in self.compartments]
-        
-        else:
-            numruns, numspecies, numcompartments, _ = amounts_.shape
-            numruns, numcompartments, _ = volumes_.shape
-            
-            runindices = xrange(numruns)
-            speciesindices = xrange(numspecies)
-            compartmentindices = xrange(numcompartments)
-
-            if amounts:
-                amountsindices = [(ri, si, ci) for ri in runindices for ci in compartmentindices for si in speciesindices]
-                amountsheader = header + [sanitise('%s in %s of %s (%s)' % (s, c, r, quantities_display_units)) for r in self.runs for c in self.compartments for s in self.species] 
-            
-            if volumes:
-                volumesindices = [(ri, ci) for ri in runindices for ci in compartmentindices]
-                volumesheader = header + [sanitise('%s of %s (%s)' % (c, r, volumes_display_units)) for r in self.runs for c in self.compartments] 
             
         
-        ext = os.path.splitext(file_name)[1].lower()
+        ext = os.path.splitext(filename)[1].lower()
 
         if ext == '.npz':
-            if mean_over_runs:
+            if individualruns:
+                if amounts:
+                    amounts_
+                    pass
+            
+                if volumes:
+                    volumes_
+                    pass
+
+            else:
                 if amounts:
                     mean_amounts_over_runs
                     std_amounts_over_runs
@@ -1068,19 +1082,50 @@ class McssResults(object):
                     mean_volumes_over_runs
                     std_volumes_over_runs
                     ci_volumes_over_runs
-                    pass
-            
-            else:
-                if amounts:
-                    amounts_
-                    pass
-            
-                if volumes:
-                    volumes_
                     pass
             
         elif ext == '.xls':
-            if mean_over_runs:
+            
+            """
+def write_xls():
+    ''' https: // secure.simplistix.co.uk / svn / xlwt / trunk / README.html '''
+    wb = xlwt.Workbook()
+    try:
+        ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
+    except:
+        ws = wb.add_sheet('McssResults')
+    ws.write(0, 0, header[0])
+    for ti in range(len(timepoints)):
+        ws.write(1 + ti, 0, timepoints[ti])
+    if averaging:
+        for ci, c in enumerate(compartments):
+            for si, s in enumerate(species):
+                y = 1 + si + (ci * len(species))
+#                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
+                ws.write(0, y, averaging_header_item(s.text(), c.text(), len(runs)))
+                for ti in range(len(timepoints)):
+                    ws.write(1 + ti, y, results[mean_index][si, ci, ti])
+    else:
+        for ri, r in enumerate(runs):
+            for ci, c in enumerate(compartments):
+                for si, s in enumerate(species):
+                    y = 1 + si + (ci * len(species)) + (ri * len(species) * len(compartments))
+                    ws.write(0, y, header_item % (s.text(), c.text(), r.text()))
+                    for ti in range(len(timepoints)):
+                        ws.write(1 + ti, y, results[ri][si, ci, ti])
+    wb.save(filename)            
+            """
+            
+            if individualruns:
+                if amounts:
+                    amounts_
+                    pass
+            
+                if volumes:
+                    volumes_
+                    pass
+            
+            else:
                 if amounts:
                     mean_amounts_over_runs
                     std_amounts_over_runs
@@ -1092,25 +1137,27 @@ class McssResults(object):
                     std_volumes_over_runs
                     ci_volumes_over_runs
                     pass
-            
-            else:
-                if amounts:
-                    amounts_
-                    pass
-            
-                if volumes:
-                    volumes_
-                    pass
-            
         else:
             # .csv
 
             if volumes:
                 # use a separate .csv file for volumes
-                path, ext = os.path.splitext(file_name)
-                volumes_file_name = path + '-volumes' + ext # ext ~= .csv
+                path, ext = os.path.splitext(filename)
+                volumes_filename = path + '-volumes' + ext # ext ~= .csv
 
-            if mean_over_runs:
+            if individualruns:
+                if amounts:
+#                    mcss-postprocess does amount of each species in each compartment for one run
+#                    we want the same but for all runs
+                    amounts_ = tuple(amounts_[ri, si, ci] for ri, si, ci in amountsindices)
+                    fmt = ['%.f'] + ['%d'] * len(amounts_) # timepoints are floats, levels are ints
+                    
+                if volumes:
+#                    mcss-postprocess does volume of each compartment for one run
+#                    we want the same but for all runs
+                    volumes_ = tuple(volumes_[ri, ci] for ri, ci in volumesindices) 
+            
+            else:                
                 if amounts:
 #                    jvb@weasel:~/simulations$ mcss-postprocess -l -s FP1,FP2 -c [20,20],[21,21] patternFormation.h5 | head
 #                    time FP1_[20,20]_mean FP1_[20,20]_sd FP1_[20,20]_ci FP2_[20,20]_mean FP2_[20,20]_sd FP2_[20,20]_ci FP1_[21,21]_mean FP1_[21,21]_sd FP1_[21,21]_ci FP2_[21,21]_mean FP2_[21,21]_sd FP2_[21,21]_ci
@@ -1147,30 +1194,19 @@ class McssResults(object):
 
                     volumesheader = header + [item for tup in zip(meanvolumesheader, stdvolumesheader, civolumesheader) for item in tup]
 
-            else:
-                if amounts:
-#                    mcss-postprocess does amount of each species in each compartment for one run
-#                    we want the same but for all runs
-                    amounts_ = tuple(amounts_[ri, si, ci] for ri, si, ci in amountsindices)
-                    fmt = ['%.f'] + ['%d'] * len(amounts_) # timepoints are floats, levels are ints
-                    
-                if volumes:
-#                    mcss-postprocess does volume of each compartment for one run
-#                    we want the same but for all runs
-                    volumes_ = tuple(volumes_[ri, ci] for ri, ci in volumesindices) 
-
+            # write .csv
             if amounts:
-                np.savetxt(file_name, np.transpose((self.timepoints,) + amounts_), fmt=fmt, delimiter=csv_delimiter)                    
+                np.savetxt(filename, np.transpose((self.timepoints,) + amounts_), fmt=fmt, delimiter=csv_delimiter)                    
                 # transpose converts the tuple of 1D arrays to columns
                 # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
 
-                prepend_line_to_file(csv_delimiter.join(amountsheader), file_name)
+                prepend_line_to_file(csv_delimiter.join(amountsheader), filename)
             
             if volumes:
                 fmt = ['%.f'] + ['%%.%sf' % csv_precision] * len(volumes_) # timepoints are floats, levels are ints
-                np.savetxt(volumes_file_name, np.transpose((self.timepoints,) + volumes_), fmt=fmt, delimiter=csv_delimiter)
+                np.savetxt(volumes_filename, np.transpose((self.timepoints,) + volumes_), fmt=fmt, delimiter=csv_delimiter)
            
-                prepend_line_to_file(csv_delimiter.join(volumesheader), volumes_file_name)
+                prepend_line_to_file(csv_delimiter.join(volumesheader), volumes_filename)
             
         """
         '''
@@ -1185,36 +1221,6 @@ class McssResults(object):
         
         '''
         
-        def write_xls():
-            ''' https: // secure.simplistix.co.uk / svn / xlwt / trunk / README.html '''
-            wb = xlwt.Workbook()
-            try:
-                ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
-            except:
-                ws = wb.add_sheet('McssResults')
-            ws.write(0, 0, header[0])
-            for ti in range(len(timepoints)):
-                ws.write(1 + ti, 0, timepoints[ti])
-            if averaging:
-                for ci, c in enumerate(compartments):
-                    for si, s in enumerate(species):
-                        y = 1 + si + (ci * len(species))
-#                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
-                        ws.write(0, y, averaging_header_item(s.text(), c.text(), len(runs)))
-                        for ti in range(len(timepoints)):
-                            ws.write(1 + ti, y, results[mean_index][si, ci, ti])
-            else:
-                for ri, r in enumerate(runs):
-                    for ci, c in enumerate(compartments):
-                        for si, s in enumerate(species):
-                            y = 1 + si + (ci * len(species)) + (ri * len(species) * len(compartments))
-                            ws.write(0, y, header_item % (s.text(), c.text(), r.text()))
-                            for ti in range(len(timepoints)):
-                                ws.write(1 + ti, y, results[ri][si, ci, ti])
-            wb.save(file_name)
-
-
-
         def write_npz(species_indices=species_indices, compartment_indices=compartment_indices):
             # convert QString to str #TODO is this now unncessary with QString api version 2?
             species_names = [str(s.text()) for s in species]
@@ -1228,8 +1234,8 @@ class McssResults(object):
                 compartment_indices=compartment_indices,
                 compartment_labels_and_positions=compartment_labels_and_positions,
                 timepoints=timepoints,
-                model_file_name=os.path.basename(self.simulation.model_input_file),
-                data_file_name=os.path.basename(self.simulation.data_file),
+                model_filename=os.path.basename(self.simulation.model_input_file),
+                data_filename=os.path.basename(self.simulation.data_file),
             )
             if averaging:
                 kwargs['means'] = results[mean_index]
@@ -1237,25 +1243,25 @@ class McssResults(object):
             else:
                 kwargs['levels'] = results
                 kwargs['shape'] = ('run', 'species', 'compartment', 'timepoint')
-            np.savez(file_name, **kwargs)
+            np.savez(filename, **kwargs)
 
-        if file_name.endswith('.npz'):
+        if filename.endswith('.npz'):
             write_npz()
-        elif file_name.endswith('.xls'):
+        elif filename.endswith('.xls'):
             write_xls()
         else:
             write_csv()#csv_precision, csv_delimiter) # done using default values
 
-#        if copy_file_name_to_clipboard:
+#        if copy_filename_to_clipboard:
 #            from infobiotics.commons.qt4 import copy_to_clipboard
-#            copy_to_clipboard(file_name)
+#            copy_to_clipboard(filename)
 #
 #        if open_after_save:
-##            if file_name.endswith('.csv') or file_name.endswith('.xls'):
+##            if filename.endswith('.csv') or filename.endswith('.xls'):
 #            from infobiotics.commons.qt4 import open_file
-#            open_file(file_name)
+#            open_file(filename)
 
-        return file_name        
+        return filename        
         """
         
         # reset timepoints_display_units (see above)
@@ -1682,8 +1688,8 @@ def test_surfaces():
     print mean(sum(surfaces, 1), 0).shape # the mean over runs of the sum of the species amounts
 
 def test_timeseries():
-    file_name = 'tests/germination_09.h5'
-    results = McssResults(file_name)
+    filename = 'tests/germination_09.h5'
+    results = McssResults(filename)
     print results.timeseries_information()
     exit()
     results.select_species('SIG1')#, 'P1')
@@ -1709,7 +1715,7 @@ def test_timeseries():
     from timeseries_plot import TimeseriesPlot
     TimeseriesPlot(
         timeseries=timeseries,
-        window_title='Timeseries Plot(s) for %s' % file_name,
+        window_title='Timeseries Plot(s) for %s' % filename,
     ).configure_traits()
     
 
