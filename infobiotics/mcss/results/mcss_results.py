@@ -191,7 +191,7 @@ class McssResults(object):
 #        max_time = self.simulation.max_time # can't be trusted, multiply log_interval by number_of_timepoints instead
         number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
 #        self._timepoints = Quantity(np.linspace(0, max_time, number_of_timepoints), time_units[self.timepoints_data_units])
-        self._timepoints = Quantity(np.linspace(0, log_interval * number_of_timepoints, number_of_timepoints), time_units[self.timepoints_data_units])
+        self._timepoints = Quantity(np.linspace(0, log_interval * (number_of_timepoints - log_interval), number_of_timepoints), time_units[self.timepoints_data_units])
 
         self._timestep = Quantity(log_interval, time_units[self.timepoints_data_units])
 
@@ -968,12 +968,15 @@ class McssResults(object):
 #            raise ValueError(error)
             individualruns = True
         
+        
+        # data extract (and unit conversion)
+        
         if individualruns:
             if amounts:
-                amounts_ = self.amounts()
+                amounts_ = self.amounts(quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units)
 
             if volumes:
-                volumes_ = self.volumes()
+                volumes_ = self.volumes(volumes_display_units=volumes_display_units)
 
         else:
             if ci_degree is None:
@@ -1018,7 +1021,7 @@ class McssResults(object):
 
         if individualruns:
             if amounts:
-                numruns, numspecies, numcompartments, _ = amounts_.shape
+                numruns, numspecies, numcompartments, numtimepoints = amounts_.shape
                 runindices = xrange(numruns)
                 speciesindices = xrange(numspecies)
                 compartmentindices = xrange(numcompartments)
@@ -1026,37 +1029,39 @@ class McssResults(object):
                 # order of for loops determines order of columns in 2D array for .csv 
                 amountsindices = [(ri, si, ci) for ri in runindices for ci in compartmentindices for si in speciesindices]
                 
-                amountsheader = header + [sanitise('%s in %s of %s (%s)' % (s, c, r, quantities_display_units)) for r in self.runs for c in self.compartments for s in self.species] 
+                amountsheader = header + ['%s in %s of %s (%s)' % (s, c, r, quantities_display_units) for r in self.runs for c in self.compartments for s in self.species] 
+                amountsheader = map(sanitise, amountsheader)
             
             if volumes:
-                numruns, numcompartments, _ = volumes_.shape
+                numruns, numcompartments, numtimepoints = volumes_.shape
                 runindices = xrange(numruns)
                 compartmentindices = xrange(numcompartments)
 
                 volumesindices = [(ri, ci) for ri in runindices for ci in compartmentindices]
                 
-                volumesheader = header + [sanitise('%s of %s (%s)' % (c, r, volumes_display_units)) for r in self.runs for c in self.compartments] 
+                volumesheader = header + ['%s of %s (%s)' % (c, r, volumes_display_units) for r in self.runs for c in self.compartments]
+                volumesheader = map(sanitise, volumesheader) 
         
         else:
             if amounts:
-                numspecies, numcompartments, _ = mean_amounts_over_runs.shape
+                numspecies, numcompartments, numtimepoints = mean_amounts_over_runs.shape
                 speciesindices = xrange(numspecies)
                 compartmentindices = xrange(numcompartments)
                 
                 amountsindices = [(si, ci) for ci in compartmentindices for si in speciesindices]
 
-                meanamountsheader = [sanitise('mean %s in %s (%s)' % (s, c, quantities_display_units)) for c in self.compartments for s in self.species] 
-                stdamountsheader = [sanitise('std %s in %s (%s)' % (s, c, quantities_display_units)) for c in self.compartments for s in self.species] 
-                ciamountsheader = [sanitise('ci %s in %s (%s)' % (s, c, quantities_display_units)) for c in self.compartments for s in self.species] 
+                meanamountsheader = ['mean %s in %s (%s)' % (s, c, quantities_display_units) for c in self.compartments for s in self.species] 
+                stdamountsheader = ['std %s in %s (%s)' % (s, c, quantities_display_units) for c in self.compartments for s in self.species] 
+                ciamountsheader = ['ci %s in %s (%s)' % (s, c, quantities_display_units) for c in self.compartments for s in self.species] 
 
             if volumes:
-                numcompartments, _ = mean_volumes_over_runs.shape
+                numcompartments, numtimepoints = mean_volumes_over_runs.shape
                 compartmentindices = xrange(numcompartments)
                 volumesindices = compartmentindices
                 
-                meanvolumesheader = [sanitise('mean %s (%s)' % (c, volumes_display_units)) for c in self.compartments]
-                stdvolumesheader = [sanitise('std %s (%s)' % (c, volumes_display_units)) for c in self.compartments]
-                civolumesheader = [sanitise('ci %s (%s)' % (c, volumes_display_units)) for c in self.compartments]
+                meanvolumesheader = ['mean %s (%s)' % (c, volumes_display_units) for c in self.compartments]
+                stdvolumesheader = ['std %s (%s)' % (c, volumes_display_units) for c in self.compartments]
+                civolumesheader = ['ci %s (%s)' % (c, volumes_display_units) for c in self.compartments]
             
         
         ext = os.path.splitext(filename)[1].lower()
@@ -1085,58 +1090,93 @@ class McssResults(object):
                     pass
             
         elif ext == '.xls':
-            
-            """
-def write_xls():
-    ''' https: // secure.simplistix.co.uk / svn / xlwt / trunk / README.html '''
-    wb = xlwt.Workbook()
-    try:
-        ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
-    except:
-        ws = wb.add_sheet('McssResults')
-    ws.write(0, 0, header[0])
-    for ti in range(len(timepoints)):
-        ws.write(1 + ti, 0, timepoints[ti])
-    if averaging:
-        for ci, c in enumerate(compartments):
-            for si, s in enumerate(species):
-                y = 1 + si + (ci * len(species))
-#                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
-                ws.write(0, y, averaging_header_item(s.text(), c.text(), len(runs)))
-                for ti in range(len(timepoints)):
-                    ws.write(1 + ti, y, results[mean_index][si, ci, ti])
-    else:
-        for ri, r in enumerate(runs):
-            for ci, c in enumerate(compartments):
-                for si, s in enumerate(species):
-                    y = 1 + si + (ci * len(species)) + (ri * len(species) * len(compartments))
-                    ws.write(0, y, header_item % (s.text(), c.text(), r.text()))
-                    for ti in range(len(timepoints)):
-                        ws.write(1 + ti, y, results[ri][si, ci, ti])
-    wb.save(filename)            
-            """
-            
-            if individualruns:
-                if amounts:
-                    amounts_
-                    pass
-            
-                if volumes:
-                    volumes_
-                    pass
-            
-            else:
-                if amounts:
-                    mean_amounts_over_runs
-                    std_amounts_over_runs
-                    ci_amounts_over_runs
-                    pass
+            '''https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html'''
+            import xlwt
+            wb = xlwt.Workbook()
 
-                if volumes:
-                    mean_volumes_over_runs
-                    std_volumes_over_runs
-                    ci_volumes_over_runs
-                    pass
+            timepointsindices = xrange(numtimepoints) 
+
+#            def uqt(timepoint): # unquantity timepoint
+#                return float(timepoint)
+#
+#            def uqa(amount): # unquantity amount
+#                if quantities_display_type == 'molecules':
+#                    return int(amount)
+#                return float(amount)
+#
+#            def uqv(volume): # unquantity volume
+#                return float(volume) 
+            
+            def writetimecol():
+                row = 0
+                col = 0
+                ws.write(row, col, header[0])
+                for ti in timepointsindices:
+                    row = 1 + ti
+                    ws.write(row, col, self.timepoints.magnitude[ti])
+#                    ws.write(row, col, timepoints[ti])
+#            timepoints = [float(t) for t in self.timepoints]
+
+            if amounts:
+                ws = wb.add_sheet('amounts')
+                writetimecol()
+                
+                if individualruns:
+                    for ri, r in enumerate(self.runs):
+                        for ci, c in enumerate(self.compartments):
+                            for si, s in enumerate(self.species):
+                                col = (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
+                                ws.write(0, col, amountsheader[col]) # 0 = row
+                                for ti in timepointsindices:
+                                    ws.write(1 + ti, col, amounts_[ri, si, ci, ti]) # 1 + ti = row
+#                    def amountsindividualruns(qw): # quantity wrapper
+#                        for ri, r in enumerate(self.runs):
+#                            for ci, c in enumerate(self.compartments):
+#                                for si, s in enumerate(self.species):
+#                                    col = (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
+#                                    ws.write(0, col, amountsheader[col]) # 0 = row
+#                                    for ti in timepointsindices:
+#                                        ws.write(1 + ti, col, qw(amounts_[ri, si, ci, ti])) # 1 + ti = row
+#                    if quantities_display_type == 'molecules':
+#                        amountsindividualruns(int)
+#                    else:
+#                        amountsindividualruns(float) 
+                                    
+                else:
+                    headers = (meanamountsheader, stdamountsheader, ciamountsheader)
+                    col = 0
+                    for ci, c in enumerate(self.compartments):
+                        for si, s in enumerate(self.species):
+                            for ai, array in enumerate((mean_amounts_over_runs, std_amounts_over_runs, ci_amounts_over_runs)):
+                                col += 1
+                                ws.write(0, col, headers[ai][(ci * numspecies) + si]) # 0 = row
+                                for ti in timepointsindices:
+                                    ws.write(1 + ti, col, array[si, ci, ti]) # 1 + ti = row
+            
+            if volumes:
+                ws = wb.add_sheet('volumes')
+                writetimecol()
+                
+                if individualruns:
+                    for ri, r in enumerate(self.runs):
+                        for ci, c in enumerate(self.compartments):
+                            y = (ri * numcompartments) + ci + 1
+                            ws.write(0, y, volumesheader[y]) # 0 = row
+                            for ti in timepointsindices:
+                                ws.write(1 + ti, y, volumes_[ri, ci, ti]) # 1 + ti = row
+                else:
+                    headers = (meanvolumesheader, stdvolumesheader, civolumesheader)
+                    col = 0
+                    for ci, c in enumerate(self.compartments):
+                        for ai, array in enumerate((mean_volumes_over_runs, std_volumes_over_runs, ci_volumes_over_runs)):
+                            col += 1
+                            ws.write(0, col, headers[ai][ci]) # 0 = row
+                            for ti in timepointsindices:
+                                ws.write(1 + ti, col, array[ci, ti]) # 1 + ti = row
+
+            
+            wb.save(filename)            
+
         else:
             # .csv
 
@@ -1150,7 +1190,8 @@ def write_xls():
 #                    mcss-postprocess does amount of each species in each compartment for one run
 #                    we want the same but for all runs
                     amounts_ = tuple(amounts_[ri, si, ci] for ri, si, ci in amountsindices)
-                    fmt = ['%.f'] + ['%d'] * len(amounts_) # timepoints are floats, levels are ints
+                    amountfmt = '%d' if quantities_display_type == 'molecules' else '%%.%se' % csv_precision
+                    fmt = ['%f'] + [amountfmt] * len(amounts_) # timepoints are floats, levels are ints
                     
                 if volumes:
 #                    mcss-postprocess does volume of each compartment for one run
@@ -1174,9 +1215,9 @@ def write_xls():
                     amounts_ = tuple(item for tup in zip(mean_amounts_over_runs, std_amounts_over_runs, ci_amounts_over_runs) for item in tup)
                     # Twitter 9 Aug @raymondh #python tip: build a simple flattener with nested for-loops in a list comprehension: [char for string in strings for char in string]
 
-                    fmt = ['%.f'] + ['%%.%sf' % csv_precision] * len(amounts_) # timepoints are floats, levels are ints
+                    fmt = ['%f'] + ['%%.%se' % csv_precision] * len(amounts_) # timepoints are floats, levels are ints
                     
-                    amountsheader = header + [item for tup in zip(meanamountsheader, stdamountsheader, ciamountsheader) for item in tup]
+                    amountsheader = header + [sanitise(item) for tup in zip(meanamountsheader, stdamountsheader, ciamountsheader) for item in tup]
                     
                 if volumes:
 #                    jvb@weasel:~/simulations$ mcss-postprocess -w -C 0,1 germination_09.h5 | head
@@ -1192,7 +1233,7 @@ def write_xls():
                     
                     volumes_ = tuple(item for tup in zip(mean_volumes_over_runs, std_volumes_over_runs, ci_volumes_over_runs) for item in tup)
 
-                    volumesheader = header + [item for tup in zip(meanvolumesheader, stdvolumesheader, civolumesheader) for item in tup]
+                    volumesheader = header + [sanitise(item) for tup in zip(meanvolumesheader, stdvolumesheader, civolumesheader) for item in tup]
 
             # write .csv
             if amounts:
@@ -1203,7 +1244,7 @@ def write_xls():
                 prepend_line_to_file(csv_delimiter.join(amountsheader), filename)
             
             if volumes:
-                fmt = ['%.f'] + ['%%.%sf' % csv_precision] * len(volumes_) # timepoints are floats, levels are ints
+                fmt = ['%f'] + ['%%.%se' % csv_precision] * len(volumes_) # timepoints are floats, levels are ints
                 np.savetxt(volumes_filename, np.transpose((self.timepoints,) + volumes_), fmt=fmt, delimiter=csv_delimiter)
            
                 prepend_line_to_file(csv_delimiter.join(volumesheader), volumes_filename)
@@ -1404,6 +1445,7 @@ def write_xls():
 #        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
 #        widget.show()
 #        return timeseries_plot
+    
     
     def histograms(self, bins=10, data='compartments', sum_species=False, dtype=np.float64):#'float64'):
         '''Returns a 2D array of (histogram array, bin_edges array) tuples with 
@@ -1736,14 +1778,20 @@ if __name__ == '__main__':
 #    McssResults('/home/jvb/simulations/module1.h5').export_timeseries(
 #        'module1.csv', 
     McssResults('/home/jvb/simulations/aba_receptor_05.h5').export_timeseries(
-#        'aba_receptor_05.csv', 
+        
+        filename='aba_receptor_05.xls',
+
         amounts=True,
-        timepoints_display_units='minutes',
 #        volumes=True, 
-        mean_over_runs=True, 
-#        ci_degree=0.95, 
-#        csv_precision=3, 
-#        csv_delimiter=',',
+
+#        individualruns=True, 
+
+#        timepoints_display_units='minutes',
+#        timepoints_display_units='hours',
+        
+#        quantities_display_type = 'moles',
+#        quantities_display_units = 'femtomoles',
+        
     )
     
 ##    test1()
