@@ -18,6 +18,8 @@ import bisect
 import math
 #import decimal
 
+import os.path
+
 import numpy as np
 
 import tables
@@ -881,7 +883,11 @@ class McssResults(object):
         table = indent([labels] + rows, hasHeader=True)
         return table
 
-    def ci_factor(self, ci_degree=0.95):
+    ci_degree = 0.95
+
+    def ci_factor(self, ci_degree=None):
+        if ci_degree is None:
+            ci_degree = self.ci_degree
         assert 0 <= ci_degree <= 1
         num_runs = len(self.run_indices)
 #        from scipy.special import stdtrit
@@ -1008,12 +1014,16 @@ class McssResults(object):
     
     def export_timeseries(self, 
         file_name,
-        amounts=True, volumes=True, mean_over_runs=True,                  
+        amounts=True, volumes=True, 
+        mean_over_runs=True, ci_degree=None,                  
         csv_precision=None, csv_delimiter=None,
         #TODO custom titles here?
     ):
-        ''' Write selected data to a file in csv, xls or npz format.
-        
+        ''' Write selected data to a file in .csv, .xls (.xlsx not supported) 
+        or .npz format.
+
+        '''
+        '''
         (Over?)use of inner functions here can result in crytic exceptions, e.g.
             "UnboundLocalError: local variable 'x' referenced before assignment"
         The actual reason for these errors is that variables inside inner 
@@ -1031,9 +1041,6 @@ class McssResults(object):
 
         self.assertions()
         
-#        timeseries = []
-        num_species = len(self.species)
-
         if len(self.runs) > 1 and mean_over_runs:
             if amounts:
                 mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
@@ -1058,6 +1065,7 @@ class McssResults(object):
             if volumes:
                 mean_volumes_over_runs, std_volumes_over_runs = functions_of_values_over_axis(self.volumes(), self.volumes_axes, 'runs', (mean, std)) 
 #                for ci, c in enumerate(self.compartments):
+
 ##                    timeseries.append(
 ##                        Timeseries(
 ##                            runs=self.runs,
@@ -1073,7 +1081,13 @@ class McssResults(object):
 ##                            marker=colours.marker(ci),
 ##                        )
 ##                    )
-        
+
+            if ci_degree is None:
+                ci_degree = self.ci_degree
+            ci_factor = self.ci_factor(ci_degree)
+            ci_amounts_over_runs = std_amounts_over_runs * ci_factor
+            ci_volumes_over_runs = std_volumes_over_runs * ci_factor
+
         else: # not mean_over_runs
             if amounts:
                 amounts = self.amounts()
@@ -1114,8 +1128,196 @@ class McssResults(object):
 ##                                marker=colours.marker(ci),
 ##                            )
 ##                        )        
+
+#        self.timepoints()
+
+        if len(self.runs) > 1 and mean_over_runs:
+            numspecies, numcompartments, _ = mean_amounts_over_runs.shape
+            numcompartments, _ = mean_volumes_over_runs.shape
+#            numruns = self.num_selected_runs()
+            
+            speciesindices = xrange(numspecies)
+            compartmentindices = xrange(numcompartments)
+        
+            if amounts:
+                amountsindices = [(si, ci) for ci in compartmentindices for si in speciesindices]
+            
+            if volumes:
+                volumesindices = compartmentindices
+        
+        else:
+            numruns, numspecies, numcompartments, _ = amounts.shape
+            numruns, numcompartments, _ = volumes.shape
+            
+            runindices = xrange(numruns)
+            speciesindices = xrange(numspecies)
+            compartmentindices = xrange(numcompartments)
+
+            if amounts:
+                # order of for loops determines order of columns in 2D array for .csv 
+                amountsindices = [(ri, si, ci) for ri in runindices for ci in compartmentindices for si in speciesindices]
+            
+            if volumes:
+                volumesindices = [(ri, ci) for ri in runindices for ci in compartmentindices]
         
         
+        ext = os.path.splitext(file_name).lower()
+
+        if ext == '.npz':
+            if len(self.runs) > 1 and mean_over_runs:
+                if amounts:
+                    mean_amounts_over_runs
+                    std_amounts_over_runs
+                    ci_amounts_over_runs
+                    pass
+
+                if volumes:
+                    mean_volumes_over_runs
+                    std_volumes_over_runs
+                    ci_volumes_over_runs
+                    pass
+            
+            else:
+                if amounts:
+                    amounts
+                    pass
+            
+                if volumes:
+                    volumes
+                    pass
+            
+        elif ext == '.xls':
+            if len(self.runs) > 1 and mean_over_runs:
+                if amounts:
+                    mean_amounts_over_runs
+                    std_amounts_over_runs
+                    ci_amounts_over_runs
+                    pass
+
+                if volumes:
+                    mean_volumes_over_runs
+                    std_volumes_over_runs
+                    ci_volumes_over_runs
+                    pass
+            
+            else:
+                if amounts:
+                    amounts
+                    pass
+            
+                if volumes:
+                    volumes
+                    pass
+            
+        else:
+            # .csv
+
+            if volumes:
+                # use a separate .csv file for volumes
+                import os.path
+                path, ext = os.path.splitext(file_name)
+                volumes_file_name = path + '_volumes' + ext # ext ~= .csv
+            
+            if len(self.runs) > 1 and mean_over_runs:
+
+                fmt = '%%.%sf' % csv_precision
+
+                if amounts:
+#                    jvb@weasel:~/simulations$ mcss-postprocess -l -s FP1,FP2 -c [20,20],[21,21] patternFormation.h5 | head
+#                    time FP1_[20,20]_mean FP1_[20,20]_sd FP1_[20,20]_ci FP2_[20,20]_mean FP2_[20,20]_sd FP2_[20,20]_ci FP1_[21,21]_mean FP1_[21,21]_sd FP1_[21,21]_ci FP2_[21,21]_mean FP2_[21,21]_sd FP2_[21,21]_ci
+#                    1191.000000 150.666667 234.131302 245.705733 238.500000 267.294407 280.508277 250.833333 275.801680 289.436112 155.500000 241.829485 253.784481
+#                    1192.000000 150.166667 233.718135 245.272141 246.833333 278.129766 291.879289 249.666667 274.586720 288.161090 155.000000 240.976347 252.889167
+#    
+#                    mcss-postprocess does mean, std, ci of amounts for for each species in each compartment for all runs
+#                    we want the same
+                
+#                    mean_amounts_over_runs
+#                    std_amounts_over_runs
+#                    ci_amounts_over_runs
+#                    col = lambda si, ci: (ci * numspecies) + si + 1
+            
+#                    statsindices?
+                    mean_amounts_over_runs = tuple(mean_amounts_over_runs[si, ci] for ci, si in amountsindices)
+                    std_amounts_over_runs = tuple(std_amounts_over_runs[si, ci] for ci, si in amountsindices)
+                    ci_amounts_over_runs = tuple(ci_amounts_over_runs[si, ci] for ci, si in amountsindices)
+                    
+                    
+                if volumes:
+#                    volumes
+#    
+#                    jvb@weasel:~/simulations$ mcss-postprocess -w -C 0,1 germination_09.h5 | head
+#                    time 0_mean 0_sd 0_ci 1_mean 1_sd 1_ci
+#                    0.000000 10.000000 0.000000 0.000000 1.000000 0.000000 0.000000
+#    
+#                    mcss-postprocess does mean, std, ci of volumes of each compartment for all runs
+#                    we want the same
+
+#                    mean_volumes_over_runs
+#                    std_volumes_over_runs
+#                    ci_volumes_over_runs
+#                    col = lambda ci: ci + 1
+
+                    mean_volumes_over_runs = tuple(mean_volumes_over_runs[ci] for ci in volumesindices)
+                    std_volumes_over_runs = tuple(std_volumes_over_runs[ci] for ci in volumesindices)
+                    ci_volumes_over_runs = tuple(ci_volumes_over_runs[ci] for ci in volumesindices)
+                    
+                    
+
+
+                pass
+                '''    
+                if averaging:
+                    indices = [(ci, si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+                    results = tuple((results[mean_index][si, ci] for ci, si in indices))
+                    fmt = '%%.%sf' % csv_precision
+                else:
+                    indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
+                    results = tuple((results[ri][si, ci, :] for ri, ci, si in indices))
+                    d = '%d,' * len(results); fmt = ['%.3f'] + d.split(',')[:-1] # timepoints must be floats, levels are ints
+                
+                timepoints_and_levels = (timepoints,) + results
+                # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+                np.savetxt(file_name, np.transpose(timepoints_and_levels), fmt=fmt, delimiter=csv_delimiter)
+                # transpose converts the tuple of 1D arrays to columns                    
+                '''     
+
+            else:
+                if amounts:
+#                    mcss-postprocess does amount of each species in each compartment for one run
+#                    we want the same but for all runs
+                
+#                    amounts
+##                    def col(ri, si, ci):
+##                        col = (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
+###                        print col,
+##                        return col
+#                    col = lambda ri, si, ci: (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
+
+                    amounts = tuple(amounts[ri, si, ci] for ri, si, ci in amountsindices)
+
+                    fmt = ['%.%sf' % csv_precision] + ['%d'] * len(amounts - 1) # timepoints are floats, levels are ints
+
+                    np.savetxt(file_name, np.transpose((self.timepoints,) + amounts), fmt=fmt, delimiter=csv_delimiter)                    
+            
+                if volumes:
+
+#                    mcss-postprocess does volume of each compartment for one run
+#                    we want the same but for all runs
+
+#                    volumes
+##                    def col(ri, ci):
+##                        col = (ri * numcompartments) + ci + 1
+###                        print col,
+##                        return col
+#                    col = lambda ri, ci: (ri * numcompartments) + ci + 1
+                    
+                    volumes = tuple(volumes[ri, ci] for ri, ci in volumesindices) 
+
+                    fmt = '%.%sf' % csv_precision
+
+                    np.savetxt(volumes_file_name, np.transpose((self.timepoints,) + volumes), fmt=fmt, delimiter=csv_delimiter)
+                    
+        """
         #TODO volumes like plot()
         if averaging:
             timepoints, results = results.get_amounts_mean_over_runs()
@@ -1268,7 +1470,7 @@ class McssResults(object):
 #            open_file(file_name)
 
         return file_name        
-        
+        """
         
 
 
@@ -1622,9 +1824,20 @@ def test_histograms():
     print results.histograms(data='runs', sum_species=True).shape
      
 
+
+
 if __name__ == '__main__':
-    import mcss_results_widget
-    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
+#    import mcss_results_widget
+#    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
+
+    McssResults('/home/jvb/simulation/module1.h5').export_timeseries(
+        'test.csv', 
+        amounts=True, 
+        volumes=True, 
+        mean_over_runs=True, 
+        ci_degree=0.95, 
+        csv_precision=3, 
+        csv_delimiter=',')
     
 ##    test1()
 #    test_surfaces()
