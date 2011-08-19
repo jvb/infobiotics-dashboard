@@ -1222,9 +1222,6 @@ class McssResults(object):
                 volumes_file_name = path + '_volumes' + ext # ext ~= .csv
             
             if len(self.runs) > 1 and mean_over_runs:
-
-                fmt = '%%.%sf' % csv_precision
-
                 if amounts:
 #                    jvb@weasel:~/simulations$ mcss-postprocess -l -s FP1,FP2 -c [20,20],[21,21] patternFormation.h5 | head
 #                    time FP1_[20,20]_mean FP1_[20,20]_sd FP1_[20,20]_ci FP2_[20,20]_mean FP2_[20,20]_sd FP2_[20,20]_ci FP1_[21,21]_mean FP1_[21,21]_sd FP1_[21,21]_ci FP2_[21,21]_mean FP2_[21,21]_sd FP2_[21,21]_ci
@@ -1234,20 +1231,16 @@ class McssResults(object):
 #                    mcss-postprocess does mean, std, ci of amounts for for each species in each compartment for all runs
 #                    we want the same
                 
-#                    mean_amounts_over_runs
-#                    std_amounts_over_runs
-#                    ci_amounts_over_runs
-#                    col = lambda si, ci: (ci * numspecies) + si + 1
-            
-#                    statsindices?
                     mean_amounts_over_runs = tuple(mean_amounts_over_runs[si, ci] for si, ci in amountsindices)
                     std_amounts_over_runs = tuple(std_amounts_over_runs[si, ci] for si, ci in amountsindices)
                     ci_amounts_over_runs = tuple(ci_amounts_over_runs[si, ci] for si, ci in amountsindices)
+
+                    amounts_ = tuple(item for tup in zip(mean_amounts_over_runs, std_amounts_over_runs, ci_amounts_over_runs) for item in tup)
+                    # Twitter 9 Aug @raymondh #python tip: build a simple flattener with nested for-loops in a list comprehension: [char for string in strings for char in string]
                     
+                    fmt = ['%.f'] + ['%%.%sf' % csv_precision] * len(amounts_) # timepoints are floats, levels are ints
                     
                 if volumes:
-#                    volumes
-#    
 #                    jvb@weasel:~/simulations$ mcss-postprocess -w -C 0,1 germination_09.h5 | head
 #                    time 0_mean 0_sd 0_ci 1_mean 1_sd 1_ci
 #                    0.000000 10.000000 0.000000 0.000000 1.000000 0.000000 0.000000
@@ -1255,80 +1248,34 @@ class McssResults(object):
 #                    mcss-postprocess does mean, std, ci of volumes of each compartment for all runs
 #                    we want the same
 
-#                    mean_volumes_over_runs
-#                    std_volumes_over_runs
-#                    ci_volumes_over_runs
-#                    col = lambda ci: ci + 1
-
                     mean_volumes_over_runs = tuple(mean_volumes_over_runs[ci] for ci in volumesindices)
                     std_volumes_over_runs = tuple(std_volumes_over_runs[ci] for ci in volumesindices)
                     ci_volumes_over_runs = tuple(ci_volumes_over_runs[ci] for ci in volumesindices)
                     
-                    
-
-
-                pass
-                '''    
-                if averaging:
-                    indices = [(ci, si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
-                    results = tuple((results[mean_index][si, ci] for ci, si in indices))
-                    fmt = '%%.%sf' % csv_precision
-                else:
-                    indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
-                    results = tuple((results[ri][si, ci, :] for ri, ci, si in indices))
-                    d = '%d,' * len(results); fmt = ['%.3f'] + d.split(',')[:-1] # timepoints must be floats, levels are ints
-                
-                timepoints_and_levels = (timepoints,) + results
-                # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
-                np.savetxt(file_name, np.transpose(timepoints_and_levels), fmt=fmt, delimiter=csv_delimiter)
-                # transpose converts the tuple of 1D arrays to columns                    
-                '''     
+                    volumes_ = tuple(item for tup in zip(mean_volumes_over_runs, std_volumes_over_runs, ci_volumes_over_runs) for item in tup)
 
             else:
                 if amounts:
 #                    mcss-postprocess does amount of each species in each compartment for one run
 #                    we want the same but for all runs
-                
-#                    amounts_
-##                    def col(ri, si, ci):
-##                        col = (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
-###                        print col,
-##                        return col
-#                    col = lambda ri, si, ci: (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
-
                     amounts_ = tuple(amounts_[ri, si, ci] for ri, si, ci in amountsindices)
-
-                    fmt = ['%%.%sf' % csv_precision] + ['%d'] * len(amounts_) # timepoints are floats, levels are ints
-
-                    np.savetxt(file_name, np.transpose((self.timepoints,) + amounts_), fmt=fmt, delimiter=csv_delimiter)                    
-            
+                    fmt = ['%.f'] + ['%d'] * len(amounts_) # timepoints are floats, levels are ints
+                    
                 if volumes:
-
 #                    mcss-postprocess does volume of each compartment for one run
 #                    we want the same but for all runs
-
-#                    volumes_
-##                    def col(ri, ci):
-##                        col = (ri * numcompartments) + ci + 1
-###                        print col,
-##                        return col
-#                    col = lambda ri, ci: (ri * numcompartments) + ci + 1
-                    
                     volumes_ = tuple(volumes_[ri, ci] for ri, ci in volumesindices) 
 
-                    fmt = '%%.%sf' % csv_precision
-
-                    np.savetxt(volumes_file_name, np.transpose((self.timepoints,) + volumes_), fmt=fmt, delimiter=csv_delimiter)
-                    
+            if amounts:
+                np.savetxt(file_name, np.transpose((self.timepoints,) + amounts_), fmt=fmt, delimiter=csv_delimiter)                    
+                # transpose converts the tuple of 1D arrays to columns
+                # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
+            
+            if volumes:
+                fmt = ['%.f'] + ['%%.%sf' % csv_precision] * len(volumes_) # timepoints are floats, levels are ints
+                np.savetxt(volumes_file_name, np.transpose((self.timepoints,) + volumes_), fmt=fmt, delimiter=csv_delimiter)
+            
         """
-        #TODO volumes like plot()
-        if averaging:
-            timepoints, results = results.get_amounts_mean_over_runs()
-            mean_index = 0
-        else:
-            timepoints, results = results.amounts()
-        if len(results) == 0:
-            return
 
         header = ['time']# (%s)' % units]
         #TODO move these to method signature?
