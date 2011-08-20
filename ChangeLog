@@ -16,3 +16,11 @@ version 0.1.0 - released 15/08/11
 
 * record surface visualizations using ffmpeg
 * Save resized button on far right of matplotlib toolbar
+
+version 0.1.1 - released ?
+
+* can generate JavaDoc-esque documentation for all used classes using doc/epydoc.sh 
+
+version 1.0.0 - released ?
+
+* 
