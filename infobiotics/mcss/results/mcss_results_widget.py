@@ -481,14 +481,28 @@ class McssResultsWidget(QWidget):
             # no more than 4 surfaces
             if num_selected_species > 4:
                 disable_widgets(self.ui.visualise_population_button)
-            else:
+            elif num_selected_compartments >= 4:
                 enable_widgets(self.ui.visualise_population_button)
                 
-            # no more than 10 timeseries (per species)
-            if num_selected_compartments > 10:
-                disable_widgets(self.ui.plot_timeseries_button)
-            else:
-                enable_widgets(self.ui.plot_timeseries_button)
+#            # no more than 10 timeseries (per species)
+#            if num_selected_compartments > 10:
+#                disable_widgets(self.ui.plot_timeseries_button)
+#            else:
+#                enable_widgets(self.ui.plot_timeseries_button)
+
+            results = self.selected_items_results()
+            _, _, _, averaging = self.options()
+            numtimeseries = results.len_timeseries(True, self.volumes_selected, averaging) 
+            numtimepoints = results.num_timepoints * numtimeseries
+            
+            numsurfaces = results.num_selected_species
+
+            (xmin, xmax), (ymin, ymax) = results.xy_min_max()
+            numsurfacetimepoints = numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * results.num_timepoints 
+            
+            print '%s timeseries' % numtimeseries, '(%s timepoints)' % numtimepoints
+            print '%s surfaces' % numsurfaces, '(%s timepoints)' % numsurfacetimepoints
+            print 
 
 
     # slots
@@ -506,7 +520,7 @@ class McssResultsWidget(QWidget):
     # accessors
     
     def selected_species(self):
-        ''' Return selected species after removing volumes. '''
+        '''Return selected species after removing volumes.'''
         selected_species = self.ui.species_list_widget.selectedItems()
         if self.simulation.log_volumes in ('true', 1) and self.volumes_list_widget_item in selected_species:
             selected_species.remove(self.volumes_list_widget_item)
@@ -518,14 +532,14 @@ class McssResultsWidget(QWidget):
     # compound accessors
 
     def selected_items(self):
-        ''' Usage: runs, species, compartments = selected_items() '''
+        '''Usage: runs, species, compartments = selected_items()'''
         runs = self.ui.runs_list_widget.selectedItems()
         species = self.selected_species()
         compartments = self.ui.compartments_list_widget.selectedItems()
         return runs, species, compartments
 
     def selected_items_amount_indices(self):
-        ''' Usage: run_indices, species_indices, compartment_indices = self.selected_items_amount_indices() 
+        '''Usage: run_indices, species_indices, compartment_indices = self.selected_items_amount_indices() 
             
         Use for ri, r in enumerate(run_indices): for selected results
          
@@ -537,7 +551,7 @@ class McssResultsWidget(QWidget):
         return run_indices, species_indices, compartment_indices
 
     def options(self):
-        ''' Usage: from_, to, every, averaging = self.options() '''
+        '''Usage: from_, to, every, averaging = self.options()'''
         from_ = self.ui.from_spin_box.value()
         to = self.ui.to_spin_box.value()
         every = self.ui.every_spin_box.value()
@@ -628,42 +642,28 @@ class McssResultsWidget(QWidget):
 #        print timepoints
 #        print results
 
+    csv_precision = mcss_results.McssResults.csv_precision
+    csv_delimiter = mcss_results.McssResults.csv_delimiter
 
-    # remember these within this instance
-    csv_precision = 3
-    csv_delimiter = ','
     @wait_cursor
-    #FIXME migrate export functionality to McssResults 
-    def export_data_as(self, file_name='',
-        open_after_save=True, copy_file_name_to_clipboard=True,
+    def export_data_as(self, 
+        open_after_save=True, copy_filename_to_clipboard=True,
         csv_precision=None, csv_delimiter=None,
-        #TODO custom titles here?
+#        amounts=True, 
+#        volumes=False, #TODO 
+#        ci_degree=None, #TODO
     ):
-        ''' Write selected data to a file in csv, xls or npz format.
+        '''Write selected data to a file in csv, xls or npz format.'''
         
-        (Over?)use of inner functions here can result in crytic exceptions, e.g.
-            "UnboundLocalError: local variable 'x' referenced before assignment"
-        The actual reason for these errors is that variables inside inner 
-        functions are immutable, see:           
-            http: // stackoverflow.com / questions / 1414304 / local - functions - in - python / 1414320#1414320
-        The correct solution is, in this instance, to pass these variables as
-        arguments to the inner functions, and the neatest way to do that is as
-        default arguments, see write_csv, fix_delimited_string and write_npz. 
-        
-        '''
-        interactive = True if file_name == '' else False
-        if interactive:
-            file_name = QFileDialog.getSaveFileName(self,
-                self.tr("Save selected timeseries data"),
-                ".",
-                self.tr("Comma-separated values (*.csv *.txt);;Excel spreadsheets (*.xls);;Numpy compressed (*.npz)"))
-            if file_name == '':
-                return # user cancelled
-            file_name = unicode(file_name)
+        filename = QFileDialog.getSaveFileName(self,
+            self.tr("Save selected timeseries data"),
+            ".",
+            self.tr("Comma-separated values (*.csv *.txt);;Excel spreadsheets (*.xls);;Numpy compressed (*.npz)"))
+        if filename == '':
+            return # user cancelled
+        filename = unicode(filename)
 
-
-        if file_name.lower().endswith('.csv'):
-            
+        if filename.lower().endswith('.csv'):
             if csv_precision is None:
                 csv_precision = self.csv_precision
             if csv_delimiter is None:
@@ -691,186 +691,21 @@ class McssResultsWidget(QWidget):
                 csv_delimiter = self.csv_delimiter = csv_config.delimiter
 
 
-        runs, species, compartments = self.selected_items()
-        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
         _, _, _, averaging = self.options()
         results = self.selected_items_results()
 
-        results.export_timeseries(file_name, amounts, volumes, mean_over_runs, csv_precision, csv_delimiter)
-#        #TODO volumes like plot()
-#        if averaging:
-#            timepoints, results = results.get_amounts_mean_over_runs()
-#            mean_index = 0
-#        else:
-#            timepoints, results = results.amounts()
-#        if len(results) == 0:
-#            return
-#
-#        header = ['time']# (%s)' % units]
-#        #TODO move these to method signature?
-##        averaging_header_item = '%s in %s mean of %s runs'
-#        def averaging_header_item(s, c, r):
-#            return '%s in %s mean of %s runs' % (s, c, r) if r != 1 else '%s in %s mean of %s run' % (s, c, r)
-#        header_item = '%s in %s of run %s'
-##        def header_item(s, c, r):
-##            return '%s in %s of run %s' % (s, c, r)
-#
-#        def write_csv(csv_precision=csv_precision, csv_delimiter=csv_delimiter, results=results):
-#            # load default or remembered values
-#            if csv_precision is None:
-#                csv_precision = self.csv_precision
-#            if csv_delimiter is None:
-#                csv_delimiter = self.csv_delimiter
-#
-#            if interactive:
-#                class CSVConfig(HasTraits):
-#                    precision = Range(0, 18, desc='the number of decimal places to use for floating point values')
-#                    delimiter = String(minlen=1, maxlen=1, desc="a single character used to delimit fields, e.g. ',', '|', ' ', ';' or '\t' (tab)")
-#                    view = View(
-#                        VGroup(
-#                            HGroup(
-#                               Item('precision'),
-#                               Item(label='decimal places'),
-#                            ),
-#                            Item('delimiter'),
-#                            show_border=False,
-#                        ),
-#                        buttons=['OK'],
-#                    )
-#                csv_config = CSVConfig(precision=csv_precision, delimiter=csv_delimiter)
-#                ui = csv_config.edit_traits(kind='modal')
-#                if ui.result:
-#                    # use and remember option values
-#                    csv_precision = self.csv_precision = csv_config.precision
-#                    csv_delimiter = self.csv_delimiter = csv_config.delimiter
-#
-#            # data
-#            if averaging:
-#                indices = [(ci, si) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
-#                results = tuple((results[mean_index][si, ci] for ci, si in indices))
-#                fmt = '%%.%sf' % csv_precision
-#            else:
-#                indices = [(ri, ci, si) for ri, r in enumerate(runs) for ci, c in enumerate(compartments) for si, s in enumerate(species)]
-#                results = tuple((results[ri][si, ci, :] for ri, ci, si in indices))
-#                d = '%d,' * len(results); fmt = ['%.3f'] + d.split(',')[:-1] # timepoints must be floats, levels are ints
-#            timepoints_and_levels = (timepoints,) + results
-#            # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
-#            np.savetxt(file_name, np.transpose(timepoints_and_levels), fmt=fmt, delimiter=csv_delimiter)
-#            # transpose converts the tuple of 1D arrays to columns
-#
-#            # header
-#
-#            # try for similar non-delimiter
-#            if csv_delimiter == ',':
-#                non_delimiter = ';'
-#            elif csv_delimiter == ' ':
-#                non_delimiter = '_'
-#            else:
-#                non_delimiter = ' '
-#
-#            # ordered list of other potential non-delimiters
-#            delimiters = list(' _-,;:+&|/?!#\t')
-#
-#            def fix_delimited_string(s, non_delimiter=non_delimiter):
-#                ''' Usage: fix_delimited_string(header_item(s.text(), c.text(), r.text()))) '''
-#                if str(csv_delimiter) in s:
-#                    i = 0
-#                    while str(non_delimiter) in s:
-#                        try:
-#                            if str(delimiters[i]) not in s:
-#                                non_delimiter = delimiters[i]
-#                                break
-#                        except IndexError:
-#                            raise ValueError('All potential non-delimiters (%s) found in string "%s"' % (delimiters, s))
-#                        i += 1
-#                    return s.replace(csv_delimiter, non_delimiter)
-#                return s
-#
-#            header[0] = fix_delimited_string(header[0])
-#            if averaging:
-#                for c in compartments:
-#                    for s in species:
-##                        header.append(fix_delimited_string(averaging_header_item % (s.text(), c.text(), len(runs))))
-#                        header.append(fix_delimited_string(averaging_header_item(s.text(), c.text(), len(runs))))
-#            else:
-#                for r in runs:
-#                    for c in compartments:
-#                        for s in species:
-#                            header.append(fix_delimited_string(header_item % (s.text(), c.text(), r.text())))
-##                            header.append(fix_delimited_string(header_item(s.text(), c.text(), r.text())))
-#            # write header at beginning of file
-#            from infobiotics.commons.files import prepend_line_to_file
-#            prepend_line_to_file(csv_delimiter.join(header), file_name)
-#
-#        def write_xls():
-#            ''' https: // secure.simplistix.co.uk / svn / xlwt / trunk / README.html '''
-#            wb = xlwt.Workbook()
-#            try:
-#                ws = wb.add_sheet(os.path.basename(self.simulation.model_input_file)[:31])
-#            except:
-#                ws = wb.add_sheet('McssResults')
-#            ws.write(0, 0, header[0])
-#            for ti in range(len(timepoints)):
-#                ws.write(1 + ti, 0, timepoints[ti])
-#            if averaging:
-#                for ci, c in enumerate(compartments):
-#                    for si, s in enumerate(species):
-#                        y = 1 + si + (ci * len(species))
-##                        ws.write(0, y, averaging_header_item % (s.text(), c.text(), len(runs)))
-#                        ws.write(0, y, averaging_header_item(s.text(), c.text(), len(runs)))
-#                        for ti in range(len(timepoints)):
-#                            ws.write(1 + ti, y, results[mean_index][si, ci, ti])
-#            else:
-#                for ri, r in enumerate(runs):
-#                    for ci, c in enumerate(compartments):
-#                        for si, s in enumerate(species):
-#                            y = 1 + si + (ci * len(species)) + (ri * len(species) * len(compartments))
-#                            ws.write(0, y, header_item % (s.text(), c.text(), r.text()))
-#                            for ti in range(len(timepoints)):
-#                                ws.write(1 + ti, y, results[ri][si, ci, ti])
-#            wb.save(file_name)
-#
-#        def write_npz(species_indices=species_indices, compartment_indices=compartment_indices):
-#            # convert QString to str #TODO is this now unncessary with QString api version 2?
-#            species_names = [str(s.text()) for s in species]
-#            compartment_labels_and_positions = [str(c.text()) for c in compartments]
-#            run_numbers = [str(r.text()) for r in runs]
-#            kwargs = dict(
-#                run_indices=np.array(run_indices),
-#                run_numbers=run_numbers,
-#                species_indices=species_indices,
-#                species_names=species_names,
-#                compartment_indices=compartment_indices,
-#                compartment_labels_and_positions=compartment_labels_and_positions,
-#                timepoints=timepoints,
-#                model_file_name=os.path.basename(self.simulation.model_input_file),
-#                data_file_name=os.path.basename(self.simulation.data_file),
-#            )
-#            if averaging:
-#                kwargs['means'] = results[mean_index]
-#                kwargs['shape'] = ('species', 'compartment', 'timepoint')
-#            else:
-#                kwargs['levels'] = results
-#                kwargs['shape'] = ('run', 'species', 'compartment', 'timepoint')
-#            np.savez(file_name, **kwargs)
-#
-#        if file_name.endswith('.npz'):
-#            write_npz()
-#        elif file_name.endswith('.xls'):
-#            write_xls()
-#        else:
-#            write_csv()#csv_precision, csv_delimiter) # done using default values
+        results.export_timeseries(filename, amounts=True, volumes=False, individualruns=averaging, csv_precision=csv_precision, csv_delimiter=csv_delimiter)
 
-        if copy_file_name_to_clipboard:
+        if copy_filename_to_clipboard:
             from infobiotics.commons.qt4 import copy_to_clipboard
-            copy_to_clipboard(file_name)
+            copy_to_clipboard(filename)
 
         if open_after_save:
-#            if file_name.endswith('.csv') or file_name.endswith('.xls'):
-            from infobiotics.commons.qt4 import open_file
-            open_file(file_name)
+            if filename.endswith('.csv') or filename.endswith('.xls'):
+                from infobiotics.commons.qt4 import open_file
+                open_file(filename)
 
-        return file_name
+        return filename
 
             
     @wait_cursor

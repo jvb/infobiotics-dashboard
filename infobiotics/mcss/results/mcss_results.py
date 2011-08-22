@@ -26,15 +26,24 @@ import numpy as np
 import tables
 from infobiotics.commons.quantities.units.volume import microlitre
 
+def is64():
+    import platform
+    return platform.architecture()[0].startswith('64')
+
+if is64():
+    dtypedefault = np.float64
+else:
+    dtypedefault = np.float32 
+
 
 sum_compartments_at_same_xy_lattice_position = True
 
 # pre-defined functions that are applied along one axis 
-mean = lambda array, axis: np.mean(array, axis, dtype=np.float64)
-#std = lambda array, axis: np.std(array, axis, ddof=1, dtype=np.float64)
-std = lambda array, axis: Quantity(np.std(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.std(array, axis, ddof=1, dtype=np.float64) # work around Quantity.std not having 'ddof' keyword argument
-var = lambda array, axis: Quantity(np.var(array.magnitude, axis, ddof=1, dtype=np.float64), array.units) if isinstance(array, Quantity) else np.var(array, axis, ddof=1, dtype=np.float64) # work around Quantity.var not having 'ddof' keyword argument
-sum = lambda array, axis: np.sum(array, axis, dtype=np.float64)
+mean = lambda array, axis: np.mean(array, axis, dtype=dtypedefault)
+#std = lambda array, axis: np.std(array, axis, ddof=1, dtype=dtypedefault)
+std = lambda array, axis: Quantity(np.std(array.magnitude, axis, ddof=1, dtype=dtypedefault), array.units) if isinstance(array, Quantity) else np.std(array, axis, ddof=1, dtype=dtypedefault) # work around Quantity.std not having 'ddof' keyword argument
+var = lambda array, axis: Quantity(np.var(array.magnitude, axis, ddof=1, dtype=dtypedefault), array.units) if isinstance(array, Quantity) else np.var(array, axis, ddof=1, dtype=dtypedefault) # work around Quantity.var not having 'ddof' keyword argument
+sum = lambda array, axis: np.sum(array, axis, dtype=dtypedefault)
 
 def functions_of_values_over_axis(array, array_axes, axis, functions): 
     ''' Returns an array similar in shape to 'array' but with the dimension 
@@ -797,7 +806,7 @@ class McssResults(object):
 #        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.simulation._runs_list]
         rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.runs]
         table = indent([labels] + rows, hasHeader=True)
-        if truncate and self.simulation.number_of_runs > 1:
+        if truncate and self.simulation.number_of_runs >= 3:
             s = table.split('\n')
             return '\n'.join((s[0], s[1], s[2], '...', s[-2], s[-1]))
         return table
@@ -818,7 +827,7 @@ class McssResults(object):
         table = indent([labels] + rows, hasHeader=True)
         return table
 
-    def compartments_information(self, sort_column_index=0, reverse=False):
+    def compartments_information(self, sort_column_indices=(0,2,3), reverse=False, truncate=False):
         '''
         Name         | Index | X | Y
         ----------------------------
@@ -827,9 +836,12 @@ class McssResults(object):
         labels = ('Name', 'Index', 'X', 'Y')
 #        rows = [[str(s) for s in (compartment.name, compartment.index, compartment.x_position, compartment.y_position)] for compartment in self.simulation._runs_list[0]._compartments_list]
 #        rows = [(compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.simulation._runs_list[0]._compartments_list]
-        rows = [(compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.compartments]
-        rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
+        rows = [(''.join(compartment.name.rsplit(':')[:-1]) if ':' in compartment.name else compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.compartments]
+        rows.sort(key=operator.itemgetter(*sort_column_indices), reverse=reverse)
         table = indent([labels] + rows, hasHeader=True)
+        if truncate and self.num_selected_compartments >= 3:
+            s = table.split('\n')
+            return '\n'.join((s[0], s[1], s[2], '...', s[-2], s[-1]))
         return table
     
     @property
@@ -973,10 +985,10 @@ class McssResults(object):
         
         if individualruns:
             if amounts:
-                amounts_ = self.amounts(quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units)
+                amountsarray = self.amounts(quantities_display_type=quantities_display_type, quantities_display_units=quantities_display_units)
 
             if volumes:
-                volumes_ = self.volumes(volumes_display_units=volumes_display_units)
+                volumesarray = self.volumes(volumes_display_units=volumes_display_units)
 
         else:
             if ci_degree is None:
@@ -1021,7 +1033,7 @@ class McssResults(object):
 
         if individualruns:
             if amounts:
-                numruns, numspecies, numcompartments, numtimepoints = amounts_.shape
+                numruns, numspecies, numcompartments, numtimepoints = amountsarray.shape
                 runindices = xrange(numruns)
                 speciesindices = xrange(numspecies)
                 compartmentindices = xrange(numcompartments)
@@ -1033,7 +1045,7 @@ class McssResults(object):
                 amountsheader = map(sanitise, amountsheader)
             
             if volumes:
-                numruns, numcompartments, numtimepoints = volumes_.shape
+                numruns, numcompartments, numtimepoints = volumesarray.shape
                 runindices = xrange(numruns)
                 compartmentindices = xrange(numcompartments)
 
@@ -1082,11 +1094,11 @@ class McssResults(object):
     
             if individualruns:
                 if amounts:
-                    kwargs['amounts'] = amounts_
+                    kwargs['amounts'] = amountsarray
                     kwargs['amounts_axes'] = ('runs', 'species', 'compartment', 'timepoint')
             
                 if volumes:
-                    kwargs['volumes'] = volumes_
+                    kwargs['volumes'] = volumesarray
                     kwargs['volumes_axes'] = ('runs', 'compartment', 'timepoint')
 
             else:
@@ -1131,7 +1143,7 @@ class McssResults(object):
                                 col = (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
                                 ws.write(0, col, amountsheader[col]) # 0 = row
                                 for ti in timepointsindices:
-                                    ws.write(1 + ti, col, amounts_[ri, si, ci, ti]) # 1 + ti = row
+                                    ws.write(1 + ti, col, amountsarray[ri, si, ci, ti]) # 1 + ti = row
 #                    def amountsindividualruns(qw): # quantity wrapper
 #                        for ri, r in enumerate(self.runs):
 #                            for ci, c in enumerate(self.compartments):
@@ -1139,7 +1151,7 @@ class McssResults(object):
 #                                    col = (ri * numspecies * numcompartments) + (ci * numspecies) + si + 1
 #                                    ws.write(0, col, amountsheader[col]) # 0 = row
 #                                    for ti in timepointsindices:
-#                                        ws.write(1 + ti, col, qw(amounts_[ri, si, ci, ti])) # 1 + ti = row
+#                                        ws.write(1 + ti, col, qw(amountsarray[ri, si, ci, ti])) # 1 + ti = row
 #                    if quantities_display_type == 'molecules':
 #                        amountsindividualruns(int)
 #                    else:
@@ -1166,7 +1178,7 @@ class McssResults(object):
                             y = (ri * numcompartments) + ci + 1
                             ws.write(0, y, volumesheader[y]) # 0 = row
                             for ti in timepointsindices:
-                                ws.write(1 + ti, y, volumes_[ri, ci, ti]) # 1 + ti = row
+                                ws.write(1 + ti, y, volumesarray[ri, ci, ti]) # 1 + ti = row
                 else:
                     headers = (meanvolumesheader, stdvolumesheader, civolumesheader)
                     col = 0
@@ -1191,14 +1203,14 @@ class McssResults(object):
                 if amounts:
 #                    mcss-postprocess does amount of each species in each compartment for one run
 #                    we want the same but for all runs
-                    amounts_ = tuple(amounts_[ri, si, ci] for ri, si, ci in amountsindices)
+                    amountsarray = tuple(amountsarray[ri, si, ci] for ri, si, ci in amountsindices)
                     amountfmt = '%d' if quantities_display_type == 'molecules' else '%%.%se' % csv_precision
-                    fmt = ['%f'] + [amountfmt] * len(amounts_) # timepoints are floats, levels are ints
+                    fmt = ['%f'] + [amountfmt] * len(amountsarray) # timepoints are floats, levels are ints
                     
                 if volumes:
 #                    mcss-postprocess does volume of each compartment for one run
 #                    we want the same but for all runs
-                    volumes_ = tuple(volumes_[ri, ci] for ri, ci in volumesindices) 
+                    volumesarray = tuple(volumesarray[ri, ci] for ri, ci in volumesindices) 
             
             else:                
                 if amounts:
@@ -1214,10 +1226,10 @@ class McssResults(object):
                     std_amounts_over_runs = tuple(std_amounts_over_runs[si, ci] for si, ci in amountsindices)
                     ci_amounts_over_runs = tuple(ci_amounts_over_runs[si, ci] for si, ci in amountsindices)
 
-                    amounts_ = tuple(item for tup in zip(mean_amounts_over_runs, std_amounts_over_runs, ci_amounts_over_runs) for item in tup)
+                    amountsarray = tuple(item for tup in zip(mean_amounts_over_runs, std_amounts_over_runs, ci_amounts_over_runs) for item in tup)
                     # Twitter 9 Aug @raymondh #python tip: build a simple flattener with nested for-loops in a list comprehension: [char for string in strings for char in string]
 
-                    fmt = ['%f'] + ['%%.%se' % csv_precision] * len(amounts_) # timepoints are floats, levels are ints
+                    fmt = ['%f'] + ['%%.%se' % csv_precision] * len(amountsarray) # timepoints are floats, levels are ints
                     
                     amountsheader = header + [sanitise(item) for tup in zip(meanamountsheader, stdamountsheader, ciamountsheader) for item in tup]
                     
@@ -1233,21 +1245,21 @@ class McssResults(object):
                     std_volumes_over_runs = tuple(std_volumes_over_runs[ci] for ci in volumesindices)
                     ci_volumes_over_runs = tuple(ci_volumes_over_runs[ci] for ci in volumesindices)
                     
-                    volumes_ = tuple(item for tup in zip(mean_volumes_over_runs, std_volumes_over_runs, ci_volumes_over_runs) for item in tup)
+                    volumesarray = tuple(item for tup in zip(mean_volumes_over_runs, std_volumes_over_runs, ci_volumes_over_runs) for item in tup)
 
                     volumesheader = header + [sanitise(item) for tup in zip(meanvolumesheader, stdvolumesheader, civolumesheader) for item in tup]
 
             # write .csv
             if amounts:
-                np.savetxt(filename, np.transpose((self.timepoints,) + amounts_), fmt=fmt, delimiter=csv_delimiter)                    
+                np.savetxt(filename, np.transpose((self.timepoints,) + amountsarray), fmt=fmt, delimiter=csv_delimiter)                    
                 # transpose converts the tuple of 1D arrays to columns
                 # http://www.scipy.org/Numpy_Example_List#head-786f6bde962f7d1bcb92272b3654bc7cecef0f32
 
                 prepend_line_to_file(csv_delimiter.join(amountsheader), filename)
             
             if volumes:
-                fmt = ['%f'] + ['%%.%se' % csv_precision] * len(volumes_) # timepoints are floats, levels are ints
-                np.savetxt(volumes_filename, np.transpose((self.timepoints,) + volumes_), fmt=fmt, delimiter=csv_delimiter)
+                fmt = ['%f'] + ['%%.%se' % csv_precision] * len(volumesarray) # timepoints are floats, levels are ints
+                np.savetxt(volumes_filename, np.transpose((self.timepoints,) + volumesarray), fmt=fmt, delimiter=csv_delimiter)
            
                 prepend_line_to_file(csv_delimiter.join(volumesheader), volumes_filename)
             
@@ -1395,7 +1407,7 @@ class McssResults(object):
 #        return timeseries_plot
     
     
-    def histograms(self, bins=10, data='compartments', sum_species=False, dtype=np.float64):#'float64'):
+    def histograms(self, bins=10, data='compartments', sum_species=False, dtype=dtypedefault):
         '''Returns a 2D array of (histogram array, bin_edges array) tuples with 
         axes (species, timepoints) unless sum_species is True, in which case it 
         returns a 1D array of (histogram array, bin_edges array) tuples with 
@@ -1417,8 +1429,8 @@ class McssResults(object):
         
         '''
 
-        mean = lambda array, axis: np.mean(array, axis, dtype=dtype)#np.float64)
-        sum = lambda array, axis: np.sum(array, axis, dtype=dtype)#np.float64)
+        mean = lambda array, axis: np.mean(array, axis, dtype=dtype)
+        sum = lambda array, axis: np.sum(array, axis, dtype=dtype)
 
         numruns, numspecies, numcompartments, numtimepoints = self.amounts_shape 
         histogram_dtype = self.histogram_dtype(bins, dtype)
@@ -1453,8 +1465,8 @@ class McssResults(object):
             raise ValueError("data argument must be either 'compartments' or 'runs'")
         return histograms
 
-    def histogram_dtype(self, bins, dtype=np.float64):#'float64'):
-        # np.zeros(3, dtype=[('x','f4'),('y',np.float32),('value','f4',(2,2))]) # http://docs.scipy.org/doc/numpy/user/basics.rec.html "Defining Structured Arrays"  3) List argument
+    def histogram_dtype(self, bins, dtype=dtypedefault):
+        # np.zeros(3, dtype=[('x','f4'),('y',dtype),('value','f4',(2,2))]) # http://docs.scipy.org/doc/numpy/user/basics.rec.html "Defining Structured Arrays"  3) List argument
         return np.dtype([('histogram', dtype, (bins,)),('bin_edges', dtype, (bins+1,))])
 
     @property
@@ -1737,10 +1749,19 @@ def test_export_timeseries():
         
     )
 
+
+def test_information():
+    results = McssResults('/home/jvb/simulations/oregonator/oregonator.h5')
+#    print results.runs_information()
+#    print results.species_information()
+#    print results.compartments_information(truncate=True)
+    print results.timeseries_information()
+
 if __name__ == '__main__':
 #    import mcss_results_widget
 #    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
-    test_export_timeseries()
+#    test_export_timeseries()
+    test_information()
 ##    test1()
 #    test_surfaces()
 #    test_timeseries()
