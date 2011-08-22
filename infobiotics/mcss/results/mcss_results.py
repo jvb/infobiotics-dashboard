@@ -1067,27 +1067,43 @@ class McssResults(object):
         ext = os.path.splitext(filename)[1].lower()
 
         if ext == '.npz':
+            
+            kwargs = dict(
+                run_indices=np.array(self.run_indices),
+                run_numbers=self.run_numbers,
+                species_indices=self.species_indices,
+                species_names=[str(s) for s in self.species],
+                compartment_indices=self.compartment_indices,
+                compartment_labels_and_positions=[str(c) for c in self.compartments],
+                timepoints=self.timepoints,
+                model_filename=os.path.basename(self.simulation.model_input_file),
+                data_filename=os.path.basename(self.simulation.data_file),
+            )
+    
             if individualruns:
                 if amounts:
-                    amounts_
-                    pass
+                    kwargs['amounts'] = amounts_
+                    kwargs['amounts_axes'] = ('runs', 'species', 'compartment', 'timepoint')
             
                 if volumes:
-                    volumes_
-                    pass
+                    kwargs['volumes'] = volumes_
+                    kwargs['volumes_axes'] = ('runs', 'compartment', 'timepoint')
 
             else:
                 if amounts:
-                    mean_amounts_over_runs
-                    std_amounts_over_runs
-                    ci_amounts_over_runs
-                    pass
+                    kwargs['mean_amounts_over_runs'] = mean_amounts_over_runs
+                    kwargs['std_amounts_over_runs'] = std_amounts_over_runs
+                    kwargs['ci_amounts_over_runs'] = ci_amounts_over_runs
+                    kwargs['amounts_over_runs_axes'] = ('species', 'compartment', 'timepoint')
 
                 if volumes:
-                    mean_volumes_over_runs
-                    std_volumes_over_runs
-                    ci_volumes_over_runs
-                    pass
+                    kwargs['mean_volumes_over_runs'] = mean_volumes_over_runs
+                    kwargs['std_volumes_over_runs'] = std_volumes_over_runs
+                    kwargs['ci_volumes_over_runs'] = ci_volumes_over_runs
+                    kwargs['volumes_over_runs_axes'] = ('compartment', 'timepoint')
+
+            np.savez(filename, **kwargs)
+
             
         elif ext == '.xls':
             '''https://secure.simplistix.co.uk/svn/xlwt/trunk/README.html'''
@@ -1235,65 +1251,11 @@ class McssResults(object):
            
                 prepend_line_to_file(csv_delimiter.join(volumesheader), volumes_filename)
             
-        """
-        '''
-        (Over?)use of inner functions here can result in crytic exceptions, e.g.
-            "UnboundLocalError: local variable 'x' referenced before assignment"
-        The actual reason for these errors is that variables inside inner 
-        functions are immutable, see:           
-            http: // stackoverflow.com / questions / 1414304 / local - functions - in - python / 1414320#1414320
-        The correct solution is, in this instance, to pass these variables as
-        arguments to the inner functions, and the neatest way to do that is as
-        default arguments, see write_csv, fix_delimited_string and write_npz. 
-        
-        '''
-        
-        def write_npz(species_indices=species_indices, compartment_indices=compartment_indices):
-            # convert QString to str #TODO is this now unncessary with QString api version 2?
-            species_names = [str(s.text()) for s in species]
-            compartment_labels_and_positions = [str(c.text()) for c in compartments]
-            run_numbers = [str(r.text()) for r in runs]
-            kwargs = dict(
-                run_indices=np.array(run_indices),
-                run_numbers=run_numbers,
-                species_indices=species_indices,
-                species_names=species_names,
-                compartment_indices=compartment_indices,
-                compartment_labels_and_positions=compartment_labels_and_positions,
-                timepoints=timepoints,
-                model_filename=os.path.basename(self.simulation.model_input_file),
-                data_filename=os.path.basename(self.simulation.data_file),
-            )
-            if averaging:
-                kwargs['means'] = results[mean_index]
-                kwargs['shape'] = ('species', 'compartment', 'timepoint')
-            else:
-                kwargs['levels'] = results
-                kwargs['shape'] = ('run', 'species', 'compartment', 'timepoint')
-            np.savez(filename, **kwargs)
 
-        if filename.endswith('.npz'):
-            write_npz()
-        elif filename.endswith('.xls'):
-            write_xls()
-        else:
-            write_csv()#csv_precision, csv_delimiter) # done using default values
-
-#        if copy_filename_to_clipboard:
-#            from infobiotics.commons.qt4 import copy_to_clipboard
-#            copy_to_clipboard(filename)
-#
-#        if open_after_save:
-##            if filename.endswith('.csv') or filename.endswith('.xls'):
-#            from infobiotics.commons.qt4 import open_file
-#            open_file(filename)
-
-        return filename        
-        """
-        
         # reset timepoints_display_units (see above)
         self.timepoints_display_units = _timepoints_display_units
 
+        return filename
         # end of export_timeseries
         
         
@@ -1307,7 +1269,7 @@ class McssResults(object):
     def timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
         '''Return Timeseries objects for current selection.'''
         
-        self.assertions(amounts, volumes, mean_over_runs)
+#        self.assertions(amounts, volumes, mean_over_runs) #TODO
 
         from timeseries import Timeseries
         from infobiotics.commons import colours
