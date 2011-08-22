@@ -46,6 +46,7 @@ mcss_params_group = Group(
             ),
             
             VGroup(
+                Item('handler.neighbourhood', label='Neighbourhood'),
                 Item('periodic_x', label='Periodic X dimension'),
                 Item('periodic_y', label='Periodic Y dimension'),
                 Item('periodic_z', label='Periodic Z dimension'),

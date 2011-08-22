@@ -1562,8 +1562,7 @@ class McssResults(object):
             compartment = selected_compartments[ci]
             for si, _ in enumerate(self.species_indices):
                 surfaces[:, si, compartment.x_position - xmin, compartment.y_position - ymin, :] += amounts[:, si, ci, :]
-#        np.save('/home/jvb/Desktop/after', surfaces)
-        np.save('/home/jvb/Desktop/next', surfaces)
+
         return surfaces
     
     def x_min_max(self):
