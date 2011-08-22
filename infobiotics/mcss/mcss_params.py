@@ -1,6 +1,6 @@
 from infobiotics.core.api import ParamsRelativeFile, ModelFile
 from infobiotics.core.params import Params
-from enthought.traits.api import Enum, Bool, Range, Long, Float
+from enthought.traits.api import Enum, Bool, Range, Long, Float, Int
 from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
 from enthought.traits.api import TraitError
 import os.path
@@ -53,7 +53,32 @@ class McssParams(Params):
     seed = Long(0, desc='the random number seed (0=randomly generated)')
     compress = Bool(True, desc='whether to compress HDF5 output')
     compression_level = Range(low=0, high=9, value=9, desc='the HDF5 compression level (0-9; 9=best)')
-    simulation_algorithm = Enum(['dmq2', 'dmq', 'dm', 'ldm', 'dmgd', 'dmcp', 'dmqg', 'dmq2g', 'dmq2gd'], desc='the stochastic simulation algorithm to use')
+    simulation_algorithm = Enum(['ode1','dmq2', 'dmq', 'dm', 'ldm', 'dmgd', 'dmcp', 'dmqg', 'dmq2g', 'dmq2gd'], desc='the stochastic simulation algorithm to use')
+
+    ode_solver = Enum(['rk2','rk4','rkf45','rkck','rk8pd','rk2imp','rk4imp','bsimp','gear1','gear2'])
+    """
+    mcss/Psystem.cpp:159
+    if((strcmp(parameters.simulation_algorithm, "ode1") == 0)) {
+        if((strcmp(parameters.ode_solver, "rk2") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_rk2);
+        if((strcmp(parameters.ode_solver, "rk4") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_rk4);
+        if((strcmp(parameters.ode_solver, "rkf45") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_rkf45);
+        if((strcmp(parameters.ode_solver, "rkck") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_rkck);
+        if((strcmp(parameters.ode_solver, "rk8pd") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_rk8pd);
+        if((strcmp(parameters.ode_solver, "rk2imp") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_rk2imp);
+        if((strcmp(parameters.ode_solver, "rk4imp") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_rk4imp);
+        if((strcmp(parameters.ode_solver, "bsimp") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_bsimp);
+        if((strcmp(parameters.ode_solver, "gear1") == 0))
+                simalg->setOdeSolver(gsl_odeiv_step_gear1);
+                    if((strcmp(parameters.ode_solver, "gear2") == 0))
+    """
 
     log_type = Enum(['levels', 'reactions'], desc='the type of data logging to perform')
     log_memory = Bool(desc='whether to log output to memory')
@@ -70,19 +95,48 @@ class McssParams(Params):
     keep_divisions = Bool(False, desc='whether to keep dividing cells (no need for degradation rates to emulate dilution by cell division)')
     growth_type = Enum(['none', 'linear', 'exponential', 'function'], desc='the volume growth type')
     
-    show_progress = Bool(False, desc='whether to output the current time to screen at each log interval') # not in parameter_names below
-    progress_interval = Float(0.0, desc='time interval within each run to output progress information') #TODO
+    show_progress = Bool(False, desc='whether to output the current time to screen at each log interval')
+    progress_interval = Float(0.0, desc='time interval within each run to output progress information')
     
     def parameter_names(self):
         return [
-            'model_file', 'model_format', 'duplicate_initial_amounts',
-#            'just_psystem', 
-            'max_time', 'log_interval', 'runs', 'data_file',
-            'seed', 'compress', 'compression_level', #'show_progress', 
-            'simulation_algorithm', 'log_type', 'log_memory',
-            'log_propensities', 'log_volumes', 'log_steady_state',
-            'log_degraded', 'dump', 'periodic_x', 'periodic_y', 'periodic_z',
-            'division_direction', 'keep_divisions', 'growth_type' 
+            'model_file', 
+            'model_format', 
+                'duplicate_initial_amounts', # SBML
+#                'just_psystem', # P system XML?
+
+            'max_time', 
+            'log_interval', 
+            'runs', 
+            
+            'data_file', 
+            'seed', 
+            
+            'compress', 
+            'compression_level', 
+
+            'simulation_algorithm', 
+            'ode_solver',
+            
+            'log_memory',
+            'log_type', 
+            'log_propensities', 
+            'log_volumes', 
+            'log_steady_state',
+            'log_degraded', 
+#            'dump', 
+            
+            'periodic_x', 
+            'periodic_y', 
+            'periodic_z',
+            
+            'division_direction', 
+            
+            'keep_divisions', 
+            'growth_type', 
+            
+            'show_progress', 
+            'progress_interval', 
         ]
 
 

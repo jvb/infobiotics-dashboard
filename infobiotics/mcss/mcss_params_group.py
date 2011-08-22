@@ -19,14 +19,16 @@ mcss_params_group = Group(
                 VGroup(
                     Item('max_time'),
                     Item('log_interval'),
-                    Item('runs'),
+                    Item('runs', visible_when='object.simulation_algorithm!="ode1"'),
                     Item('max_run_time'),
                     Item('data_file'),
-            #        Item('show_progress'), #TODO popup showing stdout and stderr for each params program
-                    Item('compress', label='Compress output'),
-                    Item('compression_level', enabled_when='object.compress==True'),
+                    HGroup(
+                        Item('compress', label='Compress output'),
+                        Item('compression_level', enabled_when='object.compress==True'),
+                    ),
                     Item('handler.simulation_algorithm'),
-                    Item('seed', label='Random seed'),
+                    Item('handler.ode_solver', label='ODE solver', visible_when='object.simulation_algorithm=="ode1"'),
+                    Item('seed', label='Random seed', visible_when='object.simulation_algorithm!="ode1"'),
                     label='Simulation',
                 ),
                 label='Input'
