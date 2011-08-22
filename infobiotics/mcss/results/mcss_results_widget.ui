@@ -1188,6 +1188,13 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>datapoints</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -1211,7 +1218,7 @@
      <item>
       <widget class="QCommandLinkButton" name="export_data_as_button">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="toolTip">
         <string>Save timeseries data for selected runs, species and compartments</string>
@@ -1261,7 +1268,7 @@ NumPy (.npz)</string>
         </size>
        </property>
        <property name="description">
-        <string>Preview plots individually then combine, stack or tile</string>
+        <string>Combined or individual plots from selection</string>
        </property>
       </widget>
      </item>
@@ -1291,10 +1298,10 @@ NumPy (.npz)</string>
      <item>
       <widget class="QCommandLinkButton" name="plot_histogram_button">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="toolTip">
-        <string>Save timeseries data for selected runs, species and compartments</string>
+        <string>Plot distributions of species in runs or compartments (and mean of the other)</string>
        </property>
        <property name="text">
         <string>Plot histogram</string>
@@ -1316,7 +1323,7 @@ NumPy (.npz)</string>
         <bool>false</bool>
        </property>
        <property name="description">
-        <string>Plot distribution of species in runs or compartments</string>
+        <string>Plot distributions of species in runs or compartments</string>
        </property>
       </widget>
      </item>

@@ -59,12 +59,9 @@ class McssResultsWidget(QWidget):
         self.ui = Ui_McssResultsWidget()
         self.ui.setupUi(self) # QPixmap: It is not safe to use pixmaps outside the GUI thread
 
-        # hide buttons that don't work
-        self.ui.export_data_as_button.setVisible(False)
-        self.ui.plot_histogram_button.setVisible(False)
-        self.ui.calculate_button.setVisible(False)
+        self.ui.calculate_button.setVisible(False) # hide buttons that don't work #TODO make it work
 
-        self.ui.compartments_list_widget.setToolTip('')
+#        self.ui.compartments_list_widget.setToolTip('')
 
         self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
 
@@ -467,28 +464,25 @@ class McssResultsWidget(QWidget):
             )
         else:
             enable_widgets(
-#                self.ui.export_data_as_button, #TODO
+                self.ui.export_data_as_button,
                 self.ui.plot_timeseries_button,
-#                self.ui.plot_histogram_button, #TODO
             )
             if num_selected_species >= 1 and num_selected_compartments > 1:
                 enable_widgets(self.ui.visualise_population_button)
             else:
                 disable_widgets(self.ui.visualise_population_button)
+            
+            if num_selected_runs > 1 or num_selected_compartments > 1:
+                enable_widgets(self.ui.plot_histogram_button)
+                self.ui.plot_histogram_button.setToolTip("Plot distributions of species in runs or compartments")
+            else:
+                self.ui.plot_histogram_button.setToolTip("To enable select two or more runs or compartments")
+            
             if num_selected_runs > 1:
                 enable_widgets(self.ui.calculate_button)
 
-            # no more than 4 surfaces
-            if num_selected_species > 4:
-                disable_widgets(self.ui.visualise_population_button)
-            elif num_selected_compartments >= 4:
-                enable_widgets(self.ui.visualise_population_button)
-                
-#            # no more than 10 timeseries (per species)
-#            if num_selected_compartments > 10:
-#                disable_widgets(self.ui.plot_timeseries_button)
-#            else:
-#                enable_widgets(self.ui.plot_timeseries_button)
+
+            #TODO show numdatapoints with warning if too high
 
             results = self.selected_items_results()
             _, _, _, averaging = self.options()
@@ -500,9 +494,23 @@ class McssResultsWidget(QWidget):
             (xmin, xmax), (ymin, ymax) = results.xy_min_max()
             numsurfacetimepoints = numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * results.num_timepoints 
             
-            print '%s timeseries' % numtimeseries, '(%s timepoints)' % numtimepoints
-            print '%s surfaces' % numsurfaces, '(%s timepoints)' % numsurfacetimepoints
-            print 
+#            print '%s timeseries' % numtimeseries, '(%s timepoints)' % numtimepoints
+#            print '%s surfaces' % numsurfaces, '(%s timepoints)' % numsurfacetimepoints
+#            print 
+
+
+            # no more than 6 surfaces
+            if num_selected_species <= 6 and num_selected_compartments >= 4:
+                enable_widgets(self.ui.visualise_population_button)
+                self.ui.visualise_population_button.setToolTip("Animate species levels as a surface over the lattice")
+            else:
+                self.ui.visualise_population_button.setToolTip("To enable select more than 4 compartments and fewer than 7 species")
+                
+#            # no more than 10 timeseries (per species)
+#            if num_selected_compartments > 10:
+#                disable_widgets(self.ui.plot_timeseries_button)
+#            else:
+#                enable_widgets(self.ui.plot_timeseries_button)
 
 
     # slots
@@ -615,32 +623,15 @@ class McssResultsWidget(QWidget):
             
             results = self.selected_items_results()
             array, axes = results.functions_over_successive_axes(axes, functions)
+            #TODO
+        
 
     def histogram(self):
-        raise NotImplementedError
-#
-##        runs, species, compartments = self.selected_items()
-##        run_indices, species_indices, compartment_indices = self.selected_items_amount_indices()
-#        _, _, _, averaging = self.options()
-#        results = self.selected_items_results()
-#        _, timepoints_display_units, _, quantities_display_type, quantities_display_units, volume, _, _ = self.units()
-#
-#        #TODO volumes like plot()
-#        if averaging:
-#            timepoints, results = results.get_amounts_mean_over_runs()
-#            mean_index = 0
-#        else:
-#            timepoints, results = results.amounts(
-#                timepoints_display_units=timepoints_display_units,
-#                quantities_display_type=quantities_display_type,
-#                quantities_display_units=quantities_display_units,
-#                volume=volume if self.simulation.log_volumes != 1 else None,
-#            )
-#        if len(results) == 0:
-#            return
-#    
-#        print timepoints
-#        print results
+#        raise NotImplementedError
+        from histograms import Histogram
+        results = self.selected_items_results()
+        Histogram.fromresults(results).configure_traits()
+
 
     csv_precision = mcss_results.McssResults.csv_precision
     csv_delimiter = mcss_results.McssResults.csv_delimiter
@@ -658,7 +649,7 @@ class McssResultsWidget(QWidget):
         filename = QFileDialog.getSaveFileName(self,
             self.tr("Save selected timeseries data"),
             ".",
-            self.tr("Comma-separated values (*.csv *.txt);;Excel spreadsheets (*.xls);;Numpy compressed (*.npz)"))
+            self.tr("All supported types (*.csv *.txt *.xls *.npz);;Comma-separated values (*.csv *.txt);;Excel spreadsheets (*.xls);;Numpy compressed (*.npz)"))
         if filename == '':
             return # user cancelled
         filename = unicode(filename)
@@ -690,11 +681,10 @@ class McssResultsWidget(QWidget):
                 csv_precision = self.csv_precision = csv_config.precision
                 csv_delimiter = self.csv_delimiter = csv_config.delimiter
 
-
         _, _, _, averaging = self.options()
         results = self.selected_items_results()
 
-        results.export_timeseries(filename, amounts=True, volumes=False, individualruns=averaging, csv_precision=csv_precision, csv_delimiter=csv_delimiter)
+        results.export_timeseries(filename, amounts=True, volumes=False, individualruns=not averaging, csv_precision=csv_precision, csv_delimiter=csv_delimiter)
 
         if copy_filename_to_clipboard:
             from infobiotics.commons.qt4 import copy_to_clipboard
@@ -754,18 +744,22 @@ class McssResultsWidget(QWidget):
             )
 
     @wait_cursor
-    def redVsGreenPlot(self):
+    def redVsGreenPlot(self): #TODO button
         results = self.selected_items_results()
         surfaces = results.surfaces()
         runs = surfaces.shape[0]
         surfaces = mcss_results.mean(surfaces, 0) # do mean across all runs
         
+        xymultiplier = 1
+        tmultiplier = 1
+
 #        # pattern formation
 #        xymultiplier = 5
 #        tmultiplier = 11
-        # pulse inverter
-        xymultiplier = 3
-        tmultiplier = 8
+        
+#        # pulse inverter
+#        xymultiplier = 3
+#        tmultiplier = 8
         
         surfaces = np.array([interpolate(surfaces[i], xymultiplier, tmultiplier) for i in range(len(surfaces))])
 #        print surfaces.shape

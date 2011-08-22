@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mcss_results_widget.ui'
 #
-# Created: Mon Aug  8 08:51:39 2011
+# Created: Mon Aug 22 12:57:58 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -425,7 +425,7 @@ class Ui_McssResultsWidget(object):
         spacerItem8 = QtGui.QSpacerItem(244, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self._actions_layout.addItem(spacerItem8)
         self.export_data_as_button = QtGui.QCommandLinkButton(McssResultsWidget)
-        self.export_data_as_button.setEnabled(False)
+        self.export_data_as_button.setEnabled(True)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/data.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.export_data_as_button.setIcon(icon)
@@ -449,7 +449,7 @@ class Ui_McssResultsWidget(object):
         self.visualise_population_button.setObjectName(_fromUtf8("visualise_population_button"))
         self._actions_layout.addWidget(self.visualise_population_button)
         self.plot_histogram_button = QtGui.QCommandLinkButton(McssResultsWidget)
-        self.plot_histogram_button.setEnabled(False)
+        self.plot_histogram_button.setEnabled(True)
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/hist.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.plot_histogram_button.setIcon(icon3)

@@ -6,7 +6,8 @@ with warnings.catch_warnings():
 from enthought.traits.api import *
 from enthought.traits.ui.api import *
 
-from infobiotics.mcss.results.mcss_results import McssResults, mean, sum
+#from infobiotics.mcss.results.mcss_results import McssResults, mean, sum
+from infobiotics.mcss.results import mcss_results
 import numpy as np
 
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
@@ -18,14 +19,14 @@ from matplotlib.axes import Axes#, Subplot as AxesSubplot
 import os.path
 
 
-class Histograms(HasTraits):
+class Histogram(HasTraits):
     
     data = Enum(['Compartments', 'Runs'])
     sum_species = Bool(False)
     bins = Range(2,100,10)
 #    quanitities_display_units = Enum(...) #TODO
 
-    results = Instance(McssResults)
+    results = Any#Instance(mcss_results.McssResults)
 
     max_timepoint_index = Int
     from_timepoint_index = Int
@@ -41,7 +42,8 @@ class Histograms(HasTraits):
         return len(self.results.timepoints) - 1
 
     def _from_timepoint_index_default(self):
-        return self.max_timepoint_index // 2
+#        return self.max_timepoint_index // 2
+        return 0
 
     def _to_timepoint_index_default(self):
         return self.max_timepoint_index
@@ -55,9 +57,9 @@ class Histograms(HasTraits):
     @cached_property
     def _get_amounts(self):
         if self.data == 'Compartments':
-            return self.results.functions_of_amounts_over_runs(mean)[0] # (species, compartments, timepoints)
+            return self.results.functions_of_amounts_over_runs(mcss_results.mean)[0] # (species, compartments, timepoints)
         else: # self.data == 'runs'
-            return mean(self.results.amounts(), self.results.amounts_axes.index('compartments')) # (runs, species, timepoints)
+            return mcss_results.mean(self.results.amounts(), self.results.amounts_axes.index('compartments')) # (runs, species, timepoints)
     
     @cached_property
     def _get_species_amounts_index(self):
@@ -69,7 +71,11 @@ class Histograms(HasTraits):
 
     @classmethod
     def fromfile(cls, file):
-        return cls(results=McssResults(file))
+        return cls(results=mcss_results.McssResults(file))
+
+    @classmethod
+    def fromresults(cls, results):
+        return cls(results=results)
 
     def __init__(self, results, **traits):
         assert results.num_selected_compartments > 1 or results.num_selected_runs > 1 
@@ -98,7 +104,7 @@ class Histograms(HasTraits):
         # 2D
         if self.data == 'Compartments':
             if self.sum_species:
-                sum_mean_amounts_over_runs_over_species = sum(self.amounts, self.species_amounts_index)
+                sum_mean_amounts_over_runs_over_species = mcss_results.sum(self.amounts, self.species_amounts_index)
                 data = sum_mean_amounts_over_runs_over_species[:, self.from_timepoint_index]
 #                axes = self.update_plot(data)
             else:
@@ -109,7 +115,7 @@ class Histograms(HasTraits):
                  
         else: # self.data == 'runs'
             if self.sum_species:
-                sum_mean_amounts_over_compartments_over_species = sum(self.amounts, self.species_amounts_index)
+                sum_mean_amounts_over_compartments_over_species = mcss_results.sum(self.amounts, self.species_amounts_index)
                 data = sum_mean_amounts_over_compartments_over_species[:, self.from_timepoint_index]
 #                axes = self.update_plot(data)
             else:
@@ -149,7 +155,8 @@ class Histograms(HasTraits):
         return axes
 
     def maketitle(self):
-        return "Histograms TODO from %.1f to %.1f" % (self.results.timepoints[self.from_timepoint_index], self.results.timepoints[self.to_timepoint_index])#, self.timepoints_display_units)
+        #TODO
+        return "Histogram TODO from %.1f to %.1f" % (self.results.timepoints[self.from_timepoint_index], self.results.timepoints[self.to_timepoint_index])#, self.timepoints_display_units)
 
 # from histograms2.HistogramWidget.HistogramWidget.onDraw
 #        self.axes.set_title(self.title)
@@ -208,7 +215,7 @@ class Histograms(HasTraits):
             width=800, height=600,
             resizable=True,
             title="%s histograms" % basename,
-            id='Histograms',
+            id='Histogram',
         )
         return view
 
@@ -220,7 +227,7 @@ class Histograms(HasTraits):
 #    arrays = Array
 #
 #    def maketitle(self):
-#        return "Histograms TODO from %.1f to %.1f" % (self.results.timepoints[self.from_timepoint_index], self.results.timepoints[self.to_timepoint_index])#, self.timepoints_display_units)
+#        return "Histogram TODO from %.1f to %.1f" % (self.results.timepoints[self.from_timepoint_index], self.results.timepoints[self.to_timepoint_index])#, self.timepoints_display_units)
 #    
 #    def update_surface(self):
 #        slice_ = slice(self.from_timepoint_index, self.to_timepoint_index)
@@ -330,7 +337,7 @@ class Histograms(HasTraits):
 
 
 def test():
-    Histograms.fromfile('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5').configure_traits()
+    Histogram.fromfile('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5').configure_traits()
 
 
 if __name__ == '__main__':

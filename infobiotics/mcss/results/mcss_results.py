@@ -1042,7 +1042,6 @@ class McssResults(object):
                 amountsindices = [(ri, si, ci) for ri in runindices for ci in compartmentindices for si in speciesindices]
                 
                 amountsheader = header + ['%s in %s of %s (%s)' % (s, c, r, quantities_display_units) for r in self.runs for c in self.compartments for s in self.species] 
-                amountsheader = map(sanitise, amountsheader)
             
             if volumes:
                 numruns, numcompartments, numtimepoints = volumesarray.shape
@@ -1052,7 +1051,6 @@ class McssResults(object):
                 volumesindices = [(ri, ci) for ri in runindices for ci in compartmentindices]
                 
                 volumesheader = header + ['%s of %s (%s)' % (c, r, volumes_display_units) for r in self.runs for c in self.compartments]
-                volumesheader = map(sanitise, volumesheader) 
         
         else:
             if amounts:
@@ -1082,7 +1080,7 @@ class McssResults(object):
             
             kwargs = dict(
                 run_indices=np.array(self.run_indices),
-                run_numbers=self.run_numbers,
+                run_numbers=self.num_selected_runs,
                 species_indices=self.species_indices,
                 species_names=[str(s) for s in self.species],
                 compartment_indices=self.compartment_indices,
@@ -1204,13 +1202,15 @@ class McssResults(object):
 #                    mcss-postprocess does amount of each species in each compartment for one run
 #                    we want the same but for all runs
                     amountsarray = tuple(amountsarray[ri, si, ci] for ri, si, ci in amountsindices)
+                    amountsheader = map(sanitise, amountsheader)
                     amountfmt = '%d' if quantities_display_type == 'molecules' else '%%.%se' % csv_precision
                     fmt = ['%f'] + [amountfmt] * len(amountsarray) # timepoints are floats, levels are ints
                     
                 if volumes:
 #                    mcss-postprocess does volume of each compartment for one run
 #                    we want the same but for all runs
-                    volumesarray = tuple(volumesarray[ri, ci] for ri, ci in volumesindices) 
+                    volumesarray = tuple(volumesarray[ri, ci] for ri, ci in volumesindices)
+                    volumesheader = map(sanitise, volumesheader) 
             
             else:                
                 if amounts:
@@ -1388,7 +1388,7 @@ class McssResults(object):
         import os.path
         timeseries_plot = TimeseriesPlot(
             results=self,
-            window_title='Timeseries from %s' % self.basename,
+            window_title='Timeseries from %s' % os.path.basename(self.filename),
             timeseries=self.timeseries(
                 amounts=True,
                 volumes=True if self.has_volumes else False,
