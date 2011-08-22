@@ -57,7 +57,7 @@ class SpatialPlotsWindow(QWidget):
         rows, cols = arrange(self.surfaces)
         if len(self.widgets) == 3:
             for i, widget in enumerate(self.widgets):
-                gridLayout.addWidget(widget, i, 0) #TODO check with 3 species
+                gridLayout.addWidget(widget, 0, i)
         else:
             for i, widget in enumerate(self.widgets):
                 gridLayout.addWidget(widget, i // rows, i % rows) 
@@ -468,7 +468,6 @@ class SpatialPlotsControlsWidget(ControlsWidget):
         for i, surface in enumerate(self.surfaces):
             surface.scene.mlab.savefig(self.movie.next_frame(self.templates[i]), figure=surface.surf)
             
-
     def update_surfaces(self):
         for surface in self.surfaces:
             surface.set_position(self.position)
