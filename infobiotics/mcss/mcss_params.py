@@ -95,6 +95,8 @@ class McssParams(Params):
     keep_divisions = Bool(False, desc='whether to keep dividing cells (no need for degradation rates to emulate dilution by cell division)')
     growth_type = Enum(['none', 'linear', 'exponential', 'function'], desc='the volume growth type')
     
+#    neighbourhood = Enum([4,8], desc='the TODO')
+    
     show_progress = Bool(False, desc='whether to output the current time to screen at each log interval')
     progress_interval = Float(0.0, desc='time interval within each run to output progress information')
     

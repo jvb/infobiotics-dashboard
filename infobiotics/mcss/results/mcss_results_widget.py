@@ -481,23 +481,21 @@ class McssResultsWidget(QWidget):
             if num_selected_runs > 1:
                 enable_widgets(self.ui.calculate_button)
 
-
-            #TODO show numdatapoints with warning if too high
-
-            results = self.selected_items_results()
-            _, _, _, averaging = self.options()
-            numtimeseries = results.len_timeseries(True, self.volumes_selected, averaging) 
-            numtimepoints = results.num_timepoints * numtimeseries
-            
-            numsurfaces = results.num_selected_species
-
-            (xmin, xmax), (ymin, ymax) = results.xy_min_max()
-            numsurfacetimepoints = numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * results.num_timepoints 
-            
+#            #TODO show numdatapoints with warning if too high
+#
+#            results = self.selected_items_results()
+#            _, _, _, averaging = self.options()
+#            numtimeseries = results.len_timeseries(True, self.volumes_selected, averaging) 
+#            numtimepoints = results.num_timepoints * numtimeseries
+#            
+#            numsurfaces = results.num_selected_species
+#
+#            (xmin, xmax), (ymin, ymax) = results.xy_min_max()
+#            numsurfacetimepoints = numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * results.num_timepoints 
+#            
 #            print '%s timeseries' % numtimeseries, '(%s timepoints)' % numtimepoints
 #            print '%s surfaces' % numsurfaces, '(%s timepoints)' % numsurfacetimepoints
 #            print 
-
 
             # no more than 6 surfaces
             if num_selected_species <= 6 and num_selected_compartments >= 4:

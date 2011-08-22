@@ -783,7 +783,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Quantities are in</string>
+           <string>Species amounts are in</string>
           </property>
          </widget>
         </item>
@@ -1011,7 +1011,7 @@
            <item>
             <widget class="QLabel" name="_volumes_label_1">
              <property name="text">
-              <string>Volumes are</string>
+              <string>Compartment volumes are</string>
              </property>
             </widget>
            </item>

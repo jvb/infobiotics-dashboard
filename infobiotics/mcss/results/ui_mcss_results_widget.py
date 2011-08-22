@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mcss_results_widget.ui'
 #
-# Created: Mon Aug 22 12:57:58 2011
+# Created: Mon Aug 22 14:10:50 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -418,6 +418,9 @@ class Ui_McssResultsWidget(object):
         self._calculate_layout.addWidget(self.calculate_button)
         spacerItem7 = QtGui.QSpacerItem(48, 1, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self._calculate_layout.addItem(spacerItem7)
+        self.label = QtGui.QLabel(self._data_group_box)
+        self.label.setObjectName(_fromUtf8("label"))
+        self._calculate_layout.addWidget(self.label)
         self.verticalLayout_8.addLayout(self._calculate_layout)
         self.verticalLayout_2.addWidget(self._data_group_box)
         self._actions_layout = QtGui.QHBoxLayout()
@@ -549,7 +552,7 @@ class Ui_McssResultsWidget(object):
         self.timepoints_display_units_combo_box.setItemText(11, QtGui.QApplication.translate("McssResultsWidget", "femtoseconds", None, QtGui.QApplication.UnicodeUTF8))
         self.timepoints_display_units_combo_box.setItemText(12, QtGui.QApplication.translate("McssResultsWidget", "attoseconds", None, QtGui.QApplication.UnicodeUTF8))
         self._data_group_box.setTitle(QtGui.QApplication.translate("McssResultsWidget", "Data", None, QtGui.QApplication.UnicodeUTF8))
-        self._quantities_label_1.setText(QtGui.QApplication.translate("McssResultsWidget", "Quantities are in", None, QtGui.QApplication.UnicodeUTF8))
+        self._quantities_label_1.setText(QtGui.QApplication.translate("McssResultsWidget", "Species amounts are in", None, QtGui.QApplication.UnicodeUTF8))
         self.quantities_data_units_combo_box.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Specifies the type of quantities used in the simulated model.", None, QtGui.QApplication.UnicodeUTF8))
         self.quantities_data_units_combo_box.setItemText(0, QtGui.QApplication.translate("McssResultsWidget", "molecules", None, QtGui.QApplication.UnicodeUTF8))
         self.quantities_data_units_combo_box.setItemText(1, QtGui.QApplication.translate("McssResultsWidget", "moles", None, QtGui.QApplication.UnicodeUTF8))
@@ -582,7 +585,7 @@ class Ui_McssResultsWidget(object):
         self.concentrations_display_units_combo_box.setItemText(4, QtGui.QApplication.translate("McssResultsWidget", "picomolar", None, QtGui.QApplication.UnicodeUTF8))
         self.concentrations_display_units_combo_box.setItemText(5, QtGui.QApplication.translate("McssResultsWidget", "femtomolar", None, QtGui.QApplication.UnicodeUTF8))
         self.concentrations_display_units_combo_box.setItemText(6, QtGui.QApplication.translate("McssResultsWidget", "attomolar", None, QtGui.QApplication.UnicodeUTF8))
-        self._volumes_label_1.setText(QtGui.QApplication.translate("McssResultsWidget", "Volumes are", None, QtGui.QApplication.UnicodeUTF8))
+        self._volumes_label_1.setText(QtGui.QApplication.translate("McssResultsWidget", "Compartment volumes are", None, QtGui.QApplication.UnicodeUTF8))
         self.in_label.setText(QtGui.QApplication.translate("McssResultsWidget", "in", None, QtGui.QApplication.UnicodeUTF8))
         self.volumes_data_units_combo_box.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Specifies the units of volume used in the simulated model.", None, QtGui.QApplication.UnicodeUTF8))
         self.volumes_data_units_combo_box.setItemText(0, QtGui.QApplication.translate("McssResultsWidget", "litres", None, QtGui.QApplication.UnicodeUTF8))
@@ -603,6 +606,7 @@ class Ui_McssResultsWidget(object):
         self.volumes_display_units_combo_box.setItemText(6, QtGui.QApplication.translate("McssResultsWidget", "attolitres", None, QtGui.QApplication.UnicodeUTF8))
         self.average_over_selected_runs_check_box.setText(QtGui.QApplication.translate("McssResultsWidget", "Average over selected runs", None, QtGui.QApplication.UnicodeUTF8))
         self.calculate_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Calculate other functions...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("McssResultsWidget", "datapoints", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Save timeseries data for selected runs, species and compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Export data as...", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setDescription(QtGui.QApplication.translate("McssResultsWidget", "text (.csv)\n"
@@ -610,13 +614,13 @@ class Ui_McssResultsWidget(object):
 "NumPy (.npz)", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_timeseries_button.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Plot timeseries for selected runs, species and compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_timeseries_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Plot timeseries", None, QtGui.QApplication.UnicodeUTF8))
-        self.plot_timeseries_button.setDescription(QtGui.QApplication.translate("McssResultsWidget", "Preview plots individually then combine, stack or tile", None, QtGui.QApplication.UnicodeUTF8))
+        self.plot_timeseries_button.setDescription(QtGui.QApplication.translate("McssResultsWidget", "Combined or individual plots from selection", None, QtGui.QApplication.UnicodeUTF8))
         self.visualise_population_button.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Animate levels of selected species on the lattice", None, QtGui.QApplication.UnicodeUTF8))
         self.visualise_population_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Visualise population", None, QtGui.QApplication.UnicodeUTF8))
         self.visualise_population_button.setDescription(QtGui.QApplication.translate("McssResultsWidget", "Animate species levels as a surface over the lattice", None, QtGui.QApplication.UnicodeUTF8))
-        self.plot_histogram_button.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Save timeseries data for selected runs, species and compartments", None, QtGui.QApplication.UnicodeUTF8))
+        self.plot_histogram_button.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Plot distributions of species in runs or compartments (and mean of the other)", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_histogram_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Plot histogram", None, QtGui.QApplication.UnicodeUTF8))
-        self.plot_histogram_button.setDescription(QtGui.QApplication.translate("McssResultsWidget", "Plot distribution of species in runs or compartments", None, QtGui.QApplication.UnicodeUTF8))
+        self.plot_histogram_button.setDescription(QtGui.QApplication.translate("McssResultsWidget", "Plot distributions of species in runs or compartments", None, QtGui.QApplication.UnicodeUTF8))
 
 from compartments_list_widget import CompartmentsListWidget
 from FromToDoubleSpinBox import FromToDoubleSpinBox

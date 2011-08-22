@@ -51,6 +51,14 @@ class SpatialPlotsWindow(QWidget):
         self.widgets = []
         for surface in self.surfaces:
             self.widgets.append(surface.edit_traits(kind='subpanel').control) #TODO edit_traits(kind='panel')?
+            
+#        # sync cameras #TODO button
+#        if len(self.surfaces) > 1:
+#            figure = self.surfaces[0].scene.mayavi_scene
+#            mlab = self.surfaces[0].scene.mlab 
+#            for surface in self.surfaces[1:]:
+#                mlab.sync_camera(figure, surface.scene.mayavi_scene)
+            
         gridLayout = QGridLayout()
         gridLayout.setHorizontalSpacing(6)
         gridLayout.setVerticalSpacing(6)
@@ -508,46 +516,6 @@ class Surface(HasTraits):
         resizable=True,
     )
 
-    def surf_default(self):
-        """ (Called after initialisation) \
-            Plots a surface with the shape of the first two indicies in \ 
-            self.array and the height of the value in the third index.
-        """
-        
-        figure=self.scene.mayavi_scene
-        
-        # create the surf trait, our surface
-        surf = self.scene.mlab.surf(self.array[:, :, 0], warp_scale=self.warp_scale, figure=figure)
-
-        # create a title and get handle to it
-        self.title = self.scene.mlab.title("%s at 0" % self.species_name, size=0.5, height=0.91, figure=figure)
-        self.title.x_position = 0.03
-        self.title.actor.width = 0.8#0.94 #FIXME set title to last timepoint then set width, then set title to first timepoint (not just 0) # actually these are indices in the time axis ('position') 
-
-        # create axes showing compartment x,y coordinates and fix text formatting
-        axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure)
-        axes.label_text_property.set(italic=0, bold=0)
-        #axes.axes.print_traits()
-        axes.axes.number_of_labels = 3
-        axes.axes.z_axis_visibility = 0
-        axes.axes.z_label = ''#self.quantities_display_units
-
-        # create and get a handle to the scalarbar
-        scalarbar = self.scene.mlab.scalarbar(None, str(self.quantities_display_units), "vertical", 5, None, '%.f')
-        # set scalarbar title and label fonts
-        scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
-        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
-        # vtk (< 5.2)
-#        scalarbar.position = [0.832050505051, 0.0348561403509]
-#        scalarbar.position2 = value = [0.162034646465, 0.287167919799]
-
-        # set angle scene is viewed from
-        self.scene.scene_editor.isometric_view() #WARNING removing this line causes the surface not to display and the axes to rotate 90 degrees vertically!
-##        self.scene.mlab.view(-45, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4  
-        # more angle setting in self.create_pipeline()
-
-        return surf
-
     @on_trait_change('scene.activated')
     def create_pipeline(self):
         """ set traits for items in figure """
@@ -568,10 +536,46 @@ class Surface(HasTraits):
 #        camera.position = (36.0146, 67.4237, 77.1612)
 #        camera.distance = 100
 #        self.scene.isometric_view()
+    
+    def surf_default(self):
+        figure=self.scene.mayavi_scene
+        
+        # create the surf trait, our surface
+        surf = self.scene.mlab.surf(self.array[:, :, 0], warp_scale=self.warp_scale, figure=figure)
 
-#    def __del__(self):
-#        del self.surf
+        # create a title and get handle to it
+        self.title = self.scene.mlab.title(self.maketitle(-1), size=0.5, height=0.91, figure=figure)
+        self.title = self.scene.mlab.title("%s at 0" % self.species_name, size=0.5, height=0.91, figure=figure)
+        self.title.x_position = 0.03
+        self.title.actor.width = 0.9 
+        self.title.text = self.maketitle(0)
 
+        # create axes showing compartment x,y coordinates and fix text formatting
+        axes = self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=figure, z_axis_visibility=False)
+        axes.label_text_property.set(italic=0, bold=0)
+#        axes.axes.print_traits()
+        axes.axes.number_of_labels = 3
+        axes.axes.z_axis_visibility = 0
+        axes.axes.z_label = ''#self.quantities_display_units
+
+        # create and get a handle to the scalarbar
+        scalarbar = self.scene.mlab.scalarbar(None, str(self.quantities_display_units), "vertical", 5, None, '%.f')
+        # set scalarbar title and label fonts
+        scalarbar.title_text_property.set(font_size=4, italic=0, bold=0)
+        scalarbar.label_text_property.set(font_size=4, italic=0, bold=0)#, line_spacing=0.5)
+        # vtk (< 5.2)
+#        scalarbar.position = [0.832050505051, 0.0348561403509]
+#        scalarbar.position2 = value = [0.162034646465, 0.287167919799]
+
+        # set angle scene is viewed from
+        self.scene.scene_editor.isometric_view() #WARNING removing this line causes the surface not to display and the axes to rotate 90 degrees vertically!
+##        self.scene.mlab.view(-45, 90, 4) # rotated 45 degrees, viewed side on, from a distance of 4  
+        # more angle setting in self.create_pipeline()
+
+        return surf
+
+    def maketitle(self, position):
+        return '%s at %s' % (self.species_name, round(self.timepoints[self.position], 2))
 
     # PyQt4 slot
     def set_position(self, position):
@@ -580,10 +584,14 @@ class Surface(HasTraits):
     @on_trait_change('position')
     def update_plot(self):
         self.surf.mlab_source.set(scalars=self.array[:, :, self.position])
-        self.title.text = "%s at %s" % (self.species_name, round(self.timepoints[self.position]))
+        self.scene.mlab.axes(ranges=self.extent, xlabel="X", ylabel="Y", figure=self.scene.mayavi_scene)#, z_axis_visibility=False)
+        self.title.text = self.maketitle(self.position)
 
     def arrayAtPosition(self, position):
         return self.array[:, :, position]
+
+#    def __del__(self):
+#        del self.surf
 
 
 #lut = surf.module_manager.scalar_lut_manager.lut.table.to_array()

@@ -127,15 +127,12 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.core.experiment_handler
     import infobiotics.core.params_handler
     import infobiotics.core.experiment_progress_handler
-#    import infobiotics.core.winpexpect
 #    import infobiotics.language.dependency_graphs
 #    import infobiotics.language.partial_propensities_fixed
 #    import infobiotics.language.module1
 #    import infobiotics.language.TODO
 #    import infobiotics.language.partial_propensities
 #    import infobiotics.language.species
-#    import infobiotics.language.module_introspection.ply
-#    import infobiotics.language.module_introspection.ply_importing_module
 #    import infobiotics.language.api
 #    import infobiotics.language.partial_propensities_backup
 #    import infobiotics.language.sbml
@@ -380,8 +377,8 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.mcss.results.ui_simulation_results_dialog
     import infobiotics.mcss.results.mcss_results
     import infobiotics.mcss.results.timeseries_plot
+#    import infobiotics.mcss.results.oregonator_movie
     import infobiotics.mcss.results.ui_mcss_results_widget
-#    import infobiotics.mcss.results.adapted_wigner
     import infobiotics.mcss.results.simulation
 #    import infobiotics.mcss.results.combined_surfaces
     import infobiotics.mcss.results.mcss_results_widget

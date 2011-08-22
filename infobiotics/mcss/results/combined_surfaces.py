@@ -96,22 +96,23 @@ if __name__ == '__main__':
     #npzfile = np.load('/home/jvb/Desktop/pulseInverter.h5_surfaces.npz')
     #proteinGFP = npzfile['proteinGFP']
     #proteinCI = npzfile['proteinCI']
-    npzfile = np.load('/home/jvb/Desktop/ThreeLayers.h5_surfaces.npz')
+    npzfile = np.load('/home/jvb/simulations/ThreeLayers.h5_surfaces.npz')
     FP1 = npzfile['FP1']
     FP2 = npzfile['FP2']
-    FP1 = FP1[46:86,1:-1,:] # crop to Central cells only
-    FP2 = FP2[46:86,1:-1,:] # crop to Central cells only
-    from interpolation import interpolate
-    tmultiplier = 5
-    xymultiplier = 3
-    FP1 = interpolate(FP1, xymultiplier, tmultiplier)
-    FP2 = interpolate(FP2, xymultiplier, tmultiplier)
+#    FP1 = FP1[46:86,1:-1,:] # crop to Central cells only
+#    FP2 = FP2[46:86,1:-1,:] # crop to Central cells only
+#    from interpolation import interpolate
+#    tmultiplier = 5
+#    xymultiplier = 3
+#    FP1 = interpolate(FP1, xymultiplier, tmultiplier)
+#    FP2 = interpolate(FP2, xymultiplier, tmultiplier)
     arrays = np.array([FP1, FP2])    
     surfaces = Surfaces(arrays)
     
-    self = surfaces.edit_traits().control
-    self.show()
-    self.raise_()
-    qApp.processEvents()
-    exit(qApp.exec_())
+#    self = surfaces.edit_traits().control
+#    self.show()
+#    self.raise_()
+#    qApp.processEvents()
+#    exit(qApp.exec_())
+    surfaces.configure_traits()
     
