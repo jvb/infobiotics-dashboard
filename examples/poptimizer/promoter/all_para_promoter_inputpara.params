@@ -7,8 +7,8 @@
 <!-- parameter definitions -->
 <parameterSet name="POptimizerParameters">
 	<parameter name="num_initials" value="1"/>
-	<parameter name="target_file" value="target_data_promoter.txt"/>
-	<parameter name="initial_file" value="initial_values_ptomoter.txt"/>
+	<parameter name="target_file" value="target_data_promoter"/>
+	<parameter name="initial_file" value="initial_values_promoter"/>
 	<parameter name="nonfix_module_lib_file" value="all_para_module_library_promoter.xml"/>
 	<parameter name="fix_module_lib_file" value="Null"/>
 	<parameter name="molecules" value="LuxR:CI:LacI:FP"/>

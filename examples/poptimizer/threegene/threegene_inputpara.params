@@ -5,10 +5,10 @@
 
     <!-- parameter definitions -->
     <parameterSet name="POptimizerParameters">
+        <parameter name="num_initials" value="1"/>
         <parameter name="target_file" value="target_data_threegene"/>
         <parameter name="target_obj_num" value="6"/>
         <parameter name="initial_file" value="initial_values_threegene"/>
-        <parameter name="num_initials" value="1"/>
         <parameter name="nonfix_module_lib_file" value="threegene_module_library.xml"/>
         <parameter name="fix_module_lib_file" value="Null"/>
         <parameter name="molecules" value="1:2:3"/>
@@ -19,9 +19,11 @@
         <parameter name="simu_runs" value="20"/>
         <parameter name="fitness_func_type" value="RandomWeightedSum"/>
         <parameter name="para_opti_algo" value="DE"/>
-        <parameter name="percent_paraopti" value="0.1"/>
-        <parameter name="maxgeno" value="10"/>
+		<parameter name="show_progress" value="true"/>
+	        <parameter name="debug_mode" value="true"/>        
         <parameter name="popsize" value="20"/>
+        <parameter name="maxgeno" value="10"/>
+        <parameter name="percent_paraopti" value="0.1"/>
         <parameter name="DE_psize" value="20"/>
         <parameter name="DE_maxgeno" value="10"/>
         <parameter name="GA_psize" value="30"/>
