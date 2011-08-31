@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-'''
-Single entry-point for Infobiotics Workbench.
+# THIS FILE IS AUTOMATICALLY CREATED
+'''Single entry-point for Infobiotics Workbench.
 
 With zero arguments it launches the Infobiotics Workbench/Dashboard (Envisage Workbench), 
 with one argument it launches the individual experiment/command GUI (e.g. 'McssExperiment().configure()') and
