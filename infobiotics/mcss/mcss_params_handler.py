@@ -16,16 +16,23 @@ model_formats = {
 model_formats_reversed = reversedict(model_formats)
 
 simulation_algorithms = {
+# working
     'Multicompartment Gillespie Enhanced Queue'                          : 'dmq2',
-    'Multicompartment Gillespie Enhanced Queue with growth'              : 'dmq2g',
-    'Multicompartment Gillespie Enhanced Queue with growth and division' : 'dmq2gd',
-    'Multicompartment Gillespie Queue'                                   : 'dmq',
-    'Multicompartment Gillespie Queue with growth'                       : 'dmqg',
+#    'Multicompartment Gillespie Enhanced Queue with growth'              : 'dmq2g',
+#    'Multicompartment Gillespie Enhanced Queue with growth and division' : 'dmq2gd',
     'Multicompartment Gillespie Direct Method'                           : 'dm',
-    'Multicompartment Gillespie Logarithmic Direct Method'               : 'ldm',
-    'Multicompartment Gillespie Direct Method with growth and division'  : 'dmgd',
-    'Multicompartment Gillespie Direct Method Cellular Potts'            : 'dmcp',
+
+# new    
     'Deterministic solver'  : 'ode1',
+
+## broken
+#    'Multicompartment Gillespie Logarithmic Direct Method'               : 'ldm',
+#    'Multicompartment Gillespie Direct Method Cellular Potts'            : 'dmcp',
+#
+## superceded
+#    'Multicompartment Gillespie Queue'                                   : 'dmq',
+#    'Multicompartment Gillespie Queue with growth'                       : 'dmqg',
+#    'Multicompartment Gillespie Direct Method with growth and division'  : 'dmgd',
 }
 simulation_algorithms_reversed = reversedict(simulation_algorithms)
 

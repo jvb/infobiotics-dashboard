@@ -12,7 +12,7 @@
         <parameter name="nonfix_module_lib_file" value="threegene_module_library.xml"/>
         <parameter name="fix_module_lib_file" value="Null"/>
         <parameter name="molecules" value="1:2:3"/>
-        <parameter name="seednum" value="4123"/>
+        <parameter name="seednum" value="1"/>
         <parameter name="maxtime" value="118.0"/>
         <parameter name="interval" value="1.0"/>
         <parameter name="maxmodulesno" value="4"/>

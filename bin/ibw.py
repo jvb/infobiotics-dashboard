@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-'''
-Single entry-point for Infobiotics Workbench.
+# THIS FILE IS AUTOMATICALLY CREATED
+'''Single entry-point for Infobiotics Workbench.
 
 With zero arguments it launches the Infobiotics Workbench/Dashboard (Envisage Workbench), 
 with one argument it launches the individual experiment/command GUI (e.g. 'McssExperiment().configure()') and
@@ -81,6 +81,8 @@ def main(argv):
             model = args1
     if model != '':
         directory, model = os.path.split(model)
+#    else:
+#        directory = os.getcwd()
 
     if command == simulate:
         from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment
@@ -112,5 +114,38 @@ def main(argv):
 #    experiment.perform() # useful for debugging without threads
 
 
+dir = os.path.dirname(__file__)
+
+def test_relative_path_to_model():
+    main(sys.argv + ['mcss', '../examples/mcss/models/module1.sbml'])
+
+def test_absolute_path_to_model():
+    main(sys.argv + ['mcss', dir + '../examples/mcss/models/module1.sbml'])
+
+def test_relative_path_to_params():
+    main(sys.argv + ['pmodelchecker-mc2', '../examples/pmodelchecker/pulsePropagation/pulse_MC2.params'])
+
+def test_absolute_path_to_params():
+    main(sys.argv + ['poptimizer', dir + '../examples/poptimizer/fourinitial/four_initial_inputpara.params'])
+
+def test_wrong_params_for_experiment():
+    main(sys.argv + ['poptimizer', '../examples/mcss/models/reactions1.params'])
+
+def test_absolute_path_to_model2():
+    main(sys.argv + ['pmodelchecker-prism', dir + '../examples/pmodelchecker/pulsePropagation/pulsePropagation.lpp'])
+    
+def test_absolute_path_to_params2():
+    main(sys.argv + ['pmodelchecker-prism', dir + '../examples/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params'])
+    
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main(sys.argv) #TODO uncomment
+#    main(sys.argv + ['mcss'])
+    #TODO comment
+#    test_relative_path_to_model()
+#    test_absolute_path_to_model()
+#    test_relative_path_to_params()
+#    test_absolute_path_to_params()
+#    test_wrong_params_for_experiment()
+#    test_absolute_path_to_model2()
+#    test_absolute_path_to_params2()
