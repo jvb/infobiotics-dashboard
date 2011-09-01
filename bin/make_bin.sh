@@ -1,4 +1,19 @@
-cp ibw.py infobiotics-dashboard && chmod +x infobiotics-dashboard
-cp ibw.py infobiotics-dashboard.py && chmod +x infobiotics-dashboard.py
-cp ibw.py infobiotics-dashboard.pyw && chmod +x infobiotics-dashboard.pyw
+#!/bin/bash
+set -o nounset
+set -o errexit
 
+names="infobiotics-dashboard
+infobiotics-workbench
+ibw"
+
+exts=".py
+.pyw"
+
+for name in $names
+do
+    for ext in $exts ""
+    do
+    	f=$name$ext
+    	cp _ibw.py $f && chmod +x $f
+    done
+done
