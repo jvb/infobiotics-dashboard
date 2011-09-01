@@ -27,10 +27,11 @@ sip.setapi('QString', 1) # EPD <= 3.6? (Ubuntu Maverick and Natty use 3.4.1)
 # set toolkit to 'qt4' (TraitsBackendQt) before any Traits imports; os.environ['ETS_TOOLKIT']='qt4' also works
 from enthought.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'#TODO PySide
-# PySide signals and slots
-#from PySide import QtCore
-#QtCore.Signal = QtCore.pyqtSignal
-#QtCore.Slot = QtCore.pyqtSlot
+## PySide signals and slots
+##from PySide import QtCore
+##QtCore.Signal = QtCore.pyqtSignal
+##QtCore.Slot = QtCore.pyqtSlot
+## PySide not supported
 
 # set company to 'Infobiotics'
 ETSConfig.company = 'Infobiotics'
@@ -38,4 +39,8 @@ ETSConfig.company = 'Infobiotics'
 # ~/.enthought for preferences.ini
 # used by ETSConfig.get_application_data() for persistence (preferences)
 
-#import preferences # fails on weasel
+#import preferences # fails on weasel #TODO
+
+def tests():
+    '''Runs all tests.''' #TODO
+
