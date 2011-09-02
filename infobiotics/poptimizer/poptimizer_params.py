@@ -48,6 +48,7 @@ An example target timeseries file with 2 objects should look like:
 
     # structure optimisation
     fitness_func_type = Enum(['RandomWeightedSum', 'EqualWeightedSum'], desc='the fitness function chosen to do the model quality evaluation')
+    #TODO ODE # opposition differential evolution (ODE) http://www.infobiotics.org/infobiotics-workbench/completeDocumentation/optimisation/optimisation_Claudio.html
     para_opti_algo = Enum(['DE', 'GA', 'EDA', 'CMA-ES'], desc='the algorithm chosen to do the model parameter optimization')
     percent_paraopti = Range(0.0, 1.0, 0.1, desc='the percentage of the individuals in the model population on which to do the parameter optimization')
     maxgeno = IntGreaterThanZero(50, desc='the maximum number of generations to evolve the best model')

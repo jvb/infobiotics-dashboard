@@ -1,10 +1,9 @@
 from __future__ import with_statement
-import os; os.environ['ETS_TOOLKIT'] = 'qt4'
+import infobiotics
 from enthought.traits.api import HasTraits, Instance, Str, Button, Any 
 from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring, HSplit, CodeEditor
 from matplotlib.figure import Figure
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
-from infobiotics.commons.matplotlib.matplotlib_figure_size import MatplotlibFigureSize, resize_and_save_matplotlib_figure
 from poptimizer_experiment import POptimizerExperiment
 
 #import logging
@@ -26,10 +25,6 @@ class POptimizerResults(HasTraits):
     def _edit_experiment_fired(self):
         self.experiment.edit()
     
-    save_resized = Button
-    def _save_resized_fired(self):
-        resize_and_save_matplotlib_figure(self.figure)
-
     def traits_view(self):
         return View(
             HSplit(
@@ -38,8 +33,6 @@ class POptimizerResults(HasTraits):
                         Item(label='Best model found:'),
                         Spring(),
                         Item('edit_experiment', show_label=False, enabled_when='object.experiment is not None'),
-                        Spring(),
-                        Item('save_resized', show_label=False),
                     ),
                     Item('best_model',
                         show_label=False,
@@ -48,9 +41,7 @@ class POptimizerResults(HasTraits):
                 ),
                 Item('figure',
                     show_label=False,
-                    editor=MatplotlibFigureEditor(
-#                            toolbar=True
-                    ),
+                    editor=MatplotlibFigureEditor(),
                 ),
                 show_border=True,
             ),
