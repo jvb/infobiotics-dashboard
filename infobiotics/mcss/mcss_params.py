@@ -49,7 +49,7 @@ class McssParams(Params):
     duplicate_initial_amounts = Bool(True, desc='whether to duplicate initial amounts for all templates in the SBML model')
 #    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
     max_time = FloatGreaterThanZero(desc='the maximum simulated time')
-    max_run_time = Range(low=0, desc='the maximum execution time for all runs')
+    max_runtime = Range(low=0, desc='the maximum execution time for all runs (in seconds)')
     log_interval = FloatGreaterThanZero(1.0, desc='the time interval between which to log data') 
     runs = LongGreaterThanZero(1, desc='the number of simulation runs to perform')
     data_file = ParamsRelativeFile('simulation.h5', writable=True, filter=['HDF5 files (*.h5)'], desc='the file to save simulation data to')
@@ -105,7 +105,7 @@ class McssParams(Params):
             'model_format', 
 
             'max_time', 
-            'max_run_time',
+            'max_runtime',
             'log_interval', 
             
             'data_file', 

@@ -20,7 +20,7 @@ mcss_params_group = Group(
                     Item('max_time'),
                     Item('log_interval'),
                     Item('runs', visible_when='object.simulation_algorithm!="ode1"'),
-                    Item('max_run_time'),
+                    Item('max_runtime'),
                     Item('data_file'),
                     HGroup(
                         Item('compress', label='Compress output'),
