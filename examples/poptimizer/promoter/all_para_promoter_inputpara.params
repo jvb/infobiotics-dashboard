@@ -19,7 +19,7 @@
 	<parameter name="interval" value="36"/>
 	<parameter name="maxmodulesno" value="5"/>
 	<parameter name="simu_runs" value="20"/>
-	<parameter name="seednum" value="4123"/>	
+	<parameter name="seednum" value="0"/>	
 	<parameter name="show_progress" value="true"/>
         <parameter name="debug_mode" value="false"/>
 	<parameter name="popsize" value="20"/>

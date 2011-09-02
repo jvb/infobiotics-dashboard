@@ -42,7 +42,6 @@ neighbourhoods = {
 }
 neighbourhoods_reversed = reversedict(neighbourhoods)
 
-ode_solvers_reversed = { 
 """
 mcss/Psystem.cpp:159
 if((strcmp(parameters.simulation_algorithm, "ode1") == 0)) {
@@ -67,6 +66,7 @@ if((strcmp(parameters.simulation_algorithm, "ode1") == 0)) {
     if((strcmp(parameters.ode_solver, "gear2") == 0))
             simalg->setOdeSolver(gsl_odeiv_step_gear2);
 """
+ode_solvers_reversed = { 
     'rk2'   : 'Explicit embedded Runge-Kutta (2, 3) method',
     'rk4'   : 'Explicit 4th order (classical) Runge-Kutta',
     'rkf45' : 'Explicit embedded Runge-Kutta-Fehlberg (4, 5) method',

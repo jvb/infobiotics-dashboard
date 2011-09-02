@@ -87,15 +87,26 @@ class McssParams(Params):
     progress_interval = Float(0.0, desc='time interval within each run to output progress information')
     
     def parameter_names(self):
-        return [
+        parameter_names = []
+        if self.simulation_algorithm == 'ode1':
+            parameter_names += [
+                'ode_solver',
+            ]
+        else:
+            parameter_names += [
+                'runs',
+            ]
+        if self.model_format == 'sbml':
+            parameter_names += [
+                'duplicate_initial_amounts',
+            ]
+        return parameter_names + [
             'model_file', 
             'model_format', 
-                'duplicate_initial_amounts', # SBML
-#                'just_psystem', # P system XML?
 
             'max_time', 
+            'max_run_time',
             'log_interval', 
-            'runs', 
             
             'data_file', 
             'seed', 
@@ -104,7 +115,6 @@ class McssParams(Params):
             'compression_level', 
 
             'simulation_algorithm', 
-            'ode_solver',
             
             'log_memory',
             'log_type', 
@@ -112,7 +122,6 @@ class McssParams(Params):
             'log_volumes', 
             'log_steady_state',
             'log_degraded', 
-#            'dump', 
             
             'neighbourhood',
             
@@ -140,7 +149,6 @@ class McssParams(Params):
 
 
 if __name__ == '__main__':
-    parameters = McssParams()#executable='/usr/bin/mcs')
-#    print 'executable', parameters.executable
+    parameters = McssParams()
     parameters.configure()
             
