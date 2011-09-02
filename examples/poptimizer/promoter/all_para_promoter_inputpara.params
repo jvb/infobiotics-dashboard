@@ -12,7 +12,7 @@
 	<parameter name="nonfix_module_lib_file" value="all_para_module_library_promoter.xml"/>
 	<parameter name="fix_module_lib_file" value="Null"/>
 	<parameter name="molecules" value="LuxR:CI:LacI:FP"/>
-	<parameter name="para_opti_algo" value="DE"/>
+	<parameter name="para_opti_algo" value="EDA"/>
 	<parameter name="fitness_func_type" value="RandomWeightedSum"/>  
 	<parameter name="target_obj_num" value="4"/>
 	<parameter name="maxtime" value="3600"/>

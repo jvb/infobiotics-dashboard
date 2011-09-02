@@ -112,5 +112,6 @@ class POptimizerResults(HasTraits):
             
 
 if __name__ == '__main__':
-    experiment = POptimizerExperiment('../../examples/poptimizer/fourinitial/four_initial_inputpara.params')
+#    experiment = POptimizerExperiment('../../examples/poptimizer/fourinitial/four_initial_inputpara.params')
+    experiment = POptimizerExperiment('../../examples/poptimizer/threegene/threegene_inputpara.params')
     POptimizerResults(experiment=experiment).configure_traits()
