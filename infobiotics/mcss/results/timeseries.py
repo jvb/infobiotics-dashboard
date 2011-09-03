@@ -64,7 +64,7 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
             if title:
                 title += ' in '
             title += '%s' % str(self.compartment)
-        if self.runs_summary not in self.plot_title:
+        if self.runs_summary and self.runs_summary not in self.plot_title:
             runs = self.runs_summary if self.num_runs > 1 else 'run %s' % self.run_numbers[0]
             if title:
                 title += ' (%s)' % runs

@@ -10,7 +10,7 @@ from quantities.units.time import hour, minute
 import operator
 from table import indent
 from PyQt4.QtGui import QMessageBox
-from PyQt4.QtCore import QString#, Qt, SIGNAL, SLOT
+from PyQt4.QtCore import QString, Qt, SIGNAL, SLOT
 
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
 
@@ -1436,7 +1436,10 @@ class McssResults(object):
             else:
                 '%s runs' % num_runs
         else:
-            runs_summary = 'run %s' % run_numbers[0]
+            run_num = run_numbers[0]
+            runs_summary = 'run %s' % run_numbers[0] if run_num > 1 else ''
+            del run_num 
+        
         
         plot_title = ''
         if species_summary:
@@ -1445,27 +1448,11 @@ class McssResults(object):
             if plot_title:
                 plot_title += ' in '
             plot_title += compartments_summary
-        if plot_title:
-            plot_title += ' (%s)' % runs_summary
-        else:
-            plot_title += runs_summary
-        
-#        def short_title(species=None):
-#            return str(species) if species else 'Volume'
-#                
-#        def long_title(compartment, species=None, run=None):
-#            '''Needed when short title would be ambiguous, i.e. same species 
-#            name in different simulations when different numbers of runs'''
-#            if num_runs == 1: assert run is not None
-#            title = str(species) if species else 'Volume'#short_title(species) 
-#            if compartments_summary:
-#                if compartments_summary not in plot_title:
-#                    title += ' in %s' % compartments_summary
-#            else:
-#                title += ' in %s' % str(compartment)
-#            if runs_summary not in plot_title:
-#                title += ', %s' % runs_summary if num_runs > 1 else ', run %s' % str(run)
-#            return title
+        if runs_summary:
+            if plot_title:
+                plot_title += ' (%s)' % runs_summary
+            else:
+                plot_title += runs_summary
         
         values_type = 'Concentration' if self.quantities_display_type == 'concentrations' else 'Amount'
 
@@ -1493,8 +1480,6 @@ class McssResults(object):
                                 values_units=self.quantities_display_units,
                                 _colour=colours.colour(si), #TODO rechoose colours based on different strategy for stacked, etc in timeseries plot
                                 marker=colours.marker(ci),
-#                                short_title=short_title(s),
-#                                long_title=long_title(c, s),
                                 run_numbers=run_numbers,
                                 compartment=str(c),
                                 species=str(s),
@@ -1506,14 +1491,11 @@ class McssResults(object):
                 for ci, c in enumerate(compartments):
                     timeseries.append(
                         Timeseries(
-#                            values_type='Volume', # 'Volume' is values_type default
                             values=mean_volumes_over_runs[ci, :],
                             std=std_volumes_over_runs[ci, :],
                             values_units=self.volumes_display_units,
                             _colour=colours.colour(num_species + ci),
                             marker=colours.marker(ci),
-#                            short_title=short_title(),
-#                            long_title=long_title(c),
                             run_numbers=run_numbers,
                             compartment=str(c),
                             **commons
@@ -1533,8 +1515,6 @@ class McssResults(object):
                                     values_units=self.quantities_display_units,
                                     _colour=colours.colour(si),
                                     marker=colours.marker(ci),
-#                                    short_title=short_title(s),
-#                                    long_title=long_title(c, s, r),
                                     run_numbers=[r._run_number],
                                     compartment=str(c),
                                     species=str(s),
@@ -1547,13 +1527,10 @@ class McssResults(object):
                     for ci, c in enumerate(self.compartments):
                         timeseries.append(
                             Timeseries(
-#                                values_type='Volume', # 'Volume' is values_type default
                                 values=volumes[ri, ci, :],
                                 values_units=self.volumes_display_units,
                                 _colour=colours.colour(num_species + ci),
                                 marker=colours.marker(ci),
-#                                short_title=short_title(),
-#                                long_title=long_title(c, run=r),
                                 run_numbers=[r._run_number],
                                 compartment=str(c),
                                 **commons
@@ -1580,14 +1557,14 @@ class McssResults(object):
             **kwargs
         )
         ui = timeseries_plot.edit_traits(kind='live')
-        return ui
-#        widget = ui.control
-#        widget.setAttribute(Qt.WA_DeleteOnClose)
-#        if parent:
-#            widget.connect(parent, SIGNAL("destroyed(QObject*)"), SLOT("close()"))
-#        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
-#        widget.show()
-#        return timeseries_plot
+#        return ui
+        widget = ui.control
+        widget.setAttribute(Qt.WA_DeleteOnClose)
+        if parent:
+            widget.connect(parent, SIGNAL("destroyed(QObject*)"), SLOT("close()"))
+        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
+        widget.show()
+        return timeseries_plot
     
     
     def histograms(self, bins=10, data='compartments', sum_species=False, dtype=dtypedefault):

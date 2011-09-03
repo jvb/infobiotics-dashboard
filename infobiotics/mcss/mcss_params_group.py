@@ -41,7 +41,6 @@ mcss_params_group = Group(
                 Item('log_steady_state'),
                 Item('log_degraded'),
                 Item('log_memory', label='Log output to memory'),
-                Item('dump'),
                 label='Output'
             ),
             

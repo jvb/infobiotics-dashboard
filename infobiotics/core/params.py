@@ -111,7 +111,7 @@ class Params(HasTraits):
     
     def __init__(self, file=None, only_bind_executable=False, **traits):
         # only_bind_exectuable is necessary so that PModelCheckerParams.translate_model_specification doesn't override PRISMParams directory
-        self.bind_preferences(only_bind_executable) # essential #TODO do in configure() or edit() so that scripts and terminal can rely on defaults not preferences?
+        self.bind_preferences(only_bind_executable, **traits) #TODO do in configure() or edit() so that scripts and terminal can rely on defaults not preferences?
 #        if self._interaction_mode == 'terminal':
 #            self.directory = os.getcwd()
         super(Params, self).__init__(**traits) # do this after binding preferences so that we can override executable and directory 
@@ -119,11 +119,7 @@ class Params(HasTraits):
         if file is not None:
             self.load(file)
 
-    def bind_preferences(self, only_bind_executable=False):
-        ''' Changes to preferences object will update bound trait value and 
-        vice versa. 
-        '''
-#        self._bound_preferences = [] # must assign _bound_preferences otherwise bindings are lost when this method returns
+    def bind_preferences(self, only_bind_executable=False, **traits): #RENAME
         if only_bind_executable:
             _preferences = ['executable']
         else:
@@ -131,31 +127,35 @@ class Params(HasTraits):
         for preference in _preferences:
             preferences_path = '.'.join([self._preferences_path, preference])
             try:
-                bound_preference = bind_preference(self, preference, preferences_path, preferences)
-#                bind_preference(self, preference, preferences_path, preferences)
+                value = preferences.get(preferences_path) # not converting strings
+                if value is not None:
+                    value = trait_value_from_parameter_value(self, preference, value)
+                    setattr(self, preference, value)
             except TraitError:
-                value = preferences.get(preferences_path)
                 preferences.remove(preferences_path)
                 preferences.flush()
-                default = preferences.get(preferences_path)
-#                warning = "Value of preference %s in '%s' ('%s') is invalid. %s Using default ('%s')." % (preferences_path, preferences.filename, value, e, default)
+                default = self.preferences_helper.get(preferences_path)
+                if default is not None and preference not in traits:
+                    default = trait_value_from_parameter_value(self, preference, value)
+                    try:
+                        setattr(self, preference, default)
+                    except TraitError:
+                        pass #TODO mention it?
                 warning = "Value of preference %s in '%s' ('%s') is invalid. Removing and using default ('%s') instead." % (preferences_path, preferences.filename, value, default)
                 if self._interaction_mode == 'script':
                     logger.warn(warning)
                 elif self._interaction_mode == 'terminal':
                     print warning
                 elif self._interaction_mode == 'gui':
-                    pass 
-#                bound_preference = bind_preference(self, preference, preferences_path, infobiotics.preferences.preferences)
-                bind_preference(self, preference, preferences_path, infobiotics.preferences.preferences)
-#            self._bound_preferences.append(bound_preference)
-#            bound_preference = None
-        preferences.save() # save preferences because some invalid ones might have been removed
+                    pass #TODO? 
+        self.save_preferences() # save preferences because some invalid ones might have been removed
         
     def save_preferences(self):
         ''' Called from self._handler.close() '''
-        from enthought.preferences.api import get_default_preferences
-        get_default_preferences().save()
+        for preference in ['executable', 'directory'] + self.parameter_names():
+            preferences_path = '.'.join([self._preferences_path, preference])
+            preferences.set(preferences_path, getattr(self, preference))
+        preferences.save()
 
         
     _interaction_mode = Enum(['script', 'terminal', 'gui'])

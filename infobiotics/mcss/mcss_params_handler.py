@@ -37,8 +37,8 @@ simulation_algorithms = {
 simulation_algorithms_reversed = reversedict(simulation_algorithms)
 
 neighbourhoods = { 
-    'von Neumann (4)'   : 4,
-    'Moore (8)'         : 8,
+    'von Neumann (4)'   : '4',
+    'Moore (8)'         : '8',
 }
 neighbourhoods_reversed = reversedict(neighbourhoods)
 
@@ -118,7 +118,7 @@ class McssParamsHandler(ParamsHandler):
     )
 
     neighbourhood = Trait(
-        4,
+        '4',
         neighbourhoods,
         desc='the neighbourhood for non-vector transport rules',
     )
@@ -130,6 +130,7 @@ class McssParamsHandler(ParamsHandler):
         model_format = info.object.model_format
         simulation_algorithm = info.object.simulation_algorithm
         ode_solver = info.object.ode_solver
+        neighbourhood = info.object.neighbourhood
 
         # remember dirty
         dirty = info.object._dirty
@@ -143,6 +144,7 @@ class McssParamsHandler(ParamsHandler):
         info.object.model_format = model_format
         info.object.simulation_algorithm = simulation_algorithm
         info.object.ode_solver = ode_solver
+        info.object.neighbourhood = neighbourhood
 
         # reset dirty 
         info.object._dirty = dirty

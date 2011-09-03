@@ -81,7 +81,7 @@ class McssParams(Params):
     growth_type = Enum(['none', 'linear', 'exponential', 'function'], desc='the volume growth type')
     
     # overridden in McssParamsHandler
-    neighbourhood = Enum([4,8])
+    neighbourhood = Enum(['4','8'])#4,8])
     
     show_progress = Bool(False, desc='whether to output the current time to screen at each log interval')
     progress_interval = Float(0.0, desc='time interval within each run to output progress information')
