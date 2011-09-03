@@ -2,7 +2,7 @@ import infobiotics
 from mcss_results import McssResults
 from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
     Button, on_trait_change, Tuple, Dict, Array, Enum, Property, Range, Any, Button,
-    cached_property, Int)
+    cached_property, Int, Set)
 from enthought.traits.ui.api import (View, VGroup, Item, HGroup, Spring,
     ListEditor, InstanceEditor, SetEditor, RangeEditor, VFold, VSplit, VGrid, VFlow, HSplit, TextEditor)
 from infobiotics.commons import colours
@@ -70,15 +70,14 @@ class TimeseriesPlot(HasTraits):
     scientific_volume_ticklabels = Bool(True)
 
 
-    figure_title = Str #TODO get from McssResultsDialog
-
-#    def _figure_title_default(self):
+    figure_title = Str
+    def _figure_title_default(self):
 #        return 'figure\ntitle'
+        return '; '.join(self.plot_titles)
 
 
+    _timeseries = List(Timeseries) # enables choice of timeseries
     timeseries = List(Timeseries)
-    _timeseries = List(Timeseries)
-    
     def _timeseries_changed(self):
         self._timeseries = self.timeseries[:]
 
@@ -192,13 +191,27 @@ class TimeseriesPlot(HasTraits):
         labels = []
         for timeseries, line in self._timeseries_to_line_map.iteritems():
             lines.append(line)
-            labels.append(timeseries.title)
+            labels.append(self.get_timeseries_title(timeseries))
         return self._figure.legend(
             lines,
             labels,
             loc='upper center', # http://matplotlib.sourceforge.net/api/figure_api.html#matplotlib.figure.Figure.legend 
             prop=self.legend_font_properties
         ) 
+
+    plot_titles = Property(Set(Str), depends_on='timeseries')
+    @cached_property
+    def _get_plot_titles(self):
+        return set(t.plot_title for t in self.timeseries)
+
+    def get_timeseries_title(self, timeseries):
+        '''Returns either timeseries.short_title or timeseries.long_title 
+        depending on whether multiple plot_titles are found in all timeseries.
+        '''
+        if len(self.plot_titles) > 1:
+            return timeseries.long_title
+        else:
+            return timeseries.short_title
     
 
 #    @on_trait_change('+') # dangerous
@@ -248,7 +261,14 @@ class TimeseriesPlot(HasTraits):
 
         # don't allow negative x (time) or y (values)
         for axes in self.axes:
-            axes.set_xlim(self.results.from_.magnitude, self._timeseries[0].timepoints[-1].magnitude)
+#            axes.set_xlim(self.results.from_.magnitude, self._timeseries[0].timepoints[-1].magnitude) 
+            # removing dependency on results (so timeseries for different results can be plotted) 
+            # using max of each timeseries (in case some are longer than others)
+            xmin_xmax_tuples = [(t.timepoints[0].magnitude, t.timepoints[-1].magnitude) for t in self._timeseries]
+            xmins, xmaxs = zip(*xmin_xmax_tuples)
+            xmin = min(xmins)
+            xmax = max(xmaxs)
+            axes.set_xlim(xmax, xmin) #TODO test
             ymin, ymax = axes.get_ylim() 
             if ymin < 0:
                 axes.set_ylim(0, ymax)
@@ -385,7 +405,7 @@ class TimeseriesPlot(HasTraits):
         if (timeseries.values_type != 'Volume' and self.scientific_amounts_ticklabels) or (timeseries.values_type == 'Volume' and self.scientific_volume_ticklabels):
             axes.yaxis.set_major_formatter(get_scientific_formatter())
 
-    marker_interval = Int(1, auto_set=True, desc='the number of timepoints between markers (and errorbars if available)')
+    marker_interval = Int(10, auto_set=True, desc='the number of timepoints between markers (and errorbars if available)')
 #    def _marker_interval_default(self):
 #        return len(self.results._timepoints) // 10
 
@@ -434,7 +454,7 @@ class TimeseriesPlot(HasTraits):
         lines = axes.plot(
             timeseries.timepoints,
             timeseries.values,
-            label=timeseries.title,
+            label=self.get_timeseries_title(timeseries),
             color=timeseries.colour,
             linestyle='--' if timeseries.values_type == 'Volume' else '-',
             marker=timeseries.marker,
@@ -769,15 +789,15 @@ class TimeseriesPlot(HasTraits):
     def _get__timeseries_mapping(self):
 #        from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_EnumEditor
         if self.separate_volumes:
-#            l = [(timeseries, timeseries.title) for timeseries in self.timeseries]
+#            l = [(timeseries, self.get_timeseries_title(timeseries)) for timeseries in self.timeseries]
 #            w = len(str(len(l)))
 #            import string
 #            d = dict((timeseries, '%s:%s' % (string.zfill(i + 1, w), title)) for i, (timeseries, title) in enumerate(l))
 #            print d
 #            return d
-            return dict([(timeseries, ':%s' % timeseries.title) for timeseries in self.timeseries])
+            return dict([(timeseries, ':%s' % self.get_timeseries_title(timeseries)) for timeseries in self.timeseries])
         else:
-            return dict([(timeseries, ':%s' % timeseries.title) for timeseries in self.timeseries if timeseries.values_type != 'Volume'])
+            return dict([(timeseries, ':%s' % self.get_timeseries_title(timeseries)) for timeseries in self.timeseries if timeseries.values_type != 'Volume'])
 
     def _refine_timeseries_selection_fired(self):
         self.edit_traits(
@@ -788,7 +808,7 @@ class TimeseriesPlot(HasTraits):
                     ),
                     Item('_timeseries',
                         editor=SetEditor(
-#                            values=dict([(timeseries, ':%s' % timeseries.title) for timeseries in self.timeseries]),
+#                            values=dict([(timeseries, ':%s' % self.get_timeseries_title(timeseries)) for timeseries in self.timeseries]),
                             name='_timeseries_mapping',
                             can_move_all=True,
                             ordered=True,
@@ -830,7 +850,7 @@ class TimeseriesPlot(HasTraits):
         list_widget.setGridSize(QSize(size - 1, size - 1)) # hides label
 #        list_widget.hideInvariants = True #TODO
         for timeseries in self._timeseries:
-            QListWidgetItem(QIcon(timeseries.pixmap()), timeseries.title, list_widget)
+            QListWidgetItem(QIcon(timeseries.pixmap()), self.get_timeseries_title(timeseries), list_widget)
         self._list_widget = list_widget # must keep reference to list_widget or it gets destroyed when method returns 
         self._list_widget.show()
 

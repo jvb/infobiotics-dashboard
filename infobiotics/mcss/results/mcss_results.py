@@ -1287,61 +1287,88 @@ class McssResults(object):
         
 #        self.assertions(amounts, volumes, mean_over_runs) #TODO
 
+#        class timeseries(object): #TODO replace Timeseries
+#            def __init__(self, 
+#                timepoints, values, # quantities
+#                short_title, long_title,
+#            ):
+#                self.timepoints = timepoints
+#                self.values = values
+#                self.short_title = short_title
+#                self.long_title = long_title
         from timeseries import Timeseries
         from infobiotics.commons import colours
         
-        from species import Species
+#        from species import Species
+#
+#        if volumes:
+#            volumes_species = Species(
+#                index=None, #TODO hack
+#                name='Volumes',
+#                simulation=self.simulation,
+#            )
 
-        if volumes:
-            volumes_species = Species(
-                index=None, #TODO hack
-                name='Volumes',
-                simulation=self.simulation,
-            )
+        runs = self.runs
+        run_numbers = self.run_numbers #TODO store run_numbers as list or xrange for all
+        num_runs = len(run_numbers) 
+        assert num_runs > 0
 
-        timeseries = []
         num_species = len(self.species)
-
-        #TODO compute titles and plot title so that run and compartment can be factored out if possible
-        plottitle = ''
-        if len(self.compartments) == 1:
-            plottitle += 'compartment %s, ' % self.compartments[0]
-        if len(self.runs) > 1:
+        assert num_species > 0
+        
+        compartments = self.compartments
+        num_compartments = len(compartments)
+        assert num_compartments > 0
+         
+        
+        #TODO move summarisation to TimeseriesPlot or McssResultsWidget that creates it?
+        
+        compartments_summary = str(self.compartments[0]) if len(self.compartments) == 1 else None
+        
+        if num_runs > 1:
             if mean_over_runs:
-                plottitle += 'mean of %s runs' % len(self.runs)
+                runs_summary = 'mean of %s runs' % num_runs
             else:
-                plottitle += 'runs %s' % ','.join(self.run_numbers)
+                runs_summary = 'runs %s' % ','.join(run_numbers) if num_runs <= 3 else '%s runs' % num_runs
         else:
-            plottitle += 'run %s' % self.run_numbers[0]
-            
-        timeseriestitle = ''
-#        title='Volume'
-        if len(self.runs) > 1 and not mean_over_runs:
-            timeseriestitle += '(%d)' % r
-        if len(self.compartments) > 1:
-            timeseriestitle += 'in %s' % c
-#        title = ' '.join(['%s' % species,   
-        def maketitle(species, compartment, run=None):
-            if species is None:
-                species = 'Volume'
-        #TODO start here
+            runs_summary = 'run %s' % run_numbers[0]
+        
+        # precompute plot title so that run and compartment can be factored out if possible
+        plot_title = compartments_summary + ', ' + runs_summary if compartments_summary is not None else runs_summary
+        plot_title += ' (%s)' % os.path.basename(self.filename) 
+        plot_title.capitalize()
+        
+        def short_title(species=None):
+            return str(species) if species else 'Volume'
+                
+        def long_title(compartment, species=None, run=None):
+            if num_runs == 1: assert run is not None
+            return short_title(species) + ' in %s' % (compartments_summary if compartments_summary else str(compartment)) + ' (%s)' % (runs_summary if num_runs > 1 else str(run)) 
+        
 #        amountsheader = '%s in %s of %s (%s)' % (s, c, r, quantities_display_units) for r in self.runs for c in self.compartments for s in self.species] 
 #        volumesheader = '%s of %s (%s)' % (c, r, volumes_display_units) for r in self.runs for c in self.compartments]
-            
 
-        if len(self.runs) > 1 and mean_over_runs:
+        timeseries = []
+        values_type = 'Concentration' if self.quantities_display_type == 'concentrations' else 'Amount'
+            
+        if num_runs > 1 and mean_over_runs:
             if amounts:
                 mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
-                for ci, c in enumerate(self.compartments):
+                for ci, c in enumerate(compartments): # adding in compartment order
                     for si, s in enumerate(self.species):
                         timeseries.append(
                             Timeseries(
 #                                runs=self.runs,
-                                species=s,
-                                compartment=c,
+#                                species=s,
+#                                compartment=c,
+                                
+                                short_title=short_title(s),
+                                long_title=long_title(c, s),
+                                plot_title=plot_title,
+                                
                                 timepoints=self.timepoints,
                                 timepoints_units=self.timepoints_display_units,
-                                values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
+                                values_type=values_type,
                                 values=mean_amounts_over_runs[si, ci, :],
                                 std=std_amounts_over_runs[si, ci, :],
                                 values_units=self.quantities_display_units,
@@ -1351,15 +1378,20 @@ class McssResults(object):
                         )
             if volumes:
                 mean_volumes_over_runs, std_volumes_over_runs = functions_of_values_over_axis(self.volumes(), self.volumes_axes, 'runs', (mean, std)) 
-                for ci, c in enumerate(self.compartments):
+                for ci, c in enumerate(compartments):
                     timeseries.append(
                         Timeseries(
 #                            runs=self.runs,
-                            species=volumes_species,
-                            compartment=c,
+#                            species=volumes_species,
+#                            compartment=c,
+
+                            short_title=short_title(),
+                            long_title=long_title(c),
+                            plot_title=plot_title,
+                            
                             timepoints=self.timepoints,
                             timepoints_units=self.timepoints_display_units,
-                            values_type='Volume',
+#                            values_type='Volume', # 'Volume' is values_type default
                             values=mean_volumes_over_runs[ci, :],
                             std=std_volumes_over_runs[ci, :],
                             values_units=self.volumes_display_units,
@@ -1376,12 +1408,17 @@ class McssResults(object):
                         for si, s in enumerate(self.species):
                             timeseries.append(
                                 Timeseries(
-                                    run=r,
-                                    species=s,
-                                    compartment=c,
+#                                    run=r,
+#                                    species=s,
+#                                    compartment=c,
+
+                                    short_title=short_title(s),
+                                    long_title=long_title(c, s, r),
+                                    plot_title=plot_title,
+
                                     timepoints=self.timepoints,
                                     timepoints_units=self.timepoints_display_units,
-                                    values_type='Concentration' if self.quantities_display_type == 'concentrations' else 'Amount',
+                                    values_type=values_type,
                                     values=amounts[ri, si, ci, :],
                                     values_units=self.quantities_display_units,
                                     _colour=colours.colour(si),
@@ -1394,12 +1431,17 @@ class McssResults(object):
                     for ci, c in enumerate(self.compartments):
                         timeseries.append(
                             Timeseries(
-                                run=r,
-                                species=volumes_species,
-                                compartment=c,
+#                                run=r,
+#                                species=volumes_species,
+#                                compartment=c,
+
+                                short_title=short_title(),
+                                long_title=long_title(c, run=r),
+                                plot_title=plot_title,
+                                
                                 timepoints=self.timepoints,
                                 timepoints_units=self.timepoints_display_units,
-                                values_type='Volume',
+#                                values_type='Volume', # 'Volume' is values_type default
                                 values=volumes[ri, ci, :],
                                 values_units=self.volumes_display_units,
                                 _colour=colours.colour(num_species + ci),
@@ -1416,10 +1458,9 @@ class McssResults(object):
 #        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=False)
 #        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=False)
         from timeseries_plot import TimeseriesPlot
-        import os.path
         timeseries_plot = TimeseriesPlot(
             results=self,
-            window_title='Timeseries from %s' % os.path.basename(self.filename),
+            window_title='%s timeseries' % os.path.basename(self.filename),
             timeseries=self.timeseries(
                 amounts=True,
                 volumes=True if self.has_volumes else False,
@@ -1720,7 +1761,7 @@ def test_surfaces():
     print mean(sum(surfaces, 1), 0).shape # the mean over runs of the sum of the species amounts
 
 def test_timeseries():
-    filename = 'tests/germination_09.h5'
+    filename = '/home/jvb/simulations/germination_09.h5'
     results = McssResults(filename)
     print results.timeseries_information()
     exit()
@@ -1750,6 +1791,30 @@ def test_timeseries():
         window_title='Timeseries Plot(s) for %s' % filename,
     ).configure_traits()
     
+
+def test_timeseries_plot():
+    filename = '/home/jvb/simulations/module1.h5'
+#    results = McssResults(filename)
+#    results.select_species('SIG1')#, 'P1')
+#    results.timestep = 1 * hour # 961 -> 17
+#    results.timepoints_display_units = 'minutes'
+#    results.quantities_display_type = 'concentrations'
+#    results.quantities_display_units = 'molar'
+#    results.volumes_data_units = 'microlitres'
+#    results.volumes_display_units = 'femtolitres'
+#    results.select_runs([1, 2, 3])
+#    results.select_runs([1])
+#    results.select_compartments(['receiver'], [(0, i) for i in range(10, 13)])
+#    timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=True)
+#    from timeseries_plot import TimeseriesPlot
+#    TimeseriesPlot(
+#        timeseries=timeseries,
+#        window_title='Timeseries Plot(s) for %s' % filename,
+#    ).configure_traits()
+    from mcss_results_widget import main
+    main(filename)
+
+
 
 def test_histograms():
     results = McssResults('../../../examples/mcss/models/module1.h5')
@@ -1787,12 +1852,14 @@ def test_information():
 #    print results.compartments_information(truncate=True)
     print results.timeseries_information()
 
+
 if __name__ == '__main__':
 #    import mcss_results_widget
 #    mcss_results_widget.main('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5')
 #    test_export_timeseries()
-    test_information()
+#    test_information()
 ##    test1()
 #    test_surfaces()
 #    test_timeseries()
 #    test_histograms()
+    test_timeseries_plot()

@@ -1,36 +1,64 @@
 from __future__ import division # essential for _get_colour
 from enthought.traits.api import HasTraits, Float, Str, Color, Enum, Property, \
     cached_property, Array, Instance, Tuple, Bool, List
+from enthought.traits.ui.api import View, HGroup, Item
 from run import Run
 from species import Species
 from compartment import Compartment
 
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-import StringIO
-from PyQt4.QtGui import QPixmap#, QColor
-from enthought.traits.ui.api import View, HGroup, Item
+class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and have McssResults produce 'timeseries' objects
 
-class Timeseries(HasTraits):
+    def __init__(self, **traits):
+        self.timepoints = traits.pop('timepoints')[:] # copy timepoints
+        HasTraits.__init__(self, **traits)
 
     std = Array(desc='the standard deviations of the timeseries values')
 
 #    runs = List(Run)
-    run = Instance(Run)
-    species = Instance(Species) # None == Volume
-    compartment = Instance(Compartment)
+#    run = Instance(Run)
+#    species = Instance(Species) # None == Volume
+#    compartment = Instance(Compartment)
 
     timepoints = Array
     timepoints_units = Str
     
-    values_type = Enum(['Amount', 'Concentration', 'Volume'])
+    values_type = Enum(['Volume', 'Amount', 'Concentration'])
+#    def _values_type_default(self):
+#        raise ValueError('values_type must be specified when Timeseries initialised')
+    
     values = Array
     values_units = Str
     
     abbreviated_units = Bool(False)
 
+##    title = Property(Str, depends_on='values_type, run, species, compartment')
+###    @cached_property
+##    def _get_title(self):
+#    title = Str
+#    def _title_default(self):
+#        compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
+#        if self.values_type == 'Volume':
+#            if self.run == None:
+#                return 'Volume of %s' % (compartment_name_and_xy_coords)
+##                return '%s' % (compartment_name_and_xy_coords)
+#            else:
+#                return 'Volume of %s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
+##                return '%s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
+#        else:
+#            if self.run == None:
+#                return '%s of %s in %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords)
+##                return '%s in %s' % (self.species.name, compartment_name_and_xy_coords)
+#            else:
+#                return '%s of %s in %s of run %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords, self.run._run_number)
+##                return '%s in %s of run %s' % (self.species.name, compartment_name_and_xy_coords, self.run._run_number)
+    # calculated in McssResults.timeseries
+    short_title = Str
+    long_title = Str
+    plot_title = Str # used by TimeseriesPlot to discover whether timeseries from multiple data sets are being plotted 
+    
+    
+    
     xlabel = Property(Str, depends_on='timepoints, abbreviated_units, timepoints_units')
-
     @cached_property
     def _get_xlabel(self):
         label = 'Time'
@@ -41,42 +69,17 @@ class Timeseries(HasTraits):
     
     
     ylabel = Property(Str, depends_on='values, values_type, abbreviated_units, values_units')
-
     @cached_property
     def _get_ylabel(self):
         label = self.values_type
         values_units = str(self.values.dimensionality) if self.abbreviated_units and hasattr(self.values, 'dimensionality') else self.values_units
         if values_units != '':
             label += ' (%s)' % values_units
-        return label
-
-
-    #TODO have McssResults.timeseries deduce the best title because it knows how many runs, etc
-#    title = Property(Str, depends_on='values_type, run, species, compartment')
-##    @cached_property
-#    def _get_title(self):
-    title = Str
-    def _title_default(self):
-        compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
-        if self.values_type == 'Volume':
-            if self.run == None:
-                return 'Volume of %s' % (compartment_name_and_xy_coords)
-#                return '%s' % (compartment_name_and_xy_coords)
-            else:
-                return 'Volume of %s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
-#                return '%s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
-        else:
-            if self.run == None:
-                return '%s of %s in %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords)
-#                return '%s in %s' % (self.species.name, compartment_name_and_xy_coords)
-            else:
-                return '%s of %s in %s of run %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords, self.run._run_number)
-#                return '%s in %s of run %s' % (self.species.name, compartment_name_and_xy_coords, self.run._run_number)
+        return label    
     
     
     _colour = Color
     colour = Property(Tuple(Float, Float, Float), depends_on='_colour')    
-    
     @cached_property
     def _get_colour(self):
         return (self._colour.red() / 255, self._colour.green() / 255, self._colour.blue() / 255)
@@ -90,6 +93,10 @@ class Timeseries(HasTraits):
 
 
     def pixmap(self, width=4, height=4, dpi=100):
+        from matplotlib.figure import Figure
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        import StringIO
+        from PyQt4.QtGui import QPixmap#, QColor
         fig = Figure(figsize=(width, height), dpi=dpi)
         canvas = FigureCanvasAgg(fig) # needed for savefig below
         ax = fig.add_subplot(111)
