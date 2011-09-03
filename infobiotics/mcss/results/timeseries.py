@@ -9,14 +9,6 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
         self.timepoints = traits.pop('timepoints')[:] # copy timepoints
         HasTraits.__init__(self, **traits)
 
-    run_numbers = Any # list or xrange if all
-    num_runs = Property(Int, depends_on='run_numbers')
-    @cached_property
-    def _get_num_runs(self):
-        return len(self.run_numbers)
-    
-    compartment = Str
-
     timepoints = Array
     values = Array
     std = Array(desc='the standard deviations of the timeseries values')
@@ -30,10 +22,55 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
     values_units = Str
     abbreviated_units = Bool(False)
 
+    run_numbers = Any # list or xrange if all
+    num_runs = Property(Int, depends_on='run_numbers')
+    @cached_property
+    def _get_num_runs(self):
+        return len(self.run_numbers)
+    
+    species = Str
+    compartment = Str
+
+    runs_summary = Str
+    species_summary = Str
+    compartments_summary = Str
+
     # calculated in McssResults.timeseries
-    short_title = Str
-    long_title = Str
     plot_title = Str # used by TimeseriesPlot to discover whether timeseries from multiple data sets are being plotted 
+
+#    short_title = Str
+    short_title = Property(Str, depends_on='species')
+    @cached_property
+    def _get_short_title(self):
+        title = str(self.species) 
+        if title == self.species_summary:
+            return ''
+        else:
+            return title if self.species else 'Volume'
+                
+#    long_title = Str
+    long_title = Property(Str, depends_on='run, species, compartment')
+    @cached_property
+    def _get_long_title(self):
+        '''Needed when short title would be ambiguous, i.e. same species 
+        name in different simulations when different numbers of runs'''
+        title = self.short_title#str(self.species) if self.species else 'Volume'#short_title(species) 
+        if self.compartments_summary:
+            if self.compartments_summary not in self.plot_title:
+                if title:
+                    title += ' in '
+                title += '%s' % self.compartments_summary
+        else:
+            if title:
+                title += ' in '
+            title += '%s' % str(self.compartment)
+        if self.runs_summary not in self.plot_title:
+            runs = self.runs_summary if self.num_runs > 1 else 'run %s' % self.run_numbers[0]
+            if title:
+                title += ' (%s)' % runs
+            else:
+                title += runs  
+        return title
 
     filename = Str #TODO use in TimeseriesPlot when multiple data sets used 
     

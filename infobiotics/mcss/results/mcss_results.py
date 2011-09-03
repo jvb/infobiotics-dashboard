@@ -342,11 +342,11 @@ class McssResults(object):
 
     @property
     def all_species_indices(self):
-        return self._all_run_indices
+        return self._all_species_indices
 
     @property
     def all_compartment_indices(self):
-        return self._all_run_indices
+        return self._all_compartment_indices
 
     
     @property
@@ -867,7 +867,7 @@ class McssResults(object):
         if len(names) == 0:
             self.species_indices = self.all_species_indices
         else:
-            self.species_indices = [species.index for species in self.simulation._species_list if species.name in names]
+            self.species_indices = [species.index for species in self.all_species if species.name in names]
     
     def select_compartments(self, names=None, xy_coordinates=None):
         '''Select compartments with names in 'names' and (x,y) coordinates in xy_coordinates.
@@ -962,7 +962,7 @@ class McssResults(object):
     
     def timeseries_information(self, sort_column_index=6, reverse=False, all=False):
         labels = ('# species', '# compartments', '#runs', 'amounts', 'volumes', 'mean over runs', '# timeseries') 
-        num_runs, num_species, num_compartments, _ = self._num_runs_species_compartments(all)
+        num_runs, num_species, num_compartments, _ = self._num_runs_species_compartments_timepoints(all)
         rows = []
         for mean_over_runs in True, False:
             for amounts in True, False:
@@ -987,7 +987,7 @@ class McssResults(object):
     def num_timeseries(self, amounts=True, volumes=True, mean_over_runs=True, 
             all=False, num_runs=None, num_species=None, num_compartments=None, # enables hypothetical calculations
         ):
-        _num_runs, _num_species, _num_compartments, _ = self._num_runs_species_compartments(all)
+        _num_runs, _num_species, _num_compartments, _ = self._num_runs_species_compartments_timepoints(all)
         if not num_runs:
             num_runs = _num_runs
         if not num_species:
@@ -1412,57 +1412,71 @@ class McssResults(object):
         num_runs = len(run_numbers) 
         assert num_runs > 0
 
-        num_species = len(self.species)
+        num_species = self.num_species
         assert num_species > 0
         
         compartments = self.compartments
         num_compartments = len(compartments)
         assert num_compartments > 0
         
+        #TODO use different colours if only one species being plotted
+
+        
         # summaries -> plot_title which is shared by all returned Timeseries
         
-        compartments_summary = str(self.compartments[0]) if len(self.compartments) == 1 else None
+        species_summary = str(self.species[0]) if len(self.species) == 1 else ''
+        
+        compartments_summary = str(self.compartments[0]) if len(self.compartments) == 1 else ''
         
         if num_runs > 1:
             if mean_over_runs:
                 runs_summary = 'mean of %s runs' % num_runs
+            elif num_runs <= 3:
+                runs_summary = 'runs %s' % ','.join(str(rn) for rn in run_numbers) 
             else:
-                runs_summary = 'runs %s' % ','.join(str(rn) for rn in run_numbers) if num_runs <= 3 else '%s runs' % num_runs
+                '%s runs' % num_runs
         else:
             runs_summary = 'run %s' % run_numbers[0]
         
-        plot_title = compartments_summary + ', ' + runs_summary if compartments_summary is not None else runs_summary
-#        plot_title += ' (%s)' % os.path.basename(self.filename)
-        #TODO store filename in Timeseries instead
+        plot_title = ''
+        if species_summary:
+            plot_title += species_summary
+        if compartments_summary:
+            if plot_title:
+                plot_title += ' in '
+            plot_title += compartments_summary
+        if plot_title:
+            plot_title += ' (%s)' % runs_summary
+        else:
+            plot_title += runs_summary
         
-        def short_title(species=None):
-            return str(species) if species else 'Volume'
-                
-        def long_title(compartment, species=None, run=None):
-            '''Needed when short title would be ambiguous, i.e. same species 
-            name in different simulations when different numbers of runs'''
-            if num_runs == 1: assert run is not None
-            title = short_title(species) 
-            if compartments_summary:
-                if compartments_summary not in plot_title:
-                    title += ' in %s' % compartments_summary
-            else:
-                title += ' in %s' % str(compartment)
-            if runs_summary not in plot_title:
-                title += ', %s' % runs_summary if num_runs > 1 else ', run %s' % str(run) 
-            return title
-        
-        #TODO add to Timeseries?
-#        compartment = str(c)
-#        run = str(r)
+#        def short_title(species=None):
+#            return str(species) if species else 'Volume'
+#                
+#        def long_title(compartment, species=None, run=None):
+#            '''Needed when short title would be ambiguous, i.e. same species 
+#            name in different simulations when different numbers of runs'''
+#            if num_runs == 1: assert run is not None
+#            title = str(species) if species else 'Volume'#short_title(species) 
+#            if compartments_summary:
+#                if compartments_summary not in plot_title:
+#                    title += ' in %s' % compartments_summary
+#            else:
+#                title += ' in %s' % str(compartment)
+#            if runs_summary not in plot_title:
+#                title += ', %s' % runs_summary if num_runs > 1 else ', run %s' % str(run)
+#            return title
         
         values_type = 'Concentration' if self.quantities_display_type == 'concentrations' else 'Amount'
 
         commons = dict(
-            plot_title=plot_title.capitalize(), 
+            plot_title=plot_title, # do not capitalize 
             filename=self.filename,
             timepoints=self.timepoints,
-            timepoints_units=self.timepoints_display_units
+            timepoints_units=self.timepoints_display_units,
+            runs_summary=runs_summary,
+            compartments_summary=compartments_summary,
+            species_summary=species_summary,
         )
             
         timeseries = []
@@ -1479,10 +1493,11 @@ class McssResults(object):
                                 values_units=self.quantities_display_units,
                                 _colour=colours.colour(si), #TODO rechoose colours based on different strategy for stacked, etc in timeseries plot
                                 marker=colours.marker(ci),
-                                short_title=short_title(s),
-                                long_title=long_title(c, s),
+#                                short_title=short_title(s),
+#                                long_title=long_title(c, s),
                                 run_numbers=run_numbers,
                                 compartment=str(c),
+                                species=str(s),
                                 **commons
                             ),
                         )
@@ -1497,8 +1512,8 @@ class McssResults(object):
                             values_units=self.volumes_display_units,
                             _colour=colours.colour(num_species + ci),
                             marker=colours.marker(ci),
-                            short_title=short_title(),
-                            long_title=long_title(c),
+#                            short_title=short_title(),
+#                            long_title=long_title(c),
                             run_numbers=run_numbers,
                             compartment=str(c),
                             **commons
@@ -1518,10 +1533,11 @@ class McssResults(object):
                                     values_units=self.quantities_display_units,
                                     _colour=colours.colour(si),
                                     marker=colours.marker(ci),
-                                    short_title=short_title(s),
-                                    long_title=long_title(c, s, r),
+#                                    short_title=short_title(s),
+#                                    long_title=long_title(c, s, r),
                                     run_numbers=[r._run_number],
                                     compartment=str(c),
+                                    species=str(s),
                                     **commons
                                 )
                             )
@@ -1536,8 +1552,8 @@ class McssResults(object):
                                 values_units=self.volumes_display_units,
                                 _colour=colours.colour(num_species + ci),
                                 marker=colours.marker(ci),
-                                short_title=short_title(),
-                                long_title=long_title(c, run=r),
+#                                short_title=short_title(),
+#                                long_title=long_title(c, run=r),
                                 run_numbers=[r._run_number],
                                 compartment=str(c),
                                 **commons
@@ -1868,9 +1884,14 @@ def test_surfaces():
 def test_timeseries():
     filename = '/home/jvb/simulations/germination_09.h5'
     results = McssResults(filename)
-    print results.timeseries_information()
-    exit()
+#    print results.timeseries_information()
+#    exit()
+#    print results.species_information(all=True)
+#    print [str(s) for s in results.species]
+#    print [str(s) for s in results.all_species]
     results.select_species('SIG1')#, 'P1')
+#    print results.species_information()
+#    exit()
     results.timestep = 1 * hour # 961 -> 17
     results.timepoints_display_units = 'minutes'
     results.quantities_display_type = 'concentrations'
@@ -1894,6 +1915,7 @@ def test_timeseries():
     TimeseriesPlot(
         timeseries=timeseries,
         window_title='Timeseries Plot(s) for %s' % filename,
+        style='Stacked',
     ).configure_traits()
     
 
@@ -1951,9 +1973,9 @@ def test_export_timeseries():
 
 def test_information():
     results = McssResults('/home/jvb/simulations/oregonator/oregonator.h5')
-#    print results.runs_information()
-#    print results.species_information()
-#    print results.compartments_information(truncate=True)
+    print results.runs_information()
+    print results.species_information()
+    print results.compartments_information(truncate=True)
     print results.timeseries_information()
 
 
@@ -1966,4 +1988,5 @@ if __name__ == '__main__':
 #    test_surfaces()
 #    test_timeseries()
 #    test_histograms()
-    test_timeseries_plot()
+#    test_timeseries_plot()
+    test_timeseries()

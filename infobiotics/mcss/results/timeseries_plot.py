@@ -179,7 +179,6 @@ class TimeseriesPlot(HasTraits):
         _amounts_to_volumes_map = {}
         for amounts in self._amounts:
             for volumes in self._volumes:
-#                if volumes.compartment.index == amounts.compartment.index:
                 if volumes.compartment == amounts.compartment and volumes.filename == amounts.filename:
                     _amounts_to_volumes_map[amounts] = volumes
                     break
