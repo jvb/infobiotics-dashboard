@@ -1041,7 +1041,7 @@ class McssResults(object):
                 # order of for loops determines order of columns in 2D array for .csv 
                 amountsindices = [(ri, si, ci) for ri in runindices for ci in compartmentindices for si in speciesindices]
                 
-                amountsheader = header + ['%s in %s of %s (%s)' % (s, c, r, quantities_display_units) for r in self.runs for c in self.compartments for s in self.species] 
+                amountsheader = header + ['%s in %s of run %s (%s)' % (s, c, r, quantities_display_units) for r in self.runs for c in self.compartments for s in self.species] 
             
             if volumes:
                 numruns, numcompartments, numtimepoints = volumesarray.shape
@@ -1050,8 +1050,8 @@ class McssResults(object):
 
                 volumesindices = [(ri, ci) for ri in runindices for ci in compartmentindices]
                 
-                volumesheader = header + ['%s of %s (%s)' % (c, r, volumes_display_units) for r in self.runs for c in self.compartments]
-        
+                volumesheader = header + ['%s of run %s (%s)' % (c, r, volumes_display_units) for r in self.runs for c in self.compartments]
+
         else:
             if amounts:
                 numspecies, numcompartments, numtimepoints = mean_amounts_over_runs.shape
@@ -1080,7 +1080,7 @@ class McssResults(object):
             
             kwargs = dict(
                 run_indices=np.array(self.run_indices),
-                run_numbers=self.num_selected_runs,
+                run_numbers=self.run_numbers,
                 species_indices=self.species_indices,
                 species_names=[str(s) for s in self.species],
                 compartment_indices=self.compartment_indices,
@@ -1278,6 +1278,10 @@ class McssResults(object):
         assert len(self.timepoints) > 0
 
 
+    @property
+    def run_numbers(self):
+        return [r._run_number for r in self.runs]
+
     def timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
         '''Return Timeseries objects for current selection.'''
         
@@ -1298,6 +1302,33 @@ class McssResults(object):
         timeseries = []
         num_species = len(self.species)
 
+        #TODO compute titles and plot title so that run and compartment can be factored out if possible
+        plottitle = ''
+        if len(self.compartments) == 1:
+            plottitle += 'compartment %s, ' % self.compartments[0]
+        if len(self.runs) > 1:
+            if mean_over_runs:
+                plottitle += 'mean of %s runs' % len(self.runs)
+            else:
+                plottitle += 'runs %s' % ','.join(self.run_numbers)
+        else:
+            plottitle += 'run %s' % self.run_numbers[0]
+            
+        timeseriestitle = ''
+#        title='Volume'
+        if len(self.runs) > 1 and not mean_over_runs:
+            timeseriestitle += '(%d)' % r
+        if len(self.compartments) > 1:
+            timeseriestitle += 'in %s' % c
+#        title = ' '.join(['%s' % species,   
+        def maketitle(species, compartment, run=None):
+            if species is None:
+                species = 'Volume'
+        #TODO start here
+#        amountsheader = '%s in %s of %s (%s)' % (s, c, r, quantities_display_units) for r in self.runs for c in self.compartments for s in self.species] 
+#        volumesheader = '%s of %s (%s)' % (c, r, volumes_display_units) for r in self.runs for c in self.compartments]
+            
+
         if len(self.runs) > 1 and mean_over_runs:
             if amounts:
                 mean_amounts_over_runs, std_amounts_over_runs = self.functions_of_amounts_over_runs((mean, std))
@@ -1305,7 +1336,7 @@ class McssResults(object):
                     for si, s in enumerate(self.species):
                         timeseries.append(
                             Timeseries(
-                                runs=self.runs,
+#                                runs=self.runs,
                                 species=s,
                                 compartment=c,
                                 timepoints=self.timepoints,
@@ -1323,7 +1354,7 @@ class McssResults(object):
                 for ci, c in enumerate(self.compartments):
                     timeseries.append(
                         Timeseries(
-                            runs=self.runs,
+#                            runs=self.runs,
                             species=volumes_species,
                             compartment=c,
                             timepoints=self.timepoints,

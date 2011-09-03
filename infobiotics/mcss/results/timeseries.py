@@ -15,7 +15,7 @@ class Timeseries(HasTraits):
 
     std = Array(desc='the standard deviations of the timeseries values')
 
-    runs = List(Run)
+#    runs = List(Run)
     run = Instance(Run)
     species = Instance(Species) # None == Volume
     compartment = Instance(Compartment)
@@ -51,14 +51,12 @@ class Timeseries(HasTraits):
         return label
 
 
+    #TODO have McssResults.timeseries deduce the best title because it knows how many runs, etc
 #    title = Property(Str, depends_on='values_type, run, species, compartment')
+##    @cached_property
+#    def _get_title(self):
     title = Str
-
     def _title_default(self):
-        return self._get_title()
-    
-#    @cached_property
-    def _get_title(self):
         compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
         if self.values_type == 'Volume':
             if self.run == None:

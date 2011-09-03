@@ -410,7 +410,7 @@ class TimeseriesPlot(HasTraits):
         return self.results.ci_factor(self.ci_degree)
 
     def _plot_timeseries(self, axes, timeseries):
-        if self.errorbars != 'None' and len(timeseries.runs) > 0 and len(timeseries.std) > 0:
+        if self.errorbars != 'None' and len(timeseries.std) > 0:#and len(timeseries.runs) > 0:
 #            print timeseries.std, timeseries.xlabel
             self._plot_errorbars(axes, timeseries)
         self._plot_line(axes, timeseries)
