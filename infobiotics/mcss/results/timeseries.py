@@ -15,6 +15,7 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
     def _get_num_runs(self):
         return len(self.run_numbers)
     
+    compartment = Str
 
     timepoints = Array
     values = Array

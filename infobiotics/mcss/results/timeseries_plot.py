@@ -178,9 +178,9 @@ class TimeseriesPlot(HasTraits):
     def _get__amounts_to_volumes_map(self):
         _amounts_to_volumes_map = {}
         for amounts in self._amounts:
-            amounts_compartment_index = amounts.compartment.index
             for volumes in self._volumes:
-                if volumes.compartment.index == amounts_compartment_index:
+#                if volumes.compartment.index == amounts.compartment.index:
+                if volumes.compartment == amounts.compartment and volumes.filename == amounts.filename:
                     _amounts_to_volumes_map[amounts] = volumes
                     break
         return _amounts_to_volumes_map

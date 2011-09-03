@@ -1427,14 +1427,13 @@ class McssResults(object):
             if mean_over_runs:
                 runs_summary = 'mean of %s runs' % num_runs
             else:
-                runs_summary = 'runs %s' % ','.join(run_numbers) if num_runs <= 3 else '%s runs' % num_runs
+                runs_summary = 'runs %s' % ','.join(str(rn) for rn in run_numbers) if num_runs <= 3 else '%s runs' % num_runs
         else:
             runs_summary = 'run %s' % run_numbers[0]
         
         plot_title = compartments_summary + ', ' + runs_summary if compartments_summary is not None else runs_summary
 #        plot_title += ' (%s)' % os.path.basename(self.filename)
         #TODO store filename in Timeseries instead
-        plot_title.capitalize()
         
         def short_title(species=None):
             return str(species) if species else 'Volume'
@@ -1443,12 +1442,24 @@ class McssResults(object):
             '''Needed when short title would be ambiguous, i.e. same species 
             name in different simulations when different numbers of runs'''
             if num_runs == 1: assert run is not None
-            return short_title(species) + ' in %s' % (compartments_summary if compartments_summary else str(compartment)) + ' (%s)' % (runs_summary if num_runs > 1 else str(run)) 
+            title = short_title(species) 
+            if compartments_summary:
+                if compartments_summary not in plot_title:
+                    title += ' in %s' % compartments_summary
+            else:
+                title += ' in %s' % str(compartment)
+            if runs_summary not in plot_title:
+                title += ', %s' % runs_summary if num_runs > 1 else ', run %s' % str(run) 
+            return title
+        
+        #TODO add to Timeseries?
+#        compartment = str(c)
+#        run = str(r)
         
         values_type = 'Concentration' if self.quantities_display_type == 'concentrations' else 'Amount'
 
         commons = dict(
-            plot_title=plot_title, 
+            plot_title=plot_title.capitalize(), 
             filename=self.filename,
             timepoints=self.timepoints,
             timepoints_units=self.timepoints_display_units
@@ -1471,6 +1482,7 @@ class McssResults(object):
                                 short_title=short_title(s),
                                 long_title=long_title(c, s),
                                 run_numbers=run_numbers,
+                                compartment=str(c),
                                 **commons
                             ),
                         )
@@ -1488,6 +1500,7 @@ class McssResults(object):
                             short_title=short_title(),
                             long_title=long_title(c),
                             run_numbers=run_numbers,
+                            compartment=str(c),
                             **commons
                         )
                     )
@@ -1508,6 +1521,7 @@ class McssResults(object):
                                     short_title=short_title(s),
                                     long_title=long_title(c, s, r),
                                     run_numbers=[r._run_number],
+                                    compartment=str(c),
                                     **commons
                                 )
                             )
@@ -1525,6 +1539,7 @@ class McssResults(object):
                                 short_title=short_title(),
                                 long_title=long_title(c, run=r),
                                 run_numbers=[r._run_number],
+                                compartment=str(c),
                                 **commons
                             )
                         )
