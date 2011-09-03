@@ -1,5 +1,5 @@
 import infobiotics
-from mcss_results import McssResults
+import os.path
 from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
     Button, on_trait_change, Tuple, Dict, Array, Enum, Property, Range, Any, Button,
     cached_property, Int, Set)
@@ -44,12 +44,9 @@ class TimeseriesPlot(HasTraits):
     def __figure_default(self):
         return Figure(figsize=(12,10))
 
-    def __init__(self, results, **traits):
+    def __init__(self, **traits):
         HasTraits.__init__(self)
         self.trait_setq(**traits)
-        self.results = results
-        if len(self.results.run_indices) < 2:
-            self.errorbars = 'None'
         self._timeseries_changed()
         self._update_units()
         # call _update_figure only once during initialisation. 
@@ -59,7 +56,6 @@ class TimeseriesPlot(HasTraits):
     legend_font_size = Range(1, 20, 12)#, auto_set=True)
 
     legend_font_properties = Property(Instance(FontProperties), depends_on='legend_font_size')
-    
     @cached_property
     def _get_legend_font_properties(self):
         return FontProperties(size=self.legend_font_size)
@@ -75,6 +71,45 @@ class TimeseriesPlot(HasTraits):
 #        return 'figure\ntitle'
         return '; '.join(self.plot_titles)
 
+    plot_titles = Property(Set(Str), depends_on='timeseries')
+    @cached_property
+    def _get_plot_titles(self):
+        return set(t.plot_title for t in self.timeseries)
+
+    errorbars_possible = Property(Bool, depends_on='timeseries')
+    @cached_property
+    def _get_errorbars_possible(self):
+        for t in self.timeseries:
+            if len(t.run_numbers) > 1:
+                return True
+        self.errorbars = 'None' #TODO bad?
+        return False
+
+    timeseries_short_titles = Property(List(Str), depends_on='timeseries')
+    @cached_property
+    def _get_timeseries_short_titles(self):
+        return [t.short_title for t in self.timeseries]
+
+    timeseries_filenames = Property(List(Str), depends_on='timeseries')
+    @cached_property
+    def _get_timeseries_filenames(self):
+        return [t.filename for t in self.timeseries]
+
+    def get_timeseries_title(self, timeseries):
+        if self.timeseries_short_titles.count(timeseries.short_title) > 1:
+            title = timeseries.long_title
+        else:
+            title = timeseries.short_title
+        filenames_set = set(self.timeseries_filenames)
+        basenames_set = set(map(os.path.basename, self.timeseries_filenames))
+#        print filenames_set
+#        print basenames_set
+        if len(filenames_set) > len(basenames_set):
+            title += ' (%s)' % timeseries.filename
+        elif len(filenames_set) > 1:
+            title += ' (%s)' % os.path.basename(timeseries.filename)
+#        if len(self.plot_titles) > 1:
+        return title
 
     _timeseries = List(Timeseries) # enables choice of timeseries
     timeseries = List(Timeseries)
@@ -199,20 +234,6 @@ class TimeseriesPlot(HasTraits):
             prop=self.legend_font_properties
         ) 
 
-    plot_titles = Property(Set(Str), depends_on='timeseries')
-    @cached_property
-    def _get_plot_titles(self):
-        return set(t.plot_title for t in self.timeseries)
-
-    def get_timeseries_title(self, timeseries):
-        '''Returns either timeseries.short_title or timeseries.long_title 
-        depending on whether multiple plot_titles are found in all timeseries.
-        '''
-        if len(self.plot_titles) > 1:
-            return timeseries.long_title
-        else:
-            return timeseries.short_title
-    
 
 #    @on_trait_change('+') # dangerous
     @on_trait_change('\
@@ -261,8 +282,6 @@ class TimeseriesPlot(HasTraits):
 
         # don't allow negative x (time) or y (values)
         for axes in self.axes:
-            # removed dependency on results (so timeseries for different results can be plotted) 
-            # using max of each timeseries (in case some are longer than others)
             xmin_xmax_tuples = [(t.timepoints[0].magnitude, t.timepoints[-1].magnitude) for t in self._timeseries]
             xmins, xmaxs = zip(*xmin_xmax_tuples)
             xmin = min(xmins)
@@ -415,16 +434,15 @@ class TimeseriesPlot(HasTraits):
         desc='the statistic to show in error bars'
     )
     ci_degree = Range(0.5, 0.999, 0.95)
-    ci_factor = Property(Float, depends_on='results,ci_degree')
-    results = Instance(McssResults)
     
-    @cached_property
-    def _get_ci_factor(self):
-        if len(self.results.run_indices) < 2:
+    def ci_factor(self, timeseries):
+        num_samples = len(timeseries.run_numbers) 
+        if num_samples < 2:
             return 1
 #        if self.ci_degree > 0.999:
 #            return 0.999
-        return self.results.ci_factor(self.ci_degree)
+        import statistics
+        return statistics.ci_factor(num_samples, self.ci_degree)
 
     def _plot_timeseries(self, axes, timeseries):
         if self.errorbars != 'None' and len(timeseries.std) > 0:#and len(timeseries.runs) > 0:
@@ -437,7 +455,7 @@ class TimeseriesPlot(HasTraits):
         axes.errorbar(
             timeseries.timepoints[::step],
             timeseries.values[::step],
-            yerr=timeseries.std[::step] if self.errorbars != 'Confidence interval' else timeseries.std[::step] * self.ci_factor,
+            yerr=timeseries.std[::step] if self.errorbars != 'Confidence interval' else timeseries.std[::step] * self.ci_factor(timeseries),
             linestyle='None',
             color=timeseries.colour,
 #            marker=timeseries.marker,
@@ -691,7 +709,7 @@ class TimeseriesPlot(HasTraits):
                                 visible_when='object.errorbars=="Confidence interval"',
                                 springy=False,
                             ),
-                            visible_when='len(object.results.run_indices) > 1',
+                            visible_when='object.errorbars_possible',
                             label='Error bars',
                             springy=True
                         ),

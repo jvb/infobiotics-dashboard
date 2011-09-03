@@ -1,10 +1,7 @@
 from __future__ import division # essential for _get_colour
 from enthought.traits.api import HasTraits, Float, Str, Color, Enum, Property, \
-    cached_property, Array, Instance, Tuple, Bool, List
+    cached_property, Array, Instance, Tuple, Bool, List, Int, Any
 from enthought.traits.ui.api import View, HGroup, Item
-from run import Run
-from species import Species
-from compartment import Compartment
 
 class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and have McssResults produce 'timeseries' objects
 
@@ -12,26 +9,32 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
         self.timepoints = traits.pop('timepoints')[:] # copy timepoints
         HasTraits.__init__(self, **traits)
 
-    std = Array(desc='the standard deviations of the timeseries values')
-
-    run_numbers = Any # list or xrange if all 
+    run_numbers = Any # list or xrange if all
+    num_runs = Property(Int, depends_on='run_numbers')
+    @cached_property
+    def _get_num_runs(self):
+        return len(self.run_numbers)
+    
 
     timepoints = Array
-    timepoints_units = Str
+    values = Array
+    std = Array(desc='the standard deviations of the timeseries values')
     
     values_type = Enum(['Volume', 'Amount', 'Concentration'])
 #    def _values_type_default(self):
 #        raise ValueError('values_type must be specified when Timeseries initialised')
+    # called erroneously by HasTraits.__init__ even when values_type is in traits
     
-    values = Array
+    timepoints_units = Str
     values_units = Str
-    
     abbreviated_units = Bool(False)
 
     # calculated in McssResults.timeseries
     short_title = Str
     long_title = Str
     plot_title = Str # used by TimeseriesPlot to discover whether timeseries from multiple data sets are being plotted 
+
+    filename = Str #TODO use in TimeseriesPlot when multiple data sets used 
     
     xlabel = Property(Str, depends_on='timepoints, abbreviated_units, timepoints_units')
     @cached_property
@@ -67,6 +70,18 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
     marker = Str
 
 
+    view = View(
+        HGroup(
+            Item('title'),
+            Item('_colour'),
+            Item('timepoints_units'),
+            Item('values_units'),
+#            Item('filename', label='Simulation'), #TODO allow user to override this 
+            show_labels=False,
+        ),
+    )
+
+
     def pixmap(self, width=4, height=4, dpi=100):
         from matplotlib.figure import Figure
         from matplotlib.backends.backend_agg import FigureCanvasAgg
@@ -85,16 +100,6 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
         pixmap.loadFromData(file_like_object.getvalue(), 'PNG')
         file_like_object.close()
         return pixmap
-
-    view = View(
-        HGroup(
-            Item('title'),
-            Item('_colour'),
-            Item('timepoints_units'),
-            Item('values_units'),
-            show_labels=False,
-        ),
-    )
 
 
 if __name__ == '__main__':
