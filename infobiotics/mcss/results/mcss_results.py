@@ -4,6 +4,8 @@ arrays.'''
 
 from __future__ import division
 
+import statistics
+
 from quantities.units.time import hour, minute
 import operator
 from table import indent
@@ -228,20 +230,97 @@ class McssResults(object):
 
         self.step = step # uses step.setter
 
-        if species_indices is None:
-            self.species_indices = range(self.simulation.number_of_species)
-        else:
-            self.species_indices = species_indices
-        if compartment_indices is None:
-            self.compartment_indices = range(self.simulation._runs_list[0].number_of_compartments)
-        else:
-            self.compartment_indices = compartment_indices
-        if run_indices is None:
-            self.run_indices = range(0, self.simulation.number_of_runs)
-        else:
-            self.run_indices = run_indices
+        
+        # constant (for simulation)
+        
+        self._first_run = self.simulation._runs_list[0]
 
-    # indices
+        self._max_runs = self.simulation.number_of_runs
+        self._max_species = self.simulation.number_of_species
+        self._max_compartments = self.first_run.number_of_compartments #TODO bad
+        
+        self._all_run_indices = xrange(self.max_runs)
+        self._all_species_indices = xrange(self.max_species) 
+        self._all_compartment_indices = xrange(self.max_compartments) 
+
+        self._all_runs = self.simulation._runs_list
+        self._all_species = self.simulation._species_list
+        self._all_compartments = self.first_run._compartments_list
+        
+        # variable
+
+        self.run_indices = self._all_run_indices if run_indices is None else run_indices
+        self.species_indices = self._all_species_indices if species_indices is None else species_indices
+        self.compartment_indices = self._all_compartment_indices if compartment_indices is None else compartment_indices
+
+    
+    # properties ---
+    
+    # simulation objects
+        
+    @property
+    def first_run(self):
+        return self._first_run
+
+    @property
+    def all_runs(self):
+        return self._all_runs
+    
+    @property
+    def all_species(self):
+        return self._all_species
+    
+    @property
+    def all_compartments(self):
+        return self._all_compartments
+    
+    
+    # selection
+    
+    @property
+    def runs(self):
+        return [self.all_runs[i] for i in self.run_indices]
+
+    @property
+    def species(self):
+        return [self.all_species[i] for i in self.species_indices]
+
+    @property
+    def compartments(self):
+        return [self.all_compartments[i] for i in self.compartment_indices]
+
+
+    # maxs
+    
+    @property
+    def max_runs(self):
+        return self._max_runs
+
+    @property
+    def max_species(self):
+        return self._max_species
+
+    @property
+    def max_compartments(self):
+        return self._max_compartments
+
+
+    # runs, species and compartment indices
+
+    @property
+    def all_run_indices(self):
+        return self._all_run_indices
+
+    @property
+    def all_species_indices(self):
+        return self._all_run_indices
+
+    @property
+    def all_compartment_indices(self):
+        return self._all_run_indices
+
+    
+    # timepoint indices
 
     @property
     def start(self): #TODO rename to _start
@@ -270,10 +349,10 @@ class McssResults(object):
             print 'to ensure stop is greater than start it has been set to %s' % self.stop #TODO
 
     @property
-    def step(self): #TODO rename to _step
+    def step(self): #TODO rename to _step?
         return self._step
     @step.setter
-    def step(self, step): #TODO rename to _step
+    def step(self, step): #TODO rename to _step?
         if step is not int:
             step = int(step)
         if step > self.stop:
@@ -283,7 +362,7 @@ class McssResults(object):
         self._step = step
 
     
-    # times
+    # timepoints
 
     @property
     def from_(self):
@@ -493,9 +572,6 @@ class McssResults(object):
 #        pass
 
 
-
-    
-
 #    @profile # use profile(results.get_amounts) instead - won't raise "'profile' not found" error
     def amounts(self, quantities_display_type=None, quantities_display_units=None, volume=None, **ignored_kwargs):
 #        ''' Returns a tuple of (timepoints, results) where timepoints is an 1 - D
@@ -675,51 +751,34 @@ class McssResults(object):
         results = Quantity(results, quantities_display_units)
         return results
 
-    def select_species(self, *names):
-        '''Select species with names in 'names'.
-        
-        if len(names) == 0: select all species
-        '''
-        if len(names) == 0:
-            self.species_indices = xrange(self.simulation.number_of_species)
+
+    # selection methods
+
+    def reset_selection(self):
+        self.select_runs()
+        self.select_species()
+        self.select_compartments()
+        self.select_timepoints()
+
+    def select_timepoints(self, from_=None, to=None, timestep=None):
+        '''Select every 'timestep' timepoints from 'from_' to 'to'.'''
+        if from_ is not None:
+            self.from_ = from_
         else:
-            self.species_indices = [species.index for species in self.simulation._species_list if species.name in names]
-    
-    def xy_coordinates(self, min_x, max_x, min_y, max_y):
-        '''Returns pairs of (x,y) where min_x <= x <= max_x and min_y <= y <= max_y'''
-        return [(x, y) for x in xrange(min_x, max_x + 1) for y in xrange(min_y, max_y + 1)]
-    
-    def select_compartments(self, names=None, xy_coordinates=None):
-        '''Select compartments with names in 'names' and (x,y) coordinates in xy_coordinates.
-        
-        if names is None and xy_coordinates is None: 
-            select all compartments
-        elif names is None and xy_coordinates is not None: 
-            select compartments for (x,y) in 'xy_coordinates'
-        elif names is not None and xy_coordinates is None: 
-            select compartments for name in 'names'
-        else: 
-            select compartments for name in 'names' for (x,y) in 'xy_coordinates'
-        '''
-        compartments = self.simulation._runs_list[0]._compartments_list
-#        compartments = self.compartments
-        if names is None and xy_coordinates is None: 
-            # select all compartments
-            self.compartment_indices = [compartment.index for compartment in compartments]
-        elif names is None and xy_coordinates is not None: 
-            # select compartments for (x,y) in 'xy_coordinates'
-            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates]
-        elif names is not None and xy_coordinates is None: 
-            # select compartments for name in 'names'
-            self.compartment_indices = [compartment.index for compartment in compartments if compartment.name in names]
+            self.from_ = self._timepoints[0]
+        if to is not None:
+            self.to = to
         else:
-            # select compartments for name in 'names' for (x, y) in 'xy_coordinates'
-            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates and any(map(lambda name: name in compartment.name, names))]
+            self.to = self._timepoints[-1]
+        if timestep is not None:
+            self.timestep = timestep
+        else:
+            self.timestep = self._timepoints[1] - self._timepoints[0]
 
     def select_runs(self, runs=None, from_=None, to=None, random=None):
         '''Select runs in 'runs', or from 'from_' to 'to', or randomly where 0 < 'random' < len(self.run_indices).'''
-        max_runs = self.simulation.number_of_runs
-        run_indices = xrange(max_runs)
+        max_runs = self.max_runs
+        run_indices = self.all_run_indices
         if runs is not None:
             run_indices = [i - 1 for i in runs if i > 0 and i <= max_runs]
             if len(run_indices) < len(runs):
@@ -739,26 +798,47 @@ class McssResults(object):
                 print 'McssResults.select_runs: random > len(run_indices)' #TODO use logger
         self.run_indices = run_indices
 
-    def select_timepoints(self, from_=None, to=None, timestep=None):
-        '''Select every 'timestep' timepoints from 'from_' to 'to'.'''
-        if from_ is not None:
-            self.from_ = from_
+    def select_species(self, *names):
+        '''Select species with names in 'names'.
+        
+        if len(names) == 0: select all species
+        '''
+        if len(names) == 0:
+            self.species_indices = self.all_species_indices
         else:
-            self.from_ = self._timepoints[0]
-        if to is not None:
-            self.to = to
+            self.species_indices = [species.index for species in self.simulation._species_list if species.name in names]
+    
+    def select_compartments(self, names=None, xy_coordinates=None):
+        '''Select compartments with names in 'names' and (x,y) coordinates in xy_coordinates.
+        
+        if names is None and xy_coordinates is None: 
+            select all compartments
+            return
+        if names is None and xy_coordinates is not None: 
+            select compartments for (x,y) in 'xy_coordinates'
+        elif names is not None and xy_coordinates is None: 
+            select compartments for name in 'names'
+        else: 
+            select compartments for name in 'names' for (x,y) in 'xy_coordinates'
+        '''
+        if names is None and xy_coordinates is None: 
+            # select all compartments
+            self.compartment_indices = self.all_compartment_indices
+            return
+        compartments = self.simulation._runs_list[0]._compartments_list
+        if names is None and xy_coordinates is not None: 
+            # select compartments for (x,y) in 'xy_coordinates'
+            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates]
+        elif names is not None and xy_coordinates is None: 
+            # select compartments for name in 'names'
+            self.compartment_indices = [compartment.index for compartment in compartments if compartment.name in names]
         else:
-            self.to = self._timepoints[-1]
-        if timestep is not None:
-            self.timestep = timestep
-        else:
-            self.timestep = self._timepoints[1] - self._timepoints[0]
+            # select compartments for name in 'names' for (x, y) in 'xy_coordinates'
+            self.compartment_indices = [compartment.index for compartment in compartments if compartment.coordinates() in xy_coordinates and any(map(lambda name: name in compartment.name, names))]
 
-    def reset_selection(self):
-        self.select_runs()
-        self.select_species()
-        self.select_compartments()
-        self.select_timepoints()             
+    def xy_coordinates(self, min_x, max_x, min_y, max_y):
+        '''Returns pairs of (x,y) where min_x <= x <= max_x and min_y <= y <= max_y'''
+        return [(x, y) for x in xrange(min_x, max_x + 1) for y in xrange(min_y, max_y + 1)]
         
         
     '''
@@ -794,7 +874,8 @@ class McssResults(object):
     
     '''
 
-    def runs_information(self, truncate=True):
+
+    def runs_information(self, truncate=True, all=False):
         '''
         Run # | # compartments | # timepoints | Simulated time
         ------------------------------------------------------
@@ -803,15 +884,15 @@ class McssResults(object):
         200   | 1              | 601          | 6000.0        
         '''
         labels = ('Run #', '# compartments', '# timepoints', 'Simulated time')
-#        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.simulation._runs_list]
-        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in self.runs]
+        runs = self.all_runs if all else self.runs
+        rows = [[str(s) for s in (run._run_number, run.number_of_compartments, run.number_of_timepoints, run.simulated_time)] for run in runs]
         table = indent([labels] + rows, hasHeader=True)
-        if truncate and self.simulation.number_of_runs >= 3:
+        if truncate and len(runs) >= 3:
             s = table.split('\n')
             return '\n'.join((s[0], s[1], s[2], '...', s[-2], s[-1]))
         return table
         
-    def species_information(self, sort_column_index=0, reverse=False):
+    def species_information(self, sort_column_index=0, reverse=False, all=False):
         '''
         Name           | Index
         ----------------------
@@ -821,78 +902,74 @@ class McssResults(object):
         rna1           | 3    
         '''
         labels = ('Name', 'Index')
-#        rows = [[str(s) for s in (species.name, species.index)] for species in self.simulation._species_list]
-        rows = [[str(s) for s in (species.name, species.index)] for species in self.species]
+        rows = [[str(s) for s in (species, species.index)] for species in (self.all_species if all else self.species)] #TODO map(str, ...)?
         rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
         table = indent([labels] + rows, hasHeader=True)
         return table
 
-    def compartments_information(self, sort_column_indices=(0,2,3), reverse=False, truncate=False):
+    def compartments_information(self, sort_column_indices=(0,2,3), reverse=False, truncate=False, all=False):
         '''
         Name         | Index | X | Y
         ----------------------------
         NARbacterium | 0     | 0 | 0
         '''
         labels = ('Name', 'Index', 'X', 'Y')
-#        rows = [[str(s) for s in (compartment.name, compartment.index, compartment.x_position, compartment.y_position)] for compartment in self.simulation._runs_list[0]._compartments_list]
-#        rows = [(compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.simulation._runs_list[0]._compartments_list]
-        rows = [(''.join(compartment.name.rsplit(':')[:-1]) if ':' in compartment.name else compartment.name, compartment.index, compartment.x_position, compartment.y_position) for compartment in self.compartments]
+        compartments = self.all_compartments if all else self.compartments
+        rows = []
+        for compartment in compartments:
+            if ':' in compartment.name: # an mcss-SBML compartment
+                split = compartment.name.split(':')
+                name = split[0] + '::' + split[2] # name and used templates, leaving out templates defined and coordinates    
+            else:
+                name = compartment.name
+            rows.append([name, compartment.index, compartment.x_position, compartment.y_position])
+        
         rows.sort(key=operator.itemgetter(*sort_column_indices), reverse=reverse)
         table = indent([labels] + rows, hasHeader=True)
-        if truncate and self.num_selected_compartments >= 3:
+        if truncate and len(compartments) >= 3:
             s = table.split('\n')
             return '\n'.join((s[0], s[1], s[2], '...', s[-2], s[-1]))
         return table
-    
-    @property
-    def runs(self):
-        return [self.simulation._runs_list[i] for i in self.run_indices]
-
-    @property
-    def compartments(self):
-        return [self.runs[0]._compartments_list[i] for i in self.compartment_indices]
-
-    @property
-    def species(self):
-        return [self.simulation._species_list[i] for i in self.species_indices]
 
 
-    def len_timeseries(self, amounts=True, volumes=True, mean_over_runs=True):
-        len_runs = len(self.runs)
-        len_species = len(self.species)
-        len_compartments = len(self.compartments)
-        if len_runs > 1 and mean_over_runs:
+    def _num_runs_species_compartments(self, all=False):
+        num_runs = self.max_runs if all else len(self.runs)
+        num_species = self.max_species if all else len(self.species)
+        num_compartments = self.max_compartments if all else len(self.compartments)
+        return num_runs, num_species, num_compartments
+
+    def num_timeseries(self, amounts=True, volumes=True, mean_over_runs=True, all=False):
+        num_runs, num_species, num_compartments = self._num_runs_species_compartments(all)
+        if num_runs > 1 and mean_over_runs:
             if amounts and volumes:
-                return (len_species * len_compartments) + len_compartments
+                return (num_species * num_compartments) + num_compartments
             elif amounts:
-                return len_species * len_compartments
+                return num_species * num_compartments
             elif volumes:
-                return len_compartments
+                return num_compartments
             else:
                 return 0
         else:
             if amounts and volumes:
-                return (len_runs * len_species * len_compartments) + (len_runs * len_compartments)
+                return (num_runs * num_species * num_compartments) + (num_runs * num_compartments)
             elif amounts:
-                return len_runs * len_species * len_compartments
+                return num_runs * num_species * num_compartments
             elif volumes:
-                return len_runs * len_compartments
+                return num_runs * num_compartments
             else:
                 return 0
             
-    def timeseries_information(self, sort_column_index=6, reverse=False):
+    def timeseries_information(self, sort_column_index=6, reverse=False, all=False):
         labels = ('# species', '# compartments', '#runs', 'amounts', 'volumes', 'mean over runs', '# timeseries') 
-        len_runs = len(self.runs)
-        len_species = len(self.species)
-        len_compartments = len(self.compartments)
+        num_runs, num_species, num_compartments = self._num_runs_species_compartments(all)
         rows = []
         for mean_over_runs in True, False:
             for amounts in True, False:
                 for volumes in True, False:
                     if not (volumes or amounts):
                         continue
-                    len_timeseries = self.len_timeseries(amounts, volumes, mean_over_runs)
-                    rows.append([len_species, len_compartments, len_runs, amounts, volumes, mean_over_runs, len_timeseries])
+                    num_timeseries = self.num_timeseries(amounts, volumes, mean_over_runs)
+                    rows.append([num_species, num_compartments, num_runs, amounts, volumes, mean_over_runs, num_timeseries])
         rows.sort(key=operator.itemgetter(sort_column_index), reverse=reverse)
         table = indent([labels] + rows, hasHeader=True)
         return table
@@ -903,13 +980,7 @@ class McssResults(object):
     def ci_factor(self, ci_degree=None):
         if ci_degree is None:
             ci_degree = self.ci_degree
-        assert 0 <= ci_degree <= 1
-        num_runs = len(self.run_indices)
-#        from scipy.special import stdtrit
-#        ci_factor = stdtrit(num_runs - 1, 1.0 - (1.0 - ci_degree) / 2.0) / math.sqrt(num_runs)
-        from infobiotics.thirdparty.statistics import InverseStudentT
-        ci_factor = InverseStudentT(num_runs - 1, 1.0 - (1.0 - ci_degree) / 2.0) / math.sqrt(num_runs)
-        return ci_factor
+        return statistics.ci_factor(self.num_selected_runs, ci_degree)
 
 
     # remember these within this instance
@@ -976,7 +1047,7 @@ class McssResults(object):
 
         if not individualruns and numruns == 1:
 #            error = 'Cannot calculate statistics with only 1 run, '
-#            error + 'try setting run_indices = range(%s)' % numruns if self.simulation.number_of_runs > 1 else 'use individualruns=True instead.'
+#            error + 'try setting run_indices = range(%s)' % numruns if self.max_runs > 1 else 'use individualruns=True instead.'
 #            raise ValueError(error)
             individualruns = True
         
@@ -1312,6 +1383,7 @@ class McssResults(object):
         run_numbers = self.run_numbers #TODO store run_numbers as list or xrange for all
         num_runs = len(run_numbers) 
         assert num_runs > 0
+        all_runs = True if num_runs == self.runs()
 
         num_species = len(self.species)
         assert num_species > 0
@@ -1550,15 +1622,15 @@ class McssResults(object):
         return self.num_selected_runs, self.num_selected_species, self.num_selected_compartments, self.num_timepoints
 
     @property
-    def num_selected_runs(self):
+    def num_selected_runs(self): #TODO rename num_runs?
         return len(self.run_indices)
 
     @property
-    def num_selected_species(self):
+    def num_selected_species(self): #TODO rename num_species?
         return len(self.species_indices)
     
     @property
-    def num_selected_compartments(self):
+    def num_selected_compartments(self): #TODO rename num_compartments?
         return len(self.compartment_indices)
     
     @property
@@ -1572,7 +1644,8 @@ class McssResults(object):
 
     @compartment_indices.setter
     def compartment_indices(self, compartment_indices):
-        _compartment_indices = xrange(self.simulation._runs_list[0].number_of_compartments)
+        '''Ignores erroneous indices''' #TODO log erroneous indices
+        _compartment_indices = xrange(self.max_compartments)
         self._compartment_indices = [i for i in compartment_indices if i in _compartment_indices]
 
 

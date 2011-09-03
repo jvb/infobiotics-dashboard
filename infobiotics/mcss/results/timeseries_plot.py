@@ -261,14 +261,13 @@ class TimeseriesPlot(HasTraits):
 
         # don't allow negative x (time) or y (values)
         for axes in self.axes:
-#            axes.set_xlim(self.results.from_.magnitude, self._timeseries[0].timepoints[-1].magnitude) 
-            # removing dependency on results (so timeseries for different results can be plotted) 
+            # removed dependency on results (so timeseries for different results can be plotted) 
             # using max of each timeseries (in case some are longer than others)
             xmin_xmax_tuples = [(t.timepoints[0].magnitude, t.timepoints[-1].magnitude) for t in self._timeseries]
             xmins, xmaxs = zip(*xmin_xmax_tuples)
             xmin = min(xmins)
             xmax = max(xmaxs)
-            axes.set_xlim(xmax, xmin) #TODO test
+            axes.set_xlim(xmin, xmax)
             ymin, ymax = axes.get_ylim() 
             if ymin < 0:
                 axes.set_ylim(0, ymax)
@@ -406,8 +405,6 @@ class TimeseriesPlot(HasTraits):
             axes.yaxis.set_major_formatter(get_scientific_formatter())
 
     marker_interval = Int(10, auto_set=True, desc='the number of timepoints between markers (and errorbars if available)')
-#    def _marker_interval_default(self):
-#        return len(self.results._timepoints) // 10
 
     errorbars = Enum(
         [

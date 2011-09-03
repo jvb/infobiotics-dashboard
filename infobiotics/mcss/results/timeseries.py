@@ -14,10 +14,7 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
 
     std = Array(desc='the standard deviations of the timeseries values')
 
-#    runs = List(Run)
-#    run = Instance(Run)
-#    species = Instance(Species) # None == Volume
-#    compartment = Instance(Compartment)
+    run_numbers = Any # list or xrange if all 
 
     timepoints = Array
     timepoints_units = Str
@@ -31,32 +28,10 @@ class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and ha
     
     abbreviated_units = Bool(False)
 
-##    title = Property(Str, depends_on='values_type, run, species, compartment')
-###    @cached_property
-##    def _get_title(self):
-#    title = Str
-#    def _title_default(self):
-#        compartment_name_and_xy_coords = self.compartment.compartment_name_and_xy_coords()
-#        if self.values_type == 'Volume':
-#            if self.run == None:
-#                return 'Volume of %s' % (compartment_name_and_xy_coords)
-##                return '%s' % (compartment_name_and_xy_coords)
-#            else:
-#                return 'Volume of %s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
-##                return '%s in run %s' % (compartment_name_and_xy_coords, self.run._run_number)
-#        else:
-#            if self.run == None:
-#                return '%s of %s in %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords)
-##                return '%s in %s' % (self.species.name, compartment_name_and_xy_coords)
-#            else:
-#                return '%s of %s in %s of run %s' % (self.values_type, self.species.name, compartment_name_and_xy_coords, self.run._run_number)
-##                return '%s in %s of run %s' % (self.species.name, compartment_name_and_xy_coords, self.run._run_number)
     # calculated in McssResults.timeseries
     short_title = Str
     long_title = Str
     plot_title = Str # used by TimeseriesPlot to discover whether timeseries from multiple data sets are being plotted 
-    
-    
     
     xlabel = Property(Str, depends_on='timepoints, abbreviated_units, timepoints_units')
     @cached_property

@@ -485,7 +485,7 @@ class McssResultsWidget(QWidget):
 #
 #            results = self.selected_items_results()
 #            _, _, _, averaging = self.options()
-#            numtimeseries = results.len_timeseries(True, self.volumes_selected, averaging) 
+#            numtimeseries = results.num_timeseries(True, self.volumes_selected, averaging) 
 #            numtimepoints = results.num_timepoints * numtimeseries
 #            
 #            numsurfaces = results.num_selected_species

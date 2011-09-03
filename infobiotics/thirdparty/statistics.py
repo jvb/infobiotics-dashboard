@@ -1,14 +1,10 @@
-#!/usr/bin/python
-
-# we use inverse cumulative distribution function (cdf) for confidence intervals
-
 """Basic statistics utility functions.
 
 The implementation of Student's t distribution inverse CDF was ported to Python
 from JSci. The parameters are set to only be accurate to approximately 5
 decimal places.
 
-The JSci port comes frist. "New" code is near the bottom.
+The JSci port comes first. "New" code is near the bottom.
 
 JSci information:
 http://jsci.sourceforge.net/
