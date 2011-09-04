@@ -37,6 +37,7 @@ from infobiotics.commons.quantities.units.volume import volume_units
 import infobiotics
 import sys
 from PyQt4.QtGui import qApp
+from infobiotics.commons.files import readable
 # must use qApp not QApplication(sys.argv) when mixing with TraitsUI
 if qApp is None:
     import sys
@@ -103,10 +104,11 @@ class McssResultsWidget(QWidget):
 
         self.load_settings()
 
-        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
-        self.loaded = self.load(filename)
-        if not self.loaded:
-            self.close()
+        if not hasattr(self, 'filename'):
+            self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
+            self.loaded = self.load(filename)
+            if not self.loaded:
+                self.close()
 
         self.update_ui()
 
@@ -117,22 +119,118 @@ class McssResultsWidget(QWidget):
         self.save_settings()
         event.accept()
 
-    def load_settings(self):
+    def load_settings(self, filename=None, loaded=False):
         settings = QSettings()
+#        print settings.fileName()
         settings.beginGroup(self.__settings_group)
+        
         self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
-        #TODO load options and units
+        
+        if filename is None:
+            filename = settings.value('filename').toString()
+        
+        if not loaded and filename and readable(filename):
+            loaded = self.load(filename)
+        
+        if loaded:
+            settings.beginGroup(self.__settings_group+'.'+filename)
+            
+            units = settings.value('units').toPyObject()
+            if units:
+                units = dict((unicode(key), unicode(value)) for key, value in units.items())
+                self.set_units(**units)
+            
+            random_runs, ok = settings.value('random_runs', QVariant(1)).toInt() 
+            if ok:
+                self.ui.random_runs_spin_box.setValue(random_runs)
+            self.ui.runs_list_widget.clearSelection()
+    
+            checked, ok = settings.value('all_runs', QVariant(Qt.Unchecked)).toInt()
+            if checked:
+                self.ui.select_all_runs_check_box.setCheckState(checked)
+            else:
+                rows = settings.value('runs', QVariant([])).toPyObject()
+                if rows is None:
+                    rows = []
+                for row in rows: 
+                    row, ok = row.toInt()
+                    if ok:
+                        self.ui.runs_list_widget.select(row)
+    
+            checked, ok = settings.value('all_species', QVariant(Qt.Unchecked)).toInt()
+            if checked:
+                self.ui.select_all_species_check_box.setCheckState(checked)
+            else:
+                rows = settings.value('species', QVariant([])).toPyObject()
+                if rows is None:
+                    rows = []
+                for row in rows: 
+                    row, ok = row.toInt()
+                    if ok: 
+                        self.ui.species_list_widget.select(row)
+    
+            checked, ok = settings.value('all_compartments', QVariant(Qt.Unchecked)).toInt()
+            if checked:
+                self.ui.select_all_compartments_check_box.setCheckState(checked)
+            else:
+                rows = settings.value('compartments', QVariant([])).toPyObject()
+                if rows is None:
+                    rows = []
+                for row in rows: 
+                    row, ok = row.toInt()
+                    if ok:
+                        self.ui.compartments_list_widget.select(row)
+    
+            self.ui.filter_species_line_edit.setText(settings.value('species_filter', '').toString())
+            
+            self.ui.filter_compartments_line_edit.setText(settings.value('compartments_filter', '').toString())
+    
+            from_, ok = settings.value('from', 0.0).toDouble()
+            if ok: 
+                self.ui.from_spin_box.setValue(from_)
+            to, ok = settings.value('to', None).toDouble()
+            if ok:
+                self.ui.to_spin_box.setValue(to)
+            every, ok = settings.value('every', QVariant(1)).toInt()
+            if ok:
+                self.ui.every_spin_box.setValue(every)
+    
+            checked, ok = settings.value('averaging', Qt.Checked).toInt() 
+            if ok:
+                self.ui.average_over_selected_runs_check_box.setCheckState(checked)
+    
+            volume, ok = settings.value('volume', QVariant(0.01)).toDouble()
+            if ok:
+                self.ui.volume_spin_box.setValue(volume)
+    
+            settings.endGroup()
+
         settings.endGroup()
+        
 
     def save_settings(self):
         settings = QSettings()
         settings.beginGroup(self.__settings_group)
-        settings.setValue("current_directory", QVariant(unicode(self.current_directory)))
-        #TODO save options and units
-        
-#        # save filename specific options and units
-#        settings.setValue(self.filename)
-        
+        settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
+        if hasattr(self, 'filename'):
+            settings.setValue('filename', QVariant(self.filename))
+            settings.beginGroup(self.__settings_group+'.'+self.filename)
+            settings.setValue('units', QVariant(self.units_dict()))
+            settings.setValue('from', QVariant(self.ui.from_spin_box.value()))
+            settings.setValue('to', QVariant(self.ui.to_spin_box.value()))
+            settings.setValue('every', QVariant(self.ui.every_spin_box.value()))
+            settings.setValue('averaging', QVariant(self.ui.average_over_selected_runs_check_box.checkState()))
+            settings.setValue('random_runs', QVariant(self.ui.random_runs_spin_box.value()))
+            settings.setValue('all_runs', QVariant(self.ui.select_all_runs_check_box.checkState()))
+            settings.setValue('all_species', QVariant(self.ui.select_all_species_check_box.checkState()))
+            settings.setValue('all_compartments', QVariant(self.ui.select_all_compartments_check_box.checkState()))
+            settings.setValue('runs', QVariant([modelIndex.row() for modelIndex in self.ui.runs_list_widget.selectedIndexes()]))
+            settings.setValue('species', QVariant([modelIndex.row() for modelIndex in self.ui.species_list_widget.selectedIndexes()]))
+            settings.setValue('compartments', QVariant([modelIndex.row() for modelIndex in self.ui.compartments_list_widget.selectedIndexes()]))
+            settings.setValue('species_filter', QVariant(self.ui.filter_species_line_edit.text()))
+            settings.setValue('compartments_filter', QVariant(self.ui.filter_compartments_line_edit.text()))
+            settings.setValue('volume', QVariant(self.ui.volume_spin_box.value()))
+            settings.endGroup()
         settings.endGroup()
 
     def load(self, filename=None):
@@ -183,6 +281,9 @@ class McssResultsWidget(QWidget):
         self.filename = filename
 
         self.load_succeeded()
+
+        self.load_settings(filename, loaded=True)
+
         return True
 
 
@@ -567,23 +668,69 @@ class McssResultsWidget(QWidget):
     def volume(self):
         return self.ui.volume_spin_box.value()
 
+    def set_units(self, **units):
+        flags=Qt.MatchExactly|Qt.MatchCaseSensitive
+        for key, value in units.items():
+            if key == 'timepoints_data_units':
+                index = self.ui.timepoints_data_units_combo_box.findText(value, flags)
+                if index != -1:
+                    self.ui.timepoints_data_units_combo_box.setCurrentIndex(index)
+
+            if key == 'timepoints_display_units':
+                index = self.ui.timepoints_display_units_combo_box.findText(value, flags)
+                if index != -1:
+                    self.ui.timepoints_display_units_combo_box.setCurrentIndex(index)
+            
+            if key == 'quantities_data_units':
+                index = self.ui.quantities_data_units_combo_box.findText(value, flags)
+                if index != -1:
+                    self.ui.quantities_data_units_combo_box.setCurrentIndex(index)
+            
+            if key == 'quantities_display_type':
+                index = self.ui.quantities_display_type_combo_box.findText(value, flags)
+                if index != -1:
+                    self.ui.quantities_display_type_combo_box.setCurrentIndex(index)
+                quantities_display_type = value
+                if 'quantities_display_units' in units:
+                    quantities_display_units = units['quantities_display_units']
+                    if quantities_display_type == 'concentrations':
+                        index = self.ui.concentrations_display_units_combo_box.findText(quantities_display_units, flags)
+                        if index != -1:
+                            self.ui.concentrations_display_units_combo_box.setCurrentIndex(index)
+                    elif quantities_display_type == 'moles':
+                        index = self.ui.moles_display_units_combo_box.findText(quantities_display_units, flags)
+                        if index != -1:
+                            self.ui.moles_display_units_combo_box.setCurrentIndex(index)
+#                    elif quantities_display_type == 'molecules':
+#                        pass
+
+            if key == 'volumes_data_units':
+                index = self.ui.volumes_data_units_combo_box.findText(value, flags)
+                if index != -1:
+                    self.ui.volumes_data_units_combo_box.setCurrentIndex(index)
+            
+            if key == 'volumes_display_units':
+                index = self.ui.volumes_display_units_combo_box.findText(value, flags)
+                if index != -1:
+                    self.ui.volumes_display_units_combo_box.setCurrentIndex(index)
+
     def units_dict(self):
         '''McssResults(..., **self.units_dict())'''
         units = {}
-        units['timepoints_data_units'] = str(self.ui.timepoints_data_units_combo_box.currentText())
-        units['timepoints_display_units'] = str(self.ui.timepoints_display_units_combo_box.currentText())
-        units['quantities_data_units'] = str(self.ui.quantities_data_units_combo_box.currentText())
-        quantities_display_type = str(self.ui.quantities_display_type_combo_box.currentText())
-        units['quantities_display_type'] = str(quantities_display_type)
+        units['timepoints_data_units'] = unicode(self.ui.timepoints_data_units_combo_box.currentText())
+        units['timepoints_display_units'] = unicode(self.ui.timepoints_display_units_combo_box.currentText())
+        units['quantities_data_units'] = unicode(self.ui.quantities_data_units_combo_box.currentText())
+        quantities_display_type = unicode(self.ui.quantities_display_type_combo_box.currentText())
+        units['quantities_display_type'] = unicode(quantities_display_type)
         if quantities_display_type == 'molecules':
             quantities_display_units = 'molecules'
         elif quantities_display_type == 'concentrations':
-            quantities_display_units = str(self.ui.concentrations_display_units_combo_box.currentText())
+            quantities_display_units = unicode(self.ui.concentrations_display_units_combo_box.currentText())
         elif quantities_display_type == 'moles':
-            quantities_display_units = str(self.ui.moles_display_units_combo_box.currentText())
-        units['quantities_display_units'] = str(quantities_display_units)
-        units['volumes_data_units'] = str(self.ui.volumes_data_units_combo_box.currentText())
-        units['volumes_display_units'] = str(self.ui.volumes_display_units_combo_box.currentText())
+            quantities_display_units = unicode(self.ui.moles_display_units_combo_box.currentText())
+        units['quantities_display_units'] = unicode(quantities_display_units)
+        units['volumes_data_units'] = unicode(self.ui.volumes_data_units_combo_box.currentText())
+        units['volumes_display_units'] = unicode(self.ui.volumes_display_units_combo_box.currentText())
         return units
 
     def selected_items_results(self, type=float):
@@ -646,7 +793,7 @@ class McssResultsWidget(QWidget):
         
         filename = QFileDialog.getSaveFileName(self,
             self.tr("Save selected timeseries data"),
-            ".",
+            self.current_directory,
             self.tr("All supported types (*.csv *.txt *.xls *.npz);;Comma-separated values (*.csv *.txt);;Excel spreadsheets (*.xls);;Numpy compressed (*.npz)"))
         if filename == '':
             return # user cancelled

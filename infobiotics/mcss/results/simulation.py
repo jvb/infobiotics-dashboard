@@ -149,8 +149,12 @@ def load_h5(h5_file):
 
         simulation._runs_list.append(run)
 
+    # setting simulation.max_time using first run's number of timepoints
+    # because it may have been truncated 
     number_of_timepoints = simulation._runs_list[0].number_of_timepoints
-    simulation.max_time = simulation.log_interval * number_of_timepoints
+    log_interval = simulation.log_interval
+    simulation.max_time = (log_interval * number_of_timepoints) - log_interval
+    # simulation.max_time is used to set the default value of McssResultsWidget.ui.to_spin_box
 
     h5.close()
     return simulation

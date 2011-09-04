@@ -78,7 +78,6 @@ class Histogram(HasTraits):
         return cls(results=results)
 
     def __init__(self, results, **traits):
-        assert results.num_selected_compartments > 1 or results.num_selected_runs > 1 
         HasTraits.__init__(self, results=results, **traits)
         self.update()
 

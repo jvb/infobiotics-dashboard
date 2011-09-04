@@ -199,9 +199,8 @@ class McssResults(object):
         self.basename = os.path.basename(filename)
         
         log_interval = self.simulation.log_interval
-#        max_time = self.simulation.max_time # can't be trusted, multiply log_interval by number_of_timepoints instead
+#        max_time = self.simulation.max_time # can't be trusted, use ((log_interval * number_of_timepoints) - log_interval) instead
         number_of_timepoints = self.simulation._runs_list[0].number_of_timepoints
-#        self._timepoints = Quantity(np.linspace(0, max_time, number_of_timepoints), time_units[self.timepoints_data_units])
         self._timepoints = Quantity(np.linspace(0, (log_interval * number_of_timepoints) - log_interval, number_of_timepoints), time_units[self.timepoints_data_units])
 
         self._timestep = Quantity(log_interval, time_units[self.timepoints_data_units])
