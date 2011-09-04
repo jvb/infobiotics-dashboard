@@ -1412,7 +1412,7 @@ class McssResults(object):
         assert num_runs > 0
 
         num_species = self.num_species
-        assert num_species > 0
+        assert num_species > 0 or volumes
         
         compartments = self.compartments
         num_compartments = len(compartments)
@@ -1538,31 +1538,24 @@ class McssResults(object):
         return timeseries
 
 
-    def timeseries_plot(self, mean_over_runs, parent=None, **kwargs):
-#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=True)
-#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=True)
-#        timeseries = results.timeseries(amounts=True, volumes=True, mean_over_runs=False) 
-#        timeseries = results.timeseries(amounts=True, volumes=False, mean_over_runs=False)
-#        timeseries = results.timeseries(amounts=False, volumes=True, mean_over_runs=False)
+    def timeseries_plot(self, amounts=None, volumes=None, mean_over_runs=None, **timeseries_plot_traits):
+        if not amounts:
+            amounts = True if self.num_species else False
+        if not volumes:
+            volumes = True if self.has_volumes else False
+        if not mean_over_runs:
+            mean_over_runs = True if self.num_runs else False
+        assert any((amounts, volumes))
         from timeseries_plot import TimeseriesPlot
         timeseries_plot = TimeseriesPlot(
-            results=self,
-            window_title='%s timeseries' % os.path.basename(self.filename),
             timeseries=self.timeseries(
-                amounts=True,
-                volumes=True if self.has_volumes else False,
-                mean_over_runs=mean_over_runs,
+                amounts,
+                volumes,
+                mean_over_runs,
             ),
-            **kwargs
+            window_title='%s timeseries' % os.path.basename(self.filename),
+            **timeseries_plot_traits
         )
-        ui = timeseries_plot.edit_traits(kind='live')
-#        return ui
-        widget = ui.control
-        widget.setAttribute(Qt.WA_DeleteOnClose)
-        if parent:
-            widget.connect(parent, SIGNAL("destroyed(QObject*)"), SLOT("close()"))
-        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
-        widget.show()
         return timeseries_plot
     
     

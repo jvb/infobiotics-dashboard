@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>965</width>
-    <height>662</height>
+    <width>952</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -38,6 +38,9 @@
        </property>
        <property name="toolTip">
         <string/>
+       </property>
+       <property name="text">
+        <string>Browse for a simulation file to load:</string>
        </property>
        <property name="readOnly">
         <bool>true</bool>
@@ -325,6 +328,9 @@
            <property name="toolTip">
             <string>Filter Species</string>
            </property>
+           <property name="placeholderText">
+            <string>Filter species</string>
+           </property>
           </widget>
          </item>
         </layout>
@@ -411,7 +417,8 @@
             <bool>true</bool>
            </property>
            <property name="toolTip">
-            <string>Select multiple compartments using Ctrl-click, Shift-click or by clicking and dragging.</string>
+            <string>Select multiple compartments using Ctrl-click, Shift-click or by clicking and dragging.
+Right-click for sorting options</string>
            </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -425,6 +432,9 @@
           <widget class="QLineEdit" name="filter_compartments_line_edit">
            <property name="toolTip">
             <string>Filter Compartments</string>
+           </property>
+           <property name="placeholderText">
+            <string>Filter compartments</string>
            </property>
           </widget>
          </item>
@@ -1157,6 +1167,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>Compute the arithmetic mean of amounts (and volumes) over selected runs</string>
+          </property>
           <property name="text">
            <string>Average over selected runs</string>
           </property>
@@ -1201,133 +1214,141 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="_actions_layout">
-     <item>
-      <spacer name="_actions_spacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>244</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="export_data_as_button">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>Save timeseries data for selected runs, species and compartments</string>
-       </property>
-       <property name="text">
-        <string>Export data as...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/data.png</normaloff>:/data.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>64</width>
-         <height>64</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="autoExclusive">
-        <bool>false</bool>
-       </property>
-       <property name="description">
-        <string>text (.csv)
+    <widget class="QWidget" name="actionsWidget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item>
+       <spacer name="_actions_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>244</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCommandLinkButton" name="export_data_as_button">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Save timeseries data for selected runs, species and compartments</string>
+        </property>
+        <property name="text">
+         <string>Export data as...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/data.png</normaloff>:/data.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>64</width>
+          <height>64</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>false</bool>
+        </property>
+        <property name="description">
+         <string>text (.csv)
 Excel (.xls)
 NumPy (.npz)</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="plot_timeseries_button">
-       <property name="toolTip">
-        <string>Plot timeseries for selected runs, species and compartments</string>
-       </property>
-       <property name="text">
-        <string>Plot timeseries</string>
-       </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/plot_2d.png</normaloff>:/plot_2d.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>64</width>
-         <height>64</height>
-        </size>
-       </property>
-       <property name="description">
-        <string>Combined or individual plots from selection</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="visualise_population_button">
-       <property name="toolTip">
-        <string>Animate levels of selected species on the lattice</string>
-       </property>
-       <property name="text">
-        <string>Visualise population</string>
-       </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/plot_3d.png</normaloff>:/plot_3d.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>64</width>
-         <height>64</height>
-        </size>
-       </property>
-       <property name="description">
-        <string>Animate species levels as a surface over the lattice</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="plot_histogram_button">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>Plot distributions of species in runs or compartments (and mean of the other)</string>
-       </property>
-       <property name="text">
-        <string>Plot histogram</string>
-       </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/hist.png</normaloff>:/hist.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>64</width>
-         <height>64</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="autoExclusive">
-        <bool>false</bool>
-       </property>
-       <property name="description">
-        <string>Plot distributions of species in runs or compartments</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCommandLinkButton" name="plot_timeseries_button">
+        <property name="toolTip">
+         <string>Plot timeseries for selected runs, species and compartments</string>
+        </property>
+        <property name="text">
+         <string>Plot timeseries</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/plot_2d.png</normaloff>:/plot_2d.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>64</width>
+          <height>64</height>
+         </size>
+        </property>
+        <property name="description">
+         <string>Combined or individual plots from selection</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCommandLinkButton" name="visualise_population_button">
+        <property name="toolTip">
+         <string>Animate levels of selected species on the lattice</string>
+        </property>
+        <property name="text">
+         <string>Visualise population</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/plot_3d.png</normaloff>:/plot_3d.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>64</width>
+          <height>64</height>
+         </size>
+        </property>
+        <property name="description">
+         <string>Animate species levels as a surface over the lattice</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCommandLinkButton" name="plot_histogram_button">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Plot distributions of species in runs or compartments (and mean of the other)</string>
+        </property>
+        <property name="text">
+         <string>Plot histogram</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/hist.png</normaloff>:/hist.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>64</width>
+          <height>64</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>false</bool>
+        </property>
+        <property name="description">
+         <string>Plot distributions of species in runs or compartments</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>

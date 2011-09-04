@@ -1,46 +1,15 @@
 from __future__ import division
 
-import infobiotics
-from quantities.quantity import Quantity
-
-from enthought.traits.api import HasTraits, Range, String
-from enthought.traits.ui.api import View, VGroup, HGroup, Item
-
-from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow,\
-    RedVsGreen
-
-from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, Qt, QString
-from PyQt4.QtGui import QWidget, QListWidgetItem, QItemSelectionModel, QFileDialog, QMessageBox
-
-from infobiotics.commons import colours
-from infobiotics.commons.qt4 import *#wait_cursor, disable_widgets, enable_widgets, hide_widgets, show_widgets, uncheck_widgets, clear_widgets, centre_window
-
-from ui_mcss_results_widget import Ui_McssResultsWidget
-
+import sys
 from random import randint
 import os
 
-import xlwt
+import infobiotics # must be before traits imports
 
-import numpy as np
-
-from simulation import load_h5
-from simulation_list_widget_item import SimulationListWidgetItem
-from species import Species
-
-from infobiotics.mcss.results import mcss_results
-from mcss_results import McssResults
-from infobiotics.commons.quantities.units.time import time_units
-from infobiotics.commons.quantities.units.volume import volume_units
-
-# for QSettings
-import infobiotics
-import sys
+# settings
 from PyQt4.QtGui import qApp
-from infobiotics.commons.files import readable
 # must use qApp not QApplication(sys.argv) when mixing with TraitsUI
 if qApp is None:
-    import sys
     from PyQt4.QtGui import QApplication
     app = QApplication(sys.argv) # must keep reference too
 qApp.setOrganizationDomain('www.infobiotics.org')
@@ -48,209 +17,259 @@ qApp.setOrganizationName('Infobiotics')
 qApp.setApplicationName('Infobiotics Dashboard')
 qApp.setApplicationVersion(infobiotics.version)
 
+from PyQt4.QtCore import Qt #@UnusedImport
+from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, SLOT, QString
+from PyQt4.QtGui import QWidget, QListWidgetItem, QItemSelectionModel, QFileDialog, QMessageBox
+
+from infobiotics.commons.qt4 import *#@UnusedWildImport
+
+from enthought.traits.api import HasTraits, Range, String #@UnresolvedImport
+from enthought.traits.ui.api import View, VGroup, HGroup, Item #@UnresolvedImport
+
+import numpy as np
+
+from quantities.quantity import Quantity
+
+from infobiotics.commons.quantities.units.volume import volume_units
+from infobiotics.commons.files import readable
+
+from infobiotics.mcss.results import mcss_results
+from mcss_results import McssResults
+
+from infobiotics.mcss.results.spatial_plots import Surface, SpatialPlotsWindow, RedVsGreen
+
+from simulation import load_h5
+
+from simulation_list_widget_item import SimulationListWidgetItem
+
+from ui_mcss_results_widget import Ui_McssResultsWidget
+
+
 class McssResultsWidget(QWidget):
     '''Extract and plot data from mcss simulations'''
     
-    __settings_group = "McssResultsWidget"
-
     def __init__(self, filename=None):
         '''Setup widgets, connect signals to slots and attempt load.'''
-        QWidget.__init__(self) # initialize base class
+        QWidget.__init__(self)
 
         self.ui = Ui_McssResultsWidget()
         self.ui.setupUi(self) # QPixmap: It is not safe to use pixmaps outside the GUI thread
 
-        self.ui.calculate_button.setVisible(False) # hide buttons that don't work #TODO make it work
-
-#        self.ui.compartments_list_widget.setToolTip('')
+        # connect signals to slots
 
         self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
-
 
         self.ui.runs_list_widget.connect_all_selected_check_box(self.ui.select_all_runs_check_box)
         self.ui.species_list_widget.connect_all_selected_check_box(self.ui.select_all_species_check_box)
         self.ui.compartments_list_widget.connect_all_selected_check_box(self.ui.select_all_compartments_check_box)
-
+        # using ListWidget methods
         self.ui.species_list_widget.connect_filter_line_edit(self.ui.filter_species_line_edit)
         self.ui.compartments_list_widget.connect_filter_line_edit(self.ui.filter_compartments_line_edit)
 
+        for widget in self.ui.runs_list_widget, self.ui.species_list_widget, self.ui.compartments_list_widget:
+            self.connect(widget, SIGNAL('itemSelectionChanged()'), self.update_ui)
 
-        self.connect(self.ui.runs_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
-        self.connect(self.ui.species_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
-        self.connect(self.ui.compartments_list_widget, SIGNAL("itemSelectionChanged()"), self.update_ui)
+        for function in self.select_random_runs, lambda: (
+            self.ui.select_all_runs_check_box.setChecked(False)
+                if self.ui.random_runs_spin_box.value() < self.ui.random_runs_spin_box.maximum()
+                    else self.ui.select_all_runs_check_box.setChecked(True)
+        ):
+            self.connect(self.ui.random_runs_spin_box, SIGNAL('valueChanged(int)'), function)
 
-        self.connect(self.ui.random_runs_spin_box, SIGNAL("valueChanged(int)"), self.select_random_runs)
-        self.connect(self.ui.random_runs_spin_box, SIGNAL("valueChanged(int)"),
-            lambda: (
-                self.ui.select_all_runs_check_box.setChecked(False)
-                    if self.ui.random_runs_spin_box.value() < self.ui.random_runs_spin_box.maximum()
-                        else self.ui.select_all_runs_check_box.setChecked(True)
-            )
-        )
-
-        # make sure from is always less than to and that to is always more than from
+        # ensure from < to
         self.connect(self.ui.from_spin_box, SIGNAL("valueChanged(double)"), self.ui.to_spin_box.set_minimum)
         self.connect(self.ui.to_spin_box, SIGNAL("valueChanged(double)"), self.ui.from_spin_box.set_maximum)
 
-        self.quantities_display_type_changed(self.ui.quantities_display_type_combo_box.currentText())
+        self.quantities_display_type_changed(self.ui.quantities_display_type_combo_box.currentText()) # ui update
         self.connect(self.ui.quantities_display_type_combo_box, SIGNAL('currentIndexChanged(QString)'), self.quantities_display_type_changed)
-
-        self.connect(self.ui.calculate_button, SIGNAL('clicked()'), self.calculate)
 
         self.connect(self.ui.plot_histogram_button, SIGNAL("clicked()"), self.histogram)
         self.connect(self.ui.export_data_as_button, SIGNAL("clicked()"), self.export_data_as)
         self.connect(self.ui.plot_timeseries_button, SIGNAL("clicked()"), self.plot)
         self.connect(self.ui.visualise_population_button, SIGNAL("clicked()"), self.surfacePlot)
 
+        self.connect(self.ui.calculate_button, SIGNAL('clicked()'), self.calculate)
+        #TODO implement multi-dimensional calculation plotter
+        self.ui.calculate_button.setVisible(False) # hide buttons that don't work
+
+        self._geometry_orig = self.geometry()
+        # must be before self.load_settings()
+        
+        self.restore_geometry()
+        
         self.load_settings()
 
-        if not hasattr(self, 'filename'):
+        # must be after self.load_settings()
+        self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text()
+        # and before self.load()
+        
+        if filename:#not hasattr(self, 'filename'):
             self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
             self.loaded = self.load(filename)
-            if not self.loaded:
-                self.close()
+#            if not self.loaded:
+#                self.close()
 
-        self.update_ui()
+#        self.update_ui()
+
 
     def closeEvent(self, event):
-        if hasattr(self, 'timeseries_plot'):
-            self.timeseries_plot.dispose()
-#        shared.settings.save_window_size_and_position(self, self.__settings_group)
+        print 'closeEvent() save_settings', self.current_directory
         self.save_settings()
+        if self.loaded:
+            print 'closeEvent() save_geometry', self.current_directory
+            self.save_geometry()
+        if hasattr(self, '_timeseries_plot_uis'):
+            for ui in self._timeseries_plot_uis:
+                ui.dispose()
         event.accept()
 
-    def load_settings(self, filename=None, loaded=False):
-        settings = QSettings()
-#        print settings.fileName()
-        settings.beginGroup(self.__settings_group)
-        
-        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
-        
-        if filename is None:
-            filename = settings.value('filename').toString()
-        
-        if not loaded and filename and readable(filename):
-            loaded = self.load(filename)
-        
-        if loaded:
-            settings.beginGroup(self.__settings_group+'.'+filename)
-            
-            units = settings.value('units').toPyObject()
-            if units:
-                units = dict((unicode(key), unicode(value)) for key, value in units.items())
-                self.set_units(**units)
-            
-            random_runs, ok = settings.value('random_runs', QVariant(1)).toInt() 
-            if ok:
-                self.ui.random_runs_spin_box.setValue(random_runs)
-            self.ui.runs_list_widget.clearSelection()
-    
-            checked, ok = settings.value('all_runs', QVariant(Qt.Unchecked)).toInt()
-            if checked:
-                self.ui.select_all_runs_check_box.setCheckState(checked)
-            else:
-                rows = settings.value('runs', QVariant([])).toPyObject()
-                if rows is None:
-                    rows = []
-                for row in rows: 
-                    row, ok = row.toInt()
-                    if ok:
-                        self.ui.runs_list_widget.select(row)
-    
-            checked, ok = settings.value('all_species', QVariant(Qt.Unchecked)).toInt()
-            if checked:
-                self.ui.select_all_species_check_box.setCheckState(checked)
-            else:
-                rows = settings.value('species', QVariant([])).toPyObject()
-                if rows is None:
-                    rows = []
-                for row in rows: 
-                    row, ok = row.toInt()
-                    if ok: 
-                        self.ui.species_list_widget.select(row)
-    
-            checked, ok = settings.value('all_compartments', QVariant(Qt.Unchecked)).toInt()
-            if checked:
-                self.ui.select_all_compartments_check_box.setCheckState(checked)
-            else:
-                rows = settings.value('compartments', QVariant([])).toPyObject()
-                if rows is None:
-                    rows = []
-                for row in rows: 
-                    row, ok = row.toInt()
-                    if ok:
-                        self.ui.compartments_list_widget.select(row)
-    
-            self.ui.filter_species_line_edit.setText(settings.value('species_filter', '').toString())
-            
-            self.ui.filter_compartments_line_edit.setText(settings.value('compartments_filter', '').toString())
-    
-            from_, ok = settings.value('from', 0.0).toDouble()
-            if ok: 
-                self.ui.from_spin_box.setValue(from_)
-            to, ok = settings.value('to', None).toDouble()
-            if ok:
-                self.ui.to_spin_box.setValue(to)
-            every, ok = settings.value('every', QVariant(1)).toInt()
-            if ok:
-                self.ui.every_spin_box.setValue(every)
-    
-            checked, ok = settings.value('averaging', Qt.Checked).toInt() 
-            if ok:
-                self.ui.average_over_selected_runs_check_box.setCheckState(checked)
-    
-            volume, ok = settings.value('volume', QVariant(0.01)).toDouble()
-            if ok:
-                self.ui.volume_spin_box.setValue(volume)
-    
-            settings.endGroup()
 
+    __settings_group = 'McssResultsWidget'
+
+    def save_geometry(self):
+        settings = QSettings()
+        settings.beginGroup(self._settings_group())
+        settings.setValue('geometry', self.geometry())
+        print 'saved', self.geometry()
         settings.endGroup()
         
+    def restore_geometry(self):
+        settings = QSettings()
+        settings.beginGroup(self._settings_group())
+        self.setGeometry(settings.value('geometry', self.geometry()).toRect())
+        print 'restored', self.geometry()
+        settings.endGroup()
+        
+#    def save_current_directory(self):
+#        settings = QSettings()
+#        settings.beginGroup(self._settings_group())
+#        settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
+#        settings.endGroup()
+        
+#    def restore_current_directory(self):
+#        settings = QSettings()
+#        settings.beginGroup(self._settings_group())
+#        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+#        settings.endGroup()
+
+    def _settings_group(self, filename=None):
+        if filename:
+            return filename
+#            return '/'.join([self.__settings_group, filename])
+        return self.__settings_group 
+            
+        
+    def load_settings(self):
+#        self.restore_geometry()
+        
+#        self.restore_current_directory()
+
+        settings = QSettings()
+        settings.beginGroup(self._settings_group())
+        
+        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+
+        if not (hasattr(self, 'filename') and readable(self.filename)):
+            return
+        
+        settings.beginGroup(self._settings_group(self.filename))
+        
+        units = settings.value('units').toPyObject()
+        if units:
+            units = dict((unicode(key), unicode(value)) for key, value in units.items())
+            self.set_units(**units)
+        
+        random_runs, ok = settings.value('random_runs', QVariant(1)).toInt() 
+        if ok:
+            self.ui.random_runs_spin_box.setValue(random_runs)
+        self.ui.runs_list_widget.clearSelection()
+
+        def restore_selection(checkboxsetting, checkbox, listwidgetsetting, listwidget):
+            checked, ok = settings.value(checkboxsetting, QVariant(Qt.Unchecked)).toInt()
+            if checked:
+                checkbox.setCheckState(checked)
+            else:
+                rows = settings.value(listwidgetsetting).toPyObject()
+                if rows is None:
+                    rows = []
+                for row in rows: 
+                    if not isinstance(row, int):
+                        row, ok = row.toInt()
+                    else:
+                        ok = True
+                    if ok:
+                        listwidget.select(row)
+
+        restore_selection('all_runs', self.ui.select_all_runs_check_box, 'runs', self.ui.runs_list_widget)
+        restore_selection('all_species', self.ui.select_all_species_check_box, 'species', self.ui.species_list_widget)
+        restore_selection('all_compartments', self.ui.select_all_compartments_check_box, 'compartments', self.ui.compartments_list_widget)
+
+        self.ui.filter_species_line_edit.setText(settings.value('species_filter', '').toString())
+        
+        self.ui.filter_compartments_line_edit.setText(settings.value('compartments_filter', '').toString())
+
+        from_, ok = settings.value('from', 0.0).toDouble()
+        if ok: 
+            self.ui.from_spin_box.setValue(from_)
+        to, ok = settings.value('to', None).toDouble()
+        if ok:
+            self.ui.to_spin_box.setValue(to)
+        every, ok = settings.value('every', QVariant(1)).toInt()
+        if ok:
+            self.ui.every_spin_box.setValue(every)
+
+        checked, ok = settings.value('averaging', Qt.Checked).toInt() 
+        if ok:
+            self.ui.average_over_selected_runs_check_box.setCheckState(checked)
+
+        volume, ok = settings.value('volume', QVariant(0.01)).toDouble()
+        if ok:
+            self.ui.volume_spin_box.setValue(volume)
+
 
     def save_settings(self):
         settings = QSettings()
-        settings.beginGroup(self.__settings_group)
+        settings.beginGroup(self._settings_group())
         settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
-        if hasattr(self, 'filename'):
-            settings.setValue('filename', QVariant(self.filename))
-            settings.beginGroup(self.__settings_group+'.'+self.filename)
-            settings.setValue('units', QVariant(self.units_dict()))
-            settings.setValue('from', QVariant(self.ui.from_spin_box.value()))
-            settings.setValue('to', QVariant(self.ui.to_spin_box.value()))
-            settings.setValue('every', QVariant(self.ui.every_spin_box.value()))
-            settings.setValue('averaging', QVariant(self.ui.average_over_selected_runs_check_box.checkState()))
-            settings.setValue('random_runs', QVariant(self.ui.random_runs_spin_box.value()))
-            settings.setValue('all_runs', QVariant(self.ui.select_all_runs_check_box.checkState()))
-            settings.setValue('all_species', QVariant(self.ui.select_all_species_check_box.checkState()))
-            settings.setValue('all_compartments', QVariant(self.ui.select_all_compartments_check_box.checkState()))
-            settings.setValue('runs', QVariant([modelIndex.row() for modelIndex in self.ui.runs_list_widget.selectedIndexes()]))
-            settings.setValue('species', QVariant([modelIndex.row() for modelIndex in self.ui.species_list_widget.selectedIndexes()]))
-            settings.setValue('compartments', QVariant([modelIndex.row() for modelIndex in self.ui.compartments_list_widget.selectedIndexes()]))
-            settings.setValue('species_filter', QVariant(self.ui.filter_species_line_edit.text()))
-            settings.setValue('compartments_filter', QVariant(self.ui.filter_compartments_line_edit.text()))
-            settings.setValue('volume', QVariant(self.ui.volume_spin_box.value()))
-            settings.endGroup()
-        settings.endGroup()
+        if not hasattr(self, 'filename'):
+            return
+        settings.setValue('previous', QVariant(self.filename))
+#        settings.beginGroup(self.filename)
+        settings.beginGroup(self._settings_group(self.filename))
+        settings.setValue('units', QVariant(self.units_dict()))
+        settings.setValue('from', QVariant(self.ui.from_spin_box.value()))
+        settings.setValue('to', QVariant(self.ui.to_spin_box.value()))
+        settings.setValue('every', QVariant(self.ui.every_spin_box.value()))
+        settings.setValue('averaging', QVariant(self.ui.average_over_selected_runs_check_box.checkState()))
+        settings.setValue('random_runs', QVariant(self.ui.random_runs_spin_box.value()))
+        settings.setValue('all_runs', QVariant(self.ui.select_all_runs_check_box.checkState()))
+        settings.setValue('all_species', QVariant(self.ui.select_all_species_check_box.checkState()))
+        settings.setValue('all_compartments', QVariant(self.ui.select_all_compartments_check_box.checkState()))
+        settings.setValue('runs', QVariant([modelIndex.row() for modelIndex in self.ui.runs_list_widget.selectedIndexes()]))
+        settings.setValue('species', QVariant([modelIndex.row() for modelIndex in self.ui.species_list_widget.selectedIndexes()]))
+        settings.setValue('compartments', QVariant([modelIndex.row() for modelIndex in self.ui.compartments_list_widget.selectedIndexes()]))
+        settings.setValue('species_filter', QVariant(self.ui.filter_species_line_edit.text()))
+        settings.setValue('compartments_filter', QVariant(self.ui.filter_compartments_line_edit.text()))
+        settings.setValue('volume', QVariant(self.ui.volume_spin_box.value()))
+
 
     def load(self, filename=None):
-        
-#        if getattr(self, 'filename', '') != '':
-#            self.save_settings()
-        
         if filename is None:
-            filename = QFileDialog.getOpenFileName(self,
-                                                   self.tr("Open HDF5 simulation data file"),
-                                                   self.current_directory,
-                                                   self.tr("HDF5 data files (*.h5 *.hdf5);;All files (*)"))
+            filename = QFileDialog.getOpenFileName(
+               self,
+               self.tr("Open HDF5 simulation data file"),
+               self.current_directory,
+               self.tr("HDF5 data files (*.h5 *.hdf5);;All files (*)")
+            )
             if filename == '':
                 if self.loaded:
                     return
                 else:
                     self.load_failed()
                     return False
-
-        self.current_directory = QFileInfo(filename).absolutePath()
+        
+        print 'load() save_settings', self.current_directory
+        self.save_settings()
 
 #        if sip.getapi('QString') == 1:
         filename = unicode(filename) # must convert QString into unicode
@@ -282,36 +301,46 @@ class McssResultsWidget(QWidget):
 
         self.load_succeeded()
 
-        self.load_settings(filename, loaded=True)
-
+        self.load_settings()
+        self.current_directory = QFileInfo(filename).absolutePath()
+        self.save_settings()
+        
+        self.update_ui()
+        
         return True
 
 
     def load_failed(self):
-        ''' Hides, clears, unchecks and disables relevant widgets. '''
+        '''Hides, clears, unchecks and disables relevant widgets.'''
         
         ui = self.ui
 
         hide_widgets(
-            ui.runs_selected_and_total_label,
-            ui.species_selected_and_total_label,
-            ui.compartments_selected_and_total_label,
-            
-            ui.timepoints_data_units_combo_box,
-            ui.timepoints_display_units_combo_box,
-            
+            ui._timepoints_group_box,
+            ui._runs_group_box,
+            ui._species_group_box,
+            ui._compartments_group_box,
             ui._data_group_box,
-#            ui.quantities_data_units_combo_box,
-#            ui.quantities_display_type_combo_box,
-##            ui.molecules_display_units_label,
-#            ui.moles_display_units_combo_box,
-#            ui.concentrations_display_units_combo_box,
-            
-#            ui.volumes_data_units_combo_box,
-#            ui.volumes_display_units_combo_box,
-            ui.volumes_widget,
-
-#            ui._actions_layout, # not possible because QLayouts don't have a setVisible method
+#            
+#            ui.runs_selected_and_total_label,
+#            ui.species_selected_and_total_label,
+#            ui.compartments_selected_and_total_label,
+#            
+#            ui.timepoints_data_units_combo_box,
+#            ui.timepoints_display_units_combo_box,
+#            
+#            ui._data_group_box,
+##            ui.quantities_data_units_combo_box,
+##            ui.quantities_display_type_combo_box,
+###            ui.molecules_display_units_label,
+##            ui.moles_display_units_combo_box,
+##            ui.concentrations_display_units_combo_box,
+#            
+##            ui.volumes_data_units_combo_box,
+##            ui.volumes_display_units_combo_box,
+#            ui.volumes_widget,
+#
+            ui.actionsWidget,
         )
 
         clear_widgets(
@@ -320,6 +349,8 @@ class McssResultsWidget(QWidget):
             ui.species_list_widget,
             ui.compartments_list_widget,
         )
+
+        ui.file_name_line_edit.setText(self._file_name_line_edit_text_orig)
 
         uncheck_widgets(
             ui.select_all_runs_check_box,
@@ -360,17 +391,7 @@ class McssResultsWidget(QWidget):
         
         ui.load_button.setFocus(Qt.OtherFocusReason)
 
-
-    def quantities_display_type_changed(self, text):
-        if text == 'molecules': #FIXME replace with substance_display units?
-            hide_widgets(self.ui.concentrations_display_units_combo_box, self.ui.moles_display_units_combo_box)
-            show_widgets(self.ui.molecules_display_units_label)
-        elif text == 'concentrations':
-            hide_widgets(self.ui.molecules_display_units_label, self.ui.moles_display_units_combo_box)
-            show_widgets(self.ui.concentrations_display_units_combo_box)
-        elif text == 'moles':
-            hide_widgets(self.ui.molecules_display_units_label, self.ui.concentrations_display_units_combo_box)
-            show_widgets(self.ui.moles_display_units_combo_box)
+        self.resize(350,32)
         
         
     def load_succeeded(self):
@@ -412,6 +433,14 @@ class McssResultsWidget(QWidget):
             SimulationListWidgetItem(i, ui.species_list_widget)
         for i in simulation._runs_list[0]._compartments_list: #FIXME can't rely on run1 alone if compartments divide
             SimulationListWidgetItem(i, ui.compartments_list_widget)
+
+        show_widgets(            
+            ui._timepoints_group_box,
+            ui._runs_group_box,
+            ui._species_group_box,
+            ui._compartments_group_box,
+            ui._data_group_box,
+        )
         
         # runs
         runs = ui.runs_list_widget.count()
@@ -536,14 +565,31 @@ class McssResultsWidget(QWidget):
 #            ui.volumes_data_units_combo_box,
 #            ui.volumes_display_units_combo_box,
 #            ui.volumes_widget,
+            ui.actionsWidget,
         )
 
         self.ui.species_list_widget.setFocus(Qt.OtherFocusReason)
 
+#        self.setGeometry(self._geometry_orig)
+#        self.restore_geometry()
+
+
+    def quantities_display_type_changed(self, text):
+        if text == 'molecules': #TODO replace with substance_display units?
+            hide_widgets(self.ui.concentrations_display_units_combo_box, self.ui.moles_display_units_combo_box)
+            show_widgets(self.ui.molecules_display_units_label)
+        elif text == 'concentrations':
+            hide_widgets(self.ui.molecules_display_units_label, self.ui.moles_display_units_combo_box)
+            show_widgets(self.ui.concentrations_display_units_combo_box)
+        elif text == 'moles':
+            hide_widgets(self.ui.molecules_display_units_label, self.ui.concentrations_display_units_combo_box)
+            show_widgets(self.ui.moles_display_units_combo_box)
+        
 
     def update_ui(self):
-        ''' Called at the end of __init__ and whenever runs/species/compartments
-        list_widget's item selection changes in order to disable/enable actions. '''
+        '''Called at the end of __init__ and whenever runs/species/compartments
+        list_widget's item selection changes in order to disable/enable actions
+        '''
         
         num_selected_runs = len(self.ui.runs_list_widget.selectedItems())
         self.ui.runs_selected_and_total_label.setText('%s/%s' % (num_selected_runs, self.ui.runs_list_widget.count()))
@@ -586,7 +632,7 @@ class McssResultsWidget(QWidget):
 #
 #            results = self.selected_items_results()
 #            _, _, _, averaging = self.options()
-#            numtimeseries = results.num_timeseries(True, self.volumes_selected, averaging) 
+#            numtimeseries = results.num_timeseries(True, self.volumes_selected(), averaging) 
 #            numtimepoints = results.num_timepoints * numtimeseries
 #            
 #            numsurfaces = results.num_selected_species
@@ -626,14 +672,15 @@ class McssResultsWidget(QWidget):
 
     # accessors
     
+    def volumes_selected(self):
+        return True if hasattr(self, 'volumes_list_widget_item') and self.volumes_list_widget_item.isSelected() else False
+    
     def selected_species(self):
         '''Return selected species after removing volumes.'''
         selected_species = self.ui.species_list_widget.selectedItems()
-        if self.simulation.log_volumes in ('true', 1) and self.volumes_list_widget_item in selected_species:
+#        if self.simulation.log_volumes in ('true', 1) and self.volumes_list_widget_item in selected_species:
+        if self.volumes_selected():
             selected_species.remove(self.volumes_list_widget_item)
-            self.volumes_selected = True
-        else:
-            self.volumes_selected = False
         return selected_species
     
     # compound accessors
@@ -662,8 +709,11 @@ class McssResultsWidget(QWidget):
         from_ = self.ui.from_spin_box.value()
         to = self.ui.to_spin_box.value()
         every = self.ui.every_spin_box.value()
-        averaging = self.ui.average_over_selected_runs_check_box.isChecked()
+        averaging = self.mean_over_runs()
         return from_, to, every, averaging
+
+    def mean_over_runs(self):
+        return True if self.ui.average_over_selected_runs_check_box.isChecked() else False
 
     def volume(self):
         return self.ui.volume_spin_box.value()
@@ -842,14 +892,32 @@ class McssResultsWidget(QWidget):
 
         return filename
 
-            
+
     @wait_cursor
     def plot(self, **kwargs):
-        '''Plot selected data. '''
+        '''Plot timeseries from selection'''
         results = self.selected_items_results()
-#        print results.timeseries_information()
-        self.timeseries_plot = results.timeseries_plot(parent=self, mean_over_runs=True if self.ui.average_over_selected_runs_check_box.isChecked() else False, **kwargs) 
-        widget = self.timeseries_plot.control
+        print results.timeseries_information()
+        self.timeseries_plot = results.timeseries_plot(
+            mean_over_runs=self.mean_over_runs(),
+            volumes=self.volumes_selected(), 
+            **kwargs
+        ) 
+        
+        ui = self.timeseries_plot.edit_traits(kind='live')
+
+        # self._timeseries_plot_uis is used in self.closeEvent to close open windows
+        if not hasattr(self, '_timeseries_plots_uis'):
+            self._timeseries_plot_uis=[ui]
+        else:
+            self._timeseries_plot_uis.append(ui)
+
+        widget = ui.control
+        
+        #TODO works?
+        widget.setAttribute(Qt.WA_DeleteOnClose)
+        widget.connect(self, SIGNAL("destroyed(QObject*)"), SLOT("close()"))
+        
         widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
         widget.show()
         
@@ -959,9 +1027,9 @@ def interpolate(surfacearray, xymultiplier, tmultiplier, order=1):
 
 
 def main(filename=None):
-    '''see spatial_splot.test for how to automate selections, etc.'''
-#    argv = qApp.arguments()
-    argv = sys.argv
+    # see spatial_splot.test for how to automate selections, etc
+    
+    argv = sys.argv#qApp.arguments()
     
     if filename is not None:
         self = McssResultsWidget(filename=filename)
@@ -970,21 +1038,22 @@ def main(filename=None):
             print 'usage: python mcss_results_widget.py {h5file}'#TODO mcss-results {h5file}'
             sys.exit(2)
         if len(argv) == 1:
-    #        shared.settings.register_infobiotics_settings()
             self = McssResultsWidget()
+            self.load_failed()
         elif len(argv) == 2:
-            self = McssResultsWidget(filename=argv[1])
+            filename=argv[1]
+            self = McssResultsWidget(filename)
+#    self.update_ui()
     centre_window(self)
     self.show()
+    if len(argv) == 1:
+        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
+        self.loaded = self.load()
+
 
     self.raise_()
     qApp.processEvents()
     
-#    self.raise_()
-#    qApp.processEvents()
-    
-#    shared.settings.restore_window_size_and_position(self)
-
 #    return self
     exit(qApp.exec_())
 
