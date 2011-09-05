@@ -898,7 +898,14 @@ class McssResultsWidget(QWidget):
     def histogram(self):
         from histograms import Histogram
         results = self.selected_items_results()
-        Histogram.fromresults(results).configure_traits()
+        units = self.units_dict()
+        histogram = Histogram.fromresults(
+            results,
+            timepoints_display_units=units['timepoints_display_units'],
+            quantities_display_units=units['quantities_display_units'],
+            bins=10,
+        )
+        histogram.edit_traits()
 
 
     csv_precision = mcss_results.McssResults.csv_precision

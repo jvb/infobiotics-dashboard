@@ -18,9 +18,13 @@ from enthought.traits.ui.api import *
 class Histogram(HasTraits):
     
     data = Enum(['Compartments', 'Runs'])
+
     sum_species = Bool(False)
+    
     bins = Range(2,100,10)
-#    quanitities_display_units = Enum(...) #TODO
+    
+    quantities_display_units = Str
+    timepoints_display_units = Str
 
     results = Any#Instance(mcss_results.McssResults)
 
@@ -35,7 +39,7 @@ class Histogram(HasTraits):
 
 
     def _max_timepoint_index_default(self):
-        return len(self.results.timepoints) - 1
+        return len(self.results.timepoints)# - 1
 
     def _from_timepoint_index_default(self):
 #        return self.max_timepoint_index // 2
@@ -66,12 +70,12 @@ class Histogram(HasTraits):
 
 
     @classmethod
-    def fromfile(cls, file):
-        return cls(results=mcss_results.McssResults(file))
+    def fromfile(cls, file, **traits):
+        return cls(results=mcss_results.McssResults(file, **traits), **traits)
 
     @classmethod
-    def fromresults(cls, results):
-        return cls(results=results)
+    def fromresults(cls, results, **traits):
+        return cls(results=results, **traits)
 
     def __init__(self, results, **traits):
         HasTraits.__init__(self, results=results, **traits)
@@ -123,7 +127,7 @@ class Histogram(HasTraits):
         # 3D
 #        self.update_surface()
 
-    style = Enum(['bar', 'step'], desc='type of histogram to plot (larger bin sizes are recommended with step') 
+    style = Enum(['stepfilled', 'step', 'bar'], desc='type of histogram to plot (larger bin sizes are recommended with step') 
 
     def _min_max(self, quantities):
         return (np.min(quantities.magnitude), np.max(quantities.magnitude))
@@ -132,26 +136,33 @@ class Histogram(HasTraits):
         self._figure.clear()
         axes = self._figure.add_subplot(1,1,1)
         axes.grid(True)
+        axes.set_xlabel(self.quantities_display_units)
+        axes.set_ylabel('frequency')
         label = [species.name for species in self.results.species]
         hist, bins, patches = axes.hist(data, self.bins, 
            label = ', '.join(label) if self.sum_species else label,
 #           range=self._min_max(data) if self.sum_species else self._min_max(self.amounts),
            range=(0, np.max(data.magnitude)) if self.sum_species else self._min_max(self.amounts),
            histtype=self.style, 
-           alpha=0.5 if self.style == 'step' else 1, 
+           alpha=0.4 if self.style == 'stepfilled' else 1,
         )
+        self._figure.set_facecolor('white')
 #        print data, data.shape
 #        print hist
         if not self.sum_species:
             axes.legend()
         if self._figure.canvas is not None:
             self._figure.canvas.draw()
-        self._figure.suptitle(self.maketitle().split(' to')[0])
+        self._figure.suptitle(self.maketitle())
         return axes
 
     def maketitle(self):
-        #TODO
-        return "Histogram TODO from %.1f to %.1f" % (self.results.timepoints[self.from_timepoint_index], self.results.timepoints[self.to_timepoint_index])#, self.timepoints_display_units)
+        return "Histogram of species quantities at %.1f %s (mean over %s)" % (
+            self.results.timepoints[self.from_timepoint_index], 
+#            self.results.timepoints[self.to_timepoint_index]
+            self.timepoints_display_units,
+            self.data.lower(), 
+        )
 
 # from histograms2.HistogramWidget.HistogramWidget.onDraw
 #        self.axes.set_title(self.title)
@@ -332,7 +343,7 @@ class Histogram(HasTraits):
 
 
 def test():
-    Histogram.fromfile('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5').configure_traits()
+    Histogram.fromfile('../../../examples/tutorial-autoregulation/autoregulation_simulation.h5', to=100).configure_traits()
 
 
 if __name__ == '__main__':

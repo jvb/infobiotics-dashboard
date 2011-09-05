@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mcss_results_widget.ui'
 #
-# Created: Mon Sep  5 12:15:44 2011
+# Created: Mon Sep  5 12:22:03 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
