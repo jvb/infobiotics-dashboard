@@ -95,29 +95,25 @@ class McssResultsWidget(QWidget):
 
         self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text() # remember text from Ui_McssResultsWidget
 
-        self._geometry_orig = self.geometry() # remember geometry from Ui_McssResultsWidget
-        print '__init__(), restore_geometry()'
+#        self._geometry_orig = self.geometry() # remember geometry from Ui_McssResultsWidget
         self.restore_geometry()
         
-        print '__init__(), restore_current_directory'
         self.restore_current_directory()
         
         self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
         if filename:
-            self.loaded = self.load(filename)
-        else:
+            self.load(filename)
+        if not self.loaded:
             self.load_failed()
+            
         self.update_ui()
 
 
     def closeEvent(self, event):
-        print 'closeEvent() save_settings',
         self.save_settings()
         if self.loaded:
-            print 'closeEvent() save_geometry', 
             self.save_geometry()
-            print 'closeEvent() save_current_directory',
-            self.save_current_directory()
+
         if hasattr(self, '_timeseries_plot_uis'):
             for ui in self._timeseries_plot_uis:
                 ui.dispose()
@@ -143,35 +139,31 @@ class McssResultsWidget(QWidget):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         settings.setValue('geometry', self.geometry())
-        print 'saved', self.geometry()
         settings.endGroup()
         
     def restore_geometry(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         self.setGeometry(settings.value('geometry', self.geometry()).toRect())
-        print 'restored', self.geometry()
         settings.endGroup()
         
     def save_current_directory(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
-        print 'saved', self.current_directory
         settings.endGroup()
         
     def restore_current_directory(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
-        print 'restored', self.current_directory
         settings.endGroup()
 
-    def previous(self): #TODO
-        settings = QSettings()
-        settings.beginGroup(self._settings_group())
-        previous = unicode(settings.value('previous').toString())
-        return previous
+#    def previous(self): #TODO
+#        settings = QSettings()
+#        settings.beginGroup(self._settings_group())
+#        previous = unicode(settings.value('previous').toString())
+#        return previous
 
 
     def save_settings(self):
@@ -183,12 +175,9 @@ class McssResultsWidget(QWidget):
         
         settings.beginGroup(self._settings_group())
         settings.setValue('previous', QVariant(self.filename))
-        settings.endGroup()
+        settings.endGroup() # vital
         
         settings.beginGroup(self._settings_group(self.filename))
-        
-        print settings.group()
-        
         settings.setValue('units', QVariant(self.units_dict()))
         settings.setValue('from', QVariant(self.ui.from_spin_box.value()))
         settings.setValue('to', QVariant(self.ui.to_spin_box.value()))
@@ -203,10 +192,7 @@ class McssResultsWidget(QWidget):
         settings.setValue('species_filter', QVariant(self.ui.filter_species_line_edit.text()))
         settings.setValue('compartments_filter', QVariant(self.ui.filter_compartments_line_edit.text()))
         settings.setValue('volume', QVariant(self.ui.volume_spin_box.value()))
-        
         settings.endGroup()
-        
-        print 'saved settings', self.filename
 
 
     def load_settings(self):
@@ -217,8 +203,6 @@ class McssResultsWidget(QWidget):
         settings = QSettings()
         
         settings.beginGroup(self._settings_group(self.filename))
-
-        print settings.group()
 
         units = settings.value('units').toPyObject()
         if units:
@@ -270,18 +254,15 @@ class McssResultsWidget(QWidget):
         if ok:
             self.ui.volume_spin_box.setValue(volume)
 
-        print 'loaded settings', self.filename
-        
         settings.endGroup()
+
 
     def load(self, filename=None):
 
         # save settings for current file before possibly loading a new one
-        print 'load() save_settings',
         self.save_settings()
         
         # save current directory before possibly find a new one
-        print 'load() save_current_directory',
         self.save_current_directory()
         
         if filename is None:
@@ -297,7 +278,6 @@ class McssResultsWidget(QWidget):
                 else:
                     self.load_failed()
                     return False
-        
 
 #        if sip.getapi('QString') == 1:
         filename = unicode(filename) # must convert QString into unicode
@@ -330,7 +310,6 @@ class McssResultsWidget(QWidget):
         self.current_directory = QFileInfo(filename).absolutePath()
         
         # save new current directory
-        print 'load(), save_current_directory'
         self.save_current_directory()
         
         self.loaded = True
@@ -338,9 +317,6 @@ class McssResultsWidget(QWidget):
 
         # load settings for new filename
         self.load_settings()
-#        self.save_settings()
-        
-#        self.update_ui()
         
         return True
 
@@ -465,13 +441,13 @@ class McssResultsWidget(QWidget):
         for i in simulation._runs_list[0]._compartments_list: #FIXME can't rely on run1 alone if compartments divide
             SimulationListWidgetItem(i, self.ui.compartments_list_widget)
 
-#        show_widgets(            
+        show_widgets(            
 #            self.ui._timepoints_group_box,
 #            self.ui._runs_group_box,
 #            self.ui._species_group_box,
 #            self.ui._compartments_group_box,
-#            self.ui._data_group_box,
-#        )
+            self.ui._data_group_box,
+        )
         
         # runs
         runs = self.ui.runs_list_widget.count()
@@ -488,12 +464,13 @@ class McssResultsWidget(QWidget):
                 self.ui._runs_group_box,         
                 self.ui.average_over_selected_runs_check_box,
             )
-#            enable_widgets(
-#                self.ui.random_runs_spin_box,
-#                self.ui.random_runs_label,
-#                self.ui.average_over_selected_runs_check_box,
-#            )
-#            enable_widgets(self.ui.select_all_runs_check_box)
+            enable_widgets(
+                self.ui.select_all_runs_check_box,
+                self.ui.runs_list_widget,
+                self.ui.random_runs_spin_box,
+                self.ui.random_runs_label,
+                self.ui.average_over_selected_runs_check_box,
+            )
             self.ui.average_over_selected_runs_check_box.setChecked(True) # check average over runs
 
         # species
@@ -542,20 +519,9 @@ class McssResultsWidget(QWidget):
             hide_widgets(self.ui.in_label)
             show_widgets(self.ui.volume_spin_box) #TODO switch on quantities_display_type_combo_box.currrentItem() == 'concentrations'  
         
-#        check_widgets(
-#            self.ui.select_all_runs_check_box,
-#            self.ui.select_all_species_check_box,
-#            self.ui.select_all_compartments_check_box,
-#        )
-                
         enable_widgets(
             self.ui.file_name_line_edit,
             
-#            self.ui.select_all_runs_check_box,
-            self.ui.runs_list_widget,
-#            self.ui.random_runs_spin_box,
-#            self.ui.random_runs_label,
-
             self.ui.select_all_species_check_box,
             self.ui.species_list_widget,
             self.ui.filter_species_line_edit,
@@ -600,9 +566,6 @@ class McssResultsWidget(QWidget):
         )
 
         self.ui.species_list_widget.setFocus(Qt.OtherFocusReason)
-
-#        self.setGeometry(self._geometry_orig)
-#        self.restore_geometry()
 
 
     def quantities_display_type_changed(self, text):
@@ -931,7 +894,6 @@ class McssResultsWidget(QWidget):
     def plot(self, **kwargs):
         '''Plot timeseries from selection'''
         results = self.selected_items_results()
-        print results.timeseries_information()
         self.timeseries_plot = results.timeseries_plot(
             mean_over_runs=self.mean_over_runs(),
             volumes=self.volumes_selected(), 
