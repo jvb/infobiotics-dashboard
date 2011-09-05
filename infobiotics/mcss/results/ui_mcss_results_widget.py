@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mcss_results_widget.ui'
 #
-# Created: Sun Sep  4 18:12:11 2011
+# Created: Mon Sep  5 12:15:44 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ class Ui_McssResultsWidget(object):
     def setupUi(self, McssResultsWidget):
         McssResultsWidget.setObjectName(_fromUtf8("McssResultsWidget"))
         McssResultsWidget.setEnabled(True)
-        McssResultsWidget.resize(952, 600)
+        McssResultsWidget.resize(997, 600)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -225,6 +225,7 @@ class Ui_McssResultsWidget(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.every_spin_box.sizePolicy().hasHeightForWidth())
         self.every_spin_box.setSizePolicy(sizePolicy)
+        self.every_spin_box.setProperty(_fromUtf8("value"), 1)
         self.every_spin_box.setObjectName(_fromUtf8("every_spin_box"))
         self._timepoints_layout.addWidget(self.every_spin_box)
         self._multiplied_by_label = QtGui.QLabel(self._timepoints_group_box)
@@ -418,9 +419,9 @@ class Ui_McssResultsWidget(object):
         self._calculate_layout.addWidget(self.calculate_button)
         spacerItem7 = QtGui.QSpacerItem(48, 1, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self._calculate_layout.addItem(spacerItem7)
-        self.label = QtGui.QLabel(self._data_group_box)
-        self.label.setObjectName(_fromUtf8("label"))
-        self._calculate_layout.addWidget(self.label)
+        self.datapoints_label = QtGui.QLabel(self._data_group_box)
+        self.datapoints_label.setObjectName(_fromUtf8("datapoints_label"))
+        self._calculate_layout.addWidget(self.datapoints_label)
         self.verticalLayout_8.addLayout(self._calculate_layout)
         self.verticalLayout_2.addWidget(self._data_group_box)
         self.actionsWidget = QtGui.QWidget(McssResultsWidget)
@@ -616,7 +617,7 @@ class Ui_McssResultsWidget(object):
         self.average_over_selected_runs_check_box.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Compute the arithmetic mean of amounts (and volumes) over selected runs", None, QtGui.QApplication.UnicodeUTF8))
         self.average_over_selected_runs_check_box.setText(QtGui.QApplication.translate("McssResultsWidget", "Average over selected runs", None, QtGui.QApplication.UnicodeUTF8))
         self.calculate_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Calculate other functions...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("McssResultsWidget", "datapoints", None, QtGui.QApplication.UnicodeUTF8))
+        self.datapoints_label.setText(QtGui.QApplication.translate("McssResultsWidget", "datapoints", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Save timeseries data for selected runs, species and compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Export data as...", None, QtGui.QApplication.UnicodeUTF8))
         self.export_data_as_button.setDescription(QtGui.QApplication.translate("McssResultsWidget", "text (.csv)\n"

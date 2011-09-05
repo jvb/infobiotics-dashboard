@@ -56,8 +56,24 @@ class McssResultsWidget(QWidget):
         self.ui = Ui_McssResultsWidget()
         self.ui.setupUi(self) # QPixmap: It is not safe to use pixmaps outside the GUI thread
 
-        # connect signals to slots
+        self.connect_signals_to_slots()
 
+        self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text() # remember text from Ui_McssResultsWidget
+
+#        self._geometry_orig = self.geometry() # remember geometry from Ui_McssResultsWidget
+        self.restore_geometry()
+        
+        self.restore_current_directory()
+        
+        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
+        if filename:
+            self.load(filename)
+        if not self.loaded:
+            self.load_failed()
+            
+        self.update_ui()
+
+    def connect_signals_to_slots(self):
         self.connect(self.ui.load_button, SIGNAL("clicked()"), self.load)
 
         self.ui.runs_list_widget.connect_all_selected_check_box(self.ui.select_all_runs_check_box)
@@ -69,12 +85,12 @@ class McssResultsWidget(QWidget):
 
         for widget in self.ui.runs_list_widget, self.ui.species_list_widget, self.ui.compartments_list_widget:
             self.connect(widget, SIGNAL('itemSelectionChanged()'), self.update_ui)
-
+            self.connect(widget, SIGNAL('itemSelectionChanged()'), self.update_datapoints_label)
         # numtimepoints
-        self.connect(self.ui.average_over_selected_runs_check_box, SIGNAL('toggled(bool)'), self.update_ui)
-        self.connect(self.ui.every_spin_box, SIGNAL('valueChanged(int)'), self.update_ui)
-        self.connect(self.ui.from_spin_box, SIGNAL('valueChanged(double)'), self.update_ui)
-        self.connect(self.ui.to_spin_box, SIGNAL('valueChanged(double)'), self.update_ui)
+        self.connect(self.ui.every_spin_box, SIGNAL('valueChanged(int)'), self.update_datapoints_label)
+        self.connect(self.ui.from_spin_box, SIGNAL('valueChanged(double)'), self.update_datapoints_label)
+        self.connect(self.ui.to_spin_box, SIGNAL('valueChanged(double)'), self.update_datapoints_label)
+        self.connect(self.ui.average_over_selected_runs_check_box, SIGNAL('toggled(bool)'), self.update_datapoints_label)
 
         for function in self.select_random_runs, lambda: (
             self.ui.select_all_runs_check_box.setChecked(False)
@@ -98,21 +114,6 @@ class McssResultsWidget(QWidget):
         self.connect(self.ui.calculate_button, SIGNAL('clicked()'), self.calculate)
         #TODO implement multi-dimensional calculation plotter
         self.ui.calculate_button.setVisible(False) # hide buttons that don't work
-
-        self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text() # remember text from Ui_McssResultsWidget
-
-#        self._geometry_orig = self.geometry() # remember geometry from Ui_McssResultsWidget
-        self.restore_geometry()
-        
-        self.restore_current_directory()
-        
-        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
-        if filename:
-            self.load(filename)
-        if not self.loaded:
-            self.load_failed()
-            
-        self.update_ui()
 
 
     def closeEvent(self, event):
@@ -221,7 +222,7 @@ class McssResultsWidget(QWidget):
                 checkbox.setCheckState(checked)
             else:
                 rows = settings.value(listwidgetsetting).toPyObject()
-                if rows is None:
+                if rows is None or len(rows) > 100:
                     rows = []
                 for row in rows: 
                     if not isinstance(row, int):
@@ -574,6 +575,8 @@ class McssResultsWidget(QWidget):
         self.ui.species_list_widget.setFocus(Qt.OtherFocusReason)
 
 
+    # slots
+
     def quantities_display_type_changed(self, text):
         if text == 'molecules': #TODO replace with substance_display units?
             hide_widgets(self.ui.concentrations_display_units_combo_box, self.ui.moles_display_units_combo_box)
@@ -643,18 +646,41 @@ class McssResultsWidget(QWidget):
 #            else:
 #                enable_widgets(self.ui.plot_timeseries_button)
 
-            self.update_datapoints_label()
 
     def update_datapoints_label(self):
-        #TODO show numdatapoints with warning if too high
+        num_runs = len(self.ui.runs_list_widget.selectedItems())
+        num_species = len(self.ui.species_list_widget.selectedItems())
+        num_compartments = len(self.ui.compartments_list_widget.selectedItems())
+        volumes = self.volumes_selected()
+        mean_over_runs = self.mean_over_runs()
+        amounts = True
 
-        results = self.selected_items_results()
-        numtimeseries = results.num_timeseries(True, self.volumes_selected(), self.mean_over_runs()) 
-        numtimepoints = results.num_timepoints * numtimeseries
-        numsurfaces = results.num_species
-        (xmin, xmax), (ymin, ymax) = results.xy_min_max()
-        numsurfacetimepoints = int(numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * results.num_timepoints) 
+        # adapted from McssResults.num_timeseries
+        numtimeseries = 0
+        if num_runs > 1 and mean_over_runs:
+            if amounts and volumes:
+                numtimeseries = (num_species * num_compartments) + num_compartments
+            elif amounts:
+                numtimeseries = num_species * num_compartments
+            elif volumes:
+                numtimeseries = num_compartments
+        else:
+            if amounts and volumes:
+                numtimeseries = (num_runs * num_species * num_compartments) + (num_runs * num_compartments)
+            elif amounts:
+                numtimeseries = num_runs * num_species * num_compartments
+            elif volumes:
+                numtimeseries = num_runs * num_compartments
+
+        every = int(self.ui.every_spin_box.value())
+        if not every:
+            return # avoid divide by zero
+        start = int(self.ui.from_spin_box.value() // every)
+        stop = int(self.ui.to_spin_box.value() // every) + 1
         
+        numtimepoints = (stop - start // every)
+        numdatapoints = numtimepoints * numtimeseries
+
         def convert_bytes(bytes):
             '''Taken from http://www.5dollarwhitebox.org/drupal/node/84'''
             # also http://code.activestate.com/recipes/577081-humanized-representation-of-a-number-of-bytes/
@@ -678,14 +704,32 @@ class McssResultsWidget(QWidget):
         bytes_per_datapoint = 8 if mcss_results.dtypedefault == np.float64 else 4 # np.float32
 
         text = ''
-        if results.num_species <= 6 and results.num_compartments >= 4:
-            text += '%s surfaces (<=%s)' % (numsurfaces, convert_bytes(numsurfacetimepoints*bytes_per_datapoint))
+        if num_species <= 6 and num_compartments >= 4:
+
+            def xy_min_max():
+                x_positions = [c.data.x_position for c in self.ui.compartments_list_widget.selectedItems()]
+                y_positions = [c.data.y_position for c in self.ui.compartments_list_widget.selectedItems()]
+                return (min(x_positions), max(x_positions)), (min(y_positions), max(y_positions))
+            
+            numsurfaces = num_species
+            (xmin, xmax), (ymin, ymax) = xy_min_max()
+            numsurfacedatapoints = int(numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * numtimepoints) 
+
+#            text += '%s surfaces (<=%s)' % (numsurfaces, numsurfacedatapoints)#convert_bytes(numsurfacedatapoints * bytes_per_datapoint))
+            text += '%s surfaces (<=%s)' % (numsurfaces, convert_bytes(numsurfacedatapoints * bytes_per_datapoint))
         if text:
             text +=', '
-        text += '%s timeseries (%s)' % (numtimeseries, convert_bytes(numtimepoints*bytes_per_datapoint))
+#        text += '%s timeseries (%s)' % (numtimeseries, numdatapoints)#convert_bytes(numdatapoints * bytes_per_datapoint))
+        text += '%s timeseries (%s)' % (numtimeseries, convert_bytes(numdatapoints * bytes_per_datapoint))
         self.ui.datapoints_label.setText(text)
+        
+        if numdatapoints * bytes_per_datapoint > (1073741824 / 2): # 1/2 gigabyte
+            self.ui.datapoints_label.setStyleSheet("QLabel { color : red; }")
+        else:
+            self.ui.datapoints_label.setStyleSheet("QLabel { color : black; }")
 
-    # slots
+        #TODO show numdatapoints with warning if too high
+
 
     def select_random_runs(self, runs):
         list = self.ui.runs_list_widget

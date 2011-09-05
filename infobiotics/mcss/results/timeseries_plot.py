@@ -1,5 +1,8 @@
-import infobiotics
 import os.path
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+import infobiotics
 from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
     Button, on_trait_change, Tuple, Dict, Array, Enum, Property, Range, Any, Button,
     cached_property, Int, Set)

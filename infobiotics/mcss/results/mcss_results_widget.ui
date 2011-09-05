@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>952</width>
+    <width>997</width>
     <height>600</height>
    </rect>
   </property>
@@ -560,6 +560,9 @@ Right-click for sorting options</string>
           </property>
           <property name="toolTip">
            <string>Select every &lt;I&gt;n&lt;/I&gt; timepoints from start to finish</string>
+          </property>
+          <property name="value">
+           <number>1</number>
           </property>
          </widget>
         </item>
@@ -1202,7 +1205,7 @@ Right-click for sorting options</string>
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="datapoints_label">
           <property name="text">
            <string>datapoints</string>
           </property>

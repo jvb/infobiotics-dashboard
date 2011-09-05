@@ -1,23 +1,19 @@
 from __future__ import division
+import os.path
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    import infobiotics
-from enthought.traits.api import *
-from enthought.traits.ui.api import *
+#import infobiotics
 
-#from infobiotics.mcss.results.mcss_results import McssResults, mean, sum
 from infobiotics.mcss.results import mcss_results
 import numpy as np
 
 from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
 from matplotlib.figure import Figure
-#from matplotlib.font_manager import FontProperties
-#from matplotlib.lines import Line2D
-from matplotlib.axes import Axes#, Subplot as AxesSubplot
 
-import os.path
 
+from enthought.traits.api import *
+from enthought.traits.ui.api import *
 
 class Histogram(HasTraits):
     
@@ -49,7 +45,7 @@ class Histogram(HasTraits):
         return self.max_timepoint_index
 
     def _data_default(self):
-        if self.results.num_selected_compartments > 1:
+        if self.results.num_compartments > 1:
             return 'Compartments'
         else:
             return 'Runs'
@@ -195,7 +191,7 @@ class Histogram(HasTraits):
             HGroup(
                 Item('data', 
 #                    label='',
-                    enabled_when="object.results.num_selected_compartments > 1 and object.results.num_selected_runs > 1"    
+                    enabled_when="object.results.num_compartments > 1 and object.results.num_runs > 1"    
                 ),
                 'sum_species',
                 'bins',
