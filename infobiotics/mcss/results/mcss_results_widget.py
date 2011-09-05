@@ -70,6 +70,12 @@ class McssResultsWidget(QWidget):
         for widget in self.ui.runs_list_widget, self.ui.species_list_widget, self.ui.compartments_list_widget:
             self.connect(widget, SIGNAL('itemSelectionChanged()'), self.update_ui)
 
+        # numtimepoints
+        self.connect(self.ui.average_over_selected_runs_check_box, SIGNAL('toggled(bool)'), self.update_ui)
+        self.connect(self.ui.every_spin_box, SIGNAL('valueChanged(int)'), self.update_ui)
+        self.connect(self.ui.from_spin_box, SIGNAL('valueChanged(double)'), self.update_ui)
+        self.connect(self.ui.to_spin_box, SIGNAL('valueChanged(double)'), self.update_ui)
+
         for function in self.select_random_runs, lambda: (
             self.ui.select_all_runs_check_box.setChecked(False)
                 if self.ui.random_runs_spin_box.value() < self.ui.random_runs_spin_box.maximum()
@@ -623,27 +629,12 @@ class McssResultsWidget(QWidget):
             if num_selected_runs > 1:
                 enable_widgets(self.ui.calculate_button)
 
-#            #TODO show numdatapoints with warning if too high
-#
-#            results = self.selected_items_results()
-#            _, _, _, averaging = self.options()
-#            numtimeseries = results.num_timeseries(True, self.volumes_selected(), averaging) 
-#            numtimepoints = results.num_timepoints * numtimeseries
-#            
-#            numsurfaces = results.num_selected_species
-#
-#            (xmin, xmax), (ymin, ymax) = results.xy_min_max()
-#            numsurfacetimepoints = numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * results.num_timepoints 
-#            
-#            print '%s timeseries' % numtimeseries, '(%s timepoints)' % numtimepoints
-#            print '%s surfaces' % numsurfaces, '(%s timepoints)' % numsurfacetimepoints
-#            print 
-
             # no more than 6 surfaces
             if num_selected_species <= 6 and num_selected_compartments >= 4:
                 enable_widgets(self.ui.visualise_population_button)
                 self.ui.visualise_population_button.setToolTip("Animate species levels as a surface over the lattice")
             else:
+                disable_widgets(self.ui.visualise_population_button)
                 self.ui.visualise_population_button.setToolTip("To enable select more than 4 compartments and fewer than 7 species")
                 
 #            # no more than 10 timeseries (per species)
@@ -652,6 +643,47 @@ class McssResultsWidget(QWidget):
 #            else:
 #                enable_widgets(self.ui.plot_timeseries_button)
 
+            self.update_datapoints_label()
+
+    def update_datapoints_label(self):
+        #TODO show numdatapoints with warning if too high
+
+        results = self.selected_items_results()
+        numtimeseries = results.num_timeseries(True, self.volumes_selected(), self.mean_over_runs()) 
+        numtimepoints = results.num_timepoints * numtimeseries
+        numsurfaces = results.num_species
+        (xmin, xmax), (ymin, ymax) = results.xy_min_max()
+        numsurfacetimepoints = int(numsurfaces * ((xmax - xmin) + 1) * ((ymax - ymin) + 1) * results.num_timepoints) 
+        
+        def convert_bytes(bytes):
+            '''Taken from http://www.5dollarwhitebox.org/drupal/node/84'''
+            # also http://code.activestate.com/recipes/577081-humanized-representation-of-a-number-of-bytes/
+            bytes = float(bytes)
+            if bytes >= 1099511627776:
+                terabytes = bytes / 1099511627776
+                size = '%.2fT' % terabytes
+            elif bytes >= 1073741824:
+                gigabytes = bytes / 1073741824
+                size = '%.2fG' % gigabytes
+            elif bytes >= 1048576:
+                megabytes = bytes / 1048576
+                size = '%.2fM' % megabytes
+            elif bytes >= 1024:
+                kilobytes = bytes / 1024
+                size = '%.2fK' % kilobytes
+            else:
+                size = '%.2fb' % bytes
+            return size
+
+        bytes_per_datapoint = 8 if mcss_results.dtypedefault == np.float64 else 4 # np.float32
+
+        text = ''
+        if results.num_species <= 6 and results.num_compartments >= 4:
+            text += '%s surfaces (<=%s)' % (numsurfaces, convert_bytes(numsurfacetimepoints*bytes_per_datapoint))
+        if text:
+            text +=', '
+        text += '%s timeseries (%s)' % (numtimeseries, convert_bytes(numtimepoints*bytes_per_datapoint))
+        self.ui.datapoints_label.setText(text)
 
     # slots
 
