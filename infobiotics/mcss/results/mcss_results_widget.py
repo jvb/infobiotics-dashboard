@@ -93,16 +93,14 @@ class McssResultsWidget(QWidget):
         #TODO implement multi-dimensional calculation plotter
         self.ui.calculate_button.setVisible(False) # hide buttons that don't work
 
-        self._geometry_orig = self.geometry()
-        # must be before self.load_settings()
-        
+        self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text() # remember text from Ui_McssResultsWidget
+
+        self._geometry_orig = self.geometry() # remember geometry from Ui_McssResultsWidget
+        print '__init__(), restore_geometry()'
         self.restore_geometry()
         
-        self.load_settings()
-
-        # must be after self.load_settings()
-        self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text()
-        # and before self.load()
+        print '__init__(), restore_current_directory'
+        self.restore_current_directory()
         
         self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
         if filename:
@@ -113,11 +111,13 @@ class McssResultsWidget(QWidget):
 
 
     def closeEvent(self, event):
-        print 'closeEvent() save_settings', self.current_directory
+        print 'closeEvent() save_settings',
         self.save_settings()
         if self.loaded:
             print 'closeEvent() save_geometry', 
             self.save_geometry()
+            print 'closeEvent() save_current_directory',
+            self.save_current_directory()
         if hasattr(self, '_timeseries_plot_uis'):
             for ui in self._timeseries_plot_uis:
                 ui.dispose()
@@ -126,6 +126,19 @@ class McssResultsWidget(QWidget):
 
     __settings_group = 'McssResultsWidget'
 
+#    def settings(self, *settings_group): #TODO need to endGroup() explicitly!
+#        settings = QSettings()
+#        if settings_group:
+#            settings.beginGroup('/'.join((self.__settings_group, ) + settings_group))
+#        else:
+#            settings.beginGroup(self.__settings_group)
+#        return settings
+
+    def _settings_group(self, *settings_groups):
+        if settings_groups:
+            return '/'.join((self.__settings_group, ) + settings_groups)
+        return self.__settings_group 
+        
     def save_geometry(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
@@ -144,36 +157,69 @@ class McssResultsWidget(QWidget):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
+        print 'saved', self.current_directory
         settings.endGroup()
         
     def restore_current_directory(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+        print 'restored', self.current_directory
         settings.endGroup()
 
-    def _settings_group(self, filename=None):
-        if filename:
-#            return filename
-            return '/'.join([self.__settings_group, filename])
-        return self.__settings_group 
-            
-        
-    def load_settings(self):
-#        self.restore_geometry()
-        
-        self.restore_current_directory()
-
+    def previous(self): #TODO
         settings = QSettings()
         settings.beginGroup(self._settings_group())
-        
-#        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+        previous = unicode(settings.value('previous').toString())
+        return previous
 
-        if not (self.filename and readable(self.filename)):
+
+    def save_settings(self):
+        '''Save simulation settings and current filename as previous (not geometry or current directory)'''
+        if not self.filename:
             return
+        
+        settings = QSettings()
+        
+        settings.beginGroup(self._settings_group())
+        settings.setValue('previous', QVariant(self.filename))
+        settings.endGroup()
         
         settings.beginGroup(self._settings_group(self.filename))
         
+        print settings.group()
+        
+        settings.setValue('units', QVariant(self.units_dict()))
+        settings.setValue('from', QVariant(self.ui.from_spin_box.value()))
+        settings.setValue('to', QVariant(self.ui.to_spin_box.value()))
+        settings.setValue('every', QVariant(self.ui.every_spin_box.value()))
+        settings.setValue('averaging', QVariant(self.ui.average_over_selected_runs_check_box.checkState()))
+        settings.setValue('all_runs', QVariant(self.ui.select_all_runs_check_box.checkState()))
+        settings.setValue('all_species', QVariant(self.ui.select_all_species_check_box.checkState()))
+        settings.setValue('all_compartments', QVariant(self.ui.select_all_compartments_check_box.checkState()))
+        settings.setValue('runs', QVariant([modelIndex.row() for modelIndex in self.ui.runs_list_widget.selectedIndexes()]))
+        settings.setValue('species', QVariant([modelIndex.row() for modelIndex in self.ui.species_list_widget.selectedIndexes()]))
+        settings.setValue('compartments', QVariant([modelIndex.row() for modelIndex in self.ui.compartments_list_widget.selectedIndexes()]))
+        settings.setValue('species_filter', QVariant(self.ui.filter_species_line_edit.text()))
+        settings.setValue('compartments_filter', QVariant(self.ui.filter_compartments_line_edit.text()))
+        settings.setValue('volume', QVariant(self.ui.volume_spin_box.value()))
+        
+        settings.endGroup()
+        
+        print 'saved settings', self.filename
+
+
+    def load_settings(self):
+        '''Restore simulation settings (not geometry or current directory)'''
+        if not (self.filename and readable(self.filename)):
+            return
+
+        settings = QSettings()
+        
+        settings.beginGroup(self._settings_group(self.filename))
+
+        print settings.group()
+
         units = settings.value('units').toPyObject()
         if units:
             units = dict((unicode(key), unicode(value)) for key, value in units.items())
@@ -198,11 +244,6 @@ class McssResultsWidget(QWidget):
         restore_selection('all_species', self.ui.select_all_species_check_box, 'species', self.ui.species_list_widget)
         restore_selection('all_compartments', self.ui.select_all_compartments_check_box, 'compartments', self.ui.compartments_list_widget)
 
-#        random_runs, ok = settings.value('random_runs').toInt() 
-#        if ok:
-#            self.ui.random_runs_spin_box.setValue(random_runs)
-#        else:
-#            self.ui.runs_list_widget.clearSelection()
         restore_selection('all_runs', self.ui.select_all_runs_check_box, 'runs', self.ui.runs_list_widget)
         if self.ui.runs_list_widget.count() == 1:
             self.ui.runs_list_widget.selectAll()
@@ -229,34 +270,20 @@ class McssResultsWidget(QWidget):
         if ok:
             self.ui.volume_spin_box.setValue(volume)
 
-
-    def save_settings(self):
-        settings = QSettings()
-        settings.beginGroup(self._settings_group())
-        settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
-        if not self.filename:
-            return
-        settings.setValue('previous', QVariant(self.filename))
-#        settings.beginGroup(self.filename)
-        settings.beginGroup(self._settings_group(self.filename))
-        settings.setValue('units', QVariant(self.units_dict()))
-        settings.setValue('from', QVariant(self.ui.from_spin_box.value()))
-        settings.setValue('to', QVariant(self.ui.to_spin_box.value()))
-        settings.setValue('every', QVariant(self.ui.every_spin_box.value()))
-        settings.setValue('averaging', QVariant(self.ui.average_over_selected_runs_check_box.checkState()))
-        settings.setValue('random_runs', QVariant(self.ui.random_runs_spin_box.value()))
-        settings.setValue('all_runs', QVariant(self.ui.select_all_runs_check_box.checkState()))
-        settings.setValue('all_species', QVariant(self.ui.select_all_species_check_box.checkState()))
-        settings.setValue('all_compartments', QVariant(self.ui.select_all_compartments_check_box.checkState()))
-        settings.setValue('runs', QVariant([modelIndex.row() for modelIndex in self.ui.runs_list_widget.selectedIndexes()]))
-        settings.setValue('species', QVariant([modelIndex.row() for modelIndex in self.ui.species_list_widget.selectedIndexes()]))
-        settings.setValue('compartments', QVariant([modelIndex.row() for modelIndex in self.ui.compartments_list_widget.selectedIndexes()]))
-        settings.setValue('species_filter', QVariant(self.ui.filter_species_line_edit.text()))
-        settings.setValue('compartments_filter', QVariant(self.ui.filter_compartments_line_edit.text()))
-        settings.setValue('volume', QVariant(self.ui.volume_spin_box.value()))
-
+        print 'loaded settings', self.filename
+        
+        settings.endGroup()
 
     def load(self, filename=None):
+
+        # save settings for current file before possibly loading a new one
+        print 'load() save_settings',
+        self.save_settings()
+        
+        # save current directory before possibly find a new one
+        print 'load() save_current_directory',
+        self.save_current_directory()
+        
         if filename is None:
             filename = QFileDialog.getOpenFileName(
                self,
@@ -271,8 +298,6 @@ class McssResultsWidget(QWidget):
                     self.load_failed()
                     return False
         
-        print 'load() save_settings', self.current_directory
-        self.save_settings()
 
 #        if sip.getapi('QString') == 1:
         filename = unicode(filename) # must convert QString into unicode
@@ -299,12 +324,20 @@ class McssResultsWidget(QWidget):
                 self.load_failed()
                 return False
 
+        # set new simulation, filename and current directory
         self.simulation = simulation
         self.filename = filename
+        self.current_directory = QFileInfo(filename).absolutePath()
+        
+        # save new current directory
+        print 'load(), save_current_directory'
+        self.save_current_directory()
+        
         self.loaded = True
         self.load_succeeded()
+
+        # load settings for new filename
         self.load_settings()
-#        self.current_directory = QFileInfo(filename).absolutePath()
 #        self.save_settings()
         
 #        self.update_ui()
@@ -605,7 +638,7 @@ class McssResultsWidget(QWidget):
                 self.ui.export_data_as_button,
                 self.ui.plot_timeseries_button,
                 self.ui.visualise_population_button,
-                self.ui.plot_histogram_button,
+#                self.ui.plot_histogram_button,
             )
         else:
             enable_widgets(
@@ -621,6 +654,7 @@ class McssResultsWidget(QWidget):
                 enable_widgets(self.ui.plot_histogram_button)
                 self.ui.plot_histogram_button.setToolTip("Plot distributions of species in runs or compartments")
             else:
+                disable_widgets(self.ui.plot_histogram_button)
                 self.ui.plot_histogram_button.setToolTip("To enable select two or more runs or compartments")
             
             if num_selected_runs > 1:
