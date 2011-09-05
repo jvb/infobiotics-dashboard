@@ -1,0 +1,83 @@
+Input target file 0 : target_data_threegene1.txt
+
+Input initial value file 0 : initial_values_threegene1.txt
+
+Input module library file: threegene_module_library.xml
+
+Parameter optimization method: CMA-ES
+fitness calculation method: Random weighted sum
+
+*******non-fixed module set in the model**************
+Number of modules: 4
+
+
+Module[0]:
+Module Name in Library:  UnReg
+Index in Library:2
+Number of rules: 4
+r_1:  gene1-->gene1+rna1
+kc value=8.600000  scale=linear
+
+r_2:  rna1-->rna1+protein1
+kc value=1.750000  scale=linear
+
+r_3:  rna1-->Q
+kc value=0.330000  scale=linear
+
+r_4:  protein1-->Q
+kc value=0.950000  scale=linear
+
+
+Module[1]:
+Module Name in Library:  PosReg
+Index in Library:1
+Number of rules: 6
+r_1:  protein1+gene3-->protein1_gene3
+kc value=5.600000  scale=linear
+
+r_2:  protein1_gene3-->protein1+gene3
+kc value=0.000000  scale=logarithmic
+
+r_3:  protein1_gene3-->protein1_gene3+rna3
+kc value=8.100000  scale=linear
+
+r_4:  rna3-->rna3+protein3
+kc value=1.580000  scale=linear
+
+r_5:  rna3-->Q
+kc value=0.410000  scale=linear
+
+r_6:  protein3-->Q
+kc value=1.780000  scale=linear
+
+
+Module[2]:
+Module Name in Library:  UnReg
+Index in Library:2
+Number of rules: 4
+r_1:  gene2-->gene2+rna2
+kc value=9.600000  scale=linear
+
+r_2:  rna2-->rna2+protein2
+kc value=0.980000  scale=linear
+
+r_3:  rna2-->Q
+kc value=0.890000  scale=linear
+
+r_4:  protein2-->Q
+kc value=0.680000  scale=linear
+
+
+Module[3]:
+Module Name in Library:  NegReg
+Index in Library:0
+Number of rules: 2
+r_1:  protein3+gene3-->protein3_gene3
+kc value=1.100000  scale=linear
+
+r_2:  protein3_gene3-->protein3+gene3
+kc value=-2.000000  scale=logarithmic
+
+
+total fitness= 265.263092  total RMSE=3.285769  
+

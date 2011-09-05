@@ -1,0 +1,11 @@
+
+0    3718.440430    17    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+1    3710.098145    14    PR(X=LacI)PluxR(X=FP)
+2    3616.151367    13    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+3    3616.151367    12    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+4    3616.151367    11    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+5    3616.151367    13    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+6    3616.151367    13    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+7    3616.151367    11    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+8    3616.151367    12    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
+9    3616.151367    11    PR(X=LacI)Plac(X=CI)Plac(X=LacI)PR(X=FP)PluxR(X=FP)
