@@ -186,6 +186,7 @@ class Histogram(HasTraits):
     def traits_view(self):
         basename = os.path.basename(self.results.filename)
         view = View(
+        VGroup(
             HSplit(
                 Item('_figure',
                     show_label=False,
@@ -218,6 +219,8 @@ class Histogram(HasTraits):
                 ),
             ),
 #            Item('reset_view', show_label=False),
+            show_border=True,
+        ),
             width=800, height=600,
             resizable=True,
             title="%s histograms" % basename,

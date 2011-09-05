@@ -70,7 +70,7 @@ def resize_and_save_matplotlib_figure(figure):
     old_width_inches = figure_size.width_inches
     old_height_inches = figure_size.height_inches
     ui = figure_size.edit_traits(kind='modal')
-    
+    widget = ui.control
     # maybe change figure size
     if ui.result:
         figure.dpi = figure_size.dpi # set new dpi

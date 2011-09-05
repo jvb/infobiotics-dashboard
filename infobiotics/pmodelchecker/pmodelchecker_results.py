@@ -90,6 +90,8 @@ class PModelCheckerResultsPropertyVariable(HasTraits):
         self.value = self.evaluate_value(value)
 
     def traits_view(self):
+        if len(self.values) == 1:
+            return View()
         return View(
             HGroup(
                 Item('name', show_label=False, style='readonly'),
@@ -116,7 +118,8 @@ class PModelCheckerResultsPropertyVisualisation(HasTraits):
     property_string = DelegatesTo('property')
     variables = DelegatesTo('property')
     result_array = DelegatesTo('property')
-    axisVariables = DelegatesTo('property')    
+    axisVariables = DelegatesTo('property')
+    title=DelegatesTo('property')
 
     type = Str
     def _type_default(self):
@@ -204,11 +207,12 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
     def _get_max_result(self):
         return np.max(self.result_array)
     
-    @on_trait_change('xAxis, yAxis')#, variables:value')
+    @on_trait_change('xAxis, yAxis, title')#, variables:value')
     def update(self):
+        self.figure.set_facecolor('white')
         axes = self.axes
         axes.clear()
-        axes.set_title(self.property_string)
+        axes.set_title(self.title)
         axes.set_xlabel(self.xAxis)
         axes.set_ylabel('Result')
         axes.grid(True)
@@ -344,11 +348,11 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
     # done in PModelCheckerResultsProperty.update_visualisations
     def update(self):
         self.surface.mlab_source.scalars = self.scalars # self.surface.mlab_source.(re)set(scalars=self.scalars)
-        self.title.text = self.title_text 
+        self._title.text = self.title_text 
 
     title_text = Property(Str)
     def _get_title_text(self):
-        s = "%s" % self.property_string
+        s = "%s" % self.title #+ '\n'
         if len(self.variables) > 2:
             s += ' '
             s += '(%s)' % ','.join(['%s=%s' % (variable.name, variable.value) for variable in self.variables if variable not in (self.xAxisVariable, self.yAxisVariable)])
@@ -382,7 +386,7 @@ class PModelCheckerResultsPropertySurface(PModelCheckerResultsPropertyVisualisat
 
         mlab.axes(ranges=self.ranges, nb_labels=5, xlabel=self.xAxis, ylabel=self.yAxis, zlabel="Result")#, color=(0,0,0))
         
-        self.title = mlab.title(self.title_text, size=0.4, height=0.88)
+        self._title = mlab.title(self.title_text, size=0.2, height=0.9)
         
         mlab.outline(extent=[0, 1, 0, 1, 0, 1])
         
@@ -503,8 +507,29 @@ class PModelCheckerResultsProperty(HasTraits):
         ''' Returns the set of variables with more than 1 possible value (that can therefore be an axis). '''
         return [variable for variable in self.variables if len(variable.values) > 1]
 
+    edit_title = Button
+    def _edit_title_fired(self):
+        self.edit_traits(
+            view=View(
+                Item(
+                    'title', 
+                    show_label=False, 
+                    style='custom',
+                ), 
+                buttons=['OK','Cancel'], 
+                title='Edit title',
+                resizable=True,
+                width=400,
+                height=100,
+            ), 
+            kind='live',
+        )
+
     traits_view = View(
         VGroup(
+#            HGroup(
+#                Item('title', style='custom'),
+#            ),
             Item('visualisations',
                 show_label=False,
                 style='custom',
@@ -514,15 +539,26 @@ class PModelCheckerResultsProperty(HasTraits):
                 ),
 #                defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
             ),
+            HGroup(
+                Item('edit_title', show_label=False),
+                Spring(),
+            ),   
             show_border=True,
 #            defined_when='len(object.properties) > 0', #TODO remove
         ),
     )
 
-    name = Str # used by PModelCheckerResults.selected InstanceEditor for long property names combobox
-    def _name_default(self):
+    name = Str
+    def _name_default(self): # used by PModelCheckerResults.selected InstanceEditor for long property names combobox
         return self.property_string
 
+    title = Str
+    def _title_default(self):
+        return self.property_string
+
+    def _title_changed(self):
+        self.update_visualisations()
+        
         
 class PModelCheckerResults(HasTraits):
 
@@ -683,7 +719,7 @@ class PModelCheckerResults(HasTraits):
                         style='custom',
                         editor=ListEditor(
                             use_notebook=True,
-                            page_name='.property_string',
+                            page_name='.property_string',#'.title'
                             selected='object.selected',
                         ),
 #                        defined_when='not object.outdated_mayavi and len(object.surfaces) > 0', # not object.outdated_mayavi must come first! #TODO remove
