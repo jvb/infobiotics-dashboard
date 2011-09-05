@@ -11,5 +11,7 @@ tar -xzvf $t
 cd $d
 export PYTHONPATH=`pwd`
 #python -c 'import infobiotics.dashboard.run as run; run.main()'
-#echo $PYTHONPATH
-echo "done" 
+echo
+echo "If not source ./sdist.sh do"
+echo "export PYTHONPATH=$PYTHONPATH" 
+echo "echo \$PYTHONPATH"
