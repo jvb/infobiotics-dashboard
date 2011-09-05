@@ -3,9 +3,8 @@ modulefinder when running py2app and py2exe, in particular this includes
 Enthought's TraitsUI backend modules that are dynamically loaded.
 
 The infobiotics modules import statements can be generated using the command:
-find infobiotics *.py | grep '.py$' | grep -v -E 'setup.py|py2imports.py|.__init__|.svn' | sed 's/\//./g' | sed 's/.py$//' | sed 's/[.]*/    import &/' | grep -v '\._[^_]'
-#> py2imports.txt
-but some files have been excluded manually with comments. 
+
+find infobiotics *.py | grep '.py$' | grep -v -E 'setup.py|py2imports.py|.__init__|.svn' | sed 's/\//./g' | sed 's/.py$//' | sed 's/[.]*/    import &/' | grep -v '\._[^_]' | grep -v -E 'infobiotics\.language|infobiotics\.commons\.unused|dashboard\.core\.new|dashboard\.old|mcss\.results\.old|mcss\.results\.tests|mcss\.old'#> py2imports.txt
 '''
 
 if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this still works
@@ -105,8 +104,10 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     from enthought.tvtk.tvtk_classes import * 
 
     # infobiotics-dashboard
-#    find infobiotics *.py | grep '.py$' | grep -v -E 'setup.py|py2imports.py|.__init__|.svn' | sed 's/\//./g' | sed 's/.py$//' | sed 's/[.]*/    import &/' | grep -v '\._[^_]'
-    '''
+    '''Generated with:
+    find infobiotics *.py | grep '.py$' | grep -v -E 'setup.py|py2imports.py|.__init__|.svn' | sed 's/\//./g' | sed 's/.py$//' | sed 's/[.]*/    import &/' | grep -v '\._[^_]' | grep -v -E 'infobiotics\.language|infobiotics\.commons\.unused|dashboard\.core\.new|dashboard\.old|mcss\.results\.old|mcss\.results\.tests|mcss\.old'#> py2imports.txt
+    
+    Explanation:
     find infobiotics *.py # find files and directories including *.py under (and including) infobiotics 
     grep '.py$' # exclude directories and .pyc files
     grep -v -E 'setup.py|py2imports.py|.__init__|.svn' # exclude setup.py, py2imports.py, __init__.py and files in .svn directories
@@ -114,8 +115,8 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     sed 's/.py$//' # remove .py extensions from end of line
     sed 's/[.]*/    import &/' # prepend a 4 spaces and an import statement
     grep -v '\._[^_]' # remove file names starting with an underscore but not 2 underscores
+    ...
     '''    
-    # use this command to create the list of infobiotics files below
     import infobiotics.core.traits.model_file
     import infobiotics.core.traits.params_relative_directory
     import infobiotics.core.traits.params_relative_file
@@ -127,62 +128,6 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.core.experiment_handler
     import infobiotics.core.params_handler
     import infobiotics.core.experiment_progress_handler
-#    import infobiotics.language.dependency_graphs
-#    import infobiotics.language.partial_propensities_fixed
-#    import infobiotics.language.module1
-#    import infobiotics.language.TODO
-#    import infobiotics.language.partial_propensities
-#    import infobiotics.language.species
-#    import infobiotics.language.api
-#    import infobiotics.language.partial_propensities_backup
-#    import infobiotics.language.sbml
-#    import infobiotics.language.old.lat
-#    import infobiotics.language.old.rule
-#    import infobiotics.language.old.lpp
-#    import infobiotics.language.old.plb
-#    import infobiotics.language.old.sps
-#    import infobiotics.language.old.IFFL
-#    import infobiotics.language.reactions
-#    import infobiotics.language.compartmentmixin
-#    import infobiotics.language.partial
-#    import infobiotics.language.example
-#    import infobiotics.language.config
-#    import infobiotics.language.model
-#    import infobiotics.language.PAO1
-#    import infobiotics.language.metacompartment
-#    import infobiotics.language.examples.todo
-#    import infobiotics.language.compartments
-#    import infobiotics.language.volumes
-#    import infobiotics.language.lexing.lexer4
-#    import infobiotics.language.lexing.lexer
-#    import infobiotics.language.lexing.lexer3
-#    import infobiotics.language.lexing.lpp_editor
-#    import infobiotics.language.lexing.qt_lexer
-#    import infobiotics.language.lexing.lexer2
-#    import infobiotics.language.lexing.lpp_editor3
-#    import infobiotics.language.lexing.lpp_editor2
-#    import infobiotics.language.lexing.sps_lexer
-#    import infobiotics.language.tests.test_reaction_rate_determination
-#    import infobiotics.language.tests.todo.declarative_properties
-#    import infobiotics.language.tests.todo.eval_model_string
-#    import infobiotics.language.tests.todo.modules_with_modules
-#    import infobiotics.language.tests.todo.single_inheritance
-#    import infobiotics.language.tests.todo.process
-#    import infobiotics.language.tests.todo.compartment
-#    import infobiotics.language.tests.todo.concentrations
-#    import infobiotics.language.tests.todo.species
-#    import infobiotics.language.tests.todo.test_compartment_metadata
-#    import infobiotics.language.tests.todo.distributions_for_rates
-#    import infobiotics.language.tests.todo.initial_multisets
-#    import infobiotics.language.tests.todo.module_decorator
-#    import infobiotics.language.tests.todo.export_iml
-#    import infobiotics.language.tests.todo.sequences
-#    import infobiotics.language.tests.todo.generic
-#    import infobiotics.language.tests.todo.export_sbml
-#    import infobiotics.language.tests.todo.modules_as_functions
-#    import infobiotics.language.tests.todo.multiple_inheritance
-#    import infobiotics.language.tests.todo.compartments
-#    import infobiotics.language.tests.todo.distributions_for_amounts
     import infobiotics.pmodelchecker.mc2.mc2_params_group
     import infobiotics.pmodelchecker.mc2.mc2_experiment
     import infobiotics.pmodelchecker.mc2.mc2_params
@@ -252,37 +197,11 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.commons.counter
     import infobiotics.commons.sequences
     import infobiotics.commons.ordereddict
-#    import infobiotics.commons.unused.silence
     import infobiotics.commons.multiset
     import infobiotics.commons.names
     import infobiotics.commons.descriptors
     import infobiotics.commons.webbrowsing
     import infobiotics.preferences
-#    import infobiotics.dashboard.core.new.default_action_set
-#    import infobiotics.dashboard.core.new.generic_actions
-#    import infobiotics.dashboard.core.new.plugin
-#    import infobiotics.dashboard.core.new.actions.open_action
-#    import infobiotics.dashboard.core.new.actions.close_all
-#    import infobiotics.dashboard.core.new.actions.save_as_action
-#    import infobiotics.dashboard.core.new.actions.example_action
-#    import infobiotics.dashboard.core.new.actions.close_action
-#    import infobiotics.dashboard.core.new.actions.python_module_action
-#    import infobiotics.dashboard.core.new.actions.open_python_module_action
-#    import infobiotics.dashboard.core.new.actions.new_window_action
-#    import infobiotics.dashboard.core.new.actions.untitled_text_file_action
-#    import infobiotics.dashboard.core.new.actions.about_action
-#    import infobiotics.dashboard.core.new.actions.open_text_file_action
-#    import infobiotics.dashboard.core.new.actions.save_action
-#    import infobiotics.dashboard.core.new.actions.exit_action
-#    import infobiotics.dashboard.core.new.actions.new_editor_action
-#    import infobiotics.dashboard.core.new.application
-#    import infobiotics.dashboard.core.new.editors.code_file_editor
-#    import infobiotics.dashboard.core.new.editors.api
-#    import infobiotics.dashboard.core.new.editors.text_file_editor
-#    import infobiotics.dashboard.core.new.editors.abstract_file_editor
-#    import infobiotics.dashboard.core.new.editors.python_module_editor
-#    import infobiotics.dashboard.core.new.generic_action_set
-#    import infobiotics.dashboard.core.new.core_action_set
     import infobiotics.dashboard.core.ui_plugin
     import infobiotics.dashboard.core.actions
     import infobiotics.dashboard.core.has_infobiotics_dashboard_workbench_application
@@ -303,23 +222,6 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.dashboard.pmodelchecker.action_set
     import infobiotics.dashboard.pmodelchecker.preferences_page
     import infobiotics.dashboard.api
-#    import infobiotics.dashboard.old.file_editors.abstract_file_editor_action_set
-#    import infobiotics.dashboard.old.file_editors.test_app_run
-#    import infobiotics.dashboard.old.file_editors.api
-#    import infobiotics.dashboard.old.file_editors.actions
-#    import infobiotics.dashboard.old.file_editors.plugin
-#    import infobiotics.dashboard.old.file_editors.editors.file_editor_handler
-#    import infobiotics.dashboard.old.file_editors.editors.text_file_editor
-#    import infobiotics.dashboard.old.file_editors.editors.python_module_editor_handler
-#    import infobiotics.dashboard.old.file_editors.editors.abstract_file_editor
-#    import infobiotics.dashboard.old.file_editors.editors.python_module_editor
-#    import infobiotics.dashboard.old.file_editors.action_set
-#    import infobiotics.dashboard.old.text_editor.api
-#    import infobiotics.dashboard.old.text_editor.actions
-#    import infobiotics.dashboard.old.text_editor.text_editor_plugin
-#    import infobiotics.dashboard.old.text_editor.editor.text_editor_handler
-#    import infobiotics.dashboard.old.text_editor.editor.text_editor
-#    import infobiotics.dashboard.old.text_editor.text_editor_action_set
     import infobiotics.dashboard.app
     import infobiotics.dashboard.mcss.mcss_dashboard_experiment
     import infobiotics.dashboard.mcss.results.editor
@@ -353,7 +255,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.mcss.results.compartments_list_widget
     import infobiotics.mcss.results.compartment
     import infobiotics.mcss.results.run
-#    import infobiotics.mcss.results.ui_mcss_results_widget-backup
+    import infobiotics.mcss.results.statistics
     import infobiotics.mcss.results.surfaces_widget
     import infobiotics.mcss.results.species
     import infobiotics.mcss.results.histograms
@@ -363,33 +265,18 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.mcss.results.FromToDoubleSpinBox
     import infobiotics.mcss.results.ui_plots_preview_dialog
     import infobiotics.mcss.results.driver
-#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_editors
-#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_plots
-#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_views
-#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_handler
-#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_actions
-#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results
-#    import infobiotics.mcss.results.old.mcss_results_widget_traited.mcss_results_groups
-#    import infobiotics.mcss.results.old.ideas
     import infobiotics.mcss.results.table
     import infobiotics.mcss.results.timeseries
     import infobiotics.mcss.results.PlotsListWidget
-    import infobiotics.mcss.results.ui_simulation_results_dialog
     import infobiotics.mcss.results.mcss_results
     import infobiotics.mcss.results.timeseries_plot
-#    import infobiotics.mcss.results.oregonator_movie
+    import infobiotics.mcss.results.oregonator_movie
     import infobiotics.mcss.results.ui_mcss_results_widget
     import infobiotics.mcss.results.simulation
-#    import infobiotics.mcss.results.combined_surfaces
+    import infobiotics.mcss.results.combined_surfaces
     import infobiotics.mcss.results.mcss_results_widget
-#    import infobiotics.mcss.results.tests.time_get_functions_over_runs
-#    import infobiotics.mcss.results.tests.test_mcss_results
-#    import infobiotics.mcss.results.tests.time_functions_of_values_over_axis
-#    import infobiotics.mcss.results.tests.test_mcss_results_widget
-#    import infobiotics.mcss.results.tests.mcss_postprocess
     import infobiotics.mcss.results.ui_player_control_widget
     import infobiotics.mcss.mcss_params_group
-#    import infobiotics.mcss.old.mcss_experiment
     import infobiotics.mcss.mcss_preferences
     import infobiotics.mcss.mcss_experiment_handler
     import infobiotics.mcss.mcss_params_handler

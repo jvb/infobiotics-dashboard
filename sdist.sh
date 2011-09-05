@@ -13,5 +13,5 @@ export PYTHONPATH=`pwd`
 #python -c 'import infobiotics.dashboard.run as run; run.main()'
 echo
 echo "If not source ./sdist.sh do"
-echo "export PYTHONPATH=$PYTHONPATH" 
-echo "echo \$PYTHONPATH"
+echo "export PYTHONPATH=$PYTHONPATH; echo \$PYTHONPATH; cd $PYTHONPATH" 
+

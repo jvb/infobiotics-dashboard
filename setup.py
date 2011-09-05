@@ -306,7 +306,7 @@ if sys.platform.startswith('darwin'):
     import matplotlib
     extra_options = dict(
         setup_requires=['py2app'], #, 'pexpect'], # done in INSTALL_REQUIRES
-        app=['bin/infobiotics-dashboard.py'],
+        app=['bin/ibw.py'],#bin/infobiotics-dashboard.py'],
         options=dict(
             py2app=dict(
                 argv_emulation=True, # cross-platform applications generally expect sys.argv to be used for opening files
@@ -421,6 +421,13 @@ manifestVersion="1.0">
 ##               "icon_resources": [(2, "images/example.ico")], #TODO If you have a windows icon, this is where to specify it
 #                other_resources=[(24,1,manifest)],
 #            ),
+            'bin/infobiotics-workbench.pyw',
+            'bin/ibw.pyw',
+        ],
+        console=[
+            'bin/ibw.py',
+            'bin/infobiotics-dashboard.py',
+            'bin/infobiotics-workbench.py',
         ],
 #        zipfile = None,
         options=dict(
@@ -454,6 +461,8 @@ manifestVersion="1.0">
 else: # assume sys.platform.startswith('linux'):
     extra_options = dict(
         scripts=[
+            'bin/ibw',
+            'bin/infobiotics-workbench',
             'bin/infobiotics-dashboard',
         ],
         data_files=[
