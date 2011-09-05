@@ -1,2 +1,2 @@
-add mcss-results and pmodelchecker-results to _ibw.py
+add pmodelchecker-results to _ibw.py
 	

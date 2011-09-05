@@ -14,6 +14,6 @@ do
     for ext in $exts ""
     do
     	f=$name$ext
-    	cp _ibw.py $f && chmod +x $f
+    	cp -v _ibw.py $f && chmod +x $f
     done
 done

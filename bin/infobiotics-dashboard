@@ -13,6 +13,8 @@ called from Eclipse...
 # "Application asked to unregister timer 0x1c000011 which is not registered in this thread. Fix application."
 # This is a bug in Qt 4.7 under Ubuntu that will be fixed in Qt 4.8 
 
+from __future__ import with_statement
+
 import sys
 import os.path
 
@@ -24,8 +26,11 @@ if sys.platform.startswith('win'):
     import matplotlib
     matplotlib.use('qt4agg') # overrule configuration
     import pylab #TODO remove?
-    
-import infobiotics.__version__
+
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    import infobiotics.__version__
 
 # set default log level for all loggers that use infobiotics.commons.api.logging (infobiotics.commons.unified_logging)  
 from infobiotics.commons.api import logging
@@ -36,17 +41,27 @@ simulate = 'mcss'#'simulate'
 check_mc2 = 'pmodelchecker-mc2'#'check-mc2'
 check_prism = 'pmodelchecker-prism'#'check-prism'
 optimise = 'poptimizer'#optimise
-commands = (simulate, check_mc2, check_prism, optimise)
+simulation_results = 'mcss-results'
+commands = (simulate, simulation_results, check_mc2, check_prism, optimise)
 
 def help():
-    return '''Infobiotics Workbench %s
+    return '''Infobiotics Workbench {version}
 
-Usage: infobiotics <experiment> (<model/params>)
+{self} [command [file]]
 
-Available experiments are:
+commands:
+ {commands_}
  
- %s
-''' % (infobiotics.__version__, '\n '.join(commands))
+file types:
+ .params ({simulate}, {check_prism}, {check_mc2}, {optimise})  
+ .sbml, .lpp, .xml ({simulate}, {check_prism}, {check_mc2})
+ .h5 ({simulation_results})
+'''.format(
+    version=infobiotics.__version__, 
+    self=os.path.basename(__file__), 
+    commands_='\n '.join(commands),
+    **globals()
+)
 
 
 def main(argv):
@@ -65,6 +80,7 @@ def main(argv):
 
     params = ''
     model = ''
+    simulation = ''
     
     if len(args) == 2:
         args1 = args[1]
@@ -79,11 +95,15 @@ def main(argv):
         elif command == simulate and args1.lower().endswith('.sbml'):
             # mcss accepts SBML models too
             model = args1
-    if model != '':
-        directory, model = os.path.split(model)
-#    else:
-#        directory = os.getcwd()
+        elif command == simulation_results and args1.lower().endswith('.h5'):
+            simulation = args1
 
+    if model:
+        directory, model = os.path.split(model)
+        
+    if command == simulation_results:
+        from infobiotics.mcss.results import mcss_results_widget
+        return mcss_results_widget.main(simulation)
     if command == simulate:
         from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment
     elif command == check_mc2:
