@@ -109,14 +109,14 @@ class McssResultsWidget(QWidget):
 #            if not self.loaded:
 #                self.close()
 
-#        self.update_ui()
+        self.update_ui()
 
 
     def closeEvent(self, event):
         print 'closeEvent() save_settings', self.current_directory
         self.save_settings()
         if self.loaded:
-            print 'closeEvent() save_geometry', self.current_directory
+            print 'closeEvent() save_geometry', 
             self.save_geometry()
         if hasattr(self, '_timeseries_plot_uis'):
             for ui in self._timeseries_plot_uis:
@@ -140,34 +140,34 @@ class McssResultsWidget(QWidget):
         print 'restored', self.geometry()
         settings.endGroup()
         
-#    def save_current_directory(self):
-#        settings = QSettings()
-#        settings.beginGroup(self._settings_group())
-#        settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
-#        settings.endGroup()
+    def save_current_directory(self):
+        settings = QSettings()
+        settings.beginGroup(self._settings_group())
+        settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
+        settings.endGroup()
         
-#    def restore_current_directory(self):
-#        settings = QSettings()
-#        settings.beginGroup(self._settings_group())
-#        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
-#        settings.endGroup()
+    def restore_current_directory(self):
+        settings = QSettings()
+        settings.beginGroup(self._settings_group())
+        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+        settings.endGroup()
 
     def _settings_group(self, filename=None):
         if filename:
-            return filename
-#            return '/'.join([self.__settings_group, filename])
+#            return filename
+            return '/'.join([self.__settings_group, filename])
         return self.__settings_group 
             
         
     def load_settings(self):
 #        self.restore_geometry()
         
-#        self.restore_current_directory()
+        self.restore_current_directory()
 
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         
-        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+#        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
 
         if not (hasattr(self, 'filename') and readable(self.filename)):
             return
@@ -302,10 +302,10 @@ class McssResultsWidget(QWidget):
         self.load_succeeded()
 
         self.load_settings()
-        self.current_directory = QFileInfo(filename).absolutePath()
-        self.save_settings()
+#        self.current_directory = QFileInfo(filename).absolutePath()
+#        self.save_settings()
         
-        self.update_ui()
+#        self.update_ui()
         
         return True
 
@@ -316,31 +316,31 @@ class McssResultsWidget(QWidget):
         ui = self.ui
 
         hide_widgets(
-            ui._timepoints_group_box,
-            ui._runs_group_box,
-            ui._species_group_box,
-            ui._compartments_group_box,
-            ui._data_group_box,
-#            
-#            ui.runs_selected_and_total_label,
-#            ui.species_selected_and_total_label,
-#            ui.compartments_selected_and_total_label,
-#            
-#            ui.timepoints_data_units_combo_box,
-#            ui.timepoints_display_units_combo_box,
-#            
+#            ui._timepoints_group_box,
+#            ui._runs_group_box,
+#            ui._species_group_box,
+#            ui._compartments_group_box,
 #            ui._data_group_box,
-##            ui.quantities_data_units_combo_box,
-##            ui.quantities_display_type_combo_box,
-###            ui.molecules_display_units_label,
-##            ui.moles_display_units_combo_box,
-##            ui.concentrations_display_units_combo_box,
 #            
-##            ui.volumes_data_units_combo_box,
-##            ui.volumes_display_units_combo_box,
-#            ui.volumes_widget,
+            ui.runs_selected_and_total_label,
+            ui.species_selected_and_total_label,
+            ui.compartments_selected_and_total_label,
+            
+            ui.timepoints_data_units_combo_box,
+            ui.timepoints_display_units_combo_box,
+            
+            ui._data_group_box,
+#            ui.quantities_data_units_combo_box,
+#            ui.quantities_display_type_combo_box,
+##            ui.molecules_display_units_label,
+#            ui.moles_display_units_combo_box,
+#            ui.concentrations_display_units_combo_box,
+            
+#            ui.volumes_data_units_combo_box,
+#            ui.volumes_display_units_combo_box,
+            ui.volumes_widget,
 #
-            ui.actionsWidget,
+#            ui.actionsWidget,
         )
 
         clear_widgets(
@@ -391,7 +391,7 @@ class McssResultsWidget(QWidget):
         
         ui.load_button.setFocus(Qt.OtherFocusReason)
 
-        self.resize(350,32)
+#        self.resize(350,32)
         
         
     def load_succeeded(self):
@@ -434,13 +434,13 @@ class McssResultsWidget(QWidget):
         for i in simulation._runs_list[0]._compartments_list: #FIXME can't rely on run1 alone if compartments divide
             SimulationListWidgetItem(i, ui.compartments_list_widget)
 
-        show_widgets(            
-            ui._timepoints_group_box,
-            ui._runs_group_box,
-            ui._species_group_box,
-            ui._compartments_group_box,
-            ui._data_group_box,
-        )
+#        show_widgets(            
+#            ui._timepoints_group_box,
+#            ui._runs_group_box,
+#            ui._species_group_box,
+#            ui._compartments_group_box,
+#            ui._data_group_box,
+#        )
         
         # runs
         runs = ui.runs_list_widget.count()
@@ -822,7 +822,6 @@ class McssResultsWidget(QWidget):
         
 
     def histogram(self):
-#        raise NotImplementedError
         from histograms import Histogram
         results = self.selected_items_results()
         Histogram.fromresults(results).configure_traits()
@@ -1046,9 +1045,9 @@ def main(filename=None):
 #    self.update_ui()
     centre_window(self)
     self.show()
-    if len(argv) == 1:
-        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
-        self.loaded = self.load()
+#    if len(argv) == 1:
+#        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
+#        self.loaded = self.load()
 
 
     self.raise_()
