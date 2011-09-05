@@ -17,10 +17,15 @@ version 0.1.0 - released 15/08/11
 * record surface visualizations using ffmpeg
 * Save resized button on far right of matplotlib toolbar
 
-version 0.1.1 - released ?
+version 0.1.1 - released 16/08/11
 
 * can generate JavaDoc-esque documentation for all used classes using doc/epydoc.sh 
 
-version 1.0.0 - released ?
+version 1.0.0 - released 05/09/2011
 
-* 
+* export data in .csv, .xls and .npz formats
+* deterministic solvers for mcss
+* improved labelling of timeseries plots
+* computes and displays memory usage for .h5 selection
+* improved command-line launcher
+* bug fixes 

@@ -690,9 +690,13 @@ class PModelCheckerResults(HasTraits):
                     ),
                     visible_when='len(object.properties) > 0',
                 ),
+#                Item('selected',
+#                    show_label=False,
+#                    style='custom',
+#                ),
                 show_border=True,
             ),
-            title='%s' % self.file_name,
+            title='%s' % os.path.basename(self.file_name),
             resizable=True,
 #            id='view_%s' % self.file_name, # raises TypeError: String or Integer object expected for key, unicode found
             id='view_%s' % str(self.file_name), # solved
@@ -708,7 +712,7 @@ class PModelCheckerResults(HasTraits):
 
 
 if __name__ == '__main__':
-    main = PModelCheckerResults('../../examples/1-4_variables.psm')
+    main = PModelCheckerResults('../../examples/pmodelchecker/1-4_variables.psm')
 #    main = PModelCheckerResults(file_name='results/1-4_variables.psm')
 #    main.load('2d_function.psm')
 

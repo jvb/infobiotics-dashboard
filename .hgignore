@@ -31,3 +31,5 @@ syntax: regexp
 ^doc/epydoc$
 syntax: regexp
 ^bin/i.+$
+syntax: regexp
+^\.settings$
