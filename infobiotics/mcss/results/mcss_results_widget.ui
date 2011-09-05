@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>997</width>
+    <width>952</width>
     <height>600</height>
    </rect>
   </property>
@@ -326,10 +326,10 @@
          <item>
           <widget class="QLineEdit" name="filter_species_line_edit">
            <property name="toolTip">
-            <string>Filter Species</string>
+            <string>Filter Species with wildcards (*)</string>
            </property>
            <property name="placeholderText">
-            <string>Filter species</string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -431,10 +431,10 @@ Right-click for sorting options</string>
          <item>
           <widget class="QLineEdit" name="filter_compartments_line_edit">
            <property name="toolTip">
-            <string>Filter Compartments</string>
+            <string>Filter Compartments with wildcards (*)</string>
            </property>
            <property name="placeholderText">
-            <string>Filter compartments</string>
+            <string/>
            </property>
           </widget>
          </item>

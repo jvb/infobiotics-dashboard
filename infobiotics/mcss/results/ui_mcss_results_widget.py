@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mcss_results_widget.ui'
 #
-# Created: Mon Sep  5 12:22:03 2011
+# Created: Mon Sep  5 16:12:20 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ class Ui_McssResultsWidget(object):
     def setupUi(self, McssResultsWidget):
         McssResultsWidget.setObjectName(_fromUtf8("McssResultsWidget"))
         McssResultsWidget.setEnabled(True)
-        McssResultsWidget.resize(997, 600)
+        McssResultsWidget.resize(952, 600)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -130,6 +130,7 @@ class Ui_McssResultsWidget(object):
         QtGui.QListWidgetItem(self.species_list_widget)
         self._species_layout.addWidget(self.species_list_widget)
         self.filter_species_line_edit = QtGui.QLineEdit(self._species_group_box)
+        self.filter_species_line_edit.setPlaceholderText(_fromUtf8(""))
         self.filter_species_line_edit.setObjectName(_fromUtf8("filter_species_line_edit"))
         self._species_layout.addWidget(self.filter_species_line_edit)
         self.verticalLayout_6.addLayout(self._species_layout)
@@ -164,6 +165,7 @@ class Ui_McssResultsWidget(object):
         self.compartments_list_widget.setObjectName(_fromUtf8("compartments_list_widget"))
         self._compartments_group_box_layout.addWidget(self.compartments_list_widget)
         self.filter_compartments_line_edit = QtGui.QLineEdit(self._compartments_group_box)
+        self.filter_compartments_line_edit.setPlaceholderText(_fromUtf8(""))
         self.filter_compartments_line_edit.setObjectName(_fromUtf8("filter_compartments_line_edit"))
         self._compartments_group_box_layout.addWidget(self.filter_compartments_line_edit)
         self.verticalLayout_7.addLayout(self._compartments_group_box_layout)
@@ -509,8 +511,7 @@ class Ui_McssResultsWidget(object):
         self.species_list_widget.setSortingEnabled(False)
         self.species_list_widget.item(0).setText(QtGui.QApplication.translate("McssResultsWidget", "Volumes", None, QtGui.QApplication.UnicodeUTF8))
         self.species_list_widget.setSortingEnabled(__sortingEnabled)
-        self.filter_species_line_edit.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Filter Species", None, QtGui.QApplication.UnicodeUTF8))
-        self.filter_species_line_edit.setPlaceholderText(QtGui.QApplication.translate("McssResultsWidget", "Filter species", None, QtGui.QApplication.UnicodeUTF8))
+        self.filter_species_line_edit.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Filter Species with wildcards (*)", None, QtGui.QApplication.UnicodeUTF8))
         self._compartments_group_box.setTitle(QtGui.QApplication.translate("McssResultsWidget", "Compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.select_all_compartments_check_box.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Select all (filter) compartments", None, QtGui.QApplication.UnicodeUTF8))
         self.select_all_compartments_check_box.setText(QtGui.QApplication.translate("McssResultsWidget", "All", None, QtGui.QApplication.UnicodeUTF8))
@@ -518,8 +519,7 @@ class Ui_McssResultsWidget(object):
         self.compartments_list_widget.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Select multiple compartments using Ctrl-click, Shift-click or by clicking and dragging.\n"
 "Right-click for sorting options", None, QtGui.QApplication.UnicodeUTF8))
         self.compartments_list_widget.setSortingEnabled(False)
-        self.filter_compartments_line_edit.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Filter Compartments", None, QtGui.QApplication.UnicodeUTF8))
-        self.filter_compartments_line_edit.setPlaceholderText(QtGui.QApplication.translate("McssResultsWidget", "Filter compartments", None, QtGui.QApplication.UnicodeUTF8))
+        self.filter_compartments_line_edit.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Filter Compartments with wildcards (*)", None, QtGui.QApplication.UnicodeUTF8))
         self._timepoints_group_box.setTitle(QtGui.QApplication.translate("McssResultsWidget", "Timepoints", None, QtGui.QApplication.UnicodeUTF8))
         self._from_label.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Select timepoints starting from <I>n</I>", None, QtGui.QApplication.UnicodeUTF8))
         self._from_label.setText(QtGui.QApplication.translate("McssResultsWidget", "From", None, QtGui.QApplication.UnicodeUTF8))
