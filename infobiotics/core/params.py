@@ -153,8 +153,11 @@ class Params(HasTraits):
     def save_preferences(self):
         ''' Called from self._handler.close() '''
         for preference in ['executable', 'directory'] + self.parameter_names():
-            preferences_path = '.'.join([self._preferences_path, preference])
-            preferences.set(preferences_path, getattr(self, preference))
+            try:
+                preferences_path = '.'.join([self._preferences_path, preference])
+                preferences.set(preferences_path, getattr(self, preference))
+            except AttributeError:
+                pass
         preferences.save()
 
         

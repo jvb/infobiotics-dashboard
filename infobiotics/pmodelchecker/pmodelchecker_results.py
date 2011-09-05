@@ -1,6 +1,4 @@
-if __name__ == '__main__':
-    from enthought.etsconfig.api import ETSConfig
-    ETSConfig.toolkit = 'qt4'
+import infobiotics
 from enthought.traits.api import (
     HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum,
     Property, Button, on_trait_change, Tuple, cached_property, Bool,

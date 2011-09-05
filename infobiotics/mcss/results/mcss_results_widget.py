@@ -747,7 +747,11 @@ class McssResultsWidget(QWidget):
     # accessors
     
     def volumes_selected(self):
-        return True if hasattr(self, 'volumes_list_widget_item') and self.volumes_list_widget_item.isSelected() else False
+        try:
+            return True if hasattr(self, 'volumes_list_widget_item') and self.volumes_list_widget_item.isSelected() else False
+        except RuntimeError:
+            del self.volumes_list_widget_item
+            return False
     
     def selected_species(self):
         '''Return selected species after removing volumes.'''

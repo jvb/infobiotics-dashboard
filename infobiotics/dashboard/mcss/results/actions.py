@@ -9,6 +9,7 @@ class McssResultsAction(PyFaceAction): #TODO
     
     def perform(self, event=None):
         obj = McssResultsWidget()
+        obj.load()
         if not obj.loaded:
             # user cancelled load
             return
