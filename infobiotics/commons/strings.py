@@ -12,16 +12,49 @@ def shorten_path(path, width=80):
         else:
             path = os.path.join('...', os.sep.join(head.split(os.sep)[2:]), tail)
         return shorten_path(path, width)
-
+# test
 #print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 30)
 #print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 40)
 #print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 50)
 #print shorten_path('/home/jvb/dashboard/examples/NAR-pmodelchecker/negativeAutoregulationModel.lpp', 60)
 #exit()
-    
-def wrap_paths(text, width=80, splitter=' ', joiner=os.linesep):
-    return wrap(wrap(text, width, splitter), width, os.sep, '%s\n' % os.sep)
 
+def wrap_path(path):
+    dirs = path.split(os.sep)
+    path = ''
+    for dir in dirs:
+        if not dir:
+            continue
+        if len(path.split(os.linesep)[-1]) + len(dir) <= 80 + len(os.sep):
+            path = os.sep.join([path, dir])
+        else:
+            path += os.sep + os.linesep + dir
+    return path
+#for i, path in enumerate(paths):
+#    dirs = path.split(os.sep)
+#    path = ''
+#    for dir in dirs:
+#        if not dir:
+#            continue
+#        if len(path.split(os.linesep)[-1]) + len(dir) <= 80 + len(os.sep):
+#            path = os.sep.join([path, dir])
+#        else:
+#            path += os.sep + os.linesep + dir
+#    paths[i] = path
+#paths = os.linesep.join(paths)
+def wrap_paths(paths, joiner=os.linesep):
+    for i, path in enumerate(paths):
+        paths[i] = wrap_path(path)
+    return joiner.join(paths)
+# test
+#paths = [
+#    '/home/jvb/eclipse/workspaces/infobiotics/infobiotics-dashboard/examples/pmodelchecker/Const/modelCheckingPRISM',
+#    '/home/jvb/eclipse/workspaces/infobiotics/',
+#]
+#print wrap_paths(paths)
+#exit()
+
+    
 def wrap(text, width=80, splitter=' ', joiner=os.linesep):
     '''A word-wrap function that preserves existing line breaks and most spaces 
     in the text. Expects that existing line breaks are posix newlines (\n).
@@ -37,8 +70,8 @@ def wrap(text, width=80, splitter=' ', joiner=os.linesep):
          ),
         text.split(splitter)
     )
-
-
+    
+    
 if __name__ == '__main__':
     
     # 2 very long lines separated by a blank line

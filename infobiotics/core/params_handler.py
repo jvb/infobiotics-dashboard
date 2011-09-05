@@ -309,6 +309,11 @@ class ParamsHandler(HelpfulController):
 #            error = '\n'.join(['%s must be %s' % (editor.name, editor.object.base_trait(editor.name).full_info(editor.object, editor.name, editor.value)) for editor in self.info.ui._editors if hasattr(editor, '_error') and getattr(editor, '_error', None) is not None])
 #            self.status = textwrap.TextWrapper(width=80, break_long_words=True).fill(error)
 
+    directory = Str
+    def object_directory_changed(self, info):
+        from infobiotics.commons.strings import wrap_path
+        self.directory = wrap_path(info.object.directory) 
+
         
 if __name__ == '__main__':
     execfile('params.py')
