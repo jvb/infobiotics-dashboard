@@ -282,15 +282,13 @@ class PModelCheckerResultsPropertyFigure(PModelCheckerResultsPropertyVisualisati
                 Item(
                     'figure',
                     show_label=False,
-                    editor=MatplotlibFigureEditor(toolbar=True), #TODO save with Figure.set_figsize_inches( (w,h) ) # http://www.scipy.org/Cookbook/Matplotlib/AdjustingImageSize
+                    editor=MatplotlibFigureEditor(toolbar=True, toolbar_above=False),
                     resizable=True
                 ),
                 HGroup(
                     Item('detach', show_label=False),
                     Spring(),
                     'legend',
-                    Spring(),
-                    Item('save_resized', show_label=False),
                 ),
                 show_border=True,
             ),

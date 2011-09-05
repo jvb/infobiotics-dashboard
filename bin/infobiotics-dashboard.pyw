@@ -38,11 +38,13 @@ logging.level = logging.ERROR
 #logging.level = logging.DEBUG #TODO comment out in release
 
 simulate = 'mcss'#'simulate'
+simulation_results = 'mcss-results'
 check_mc2 = 'pmodelchecker-mc2'#'check-mc2'
 check_prism = 'pmodelchecker-prism'#'check-prism'
+checking_results = 'pmodelchecker-results'
 optimise = 'poptimizer'#optimise
-simulation_results = 'mcss-results'
-commands = (simulate, simulation_results, check_mc2, check_prism, optimise)
+optimisation_results = 'poptimizer-results' 
+commands = (simulate, simulation_results, check_mc2, check_prism, checking_results, optimise, optimisation_results)
 
 def help():
     return '''Infobiotics Workbench {version}
@@ -53,9 +55,10 @@ commands:
  {commands_}
  
 file types:
- .params ({simulate}, {check_prism}, {check_mc2}, {optimise})  
+ .params ({simulate}, {check_prism}, {check_mc2}, {optimise}, {optimisation_results})  
  .sbml, .lpp, .xml ({simulate}, {check_prism}, {check_mc2})
  .h5 ({simulation_results})
+ .mc2, .psm ({checking_results})
 '''.format(
     version=infobiotics.__version__, 
     self=os.path.basename(__file__), 
@@ -80,7 +83,7 @@ def main(argv):
 
     params = ''
     model = ''
-    simulation = ''
+    results = ''
     
     if len(args) == 2:
         args1 = args[1]
@@ -96,14 +99,32 @@ def main(argv):
             # mcss accepts SBML models too
             model = args1
         elif command == simulation_results and args1.lower().endswith('.h5'):
-            simulation = args1
+            results = args1
+        elif command == checking_results and args1.lower().rsplit('.')[1] in ('mc2', 'psm'):
+            results = args1
 
     if model:
         directory, model = os.path.split(model)
-        
+    
     if command == simulation_results:
         from infobiotics.mcss.results import mcss_results_widget
-        return mcss_results_widget.main(simulation)
+        return mcss_results_widget.main(results)
+
+    if command == checking_results:
+        if results:
+            from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
+            return PModelCheckerResults(results).configure()
+        else:
+            sys.exit(help())
+    
+    if command == optimisation_results:
+        if params:
+            from infobiotics.poptimizer.poptimizer_experiment import POptimizerExperiment
+            from infobiotics.poptimizer.poptimizer_results import POptimizerResults
+            return POptimizerResults(experiment=POptimizerExperiment(params)).configure()
+        else:
+            sys.exit(help())
+            
     if command == simulate:
         from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment
     elif command == check_mc2:
@@ -159,9 +180,7 @@ def test_absolute_path_to_params2():
     
 
 if __name__ == '__main__':
-    main(sys.argv) #TODO uncomment
-#    main(sys.argv + ['mcss'])
-    #TODO comment
+    main(sys.argv)
 #    test_relative_path_to_model()
 #    test_absolute_path_to_model()
 #    test_relative_path_to_params()

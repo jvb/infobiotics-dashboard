@@ -41,7 +41,7 @@ class POptimizerResults(HasTraits):
                 ),
                 Item('figure',
                     show_label=False,
-                    editor=MatplotlibFigureEditor(),
+                    editor=MatplotlibFigureEditor(toolbar=True, toolbar_above=False),
                 ),
                 show_border=True,
             ),
@@ -106,12 +106,22 @@ class POptimizerResults(HasTraits):
                 ax.plot(time, target[:, i + 1], label='%s (target)' % species[i])
                 ax.plot(time, output[:, i], label='%s (optimised)' % species[i])    
                 ax.legend(loc='best')
+            self.figure.set_facecolor('white')
             
         except Exception, e:
             logger.error(e)
+        
             
+    def configure(self, **args): # for consistency with Params subclasses
+#        self._interactive = True
+#        self.handler.configure_traits(**args)
+        self.configure_traits(**args)
+
+    def edit(self, **args): # for consistency with Params subclasses
+        self.edit_traits(**args)
+        
 
 if __name__ == '__main__':
 #    experiment = POptimizerExperiment('../../examples/poptimizer/fourinitial/four_initial_inputpara.params')
     experiment = POptimizerExperiment('../../examples/poptimizer/threegene/threegene_inputpara.params')
-    POptimizerResults(experiment=experiment).configure_traits()
+    POptimizerResults(experiment=experiment).configure()

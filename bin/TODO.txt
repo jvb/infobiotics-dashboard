@@ -1,2 +1,0 @@
-add pmodelchecker-results to _ibw.py
-	
