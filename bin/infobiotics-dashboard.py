@@ -126,13 +126,13 @@ def main(argv):
             sys.exit(help())
             
     if command == simulate:
-        from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment
+        from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment #@UnusedImport
     elif command == check_mc2:
-        from infobiotics.pmodelchecker.mc2.mc2_experiment import MC2Experiment as Experiment
+        from infobiotics.pmodelchecker.mc2.mc2_experiment import MC2Experiment as Experiment #@UnusedImport @Reimport
     elif command == check_prism:
-        from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment as Experiment
+        from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment as Experiment #@UnusedImport @Reimport
     elif command == optimise:
-        from infobiotics.poptimizer.poptimizer_experiment import POptimizerExperiment as Experiment
+        from infobiotics.poptimizer.poptimizer_experiment import POptimizerExperiment as Experiment #@Reimport
     
     experiment = Experiment()
 
@@ -158,25 +158,25 @@ def main(argv):
 dir = os.path.dirname(__file__)
 
 def test_relative_path_to_model():
-    main(sys.argv + ['mcss', '../examples/mcss/models/module1.sbml'])
+    main(sys.argv + [simulate, '../examples/mcss/models/module1.sbml'])
 
 def test_absolute_path_to_model():
-    main(sys.argv + ['mcss', dir + '../examples/mcss/models/module1.sbml'])
+    main(sys.argv + [simulate, dir + '../examples/mcss/models/module1.sbml'])
 
 def test_relative_path_to_params():
-    main(sys.argv + ['pmodelchecker-mc2', '../examples/pmodelchecker/pulsePropagation/pulse_MC2.params'])
+    main(sys.argv + [check_mc2, '../examples/pmodelchecker/pulsePropagation/pulse_MC2.params'])
 
 def test_absolute_path_to_params():
-    main(sys.argv + ['poptimizer', dir + '../examples/poptimizer/fourinitial/four_initial_inputpara.params'])
+    main(sys.argv + [optimise, dir + '../examples/poptimizer/fourinitial/four_initial_inputpara.params'])
 
 def test_wrong_params_for_experiment():
-    main(sys.argv + ['poptimizer', '../examples/mcss/models/reactions1.params'])
+    main(sys.argv + [optimise, '../examples/mcss/models/reactions1.params'])
 
 def test_absolute_path_to_model2():
-    main(sys.argv + ['pmodelchecker-prism', dir + '../examples/pmodelchecker/pulsePropagation/pulsePropagation.lpp'])
+    main(sys.argv + [check_prism, dir + '../examples/pmodelchecker/pulsePropagation/pulsePropagation.lpp'])
     
 def test_absolute_path_to_params2():
-    main(sys.argv + ['pmodelchecker-prism', dir + '../examples/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params'])
+    main(sys.argv + [check_prism, dir + '../examples/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params'])
     
 
 if __name__ == '__main__':
