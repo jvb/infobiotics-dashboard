@@ -50,8 +50,9 @@ class McssResultsWidget(QWidget):
     
     def __init__(self, filename=None):
         '''Setup widgets, connect signals to slots and attempt load.'''
-        QWidget.__init__(self)
+        self.filename = None
 
+        QWidget.__init__(self)
         self.ui = Ui_McssResultsWidget()
         self.ui.setupUi(self) # QPixmap: It is not safe to use pixmaps outside the GUI thread
 
@@ -103,12 +104,11 @@ class McssResultsWidget(QWidget):
         self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text()
         # and before self.load()
         
-        if filename:#not hasattr(self, 'filename'):
-            self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
+        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
+        if filename:
             self.loaded = self.load(filename)
-#            if not self.loaded:
-#                self.close()
-
+        else:
+            self.load_failed()
         self.update_ui()
 
 
@@ -169,7 +169,7 @@ class McssResultsWidget(QWidget):
         
 #        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
 
-        if not (hasattr(self, 'filename') and readable(self.filename)):
+        if not (self.filename and readable(self.filename)):
             return
         
         settings.beginGroup(self._settings_group(self.filename))
@@ -179,11 +179,6 @@ class McssResultsWidget(QWidget):
             units = dict((unicode(key), unicode(value)) for key, value in units.items())
             self.set_units(**units)
         
-        random_runs, ok = settings.value('random_runs', QVariant(1)).toInt() 
-        if ok:
-            self.ui.random_runs_spin_box.setValue(random_runs)
-        self.ui.runs_list_widget.clearSelection()
-
         def restore_selection(checkboxsetting, checkbox, listwidgetsetting, listwidget):
             checked, ok = settings.value(checkboxsetting, QVariant(Qt.Unchecked)).toInt()
             if checked:
@@ -200,9 +195,17 @@ class McssResultsWidget(QWidget):
                     if ok:
                         listwidget.select(row)
 
-        restore_selection('all_runs', self.ui.select_all_runs_check_box, 'runs', self.ui.runs_list_widget)
         restore_selection('all_species', self.ui.select_all_species_check_box, 'species', self.ui.species_list_widget)
         restore_selection('all_compartments', self.ui.select_all_compartments_check_box, 'compartments', self.ui.compartments_list_widget)
+
+#        random_runs, ok = settings.value('random_runs').toInt() 
+#        if ok:
+#            self.ui.random_runs_spin_box.setValue(random_runs)
+#        else:
+#            self.ui.runs_list_widget.clearSelection()
+        restore_selection('all_runs', self.ui.select_all_runs_check_box, 'runs', self.ui.runs_list_widget)
+        if self.ui.runs_list_widget.count() == 1:
+            self.ui.runs_list_widget.selectAll()
 
         self.ui.filter_species_line_edit.setText(settings.value('species_filter', '').toString())
         
@@ -231,7 +234,7 @@ class McssResultsWidget(QWidget):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
         settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
-        if not hasattr(self, 'filename'):
+        if not self.filename:
             return
         settings.setValue('previous', QVariant(self.filename))
 #        settings.beginGroup(self.filename)
@@ -298,9 +301,8 @@ class McssResultsWidget(QWidget):
 
         self.simulation = simulation
         self.filename = filename
-
+        self.loaded = True
         self.load_succeeded()
-
         self.load_settings()
 #        self.current_directory = QFileInfo(filename).absolutePath()
 #        self.save_settings()
@@ -311,85 +313,83 @@ class McssResultsWidget(QWidget):
 
 
     def load_failed(self):
-        '''Hides, clears, unchecks and disables relevant widgets.'''
+        '''Hides, clears, unchecks and disables relevant widgets'''
         
-        ui = self.ui
-
         hide_widgets(
-#            ui._timepoints_group_box,
-#            ui._runs_group_box,
-#            ui._species_group_box,
-#            ui._compartments_group_box,
-#            ui._data_group_box,
+#            self.ui._timepoints_group_box,
+#            self.ui._runs_group_box,
+#            self.ui._species_group_box,
+#            self.ui._compartments_group_box,
+#            self.ui._data_group_box,
 #            
-            ui.runs_selected_and_total_label,
-            ui.species_selected_and_total_label,
-            ui.compartments_selected_and_total_label,
+            self.ui.runs_selected_and_total_label,
+            self.ui.species_selected_and_total_label,
+            self.ui.compartments_selected_and_total_label,
             
-            ui.timepoints_data_units_combo_box,
-            ui.timepoints_display_units_combo_box,
+            self.ui.timepoints_data_units_combo_box,
+            self.ui.timepoints_display_units_combo_box,
             
-            ui._data_group_box,
-#            ui.quantities_data_units_combo_box,
-#            ui.quantities_display_type_combo_box,
-##            ui.molecules_display_units_label,
-#            ui.moles_display_units_combo_box,
-#            ui.concentrations_display_units_combo_box,
+            self.ui._data_group_box,
+#            self.ui.quantities_data_units_combo_box,
+#            self.ui.quantities_display_type_combo_box,
+##            self.ui.molecules_display_units_label,
+#            self.ui.moles_display_units_combo_box,
+#            self.ui.concentrations_display_units_combo_box,
             
-#            ui.volumes_data_units_combo_box,
-#            ui.volumes_display_units_combo_box,
-            ui.volumes_widget,
+#            self.ui.volumes_data_units_combo_box,
+#            self.ui.volumes_display_units_combo_box,
+            self.ui.volumes_widget,
 #
-#            ui.actionsWidget,
+#            self.ui.actionsWidget,
         )
 
         clear_widgets(
-            ui.file_name_line_edit,
-            ui.runs_list_widget,
-            ui.species_list_widget,
-            ui.compartments_list_widget,
+#            self.ui.file_name_line_edit,
+            self.ui.runs_list_widget,
+            self.ui.species_list_widget,
+            self.ui.compartments_list_widget,
         )
 
-        ui.file_name_line_edit.setText(self._file_name_line_edit_text_orig)
+        self.ui.file_name_line_edit.setText(self._file_name_line_edit_text_orig)
 
         uncheck_widgets(
-            ui.select_all_runs_check_box,
-            ui.select_all_species_check_box,
-            ui.select_all_compartments_check_box,
+            self.ui.select_all_runs_check_box,
+            self.ui.select_all_species_check_box,
+            self.ui.select_all_compartments_check_box,
         )
                 
         disable_widgets(
-            ui.file_name_line_edit,
+            self.ui.file_name_line_edit,
             
-            ui.select_all_runs_check_box,
-            ui.runs_list_widget,
-            ui.random_runs_spin_box,
-            ui.random_runs_label,
+            self.ui.select_all_runs_check_box,
+            self.ui.runs_list_widget,
+            self.ui.random_runs_spin_box,
+            self.ui.random_runs_label,
 
-            ui.select_all_species_check_box,
-            ui.species_list_widget,
-            ui.filter_species_line_edit,
-#            ui.sort_species_check_box,
+            self.ui.select_all_species_check_box,
+            self.ui.species_list_widget,
+            self.ui.filter_species_line_edit,
+#            self.ui.sort_species_check_box,
             
-            ui.compartments_list_widget,
-            ui.select_all_compartments_check_box,
-            ui.filter_compartments_line_edit,
-#            ui.sort_compartments_check_box,
+            self.ui.compartments_list_widget,
+            self.ui.select_all_compartments_check_box,
+            self.ui.filter_compartments_line_edit,
+#            self.ui.sort_compartments_check_box,
             
-            ui.to_spin_box,
-            ui.from_spin_box,
-            ui.every_spin_box,
+            self.ui.to_spin_box,
+            self.ui.from_spin_box,
+            self.ui.every_spin_box,
             
-            ui.average_over_selected_runs_check_box,
-            ui.calculate_button,
+            self.ui.average_over_selected_runs_check_box,
+            self.ui.calculate_button,
             
-            ui.export_data_as_button,
-            ui.plot_timeseries_button,
-            ui.plot_histogram_button,
-            ui.visualise_population_button,
+            self.ui.export_data_as_button,
+            self.ui.plot_timeseries_button,
+            self.ui.plot_histogram_button,
+            self.ui.visualise_population_button,
         )
         
-        ui.load_button.setFocus(Qt.OtherFocusReason)
+        self.ui.load_button.setFocus(Qt.OtherFocusReason)
 
 #        self.resize(350,32)
         
@@ -398,79 +398,77 @@ class McssResultsWidget(QWidget):
         ''' Configures, populates, enables, checks and shows relevant widgets. '''
 
         simulation = self.simulation
-        filename = self.filename
-        ui = self.ui
 
-        fileinfo = QFileInfo(filename)
-        ui.file_name_line_edit.setText(fileinfo.absoluteFilePath())
+        fileinfo = QFileInfo(self.filename)
+        self.ui.file_name_line_edit.setText(fileinfo.absoluteFilePath())
         
         from_ = int(0)
         to = int(simulation.max_time)
         interval = simulation.log_interval
         
-        ui.from_spin_box.setRange(from_, to)
-        ui.from_spin_box.setValue(from_)
-        ui.from_spin_box.set_interval(interval)
+        self.ui.from_spin_box.setRange(from_, to)
+        self.ui.from_spin_box.setValue(from_)
+        self.ui.from_spin_box.set_interval(interval)
 
-        ui.to_spin_box.setRange(from_, to)
-        ui.to_spin_box.setValue(to)
-        ui.to_spin_box.set_interval(interval)
+        self.ui.to_spin_box.setRange(from_, to)
+        self.ui.to_spin_box.setValue(to)
+        self.ui.to_spin_box.set_interval(interval)
 
-        ui.every_spin_box.setRange(1, simulation._runs_list[0].number_of_timepoints)
-        ui.every_spin_box.setValue(ui.every_spin_box.minimum())
+        self.ui.every_spin_box.setRange(1, simulation._runs_list[0].number_of_timepoints)
+        self.ui.every_spin_box.setValue(self.ui.every_spin_box.minimum())
 
-        ui.log_interval_label.setText(str(interval))
+        self.ui.log_interval_label.setText(str(interval))
 
         # list widgets
         clear_widgets(
-            ui.runs_list_widget,
-            ui.species_list_widget,
-            ui.compartments_list_widget,
+            self.ui.runs_list_widget,
+            self.ui.species_list_widget,
+            self.ui.compartments_list_widget,
         )
         for i in simulation._runs_list:
-            SimulationListWidgetItem(i, ui.runs_list_widget)
+            SimulationListWidgetItem(i, self.ui.runs_list_widget)
         for i in simulation._species_list:
-            SimulationListWidgetItem(i, ui.species_list_widget)
+            SimulationListWidgetItem(i, self.ui.species_list_widget)
         for i in simulation._runs_list[0]._compartments_list: #FIXME can't rely on run1 alone if compartments divide
-            SimulationListWidgetItem(i, ui.compartments_list_widget)
+            SimulationListWidgetItem(i, self.ui.compartments_list_widget)
 
 #        show_widgets(            
-#            ui._timepoints_group_box,
-#            ui._runs_group_box,
-#            ui._species_group_box,
-#            ui._compartments_group_box,
-#            ui._data_group_box,
+#            self.ui._timepoints_group_box,
+#            self.ui._runs_group_box,
+#            self.ui._species_group_box,
+#            self.ui._compartments_group_box,
+#            self.ui._data_group_box,
 #        )
         
         # runs
-        runs = ui.runs_list_widget.count()
-        ui.random_runs_spin_box.setRange(1, runs)
+        runs = self.ui.runs_list_widget.count()
+        self.ui.random_runs_spin_box.setRange(1, runs)
         if runs == 1:
-            ui.runs_list_widget.selectAll() # should check select_all_runs_check_box automatically
+            self.ui.runs_list_widget.selectAll() # should check select_all_runs_check_box automatically
             hide_widgets(
-                ui._runs_group_box,
-                ui.average_over_selected_runs_check_box,
+                self.ui._runs_group_box,
+                self.ui.average_over_selected_runs_check_box,
             )
-            ui.average_over_selected_runs_check_box.setChecked(False)
+            self.ui.average_over_selected_runs_check_box.setChecked(False) # so we don't do the mean of 1 run
         else: # runs > 1
             show_widgets(
-                ui._runs_group_box,         
-                ui.average_over_selected_runs_check_box,
+                self.ui._runs_group_box,         
+                self.ui.average_over_selected_runs_check_box,
             )
 #            enable_widgets(
-#                ui.random_runs_spin_box,
-#                ui.random_runs_label,
-#                ui.average_over_selected_runs_check_box,
+#                self.ui.random_runs_spin_box,
+#                self.ui.random_runs_label,
+#                self.ui.average_over_selected_runs_check_box,
 #            )
-#            enable_widgets(ui.select_all_runs_check_box)
-            ui.average_over_selected_runs_check_box.setChecked(True) # check average over runs
+#            enable_widgets(self.ui.select_all_runs_check_box)
+            self.ui.average_over_selected_runs_check_box.setChecked(True) # check average over runs
 
         # species
         species = self.ui.species_list_widget.count()
         if species == 1:
             self.ui.species_list_widget.selectAll()
         else:
-            enable_widgets(ui.select_all_species_check_box)
+            enable_widgets(self.ui.select_all_species_check_box)
 
 
         # compartments
@@ -478,7 +476,7 @@ class McssResultsWidget(QWidget):
         if compartments == 1:
             self.ui.compartments_list_widget.selectAll()
         else:
-            enable_widgets(ui.select_all_compartments_check_box)
+            enable_widgets(self.ui.select_all_compartments_check_box)
         
         # timepoints
         # choosing some sensible defaults for 'every' to reduce initial number of data points
@@ -499,73 +497,73 @@ class McssResultsWidget(QWidget):
 #        i = self.ui.quantities_display_type_combo_box.findText('concentrations')
 #        if i != -1:
 #            self.ui.quantities_display_type_combo_box.removeItem(i)
-        show_widgets(ui.volumes_widget)
+        show_widgets(self.ui.volumes_widget)
         if self.simulation.log_volumes in ('true', 1):
 #            self.ui.quantities_display_type_combo_box.insertItem(1, 'concentrations')
-            self.volumes_list_widget_item = QListWidgetItem('Volumes', ui.species_list_widget)
-#            show_widgets(ui.volumes_widget)
-            hide_widgets(ui.volume_spin_box)
-            show_widgets(ui.in_label)
+            self.volumes_list_widget_item = QListWidgetItem('Volumes', self.ui.species_list_widget)
+#            show_widgets(self.ui.volumes_widget)
+            hide_widgets(self.ui.volume_spin_box)
+            show_widgets(self.ui.in_label)
         else:
-#            hide_widgets(ui.volumes_widget)
-            hide_widgets(ui.in_label)
-            show_widgets(ui.volume_spin_box) #TODO switch on quantities_display_type_combo_box.currrentItem() == 'concentrations'  
+#            hide_widgets(self.ui.volumes_widget)
+            hide_widgets(self.ui.in_label)
+            show_widgets(self.ui.volume_spin_box) #TODO switch on quantities_display_type_combo_box.currrentItem() == 'concentrations'  
         
 #        check_widgets(
-#            ui.select_all_runs_check_box,
-#            ui.select_all_species_check_box,
-#            ui.select_all_compartments_check_box,
+#            self.ui.select_all_runs_check_box,
+#            self.ui.select_all_species_check_box,
+#            self.ui.select_all_compartments_check_box,
 #        )
                 
         enable_widgets(
-            ui.file_name_line_edit,
+            self.ui.file_name_line_edit,
             
-#            ui.select_all_runs_check_box,
-            ui.runs_list_widget,
-#            ui.random_runs_spin_box,
-#            ui.random_runs_label,
+#            self.ui.select_all_runs_check_box,
+            self.ui.runs_list_widget,
+#            self.ui.random_runs_spin_box,
+#            self.ui.random_runs_label,
 
-            ui.select_all_species_check_box,
-            ui.species_list_widget,
-            ui.filter_species_line_edit,
-#            ui.sort_species_check_box,
+            self.ui.select_all_species_check_box,
+            self.ui.species_list_widget,
+            self.ui.filter_species_line_edit,
+#            self.ui.sort_species_check_box,
             
-            ui.compartments_list_widget,
-            ui.select_all_compartments_check_box,
-            ui.filter_compartments_line_edit,
-#            ui.sort_compartments_check_box,
+            self.ui.compartments_list_widget,
+            self.ui.select_all_compartments_check_box,
+            self.ui.filter_compartments_line_edit,
+#            self.ui.sort_compartments_check_box,
             
-            ui.to_spin_box,
-            ui.from_spin_box,
-            ui.every_spin_box,
+            self.ui.to_spin_box,
+            self.ui.from_spin_box,
+            self.ui.every_spin_box,
             
-#            ui.average_over_selected_runs_check_box,
-#            ui.calculate_button,
+#            self.ui.average_over_selected_runs_check_box,
+#            self.ui.calculate_button,
             
-#            ui.export_data_as_button,
-#            ui.plot_timeseries_button,
-#            ui.plot_histogram_button,
-#            ui.visualise_population_button,
+#            self.ui.export_data_as_button,
+#            self.ui.plot_timeseries_button,
+#            self.ui.plot_histogram_button,
+#            self.ui.visualise_population_button,
         )
 
         show_widgets(
-            ui.runs_selected_and_total_label,
-            ui.species_selected_and_total_label,
-            ui.compartments_selected_and_total_label,
+            self.ui.runs_selected_and_total_label,
+            self.ui.species_selected_and_total_label,
+            self.ui.compartments_selected_and_total_label,
             
-            ui.timepoints_data_units_combo_box,
-            ui.timepoints_display_units_combo_box,
+            self.ui.timepoints_data_units_combo_box,
+            self.ui.timepoints_display_units_combo_box,
             
-            ui.quantities_data_units_combo_box,
-            ui.quantities_display_type_combo_box,
-#            ui.molecules_display_units_label,
-#            ui.moles_display_units_combo_box,
-#            ui.concentrations_display_units_combo_box,
+            self.ui.quantities_data_units_combo_box,
+            self.ui.quantities_display_type_combo_box,
+#            self.ui.molecules_display_units_label,
+#            self.ui.moles_display_units_combo_box,
+#            self.ui.concentrations_display_units_combo_box,
             
-#            ui.volumes_data_units_combo_box,
-#            ui.volumes_display_units_combo_box,
-#            ui.volumes_widget,
-            ui.actionsWidget,
+#            self.ui.volumes_data_units_combo_box,
+#            self.ui.volumes_display_units_combo_box,
+#            self.ui.volumes_widget,
+            self.ui.actionsWidget,
         )
 
         self.ui.species_list_widget.setFocus(Qt.OtherFocusReason)
@@ -664,8 +662,11 @@ class McssResultsWidget(QWidget):
         list = self.ui.runs_list_widget
         list.clearSelection()
         randoms = set()
-        while len(randoms) < runs:
-            randoms.add(list.item(randint(0, list.count())))
+        if runs == list.count():
+            self.ui.select_all_runs_check_box.setChecked(True)
+            return
+        while len(randoms) <= runs:
+            randoms.add(list.item(randint(0, list.count()))) # I wonder how many false hits this generates
         for i in randoms:
             list.setCurrentItem(i, QItemSelectionModel.Select)
 
@@ -1038,15 +1039,13 @@ def main(filename=None):
             sys.exit(2)
         if len(argv) == 1:
             self = McssResultsWidget()
-            self.load_failed()
         elif len(argv) == 2:
             filename=argv[1]
             self = McssResultsWidget(filename)
-#    self.update_ui()
     centre_window(self)
     self.show()
-#    if len(argv) == 1:
-#        self.loaded = False # used by load to determine whether to fail silently and keep widgets enabled 
+    if not self.loaded:
+        self.load()
 #        self.loaded = self.load()
 
 
