@@ -1,1 +1,6 @@
-from api import *
+# Declare this package as a 'namespace package' that can be defined elsewhere
+try:
+    __import__('pkg_resources').declare_namespace(__name__)
+except:
+    pass
+# http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
