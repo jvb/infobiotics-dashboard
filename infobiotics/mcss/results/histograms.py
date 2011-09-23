@@ -157,12 +157,24 @@ class Histogram(HasTraits):
         return axes
 
     def maketitle(self):
-        return "Histogram of species quantities at %.1f %s (mean over %s)" % (
+        title = "Histogram of %s frequency against species quantities\n at %.1f %s" % (
+            self.data.lower(),
             self.results.timepoints[self.from_timepoint_index], 
-#            self.results.timepoints[self.to_timepoint_index]
+#            self.results.timepoints[self.to_timepoint_index] #TODO 3D histograms only
             self.timepoints_display_units,
-            self.data.lower(), 
         )
+        mean_over = 'Compartments' if self.data == 'Runs' else 'Runs' 
+        if mean_over == 'Compartments': 
+            sample = self.results.compartments
+        else:
+            sample = self.results.runs
+        sample_size = len(sample)
+        if sample_size == 1:
+            title += ' (%s %s)' % (mean_over.lower().strip('s'), sample[0])
+        else:
+            title += ' (mean over %s %s)' % (sample_size, mean_over.lower())
+        return title
+        
 
 # from histograms2.HistogramWidget.HistogramWidget.onDraw
 #        self.axes.set_title(self.title)
