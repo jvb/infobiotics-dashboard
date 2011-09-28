@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>952</width>
+    <width>1051</width>
     <height>600</height>
    </rect>
   </property>
@@ -328,9 +328,6 @@
            <property name="toolTip">
             <string>Filter Species with wildcards (*)</string>
            </property>
-           <property name="placeholderText">
-            <string/>
-           </property>
           </widget>
          </item>
         </layout>
@@ -432,9 +429,6 @@ Right-click for sorting options</string>
           <widget class="QLineEdit" name="filter_compartments_line_edit">
            <property name="toolTip">
             <string>Filter Compartments with wildcards (*)</string>
-           </property>
-           <property name="placeholderText">
-            <string/>
            </property>
           </widget>
          </item>
