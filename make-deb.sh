@@ -5,7 +5,7 @@ PKGVER=$(cat VERSION.txt)
 PKGFULL=$PKGNAME-$PKGVER
 MAINTAINER="Jonathan Blakes <jvb@cs.nott.ac.uk>"
 PYPKGNAME=${PKGNAME}
-PYDEPS="python-vtk, python-qt4, python-qscintilla2, python-numpy (>= 1.4.1), python-matplotlib, python-pexpect, mcss, poptimizer, pmodelchecker, python-apptools (>=3.3.2), python-traitsbackendqt (=3.4.0-1), python-traits (=3.4.0-2) | python-traits (=3.4.0-2build1), python-traitsgui (=3.4.0-1), python-enthoughtbase (>=3.0.6), python-envisagecore(>=3.1.2), python-envisageplugins(>=3.1.2), python-tables(>=2.1.2), mayavi2, python-configobj, python-xlwt, python-qt4-gl, python-progressbar, python-setproctitle, python-quantities(>=0.9.0), python-scipy, python-pkg-resources"
+PYDEPS="liblzo2-2, python-vtk, python-qt4, python-qscintilla2, python-numpy (>= 1.4.1), python-matplotlib, python-pexpect, mcss, poptimizer, pmodelchecker, python-apptools (>=3.3.2), python-traitsbackendqt (=3.4.0-1), python-traits (=3.4.0-2) | python-traits (=3.4.0-2build1), python-traitsgui (=3.4.0-1), python-enthoughtbase (>=3.0.6), python-envisagecore(>=3.1.2), python-envisageplugins(>=3.1.2), python-tables(>=2.1.2), mayavi2, python-configobj, python-xlwt, python-qt4-gl, python-progressbar, python-setproctitle, python-quantities(>=0.9.0), python-scipy, python-pkg-resources"
 
 echo "creating ${PKGFULL} debian packages..."
 
