@@ -30,7 +30,7 @@ if sys.platform.startswith('win'):
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    import infobiotics.__version__
+    from infobiotics import version
 
 # set default log level for all loggers that use infobiotics.commons.api.logging (infobiotics.commons.unified_logging)  
 from infobiotics.commons.api import logging
@@ -46,10 +46,19 @@ optimise = 'poptimizer'#optimise
 optimisation_results = 'poptimizer-results' 
 commands = (simulate, simulation_results, check_mc2, check_prism, checking_results, optimise, optimisation_results)
 
+executable = sys.argv[0]
+#executable = os.path.abspath(sys.argv[0])
+##dirname, basename = os.path.split(sys.argv[0])
+##executable = '(%s)%s%s' % (os.path.abspath(dirname), os.sep, basename)
+if os.path.splitext(executable)[1].lower() in ('.exe','') :
+    executable = executable.strip('.exe')
+else:
+    executable = 'python ' + executable
+
 def help():
     return '''Infobiotics Workbench {version}
 
-{self} [command [file]]
+{executable} [command [file]]
 
 commands:
  {commands_}
@@ -60,8 +69,6 @@ file types:
  .h5 ({simulation_results})
  .mc2, .psm ({checking_results})
 '''.format(
-    version=infobiotics.__version__, 
-    self=os.path.basename(__file__), 
     commands_='\n '.join(commands),
     **globals()
 )
@@ -153,38 +160,7 @@ def main(argv):
 
     experiment.configure() # starts event loop
 #    experiment.perform() # useful for debugging without threads
-
-
-dir = os.path.dirname(__file__)
-
-def test_relative_path_to_model():
-    main(sys.argv + [simulate, '../examples/mcss/models/module1.sbml'])
-
-def test_absolute_path_to_model():
-    main(sys.argv + [simulate, dir + '../examples/mcss/models/module1.sbml'])
-
-def test_relative_path_to_params():
-    main(sys.argv + [check_mc2, '../examples/pmodelchecker/pulsePropagation/pulse_MC2.params'])
-
-def test_absolute_path_to_params():
-    main(sys.argv + [optimise, dir + '../examples/poptimizer/fourinitial/four_initial_inputpara.params'])
-
-def test_wrong_params_for_experiment():
-    main(sys.argv + [optimise, '../examples/mcss/models/reactions1.params'])
-
-def test_absolute_path_to_model2():
-    main(sys.argv + [check_prism, dir + '../examples/pmodelchecker/pulsePropagation/pulsePropagation.lpp'])
-    
-def test_absolute_path_to_params2():
-    main(sys.argv + [check_prism, dir + '../examples/pmodelchecker/NAR/modelCheckingPRISM/NAR_PRISM.params'])
     
 
 if __name__ == '__main__':
     main(sys.argv)
-#    test_relative_path_to_model()
-#    test_absolute_path_to_model()
-#    test_relative_path_to_params()
-#    test_absolute_path_to_params()
-#    test_wrong_params_for_experiment()
-#    test_absolute_path_to_model2()
-#    test_absolute_path_to_params2()

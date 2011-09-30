@@ -2,7 +2,7 @@ from infobiotics.core.views import ParamsView, file_menu
 from enthought.traits.ui.menu import Menu, Action, MenuBar
 #from infobiotics.commons.api import can_read, mkdir_p
 import os
-from enthought.traits.api import Str, List, Unicode, Instance, Property, Bool, cached_property
+from enthought.traits.api import Str, List, Unicode, Instance, Property, Bool, cached_property, on_trait_change
 from enthought.pyface.api import OK
 from enthought.pyface.ui.qt4.file_dialog import FileDialog
 from enthought.traits.ui.api import Group#, View, Item, 
@@ -138,6 +138,12 @@ class ParamsHandler(HelpfulController):
                 page.preferences.save() # must save preferences manually
         return ui.result
 
+    @on_trait_change('preferences_pages:[executable,directory]')
+    def update_traits_from_preferences_page(self, object, name, old, new):
+#        print object, name, old, new
+        if name == 'executable':
+            self.model.executable = new
+    
 
     def close_window(self, info):
         info.ui.control.close()

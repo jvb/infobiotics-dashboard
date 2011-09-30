@@ -43,7 +43,7 @@ An example target timeseries file with 2 objects should look like:
     
     maxtime = FloatGreaterThanZero(desc='the total simulation time of the input data')
     interval = FloatGreaterThanZero(desc='the interval time between two sampling data points of input data')
-    maxmodulesno = IntGreaterThanZero(Undefined, desc='the maximum number of modules contain in one model') #TODO
+    maxmodulesno = IntGreaterThanZero(4, desc='the maximum number of modules contain in one model')
     simu_runs = IntGreaterThanZero(20, desc='the number of simulations when running the simulator to calculate the fitness of one individual')
 
     # structure optimisation
