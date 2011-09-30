@@ -14,7 +14,7 @@ bash ./clean.sh
 
 
 # pre-freeze
-chmod +x bin/infobiotics-dashboard.py
+chmod +x bin/*
 
 
 # freeze

@@ -306,7 +306,8 @@ if sys.platform.startswith('darwin'):
     import matplotlib
     extra_options = dict(
         setup_requires=['py2app'], #, 'pexpect'], # done in INSTALL_REQUIRES
-        app=['bin/ibw.py'],#bin/infobiotics-dashboard.py'],
+#        app=['bin/ibw.py'],#bin/infobiotics-dashboard.py'],
+        app=['bin/infobiotics-dashboard.py'],
         options=dict(
             py2app=dict(
                 argv_emulation=True, # cross-platform applications generally expect sys.argv to be used for opening files

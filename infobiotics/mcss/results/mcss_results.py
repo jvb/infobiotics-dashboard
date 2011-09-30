@@ -29,8 +29,13 @@ import tables
 from infobiotics.commons.quantities.units.volume import microlitre
 
 def is64():
-    import platform
-    return platform.architecture()[0].startswith('64')
+    # platform.architecture() fails when frozen with py2app, since Windows and Mac version are frozen with 32-bit EPD we can correctly assume 32-bit and return False    
+    import sys
+    if sys.platform.startswith('win') or sys.platform.startswith('darwin'):
+        return False
+    else:
+        import platform
+        return platform.architecture()[0].startswith('64')
 
 if is64():
     dtypedefault = np.float64
