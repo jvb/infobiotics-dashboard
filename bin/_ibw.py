@@ -20,22 +20,7 @@ import os.path
 
 import setproctitle
 
-# fix matplotlib backend problems on Windows
-if sys.platform.startswith('win'):
-    # http://www.py2exe.org/index.cgi/MatPlotLib
-    import matplotlib
-    matplotlib.use('qt4agg') # overrule configuration
-    import pylab #TODO remove?
-
-import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    from infobiotics import version
-
-# set default log level for all loggers that use infobiotics.commons.api.logging (infobiotics.commons.unified_logging)  
-from infobiotics.commons.api import logging
-logging.level = logging.ERROR
-#logging.level = logging.DEBUG #TODO comment out in release
+#import infobiotics.qstring
 
 simulate = 'mcss'#'simulate'
 simulation_results = 'mcss-results'
@@ -46,16 +31,20 @@ optimise = 'poptimizer'#optimise
 optimisation_results = 'poptimizer-results' 
 commands = (simulate, simulation_results, check_mc2, check_prism, checking_results, optimise, optimisation_results)
 
+
 executable = sys.argv[0]
-#executable = os.path.abspath(sys.argv[0])
-##dirname, basename = os.path.split(sys.argv[0])
-##executable = '(%s)%s%s' % (os.path.abspath(dirname), os.sep, basename)
+#executable = os.path.abspath(executable)
 if os.path.splitext(executable)[1].lower() in ('.exe','') :
     executable = executable.strip('.exe')
 else:
     executable = 'python ' + executable
 
-def help():
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    from infobiotics import version
+    
+def usage():
     return '''Infobiotics Workbench {version}
 
 {executable} [command [file]]
@@ -74,6 +63,19 @@ file types:
 )
 
 
+from infobiotics.thirdparty.which import which, WhichError
+try:
+    mcss = which('mcss')
+#    print mcss
+#    raise WhichError() # test
+except WhichError:
+    error = 'mcss not found in PATH: update PATH or reinstall Infobiotics Workbench'
+    from PyQt4.QtGui import QApplication, QMessageBox
+    app = QApplication([])
+    QMessageBox.warning(None, 'Missing dependency', 'mcss not found in PATH: update PATH or reinstall Infobiotics Workbench', buttons=QMessageBox.Ok, defaultButton=QMessageBox.Ok)
+    exit(usage())
+
+
 def main(argv):
     args = argv[1:]
     
@@ -86,7 +88,7 @@ def main(argv):
     command = args[0].lower()
 
     if len(args) > 2 or command.lower() not in commands:
-        sys.exit(help())
+        sys.exit(usage())
 
     params = ''
     model = ''
@@ -122,7 +124,7 @@ def main(argv):
             from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
             return PModelCheckerResults(results).configure()
         else:
-            sys.exit(help())
+            sys.exit(usage())
     
     if command == optimisation_results:
         if params:
@@ -130,7 +132,7 @@ def main(argv):
             from infobiotics.poptimizer.poptimizer_results import POptimizerResults
             return POptimizerResults(experiment=POptimizerExperiment(params)).configure()
         else:
-            sys.exit(help())
+            sys.exit(usage())
             
     if command == simulate:
         from infobiotics.mcss.mcss_experiment import McssExperiment as Experiment #@UnusedImport
