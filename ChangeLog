@@ -29,3 +29,13 @@ version 1.0.0 - released 05/09/2011
 * computes and displays memory usage for .h5 selection
 * improved command-line launcher
 * bug fixes 
+
+version 1.0.1 - released 22/11/2011
+
+* experiment error reporting on Windows
+
+version 1.0.2 - unreleased
+
+* fixed TraitError in bind_preferences when (PoptimiserParams.)maxmodulesno = <undefined>
+* commented out McssResultsWidget().ui.to_spin_box value loading which caused confusion
+
