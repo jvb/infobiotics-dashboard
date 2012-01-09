@@ -139,7 +139,7 @@ class McssResultsWidget(QWidget):
 
     def _settings_group(self, *settings_groups):
         if settings_groups:
-            return '/'.join((self.__settings_group, ) + settings_groups)
+            return '/'.join((self.__settings_group,) + settings_groups)
         return self.__settings_group 
         
     def save_geometry(self):
@@ -246,9 +246,9 @@ class McssResultsWidget(QWidget):
         from_, ok = settings.value('from', 0.0).toDouble()
         if ok: 
             self.ui.from_spin_box.setValue(from_)
-        to, ok = settings.value('to', None).toDouble()
-        if ok:
-            self.ui.to_spin_box.setValue(to)
+#        to, ok = settings.value('to', None).toDouble()
+#        if ok:
+#            self.ui.to_spin_box.setValue(to)
         every, ok = settings.value('every', QVariant(1)).toInt()
         if ok:
             self.ui.every_spin_box.setValue(every)
@@ -303,7 +303,7 @@ class McssResultsWidget(QWidget):
             else:
                 QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')))
         except AttributeError, e:
-            QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')+ "\nDid you use a old version of mcss (<0.0.19)?"))
+            QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '') + "\nDid you use a old version of mcss (<0.0.19)?"))
         if simulation == None:
             if self.loaded:
                 return # continue with previously loaded file
@@ -448,7 +448,7 @@ class McssResultsWidget(QWidget):
         for i in simulation._runs_list[0]._compartments_list: #FIXME can't rely on run1 alone if compartments divide
             SimulationListWidgetItem(i, self.ui.compartments_list_widget)
 
-        show_widgets(            
+        show_widgets(
 #            self.ui._timepoints_group_box,
 #            self.ui._runs_group_box,
 #            self.ui._species_group_box,
@@ -468,7 +468,7 @@ class McssResultsWidget(QWidget):
             self.ui.average_over_selected_runs_check_box.setChecked(False) # so we don't do the mean of 1 run
         else: # runs > 1
             show_widgets(
-                self.ui._runs_group_box,         
+                self.ui._runs_group_box,
                 self.ui.average_over_selected_runs_check_box,
             )
             enable_widgets(
@@ -718,7 +718,7 @@ class McssResultsWidget(QWidget):
 #            text += '%s surfaces (<=%s)' % (numsurfaces, numsurfacedatapoints)#convert_bytes(numsurfacedatapoints * bytes_per_datapoint))
             text += '%s surfaces (<=%s)' % (numsurfaces, convert_bytes(numsurfacedatapoints * bytes_per_datapoint))
         if text:
-            text +=', '
+            text += ', '
 #        text += '%s timeseries (%s)' % (numtimeseries, numdatapoints)#convert_bytes(numdatapoints * bytes_per_datapoint))
         text += '%s timeseries (%s)' % (numtimeseries, convert_bytes(numdatapoints * bytes_per_datapoint))
         self.ui.datapoints_label.setText(text)
@@ -797,7 +797,7 @@ class McssResultsWidget(QWidget):
         return self.ui.volume_spin_box.value()
 
     def set_units(self, **units):
-        flags=Qt.MatchExactly|Qt.MatchCaseSensitive
+        flags = Qt.MatchExactly | Qt.MatchCaseSensitive
         for key, value in units.items():
             if key == 'timepoints_data_units':
                 index = self.ui.timepoints_data_units_combo_box.findText(value, flags)
@@ -916,7 +916,7 @@ class McssResultsWidget(QWidget):
     csv_delimiter = mcss_results.McssResults.csv_delimiter
 
     @wait_cursor
-    def export_data_as(self, 
+    def export_data_as(self,
         open_after_save=True, copy_filename_to_clipboard=True,
         csv_precision=None, csv_delimiter=None,
 #        amounts=True, 
@@ -983,7 +983,7 @@ class McssResultsWidget(QWidget):
         results = self.selected_items_results()
         self.timeseries_plot = results.timeseries_plot(
             mean_over_runs=self.mean_over_runs(),
-            volumes=self.volumes_selected(), 
+            volumes=self.volumes_selected(),
             **kwargs
         ) 
         
@@ -991,7 +991,7 @@ class McssResultsWidget(QWidget):
 
         # self._timeseries_plot_uis is used in self.closeEvent to close open windows
         if not hasattr(self, '_timeseries_plots_uis'):
-            self._timeseries_plot_uis=[ui]
+            self._timeseries_plot_uis = [ui]
         else:
             self._timeseries_plot_uis.append(ui)
 
@@ -1001,7 +1001,7 @@ class McssResultsWidget(QWidget):
         widget.setAttribute(Qt.WA_DeleteOnClose)
         widget.connect(self, SIGNAL("destroyed(QObject*)"), SLOT("close()"))
         
-        widget.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowMinMaxButtonsHint|Qt.WindowCloseButtonHint)
+        widget.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
         widget.show()
         
 
@@ -1034,8 +1034,8 @@ class McssResultsWidget(QWidget):
             self.spatial_plots_window.show()
         except RuntimeError, e:
             QMessageBox.critical(
-                self, 
-                QString('Surface plotting failed'), 
+                self,
+                QString('Surface plotting failed'),
                 QString(str(e))
             )
 
@@ -1071,20 +1071,20 @@ class McssResultsWidget(QWidget):
             zmaxs.append(zmax)
         extent = np.array([xmin, xmax, ymin, ymax, 0, np.max(zmaxs)])
         surface = RedVsGreen(
-            surfaces, 
-            extent, 
-            species_names, 
-            self.units_dict()['quantities_display_units'], 
-            np.linspace(results.timepoints[0], results.timepoints[-1], len(results.timepoints) * tmultiplier), 
-            self.units_dict()['timepoints_display_units'], 
+            surfaces,
+            extent,
+            species_names,
+            self.units_dict()['quantities_display_units'],
+            np.linspace(results.timepoints[0], results.timepoints[-1], len(results.timepoints) * tmultiplier),
+            self.units_dict()['timepoints_display_units'],
             suffix=' (mean)' if runs > 1 else '') #TODO mean of X runs
         self.spatial_plots_window = SpatialPlotsWindow([surface], self)
         try:
             self.spatial_plots_window.show()
         except RuntimeError, e:
             QMessageBox.critical(
-                self, 
-                QString('Surface plotting failed'), 
+                self,
+                QString('Surface plotting failed'),
                 QString(str(e))
             )
 
@@ -1101,9 +1101,9 @@ def interpolate(surfacearray, xymultiplier, tmultiplier, order=1):
     
     '''
     xmax, ymax, tmax = surfacearray.shape 
-    interpolated = np.ndarray((xmax * xymultiplier, ymax* xymultiplier, tmax * tmultiplier))
+    interpolated = np.ndarray((xmax * xymultiplier, ymax * xymultiplier, tmax * tmultiplier))
     numx, numy, numt = (complex(i) for i in interpolated.shape) 
-    coords = mgrid[0:xmax-1:numx, 0:ymax-1:numy, 0:tmax-1:numt]
+    coords = mgrid[0:xmax - 1:numx, 0:ymax - 1:numy, 0:tmax - 1:numt]
     interpolated = ndimage.map_coordinates(surfacearray, coords, order=1)        
     return interpolated
 
@@ -1123,7 +1123,7 @@ def main(filename=None):
         if len(argv) == 1:
             self = McssResultsWidget()
         elif len(argv) == 2:
-            filename=argv[1]
+            filename = argv[1]
             self = McssResultsWidget(filename)
     centre_window(self)
     self.show()
