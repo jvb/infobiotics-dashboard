@@ -531,11 +531,11 @@ def trait_value_from_parameter_value(self, name, value): # change name to 'trait
             print "'%s' not specified correctly. '%s' should be in ('true', 'True', '1', 'false', 'False', '0'). Assuming False." % (name, value)
             return False
     elif type in ('Int', 'IntGreaterThanZero'):
-        return int(value) if not '<undefined>' else 1 
+        return int(value) if not value == '<undefined>' else trait.default#1
     elif type in ('Long', 'LongGreaterThanZero'):
-        return long(value)
+        return long(value) if not value == '<undefined>' else trait.default#1
     elif type in ('Float', 'FloatGreaterThanZero'):
-        return float(value) 
+        return float(value) if not value == '<undefined>' else trait.default#1
 #    elif type == 'Complex':
 #        return complex(value)
     elif type == 'Str':
