@@ -89,7 +89,10 @@ simulate final model
         if pattern_index in (1, 2):
             subtotal = ((self.parameter_optimization_subtotal / self.parameter_optimization_total) * 100) + (100 * self.current_generation)
             total = 100 * self.maxgeno
-            self._progress_percentage = (subtotal / total) * 100
+            _progress_percentage = (subtotal / total) * 100
+            if _progress_percentage > 100: 
+            	_progress_percentage = 100
+            self._progress_percentage = _progress_percentage 
 
 #    def _get_overall_progress(self):
 #        subtotal = ((self.parameter_optimization_subtotal/self.parameter_optimization_total)*100) + (100 * self.current_generation)
