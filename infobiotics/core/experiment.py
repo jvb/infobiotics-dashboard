@@ -166,8 +166,8 @@ class Experiment(Params):
 		self._finished_without_output = True if stderr_patterns_matched == 0 else False
 		self.error = self._interpret_exitcode(returncode)
 		self.success = True if self.error == '' and not self._was_cancelled else False
-#		os.remove(self.temp_params_file.name) # deletes file on Windows
 		do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread
+#		os.remove(self.temp_params_file.name) # deletes file on Windows
 
 	
 	def _perform_windows(self, expecting_no_output=False):
@@ -225,8 +225,8 @@ class Experiment(Params):
 		self._finished_without_output = True if stderr_patterns_matched == 0 else False
 		self.error = self._interpret_exitcode(returncode)
 		self.success = True if self.error == '' and not self._was_cancelled else False
-		os.remove(self.temp_params_file.name) # deletes file on Windows
 		do_later(setattr, self, 'finished', True) # trigger self._finished_fired in the main thread
+		os.remove(self.temp_params_file.name) # deletes file on Windows
 
 
 	def _perform(self, expecting_no_output=False):
