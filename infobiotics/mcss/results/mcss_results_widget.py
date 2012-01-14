@@ -640,7 +640,7 @@ class McssResultsWidget(QWidget):
                 disable_widgets(self.ui.visualise_population_button)
                 self.ui.visualise_population_button.setToolTip("To enable select more than 4 compartments and fewer than 7 species")
                 
-#            # no more than 10 timeseries (per species)
+#            #TODO no more than 10 timeseries (per species)
 #            if num_selected_compartments > 10:
 #                disable_widgets(self.ui.plot_timeseries_button)
 #            else:

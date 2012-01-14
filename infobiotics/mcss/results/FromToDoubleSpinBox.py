@@ -11,6 +11,12 @@ class FromToDoubleSpinBox(QDoubleSpinBox):
         self.setSingleStep(self.step)
 
     def set_maximum(self, max):
+#TODO fix this:
+#  File "/home/jvb/eclipse/workspaces/infobiotics/infobiotics-dashboard/infobiotics/mcss/results/FromToDoubleSpinBox.py", line 15, in set_maximum
+#    self.set_maximum(0)
+#  File "/home/jvb/eclipse/workspaces/infobiotics/infobiotics-dashboard/infobiotics/mcss/results/FromToDoubleSpinBox.py", line 14, in set_maximum
+#    if max - self.step < 0:
+#  RuntimeError: maximum recursion depth exceeded in cmp
         if max - self.step < 0:
             self.set_maximum(0)
         self.setMaximum(max - self.step)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mcss_results_widget.ui'
 #
-# Created: Sat Jan 14 16:42:47 2012
+# Created: Sat Jan 14 17:41:23 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -489,7 +489,7 @@ class Ui_McssResultsWidget(object):
         McssResultsWidget.setTabOrder(self.select_all_compartments_check_box, self.compartments_list_widget)
 
     def retranslateUi(self, McssResultsWidget):
-        McssResultsWidget.setWindowTitle(QtGui.QApplication.translate("McssResultsWidget", "Simulator Results", None, QtGui.QApplication.UnicodeUTF8))
+        McssResultsWidget.setWindowTitle(QtGui.QApplication.translate("McssResultsWidget", "Simulation Results", None, QtGui.QApplication.UnicodeUTF8))
         self.file_name_line_edit.setText(QtGui.QApplication.translate("McssResultsWidget", "Browse for a simulation file to load:", None, QtGui.QApplication.UnicodeUTF8))
         self.load_button.setToolTip(QtGui.QApplication.translate("McssResultsWidget", "Select a different H5 file", None, QtGui.QApplication.UnicodeUTF8))
         self.load_button.setText(QtGui.QApplication.translate("McssResultsWidget", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
