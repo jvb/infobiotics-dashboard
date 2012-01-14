@@ -20,12 +20,7 @@ mcss_params_group = Group(
                     Item('max_time'),
                     Item('log_interval'),
                     Item('runs', visible_when='object.simulation_algorithm!="ode1"'),
-                    Item('max_runtime'),
                     Item('data_file'),
-                    HGroup(
-                        Item('compress', label='Compress output'),
-                        Item('compression_level', enabled_when='object.compress==True'),
-                    ),
                     Item('handler.simulation_algorithm'),
                     Item('handler.ode_solver', label='ODE solver', visible_when='object.simulation_algorithm=="ode1"'),
                     Item('seed', label='Random seed', visible_when='object.simulation_algorithm!="ode1"'),
@@ -35,26 +30,38 @@ mcss_params_group = Group(
             ),
         
             VGroup(
-                Item('log_type', label='Logging type'),
-                Item('log_propensities', enabled_when='object.log_type == "reactions"'),
-                Item('log_volumes'),
-                Item('log_steady_state'),
-                Item('log_degraded'),
-                Item('log_memory', label='Log output to memory'),
-                label='Output'
-            ),
-            
-            VGroup(
-                Item('handler.neighbourhood', label='Neighbourhood'),
-                Item('periodic_x', label='Periodic X dimension'),
-                Item('periodic_y', label='Periodic Y dimension'),
-                Item('periodic_z', label='Periodic Z dimension'),
-                Item('division_direction', label='Direction of cell division'),
-                Item('keep_divisions', label='Keep dividing cells'),
-                Item('growth_type', label='Volume growth type'),
-                label='Spatial'
-            ),
+
+                Item('max_runtime'),
+                Item('max_runtime'),
         
+                VGroup(
+    #                Item('log_type', label='Logging type'),
+    #                Item('log_propensities', enabled_when='object.log_type == "reactions"'),
+    #                Item('log_volumes'),
+                    Item('log_steady_state'),
+                    Item('log_degraded'),
+    #                Item('log_memory', label='Log output to memory'),
+                    HGroup(
+                        Item('compress', label='Compress output'),
+                        Item('compression_level', enabled_when='object.compress==True'),
+                    ),
+                    label='Output'
+                ),
+                
+                VGroup(
+                    Item('handler.neighbourhood', label='Neighbourhood'),
+                    Item('periodic_x', label='Periodic X dimension'),
+                    Item('periodic_y', label='Periodic Y dimension'),
+    #                Item('periodic_z', label='Periodic Z dimension'),
+    #                Item('division_direction', label='Direction of cell division'),
+    #                Item('keep_divisions', label='Keep dividing cells'),
+    #                Item('growth_type', label='Volume growth type'),
+                    label='Spatial'
+                ),
+            
+                label='Optional',
+            ),
+               
         #    VGroup(
         #        Item(label='Copy and paste the script below to reproduce this experiment.'),
         #        Item('repr', show_label=False, style='custom', editor=TextEditor()), #TODO
