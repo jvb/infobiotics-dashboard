@@ -559,8 +559,6 @@ setup(
         exclude=[
             '*.tests', '*.tests.*', 'tests.*', 'tests', # http://packages.python.org/distribute/setuptools.html#using-find-packages
             'infobiotics.language',
-            'infobiotics.mcss.results.histograms',
-            'infobiotics.mcss.results.histograms2',
         ]
     ),
 

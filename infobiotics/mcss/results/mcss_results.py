@@ -26,7 +26,7 @@ from infobiotics.commons.files import prepend_line_to_file
 import numpy as np
 
 import tables
-from infobiotics.commons.quantities.units.volume import microlitre
+from infobiotics.commons.quantities.units.volume import picolitre
 
 def is64():
     # platform.architecture() fails when frozen with py2app, since Windows and Mac version are frozen with 32-bit EPD we can correctly assume 32-bit and return False    
@@ -162,7 +162,7 @@ class McssResults(object):
         timepoints_display_units=None,
         quantities_display_units=None,
         volumes_display_units=None,
-        default_volume=0.01 * microlitre,
+        default_volume=0.01 * picolitre,
         **ignored_kwargs
     ):
     

@@ -240,14 +240,14 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.__version__
     import infobiotics.thirdparty.which
     import infobiotics.thirdparty.statistics
-    import infobiotics.mcsscmaes.mcsscmaes_params_group
-    import infobiotics.mcsscmaes.mcsscmaes_preferences
-    import infobiotics.mcsscmaes.api
-    import infobiotics.mcsscmaes.mcsscmaes_experiment_progress_handler
-    import infobiotics.mcsscmaes.mcsscmaes_experiment_handler
-    import infobiotics.mcsscmaes.mcsscmaes_params_handler
-    import infobiotics.mcsscmaes.mcsscmaes_experiment
-    import infobiotics.mcsscmaes.mcsscmaes_params
+#    import infobiotics.mcsscmaes.mcsscmaes_params_group
+#    import infobiotics.mcsscmaes.mcsscmaes_preferences
+#    import infobiotics.mcsscmaes.api
+#    import infobiotics.mcsscmaes.mcsscmaes_experiment_progress_handler
+#    import infobiotics.mcsscmaes.mcsscmaes_experiment_handler
+#    import infobiotics.mcsscmaes.mcsscmaes_params_handler
+#    import infobiotics.mcsscmaes.mcsscmaes_experiment
+#    import infobiotics.mcsscmaes.mcsscmaes_params
     import infobiotics.mcss.mcss_experiment
     import infobiotics.mcss.mcss_params
     import infobiotics.mcss.results.axes_order_traits
@@ -270,10 +270,10 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.mcss.results.PlotsListWidget
     import infobiotics.mcss.results.mcss_results
     import infobiotics.mcss.results.timeseries_plot
-    import infobiotics.mcss.results.oregonator_movie
+#    import infobiotics.mcss.results.oregonator_movie
     import infobiotics.mcss.results.ui_mcss_results_widget
     import infobiotics.mcss.results.simulation
-    import infobiotics.mcss.results.combined_surfaces
+#    import infobiotics.mcss.results.combined_surfaces
     import infobiotics.mcss.results.mcss_results_widget
     import infobiotics.mcss.results.ui_player_control_widget
     import infobiotics.mcss.mcss_params_group

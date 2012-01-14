@@ -1031,8 +1031,18 @@ Right-click for sorting options</string>
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="volume_spin_box">
+             <property name="toolTip">
+              <string>Bacterial cell volume = ~ 0.01 picolitres (10 femtolitres)
+Plant cell volume = ~ 1 picolitre (1000 femtolitres)</string>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="minimum">
+              <double>0.001000000000000</double>
+             </property>
              <property name="maximum">
-              <double>100.000000000000000</double>
+              <double>999.000000000000000</double>
              </property>
              <property name="value">
               <double>0.010000000000000</double>
@@ -1045,7 +1055,7 @@ Right-click for sorting options</string>
               <string>Specifies the units of volume used in the simulated model.</string>
              </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>4</number>
              </property>
              <item>
               <property name="text">
@@ -1097,7 +1107,7 @@ Right-click for sorting options</string>
               <string>Specifies the units to use when handling volume data.</string>
              </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>4</number>
              </property>
              <item>
               <property name="text">

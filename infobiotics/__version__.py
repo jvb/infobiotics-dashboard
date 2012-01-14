@@ -6,7 +6,7 @@ __version__ is a str() of the form 'major.minor.micro' version number.
 __version_info__ is a tuple of int (major, minor, micro)
 '''
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 __version_info__ = tuple([int(num) for num in __version__.split('.')[:3]]) # http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package/466694#466694
 
