@@ -39,4 +39,4 @@ version 1.0.2 - unreleased
 * fixed TraitError in bind_preferences when (PoptimiserParams.)maxmodulesno = <undefined>
 * commented out McssResultsWidget().ui.to_spin_box value loading which caused confusion
 * fixed default compartment volume - 0.01 (picolitres)
-
+* fixed logic bug which meant multiple runs were always averages in timeseries plots
