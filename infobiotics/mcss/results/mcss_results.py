@@ -1548,7 +1548,7 @@ class McssResults(object):
             amounts = True if self.num_species else False
         if not volumes:
             volumes = True if self.has_volumes else False
-        if not mean_over_runs:
+        if mean_over_runs is None:#not mean_over_runs: # using 'not' instead of 'is None' was wrongly setting mean_over_runs to True when it was False as well as if it was None
             mean_over_runs = True if self.num_runs else False
         assert any((amounts, volumes))
         from timeseries_plot import TimeseriesPlot

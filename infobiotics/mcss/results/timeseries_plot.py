@@ -772,6 +772,7 @@ class TimeseriesPlot(HasTraits):
                                 show_label=False, 
                                 style='custom',
                                 height=64,
+                                #TODO enterset=True # might to set the editor to do that
                             ),
                             Spring(),
                             label='Title', 

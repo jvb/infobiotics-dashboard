@@ -791,7 +791,7 @@ class McssResultsWidget(QWidget):
         return from_, to, every, averaging
 
     def mean_over_runs(self):
-        return True if self.ui.average_over_selected_runs_check_box.isChecked() else False
+        return self.ui.average_over_selected_runs_check_box.isChecked()
 
     def volume(self):
         return self.ui.volume_spin_box.value()
