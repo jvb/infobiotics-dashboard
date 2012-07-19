@@ -40,3 +40,5 @@ version 1.0.2 - unreleased
 * commented out McssResultsWidget().ui.to_spin_box value loading which caused confusion
 * fixed default compartment volume - 0.01 (picolitres)
 * fixed logic bug which meant multiple runs were always averages in timeseries plots
+* improved error handling at application entry point (bin/_ibw.py)
+
