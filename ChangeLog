@@ -34,7 +34,7 @@ version 1.0.1 - released 22/11/2011
 
 * experiment error reporting on Windows
 
-version 1.0.2 - unreleased
+version 1.0.2 - released 24/07/2012
 
 * fixed TraitError in bind_preferences when (PoptimiserParams.)maxmodulesno = <undefined>
 * commented out McssResultsWidget().ui.to_spin_box value loading which caused confusion
