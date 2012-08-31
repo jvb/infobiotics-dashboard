@@ -1,7 +1,7 @@
-from infobiotics.core.traits.params_relative_file import ParamsRelativeFile
+from infobiotics.core.traits_.params_relative_file import ParamsRelativeFile
 from infobiotics.core.params import Params
-from enthought.traits.api import Enum, Bool, Range, Float, Int, String, Str
-from infobiotics.commons.traits.api import IntGreaterThanZero, RelativeFile
+from traits.api import Enum, Bool, Range, Float, Int, String, Str
+from infobiotics.commons.traits_.api import IntGreaterThanZero, RelativeFile
 from infobiotics.mcsscmaes.mcsscmaes_preferences import McssCmaesParamsPreferencesHelper
 
 class McssCmaesParams(Params):

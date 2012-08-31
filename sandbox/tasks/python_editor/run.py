@@ -1,8 +1,8 @@
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 # Enthought library imports.
-from enthought.pyface.api import GUI
-from enthought.pyface.tasks.api import TaskWindow
+from pyface.api import GUI
+from pyface.tasks.api import TaskWindow
 
 # Local imports.
 from example_task import ExampleTask

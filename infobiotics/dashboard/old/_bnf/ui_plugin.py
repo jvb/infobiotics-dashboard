@@ -1,7 +1,7 @@
 import os; os.environ['ETS_TOOLKIT']='qt4'
-from enthought.pyface.workbench.api import Perspective, PerspectiveItem
-from enthought.envisage.api import Plugin
-from enthought.traits.api import List
+from pyface.workbench.api import Perspective, PerspectiveItem
+from envisage.api import Plugin
+from traits.api import List
 from bnf_action_set import BNFActionSet
 from views import LPPView, SPSView, LATView, PLBView
 
@@ -24,10 +24,10 @@ class BNFUIPlugin(Plugin):
     id = 'infobiotics.bnf_ui_plugin' # The plugin's unique identifier
     name = 'BNF' # The plugin's name (suitable for displaying to the user)
 
-    ACTION_SETS       = 'enthought.envisage.ui.workbench.action_sets'
-    PERSPECTIVES      = 'enthought.envisage.ui.workbench.perspectives'
-    PREFERENCES_PAGES = 'enthought.envisage.ui.workbench.preferences_pages'
-    VIEWS             = 'enthought.envisage.ui.workbench.views'
+    ACTION_SETS       = 'envisage.ui.workbench.action_sets'
+    PERSPECTIVES      = 'envisage.ui.workbench.perspectives'
+    PREFERENCES_PAGES = 'envisage.ui.workbench.preferences_pages'
+    VIEWS             = 'envisage.ui.workbench.views'
     # Contributions to extension points made by this plugin
     action_sets = List(contributes_to=ACTION_SETS)
     perspectives = List(contributes_to=PERSPECTIVES)

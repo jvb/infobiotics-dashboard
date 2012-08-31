@@ -1,14 +1,14 @@
 from __future__ import division
 #import sip
 #sip.setapi('QString', 2)
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import *
-from enthought.traits.ui.api import View, Item, VGroup
-from enthought.mayavi.core.pipeline_base import PipelineBase
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.tvtk.pyface.scene_editor import SceneEditor
+from traits.api import *
+from traitsui.api import View, Item, VGroup
+from mayavi.core.pipeline_base import PipelineBase
+from mayavi.core.ui.mayavi_scene import MayaviScene
+from mayavi.tools.mlab_scene_model import MlabSceneModel
+from tvtk.pyface.scene_editor import SceneEditor
 import numpy as np
 from PyQt4.QtGui import (
     QWidget, QHBoxLayout, QGridLayout, QVBoxLayout, QPushButton, QListWidget, 

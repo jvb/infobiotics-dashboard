@@ -1,5 +1,5 @@
 from progress_meter import ProgressMeter
-from enthought.traits.api import Int
+from traits.api import Int
 
 class NonInteractiveProgressMeter(ProgressMeter):
 

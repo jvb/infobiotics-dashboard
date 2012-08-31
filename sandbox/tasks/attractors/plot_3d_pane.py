@@ -1,11 +1,11 @@
 # Enthought library imports.
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-from enthought.pyface.tasks.api import TraitsTaskPane
-from enthought.traits.api import Dict, Enum, Instance, List, Property, \
+from mayavi.tools.mlab_scene_model import MlabSceneModel
+from mayavi.core.ui.mayavi_scene import MayaviScene
+from pyface.tasks.api import TraitsTaskPane
+from traits.api import Dict, Enum, Instance, List, Property, \
      Unicode, on_trait_change
-from enthought.traits.ui.api import EnumEditor, HGroup, Item, Label, View
-from enthought.tvtk.pyface.scene_editor import SceneEditor
+from traitsui.api import EnumEditor, HGroup, Item, Label, View
+from tvtk.pyface.scene_editor import SceneEditor
 
 # Local imports.
 from model.i_model_3d import IModel3d

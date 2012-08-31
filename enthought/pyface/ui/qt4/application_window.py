@@ -15,13 +15,13 @@
 from PyQt4 import QtGui
 
 # Enthought library imports.
-from enthought.pyface.action.api import MenuBarManager, StatusBarManager
-from enthought.pyface.action.api import ToolBarManager
-from enthought.traits.api import implements, Instance, List, Unicode
+from pyface.action.api import MenuBarManager, StatusBarManager
+from pyface.action.api import ToolBarManager
+from traits.api import implements, Instance, List, Unicode
 
 # Local imports.
-from enthought.pyface.i_application_window import IApplicationWindow, MApplicationWindow
-from enthought.pyface.image_resource import ImageResource
+from pyface.i_application_window import IApplicationWindow, MApplicationWindow
+from pyface.image_resource import ImageResource
 from window import Window
 
 

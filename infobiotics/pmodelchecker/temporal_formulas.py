@@ -24,17 +24,17 @@ def _execute_PropertyBuilder():
     print 'TODO'
     
 
-from enthought.traits.api import (
+from traits.api import (
     HasTraits, Str, Float, Int, List, Button, Enum, Unicode, Property,
     on_trait_change, Any, TraitError
 )
-from enthought.traits.ui.api import (
+from traitsui.api import (
     View, Item, HGroup, VGroup, Group, ListEditor, TableEditor,
     CodeEditor, Spring, TextEditor
 )
-from enthought.traits.ui.table_column import ObjectColumn
-from infobiotics.commons.traits.ui.api import HelpfulController, help_action
-#from infobiotics.commons.traits.float_with_minimum import FloatWithMinimum
+from traitsui.table_column import ObjectColumn
+from infobiotics.commons.traits_.ui.api import HelpfulController, help_action
+#from infobiotics.commons.traits_.float_with_minimum import FloatWithMinimum
 
 temporal_formulas_group = VGroup(
     HGroup(
@@ -210,7 +210,7 @@ class TemporalFormula(HasTraits):
     line = Int
     column = Int
     selected_text = Str
-    params_handler = Any#Instance('PModelCheckerParamsHandler') # using Any avoids this exception: enthought.traits.trait_errors.TraitError: The 'params_handler' trait of a TemporalFormula instance must be a PModelCheckerParamsHandler or None, but a value of "class '__main__.PRISMExperimentHandler' (i.e. <__main__.PRISMExperimentHandler object at 0x8c5b4d0>)" <type 'str'> was specified.
+    params_handler = Any#Instance('PModelCheckerParamsHandler') # using Any avoids this exception: traits.trait_errors.TraitError: The 'params_handler' trait of a TemporalFormula instance must be a PModelCheckerParamsHandler or None, but a value of "class '__main__.PRISMExperimentHandler' (i.e. <__main__.PRISMExperimentHandler object at 0x8c5b4d0>)" <type 'str'> was specified.
     model_parameter_names = Property(List(Unicode), depends_on='params_handler.model_parameter_names')
     def _get_model_parameter_names(self):
         return self.params_handler.model_parameter_names 

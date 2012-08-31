@@ -1,6 +1,6 @@
 from text_file_editor import TextFileEditor
-from enthought.traits.api import Code
-from enthought.traits.ui.key_bindings import KeyBindings, KeyBinding
+from traits.api import Code
+from traitsui.key_bindings import KeyBindings, KeyBinding
 from abstract_file_editor import save_key_binding
 
 class PythonModuleEditor(TextFileEditor):
@@ -48,7 +48,7 @@ class PythonModuleEditor(TextFileEditor):
         # Execute the code.
         if len(self.obj.path) > 0:
             view = self.window.get_view_by_id(
-                'enthought.plugins.python_shell_view'
+                'envisage.plugins.python_shell_view'
             )
             if view is not None:
                 view.execute_command(

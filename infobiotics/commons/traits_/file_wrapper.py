@@ -1,4 +1,4 @@
-''' Attempts to overcome the problem of 'children' in 'enthought.io.api.File'
+''' Attempts to overcome the problem of 'children' in 'apptools.io.api.File'
 objects being None instead of [] when there are no children (i.e. the file is
 not a directory).
     
@@ -10,8 +10,8 @@ Note: TreeEditor must operate on an Instance trait.
 '''
 
 
-from enthought.io.api import File
-from enthought.traits.api import HasTraits, Str, Instance, List, Any#, This
+from apptools.io.api import File
+from traits.api import HasTraits, Str, Instance, List, Any#, This
 
 
 class FileWrapper(HasTraits):

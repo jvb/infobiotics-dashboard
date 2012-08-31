@@ -1,4 +1,4 @@
-from enthought.traits.api import BaseInt
+from traits.api import BaseInt
 from numpy import uint, uint0, uint8, uint16, uint32, uint64, uintc, uintp
 
 class IntGreaterThanZero(BaseInt):

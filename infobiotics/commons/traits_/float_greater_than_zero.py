@@ -1,4 +1,4 @@
-from enthought.traits.api import BaseFloat 
+from traits.api import BaseFloat 
 
 # used by McssParams.max_time and McssParams.log_interval
 class FloatGreaterThanZero(BaseFloat):

@@ -1,4 +1,4 @@
-from enthought.traits.api import BaseLong
+from traits.api import BaseLong
 
 class LongGreaterThanZero(BaseLong):
     ''' Used by McssParams.runs and MC2Params.number_samples (which are 

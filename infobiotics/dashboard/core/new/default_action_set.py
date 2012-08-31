@@ -1,6 +1,6 @@
-from enthought.envisage.ui.action.api import Action, ActionSet, Menu
+from envisage.ui.action.api import Action, ActionSet, Menu
 
-PKG = 'enthought.envisage.ui.workbench'
+PKG = 'envisage.ui.workbench'
 PK2 = 'infobiotics.plugins.dashboard.actions'
 
 
@@ -13,7 +13,7 @@ class DefaultActionSet(ActionSet):
         ),
         Menu(
             path='MenuBar',
-            class_name='enthought.pyface.workbench.action.api:ViewMenuManager'
+            class_name='pyface.workbench.action.api:ViewMenuManager'
         ),
         Menu(
             name='&Tools', path='MenuBar',

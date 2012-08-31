@@ -1,6 +1,6 @@
-from enthought.pyface.api import ProgressDialog as PyFaceProgressDialog
+from pyface.api import ProgressDialog as PyFaceProgressDialog
 from i_progress_meter import IProgressMeter
-from enthought.traits.api import implements, Bool, Long
+from traits.api import implements, Bool, Long
 from PyQt4.QtCore import SIGNAL
 
 class ProgressDialog(PyFaceProgressDialog):

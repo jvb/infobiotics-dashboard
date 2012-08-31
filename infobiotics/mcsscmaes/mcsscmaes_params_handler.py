@@ -1,5 +1,5 @@
 import infobiotics # set up TraitsUI backend before traits imports
-from enthought.traits.api import Trait
+from traits.api import Trait
 from infobiotics.core.params_handler import ParamsHandler
 from mcsscmaes_params_group import mcsscmaes_params_group
 from mcsscmaes_preferences import McssCmaesParamsPreferencesPage

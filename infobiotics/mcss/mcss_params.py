@@ -1,8 +1,8 @@
 from infobiotics.core.api import ParamsRelativeFile, ModelFile
 from infobiotics.core.params import Params
-from enthought.traits.api import Enum, Bool, Range, Long, Float, Int
-from infobiotics.commons.traits.api import FloatGreaterThanZero, LongGreaterThanZero
-from enthought.traits.api import TraitError
+from traits.api import Enum, Bool, Range, Long, Float, Int
+from infobiotics.commons.traits_.api import FloatGreaterThanZero, LongGreaterThanZero
+from traits.api import TraitError
 import os.path
 
 from infobiotics.commons.api import logging

@@ -1,5 +1,5 @@
-from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from enthought.envisage.ui.action.api import Action, Group, Menu, ToolBar
+from envisage.ui.workbench.api import WorkbenchActionSet
+from envisage.ui.action.api import Action, Group, Menu, ToolBar
 from actions import McssExperimentAction
             
 class GenericActionSet(WorkbenchActionSet):

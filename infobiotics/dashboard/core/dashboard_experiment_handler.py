@@ -1,5 +1,5 @@
 from has_infobiotics_dashboard_workbench_application import HasInfobioticsDashboardWorkbenchApplication
-from enthought.traits.api import on_trait_change
+from traits.api import on_trait_change
 
 class DashboardExperimentHandler(HasInfobioticsDashboardWorkbenchApplication):
 

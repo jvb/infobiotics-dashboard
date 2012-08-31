@@ -1,9 +1,9 @@
 from __future__ import with_statement
 import infobiotics
-from enthought.traits.api import HasTraits, Instance, Str, Button, Any 
-from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring, HSplit, CodeEditor
+from traits.api import HasTraits, Instance, Str, Button, Any 
+from traitsui.api import View, VGroup, HGroup, Item, Spring, HSplit, CodeEditor
 from matplotlib.figure import Figure
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
+from infobiotics.commons.traits_.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
 from poptimizer_experiment import POptimizerExperiment
 
 #import logging

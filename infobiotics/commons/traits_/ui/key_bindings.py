@@ -26,14 +26,14 @@
 
 from __future__ import absolute_import
 
-from enthought.traits.api import (Any, Event, HasPrivateTraits, HasStrictTraits, Instance, List,
+from traits.api import (Any, Event, HasPrivateTraits, HasStrictTraits, Instance, List,
     Property, Str, cached_property, on_trait_change)
 
-from enthought.traits.ui.api import HGroup, Item, BasicEditorFactory, ListEditor, View, toolkit, Group
+from traitsui.api import HGroup, Item, BasicEditorFactory, ListEditor, View, toolkit, Group
 
-from enthought.traits.trait_base import SequenceTypes
+from traits.trait_base import SequenceTypes
 
-from enthought.traits.ui.qt4.key_binding_editor import KeyBindingEditor, KeyBindingCtrl
+from traitsui.qt4.key_binding_editor import KeyBindingEditor, KeyBindingCtrl
 class KeyBindingEditor(KeyBindingEditor):
     ''' Fixes: http://markmail.org/thread/ltlgejho3643glur '''
     def init(self, parent):
@@ -163,7 +163,7 @@ class KeyBindings (HasPrivateTraits):
     #---------------------------------------------------------------------------
 
     def __init__ (self, *bindings, **traits):
-        ''' Fixed 'enthought.traits.trait_errors.TraitError: The 'bindings' trait of a KeyBindings instance must be a list of from 2 to 2 items which are an implementor of, or can be adapted to implement, KeyBinding or None, but you attempted to change its length to 0 elements.' '''
+        ''' Fixed 'traits.trait_errors.TraitError: The 'bindings' trait of a KeyBindings instance must be a list of from 2 to 2 items which are an implementor of, or can be adapted to implement, KeyBinding or None, but you attempted to change its length to 0 elements.' '''
         super(KeyBindings, self).__init__(**traits)
 
         if (len(bindings) == 1) and isinstance(bindings[0], SequenceTypes):
@@ -361,5 +361,5 @@ class KeyBindings (HasPrivateTraits):
 
 
 class View(View):
-    ''' Fixes: TraitError: The 'key_bindings' trait of a View instance must be a KeyBindings or None, but a value of "class 'infobiotics.commons.traits.ui.key_bindings.KeyBindings' (i.e. <infobiotics.commons.traits.ui.key_bindings.KeyBindings object at 0x3918fb0>)" <type 'str'> was specified. '''
-    key_bindings = Instance(KeyBindings) #= AKeyBindings; AKeyBindings = Instance('enthought.traits.ui.key_bindings.KeyBindings', desc = 'the global key bindings for the view')
+    ''' Fixes: TraitError: The 'key_bindings' trait of a View instance must be a KeyBindings or None, but a value of "class 'infobiotics.commons.traits_.ui.key_bindings.KeyBindings' (i.e. <infobiotics.commons.traits_.ui.key_bindings.KeyBindings object at 0x3918fb0>)" <type 'str'> was specified. '''
+    key_bindings = Instance(KeyBindings) #= AKeyBindings; AKeyBindings = Instance('traitsui.key_bindings.KeyBindings', desc = 'the global key bindings for the view')

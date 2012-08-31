@@ -1,16 +1,16 @@
 from infobiotics.core.views import ParamsView, file_menu
-from enthought.traits.ui.menu import Menu, Action, MenuBar
+from traitsui.menu import Menu, Action, MenuBar
 #from infobiotics.commons.api import can_read, mkdir_p
 import os
-from enthought.traits.api import Str, List, Unicode, Instance, Property, Bool, cached_property, on_trait_change
-from enthought.pyface.api import OK
-from enthought.pyface.ui.qt4.file_dialog import FileDialog
-from enthought.traits.ui.api import Group#, View, Item, 
-from infobiotics.commons.traits.ui.api import HelpfulController
-from enthought.preferences.ui.api import PreferencesPage, PreferencesManager
+from traits.api import Str, List, Unicode, Instance, Property, Bool, cached_property, on_trait_change
+from pyface.api import OK
+from pyface.ui.qt4.file_dialog import FileDialog
+from traitsui.api import Group#, View, Item, 
+from infobiotics.commons.traits_.ui.api import HelpfulController
+from apptools.preferences.ui.api import PreferencesPage, PreferencesManager
 import textwrap
 
-#from enthought.traits.ui.fixed_file_dialog import (
+#from traitsui.fixed_file_dialog import (
 #    MFileDialogModel, FileInfo, TextInfo, OpenFileDialog
 #)
 #
@@ -155,7 +155,7 @@ class ParamsHandler(HelpfulController):
 
     def load(self, info):
         ''' Load the traits of an experiment from a .params XML file. '''
-        from enthought.pyface.api import YES, NO, confirm
+        from pyface.api import YES, NO, confirm
         if info.object._dirty:
             if confirm(self.info.ui.control, 'Save current parameters before loading?', title='Unsaved parameters') == YES:
                 self.save(info)

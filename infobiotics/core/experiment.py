@@ -1,14 +1,14 @@
-from enthought.traits.api import ListStr, Str, Event, Property, Bool, on_trait_change, Instance
-from infobiotics.commons.traits.percentage import Percentage
+from traits.api import ListStr, Str, Event, Property, Bool, on_trait_change, Instance
+from infobiotics.commons.traits_.percentage import Percentage
 from infobiotics.core.params import Params
 import sys 
 import os
 import tempfile
 import re
-from enthought.pyface.timer.api import do_later
+from pyface.timer.api import do_later
 from PyQt4.QtCore import QThread
 from PyQt4.QtGui import QWidget
-from enthought.pyface.api import error as error, GUI
+from pyface.api import error as error, GUI
 
 if sys.platform.startswith('win'):	
 	# for py2exe frozen executables
@@ -337,7 +337,7 @@ class Experiment(Params):
 			elif self._interaction_mode == 'terminal':
 				logger.error(self.error)
 			elif self._interaction_mode == 'gui':
-				GUI.invoke_later(error, self._parent_widget, self.error, 'Experiment failed') # error here is enthought.pyface.api.error
+				GUI.invoke_later(error, self._parent_widget, self.error, 'Experiment failed') # error here is pyface.api.error
 				self._handler.status = self.error #TODO remove?
 
 	def _interpret_exitcode(self, exitcode):
@@ -406,7 +406,7 @@ class Experiment(Params):
 #			if self.success:
 #				if not hasattr(self, '_imported_results_modules') or not self._imported_results_modules: # have we done the long import yet?
 #					#TODO auto close message loading (if first time, otherwise it will be fast)
-#					from enthought.traits.ui.message import auto_close_message
+#					from traitsui.message import auto_close_message
 ##					GUI.invoke_later(auto_close_message(message='Loading results', time=1))#, parent=self.info.ui.control))
 #					do_later(auto_close_message(message='Loading results', time=1))#, parent=self.info.ui.control))
 #					self._imported_results_modules = True
@@ -457,7 +457,7 @@ class Experiment(Params):
 #			self._handler.update_progress_dialog(self._progress_percentage)
 		# done automatically
 			
-#from enthought.traits.ui.api import Group, Item
+#from traitsui.api import Group, Item
 #
 #error_string_group = Group(
 #	Item('error_string',

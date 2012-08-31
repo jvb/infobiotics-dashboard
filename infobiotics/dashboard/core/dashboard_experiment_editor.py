@@ -1,5 +1,5 @@
-from enthought.pyface.workbench.api import TraitsUIEditor
-from enthought.traits.api import Str
+from pyface.workbench.api import TraitsUIEditor
+from traits.api import Str
 import os.path
 
 class DashboardExperimentEditor(TraitsUIEditor):

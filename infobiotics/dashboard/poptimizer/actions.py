@@ -1,4 +1,4 @@
-from enthought.pyface.action.api import Action
+from pyface.action.api import Action
 from infobiotics.dashboard.poptimizer.poptimizer_dashboard_experiment import POptimizerDashboardExperiment
 
 class POptimizerExperimentAction(Action):

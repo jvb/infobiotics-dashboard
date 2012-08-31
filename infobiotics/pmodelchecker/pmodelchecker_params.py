@@ -1,8 +1,8 @@
 from infobiotics.core.params import Params
 from infobiotics.core.api import ParamsRelativeFile, ModelFile
-from enthought.traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property, cached_property, TraitError
+from traits.api import Enum, Str, Float, Bool, Range, on_trait_change, Property, cached_property, TraitError
 import os.path
-from infobiotics.commons.traits.api import LongGreaterThanZero
+from infobiotics.commons.traits_.api import LongGreaterThanZero
 
 from infobiotics.commons.api import logging
 logger = logging.getLogger(__name__)

@@ -1,5 +1,5 @@
-from infobiotics.commons.traits.ui.qt4.relative_file_editor import SimpleEditor as SimpleRelativeFileEditor
-from infobiotics.commons.traits.ui.qt4.relative_file_editor import RelativeFileEditor 
+from infobiotics.commons.traits_.ui.qt4.relative_file_editor import SimpleEditor as SimpleRelativeFileEditor
+from infobiotics.commons.traits_.ui.qt4.relative_file_editor import RelativeFileEditor 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QDir
 import os.path

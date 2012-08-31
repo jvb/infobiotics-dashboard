@@ -1,10 +1,10 @@
 from has_infobiotics_dashboard_workbench_application import HasInfobioticsDashboardWorkbenchApplication
-from enthought.traits.api import Str, Property, Instance
+from traits.api import Str, Property, Instance
 from PyQt4.QtGui import QWidget
-from enthought.plugins.text_editor.editor.text_editor import TextEditor
-from enthought.io.api import File
+from envisage.plugins.text_editor.editor.text_editor import TextEditor
+from apptools.io.api import File
 import os.path
-from enthought.pyface.api import GUI
+from pyface.api import GUI
 
 class DashboardExperiment(HasInfobioticsDashboardWorkbenchApplication):
     

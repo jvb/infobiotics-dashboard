@@ -1,7 +1,7 @@
-from enthought.traits.api import Instance, Button
-from enthought.traits.ui.api import View, Item, HGroup
+from traits.api import Instance, Button
+from traitsui.api import View, Item, HGroup
 from progress_item import ProgressItem
-from enthought.pyface.confirmation_dialog import confirm
+from pyface.confirmation_dialog import confirm
 from experiment import Experiment
 
 class ExperimentProgressItem(ProgressItem):
@@ -43,7 +43,7 @@ class ExperimentProgressItem(ProgressItem):
     
     def _start_function_default(self):
         def start(self):
-#            from enthought.pyface.timer.timer import Timer
+#            from pyface.timer.timer import Timer
 #            self.timer = Timer(100, lambda: self.update_progress(self.value+1))
             return True
         return start

@@ -1,10 +1,10 @@
 import infobiotics
-from enthought.traits.api import (
+from traits.api import (
     HasTraits, List, Float, Str, Int, Range, Array, Instance, Unicode, Enum,
     Property, Button, on_trait_change, Tuple, cached_property, Bool,
     DelegatesTo,
 )
-from enthought.traits.ui.api import (
+from traitsui.api import (
     View, Item, VGroup, HGroup, RangeEditor, ListEditor, Label, Spring,
     TextEditor, InstanceEditor, CodeEditor,
 #    CheckListEditor,
@@ -12,7 +12,7 @@ from enthought.traits.ui.api import (
 
 import os.path
 
-from infobiotics.commons.traits.relative_file import RelativeFile 
+from infobiotics.commons.traits_.relative_file import RelativeFile 
 
 import hashlib
 
@@ -21,8 +21,8 @@ import numpy as np
 from bisect import bisect
 
 # check if mayavi2 version < 3.3.0        
-import enthought.mayavi.__version__
-version = enthought.mayavi.__version__.__version__
+import mayavi.__version__
+version = mayavi.__version__.__version__
 if version == '': # see enthought/mayavi/version.py
     outdated_mayavi = False # assume we froze it on Mac OS X or Windows with EPD>=6.2
 else:
@@ -36,21 +36,21 @@ else:
 
 if outdated_mayavi:
     # Mayavi < 3.3
-    from enthought.tvtk.pyface.api import Scene
-    from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-    from enthought.tvtk.pyface.scene_editor import SceneEditor
-    from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-    from enthought.mayavi.core.pipeline_base import PipelineBase
+    from tvtk.pyface.api import Scene
+    from mayavi.tools.mlab_scene_model import MlabSceneModel
+    from tvtk.pyface.scene_editor import SceneEditor
+    from mayavi.core.ui.mayavi_scene import MayaviScene
+    from mayavi.core.pipeline_base import PipelineBase
 else:
     # Mayavi >= 3.3
-    from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor, MayaviScene 
-    from enthought.mayavi.core.api import Scene, PipelineBase
+    from mayavi.core.ui.api import MlabSceneModel, SceneEditor, MayaviScene 
+    from mayavi.core.api import Scene, PipelineBase
 
 from infobiotics.commons.mayavi import extent
 
 from matplotlib.figure import Figure
 
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor 
+from infobiotics.commons.traits_.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor 
 
 from infobiotics.commons.matplotlib.matplotlib_figure_size import resize_and_save_matplotlib_figure
 

@@ -1,6 +1,6 @@
 from infobiotics.pmodelchecker.pmodelchecker_preferences import PModelCheckerParamsPreferencesHelper, PModelCheckerParamsPreferencesPage, RelativeFile, PModelCheckerExecutable
 import sys
-from enthought.traits.ui.api import View, Group, Item
+from traitsui.api import View, Group, Item
 
 PREFERENCES_PATH = 'pmodelchecker.mc2'
 MC2_MCSS_PREFERENCES_PATH = PREFERENCES_PATH+'.mcss'

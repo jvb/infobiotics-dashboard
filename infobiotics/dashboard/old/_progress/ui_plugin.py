@@ -1,4 +1,4 @@
-from enthought.pyface.workbench.api import Perspective, PerspectiveItem
+from pyface.workbench.api import Perspective, PerspectiveItem
     
 class ExperimentsPerspective(Perspective):
     id = 'infobiotics.dashboard.plugins.experiments.ui_plugin.ExperimentsPerspective'
@@ -12,15 +12,15 @@ class ExperimentsPerspective(Perspective):
     ]
 
 
-from enthought.envisage.api import Plugin, ServiceOffer, ExtensionPoint
-from enthought.traits.api import List
+from envisage.api import Plugin, ServiceOffer, ExtensionPoint
+from traits.api import List
 from experiment_queue import ExperimentQueue
-from enthought.pyface.workbench.api import TraitsUIView
+from pyface.workbench.api import TraitsUIView
 
 class ExperimentsUIPlugin(Plugin):
 
     # experiments queue for view
-    service_offers = List(contributes_to='enthought.envisage.service_offers')
+    service_offers = List(contributes_to='envisage.service_offers')
     def _service_offers_default(self):
         return [
             ServiceOffer(
@@ -49,15 +49,15 @@ class ExperimentsUIPlugin(Plugin):
     name = 'Experiments' # The plugin's name (suitable for displaying to the user)
 
     # Contributions to extension points made by this plugin
-    action_sets = List(contributes_to='enthought.envisage.ui.workbench.action_sets')
+    action_sets = List(contributes_to='envisage.ui.workbench.action_sets')
     def _action_sets_default(self):
         return []
 
-    perspectives = List(contributes_to='enthought.envisage.ui.workbench.perspectives')
+    perspectives = List(contributes_to='envisage.ui.workbench.perspectives')
     def _perspectives_default(self):
         return [ExperimentsPerspective]
 
-    views = List(contributes_to='enthought.envisage.ui.workbench.views')
+    views = List(contributes_to='envisage.ui.workbench.views')
     def _views_default(self):
         return [self._create_experiment_queue_view]
     def _create_experiment_queue_view(self, **traits):
@@ -72,7 +72,7 @@ class ExperimentsUIPlugin(Plugin):
             **traits
         )
 
-    preferences_pages = List(contributes_to='enthought.envisage.ui.workbench.preferences_pages')
+    preferences_pages = List(contributes_to='envisage.ui.workbench.preferences_pages')
     def _preferences_pages_default(self):
         return []
 

@@ -1,9 +1,9 @@
-from infobiotics.commons.traits.api import RelativeFile, RelativeDirectory
-from enthought.preferences.api import PreferencesHelper
+from infobiotics.commons.traits_.api import RelativeFile, RelativeDirectory
+from apptools.preferences.api import PreferencesHelper
 #from infobiotics.core.preferences_helper import PreferencesHelper
-from enthought.preferences.ui.api import PreferencesPage
-from enthought.traits.api import Str, Unicode, TraitError
-from enthought.traits.ui.api import View, Group, Item
+from apptools.preferences.ui.api import PreferencesPage
+from traits.api import Str, Unicode, TraitError
+from traitsui.api import View, Group, Item
 #import infobiotics.preferences # calls set_default_preferences, do not remove #TODO done in Params
 
 #import logging

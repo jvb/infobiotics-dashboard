@@ -2,8 +2,8 @@ from infobiotics.mcss.mcss_experiment import McssExperiment
 from infobiotics.mcss.mcss_experiment_handler import McssExperimentHandler
 from infobiotics.pmodelchecker.mc2.mc2_params import MC2Params
 from infobiotics.pmodelchecker.mc2.mc2_mcss_experiment_group import mc2_mcss_experiment_group 
-from enthought.traits.api import Instance, DelegatesTo, Any, Str
-from enthought.traits.ui.api import View, Group
+from traits.api import Instance, DelegatesTo, Any, Str
+from traitsui.api import View, Group
 from mc2_preferences import MC2_MCSS_PREFERENCES_PATH
 
 class MC2McssExperimentHandler(McssExperimentHandler):

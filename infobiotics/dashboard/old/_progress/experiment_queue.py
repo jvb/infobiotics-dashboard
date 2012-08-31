@@ -1,6 +1,6 @@
-from enthought.traits.api import HasTraits, List, Button
+from traits.api import HasTraits, List, Button
 from experiment_progress_item import ExperimentProgressItem
-from enthought.traits.ui.api import View, Item, ListEditor
+from traitsui.api import View, Item, ListEditor
 
 class ExperimentQueue(HasTraits):
     experiment_progress_items = List(ExperimentProgressItem)

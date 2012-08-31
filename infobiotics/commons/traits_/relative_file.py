@@ -1,7 +1,7 @@
 #TODO update docstrings
 
 import os
-from enthought.traits.api import BaseStr
+from traits.api import BaseStr
 from infobiotics.commons.api import can_read, can_write, can_write_file, can_execute
 from infobiotics.thirdparty.which import which, WhichError
 
@@ -361,7 +361,7 @@ class RelativeFile(BaseStr):
             return abspath 
     
     def create_editor(self):
-        from infobiotics.commons.traits.ui.qt4.relative_file_editor import RelativeFileEditor
+        from infobiotics.commons.traits_.ui.qt4.relative_file_editor import RelativeFileEditor
         editor = RelativeFileEditor(
             absolute=self.absolute,
             auto_set=self.auto_set,

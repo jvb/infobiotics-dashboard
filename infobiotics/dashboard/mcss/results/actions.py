@@ -1,5 +1,5 @@
-#from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
-from enthought.pyface.action.api import Action as PyFaceAction #TODO
+#from traitsui.menu import UndoAction, RedoAction, RevertAction
+from pyface.action.api import Action as PyFaceAction #TODO
 from infobiotics.mcss.results.mcss_results_widget import McssResultsWidget
 from editor import McssResultsEditor
 

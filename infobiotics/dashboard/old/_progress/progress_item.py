@@ -1,6 +1,6 @@
 from progress_meter import *
-from enthought.traits.api import Instance
-from enthought.traits.ui.api import View, Item, CustomEditor, HGroup, VGroup
+from traits.api import Instance
+from traitsui.api import View, Item, CustomEditor, HGroup, VGroup
 from PyQt4.QtGui import QProgressBar
 
 class ProgressItem(ProgressMeter):
@@ -51,7 +51,7 @@ class ProgressItem(ProgressMeter):
         here and then set.
         
         window_parent = <PyQt4.QtGui.QBoxLayout object at ...>
-        editor = <enthought.traits.ui.qt4.custom_editor.CustomEditor object at ...>
+        editor = <traitsui.qt4.custom_editor.CustomEditor object at ...>
         
         '''
         progress_bar = QProgressBar()

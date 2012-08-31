@@ -1,5 +1,5 @@
-from enthought.traits.api import HasTraits, File, Directory 
-from enthought.traits.ui.api import View, Item, FileEditor, DirectoryEditor
+from traits.api import HasTraits, File, Directory 
+from traitsui.api import View, Item, FileEditor, DirectoryEditor
 
 class Workspace(HasTraits):
     

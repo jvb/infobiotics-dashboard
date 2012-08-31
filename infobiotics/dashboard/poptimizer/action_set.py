@@ -1,5 +1,5 @@
-from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from enthought.envisage.ui.action.api import Action
+from envisage.ui.workbench.api import WorkbenchActionSet
+from envisage.ui.action.api import Action
             
 class POptimizerActionSet(WorkbenchActionSet):
     

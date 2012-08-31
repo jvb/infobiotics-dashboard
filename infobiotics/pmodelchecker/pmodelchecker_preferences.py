@@ -1,6 +1,6 @@
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage, RelativeFile
 import sys
-#from enthought.traits.api import Int
+#from traits.api import Int
 
 PREFERENCES_PATH = 'pmodelchecker'
 name = 'pmodelchecker.exe' if sys.platform.startswith('win') else 'pmodelchecker' 

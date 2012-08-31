@@ -15,14 +15,14 @@
 import os
 
 # Major package imports.
-from enthought.qt.api import QtCore, QtGui
+from pyface.qt.api import QtCore, QtGui
 
 # Enthought library imports.
-from enthought.traits.api import Enum, implements, Int, Unicode, List
+from traits.api import Enum, implements, Int, Unicode, List
 
 # Local imports.
-from enthought.pyface.i_file_dialog import IFileDialog, MFileDialog
-from enthought.pyface.ui.qt4.dialog import Dialog
+from pyface.i_file_dialog import IFileDialog, MFileDialog
+from pyface.ui.qt4.dialog import Dialog
 
 
 class FileDialog(MFileDialog, Dialog):

@@ -1,11 +1,11 @@
-from enthought.traits.ui.api import Handler
-from enthought.pyface.workbench.api import TraitsUIEditor
-from enthought.traits.api import Any, List, Tuple, Str, Instance
-from enthought.traits.ui.api import Handler, Group, Item
-from enthought.traits.ui.menu import NoButtons
+from traitsui.api import Handler
+from pyface.workbench.api import TraitsUIEditor
+from traits.api import Any, List, Tuple, Str, Instance
+from traitsui.api import Handler, Group, Item
+from traitsui.menu import NoButtons
 import os.path
-from enthought.pyface.api import FileDialog, CANCEL
-from infobiotics.commons.traits.ui.key_bindings import KeyBinding, KeyBindings, View
+from pyface.api import FileDialog, CANCEL
+from infobiotics.commons.traits_.ui.key_bindings import KeyBinding, KeyBindings, View
 
 save_key_binding = KeyBinding(
     binding1='Ctrl-s',
@@ -112,7 +112,7 @@ class AbstractFileEditor(TraitsUIEditor):
             self.id = dialog.path
             self.name = os.path.basename(dialog.path)
 
-            self.obj.path = dialog.path # update obj (an enthought.io.api.File) 
+            self.obj.path = dialog.path # update obj (an apptools.io.api.File) 
 
             self.save() # save it now it has a path
 

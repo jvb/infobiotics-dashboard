@@ -134,7 +134,7 @@ class RelativeDirectory(RelativeFile):
         
         '''
         
-        from infobiotics.commons.traits.ui.qt4.relative_directory_editor import RelativeDirectoryEditor
+        from infobiotics.commons.traits_.ui.qt4.relative_directory_editor import RelativeDirectoryEditor
         editor = RelativeDirectoryEditor(
             filter=self.filter or [],
             auto_set=self.auto_set,

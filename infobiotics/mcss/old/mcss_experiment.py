@@ -78,7 +78,7 @@ class McssExperiment(ParamsExperiment):
         polling_interval = 10 # milliseconds
         
         # start a timer to poll the process on its progress
-        from enthought.pyface.timer.timer import Timer
+        from pyface.timer.timer import Timer
         self.timer = Timer(polling_interval, self._poll_process)
 
         return True

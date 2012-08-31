@@ -1,7 +1,7 @@
-from enthought.envisage.api import Plugin
-from enthought.traits.api import List
+from envisage.api import Plugin
+from traits.api import List
 
-ACTION_SETS = 'enthought.envisage.ui.workbench.action_sets'
+ACTION_SETS = 'envisage.ui.workbench.action_sets'
 
 class DashboardPlugin(Plugin):
 

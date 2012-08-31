@@ -1,11 +1,11 @@
 from __future__ import with_statement # from __future__ imports must come first
 import infobiotics # set up TraitsUI backend before traits imports
-from enthought.traits.api import (
+from traits.api import (
     HasTraits, Str, Undefined, Bool, List, TraitError, Instance, Property, Enum, Dict, Any, Unicode,
     cached_property, on_trait_change,
 )
 from infobiotics.core.params_handler import ParamsHandler
-from infobiotics.core.traits.params_relative_file import ParamsRelativeFile
+from infobiotics.core.traits_.params_relative_file import ParamsRelativeFile
 from infobiotics.commons.api import key_from_value, can_access, read, write, can_execute
 from infobiotics.core.params_preferences import Executable, Directory
 import os, sys
@@ -17,7 +17,7 @@ logger = logging.getLogger(name='Params')
 from infobiotics.preferences import preferences # calls set_default_preferences, do not remove
 from infobiotics.core.params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
 
-from enthought.preferences.api import PreferenceBinding
+from apptools.preferences.api import PreferenceBinding
 
 class ParamsPreferenceBinding(PreferenceBinding):
     '''Overrides a couple of methods that raise errors for RelativeFile traits.'''
@@ -601,7 +601,7 @@ def traits_repr(self, *names):
      experiment object (i.e. what the user would have to script). Instances 
      that match the pattern below will be correctly represented.  
      
-     >>> from enthought.traits.api import HasTraits, Str, Int
+     >>> from traits.api import HasTraits, Str, Int
      >>> class ExampleInstanceWithRepr(HasTraits):
      ...     name = Str('Jon')
      ...     age = Int(30)

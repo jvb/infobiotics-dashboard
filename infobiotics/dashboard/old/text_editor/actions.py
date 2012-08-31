@@ -1,8 +1,8 @@
-from enthought.pyface.action.api import Action
-from enthought.traits.api import Any, Property, Bool
-from enthought.io.api import File
+from pyface.action.api import Action
+from traits.api import Any, Property, Bool
+from apptools.io.api import File
 from editor.text_editor import TextEditor
-from enthought.pyface.api import FileDialog, OK
+from pyface.api import FileDialog, OK
 
 class NewFileAction(Action):
     ''' Open a new file in the text editor. '''

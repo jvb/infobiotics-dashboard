@@ -32,27 +32,27 @@ from os.path import (basename, dirname, exists, getatime, getctime, getmtime,
 
 from time import localtime, strftime
 
-from enthought.traits.api import (
+from traits.api import (
     Bool, Button, CList, Event, File, HasPrivateTraits, Instance, Int, 
     Interface, Property, Str, cached_property, implements, List, Unicode
 )
 
-from enthought.traits.trait_base import user_name_for
+from traits.trait_base import user_name_for
 
-from enthought.traits.ui.api import (
+from traitsui.api import (
     CodeEditor, FileEditor, HGroup, HSplit, Handler, HistoryEditor, ImageEditor,
     InstanceEditor, Item, UIInfo, VGroup, VSplit, View, spring, Spring
 )
 
-from enthought.traits.ui.ui_traits import AView
+from traitsui.ui_traits import AView
 
-from enthought.pyface.api import ImageResource
+from pyface.api import ImageResource
 
-from enthought.pyface.timer.api import do_later
+from pyface.timer.api import do_later
 
-from enthought.traits.ui.helper import commatize
+from traitsui.helper import commatize
 
-from enthought.traits.ui.toolkit import toolkit
+from traitsui.toolkit import toolkit
 
 #-------------------------------------------------------------------------------
 #  Constants:
@@ -457,7 +457,7 @@ class OpenFileDialog ( Handler ):
     title = Str( 'Open File' )
 
     # The Traits UI persistence id to use:
-    id = Str( 'enthought.traits.ui.file_dialog.OpenFileDialog' )
+    id = Str( 'traitsui.file_dialog.OpenFileDialog' )
 
     # A list of optional file dialog extensions:
     extensions = CList( IFileDialogModel )

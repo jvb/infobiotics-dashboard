@@ -1,9 +1,9 @@
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 
-from enthought.envisage.ui.workbench.api import WorkbenchApplication
-from enthought.pyface.api import AboutDialog, ImageResource, SplashScreen
-from enthought.traits.api import Event
+from envisage.ui.workbench.api import WorkbenchApplication
+from pyface.api import AboutDialog, ImageResource, SplashScreen
+from traits.api import Event
 import infobiotics.__version__
 
 class InfobioticsDashboardWorkbenchApplication(WorkbenchApplication):

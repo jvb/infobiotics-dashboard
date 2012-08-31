@@ -1,10 +1,10 @@
 import os.path
-from enthought.pyface.workbench.api import TraitsUIEditor
-from enthought.pyface.api import FileDialog, CANCEL
-from enthought.traits.api import Code, Instance
-from enthought.traits.ui.api import CodeEditor, Group, Item, View
-from enthought.traits.ui.key_bindings import KeyBinding, KeyBindings
-from enthought.traits.ui.menu import NoButtons
+from pyface.workbench.api import TraitsUIEditor
+from pyface.api import FileDialog, CANCEL
+from traits.api import Code, Instance
+from traitsui.api import CodeEditor, Group, Item, View
+from traitsui.key_bindings import KeyBinding, KeyBindings
+from traitsui.menu import NoButtons
 from text_editor_handler import TextEditorHandler
 
 def _id_generator():
@@ -60,7 +60,7 @@ class TextEditor(TraitsUIEditor):
             self.id   = dialog.path
             self.name = os.path.basename(dialog.path)
             
-            self.obj.path = dialog.path # update obj (an enthought.io.api.File) 
+            self.obj.path = dialog.path # update obj (an apptools.io.api.File) 
 
             self.save() # save it now it has a path
     
@@ -76,7 +76,7 @@ class TextEditor(TraitsUIEditor):
         # Execute the code.
         if len(self.obj.path) > 0:
             view = self.window.get_view_by_id(
-                'enthought.plugins.python_shell_view'
+                'envisage.plugins.python_shell_view'
             )
             if view is not None:
                 view.execute_command(

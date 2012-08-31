@@ -1,7 +1,7 @@
 from __future__ import division
 from mcss_params import McssParams
 from infobiotics.core.experiment import Experiment
-from enthought.traits.api import Int, Float, TraitError
+from traits.api import Int, Float, TraitError
 
 from infobiotics.commons.api import logging
 logger = logging.getLogger(__name__)

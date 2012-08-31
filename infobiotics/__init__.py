@@ -2,7 +2,7 @@ from __future__ import absolute_import, with_statement, division
 
 import os, sys
 
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.company = 'Infobiotics' # use ~/.infobiotics (or "Application Data\\Infobiotics" on Windows) instead of ~/.enthought for preferences.ini # used by ETSConfig.get_application_data() for persistence (preferences)
 ETSConfig.toolkit = 'qt4' #os.environ['ETS_TOOLKIT']='qt4'
 

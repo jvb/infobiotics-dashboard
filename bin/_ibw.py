@@ -20,7 +20,7 @@ import os.path
 
 import setproctitle
 
-from enthought.traits.trait_errors import TraitError
+from traits.trait_errors import TraitError
 
 #import infobiotics.qstring
 

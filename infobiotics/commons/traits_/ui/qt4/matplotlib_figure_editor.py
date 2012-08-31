@@ -1,11 +1,11 @@
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.ui.qt4.editor import Editor
+from traitsui.qt4.editor import Editor
 from PyQt4.QtGui import QWidget, QSizePolicy, QGridLayout, QIcon
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from enthought.traits.ui.basic_editor_factory import BasicEditorFactory
-from enthought.traits.api import Bool
+from traitsui.basic_editor_factory import BasicEditorFactory
+from traits.api import Bool
 import os
 from infobiotics.commons.matplotlib.matplotlib_figure_size import resize_and_save_matplotlib_figure
 

@@ -1,8 +1,8 @@
-from enthought.pyface.action.api import Action
+from pyface.action.api import Action
 from infobiotics.dashboard.pmodelchecker.prism_dashboard_experiment import PRISMDashboardExperiment
 from infobiotics.dashboard.pmodelchecker.mc2_dashboard_experiment import MC2DashboardExperiment
 from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
-from enthought.pyface.api import FileDialog, OK
+from pyface.api import FileDialog, OK
 from editor import PModelCheckerResultsEditor 
 from infobiotics.dashboard.pmodelchecker import commons
 
@@ -57,8 +57,8 @@ class PModelCheckerResultsAction(Action):
 
 #from pmodelchecker_experiment_editor import PModelCheckerExperimentEditor
 #from infobiotics.dashboard.plugins.experiments.params_experiment_editor import ParamsExperimentEditor
-#from enthought.traits.api import File, Enum, Str
-#from enthought.traits.ui.api import View, Item, Group
+#from traits.api import File, Enum, Str
+#from traitsui.api import View, Item, Group
 
 #class NewPModelCheckerAction(PyFaceAction): #TODO change to NewPModelCheckerExperimentAction
 #    name = 'PModelChecker'

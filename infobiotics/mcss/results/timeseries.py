@@ -1,7 +1,7 @@
 from __future__ import division # essential for _get_colour
-from enthought.traits.api import HasTraits, Float, Str, Color, Enum, Property, \
+from traits.api import HasTraits, Float, Str, Color, Enum, Property, \
     cached_property, Array, Instance, Tuple, Bool, List, Int, Any
-from enthought.traits.ui.api import View, HGroup, Item
+from traitsui.api import View, HGroup, Item
 
 class Timeseries(HasTraits): #TODO factor out traits into TraitTimeseries and have McssResults produce 'timeseries' objects
 

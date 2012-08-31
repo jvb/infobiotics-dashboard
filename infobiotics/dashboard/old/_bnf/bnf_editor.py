@@ -1,12 +1,12 @@
 from os.path import basename
-from enthought.pyface.workbench.api import TraitsUIEditor
-from enthought.pyface.api import FileDialog, CANCEL
-from enthought.traits.api import Code, Instance, Str
-from enthought.traits.ui.api import CodeEditor, Group, Item, View
-from enthought.traits.ui.key_bindings import KeyBinding, KeyBindings
-from enthought.traits.ui.menu import NoButtons
+from pyface.workbench.api import TraitsUIEditor
+from pyface.api import FileDialog, CANCEL
+from traits.api import Code, Instance, Str
+from traitsui.api import CodeEditor, Group, Item, View
+from traitsui.key_bindings import KeyBinding, KeyBindings
+from traitsui.menu import NoButtons
 
-from enthought.plugins.text_editor.editor.text_editor_handler import TextEditorHandler
+from envisage.plugins.text_editor.editor.text_editor_handler import TextEditorHandler
 
 
 def _id_generator():
@@ -92,7 +92,7 @@ class BNFEditor(TraitsUIEditor):
         need to be able to contribute new bindings).
 
         '''
-        from enthought.traits.ui.api import TextEditor #TODO fails without error message
+        from traitsui.api import TextEditor #TODO fails without error message
         view = View(
             Group(
                 Item(
@@ -101,7 +101,7 @@ class BNFEditor(TraitsUIEditor):
                 ),
                 show_labels = False
             ),
-            id        = 'enthought.envisage.editor.text_editor', #CHANGE?
+            id        = 'envisage.editor.text_editor', #CHANGE?
             handler   = TextEditorHandler(),
             kind      = 'live',
             resizable = True,
@@ -164,7 +164,7 @@ class BNFEditor(TraitsUIEditor):
 #        # Execute the code.
 #        if len(self.obj.path) > 0:
 #            view = self.window.get_view_by_id(
-#                'enthought.plugins.python_shell_view'
+#                'envisage.plugins.python_shell_view'
 #            )
 #            if view is not None:
 #                view.execute_command(

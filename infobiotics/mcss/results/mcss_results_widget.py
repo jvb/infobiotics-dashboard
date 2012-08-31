@@ -18,13 +18,13 @@ qApp.setApplicationName('Infobiotics Dashboard')
 qApp.setApplicationVersion(infobiotics.version)
 
 from PyQt4.QtCore import Qt #@UnusedImport
-from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, SLOT, QString
+from PyQt4.QtCore import QSettings, QVariant, QDir, QFileInfo, SIGNAL, SLOT
 from PyQt4.QtGui import QWidget, QListWidgetItem, QItemSelectionModel, QFileDialog, QMessageBox
 
 from infobiotics.commons.qt4 import *#@UnusedWildImport
 
-from enthought.traits.api import HasTraits, Range, String #@UnresolvedImport
-from enthought.traits.ui.api import View, VGroup, HGroup, Item #@UnresolvedImport
+from traits.api import HasTraits, Range, String
+from traitsui.api import View, VGroup, HGroup, Item
 
 import numpy as np
 
@@ -299,11 +299,11 @@ class McssResultsWidget(QWidget):
                 error_message = error_log.read()
                 error_log.close()
                 os.remove('mcss-error.log')
-                QMessageBox.warning(self, QString("Error"), QString("Unable to execute model:\n\n%s") % (error_message.replace('error: ', '', 1)))
+                QMessageBox.warning(self, "Error", "Unable to execute model:\n\n%s" % (error_message.replace('error: ', '', 1)))
             else:
-                QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '')))
+                QMessageBox.warning(self, "Error", str(e).replace('`', ''))
         except AttributeError, e:
-            QMessageBox.warning(self, QString("Error"), QString(str(e).replace('`', '') + "\nDid you use a old version of mcss (<0.0.19)?"))
+            QMessageBox.warning(self, "Error", str(e).replace('`', '') + "\nDid you use a old version of mcss (<0.0.19)?")
         if simulation == None:
             if self.loaded:
                 return # continue with previously loaded file
@@ -1035,8 +1035,8 @@ class McssResultsWidget(QWidget):
         except RuntimeError, e:
             QMessageBox.critical(
                 self,
-                QString('Surface plotting failed'),
-                QString(str(e))
+                'Surface plotting failed',
+                str(e)
             )
 
     @wait_cursor
@@ -1084,8 +1084,8 @@ class McssResultsWidget(QWidget):
         except RuntimeError, e:
             QMessageBox.critical(
                 self,
-                QString('Surface plotting failed'),
-                QString(str(e))
+                'Surface plotting failed',
+                str(e)
             )
 
 

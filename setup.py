@@ -485,7 +485,7 @@ INSTALL_REQUIRES = [
     'EnvisagePlugins>=3.1.2',
     'TraitsBackendQt>=3.4.0',
     'Mayavi', #>=3.4.0',
-    'configobj', # for enthought.preferences
+    'configobj', # for apptools.preferences
     'matplotlib', #,==0.99.1', 
     'progressbar',
 #    'which==1.1.0', # in infobiotics.thirdparty as there is no python-which package in Debian (also available from http://code.google.com/p/which/)

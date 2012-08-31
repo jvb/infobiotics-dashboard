@@ -1,10 +1,10 @@
 import os
 #os.environ['ETS_TOOLKIT']='qt4'
-from enthought.traits.api import HasTraits, Str, List, Instance
-from enthought.traits.ui.api import View, Item, TreeEditor, TreeNode
+from traits.api import HasTraits, Str, List, Instance
+from traitsui.api import View, Item, TreeEditor, TreeNode
 from infobiotics.shared.file_wrapper import FileWrapper
-from enthought.pyface.api import DirectoryDialog, OK
-from enthought.io.api import File
+from pyface.api import DirectoryDialog, OK
+from apptools.io.api import File
 
 
 class BNFFileWrapper(FileWrapper):
@@ -70,8 +70,8 @@ class NullFileWrapperTreeNode(TreeNode):
     view=no_view
         
 
-from enthought.traits.ui.menu import Menu, Separator
-#from enthought.traits.ui.qt4.tree_editor import \
+from traitsui.menu import Menu, Separator
+#from traitsui.qt4.tree_editor import \
 #    NewAction, CopyAction, CutAction, PasteAction, DeleteAction, RenameAction
     
 class BNFFileWrapperTreeNode(TreeNode):

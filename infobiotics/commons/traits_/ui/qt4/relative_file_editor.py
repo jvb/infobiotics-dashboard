@@ -2,9 +2,9 @@
 Adapted from qt4/extras/bounds_editor.py, qt4/file_editor.py, and qt4/html_editor.py
 '''
 
-from enthought.traits.ui.qt4.text_editor import SimpleEditor as SimpleTextEditor, ReadonlyEditor
-from enthought.traits.ui.api import FileEditor
-from enthought.traits.api import Str, Bool, TraitError, on_trait_change
+from traitsui.qt4.text_editor import SimpleEditor as SimpleTextEditor, ReadonlyEditor
+from traitsui.api import FileEditor
+from traits.api import Str, Bool, TraitError, on_trait_change
 #from infobiotics.commons.strings import wrap
 import os
 from PyQt4 import QtCore, QtGui
@@ -23,7 +23,7 @@ class SimpleEditor(SimpleTextEditor):
         self.sync_value(factory.exists_name, 'exists', 'from')
         self.sync_value(factory.empty_ok_name, 'empty_ok', 'from')
             
-        # same as enthought.traits.ui.qt4.file_editor.SimpleEditor ---
+        # same as traitsui.qt4.file_editor.SimpleEditor ---
         self.control = QtGui.QWidget()
         layout = QtGui.QHBoxLayout(self.control)
         layout.setMargin(0)

@@ -1,6 +1,6 @@
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.ui.api import (
+from traitsui.api import (
     VGroup, Item, HGroup, InstanceEditor, View, VSplit, Group, Spring
 )
 from infobiotics.pmodelchecker.model_parameters import model_parameters_group

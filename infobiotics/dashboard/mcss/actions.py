@@ -1,4 +1,4 @@
-from enthought.pyface.action.api import Action
+from pyface.action.api import Action
 from infobiotics.dashboard.mcss.mcss_dashboard_experiment import McssDashboardExperiment
 
 class McssExperimentAction(Action):

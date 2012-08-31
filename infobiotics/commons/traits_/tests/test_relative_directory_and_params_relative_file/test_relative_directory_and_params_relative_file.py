@@ -1,9 +1,9 @@
-from enthought.traits.api import HasTraits, TraitError
-from enthought.traits.ui.api import View#, Item#, Handler
-#from infobiotics.commons.traits.relative_file import RelativeFile
-from infobiotics.commons.traits.relative_directory import RelativeDirectory
-#from infobiotics.core.traits.params_relative_directory import ParamsRelativeDirectory
-from infobiotics.core.traits.params_relative_file import ParamsRelativeFile
+from traits.api import HasTraits, TraitError
+from traitsui.api import View#, Item#, Handler
+#from infobiotics.commons.traits_.relative_file import RelativeFile
+from infobiotics.commons.traits_.relative_directory import RelativeDirectory
+#from infobiotics.core.traits_.params_relative_directory import ParamsRelativeDirectory
+from infobiotics.core.traits_.params_relative_file import ParamsRelativeFile
 
 class Params(HasTraits):
     

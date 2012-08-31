@@ -53,7 +53,7 @@ def normalized_extent_z_by_other_array(x, y, z, other):
     ] 
     
 def anim():
-    from enthought.mayavi import mlab as M
+    from mayavi import mlab as M
     M.options.offscreen = True
     M.test_mesh()
     f = M.figure()
@@ -64,11 +64,11 @@ def anim():
 
 import os
 os.environ['ETS_TOOLKIT'] = 'qt4' # must be before any traits imports AND must use qApp not QApplication(sys.argv)
-from enthought.traits.api import HasTraits, Range, Instance, on_trait_change
-from enthought.traits.ui.api import View, Item#, HGroup
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.tvtk.pyface.scene_editor import SceneEditor
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
+from traits.api import HasTraits, Range, Instance, on_trait_change
+from traitsui.api import View, Item#, HGroup
+from mayavi.tools.mlab_scene_model import MlabSceneModel
+from tvtk.pyface.scene_editor import SceneEditor
+from mayavi.core.ui.mayavi_scene import MayaviScene
 class MlabWidget(HasTraits):
 
     # initialize traits

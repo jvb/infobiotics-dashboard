@@ -1,6 +1,6 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
 import os
-from enthought.traits.api import Str
+from traits.api import Str
 from mc2_preferences import PREFERENCES_PATH
 
 class MC2Params(PModelCheckerParams):

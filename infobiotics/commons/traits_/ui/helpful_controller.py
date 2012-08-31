@@ -1,8 +1,8 @@
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4' 
-from enthought.traits.api import Property, Str, Bool, List, Tuple, HasTraits
-from enthought.traits.ui.api import Controller, View, Item
-from enthought.traits.ui.menu import Action, Menu, MenuBar
+from traits.api import Property, Str, Bool, List, Tuple, HasTraits
+from traitsui.api import Controller, View, Item
+from traitsui.menu import Action, Menu, MenuBar
 from infobiotics.commons import webbrowsing
         
 class HelpStr(HasTraits):

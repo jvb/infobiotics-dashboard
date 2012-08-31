@@ -34,11 +34,11 @@ from PyQt4.Qsci import QsciScintilla, QsciScintillaBase as QsciBase, \
     QsciAbstractAPIs, QsciLexerPython, QsciStyle
 
 # Enthought library imports.
-from enthought.traits.api import Event, implements
+from traits.api import Event, implements
 
 # Local imports.
-from enthought.pyface.i_python_shell import IPythonShell, MPythonShell
-from enthought.pyface.key_pressed_event import KeyPressedEvent
+from pyface.i_python_shell import IPythonShell, MPythonShell
+from pyface.key_pressed_event import KeyPressedEvent
 from widget import Widget
 
 #-------------------------------------------------------------------------------

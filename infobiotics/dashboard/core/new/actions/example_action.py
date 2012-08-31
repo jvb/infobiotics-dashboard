@@ -1,6 +1,6 @@
-from enthought.pyface.action.api import Action
-from enthought.traits.api import Property, Bool 
-#from enthought.pyface.api import ImageResource
+from pyface.action.api import Action
+from traits.api import Property, Bool 
+#from pyface.api import ImageResource
 
 class ExampleAction(Action):
     '''

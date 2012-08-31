@@ -1,18 +1,18 @@
 from __future__ import with_statement
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import (
+from traits.api import (
     HasTraits, Str, Float, Int, Undefined, Range, Enum, Property, List, Tuple,
     Instance, TraitError
 ) 
-from enthought.traits.ui.api import (
+from traitsui.api import (
     View, Item, HGroup, VGroup, TableEditor, TextEditor, Group,
 )
 from xml.sax import ContentHandler
 from xml import sax
-from enthought.traits.ui.table_column import ObjectColumn, ExpressionColumn
+from traitsui.table_column import ObjectColumn, ExpressionColumn
 import os.path
-from infobiotics.commons.traits.api import RelativeDirectory
+from infobiotics.commons.traits_.api import RelativeDirectory
 from infobiotics.commons.api import read
 
 range_or_value_group = VGroup(

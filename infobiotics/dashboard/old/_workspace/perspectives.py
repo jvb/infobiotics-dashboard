@@ -1,4 +1,4 @@
-from enthought.pyface.workbench.api import Perspective, PerspectiveItem
+from pyface.workbench.api import Perspective, PerspectiveItem
 
 class ExamplePerspective(Perspective):
     ''' An example perspective for a workbench application plugin.

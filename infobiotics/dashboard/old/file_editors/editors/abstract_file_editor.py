@@ -1,10 +1,10 @@
-from enthought.pyface.workbench.api import TraitsUIEditor
-from enthought.traits.api import Any, List, Tuple, Str, Instance
-from enthought.traits.ui.key_bindings import KeyBinding, KeyBindings
-from enthought.traits.ui.api import Handler, Group, Item, View 
-from enthought.traits.ui.menu import NoButtons
+from pyface.workbench.api import TraitsUIEditor
+from traits.api import Any, List, Tuple, Str, Instance
+from traitsui.key_bindings import KeyBinding, KeyBindings
+from traitsui.api import Handler, Group, Item, View 
+from traitsui.menu import NoButtons
 import os.path
-from enthought.pyface.api import FileDialog, CANCEL
+from pyface.api import FileDialog, CANCEL
 
 def _id_generator():
     ''' A generator that returns the next number for untitled files. '''
@@ -92,7 +92,7 @@ class AbstractFileEditor(TraitsUIEditor):
             self.id   = dialog.path
             self.name = os.path.basename(dialog.path)
             
-            self.obj.path = dialog.path # update obj (an enthought.io.api.File) 
+            self.obj.path = dialog.path # update obj (an apptools.io.api.File) 
 
             self.save() # save it now it has a path
 

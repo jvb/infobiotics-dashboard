@@ -1,12 +1,12 @@
-from enthought.envisage.api import Plugin, contributes_to
-from enthought.traits.api import List
-from enthought.pyface.workbench.api import Perspective, PerspectiveItem
+from envisage.api import Plugin, contributes_to
+from traits.api import List
+from pyface.workbench.api import Perspective, PerspectiveItem
 
 from action_set import McssActionSet
 from infobiotics.mcss.mcss_preferences import McssParamsPreferencesPage
 
 import os
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 
 class McssUIPlugin(Plugin):
 
@@ -16,19 +16,19 @@ class McssUIPlugin(Plugin):
 
     # Contributions to extension points made by this plugin
 
-    action_sets = List(contributes_to='enthought.envisage.ui.workbench.action_sets')
+    action_sets = List(contributes_to='envisage.ui.workbench.action_sets')
     def _action_sets_default(self):
         return [McssActionSet]
 
-#    perspectives = List(contributes_to='enthought.envisage.ui.workbench.perspectives')
+#    perspectives = List(contributes_to='envisage.ui.workbench.perspectives')
 #    def _perspectives_default(self):
 #        return []
 
-#    views = List(contributes_to='enthought.envisage.ui.workbench.views')
+#    views = List(contributes_to='envisage.ui.workbench.views')
 #    def _views_default(self):
 #        return []
 
-    preferences_pages = List(contributes_to='enthought.envisage.ui.workbench.preferences_pages')
+    preferences_pages = List(contributes_to='envisage.ui.workbench.preferences_pages')
     def _preferences_pages_default(self):
         return [McssParamsPreferencesPage]
 
@@ -44,6 +44,6 @@ class McssUIPlugin(Plugin):
     
 #    # file:///home/jvb/src/ETS_3.4.0/AppTools/docs/html/preferences/PreferencesInEnvisage.html
 #    
-#    preferences = List(contributes_to='enthought.envisage.preferences')
+#    preferences = List(contributes_to='envisage.preferences')
 #    def _preferences_default(self):
 #        return ['file://%s' % os.path.join(ETSConfig.application_data, 'preferences.ini')]

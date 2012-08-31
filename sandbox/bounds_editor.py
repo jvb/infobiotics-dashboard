@@ -1,12 +1,12 @@
-from enthought.etsconfig.etsconfig import ETSConfig
+from traits.etsconfig.etsconfig import ETSConfig
 ETSConfig.toolkit = 'qt4'
 
 from PyQt4 import QtGui, QtCore
 
-from enthought.traits.api import Float, Any, Str, Trait
-from enthought.traits.ui.editors.api import RangeEditor
-from enthought.traits.ui.qt4.editor import Editor
-from enthought.traits.ui.qt4.extra.range_slider import RangeSlider
+from traits.api import Float, Any, Str, Trait
+from traitsui.editors.api import RangeEditor
+from traitsui.qt4.editor import Editor
+from traitsui.qt4.extra.range_slider import RangeSlider
 
 class _BoundsEditor(Editor):
 
@@ -216,9 +216,9 @@ class BoundsEditor(RangeEditor):
 
 
 if __name__ == '__main__':
-    from enthought.traits.api import HasTraits, Range, Int, Button, Float
-    from enthought.traits.ui.api import View, Item
-    #from enthought.traits.ui.qt4.extra.bounds_editor import BoundsEditor
+    from traits.api import HasTraits, Range, Int, Button, Float
+    from traitsui.api import View, Item
+    #from traitsui.qt4.extra.bounds_editor import BoundsEditor
     from bounds_editor import BoundsEditor
     
     class Foo(HasTraits):
