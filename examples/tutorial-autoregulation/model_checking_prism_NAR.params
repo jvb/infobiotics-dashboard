@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<parameters name="pmodelchecker" xmlns="http://www.cpib.ac.uk/~jpt"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+    <!-- parameter definitions -->
+    <parameterSet name="prism">
+        <parameter name="model_checker" value="PRISM"/>
+        <parameter name="model_specification" value="individualCells.lpp"/>
+        <parameter name="PRISM_model" value="autoregulation.sm"/>
+        <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=0,ub_gene1_0_0_NARbacterium=1,lb_protein1_0_0_NARbacterium=0,ub_protein1_0_0_NARbacterium=1000,lb_protein1_gene1_0_0_NARbacterium=0,ub_protein1_gene1_0_0_NARbacterium=1,lb_rna1_0_0_NARbacterium=0,ub_rna1_0_0_NARbacterium=1000,lb_gene1_1_0_PARbacterium=0,ub_gene1_1_0_PARbacterium=1,lb_protein1_1_0_PARbacterium=0,ub_protein1_1_0_PARbacterium=1000,lb_protein1_gene1_1_0_PARbacterium=0,ub_protein1_gene1_1_0_PARbacterium=1,lb_rna1_1_0_PARbacterium=0,ub_rna1_1_0_PARbacterium=1000,lb_gene1_2_0_UnRegbacterium=0,ub_gene1_2_0_UnRegbacterium=1,lb_protein1_2_0_UnRegbacterium=0,ub_protein1_2_0_UnRegbacterium=1000,lb_rna1_2_0_UnRegbacterium=0,ub_rna1_2_0_UnRegbacterium=1000"/>
+        <parameter name="temporal_formulas" value="properties_molecules_NAR.csl"/>
+        <parameter name="formula_parameters" value=""/>
+        <parameter name="task" value="Approximate"/>
+        <parameter name="confidence" value="0.1"/>
+        <parameter name="precision" value="1.0"/>
+        <parameter name="results_file" value="results_NAR.psm"/>
+        <parameter name="states_file" value="states.sm"/>
+        <parameter name="transitions_file" value="transitions.sm"/>
+        <parameter name="number_samples" value="500"/>
+    </parameterSet>
+</parameters>

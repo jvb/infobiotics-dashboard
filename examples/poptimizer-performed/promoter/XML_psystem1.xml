@@ -1,0 +1,608 @@
+		<PSystem name="psystem1">
+			<alphabetOfObjects>
+				<object name="pR_gLacI"/>
+				<object name="rLacI"/>
+				<object name="pLacI"/>
+				<object name="pCI"/>
+				<object name="pCI2"/>
+				<object name="pCI2_pR_gLacI"/>
+				<object name="pCI4_pR_gLacI"/>
+				<object name="plac_gCI"/>
+				<object name="rCI"/>
+				<object name="sIPTG"/>
+				<object name="pLacI_sIPTG"/>
+				<object name="pLacI_plac_gCI"/>
+				<object name="plac_gLacI"/>
+				<object name="pLacI_plac_gLacI"/>
+				<object name="pR_gFP"/>
+				<object name="rFP"/>
+				<object name="pFP"/>
+				<object name="pCI2_pR_gFP"/>
+				<object name="pCI4_pR_gFP"/>
+				<object name="s3OC6ext"/>
+				<object name="s3OC6"/>
+				<object name="pLuxR"/>
+				<object name="pLuxR_s3OC6"/>
+				<object name="pLuxR_s3OC6_2"/>
+				<object name="plux_gFP"/>
+				<object name="pLuxR_s3OC6_2_plux_gFP"/>
+			</alphabetOfObjects>
+
+			<compartmentLabels>
+				<compartmentLabel label="label"/>
+			</compartmentLabels>
+
+			<membraneStructure>
+				<compartment name="label" label="label"/>
+			</membraneStructure>
+
+			<initialMultisets>
+				<initialMultiset label="label">
+					<object name="pR_gLacI" multiplicity="1"/>
+					<object name="rLacI" multiplicity="0"/>
+					<object name="pLacI" multiplicity="0"/>
+					<object name="pCI" multiplicity="0"/>
+					<object name="pCI2" multiplicity="0"/>
+					<object name="pCI2_pR_gLacI" multiplicity="0"/>
+					<object name="pCI4_pR_gLacI" multiplicity="0"/>
+					<object name="plac_gCI" multiplicity="0"/>
+					<object name="rCI" multiplicity="0"/>
+					<object name="sIPTG" multiplicity="0"/>
+					<object name="pLacI_sIPTG" multiplicity="0"/>
+					<object name="pLacI_plac_gCI" multiplicity="0"/>
+					<object name="plac_gLacI" multiplicity="0"/>
+					<object name="pLacI_plac_gLacI" multiplicity="0"/>
+					<object name="pR_gFP" multiplicity="0"/>
+					<object name="rFP" multiplicity="0"/>
+					<object name="pFP" multiplicity="0"/>
+					<object name="pCI2_pR_gFP" multiplicity="0"/>
+					<object name="pCI4_pR_gFP" multiplicity="0"/>
+					<object name="s3OC6ext" multiplicity="5"/>
+					<object name="s3OC6" multiplicity="0"/>
+					<object name="pLuxR" multiplicity="0"/>
+					<object name="pLuxR_s3OC6" multiplicity="0"/>
+					<object name="pLuxR_s3OC6_2" multiplicity="0"/>
+					<object name="plux_gFP" multiplicity="0"/>
+					<object name="pLuxR_s3OC6_2_plux_gFP" multiplicity="0"/>
+				</initialMultiset>
+			</initialMultisets>
+
+			<ruleSets>
+				<ruleSet label="label">
+
+					<rule name="r1" constant="c1" value="0.1200000048">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pR_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pR_gLacI"/>
+								<object name="rLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r2" constant="c2" value="0.0080000004">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="rLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r3" constant="c3" value="0.0399999991">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="rLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="rLacI"/>
+								<object name="pLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r4" constant="c4" value="0.0099999998">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r5" constant="c5" value="0.0002400000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI"/>
+								<object name="pCI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r6" constant="c6" value="0.0020000001">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI"/>
+								<object name="pCI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r7" constant="c7" value="0.2100000083">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pR_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2_pR_gLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r8" constant="c8" value="0.0020000001">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2_pR_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pR_gLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r9" constant="c9" value="0.0050000004">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pCI2_pR_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI4_pR_gLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r10" constant="c10" value="0.0002000000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI4_pR_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pCI2_pR_gLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r11" constant="c11" value="0.1700000018">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="plac_gCI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="plac_gCI"/>
+								<object name="rCI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r12" constant="c12" value="0.0020000001">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="rCI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r13" constant="c13" value="0.0499999970">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="rCI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="rCI"/>
+								<object name="pCI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r14" constant="c14" value="0.0010000000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r15" constant="c15" value="0.0001700000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI"/>
+								<object name="sIPTG"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI_sIPTG"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r16" constant="c16" value="0.0040000002">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI_sIPTG"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI"/>
+								<object name="sIPTG"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r17" constant="c17" value="9.7899999619">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI"/>
+								<object name="plac_gCI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI_plac_gCI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r18" constant="c18" value="0.0199999996">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI_plac_gCI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI"/>
+								<object name="plac_gCI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r19" constant="c19" value="0.1800000072">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="plac_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="plac_gLacI"/>
+								<object name="rLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r20" constant="c20" value="9.5500001907">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI"/>
+								<object name="plac_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI_plac_gLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r21" constant="c21" value="0.0199999996">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI_plac_gLacI"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLacI"/>
+								<object name="plac_gLacI"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r22" constant="c22" value="0.1599999964">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pR_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pR_gFP"/>
+								<object name="rFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r23" constant="c23" value="0.0080000004">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="rFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r24" constant="c24" value="0.0499999970">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="rFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="rFP"/>
+								<object name="pFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r25" constant="c25" value="0.1000000015">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r26" constant="c26" value="0.2490000129">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pR_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2_pR_gFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r27" constant="c27" value="0.0010000000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2_pR_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pR_gFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r28" constant="c28" value="0.0090000005">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pCI2_pR_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI4_pR_gFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r29" constant="c29" value="0.0001000000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI4_pR_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pCI2"/>
+								<object name="pCI2_pR_gFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r30" constant="c30" value="0.1400000006">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="s3OC6ext"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="s3OC6ext"/>
+								<object name="s3OC6"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r31" constant="c31" value="0.0999999940">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="s3OC6"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r32" constant="c32" value="1.2000000477">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="s3OC6"/>
+								<object name="pLuxR"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r33" constant="c33" value="0.0040000002">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="s3OC6"/>
+								<object name="pLuxR"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r34" constant="c34" value="1.7000000477">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6"/>
+								<object name="pLuxR_s3OC6"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r35" constant="c35" value="0.0070000002">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6"/>
+								<object name="pLuxR_s3OC6"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r36" constant="c36" value="0.0040000002">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r37" constant="c37" value="1.0000000000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2"/>
+								<object name="plux_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2_plux_gFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r38" constant="c38" value="0.4000000060">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2_plux_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2"/>
+								<object name="plux_gFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+					<rule name="r39" constant="c39" value="1.0000000000">
+						<lhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2_plux_gFP"/>
+							</listOfInsideObjects>
+						</lhs>
+						<rhs>
+							<listOfInsideObjects label="label">
+								<object name="pLuxR_s3OC6_2_plux_gFP"/>
+								<object name="rFP"/>
+							</listOfInsideObjects>
+						</rhs>
+			</rule>
+
+				</ruleSet>
+
+			</ruleSets>
+
+		</PSystem>
+

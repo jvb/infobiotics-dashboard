@@ -1,0 +1,427 @@
+<CAPSystemModel name="Pulse Generator 22 April 2009">
+
+  <listOfPSystems>
+
+  <PSystem name="PulseGenerator">
+ 
+     <alphabetOfObjects>
+      <object name="Pconst_geneLuxR" />
+      <object name="rnaLuxR_RNAP" />
+      <object name="rnaLuxR" />
+      <object name="proteinLuxR_Rib" />
+      <object name="proteinLuxR" />
+      <object name="proteinLuxR_3OC12" />
+      <object name="LuxR2" />
+      <object name="Plux_geneCI" />
+      <object name="Plux_LuxR2_geneCI" />
+      <object name="rnaCI_RNAP" />
+      <object name="rnaCI" />
+      <object name="proteinCI_Rib" />
+      <object name="proteinCI" />
+      <object name="CI2" />
+      <object name="PluxPR_geneGFP" />
+      <object name="PluxPR_LuxR2_geneGFP" />
+      <object name="PluxPR_CI2_geneGFP" />
+      <object name="PluxPR_LuxR2_CI2_geneGFP" />
+      <object name="rnaGFP_RNAP" />
+      <object name="rnaGFP" />
+      <object name="proteinGFP_Rib" />
+      <object name="proteinGFP" />
+      <object name="PluxPR_geneGFP" />
+      <object name="Plux_geneCI" />
+      <object name="Plux_geneLuxI" />
+      <object name="Plux_LuxR2_geneLuxI" />
+      <object name="proteinLuxI" />
+      <object name="rnaLuxI_RNAP" />
+      <object name="rnaLuxI" />
+      <object name="proteinLuxI_Rib" />
+     </alphabetOfObjects>
+
+     <compartmentLabels>
+      <compartmentLabel label="bact"/>
+     </compartmentLabels>
+
+      <membraneStructure>
+	<compartment name="bact" label="bact"/>
+      </membraneStructure>
+      
+      <initialMultisets>
+       <initialMultiset label="bact">
+         <object name="Pconst_geneLuxR" multiplicity="1"/>
+         <object name="Plux_geneCI" multiplicity="1"/>
+         <object name="PluxPR_geneGFP" multiplicity="1"/>
+         <object name="Plux_geneLuxI" multiplicity="1"/> 
+       </initialMultiset>
+      </initialMultisets>
+
+   <ruleSets>
+      <ruleSet label="bact">
+
+	<module name="Pconst"
+		objects="LuxR" 
+		constants="0.1"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="LuxR" 
+		constants="3.2,0.3,0.04,3.6,0.075"
+		labels="bact" 
+		file="weissLibrary.xml" />
+	
+	<module name="DimSig"
+		objects="LuxR,3OC12,LuxR2" 
+		constants="1,0.0154,1,0.0154"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="Plux"
+		objects="CI" 
+		constants="1,1,4"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="CI"
+		constants="3.2,0.02,0.04,3.6,0.1"
+		labels="bact"
+		file="weissLibrary.xml" />
+
+	<module name="Dim"
+		objects="CI,CI2" 
+		constants="1,0.00554"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PluxPR"
+		objects="GFP" 
+		constants="1,1,1,1,5,0.0000001,5,0.0000001,4"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="GFP"
+		constants="3.36,0.667,0.04,3.78,0.0667"
+		labels="bact"
+		file="weissLibrary.xml" />
+
+        <module name="Diffusion" 
+                objects="3OC12" 
+                constants="0.1" 
+                labels="cell"
+		file="weissLibrary.xml"/>
+
+	<module name="Plux"
+		objects="LuxI" 
+		constants="1,1,0.1"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="LuxI"
+		constants="3.36,0.0667,0.004,3.78,0.0667"
+		labels="bact"
+		file="weissLibrary.xml" />
+
+         <rule name="r_1" type ="boundary" constant="1">
+            <lhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="cell">
+		<object name="proteinLuxI"/>
+              </listOfInsideObjects>
+            </lhs>
+            <rhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="l">
+		<object name="proteinLuxI"/>
+		<object name="signal3OC12"/>
+              </listOfInsideObjects>
+            </rhs>
+         </rule>
+
+        <!-- <module name="Deg" 
+                objects="signal3OC12" 
+		constants="0.075" 
+                labels="cell"
+		file="weissLibrary.xml"/> -->
+
+      </ruleSet>
+   </ruleSets>
+  </PSystem>
+    
+
+  <PSystem name="PulseGeneratorSignal">
+ 
+     <alphabetOfObjects>
+      <object name="Pconst_geneLuxR" />
+      <object name="rnaLuxR_RNAP" />
+      <object name="rnaLuxR" />
+      <object name="proteinLuxR_Rib" />
+      <object name="proteinLuxR" />
+      <object name="proteinLuxR_3OC12" />
+      <object name="LuxR2" />
+      <object name="Plux_geneCI" />
+      <object name="Plux_LuxR2_geneCI" />
+      <object name="rnaCI_RNAP" />
+      <object name="rnaCI" />
+      <object name="proteinCI_Rib" />
+      <object name="proteinCI" />
+      <object name="CI2" />
+      <object name="PluxPR_geneGFP" />
+      <object name="PluxPR_LuxR2_geneGFP" />
+      <object name="PluxPR_CI2_geneGFP" />
+      <object name="PluxPR_LuxR2_CI2_geneGFP" />
+      <object name="rnaGFP_RNAP" />
+      <object name="rnaGFP" />
+      <object name="proteinGFP_Rib" />
+      <object name="proteinGFP" />
+      <object name="PluxPR_geneGFP" />
+      <object name="Plux_geneCI" />
+      <object name="Plux_geneLuxI" />
+      <object name="Plux_LuxR2_geneLuxI" />
+     </alphabetOfObjects>
+
+     <compartmentLabels>
+      <compartmentLabel label="bact"/>
+     </compartmentLabels>
+
+      <membraneStructure>
+	<compartment name="bact" label="bact"/>
+      </membraneStructure>
+      
+      <initialMultisets>
+       <initialMultiset label="bact">
+         <object name="Pconst_geneLuxR" multiplicity="1"/>
+         <object name="Plux_geneCI" multiplicity="1"/>
+         <object name="PluxPR_geneGFP" multiplicity="1"/>
+         <object name="Plux_geneLuxI" multiplicity="1"/> 
+         <object name="signal3OC12" multiplicity="100"/> 
+       </initialMultiset>
+      </initialMultisets>
+
+   <ruleSets>
+      <ruleSet label="bact">
+
+	<module name="Pconst"
+		objects="LuxR" 
+		constants="0.1"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="LuxR" 
+		constants="3.2,0.3,0.04,3.6,0.075"
+		labels="bact" 
+		file="weissLibrary.xml" />
+	
+	<module name="DimSig"
+		objects="LuxR,3OC12,LuxR2" 
+		constants="1,0.0154,1,0.0154"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="Plux"
+		objects="CI" 
+		constants="1,1,4"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="CI"
+		constants="3.2,0.02,0.04,3.6,0.1"
+		labels="bact"
+		file="weissLibrary.xml" />
+
+	<module name="Dim"
+		objects="CI,CI2" 
+		constants="1,0.00554"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PluxPR"
+		objects="GFP" 
+		constants="1,1,1,1,5,0.0000001,5,0.0000001,4"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="GFP"
+		constants="3.36,0.667,0.04,3.78,0.0667"
+		labels="bact"
+		file="weissLibrary.xml" />
+
+        <module name="Diffusion" 
+                objects="3OC12" 
+                constants="0.1" 
+                labels="cell"
+		file="weissLibrary.xml"/>
+
+	<module name="Plux"
+		objects="LuxI" 
+		constants="1,1,0.1"
+		labels="bact" 
+		file="weissLibrary.xml" />
+
+	<module name="PostTransc"
+		objects="LuxI"
+		constants="3.36,0.0667,0.004,3.78,0.0667"
+		labels="bact"
+		file="weissLibrary.xml" />
+
+         <rule name="r_1" type ="boundary" constant="1">
+            <lhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="cell">
+		<object name="proteinLuxI"/>
+              </listOfInsideObjects>
+            </lhs>
+            <rhs>
+              <listOfOutsideObjects>
+              </listOfOutsideObjects>
+              <listOfInsideObjects label="l">
+		<object name="proteinLuxI"/>
+		<object name="signal3OC12"/>
+              </listOfInsideObjects>
+            </rhs>
+         </rule>
+
+        <!-- <module name="Deg" 
+                objects="signal3OC12" 
+		constants="0.075" 
+                labels="cell"
+		file="weissLibrary.xml"/> -->
+
+      </ruleSet>
+   </ruleSets>
+  </PSystem>
+
+  <PSystem name="Boundary">
+      <alphabetOfObjects>
+	<object name="signal3OC12"/>
+      </alphabetOfObjects>
+      <compartmentLabels>
+	<compartmentLabel label="cell"/>
+      </compartmentLabels>
+      <membraneStructure>
+	<compartment name="cell" label="cell"/>
+      </membraneStructure>
+      <initialMultisets>
+	<initialMultiset label="cell">
+	</initialMultiset>
+      </initialMultisets>
+      <ruleSets>
+	<ruleSet label="cell">
+         <module name="Deg" 
+                 objects="signal3OC12" 
+                 constants="0.075" labels="cell"
+		 file="weissLibrary.xml"/>
+	</ruleSet>
+      </ruleSets>      
+   </PSystem>
+
+
+  </listOfPSystems>
+
+  <lattice name="rectangular" dimension="2" units="microns"
+	   scale="10" xmax="41" ymax="41">
+    <parameter name="a" value="1" />
+    <basis>
+      <vector x="a" y="0" />
+      <vector x="0" y="a" />
+    </basis>
+  </lattice>
+
+  <cellularAutomata name="distribution" distribution="fixed">
+
+   <automaton pSystem="Boundary">
+      <Xcoordinate lowerBound="0" upperBound="101" />
+      <Ycoordinate value="0" />
+   </automaton>
+
+   <automaton pSystem="Boundary">
+      <Xcoordinate lowerBound="0" upperBound="101" />
+      <Ycoordinate value="101" />
+   </automaton>
+
+   <automaton pSystem="Boundary">
+      <Xcoordinate value="0" />
+      <Ycoordinate lowerBound="1" upperBound="100" />
+   </automaton>
+
+   <automaton pSystem="Boundary">
+      <Xcoordinate value="101" />
+      <Ycoordinate lowerBound="1" upperBound="100" />
+   </automaton>
+
+   <automaton pSystem="PulseGeneratorSignal"> 
+      <Xcoordinate lowerBound="30" upperBound="33" /> 
+      <Ycoordinate lowerBound="30" upperBound="33" />
+   </automaton>
+
+   <automaton pSystem="PulseGeneratorSignal"> 
+      <Xcoordinate lowerBound="67" upperBound="70" /> 
+      <Ycoordinate lowerBound="30" upperBound="33" />
+   </automaton>
+
+   <automaton pSystem="PulseGeneratorSignal"> 
+      <Xcoordinate lowerBound="30" upperBound="33" /> 
+      <Ycoordinate lowerBound="67" upperBound="70" />
+   </automaton>
+
+   <automaton pSystem="PulseGeneratorSignal"> 
+      <Xcoordinate lowerBound="67" upperBound="70" /> 
+      <Ycoordinate lowerBound="67" upperBound="70" />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="1" upperBound="100" />
+      <Ycoordinate lowerBound="1" upperBound="29"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="1" upperBound="29" />
+      <Ycoordinate lowerBound="30" upperBound="33"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="34" upperBound="66" />
+      <Ycoordinate lowerBound="30" upperBound="33"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="71" upperBound="100" />
+      <Ycoordinate lowerBound="30" upperBound="33"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="1" upperBound="100" />
+      <Ycoordinate lowerBound="34" upperBound="66"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="1" upperBound="29" />
+      <Ycoordinate lowerBound="67" upperBound="70"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="34" upperBound="66" />
+      <Ycoordinate lowerBound="67" upperBound="70"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="71" upperBound="100" />
+      <Ycoordinate lowerBound="67" upperBound="70"  />
+   </automaton>
+
+   <automaton pSystem="PulseGenerator">
+      <Xcoordinate lowerBound="1" upperBound="100" />
+      <Ycoordinate lowerBound="71" upperBound="100"  />
+   </automaton>
+
+
+  </cellularAutomata>
+
+</CAPSystemModel >

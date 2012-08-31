@@ -1,0 +1,81 @@
+<PSystem name="lastmodulefile1.xml">
+
+	<alphabetOfObjects>
+		<object name="pR_gLacI"/>
+		<object name="rLacI"/>
+		<object name="pLacI"/>
+		<object name="pCI"/>
+		<object name="pCI2"/>
+		<object name="pCI2_pR_gLacI"/>
+		<object name="pCI4_pR_gLacI"/>
+		<object name="plac_gCI"/>
+		<object name="rCI"/>
+		<object name="sIPTG"/>
+		<object name="pLacI_sIPTG"/>
+		<object name="pLacI_plac_gCI"/>
+		<object name="plac_gLacI"/>
+		<object name="pLacI_plac_gLacI"/>
+		<object name="pR_gFP"/>
+		<object name="rFP"/>
+		<object name="pFP"/>
+		<object name="pCI2_pR_gFP"/>
+		<object name="pCI4_pR_gFP"/>
+		<object name="s3OC6ext"/>
+		<object name="s3OC6"/>
+		<object name="pLuxR"/>
+		<object name="pLuxR_s3OC6"/>
+		<object name="pLuxR_s3OC6_2"/>
+		<object name="plux_gFP"/>
+		<object name="pLuxR_s3OC6_2_plux_gFP"/>
+	</alphabetOfObjects>
+
+	<compartmentLabels>
+		<compartmentLabel label="bact"/>
+	</compartmentLabels>
+
+	<membraneStructure>
+		<compartment name="bact" label="bact"/>
+	</membraneStructure>
+
+	<initialMultisets>
+		<initialMultiset label="bact">
+			<object name="pR_gLacI" multiplicity="1"/>
+			<object name="s3OC6ext" multiplicity="5"/>
+		</initialMultiset>
+	</initialMultisets>
+
+	<ruleSets>
+
+		<ruleSet label="bact">
+
+			<module name="PR" 
+					 objects="LacI"
+					 constants="0.1200000048,0.0080000004,0.0399999991,0.0099999998,0.0002400000,0.0020000001,0.2100000083,0.0020000001,0.0050000004,0.0002000000"
+					 labels="bact"
+					file="all_para_module_library_promoter.xml" />
+			<module name="Plac" 
+					 objects="CI"
+					 constants="0.1700000018,0.0020000001,0.0499999970,0.0010000000,0.0001700000,0.0040000002,9.7899999619,0.0199999996"
+					 labels="bact"
+					file="all_para_module_library_promoter.xml" />
+			<module name="Plac" 
+					 objects="LacI"
+					 constants="0.1800000072,0.0080000004,0.0399999991,0.0099999998,0.0001700000,0.0040000002,9.5500001907,0.0199999996"
+					 labels="bact"
+					file="all_para_module_library_promoter.xml" />
+			<module name="PR" 
+					 objects="FP"
+					 constants="0.1599999964,0.0080000004,0.0499999970,0.1000000015,0.0002400000,0.0020000001,0.2490000129,0.0010000000,0.0090000005,0.0001000000"
+					 labels="bact"
+					file="all_para_module_library_promoter.xml" />
+			<module name="PluxR" 
+					 objects="FP"
+					 constants="0.1400000006,0.0999999940,1.2000000477,0.0040000002,1.7000000477,0.0070000002,0.0040000002,1.0000000000,0.4000000060,1.0000000000,0.0080000004,0.0499999970,0.1000000015"
+					 labels="bact"
+					file="all_para_module_library_promoter.xml" />
+		</ruleSet>
+
+	</ruleSets>
+
+</PSystem>
+

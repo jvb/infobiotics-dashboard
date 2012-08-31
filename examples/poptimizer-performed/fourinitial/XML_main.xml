@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LPPsystem name="ModelToEvaluate">
+	<listOfPSystems>
+		<PSystem name="psystem1" file="XML_psystem1.xml"/>
+	</listOfPSystems>
+
+	<lattice name="onePoint" file="XML_lattice.xml"/>
+
+	<spatialDistribution name="distribution" distribution="fixed">
+		<position pSystem="psystem1">
+			<Xcoordinate value="0"/>
+			<Ycoordinate value="0"/>
+		</position>
+	</spatialDistribution>
+
+</LPPsystem>

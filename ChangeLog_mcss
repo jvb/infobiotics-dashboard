@@ -1,0 +1,225 @@
+version 0.1 - released 05/02/08
+
+version 0.2 - released 19/02/08
+
+version 0.3 - released 28/02/08
+
+* fixed Makefile to compile under both windows + linux.
+
+version 0.4 - released 08/03/08
+
+* now handles rules with one or two reactants and one or two products, and degradation rules.
+* added parameter file instead of specifying parameters on command line.
+
+version 0.5 - released 10/03/08
+
+* added a method to convert sbml model files into psystem xml representation.
+
+version 0.6 - released 03/04/08
+
+version 0.7 - released 14/04/08
+
+version 0.8 - released 01/05/08
+
+* added examples directory containing example models.
+* added documentation directory containing documentation.
+* the logarithmic direct method is broken in the current version, so don't use it!
+
+version 0.9 - released 11/06/08
+
+* random numbers seeded from /dev/urandom.
+* added "seed" parameter to allow setting of specified random number seed.
+* added "log_propensities" parameter to allow logging of propensities.
+* updated mcomp-postprocess to output propensity and rule information.
+* rewrote sbml2psys so it converts sbml models to our current p system xml representation.
+* created a shared and static library API. you can now build all the C++ classes and methods as a shared or static library and link programs to these.
+* fixed the compilation targets for windows.
+* updated documentation.
+
+version 0.10 - released 21/07/08
+
+* uploaded to trac system.
+* removed sbml2psys + expand-model + started both of these as seperate projects on trac system.
+
+version 0.11 - released 16/09/08
+
+* updated documentation.
+* able to specify constant species levels.
+* mcomp-postprocess now allows averaging of multiple runs.
+* can now specify compartment positions with mcomp-postprocess instead of having to use compartment indices.
+* time-dependent reaction constants (experimental + undocumented).
+* updated license from GPL version 2 to GPL version 3.
+
+version 0.12 - released 17/11/08
+
+* added support for reactions with 3 products.
+* added "log_degraded" simulation parameter to record levels of degraded species.
+* added CHANGES to record changes.
+* updated reactions1 model in examples directory to include 3 product reactions and distribution-based reaction constants.
+* added supported for distribution-based reaction constants.
+* updated documentation.
+* converted to use libecsb for random number initialisation and generation functions.
+* added support for export of StochKit model file.
+* added dsmts tests.
+* converted to use libecsb for parameter file parsing and added mcomp-parameters-template.xml parameter generation xml file.
+* converted to use libecsb for dataset generation.
+* added support (experimental) for variable volumes, cell growth and cell division.
+* added two programs in the legacy directory to convert simulation parameter and output files pre this release.
+* updated mcomp-postprocess to use libecsb.
+
+version 0.13 - released 19/11/08
+
+* incorporated Fran's code so that the simulator accepts models specified in xml.
+* added a "model_format" parameter.
+* added Fran's xml complexation example to the examples directory.
+* updated the Makefile to link with libxml++, which now also needs to be installed to run mcomp.
+
+version 0.14 - released 04/12/08
+
+* update createFromXML to handle periodic boundary conditions.
+* fixed complexation.params file to output correct simulation results file.
+* updated documentation for XML parameter files.
+* redesigned "amounts" dataset to optimise read/write access. changed mcomp and mcomp-postprocess to write/read new dataset.
+* optimised average level calculation for mcomp postprocess.
+* updated README.
+* added option to find first time level reached to mcomp-postprocess.
+* added specification of compartments by position to calculate ratio option of mcomp-postprocess.
+* adding averging over multiple runs to ratio option in mcomp-postprocess.
+
+version 0.15 - released 05/12/08
+
+* added support for specifying parameters on the command line.
+* updated documentation.
+* added support for logging to memory, including a new log_memory parameter.
+* added api-example directory with an example of how to write a program using the libmcomp api.
+
+version 0.16 - released 14/12/08
+
+* added show_progress parameter to mcomp to output simulation progress to stdout.
+* updated documentation.
+* added signal handler for INT and USR1 signals to gracefully exit and send program state information respectively.
+* change logging to support saving multiple runs in a single file.
+* updated destructors to free memory correctly.
+
+version 0.17 - released 16/12/08
+
+* minor installation bug fixes.
+* added reading of model file from same directory as parameter file.
+
+version 0.18 - released
+
+* updated simulation timings to report microseconds.
+* updated reactions per second calculation to handle run times under one
+second.
+
+version 0.21 - released
+
+* added MPI support for distributed runs.
+* added static compilation configure switch.
+* added queue simulation algorithm (dmq).
+* added combined Gillespie Potts algorithm.
+
+version 0.26 - released 08/09/09
+
+* fixed averaging bug in mcss-postprocess.
+* added compress and compression_level simulation parameters, and code to allow compression of hdf5 datasets.
+
+version 0.27 - released 11/09/09
+
+* fixed segmentation fault for models with no executable reactions.
+
+version 0.28 - released 15/11/09
+
+* added -A option to mcss-postprocess to output attribute values.
+* fixed bug to allow species, compartment and rule names to be a maximum of 255 characters.
+* removed setInitialAmounts function as initial amounts reset when compartments reset.
+
+version 0.29 - released 09/12/09
+
+* added '-z' option to mcss-postprocess to output at specified interval.
+* added ability to specify growth rules as a template.
+* added simulation flag "scale_translocation" to scale translocation rule rates with compartment sizes.
+* added averaging of compartment volumes in mcss-postprocess.
+
+version 0.30 - released 10/12/09
+
+* added python support.
+* fixed output bug in mcss-postprocessing when outputting average volumes.
+
+version 0.31 - released 11/12/09
+
+* fixed building of python package.
+
+version 0.32 - released 16/12/09
+
+* added queue growth algorithm.
+* fixed linking with muparser.
+
+version 0.33 - released 20/12/09
+
+* changed all calls to index() and rindex() to strchr() and strrchr() in mcss + mcss-postprocess.
+* fixed conversion from unsigned long to unsigned int for group names.
+* updated make-deb.sh.
+* fixed Makefile.am's to enable static compilation.
+
+version 0.34 - released 09/02/10
+
+* added dmq2 simulation algorithm with speeded up queue handling (binary heap priority queue).
+* added dmq2g simulation algorith with bhpq + growth.
+* fixed problem with logging of volumes + amount less than chunk_size.
+* fixed resetting of initial volumes for multiple runs.
+* fixed error when updating tau0global with very small tau in simulation algorithms.
+* changed log function to gsl_sf_log in all simulation algorithms.
+* updated createFromXML().
+
+version 0.35 - released 09/03/10
+
+* fixed bug to allow simulation of models with single (default) compartment.
+* fixed bug in mcss-postprocess to allow output of subsecond interval.
+* added max_runtime parameter to mcss to allow specification of maximum (wall clock) simulation runtime.
+
+version 0.36 - released 28/03/10
+
+* fixed bug causing segmentation fault when certain reaction constants set to 0.0.
+
+version 0.37 - released 04/05/10
+
+* added progress_interval parameter to mcss to allow outputting of progress at specified interval.
+
+version 0.38 - released 14/05/10
+
+* added functionality to define rule target types for openalea.
+* extended python interface.
+
+version 0.39 - released 25/05/10
+
+* added optimised dmq2gd growth and division algorithm.
+
+version 0.40 - released 04/08/10
+
+* removed long double references to fix mcss-postprocess output bug in windows.
+
+version 0.41 - released 14/01/11
+
+* fixed just_psystem mcss parameter to allow syntax checking of p system without simulation.
+* added implementation of sbml events for dmq2 algorithm.
+* updated dsmts test problems to test different algorithms.
+* fixed openmpi version so runs are allocated correct if there are more threads than runs.
+* fixed time output in mcss-postprocess for very small log intervals.
+* added various features to plotting scripts.
+* added sbml-set-event-amount script.
+* updated plot-timeseries-multigraph script.
+* fixed mcss-postprocess time taken to reach level output.
+* added -G option to mcss-postprocess to find time taken to reach mean level.
+* added support to mcss for definition and transport to/from enclosed and enclosing compartments.
+* fixed bug in getProduct/ReactantIndex method.
+* added --without-bnf switch to configure to compile without bnf grammar support (causing lock-ups on older gcc compilers e.g. gcc 4.1).
+
+version 0.42 - released 02/06/11
+
+* added deterministic ode solver.
+* fixed handling of single compartment SBML models.
+* added mcss-cmaes parameter optimisation application.
+* added support for SBML unit definitions.
+* added -Q switch for mcss-postprocess to suppress output of standard deviations.
+

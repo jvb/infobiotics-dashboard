@@ -1,0 +1,35 @@
+syntax: glob
+modelParameters.xml
+*.pyc
+*.svn
+*.h5
+distribute-*
+.project
+.pydevproject
+
+syntax: regexp
+^docs$
+^build$
+^dist$
+^MANIFEST$
+^InfobioticsDashboard\.egg-info$
+
+syntax: glob
+infobiotics-dashboard*.deb
+infobiotics-dashboard*.dsc
+infobiotics-dashboard*.tar.gz
+infobiotics-dashboard*.tar.gz.cdbs-config_list
+
+syntax: regexp
+^tests/old$
+
+syntax: regexp
+^ldd_changes\.sh$
+syntax: regexp
+^cp_libs\.sh$
+syntax: regexp
+^doc/epydoc$
+syntax: regexp
+^bin/i.+$
+syntax: regexp
+^\.settings$

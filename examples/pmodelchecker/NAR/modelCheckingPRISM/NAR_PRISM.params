@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<parameters name="pmodelchecker" xmlns="http://www.cpib.ac.uk/~jpt"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+    <!-- parameter definitions -->
+    <parameterSet name="prism">
+        <parameter name="model_checker" value="PRISM"/>
+        <parameter name="model_specification" value="negativeAutoregulationModel.lpp"/>
+        <parameter name="PRISM_model" value="NAR.sm"/>
+        <parameter name="model_parameters" value="lb_gene1_0_0_NARbacterium=0,ub_gene1_0_0_NARbacterium=1,lb_protein1_gene1_0_0_NARbacterium=0,ub_protein1_gene1_0_0_NARbacterium=1,lb_protein1_0_0_NARbacterium=0,ub_protein1_0_0_NARbacterium=10000,lb_rna1_0_0_NARbacterium=0,ub_rna1_0_0_NARbacterium=1000,rule=0,molecule=0"/>
+        <parameter name="temporal_formulas" value="formula.csl"/>
+        <parameter name="task" value="Approximate"/>
+        <parameter name="confidence" value="0.05"/>
+        <parameter name="precision" value="1.0"/>
+        <parameter name="results_file" value="results.psm"/>
+        <parameter name="states_file" value="file_states.psm"/>
+        <parameter name="transitions_file" value="transitions.sm"/>
+        <parameter name="number_samples" value="100"/>
+    </parameterSet>
+</parameters>

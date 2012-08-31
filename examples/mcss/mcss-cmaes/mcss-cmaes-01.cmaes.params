@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<parameters xmlns="http://www.cpib.ac.uk/~jpt"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+<!-- parameter definitions -->
+<parameterSet name="McssCmaesParameters">
+	<parameter name="population_size" value="20"/>
+	<parameter name="num_parameters" value="2"/>
+	<parameter name="max_iterations" value="40"/>
+	<parameter name="function_file" value="./mcss-cmaes-01.so"/>
+	<parameter name="mcss_parameter_file" value="mcss-cmaes-01.mcss.params"/>
+	<parameter name="target_data_file" value="mcss-cmaes-01.target.data"/>
+	<parameter name="data_file" value="mcss-cmaes-01.cmaes.h5"/>
+	<parameter name="show_progress" value="true"/>
+	<parameter name="lower_bound" value="-9.0"/>
+	<parameter name="upper_bound" value="-3.0"/>
+	<parameter name="parallel_runs" value="false"/>
+</parameterSet>
+
+</parameters>

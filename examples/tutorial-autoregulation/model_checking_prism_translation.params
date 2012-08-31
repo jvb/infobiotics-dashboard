@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<parameters name="pmodelchecker" xmlns="http://www.cpib.ac.uk/~jpt"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+    <!-- parameter definitions -->
+    <parameterSet name="prism">
+        <parameter name="model_checker" value="PRISM"/>
+        <parameter name="model_specification" value="individualCells.lpp"/>
+        <parameter name="PRISM_model" value="autoregulation.sm"/>
+        <parameter name="task" value="Translate"/>
+    </parameterSet>
+</parameters>

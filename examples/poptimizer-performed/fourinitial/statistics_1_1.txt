@@ -1,0 +1,1 @@
+Run0:  1081   754.642944   54.444111   4028    3   PluxPR(X=GFP)  Pconst(X=CI)  Pconst(X=LuxR)  

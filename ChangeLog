@@ -1,0 +1,44 @@
+version 0.0.11 - released 05/08/2010
+
+* poptimizer interface
+
+version 0.0.12 - released 12/01/2011
+
+* temporary fix added to report experiment errors on Mac 
+
+version 0.0.13 - released 17/06/2011
+
+* experiment error reporting on Windows 
+* opens erroneous files with erroneous BNF in Dashboard under Windows
+* matplotlib toolbar icons fixed under Mac and Windows (fine on Debian)
+
+version 0.1.0 - released 15/08/11
+
+* record surface visualizations using ffmpeg
+* Save resized button on far right of matplotlib toolbar
+
+version 0.1.1 - released 16/08/11
+
+* can generate JavaDoc-esque documentation for all used classes using doc/epydoc.sh 
+
+version 1.0.0 - released 05/09/2011
+
+* export data in .csv, .xls and .npz formats
+* deterministic solvers for mcss
+* improved labelling of timeseries plots
+* computes and displays memory usage for .h5 selection
+* improved command-line launcher
+* bug fixes 
+
+version 1.0.1 - released 22/11/2011
+
+* experiment error reporting on Windows
+
+version 1.0.2 - released 24/07/2012
+
+* fixed TraitError in bind_preferences when (PoptimiserParams.)maxmodulesno = <undefined>
+* commented out McssResultsWidget().ui.to_spin_box value loading which caused confusion
+* fixed default compartment volume - 0.01 (picolitres)
+* fixed logic bug which meant multiple runs were always averages in timeseries plots
+* improved error handling at application entry point (bin/_ibw.py)
+

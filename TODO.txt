@@ -1,0 +1,121 @@
+version 0.1.1 - released ??/??/11
+
+* done
+
+
+=================================================
+Things to do, bugs to fix, feature requests, etc.
+=================================================
+
+
+Priority
+--------
+
+* histograms
+
+ParamsHandler.status
+
+Tidy bin/
+
+Export mcss results data
+
+Make size of Mayavi screenshots adjustable
+
+Sync Mayavi cameras http://code.enthought.com/projects/mayavi/docs/development/html/mayavi/auto/mlab_figure.html?highlight=sync#sync-camera
+
+Use open lpp file for model parameter for each experiment -> Eclipse 
+
+Help URLs for Dashboard main window - requires altered actions strategy to HelpController
+    link to issue tracker http://bitbucket.org/jvb/infobiotics-dashboard/issues?status=new&status=open
+
+Welcome perspective *
+
+Disabled 'Perform' button should have helpful tooltip populated by has_invalid_parameters()
+
+
+Freezing
+--------
+
+png2icns
+
+test_frozen_matplotlib_images_setup.py
+
+IBW should install shortcuts to All Users when 'Run as...' Administrator on University computers - alternative is to not install in Program Files (probably more natural) - maybe suggest this on running the installer - still can't add to path though!
+
+Mayavi2 toolbar icons not rendering properly in frozen builds, where are the images in these?
+
+py2exe log error dialog fix in root
+
+
+LPP systems language
+--------------------
+
+Lexing of P system files -> Xtext/Eclipse
+
+Autocompletion from parsed data structure -> Xtext/Eclipse 
+
+
+McssResultsWidget
+-----------------
+
+BoundsEditor for time start/stop?
+
+
+PModelCheckerResults
+--------------------
+
+BoundsEditor for axes
+
+
+POptimizer
+----------
+
+Item('popsize', label='Population size', visible_when='object.para_opti_algo_ != "CMA-ES"'),
+
+need to expect not just prefix1.txt but prefix?.txt where ? is num_initials
+
+[set to undefined?] make maximum number of modules in a model '' by default but erroneous using TextEditor(evaluate-evaluate_function)
+
+
+General
+-------
+
+Splash screen
+
+Tidy up setup.py
+
+Generate py2imports.py in py2app.sh and py2exe.sh
+
+Rewrite README
+
+Update tutorial examples on infobiotics.org
+
+FIXMEs
+
+TODOs
+
+Code coverage
+
+Unit tests (before refactoring!)
+
+
+Future
+------
+
+RelativeFile validation should respect filters.
+
+change CorePlugin to DashboardPlugin *
+
+Project management (using Single Project plugin?) -> Eclipse
+
+Results management using Sumatra
+
+Parse command line arguments to Dashboard using argparse, file names to Unified file opener service 
+
+Unified 'Open File...' service/action
+
+Adding Dashboard progress bars (with Experiment and Results buttons) to view list
+
+McssResults: composite species (sum of all species in composite), composite runs (e.g. all runs) and composite compartments... 
+
+

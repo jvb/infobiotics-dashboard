@@ -1,0 +1,37 @@
+#!/bin/bash
+source /usr/local/bin/virtualenvwrapper.sh
+name=ets-trunk
+srcname=~/src/$name
+virtualenvname=$name--no-site-packages
+#mkvirtualenv --distribute --no-site-packages $virtualenvname
+#cp ets.py $srcname
+
+workon $virtualenvname
+cdsitepackages
+pymodules=/usr/lib/pymodules/python2.6
+ln -s $pymodules/sip.so
+ln -s $pymodules/sipconfig.py
+ln -s $pymodules/PyQt4
+ln -s $pymodules/matplotlib
+ln -s $pymodules/dateutil
+ln -s $pymodules/vtk
+ln -s $pymodules/xlwt
+ln -s $pymodules/pygments
+ln -s $pymodules/docutils
+ln -s $pymodules/configobj.py
+dist_packages=/usr/lib/python2.6/dist-packages
+ln -s $dist_packages/numpy
+ln -s $dist_packages/tables
+ln -s $dist_packages/pytz
+#pip install pygments docutils ConfigObj
+#pip install numpy
+#pip install http://downloads.sourceforge.net/project/matplotlib/matplotlib/matplotlib-1.0/matplotlib-1.0.0.tar.gz?use_mirror=sunet&ts=1279878271
+#pip install numexpr
+#pip install cython
+#pip install tables
+#cd ../../../build/tables/tables/
+#cython utilsExtension.pyx
+
+cd $srcname
+#python ets.py co
+#python ets.py develop

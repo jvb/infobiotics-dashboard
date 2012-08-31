@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<parameters xmlns="http://www.cpib.ac.uk/~jpt"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+<!-- parameter definitions -->
+<parameterSet name="SimulationParameters">
+	<parameter name="model_file" value="module1.sbml"/>
+	<parameter name="max_time" value="10000"/>
+	<parameter name="simulation_algorithm" value="dmq2"/>
+	<parameter name="data_file" value="module1-huge.h5"/>
+	<parameter name="log_type" value="levels"/>
+	<parameter name="log_interval" value="1.0"/>
+	<parameter name="duplicate_initial_amounts" value="1"/>
+	<parameter name="runs" value="10000"/>
+</parameterSet>
+
+</parameters>

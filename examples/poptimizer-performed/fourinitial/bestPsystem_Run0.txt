@@ -1,0 +1,218 @@
+Input target file 0 : target1.txt
+
+Input target file 1 : target2.txt
+
+Input target file 2 : target3.txt
+
+Input target file 3 : target4.txt
+
+Input initial value file 0 : initials1.txt
+
+Input initial value file 1 : initials2.txt
+
+Input initial value file 2 : initials3.txt
+
+Input initial value file 3 : initials4.txt
+
+Input module library file: library1-lin.xml
+
+Parameter optimization method: CMA-ES
+fitness calculation method: Random weighted sum
+
+*******non-fixed module set in the model**************
+Number of modules: 3
+
+
+Module[0]:
+Module Name in Library:  PluxPR
+Index in Library:2
+Number of rules: 9
+r_1:  LuxR2+PluxPR_geneGFP-->PluxPR_LuxR2_geneGFP
+kc value=0.700000  scale=linear
+
+r_2:  PluxPR_LuxR2_geneGFP-->PluxPR_geneGFP+LuxR2
+kc value=0.700000  scale=linear
+
+r_3:  LuxR2+PluxPR_CI2_geneGFP-->PluxPR_LuxR2_CI2_geneGFP
+kc value=2.900000  scale=linear
+
+r_4:  PluxPR_LuxR2_CI2_geneGFP-->PluxPR_CI2_geneGFP+LuxR2
+kc value=0.700000  scale=linear
+
+r_5:  CI2+PluxPR_geneGFP-->PluxPR_CI2_geneGFP
+kc value=2.000000  scale=linear
+
+r_6:  PluxPR_CI2_geneGFP-->PluxPR_geneGFP+CI2
+kc value=4.900000  scale=linear
+
+r_7:  CI2+PluxPR_LuxR2_geneGFP-->PluxPR_LuxR2_CI2_geneGFP
+kc value=1.100000  scale=linear
+
+r_8:  PluxPR_LuxR2_CI2_geneGFP-->PluxPR_LuxR2_geneGFP+CI2
+kc value=2.500000  scale=linear
+
+r_9:  PluxPR_LuxR2_geneGFP-->PluxPR_LuxR2_geneGFP+rnaGFP_RNAP
+kc value=2.000000  scale=linear
+
+
+Module[1]:
+Module Name in Library:  Pconst
+Index in Library:0
+Number of rules: 1
+r_1:  Pconst_geneCI-->Pconst_geneCI+rnaCI_RNAP
+kc value=3.800000  scale=linear
+
+
+Module[2]:
+Module Name in Library:  Pconst
+Index in Library:0
+Number of rules: 1
+r_1:  Pconst_geneLuxR-->Pconst_geneLuxR+rnaLuxR_RNAP
+kc value=4.200000  scale=linear
+
+
+*******fixed module set in the model**************
+number of modules: 8
+
+
+********module[0]:
+Module Name in Library: Deg
+Index in Library: 0
+Number of rules: 2
+r_1:  signal3OC12-->Q
+kc value=0.100000  scale=linear
+
+r_2:  source-->source+signal3OC12
+kc value=0.062500  scale=linear
+
+
+********module[1]:
+Module Name in Library: Dim
+Index in Library: 1
+Number of rules: 2
+r_1:  proteinCI+proteinCI-->CI2
+kc value=1.000000  scale=linear
+
+r_2:  CI2-->Q
+kc value=0.005540  scale=linear
+
+
+********module[2]:
+Module Name in Library: DimSig
+Index in Library: 2
+Number of rules: 4
+r_1:  proteinLuxR+signal3OC12-->proteinLuxR_3OC12
+kc value=1.000000  scale=linear
+
+r_2:  proteinLuxR_3OC12-->Q
+kc value=0.015400  scale=linear
+
+r_3:  proteinLuxR_3OC12+proteinLuxR_3OC12-->LuxR2
+kc value=1.000000  scale=linear
+
+r_4:  LuxR2-->Q
+kc value=0.015400  scale=linear
+
+
+********module[3]:
+Module Name in Library: PostTranscCI
+Index in Library: 3
+Number of rules: 5
+r_1:  rnaCI_RNAP-->rnaCI
+kc value=3.200000  scale=linear
+
+r_2:  rnaCI-->rnaCI+proteinCI_Rib
+kc value=0.020000  scale=linear
+
+r_3:  rnaCI-->Q
+kc value=0.040000  scale=linear
+
+r_4:  proteinCI_Rib-->proteinCI
+kc value=3.600000  scale=linear
+
+r_5:  proteinCI-->Q
+kc value=0.100000  scale=linear
+
+
+********module[4]:
+Module Name in Library: PostTranscGFP
+Index in Library: 4
+Number of rules: 5
+r_1:  rnaGFP_RNAP-->rnaGFP
+kc value=3.360000  scale=linear
+
+r_2:  rnaGFP-->rnaGFP+proteinGFP_Rib
+kc value=0.667000  scale=linear
+
+r_3:  rnaGFP-->Q
+kc value=0.040000  scale=linear
+
+r_4:  proteinGFP_Rib-->proteinGFP
+kc value=3.780000  scale=linear
+
+r_5:  proteinGFP-->Q
+kc value=0.066700  scale=linear
+
+
+********module[5]:
+Module Name in Library: PostTranscLacI
+Index in Library: 5
+Number of rules: 5
+r_1:  rnaLacI_RNAP-->rnaLacI
+kc value=2.220000  scale=linear
+
+r_2:  rnaLacI-->rnaLacI+proteinLacI_Rib
+kc value=0.010000  scale=linear
+
+r_3:  rnaLacI-->Q
+kc value=0.040000  scale=linear
+
+r_4:  proteinLacI_Rib-->proteinLacI
+kc value=2.500000  scale=linear
+
+r_5:  proteinLacI-->Q
+kc value=0.069000  scale=linear
+
+
+********module[6]:
+Module Name in Library: PostTranscLuxR
+Index in Library: 6
+Number of rules: 5
+r_1:  rnaLuxR_RNAP-->rnaLuxR
+kc value=3.200000  scale=linear
+
+r_2:  rnaLuxR-->rnaLuxR+proteinLuxR_Rib
+kc value=0.300000  scale=linear
+
+r_3:  rnaLuxR-->Q
+kc value=0.040000  scale=linear
+
+r_4:  proteinLuxR_Rib-->proteinLuxR
+kc value=3.600000  scale=linear
+
+r_5:  proteinLuxR-->Q
+kc value=0.075000  scale=linear
+
+
+********module[7]:
+Module Name in Library: PostTranscTetR
+Index in Library: 7
+Number of rules: 5
+r_1:  rnaTetR_RNAP-->rnaTetR
+kc value=3.650000  scale=linear
+
+r_2:  rnaTetR-->rnaTetR+proteinTetR_Rib
+kc value=0.010000  scale=linear
+
+r_3:  rnaTetR-->Q
+kc value=0.040000  scale=linear
+
+r_4:  proteinTetR_Rib-->proteinTetR
+kc value=4.110000  scale=linear
+
+r_5:  proteinTetR-->Q
+kc value=0.069000  scale=linear
+
+
+total fitness= 754.642944  total RMSE=54.444111  
+

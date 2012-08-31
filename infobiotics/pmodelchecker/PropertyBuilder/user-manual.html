@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+
+<div style="font-family:Arial, Helvetica, sans-serif; font-size:12px;" class="content">
+<ul>
+<li><a href="#launching">Launching the PropertyBuilder tool</a>
+    <ul>
+    	<li><a href="#launchWithParams">Calling the property builder with parameters</a></li>
+    </ul>
+    </li>
+</ul>
+
+<br /><br />
+
+<div id="launching">
+<h3>Launching the PropertyBuilder tool</h3>
+<p>The software was developed in the Java programming language and is released as a Java JAR archive. To run the property builder simply run the following command in the command line:</p>
+<div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:50%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar</div>
+</div>
+
+<div id="launchWithParams">
+<h3>Launching the PropertyBuilder with parameters</h3>
+<p>The PropertyBuilder can be called using a series of parameters which are relevant to the execution. This is a great advantage that enables users to re-use a predefined settings template for each property building session but also pass specific information that relates to the model the properties are build for. This mainly includes variables and constants and can be used to constrain the user into specifying only expressions that refer to existing identifiers in the model.</p>
+<p>The application parameters are hierarchically structured and defined using <b>XML</b>. The markup can either be loaded from an existing file or can be passed directly in the command line as a string. The latter approach is suitable for launching the property builder builder from other applications which can generate the parameters automatically. <a href="params.xml">A example XML parameter file can be found here</a>.
+</p>
+<p>It is very important to understand how the XML based specification containing the application parameters is passed upon execution.</p>
+<p>Firstly, the general command syntax for executing the property builder with XML based parameters is: </p>
+<div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:50%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar [-parameterFlag parameterValue] [-parameterFlag parameterValue] ...</div>
+</div>
+<p>The following parameter commands are supported at the moment:</p>
+<ul>
+	<li><strong>-params</strong> : when this is encountered, an string consisting of XML markup is expected directly in the command prompt as a parameter value. We clarify the case when this is correctly used with an example:
+    <div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:80%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -params &quot;&lt;params&gt;&lt;modelVariables&gt;&lt;variable id=\&quot;var1\&quot;&gt;...&lt;/variable&gt;...&lt;/modelVariables&gt;&lt;output&gt;...&lt;/output&gt;&lt;/params&gt;&quot;</div>
+    <strong>Important:</strong> Use double quotes to indicate that the whole string should be taken as an argument, including spaces. Otherwise, the command prompt will treat each space separated fragment as a different argument. Consequently, use <strong>\&quot;</strong> within the an element to define attributes.
+    </li>
+    <li><strong>-paramsFile</strong> : as the name implies, when this is encountered, the property builder attempts to load the file with the name specified by the parameter value. Used as in the examples:
+    <div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:50%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -paramsFile params.xml</div>
+    <div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:50%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -paramsFile "This is the params file.xml"</div>
+    </li>
+    <li><strong>-settings</strong> : the settings command indicates that either direct XML markup is expected or a filename containing the actual settings is passed as parameter value. The property builder will auto-detect what the value represents. Examples:
+    <div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:50%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -settings params.xml</div>
+    <div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:50%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -settings "&lt;params&gt;&lt;modelVariables&gt;...&lt;/modelVariables&gt;&lt;/params&gt;"</div>
+    </li>
+</ul>
+
+<p> A very important thing to mention here is that the PropertyBuilder also accepts combinations of these commands. That is a user or agent may specify at the same time a parameter file and also inline XML markup. In this way multiple parameters can be declared on the fly on top of the default ones which could reside in a file. You may wish to have some general settings that are to be reused throughout multiple sessions, but you also want to specify some session specific parameters (model variables for example). The settings simply complement each other, or if the same parameters are declared multiple times, they are overriden, according to the following rule:</p>
+<ol>
+<li>First load parameters from the value of the <i>-paramsFile</i> command, if it was declared.</li>
+<li>Secondly, load parameters from the value of the <i>-settings</i> command, whether it's another file or inline XML. Complement the parameters loaded in the first step (if any), and overwrite the ones that already exist. This obviously takes place if the <i>-settings</i> parameter flag was input.</li>
+<li>Lastly, load parameters from the value of the <i>-params</i> command, which is inline XML markup. Complement the parameters loaded so far (if any), and overwrite the ones that already exist.</li>
+</ol>
+
+This structure allows the user to be very selective and easily add parameters on top of the default ones which may be located in a file (basically allows for distribution of parameters).
+We further illustrate this with examples of how to use the fusion of the 3 parameter commands:
+<div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:80%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -paramsFile params.xml -params "&lt;params&gt;&lt;modelVariables&gt;...&lt;/modelVariables&gt;&lt;/params&gt;"</div>
+<div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:80%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -settings "&lt;params&gt;&lt;modelVariables&gt;...&lt;/modelVariables&gt;&lt;/params&gt;" -params "&lt;params&gt;&lt;output&gt;...&lt;/output&gt;&lt;/params&gt;"</div>
+<div style="background-color:#E6E7E2; border:1px #666 dashed; font-family:Tahoma, Geneva, sans-serif; padding:5px; width:80%; margin:10px 20px;">java -jar [path]\propertyBuilder.jar -paramsFile defaultParams.xml -settings "&lt;params&gt;&lt;dtrace&gt;...&lt;/dtrace&gt;&lt;/params&gt;" -params "&lt;params&gt;&lt;output&gt;...&lt;/output&gt;&lt;/params&gt;"</div>
+
+</div>
+</body>
+</html>

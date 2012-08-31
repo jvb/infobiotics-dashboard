@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<LPPsystem name="module1">
+  <listOfPSystems>
+    <PSystem name="B_1" file="B_1.sps"/>
+    <PSystem name="E_0" file="E_0.sps"/>
+  </listOfPSystems>
+  <lattice name="module1_lattice" file="module1_lattice.lat"/>
+  <spatialDistribution>
+    <position pSystem="B_1">
+      <Xcoordinate value="1"/>
+      <Ycoordinate value="0"/>
+    </position>
+    <position pSystem="B_1">
+      <Xcoordinate value="0"/>
+      <Ycoordinate value="1"/>
+    </position>
+    <position pSystem="B_1">
+      <Xcoordinate value="2"/>
+      <Ycoordinate value="1"/>
+    </position>
+    <position pSystem="B_1">
+      <Xcoordinate value="1"/>
+      <Ycoordinate value="2"/>
+    </position>
+    <position pSystem="E_0">
+      <Xcoordinate value="0"/>
+      <Ycoordinate value="0"/>
+    </position>
+    <position pSystem="E_0">
+      <Xcoordinate value="2"/>
+      <Ycoordinate value="0"/>
+    </position>
+    <position pSystem="E_0">
+      <Xcoordinate value="1"/>
+      <Ycoordinate value="1"/>
+    </position>
+    <position pSystem="E_0">
+      <Xcoordinate value="0"/>
+      <Ycoordinate value="2"/>
+    </position>
+    <position pSystem="E_0">
+      <Xcoordinate value="2"/>
+      <Ycoordinate value="2"/>
+    </position>
+  </spatialDistribution>
+</LPPsystem>

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Infobiotics Dashboard
+Comment=A frontend to the Infobiotics Workbench, a suite of tools for modelling and designing multi-cellular biological systems
+TryExec=infobiotics-dashboard
+Exec=infobiotics-dashboard %F
+Terminal=false
+Icon=infobiotics-workbench
+Categories=Education;Science;

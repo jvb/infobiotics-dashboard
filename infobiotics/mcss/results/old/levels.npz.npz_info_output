@@ -1,0 +1,33 @@
+
+levels.npz: 3 runs, 2 species, 9 compartments, 601 timepoints from simulation 'module1.h5' of model 'module1.sbml'
+
+2 species (index, name, original index)
+0	A	0
+1	B	1
+
+9 compartments (index, label and position, original index)
+0	B::1,2:0,1 (0,1)	4
+1	B::1,2:1,0 (1,0)	1
+2	B::1,2:1,2 (1,2)	7
+3	B::1,2:2,1 (2,1)	5
+4	E::1:0,0 (0,0)	0
+5	E::1:0,2 (0,2)	6
+6	E::1:1,1 (1,1)	3
+7	E::1:2,0 (2,0)	2
+8	E::1:2,2 (2,2)	8
+
+601 timepoints from 0.0 to 600.0 every 1.0
+
+3 runs (index, run number)
+0	1
+1	2
+2	3
+
+'levels.npy' is a 4-dimensional array of shape (3, 2, 9, 601)=(run, species, compartment, timepoint)
+
+# example function
+def get_timeseries(run_index, species_index, compartment_index):
+    import numpy as np
+    f = np.load('levels.npz')
+    return f['levels'][run_index, species_index, compartment_index, :]
+    

@@ -1,0 +1,2 @@
+Formulas:
+"P=?[ (Time=600)U([protein1_2_0_UnRegbacterium] >= B ^ [protein1_2_0_UnRegbacterium] < B + 5){Time=600}]" {B=0:10:300}

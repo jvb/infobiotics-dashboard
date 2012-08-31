@@ -1,0 +1,5 @@
+QtSvg4.dll - D:\Python26\Lib\site-packages\PyQt4\bin\QtSvg4.dll
+qscintilla2.dll - D:\Python26\Lib\site-packages\PyQt4\bin\qscintilla2.dll
+QtNetwork.pyd - D:\Python26\lib\site-packages\PyQt4\QtNetwork.pyd
+mfc90.dll - D:\Python26\lib\site-packages\pythonwin\mfc90.dll
+QtXmlPatterns4.dll - D:\Python26\Lib\site-packages\PyQt4\bin\QtXmlPatterns4.dll

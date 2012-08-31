@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<params>
+
+<modelVariables>
+	<variable id="v1">
+		<name>a_bact_0_0</name>
+		<description>Molecule a in compartment bact in position (0,0)</description>
+	</variable>
+	<variable id="v2">
+		<name>b_bact_0_0</name>
+		<description>Molecule b in compartment bact in position (0,0)</description>
+	</variable>
+	<variable id="v3">
+		<name>c_bact_0_0</name>
+		<description>Molecule c in compartment bact in position (0,0)</description>
+	</variable>
+	<variable id="v4">
+		<name>d_bact_0_0</name>
+		<type>int</type>
+		<description>Molecule d in compartment bact in position (0,0)</description>
+	</variable>
+	<variable id="v5">
+		<name>d_bact_1_0</name>
+		<type>int</type>
+		<description>Molecule d in compartment bact in position (1,0)</description>
+	</variable>
+</modelVariables>
+
+<modelConstants>
+	<constant id="c1">
+		<name>top_bound</name>
+		<value>100</value>
+		<type>int</type>
+		<description>The top boundary value</description>
+	</constant>
+	<constant id="c2">
+		<name>lower_bound</name>
+		<value>0</value>
+		<type>int</type>
+		<description>The lower boundary value</description>
+        </constant>
+</modelConstants>
+
+<listOfPatternSources>
+
+	<patternFile src="patterns/patterns.xml" />
+	<!--<patternFile src="defaultPatterns.xml" />
+	<patternFile src="ext1Patterns.xml" />
+	<patternFile src="statePatterns.xml" />
+	<patternFile src="rewardPatterns.xml" />-->
+	<patternFile src="patterns/CTLPatterns.xml" />
+</listOfPatternSources>
+
+<dtrace src="dtrace_01.dtr" />
+
+<output>
+	<defaultWorkDirectory value="D:\" />
+	<defaultPropertyFile value="properties.csl" />
+	<defaultRewardsFile value="rewards.csl" />
+	<dumpOutput toFile="false" toStandardOutput="true" />
+</output>
+
+</params>

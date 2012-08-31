@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<listOfPatterns>
+
+<pattern name="Max pattern" type="state" class="basic" id="sp1" description="smaple description">
+<description>This pattern is used to generate a state based on a maximum value a variable may have</description>
+<question>A variable v is maximum m.</question>
+<template>Variable #v1 is maximum #v2.</template>
+<translations>
+	<translation target="PRISM">
+		<description>This is the translation to PCTL</description>
+		<value>x &lt; #v</value>
+	</translation>
+	<translation target="MC2">
+		<description>This is the translation to MC2</description>
+		<value>(x &lt; #v)</value>
+	</translation>
+</translations>
+<variables>
+	<var id="v1" type="int" initValue="0" description="this is variable v1"/>
+	<var id="v2" type="int" initValue="0"><description>This is variable v2</description></var>
+	<var id="v3" type="int" initValue="0" />
+</variables>
+</pattern>
+
+<pattern name="Min pattern" type="state" class="basic" id="sp2">
+<description>This pattern is used to generate a state based on a minimum value a variable may have</description>
+<question>A variable v is minimum m.</question>
+<template>Variable #v1 is minimum #v2.</template>
+<translations>
+	<translation target="PRISM">
+		<description>This is the translation to PCTL</description>
+		<value>x &gt; #v</value>
+	</translation>
+	<translation target="MC2">
+		<description>This is the translation to MC2</description>
+		<value>(x &gt; #v)</value>
+	</translation>
+</translations>
+<variables>
+	<var id="v1" type="float" initValue="0" description="this is variable v1" />
+	<var id="v2" type="float" initValue="0"><description>This is variable v2</description></var>
+</variables>
+</pattern>
+
+<pattern name="Conjunction pattern" type="state" class="basic-state" id="sp3">
+<description>This pattern is used to generate a state based on the conjunction of 2 other states</description>
+<question>A state s holds iff states s1 and s2 hold.</question>
+<template>State s holds iff states #s1 and #s2 hold.</template>
+<translations>
+	<translation target="PRISM">
+		<description>This is the translation to PCTL</description>
+		<value>( #s1 ) &amp; ( #s2 )</value>
+	</translation>
+	<translation target="MC2">
+		<description>This is the translation to MC2</description>
+		<value>( #s1 ) &amp; ( #s2 )</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is variable v1"/>
+	<var id="s2" type="state" initValue="0"><description>This is variable v2</description></var>
+</variables>
+</pattern>
+
+<pattern name="Disjunction pattern" type="state" class="basic-state" id="sp4">
+<description>This pattern is used to generate a state based on the disjunction of 2 other states</description>
+<question>A state s holds iff states either s1 or s2 hold.</question>
+<template>State s holds iff states either #s1 or #s2 hold.</template>
+<translations>
+	<translation target="PRISM">
+		<description>This is the translation to PCTL</description>
+		<value>( #s1 ) | ( #s2 )</value>
+	</translation>
+	<translation target="MC2">
+		<description>This is the translation to MC2</description>
+		<value>( #s1 ) | ( #s2 )</value>
+	</translation>
+</translations>
+<variables>
+	<var id="s1" type="state" initValue="0" description="this is variable v1"/>
+	<var id="s2" type="state" initValue="0"><description>This is variable v2</description></var>
+</variables>
+</pattern>
+
+</listOfPatterns>

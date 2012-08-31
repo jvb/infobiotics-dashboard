@@ -1,0 +1,18 @@
+'''Describes how the dashboard version is determined. 
+
+'setup.py' reads 'VERSION.txt' (both in source root) to get the version number 
+(in the format <major>.<minor>.<micro>.<releaselevel>, e.g. 0.0.13.dev) and 
+overwrites 'infobiotics/__version__.py' with commented source that uses the new
+version number.
+
+'infobiotics/__version__.py' keeps that string in "__version__" and splits the 
+major, minor and micro numbers into a tuple of ints called "__version_info__".
+
+'infobiotics/__init__.py' does #TODO move to infobiotics.dashboard.__init__?
+"import __version__.__version__, __version_info__",
+"version = VERSION = __version__"
+and
+"version_info = VERSION_INFO = __version_info__"
+for redundant access to these attributes.
+
+'''

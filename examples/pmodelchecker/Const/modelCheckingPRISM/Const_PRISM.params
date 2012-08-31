@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<parameters name="pmodelchecker" xmlns="http://www.cpib.ac.uk/~jpt"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+    <!-- parameter definitions -->
+    <parameterSet name="prism">
+        <parameter name="model_checker" value="PRISM"/>
+        <parameter name="model_specification" value="constitutiveExpressionModel.lpp"/>
+        <parameter name="PRISM_model" value="constitutive.sm"/>
+        <parameter name="model_parameters" value="lb_gene1_0_0_Constbacterium=0,ub_gene1_0_0_Constbacterium=1,lb_protein1_0_0_Constbacterium=0,ub_protein1_0_0_Constbacterium=10000,lb_rna1_0_0_Constbacterium=0,ub_rna1_0_0_Constbacterium=1000"/>
+        <parameter name="temporal_formulas" value="formula.csl"/>
+        <parameter name="task" value="Approximate"/>
+        <parameter name="confidence" value="0.05"/>
+        <parameter name="precision" value="1.0"/>
+        <parameter name="results_file" value="Const_results.psm"/>
+        <parameter name="states_file" value="file_states.psm"/>
+        <parameter name="transitions_file" value="file_transitions.psm"/>
+        <parameter name="number_samples" value="100"/>
+    </parameterSet>
+</parameters>

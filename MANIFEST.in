@@ -1,0 +1,9 @@
+include AUTHORS.txt ChangeLog copyright COPYING.txt LICENSE.txt NAME.txt README.txt THANKS.txt VERSION.txt
+include distribute_setup.py
+include clean.sh sdist.sh make-deb.sh py2imports.py py2exe.sh py2app.sh   
+include doc/endo.sh doc/epydoc.sh
+include bin/*
+include infobiotics-dashboard.desktop
+include images/infobiotics-workbench.png images/infobiotics-workbench.xpm
+include py2app/eintr.patch
+include py2exe/windows_xp_missing_dlls.txt py2exe/boot_common.py py2exe/build_exe.py

@@ -1,0 +1,187 @@
+Input target file 0 : target_data_promoter1.txt
+
+Input initial value file 0 : initial_values_promoter1.txt
+
+Input module library file: all_para_module_library_promoter.xml
+
+Parameter optimization method: EDA
+fitness calculation method: Random weighted sum
+
+*******non-fixed module set in the model**************
+Number of modules: 5
+
+
+Module[0]:
+Module Name in Library:  PR
+Index in Library:0
+Number of rules: 10
+r_1:  pR_gLacI-->pR_gLacI+rLacI
+kc value=0.120000  scale=linear
+
+r_2:  rLacI-->Q
+kc value=0.008000  scale=linear
+
+r_3:  rLacI-->rLacI+pLacI
+kc value=0.040000  scale=linear
+
+r_4:  pLacI-->Q
+kc value=-2.000000  scale=logarithmic
+
+r_5:  pCI+pCI-->pCI2
+kc value=0.000240  scale=linear
+
+r_6:  pCI2-->pCI+pCI
+kc value=0.002000  scale=linear
+
+r_7:  pCI2+pR_gLacI-->pCI2_pR_gLacI
+kc value=0.210000  scale=linear
+
+r_8:  pCI2_pR_gLacI-->pCI2+pR_gLacI
+kc value=0.002000  scale=linear
+
+r_9:  pCI2+pCI2_pR_gLacI-->pCI4_pR_gLacI
+kc value=0.005000  scale=linear
+
+r_10:  pCI4_pR_gLacI-->pCI2+pCI2_pR_gLacI
+kc value=0.000200  scale=linear
+
+
+Module[1]:
+Module Name in Library:  Plac
+Index in Library:1
+Number of rules: 8
+r_1:  plac_gCI-->plac_gCI+rCI
+kc value=0.170000  scale=linear
+
+r_2:  rCI-->Q
+kc value=0.002000  scale=linear
+
+r_3:  rCI-->rCI+pCI
+kc value=0.050000  scale=linear
+
+r_4:  pCI-->Q
+kc value=-3.000000  scale=logarithmic
+
+r_5:  pLacI+sIPTG-->pLacI_sIPTG
+kc value=0.000170  scale=linear
+
+r_6:  pLacI_sIPTG-->pLacI+sIPTG
+kc value=0.004000  scale=linear
+
+r_7:  pLacI+plac_gCI-->pLacI_plac_gCI
+kc value=9.790000  scale=linear
+
+r_8:  pLacI_plac_gCI-->pLacI+plac_gCI
+kc value=0.020000  scale=linear
+
+
+Module[2]:
+Module Name in Library:  Plac
+Index in Library:1
+Number of rules: 8
+r_1:  plac_gLacI-->plac_gLacI+rLacI
+kc value=0.180000  scale=linear
+
+r_2:  rLacI-->Q
+kc value=0.008000  scale=linear
+
+r_3:  rLacI-->rLacI+pLacI
+kc value=0.040000  scale=linear
+
+r_4:  pLacI-->Q
+kc value=-2.000000  scale=logarithmic
+
+r_5:  pLacI+sIPTG-->pLacI_sIPTG
+kc value=0.000170  scale=linear
+
+r_6:  pLacI_sIPTG-->pLacI+sIPTG
+kc value=0.004000  scale=linear
+
+r_7:  pLacI+plac_gLacI-->pLacI_plac_gLacI
+kc value=9.550000  scale=linear
+
+r_8:  pLacI_plac_gLacI-->pLacI+plac_gLacI
+kc value=0.020000  scale=linear
+
+
+Module[3]:
+Module Name in Library:  PR
+Index in Library:0
+Number of rules: 10
+r_1:  pR_gFP-->pR_gFP+rFP
+kc value=0.160000  scale=linear
+
+r_2:  rFP-->Q
+kc value=0.008000  scale=linear
+
+r_3:  rFP-->rFP+pFP
+kc value=0.050000  scale=linear
+
+r_4:  pFP-->Q
+kc value=-1.000000  scale=logarithmic
+
+r_5:  pCI+pCI-->pCI2
+kc value=0.000240  scale=linear
+
+r_6:  pCI2-->pCI+pCI
+kc value=0.002000  scale=linear
+
+r_7:  pCI2+pR_gFP-->pCI2_pR_gFP
+kc value=0.249000  scale=linear
+
+r_8:  pCI2_pR_gFP-->pCI2+pR_gFP
+kc value=0.001000  scale=linear
+
+r_9:  pCI2+pCI2_pR_gFP-->pCI4_pR_gFP
+kc value=0.009000  scale=linear
+
+r_10:  pCI4_pR_gFP-->pCI2+pCI2_pR_gFP
+kc value=0.000100  scale=linear
+
+
+Module[4]:
+Module Name in Library:  PluxR
+Index in Library:2
+Number of rules: 13
+r_1:  s3OC6ext-->s3OC6ext+s3OC6
+kc value=0.140000  scale=linear
+
+r_2:  s3OC6-->Q
+kc value=0.100000  scale=linear
+
+r_3:  s3OC6+pLuxR-->pLuxR_s3OC6
+kc value=1.200000  scale=linear
+
+r_4:  pLuxR_s3OC6-->s3OC6+pLuxR
+kc value=0.004000  scale=linear
+
+r_5:  pLuxR_s3OC6+pLuxR_s3OC6-->pLuxR_s3OC6_2
+kc value=1.700000  scale=linear
+
+r_6:  pLuxR_s3OC6_2-->pLuxR_s3OC6+pLuxR_s3OC6
+kc value=0.007000  scale=linear
+
+r_7:  pLuxR_s3OC6_2-->Q
+kc value=0.004000  scale=linear
+
+r_8:  pLuxR_s3OC6_2+plux_gFP-->pLuxR_s3OC6_2_plux_gFP
+kc value=1.000000  scale=linear
+
+r_9:  pLuxR_s3OC6_2_plux_gFP-->pLuxR_s3OC6_2+plux_gFP
+kc value=0.400000  scale=linear
+
+r_10:  pLuxR_s3OC6_2_plux_gFP-->pLuxR_s3OC6_2_plux_gFP+rFP
+kc value=0.000000  scale=logarithmic
+
+r_11:  rFP-->Q
+kc value=0.008000  scale=linear
+
+r_12:  rFP-->rFP+pFP
+kc value=0.050000  scale=linear
+
+r_13:  pFP-->Q
+kc value=-1.000000  scale=logarithmic
+
+
+total fitness= 4151.517090  total RMSE=60.154678  
+

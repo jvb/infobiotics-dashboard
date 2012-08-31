@@ -1,0 +1,1 @@
+Run0:  2050   4151.517090   60.154678   891    5   PR(X=LacI)  Plac(X=CI)  Plac(X=LacI)  PR(X=FP)  PluxR(X=FP)  

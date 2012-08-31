@@ -1,0 +1,75 @@
+# Author: Francisco J. Romero-Campero 							         #
+# Date: July 2010						  						         #
+# Description: A multicelluar system consisting of a bacterial colony   #
+#              combining bacteria carrying the same gene under three different #
+#					regulatory mechanisms. Namely, unregulated expression, positive #
+# 					autoregulation and negative autoregulation #
+
+LPPsystem negativeAutoregulationModel
+
+    # Cell types specified as individual SP systems #
+	SPsystems
+        SPsystem UnReg from UnReg.sps
+		  SPsystem PAR from PAR.sps
+        SPsystem NAR from NAR.sps
+	endSPsystems
+
+    # The geometry of the system is determine using a regular finite point lattice #
+	lattice rectangular from rectangular.lat
+
+    # Special distribution of the cells over the lattice #
+	spatialDistribution
+		
+        # Bacteria carrying gene1 expressed constitutively are place on the leftmost part #
+		  # of the bacterial colony #
+		positions for UnReg
+
+			parameters
+				parameter i = 0:1:9
+				parameter j = 0:1:9
+			endParameters
+			
+			coordinates
+				x = i
+				y = j
+			endCoordinates
+
+		endPositions
+
+
+        # Bacteria carrying gene1 regulating itself positively are place on the rightmost part #
+		  # of the bacterial colony #
+		positions for PAR
+
+			parameters
+				parameter i = 15:1:24
+				parameter j = 0:1:10
+			endParameters
+			
+			coordinates
+				x = i
+				y = j
+			endCoordinates
+
+		endPositions
+
+
+        # Bacteria carrying gene1 regulating itself negatively are place on the rightmost part #
+		  # of the bacterial colony #
+		positions for NAR
+
+			parameters
+				parameter i = 30:1:39
+				parameter j = 0:1:10
+			endParameters
+			
+			coordinates
+				x = i
+				y = j
+			endCoordinates
+
+		endPositions
+
+	endSpatialDistribution
+
+endLPPsystem
