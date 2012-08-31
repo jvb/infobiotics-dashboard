@@ -282,6 +282,12 @@ class TimeseriesPlot(HasTraits):
         if len(self.figure_title) > 0:
             self._figure.suptitle(self.figure_title)
 
+        # debugging
+        for i, t in enumerate(self._timeseries):
+            if len(t) == 0:
+                print 'len(self._timeseries['+i+']) == 0'
+                 
+        
         # don't allow negative x (time) or y (values)
         for axes in self.axes:
             xmin_xmax_tuples = [(t.timepoints[0].magnitude, t.timepoints[-1].magnitude) for t in self._timeseries]

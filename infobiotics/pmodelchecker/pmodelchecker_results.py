@@ -46,7 +46,7 @@ else:
     from mayavi.core.ui.api import MlabSceneModel, SceneEditor, MayaviScene 
     from mayavi.core.api import Scene, PipelineBase
 
-from infobiotics.commons.mayavi import extent
+from infobiotics.commons.mayavi_ import extent
 
 from matplotlib.figure import Figure
 

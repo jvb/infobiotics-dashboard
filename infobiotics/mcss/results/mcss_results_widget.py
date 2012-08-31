@@ -56,6 +56,8 @@ class McssResultsWidget(QWidget):
         self.ui = Ui_McssResultsWidget()
         self.ui.setupUi(self) # QPixmap: It is not safe to use pixmaps outside the GUI thread
 
+        self.ui.volume_spin_box.setSingleStep(0.01)
+
         self.connect_signals_to_slots()
 
         self._file_name_line_edit_text_orig = self.ui.file_name_line_edit.text() # remember text from Ui_McssResultsWidget
@@ -151,25 +153,25 @@ class McssResultsWidget(QWidget):
     def restore_geometry(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
-        self.setGeometry(settings.value('geometry', self.geometry()).toRect())
+        self.setGeometry(settings.value('geometry', self.geometry()))
         settings.endGroup()
         
     def save_current_directory(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
-        settings.setValue('current_directory', QVariant(unicode(self.current_directory)))
+        settings.setValue('current_directory', unicode(self.current_directory))
         settings.endGroup()
         
     def restore_current_directory(self):
         settings = QSettings()
         settings.beginGroup(self._settings_group())
-        self.current_directory = unicode(settings.value('current_directory', QVariant(QDir.currentPath())).toString())
+        self.current_directory = unicode(settings.value('current_directory', QDir.currentPath()))
         settings.endGroup()
 
 #    def previous(self): #TODO
 #        settings = QSettings()
 #        settings.beginGroup(self._settings_group())
-#        previous = unicode(settings.value('previous').toString())
+#        previous = unicode(settings.value('previous'))
 #        return previous
 
 
@@ -181,24 +183,24 @@ class McssResultsWidget(QWidget):
         settings = QSettings()
         
         settings.beginGroup(self._settings_group())
-        settings.setValue('previous', QVariant(self.filename))
+        settings.setValue('previous', self.filename)
         settings.endGroup() # vital
         
         settings.beginGroup(self._settings_group(self.filename))
-        settings.setValue('units', QVariant(self.units_dict()))
-        settings.setValue('from', QVariant(self.ui.from_spin_box.value()))
-        settings.setValue('to', QVariant(self.ui.to_spin_box.value()))
-        settings.setValue('every', QVariant(self.ui.every_spin_box.value()))
-        settings.setValue('averaging', QVariant(self.ui.average_over_selected_runs_check_box.checkState()))
-        settings.setValue('all_runs', QVariant(self.ui.select_all_runs_check_box.checkState()))
-        settings.setValue('all_species', QVariant(self.ui.select_all_species_check_box.checkState()))
-        settings.setValue('all_compartments', QVariant(self.ui.select_all_compartments_check_box.checkState()))
-        settings.setValue('runs', QVariant([modelIndex.row() for modelIndex in self.ui.runs_list_widget.selectedIndexes()]))
-        settings.setValue('species', QVariant([modelIndex.row() for modelIndex in self.ui.species_list_widget.selectedIndexes()]))
-        settings.setValue('compartments', QVariant([modelIndex.row() for modelIndex in self.ui.compartments_list_widget.selectedIndexes()]))
-        settings.setValue('species_filter', QVariant(self.ui.filter_species_line_edit.text()))
-        settings.setValue('compartments_filter', QVariant(self.ui.filter_compartments_line_edit.text()))
-        settings.setValue('volume', QVariant(self.ui.volume_spin_box.value()))
+        settings.setValue('units', self.units_dict())
+        settings.setValue('from', self.ui.from_spin_box.value())
+        settings.setValue('to', self.ui.to_spin_box.value())
+        settings.setValue('every', self.ui.every_spin_box.value())
+        settings.setValue('averaging', self.ui.average_over_selected_runs_check_box.checkState())
+        settings.setValue('all_runs', self.ui.select_all_runs_check_box.checkState())
+        settings.setValue('all_species', self.ui.select_all_species_check_box.checkState())
+        settings.setValue('all_compartments', self.ui.select_all_compartments_check_box.checkState())
+        settings.setValue('runs', [modelIndex.row() for modelIndex in self.ui.runs_list_widget.selectedIndexes()])
+        settings.setValue('species', [modelIndex.row() for modelIndex in self.ui.species_list_widget.selectedIndexes()])
+        settings.setValue('compartments', [modelIndex.row() for modelIndex in self.ui.compartments_list_widget.selectedIndexes()])
+        settings.setValue('species_filter', self.ui.filter_species_line_edit.text())
+        settings.setValue('compartments_filter', self.ui.filter_compartments_line_edit.text())
+        settings.setValue('volume', self.ui.volume_spin_box.value())
         settings.endGroup()
 
 
@@ -211,26 +213,21 @@ class McssResultsWidget(QWidget):
         
         settings.beginGroup(self._settings_group(self.filename))
 
-        units = settings.value('units').toPyObject()
+        units = settings.value('units')#.toPyObject()
         if units:
             units = dict((unicode(key), unicode(value)) for key, value in units.items())
             self.set_units(**units)
         
         def restore_selection(checkboxsetting, checkbox, listwidgetsetting, listwidget):
-            checked, ok = settings.value(checkboxsetting, QVariant(Qt.Unchecked)).toInt()
+            checked = settings.value(checkboxsetting, Qt.Unchecked)
             if checked:
                 checkbox.setCheckState(checked)
             else:
-                rows = settings.value(listwidgetsetting).toPyObject()
+                rows = settings.value(listwidgetsetting)
                 if rows is None or len(rows) > 100:
                     rows = []
                 for row in rows: 
-                    if not isinstance(row, int):
-                        row, ok = row.toInt()
-                    else:
-                        ok = True
-                    if ok:
-                        listwidget.select(row)
+                    listwidget.select(row)
 
         restore_selection('all_species', self.ui.select_all_species_check_box, 'species', self.ui.species_list_widget)
         restore_selection('all_compartments', self.ui.select_all_compartments_check_box, 'compartments', self.ui.compartments_list_widget)
@@ -239,27 +236,25 @@ class McssResultsWidget(QWidget):
         if self.ui.runs_list_widget.count() == 1:
             self.ui.runs_list_widget.selectAll()
 
-        self.ui.filter_species_line_edit.setText(settings.value('species_filter', '').toString())
+        self.ui.filter_species_line_edit.setText(settings.value('species_filter', ''))
         
-        self.ui.filter_compartments_line_edit.setText(settings.value('compartments_filter', '').toString())
+        self.ui.filter_compartments_line_edit.setText(settings.value('compartments_filter', ''))
 
-        from_, ok = settings.value('from', 0.0).toDouble()
-        if ok: 
-            self.ui.from_spin_box.setValue(from_)
-#        to, ok = settings.value('to', None).toDouble()
-#        if ok:
-#            self.ui.to_spin_box.setValue(to)
-        every, ok = settings.value('every', QVariant(1)).toInt()
-        if ok:
-            self.ui.every_spin_box.setValue(every)
+        from_ = settings.value('from', 0.0)
+        self.ui.from_spin_box.setValue(from_)
 
-        checked, ok = settings.value('averaging', Qt.Checked).toInt() 
-        if ok:
-            self.ui.average_over_selected_runs_check_box.setCheckState(checked)
+        to = settings.value('to', from_)
+        self.ui.to_spin_box.setValue(to)
+        # to gets special treatment after load_settings returns in load_succeeded
+        
+        every = settings.value('every', 1)
+        self.ui.every_spin_box.setValue(every)
 
-        volume, ok = settings.value('volume', QVariant(0.01)).toDouble()
-        if ok:
-            self.ui.volume_spin_box.setValue(volume)
+        checked = settings.value('averaging', Qt.Checked) 
+        self.ui.average_over_selected_runs_check_box.setCheckState(checked)
+
+        volume = settings.value('volume', 0.01)
+        self.ui.volume_spin_box.setValue(volume)
 
         settings.endGroup()
 
@@ -324,6 +319,14 @@ class McssResultsWidget(QWidget):
 
         # load settings for new filename
         self.load_settings()
+
+        # fix to
+        to_max = simulation.max_time
+        to = self.ui.to_spin_box.value()
+        if not 0 < to < simulation.max_time:
+            self.ui.to_spin_box.setValue(to_max)
+        else:
+            self.ui.to_spin_box.setStyleSheet('color:red')
         
         return True
 

@@ -185,7 +185,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.commons.api
     import infobiotics.commons.files
     import infobiotics.commons.metaclasses.noconflict
-    import infobiotics.commons.mayavi
+    import infobiotics.commons.mayavi_
     import infobiotics.commons.strings
     import infobiotics.commons.dicts
     import infobiotics.commons.qt4
