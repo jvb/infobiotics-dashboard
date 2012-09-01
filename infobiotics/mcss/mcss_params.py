@@ -48,20 +48,24 @@ class McssParams(Params):
     
     duplicate_initial_amounts = Bool(True, desc='whether to duplicate initial amounts for all templates in the SBML model')
 #    just_psystem = Bool(False, desc='whether to just initialise the P system and not perform the simulation')
-    max_time = FloatGreaterThanZero(desc='the maximum simulated time')
-    max_runtime = Range(low=0, desc='the maximum execution time for all runs (in seconds)')
-    log_interval = FloatGreaterThanZero(1.0, desc='the time interval between which to log data') 
-    runs = LongGreaterThanZero(1, desc='the number of simulation runs to perform')
+
     data_file = ParamsRelativeFile('simulation.h5', writable=True, filter=['HDF5 files (*.h5)'], desc='the file to save simulation data to')
+    max_time = FloatGreaterThanZero(60.0, desc='the maximum simulated time')
+    log_interval = FloatGreaterThanZero(1.0, desc='the time interval between which to log data') 
+    
+    # overridden in McssParamsHandler
+    simulation_algorithm = Enum(['dmq2', 'dmq', 'dm', 'ldm', 'dmgd', 'dmcp', 'dmqg', 'dmq2g', 'dmq2gd', 'ode1'], desc='the simulation algorithm to use')
+    runs = LongGreaterThanZero(10, desc='the number of independent stochastic simulations to perform')
     seed = Long(0, desc='the random number seed (0=randomly generated)')
+
+    # overridden in McssParamsHandler
+    ode_solver = Enum(['rk4','rk2','rkf45','rkck','rk8pd','rk2imp','rk4imp','bsimp','gear1','gear2'])
+
+    max_runtime = Range(low=0, desc='the maximum execution time for all runs (in seconds)')
     compress = Bool(True, desc='whether to compress HDF5 output')
     compression_level = Range(low=0, high=9, value=9, desc='the HDF5 compression level (0-9; 9=best)')
     
-    # overridden in McssParamsHandler
-    simulation_algorithm = Enum(['ode1','dmq2', 'dmq', 'dm', 'ldm', 'dmgd', 'dmcp', 'dmqg', 'dmq2g', 'dmq2gd'])
 
-    # overridden in McssParamsHandler
-    ode_solver = Enum(['rk2','rk4','rkf45','rkck','rk8pd','rk2imp','rk4imp','bsimp','gear1','gear2'])
 
     log_type = Enum(['levels', 'reactions'], desc='the type of data logging to perform')
     log_memory = Bool(desc='whether to log output to memory')
