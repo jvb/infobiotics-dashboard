@@ -475,24 +475,32 @@ else: # assume sys.platform.startswith('linux'):
 
 # dependencies when doing 'python setup.py install' 
 INSTALL_REQUIRES = [
-#    'distribute', # http://pypi.python.org/pypi/distribute#quick-help-for-developers
-    'numpy>=1.4.0',
-    'EnthoughtBase>=3.0.4',
-    'AppTools>=3.3.2',
-    'Traits>=3.4.0',
-    'TraitsGUI>=3.4.0',
-    'EnvisageCore>=3.1.2',
-    'EnvisagePlugins>=3.1.2',
-    'TraitsBackendQt>=3.4.0',
+##    'distribute', # http://pypi.python.org/pypi/distribute#quick-help-for-developers
+#    'numpy>=1.4.0',
+	'numpy',
+	
+	'apptools',
+	'traits',
+	'traitsui',
+	'pyface',
+	'envisage',
+	
+#    'EnthoughtBase>=3.0.4',
+#    'AppTools>=3.3.2',
+#    'Traits>=3.4.0',
+#    'TraitsGUI>=3.4.0',
+#    'EnvisageCore>=3.1.2',
+#    'EnvisagePlugins>=3.1.2',
+#    'TraitsBackendQt>=3.4.0',
     'Mayavi', #>=3.4.0',
     'configobj', # for apptools.preferences
     'matplotlib', #,==0.99.1', 
     'progressbar',
-#    'which==1.1.0', # in infobiotics.thirdparty as there is no python-which package in Debian (also available from http://code.google.com/p/which/)
+##    'which==1.1.0', # in infobiotics.thirdparty as there is no python-which package in Debian (also available from http://code.google.com/p/which/)
     'setproctitle',
     'xlwt',
-    'quantities',
-#    'libsbml', #TODO
+#    'quantities',
+##    'libsbml', #TODO
 ]
 #INSTALL_REQUIRES += ['winpexpect>=1.3'] if sys.platform.startswith('win') else ['pexpect'] # winpexpect is preferred over wexpect on Windows
 if not sys.platform.startswith('win'):

@@ -1,0 +1,46 @@
+http://markmail.org/message/jlzxjxwn4a3knhm2?q=enthought-dev+envisage+action&page=2#query:enthought-dev%20envisage%20action+page:2+mid:jlzxjxwn4a3knhm2+state:results
+
+Subject:	Re: [Enthought-Dev] how to automatically fire an action on startup	permalink
+From:	Robert Kern (rke...@enthought.com)
+Date:	Aug 4, 2009 3:09:47 pm
+List:	com.enthought.mail.enthought-dev
+
+On Tue, Aug 4, 2009 at 16:33, Ondrej Certik<ond...@certik.cz> wrote:
+
+Hi,
+
+if the user starts my app with some specific commandline options, that I parse with optparse, I would like to do some action, e.g. fire some Action. So far here is what I am doing:
+
+1) hook this into the class HermesPlugin(Plugin), method _action_sets_default(self):
+
++        # XXX: find a better place to hook this in: +        self.application.workbench.on_trait_change( +                ActionSet._on_workbench_started, "window_opened")
+
+2) in the ActionSet, use this code:
+
++    @staticmethod +    def _on_workbench_started(event): +        path = os.path.normpath(sys.argv[1]) +        OpenAction().perform(event, path=sys.argv[1])
+
+So my questions:
+
+* is OpenAction().perform(event) the way to fire some particular action? E.g. do I need to instantiate it myself again? Or is there some way to access the already made instances somewhere * how can I pass the result from optparse into the ActionSet? (Is ActionSet the right place to have such code?) As you can see above, I am accessing sys.argv directly, which is bad, I want to access preparsed arguments from optparse. Of course I can use some global variable, but I am sure there is some better way.
+
+I have an application where I have the exact same issue. First, I organize my Actions such that they just call methods on other services. I usually don't subclass Action and implement a substantive perform() method for each thing I want to do. There are exceptions, of course, but if you ever want to do something from outside of a menu item or a toolbar button press, I highly suggest following my lead.
+
+Also, I usually develop Envisage applications such that there is one "application plugin" whose job is basically to configure the other plugins. What I do is pass the optparse options (I actually use argparse, these days) to this plugin. The plugin's start() method will interpret these options, and schedule the appropriate methods to run in the GUI event loop (which hasn't started, yet) using
+
+from enthought.pyface.timer.api import do_after
+
+My main.py script looks something like this:
+
+def get_plugins(args): """ Make the list of plugins to use for the application. """ from enthought.envisage.core_plugin import CorePlugin from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin from myapp.plugin import MyAppPlugin
+
+plugins = [ CorePlugin(), WorkbenchPlugin(), MyAppPlugin(initial_filename=args.file), ] return plugins
+
+def main(): import argparse parser = argparse.ArgumentParser() parser.add_argument('file', nargs='?')
+
+args = parser.parse_args()
+
+app = WorkbenchApplication( id=ID, plugins=get_plugins(args), ) app.run()
+
+-- Robert Kern
+
+"I have come to believe that the whole world is an enigma, a harmless enigma that is made terrible by our own mad attempt to interpret it as though it had an underlying truth." -- Umberto Eco 
