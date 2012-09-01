@@ -1,7 +1,9 @@
-from has_infobiotics_dashboard_workbench_application import HasInfobioticsDashboardWorkbenchApplication
-from traits.api import on_trait_change
+from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
+from traits.api import HasTraits, Instance, on_trait_change
 
-class DashboardExperimentHandler(HasInfobioticsDashboardWorkbenchApplication):
+class DashboardExperimentHandler(HasTraits):
+
+    application = Instance(InfobioticsDashboardWorkbenchApplication)
 
     _imported_results_modules = True 
 

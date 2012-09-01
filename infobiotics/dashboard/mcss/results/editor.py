@@ -31,7 +31,7 @@ class McssResultsEditor(Editor):
         if not obj:
             return
         self.id = self._get_unique_id()
-        if hasattr(obj, 'filename'):
+        if hasattr(obj, 'filename') and obj.filename is not None:
             self.name = os.path.basename(obj.filename) 
         else:
             self.name = self.id

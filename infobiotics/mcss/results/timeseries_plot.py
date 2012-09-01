@@ -282,11 +282,10 @@ class TimeseriesPlot(HasTraits):
         if len(self.figure_title) > 0:
             self._figure.suptitle(self.figure_title)
 
-        # debugging
-        for i, t in enumerate(self._timeseries):
-            if len(t) == 0:
-                print 'len(self._timeseries['+i+']) == 0'
-                 
+#        # debugging #TODO delete
+#        for i, t in enumerate(self._timeseries):
+#            if len(t.timepoints) == 0:
+#                print 'len(self._timeseries[%s]) == 0' % i
         
         # don't allow negative x (time) or y (values)
         for axes in self.axes:

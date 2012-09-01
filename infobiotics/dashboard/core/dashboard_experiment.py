@@ -1,20 +1,24 @@
-from has_infobiotics_dashboard_workbench_application import HasInfobioticsDashboardWorkbenchApplication
-from traits.api import Str, Property, Instance
+from infobiotics.dashboard.api import InfobioticsDashboardWorkbenchApplication
+from traits.api import HasTraits, Instance, Str, Property
 from PyQt4.QtGui import QWidget
 from envisage.plugins.text_editor.editor.text_editor import TextEditor
 from apptools.io.api import File
 import os.path
-from pyface.api import GUI
 
-class DashboardExperiment(HasInfobioticsDashboardWorkbenchApplication):
-    
+#from pyface.api import GUI
+from pyface.gui import GUI
+
+class DashboardExperiment(HasTraits):
+
+    application = Instance(InfobioticsDashboardWorkbenchApplication)
+       
     _interaction_mode = Str('gui') # overrides _interaction_mode in Params but means that DashboardExperiment must be imported before McssDashboardExperiment for example 
 
     _parent_widget = Property(Instance(QWidget))
 
     def _get__parent_widget(self):
-#        return self.application.workbench.active_window.control
-        return None
+        return self.application.workbench.active_window.control
+#        return None #TODO check
     
     def _stderr_pattern_matched(self, pattern_index, match):
         pattern = match.group()
