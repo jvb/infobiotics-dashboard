@@ -96,7 +96,7 @@ def main(plugin_factories=plugin_factories):
 	# create application from plugins
 	application = InfobioticsDashboardWorkbenchApplication(
 		# create plugins by calling each plugin factory
-		plugins=[plugin_factory() for plugin_factory in plugin_factories] + [mcss_ui_plugin],
+		plugins=[mcss_ui_plugin] + [plugin_factory() for plugin_factory in plugin_factories],
 		mcss_ui_plugin=mcss_ui_plugin
 	)
 
