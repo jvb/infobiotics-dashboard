@@ -17,6 +17,6 @@ __version_info__ = tuple([int(num) for num in __version__.split('.')[:3]]) # htt
 
 
 if __name__ == '__main__':
-    print "__version__ = '" + __version__ + "'"
-    print '__version_info__ =', __version_info__
+	print "__version__ = '" + __version__ + "'"
+	print '__version_info__ =', __version_info__
 

@@ -14,7 +14,17 @@ from __future__ import with_statement
 
 
 # bbfreeze
-import py2imports
+
+import sip
+sip.setapi('QString', 2)
+sip.setapi('QVariant', 2) 
+
+def __dependencies_for_freezing():
+	import infobiotics
+	import py2imports
+#	import tvtk.tvtk_access
+#	import tvtk.api
+#	import tvtk.tvtk_classes
 
 
 # "Application asked to unregister timer 0x1c000011 which is not registered in this thread. Fix application."
@@ -22,6 +32,13 @@ import py2imports
 
 
 import sys
+
+
+# testing bbfreeze
+print 'sys.executable', sys.executable
+print 'sys.path', sys.path
+
+
 import os.path
 
 from traits.trait_errors import TraitError

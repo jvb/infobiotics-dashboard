@@ -13,6 +13,9 @@ if sys.platform.startswith('win'):
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE' # required for matplotlib with Numpy-MKL 1.6.1 MKL from http://www.lfd.uci.edu/~gohlke/pythonlibs/
     import matplotlib; matplotlib.use('qt4agg') # overrule configuration # http://www.py2exe.org/index.cgi/MatPlotLib
 #    import pylab
+elif sys.platform.startswith('linux'):
+#    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE' # required for matplotlib with Numpy-MKL 1.6.1 MKL from http://www.lfd.uci.edu/~gohlke/pythonlibs/
+    import matplotlib; matplotlib.use('qt4agg')
 
 #import preferences # fails on weasel #TODO
 
