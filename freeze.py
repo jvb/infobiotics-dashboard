@@ -1,9 +1,16 @@
 from bbfreeze import Freezer
+
 f = Freezer(
-	'infobiotics-dasboard-1.1.0', 
+	'dist',#'infobiotics-dasboard-1.1.0', 
 	includes=(
-		'_strptime',
+#		'_strptime',
 	)
 )
+
 f.addScript('infobiotics-dashboard.py')
-f() # starts the freezing process
+
+# not library.zip
+f.use_compression = False
+
+# freeze
+f()
