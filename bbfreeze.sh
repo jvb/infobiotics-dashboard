@@ -47,11 +47,10 @@ HERE
 
 
 echo "freezing with bbfreeze"
-echo
 
 
 # cleaning
-
+echo "cleaning"
 # remove PKG_INFO, setup.cfg, .pyc and .class files; build, debian, dist and tmp directories; Debian packages; distribute and InfobioticsDashboard eggs  
 ./clean.sh
 
@@ -67,7 +66,7 @@ export ETS_TOOLKIT=qt4
 # install bbreeze (using pip)
 ##TODO easy_install pip
 #TODO apt-get install python-pip 
-#TODO pip install bbfreeze
+#sudo pip install bbfreeze
 
 
 # freezing
@@ -78,9 +77,26 @@ python freeze.py
 
 # post-freezing
 
-# add TVTK classes zip file to library; fixes: 'ImportError: TVTK not built properly. Unable to find either a directory: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes or a file: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes.zip with the TVTK classes.'
-#./clean.sh && python freeze.py && unzip dist/library.zip -d dist/library/ && unzip /usr/lib/python2.7/dist-packages/tvtk/tvtk_classes.zip -d dist/library/tvtk/tvtk_classes/ && rm dist/library.zip && cd dist/library/ && (sudo zip -r ../library.zip * | grep denied) && cd ../.. && rm -rf dist/library/ && dist/infobiotics-dashboard && echo ok
-cp -r tvtk_/ dist/tvtk/ && cd dist && zip library.zip tvtk/*.py && cd .. && cp /usr/share/pyshared/tvtk/tvtk_classes.zip dist/tvtk/ 
+# fix ImportError: TVTK not built properly. Unable to find either a directory: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes or a file: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes.zip with the TVTK classes.
+# patch tvtk.__init__ and tvtk.tvtk_access
+cp -r bbfreeze/tvtk/ dist/tvtk/ && cd dist && zip library.zip tvtk/*.py && cd .. && 
+# add TVTK classes zip file to library
+cp /usr/share/pyshared/tvtk/tvtk_classes.zip dist/tvtk/ 
+
+# patch mayavi.preferences.preferences_manager
+cp -r bbfreeze/mayavi/ dist/mayavi/ && cd dist && zip -r library.zip mayavi/ && cd ..
+# add mayavi preferences
+mkdir -p dist/mayavi/preferences/
+cp /usr/share/pyshared/mayavi/preferences/preferences.ini dist/mayavi/preferences/
+# add tvtk preferences
+mkdir -p dist/tvtk/plugins/scene/
+cp /usr/share/pyshared/tvtk/plugins/scene/preferences.ini dist/tvtk/plugins/scene/
+
+# patch mayavi.preferences.preferences_manager
+#TODO cp -r bbfreeze/mayavi/ dist/mayavi/ && cd dist && zip -r library.zip mayavi/ && cd ..
+# add mayavi/core/lut/pylab_luts.pkl
+mkdir -p dist/mayavi/core/lut/
+cp /usr/share/pyshared/mayavi/core/lut/pylab_luts.pkl dist/mayavi/core/lut/
 
 
 # testing

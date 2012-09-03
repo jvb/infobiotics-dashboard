@@ -34,9 +34,75 @@ def __dependencies_for_freezing():
 import sys
 
 
-# testing bbfreeze
-print 'sys.executable', sys.executable
-print 'sys.path', sys.path
+#		# debugging freezing with bbfreeze.sh (start)
+#		print 'debugging freezing with bbfreeze.sh (start)'
+#
+#	Traceback (most recent call last):
+#	  File "<string>", line 6, in <module>
+#	  File "__main__.py", line 128, in <module>
+#	  File "__main__infobiotics-dashboard__.py", line 215, in <module>
+#	  File "__main__infobiotics-dashboard__.py", line 123, in main
+#	  File "infobiotics/dashboard/run.py", line 43, in <module>
+#	    from infobiotics.dashboard.core.ui_plugin import CoreUIPlugin
+#	  File "infobiotics/dashboard/core/ui_plugin.py", line 13, in <module>
+#	    from infobiotics.api import *
+#	  File "infobiotics/api.py", line 4, in <module>
+#	    from infobiotics.pmodelchecker.prism.prism_experiment import PRISMExperiment as prism
+#	  File "infobiotics/pmodelchecker/prism/prism_experiment.py", line 5, in <module>
+#	    from infobiotics.pmodelchecker.pmodelchecker_experiment_handler import PModelCheckerExperimentHandler
+#	  File "infobiotics/pmodelchecker/pmodelchecker_experiment_handler.py", line 3, in <module>
+#	    from infobiotics.pmodelchecker.pmodelchecker_results import PModelCheckerResults
+#	  File "infobiotics/pmodelchecker/pmodelchecker_results.py", line 46, in <module>
+#	    from mayavi.core.ui.api import MlabSceneModel, SceneEditor, MayaviScene 
+#	  File "mayavi/core/ui/api.py", line 1, in <module>
+#	  File "mayavi/tools/mlab_scene_model.py", line 9, in <module>
+#	  File "mayavi/core/engine.py", line 27, in <module>
+#	  File "mayavi/core/base.py", line 28, in <module>
+#	  File "mayavi/preferences/api.py", line 4, in <module>
+#	  File "mayavi/preferences/preference_manager.py", line 128, in <module>
+#	  File "mayavi/preferences/preference_manager.py", line 81, in __init__
+#	  File "mayavi/preferences/preference_manager.py", line 109, in _load_preferences
+#	  File "pkg_resources.py", line 910, in resource_stream
+#	  File "pkg_resources.py", line 1186, in get_resource_stream
+#	  File "pkg_resources.py", line 1189, in get_resource_string
+#	  File "pkg_resources.py", line 1266, in _get
+#	IOError: [Errno 20] Not a directory: 'mayavi/preferences/preferences.ini'
+#
+#		import sys
+#		print 'sys.executable', sys.executable
+#		print 'sys.path', sys.path
+#
+##	   from traits.etsconfig.api import ETSConfig
+##	   ID = 'mayavi_e3'
+##	   print 'ID', ID
+#		#mayavi.preferences.preference_manager.PreferenceManager._load_preferences
+#		# Save current application_home.
+#		app_home = ETSConfig.get_application_home()
+#		print 'app_home', app_home
+#		# Set it to where the mayavi preferences are temporarily.
+#		path = join(ETSConfig.get_application_data(), ID)
+#		print 'path', path
+#		ETSConfig.application_home = path
+#		try:
+#			for pkg in ('mayavi.preferences',
+#						'tvtk.plugins.scene'):
+#				pref = 'preferences.ini'
+#
+#				print 'pkg', pkg
+#				print 'pref', pref
+#
+#				pref_file = pkg_resources.resource_stream(pkg, pref)
+#
+#				preferences = self.preferences
+#				default = preferences.node('default/')
+#				default.load(pref_file)
+#				pref_file.close()
+#		finally:
+#			# Set back the application home.
+#			ETSConfig.application_home = app_home
+#
+#		print 'debugging freezing with bbfreeze.sh (end)'
+#		# debugging freezing with bbfreeze.sh (end)
 
 
 import os.path
