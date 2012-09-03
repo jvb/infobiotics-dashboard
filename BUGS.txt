@@ -1,0 +1,95 @@
+# 1 timeseries (1 run 1 species 1 compartment) 36000 timepoints
+/usr/lib/python2.7/dist-packages/tables/leaf.py:416: PerformanceWarning: The Leaf ``/run1/amounts`` is exceeding the maximum recommended rowsize (104857600 bytes);
+be ready to see PyTables asking for *lots* of memory and possibly slow
+I/O.  You may want to reduce the rowsize by trimming the value of
+dimensions that are orthogonal (and preferably close) to the *main*
+dimension of this leave.  Alternatively, in case you have specified a
+very small/large chunksize, you may want to increase/decrease it.
+  PerformanceWarning)
+Traceback (most recent call last):
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results_widget.py", line 919, in histogram
+    bins=10,
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 78, in fromresults
+    return cls(results=results, **traits)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 82, in __init__
+    self.update()
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 112, in update
+    data = self.amounts[:, :, self.from_timepoint_index].T # transpose because species and compartments are the wrong way round for axes.hist
+  File "/usr/lib/python2.7/dist-packages/traits/has_traits.py", line 1304, in decorator
+    self.__dict__[ name ] = result = function( self )
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 60, in _get_amounts
+    return self.results.functions_of_amounts_over_runs(mcss_results.mean)[0] # (species, compartments, timepoints)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 796, in functions_of_amounts_over_runs
+    quantities_display_units = iteration()#chunk_size, buffer)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 783, in iteration
+    self._extract_amounts(h5, buffer, amounts_chunk_start, self.amounts_chunk_stop)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 678, in _extract_amounts
+    amounts = h5.getNode('/run%s' % (r + 1), 'amounts')[:, :, start:stop:self.step]
+  File "/usr/lib/python2.7/dist-packages/tables/array.py", line 684, in __getitem__
+    arr = self._readSlice(startl, stopl, stepl, shape)
+  File "/usr/lib/python2.7/dist-packages/tables/array.py", line 777, in _readSlice
+    nparr = numpy.empty(dtype=self.atom.dtype, shape=shape)
+MemoryError
+
+
+# 1 surface (mean 10 runs 1 species) 10000 compartments 3600 timepoints
+/usr/lib/python2.7/dist-packages/tables/leaf.py:416: PerformanceWarning: The Leaf ``/run1/amounts`` is exceeding the maximum recommended rowsize (104857600 bytes);
+be ready to see PyTables asking for *lots* of memory and possibly slow
+I/O.  You may want to reduce the rowsize by trimming the value of
+dimensions that are orthogonal (and preferably close) to the *main*
+dimension of this leave.  Alternatively, in case you have specified a
+very small/large chunksize, you may want to increase/decrease it.
+  PerformanceWarning)
+Traceback (most recent call last):
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/commons/qt4.py", line 62, in wrapper
+    result = f(self, *args, **kwds)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results_widget.py", line 1022, in surfacePlot
+    surfaces = results.surfaces()
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 1683, in surfaces
+    amounts = self.amounts()
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 668, in amounts
+    self._extract_amounts(h5, results, self.start, self.stop)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 678, in _extract_amounts
+    amounts = h5.getNode('/run%s' % (r + 1), 'amounts')[:, :, start:stop:self.step]
+  File "/usr/lib/python2.7/dist-packages/tables/array.py", line 684, in __getitem__
+    arr = self._readSlice(startl, stopl, stepl, shape)
+  File "/usr/lib/python2.7/dist-packages/tables/array.py", line 777, in _readSlice
+    nparr = numpy.empty(dtype=self.atom.dtype, shape=shape)
+MemoryError
+
+
+# 1 histogram (1 run 1 species 10000 compartments)
+/usr/lib/python2.7/dist-packages/tables/leaf.py:416: PerformanceWarning: The Leaf ``/run1/amounts`` is exceeding the maximum recommended rowsize (104857600 bytes);
+be ready to see PyTables asking for *lots* of memory and possibly slow
+I/O.  You may want to reduce the rowsize by trimming the value of
+dimensions that are orthogonal (and preferably close) to the *main*
+dimension of this leave.  Alternatively, in case you have specified a
+very small/large chunksize, you may want to increase/decrease it.
+  PerformanceWarning)
+Traceback (most recent call last):
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results_widget.py", line 919, in histogram
+    bins=10,
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 78, in fromresults
+    return cls(results=results, **traits)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 82, in __init__
+    self.update()
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 112, in update
+    data = self.amounts[:, :, self.from_timepoint_index].T # transpose because species and compartments are the wrong way round for axes.hist
+  File "/usr/lib/python2.7/dist-packages/traits/has_traits.py", line 1304, in decorator
+    self.__dict__[ name ] = result = function( self )
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/histograms.py", line 60, in _get_amounts
+    return self.results.functions_of_amounts_over_runs(mcss_results.mean)[0] # (species, compartments, timepoints)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 796, in functions_of_amounts_over_runs
+    quantities_display_units = iteration()#chunk_size, buffer)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 783, in iteration
+    self._extract_amounts(h5, buffer, amounts_chunk_start, self.amounts_chunk_stop)
+  File "/home/jvb/git/infobiotics-dashboard/infobiotics/mcss/results/mcss_results.py", line 678, in _extract_amounts
+    amounts = h5.getNode('/run%s' % (r + 1), 'amounts')[:, :, start:stop:self.step]
+  File "/usr/lib/python2.7/dist-packages/tables/array.py", line 684, in __getitem__
+    arr = self._readSlice(startl, stopl, stepl, shape)
+  File "/usr/lib/python2.7/dist-packages/tables/array.py", line 777, in _readSlice
+    nparr = numpy.empty(dtype=self.atom.dtype, shape=shape)
+MemoryError
+
+
+
