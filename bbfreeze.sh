@@ -2,7 +2,7 @@
 
 # 
 
-echo <<HERE
+cat >/dev/null <<HERE
 http://markmail.org/message/5xcwd5yw7zl7ii77
 
 Subject:	[Enthought-Dev] Standalone Envisage/Task application (Linux)	permalink
@@ -78,12 +78,12 @@ python freeze.py
 # post-freezing
 
 # fix ImportError: TVTK not built properly. Unable to find either a directory: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes or a file: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes.zip with the TVTK classes.
-# patch tvtk.__init__ and tvtk.tvtk_access
+# replace tvtk.__init__ and tvtk.tvtk_access
 cp -r bbfreeze/tvtk/ dist/tvtk/ && cd dist && zip library.zip tvtk/*.py && cd .. && 
 # add TVTK classes zip file to library
 cp /usr/share/pyshared/tvtk/tvtk_classes.zip dist/tvtk/ 
 
-# patch mayavi.preferences.preferences_manager
+# replace mayavi.preferences.preferences_manager and mayavi/core/lut_manager.py
 cp -r bbfreeze/mayavi/ dist/mayavi/ && cd dist && zip -r library.zip mayavi/ && cd ..
 # add mayavi preferences
 mkdir -p dist/mayavi/preferences/
@@ -91,9 +91,6 @@ cp /usr/share/pyshared/mayavi/preferences/preferences.ini dist/mayavi/preference
 # add tvtk preferences
 mkdir -p dist/tvtk/plugins/scene/
 cp /usr/share/pyshared/tvtk/plugins/scene/preferences.ini dist/tvtk/plugins/scene/
-
-# patch mayavi.preferences.preferences_manager
-#TODO cp -r bbfreeze/mayavi/ dist/mayavi/ && cd dist && zip -r library.zip mayavi/ && cd ..
 # add mayavi/core/lut/pylab_luts.pkl
 mkdir -p dist/mayavi/core/lut/
 cp /usr/share/pyshared/mayavi/core/lut/pylab_luts.pkl dist/mayavi/core/lut/

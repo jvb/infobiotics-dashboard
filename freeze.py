@@ -94,101 +94,83 @@ recipes.recipe_matplotlib = recipe_matplotlib
 #recipes.recipe_tvtk_classes = recipe_tvtk_classes
 
 
-from bbfreeze import codehack
-
-def recipe_mayavi(mf):
-##	m = mf.findNode('mayavi')
+#from bbfreeze import codehack
+#
+#def recipe_mayavi(mf):
+###	m = mf.findNode('mayavi')
+##	if not isRealModule(m):
+##		return
+##	print "recipe_mayavi begin"
+##	mf.import_hook("mayavi.preferences", m)
+##	t = os.path.join(os.path.dirname(m.filename), 'preferences')
+###	print t
+##	mf.copyTree(t, 'mayavi/preferences', m)
+##	
+##	print "recipe_mayavi end"
+##	return True
+#
+#	m = mf.findNode('mayavi.preferences.preference_manager')
 #	if not isRealModule(m):
 #		return
 #	print "recipe_mayavi begin"
-#	mf.import_hook("mayavi.preferences", m)
-#	t = os.path.join(os.path.dirname(m.filename), 'preferences')
-##	print t
-#	mf.copyTree(t, 'mayavi/preferences', m)
+#
+#	import mayavi.preferences.preference_manager#.PreferenceManager
+##	cls = mayavi.preferences.preference_manager.PreferenceManager
+##	method = cls._load_preferences
+##	m = mayavi.preferences.preference_manager.PreferenceManager
+#	
+#	repl = '''
+#def _load_preferences(self):
+#    """Load the default preferences."""
+#    # debugging freezing with bbfreeze.sh (start)
+#    print 'debugging freezing with bbfreeze.sh (start)'    
+#
+#    import sys
+#    print 'sys.executable', sys.executable
+#    print 'sys.path', sys.path
+#
+##       from traits.etsconfig.api import ETSConfig
+##       ID = 'mayavi_e3'
+##       print 'ID', ID
+#    # Save current application_home.
+#    app_home = ETSConfig.get_application_home()
+#    print 'app_home', app_home
+#    # Set it to where the mayavi preferences are temporarily.
+#    path = join(ETSConfig.get_application_data(), ID)
+#
+##       if getattr(sys, "frozen", False):
+##           path = join(sys.path[1], ID)
+#
+#    print 'path', path
+#    ETSConfig.application_home = path
+#    try:
+#        for pkg in ('mayavi.preferences',
+#                    'tvtk.plugins.scene'):
+#            pref = 'preferences.ini'
+#
+#            print 'pkg', pkg
+#            print 'pref', pref
+#            print join(sys.path[1], pkg.replace('.', '/'), pref)
+#            if getattr(sys, "frozen", False):
+##                    pref_file = pkg_resources.resource_stream(join(sys.path[1], pkg.replace('.', '/'), pref))
+#                pref_file = open(join(sys.path[1], pkg.replace('.', '/'), pref), 'rb')
+#            else:
+#                pref_file = pkg_resources.resource_stream(pkg, pref)
+#
+#        preferences = self.preferences
+#        default = preferences.node('default/')
+#        default.load(pref_file)
+#        pref_file.close()
+#    finally:
+#        # Set back the application home.
+#        ETSConfig.application_home = app_home
+#'''
+#	
+#	m.code = codehack.replace_functions(m.code, repl)
 #	
 #	print "recipe_mayavi end"
 #	return True
-
-	m = mf.findNode('mayavi.preferences.preference_manager')
-	if not isRealModule(m):
-		return
-	print "recipe_mayavi begin"
-
-	import mayavi.preferences.preference_manager#.PreferenceManager
-#	cls = mayavi.preferences.preference_manager.PreferenceManager
-#	method = cls._load_preferences
-#	m = mayavi.preferences.preference_manager.PreferenceManager
-	
-	repl = '''
-def _load_preferences(self):
-    """Load the default preferences."""
-    # debugging freezing with bbfreeze.sh (start)
-    print 'debugging freezing with bbfreeze.sh (start)'    
-
-    import sys
-    print 'sys.executable', sys.executable
-    print 'sys.path', sys.path
-
-#       from traits.etsconfig.api import ETSConfig
-#       ID = 'mayavi_e3'
-#       print 'ID', ID
-    # Save current application_home.
-    app_home = ETSConfig.get_application_home()
-    print 'app_home', app_home
-    # Set it to where the mayavi preferences are temporarily.
-    path = join(ETSConfig.get_application_data(), ID)
-
-#       if getattr(sys, "frozen", False):
-#           path = join(sys.path[1], ID)
-
-    print 'path', path
-    ETSConfig.application_home = path
-    try:
-        for pkg in ('mayavi.preferences',
-                    'tvtk.plugins.scene'):
-            pref = 'preferences.ini'
-
-            print 'pkg', pkg
-            print 'pref', pref
-            print join(sys.path[1], pkg.replace('.', '/'), pref)
-            if getattr(sys, "frozen", False):
-#                    pref_file = pkg_resources.resource_stream(join(sys.path[1], pkg.replace('.', '/'), pref))
-                pref_file = open(join(sys.path[1], pkg.replace('.', '/'), pref), 'rb')
-            else:
-                pref_file = pkg_resources.resource_stream(pkg, pref)
-
-        preferences = self.preferences
-        default = preferences.node('default/')
-        default.load(pref_file)
-        pref_file.close()
-    finally:
-        # Set back the application home.
-        ETSConfig.application_home = app_home
-'''
-	
-	m.code = codehack.replace_functions(m.code, repl)
-	
-	print "recipe_mayavi end"
-	return True
 #recipes.recipe_mayavi = recipe_mayavi
-
-
-#def recipe_distutils_util_get_platform(mf):
-#    m = mf.findNode('distutils.util')
-#    if not isRealModule(m):
-#        return None
-#
-#    import distutils.util
-#    val = distutils.util.get_platform()
-#
-#    repl = """
-#def get_platform():
-#    return %r
-#""" % (val,)
-#
-#    import codehack
-#    m.code = codehack.replace_functions(m.code, repl)
-#    return True
 
 
 from bbfreeze import Freezer 
@@ -202,6 +184,6 @@ f = Freezer(
 	)
 )
 f.addScript('infobiotics-dashboard.py')
-f.addScript('bbfreeze_test.py')
+#f.addScript('bbfreeze_test.py')
 f() # freeze
 
