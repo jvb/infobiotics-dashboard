@@ -70,7 +70,7 @@ data = 'quorumsensing-wt-experiment01.h5'
 write = None
 shape = (58, 10000, 36001)
 #maindim = 0? #TODO
-extdim = 2 #TODO
+extdim = 2 # = len(shape) - 1 #TODO
 expectedrows = shape[-1]
 
 filters = tables.Filters(complib='zlib', complevel=9, shuffle=False, fletcher32=False) # mcss
@@ -320,26 +320,71 @@ thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape, '*', len(rows_to_read)
 '''
 
+
+'''
+print '-' * 80
+
+print "Time to read  1 spec.     1 comp.  1000 timepoints (0:1000):",
+t1 = time()
+r1 = a[0, 0, 0:1000]
+tr1 = round(time()-t1, 3)
+thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
+print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+
+print "Time to read  1 spec.     1 comp.  1000 timepoints (0:1000):",
+t1 = time()
+r1 = a[0, 0, 0:1000]
+tr1 = round(time()-t1, 3)
+thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
+print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+
+print "Time to read 58 spec.     1 comp.  1000 timepoints (0:1000):",
+t1 = time()
+r1 = a[:, 0, 0:1000]
+tr1 = round(time()-t1, 3)
+thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
+print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+
+print "Time to read  1 spec. 10000 comp.  1000 timepoints (0:1000):",
+t1 = time()
+r1 = a[0, :, 0:1000]
+tr1 = round(time()-t1, 3)
+thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
+print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+
+print "Time to read  58 spec. 10000 comp.  1000 timepoints (0:1000):",
+t1 = time()
+r1 = a[:, :, 0:1000]
+tr1 = round(time()-t1, 3)
+thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
+print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+
+
+print '-' * 80
+
 print "Time to read  1 spec.     1 comp.  36001 timepoints:",
 t1 = time()
 r1 = a[26,500,:]
 tr1 = round(time()-t1, 3)
 thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+#Time to read  1 spec.     1 comp.  36001 timepoints: 206.024 sec (0.1 MB/s) (36001,) using file: /home/jvb/tmp/quorumsensing-wt-experiment01.h5; chunkshape: (58, 10000, 1000)
 
-print "Time to read  7 spec.     1 comp.  36001 timepoints:",
+print "Time to read  9 spec.     1 comp.  36001 timepoints:",
 t1 = time()
 r1 = a[range(0, 58, 7), 500,:]
 tr1 = round(time()-t1, 3)
 thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+#Time to read  9 spec.     1 comp.  36001 timepoints: 207.564 sec (0.1 MB/s) (9, 36001) using file: /home/jvb/tmp/quorumsensing-wt-experiment01.h5; chunkshape: (58, 10000, 1000)
 
-print "Time to read  7 spec.     1 comp.  3600 timepoints:",
+print "Time to read  9 spec.     1 comp.  3600 timepoints:",
 t1 = time()
 r1 = a[range(0, 58, 7), 500,::10]
 tr1 = round(time()-t1, 3)
 thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+#Time to read  9 spec.     1 comp.  3600 timepoints: 207.309 sec (0.1 MB/s) (9, 3601) using file: /home/jvb/tmp/quorumsensing-wt-experiment01.h5; chunkshape: (58, 10000, 1000)
 
 print "Time to read  1 spec. 10000 comp.  3600 timepoints:",
 t1 = time()
@@ -347,13 +392,15 @@ r1 = a[7, :,::10]
 tr1 = round(time()-t1, 3)
 thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+#Time to read  1 spec. 10000 comp.  3600 timepoints: 210.407 sec (0.1 MB/s) (10000, 3601) using file: /home/jvb/tmp/quorumsensing-wt-experiment01.h5; chunkshape: (58, 10000, 1000)
 
-print "Time to read  2 spec. 10000 comp. 3600 timepoints:",
+print "Time to read 40 spec. 10000 comp. 3600 timepoints:",
 t1 = time()
 r1 = a[range(7, 47), :,::10]
 tr1 = round(time()-t1, 3)
 thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+#Time to read 40 spec. 10000 comp. 3600 timepoints: 390.067 sec (0.1 MB/s) (40, 10000, 3601) using file: /home/jvb/tmp/quorumsensing-wt-experiment01.h5; chunkshape: (58, 10000, 1000)
 
 print "Time to read  1 spec.  1000 comp.  3600 timepoints:",
 t1 = time()
@@ -361,14 +408,16 @@ r1 = a[7, ::10,::10]
 tr1 = round(time()-t1, 3)
 thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
+#Time to read  1 spec.  1000 comp.  3600 timepoints: 218.413 sec (0.1 MB/s) (1000, 3601) using file: /home/jvb/tmp/quorumsensing-wt-experiment01.h5; chunkshape: (58, 10000, 1000)
 
-print "Time to read  2 spec.  1000 comp. 3600 timepoints:",
+print "Time to read 40 spec.  1000 comp. 3600 timepoints:",
 t1 = time()
 r1 = a[range(7, 47), ::10,::10]
 tr1 = round(time()-t1, 3)
 thr1 = round(dim1*dim2*len(rows_to_read)*4 / (tr1 * 1024 * 1024), 1)
 print "%s sec (%s MB/s)" % (tr1, thr1), r1.shape
-
+#Time to read 40 spec.  1000 comp. 3600 timepoints: 237.117 sec (0.1 MB/s) (40, 1000, 3601) using file: /home/jvb/tmp/quorumsensing-wt-experiment01.h5; chunkshape: (58, 10000, 1000)
+'''
 
 exit(f.close()) # copying takes ages so exit early
 
