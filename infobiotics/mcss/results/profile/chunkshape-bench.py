@@ -19,6 +19,139 @@ import tempfile
 import os
 
 
+def powersof10(min, max=None):
+	''' Returns an array of powers of 10 from min to max inclusive. '''
+	if not max:
+		max = min
+		min = 0
+#	print np.power(10, np.arange(min, max+1))
+	return np.power(10, np.arange(min, max+1))
+#print powersof10(6), powersof10(2,5)
+
+
+def cntg(minpowerof10, maxpowerof10, max=None):
+	''' Returns a list of arrays of contiguous (step == 1) integers from 0 to  
+	a power of 10 in the interval minpowerof10 <= powerof10 <= maxpowerof10.
+	'''
+	return [np.arange(0, n) for n in powersof10(minpowerof10, maxpowerof10) if not max or (max and n <= max)]
+
+
+#def eqsp(max, minpowerof10, maxpowerof10):
+#	''' Returns a list of arrays of equally-spaced integers from 0 to max  
+##	a power of 10 in the interval minpowerof10 <= powerof10 <= maxpowerof10.
+#	'''
+#	return [np.arange(0, max, 10**powerof10) for powerof10 in range(minpowerof10, maxpowerof10)]
+#				
+##print cntg(0, 2, 100)
+##for a in reversed(eqsp(10**6+574, 0, 6)):
+#for a in reversed(eqsp(574, 0, 6)):
+#	print len(a)#, a 
+#print 
+
+#def eqsp(apowerof10, minpowerof10, maxpowerof10):
+#	''' Returns a list of arrays of equally-spaced integers from 0 to ...
+#	
+#	[0:10**powerof10:10**minpowerof10]
+#	  
+#	'''
+#	return [np.arange(0, 10**apowerof10, 10**powerof10) for powerof10 in range(minpowerof10, maxpowerof10)]
+
+def eqsp(a, minpowerof10, maxpowerof10):
+	''' Returns a list of arrays of equally-spaced integers from 0 to ...
+	
+	[0:10**powerof10:10**minpowerof10]
+	  
+	'''
+	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if (len(a) / 10) * 10**(powerof10 - 1) <= len(a)]
+#	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if True]
+#	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10)]
+##	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if len(a) > 10**powerof10]
+#	f = lambda a, powerof10: (len(a) / 10) * 10**(powerof10 - 1)
+#	return [np.ceil(np.arange(0, len(a), f(a, powerof10) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if f(a, powerof10) >= 10**powerof10]
+
+	
+
+#def eqsp(n, powerof10, max):
+for a in reversed(eqsp(np.arange(66666), 0, 6)):
+	print len(a), a[-1], a
+print 
+
+exit()
+
+
+Tn = 36001
+Cn = 10000
+Sn = 58
+
+T = np.array(xrange(Tn))
+C = np.array(xrange(Cn))
+S = np.array(xrange(Sn))
+
+print eqsp(10, 0, Sn)
+print S[eqsp(10, 0, Sn)]
+
+
+def start_stop_len(a):
+	return 'a[0]: %s, a[-1]: %s, len(a): %s' % (a[0], a[-1], len(a))
+
+#print start_stop_len(S[cntg(1,2)[0]]), start_stop_len(C[cntg(1,6)[0]]), start_stop_len(T[cntg(2,6)[0]])
+#print start_stop_len(S[cntg(1,2)[-1]]), start_stop_len(C[cntg(1,6)[-1]]), start_stop_len(T[cntg(2,6)[-1]])
+#exit()
+
+##print start_stop_len(S[eqsp(Sn, 0,2)[0]]), start_stop_len(C[eqsp(Cn, 0,6)[0]]), start_stop_len(T[eqsp(Tn, 0,6)[0]])
+#print start_stop_len(S[eqsp(Sn, 0,2)[-1]]), start_stop_len(C[eqsp(Cn, 0,6)[-1]]), start_stop_len(T[eqsp(Tn, 0,6)[-1]])
+#print eqsp(Sn, 0,2)[-1], eqsp(Cn, 0,6)[-1], eqsp(Tn, 0,6)[-1]
+s = S[eqsp(Sn, 0,2)[-1]]
+c = C[eqsp(Cn, 0,6)[-1]]
+t = T[eqsp(Tn, 0,6)[-1]]
+print map(len, [s, c, t])
+#s = np.linspace(0, Sn, 1)
+#print len(s), s 
+#s = map(int, map(np.ceil, np.linspace(0, Sn, 10)))
+#print len(s), s 
+##s = np.linspace(0, Sn, 100)
+##print len(s), s 
+exit()
+
+
+#for t in cntg(2,6):
+#	for c in cntg(1,6):
+#		for s in cntg(1,2):
+##			print T[t.start:t.stop:t.step], C[c.start:c.stop:c.step], S[s.start:s.stop:s.step]
+##			print T[t], C[c], S[s]
+##			print len(S[s]), len(C[c]), len(T[t])#len(T[t]), len(C[c]), len(S[s])
+#			print start_stop_len(S[s]), start_stop_len(C[c]), start_stop_len(T[t])
+#exit()
+
+#for t in eqsp(Tn, 2,6):
+#	for c in eqsp(Cn, 1,6):
+#		for s in eqsp(Sn, 1,2):
+##			print T[t.start:t.stop:t.step], C[c.start:c.stop:c.step], S[s.start:s.stop:s.step]
+##			print T[t], C[c], S[s]
+##			print len(S[s]), len(C[c]), len(T[t])#len(T[t]), len(C[c]), len(S[s])
+#			print start_stop_len(S[s]), start_stop_len(C[c]), start_stop_len(T[t])
+#print
+#exit()
+
+reads = [] 
+for t in cntg(2,6) + eqsp(Tn, 2,6):
+	for c in cntg(1,6) + eqsp(Cn, 1,6):
+		for s in cntg(1,2) + eqsp(Sn, 1,2):
+#			print T[t.start:t.stop:t.step], C[c.start:c.stop:c.step], S[s.start:s.stop:s.step]
+#			print T[t], C[c], S[s]
+#			print len(S[s]), len(C[c]), len(T[t])#len(T[t]), len(C[c]), len(S[s])
+#			print start_stop_len(S[s]), start_stop_len(C[c]), start_stop_len(T[t])
+			r = S[s], C[c], T[t]
+			print map(start_stop_len, r)
+			reads.append(r)
+		print '-'*80
+	print '='*80
+print len(reads)
+#print np.product([len(cntg(2,6) + eqsp(Tn, 2,6)), len(cntg(1,6) + eqsp(Cn, 1,6)), len(cntg(1,2) + eqsp(Sn, 1,2))])
+exit()
+
+
+
 #def main( #TODO
 #	data=None, 
 #	write='chunkshape-bench.h5', 
