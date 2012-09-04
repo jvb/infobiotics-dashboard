@@ -56,24 +56,18 @@ def cntg(minpowerof10, maxpowerof10, max=None):
 #	'''
 #	return [np.arange(0, 10**apowerof10, 10**powerof10) for powerof10 in range(minpowerof10, maxpowerof10)]
 
-def eqsp(a, minpowerof10, maxpowerof10):
+def eqsp(a, minpowerof10, maxpowerof10): #TODO replace min/maxpowerof10 with emin/emax
 	''' Returns a list of arrays of equally-spaced integers from 0 to ...
 	
 	[0:10**powerof10:10**minpowerof10]
 	  
 	'''
-	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if (len(a) / 10) * 10**(powerof10 - 1) <= len(a)]
-#	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if True]
-#	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10)]
-##	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if len(a) > 10**powerof10]
-#	f = lambda a, powerof10: (len(a) / 10) * 10**(powerof10 - 1)
-#	return [np.ceil(np.arange(0, len(a), f(a, powerof10) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if f(a, powerof10) >= 10**powerof10]
-
+#	return [np.ceil(np.arange(0, len(a), (len(a) / 10) * 10**(powerof10 - 1) ) ) for powerof10 in range(minpowerof10, maxpowerof10) if (len(a) / 10) * 10**(powerof10 - 1) <= len(a)]
+	return [np.ceil(np.linspace(0, len(a), 10*powerof10)) for powerof10 in range(minpowerof10, maxpowerof10 + 1) if 10**powerof10 <= len(a)]
 	
 
-#def eqsp(n, powerof10, max):
-for a in reversed(eqsp(np.arange(66666), 0, 6)):
-	print len(a), a[-1], a
+for a in reversed(eqsp(np.arange(654321), 0, 6)):
+	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
 print 
 
 exit()

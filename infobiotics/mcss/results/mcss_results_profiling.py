@@ -35,16 +35,16 @@ class MockMcssResults():
         h5 = tables.openFile(self.filename)
 
 
-        self.test_io(h5)
-        self.test_io_loop(h5)
-        h5.close()
-        return
-#        np.testing.assert_equal(np.array([1,2]), np.array([2,3]))
-#        results = self._extract_amounts_new(h5, results, self.start, self.stop)
-        new = self._extract_amounts_new(h5, results, self.start, self.stop)
-        cur = self._extract_amounts(h5, results, self.start, self.stop)
-        np.testing.assert_equal(new, cur)
-        results = cur
+#        self.test_io(h5)
+#        self.test_io_loop(h5)
+#        h5.close()
+#        return
+##        np.testing.assert_equal(np.array([1,2]), np.array([2,3]))
+        results = self._extract_amounts_new(h5, results, self.start, self.stop)
+#        new = self._extract_amounts_new(h5, results, self.start, self.stop)
+#        cur = self._extract_amounts(h5, results, self.start, self.stop)
+#        np.testing.assert_equal(new, cur)
+#        results = cur
         
         h5.close()
         return results
@@ -100,23 +100,23 @@ class MockMcssResults():
     def _extract_amounts_new(self, h5, destination_array, start, stop):
         species_and_compartments_index_array = np.array([self.species_indices, self.compartment_indices])
         timepoints_slice = slice(start, stop, self.step)
-#        for ri, r in enumerate(self.run_indices):
-#            parent_run = '/run%s' % (r + 1)
-#            amounts = h5.getNode(parent_run, 'amounts')
-#            amounts_shape = amounts.shape
-#            print 'amounts', amounts_shape, 'array (%s datapoints)' % np.prod(amounts_shape)
-#            
-##            # direct with index array
-##            destination_array[ri] = amounts[np.array([self.species_indices, self.compartment_indices, xrange(start, stop, self.step)])]
-##            # reformatted
-###            destination_array[ri] = amounts[np.array([
-###                self.species_indices, 
-###                self.compartment_indices, 
-###                xrange(start, stop, self.step) # timepoints
-###            ])]
-#
-##            destination_array[ri] = amounts[species_and_compartments_index_array, start:stop:self.step]
-#            destination_array[ri] = amounts[species_and_compartments_index_array, timepoints_slice]
+        for ri, r in enumerate(self.run_indices):
+            parent_run = '/run%s' % (r + 1)
+            amounts = h5.getNode(parent_run, 'amounts')
+            amounts_shape = amounts.shape
+            print 'amounts', amounts_shape, 'array (%s datapoints)' % np.prod(amounts_shape)
+            
+#            # direct with index array
+#            destination_array[ri] = amounts[np.array([self.species_indices, self.compartment_indices, xrange(start, stop, self.step)])]
+#            # reformatted
+##            destination_array[ri] = amounts[np.array([
+##                self.species_indices, 
+##                self.compartment_indices, 
+##                xrange(start, stop, self.step) # timepoints
+##            ])]
+
+#            destination_array[ri] = amounts[species_and_compartments_index_array, start:stop:self.step]
+            destination_array[ri] = amounts[species_and_compartments_index_array, timepoints_slice]
         
         return destination_array
 
@@ -145,7 +145,7 @@ class MockMcssResults():
 #print 'profiling 10 run, 58 species, 10000 compartment, 36001 timepoint model'
 
 def test(runs, species, compartments, timepoints):
-    results = MockMcssResults('/home/jvb/data/simulations/quorumsensing-wt-experiment01.h5')
+    results = MockMcssResults('/home/jvb/tmp/quorumsensing-wt-experiment01.h5')
 #    #jvb@weasel ~/data/simulations $ h5dump -H -p quorumsensing-wt-experiment01.h5 | grep COMPRESSION | grep -v DEFLATE | cut -d ' ' -f 14-15
 #    dumped_and_cutted = '''
 #        134037100 (623.128:1
