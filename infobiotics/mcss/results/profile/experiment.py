@@ -48,7 +48,10 @@ temax = 6#7
 
 import itertools
 import math
+import os
 from pprint import pprint
+import tempfile
+from time import time
 
 import numpy as np
 
@@ -248,7 +251,7 @@ read = 0
 skipped_reading = 0
 
 # generator
-def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=temin, temax=temax, extdim=2, complib='zlib', complevel=1):
+def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=temin, temax=temax, extdim=2, filters=Filters(complib='zlib', complevel=1, shuffle=False, fletcher32=False)):
 	
 	# determine a sensible maximum array size given available memory
 	maxsize = maxmem(dtype)
@@ -271,8 +274,9 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 #	skipped_reading = 0
 
 	# list of array shapes
-#	ashps = productarrayshapes(semax, cemax, temax) #TODO reinstate
-	ashps = [(58, 10000, 36001)] # testing
+##	ashps = productarrayshapes(semax, cemax, temax) #TODO reinstate
+#	ashps = [(58, 10000, 36001)] # quorumsensing-wt-experiment01.h5
+	ashps = [(1, 2, 3), (10, 20, 30)] # testing
 
 	# in-place sorting
 	# descending by dimensions (timepoints > compartments > species)
@@ -289,6 +293,14 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 		
 		# array size in memory (bytes)
 		inflated_size = atom.size * shapesize(shp)
+
+		# expectedrows is max extdim # == shp[extdim]
+		expectedrows = shp[extdim]
+
+		# determine chunkshape that PyTable would have used
+		determined_chunkshape = determine_chunkshape(shp, extdim, expectedrows)
+		determined_chunkshape_0, determined_chunkshape_1, determined_chunkshape_2 = determined_chunkshape 
+
 
 		cntg_index_arrays = contiguous_index_arrays(shp, semax, cemax, temax)
 		evsp_index_arrays = evenly_spaced_index_arrays(shp, semax, cemax, temax)
@@ -327,31 +339,84 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 		for chunkshape in cshps:
 #			print chunkshape
 
+			chunksize = shapesize(chunkshape)
+
+			bytes_to_write_per_chunk = atom.size * chunksize
+
 			# writing
-			skip_writing = atom.size * shapesize(chunkshape) > maxrowsize #TODO replace with exceedsmaxrowsize(shape) function
+			
+			skip_writing = chunksize > maxrowsize #TODO replace with exceedsmaxrowsize(shape) function
+			
 			if skip_writing:
 				print 'skipping',
+			
 			print 'writing array shape %s with chunkshape %s' % (shp, chunkshape) 
+			
 			if skip_writing:
 				skipped_writing += 1
 				continue
 
-			#TODO write h5file measuring time_write and size_deflated if compressing
+			# write temporary h5file measuring time_write and size_deflated if compressing
+
+			tmpfile = tempfile.NamedTemporaryFile(delete=False)
+			write = tmpfile.name
+			tmpfile.close()
+			f = openFile(write, "w")
+
+			# create array
+			a = f.createEArray(f.root, 'array', 
+				atom, 
+				shape=setextdim(shp, extdim), 
+				expectedrows=expectedrows,
+				filters=filters,
+				chunkshape=chunkshape, 
+			)
+
+			# write the array in whole chunks
+			t1 = time()
+			zeros = np.zeros(chunkshape, dtype=dtype)
+			for _ in range(0, shp[extdim], chunkshape[extdim]):
+				a.append(zeros)
+			tcre = round(time()-t1, 3)
+			thcre = round(bytes_to_write_per_chunk / (tcre * 1024 * 1024), 1)
+			print 'writing array shape %s with chunkshape %s' % (shp, chunkshape) 
+			print 'wrote array shape %s with chunkshape %s in %s sec at (%s MB/s)' % (shp, chunkshape, tcre, thcre)
+
 			
-#			size_deflated = TODO
+			time_to_write = tcre
 			
+			f.close()
+			
+			size_deflated = os.path.getsize(write)
+
 			written += 1
 					
+			
 			# reading
+			
 			def f(iat): #TODO move outside loops
 				return ', '.join(['%s..%s' % (from_, to) if from_ != to else str(to) for from_, to in [(ia[0], ia[-1]) for ia in iat]])
+			
 			for iatype, iat in index_array_tuples:
-				skip_reading = atom.size * size(iat) > maxsize
+			
+				bytes_to_read = atom.size * size(iat)
+			
+				skip_reading = bytes_to_read > maxsize
+				
 				if skip_reading:
 					print 'skipping',
-				print 'reading %s %s: %s' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', f(iat))#shape(iat))
+				
+				print 'reading %s %s: %s' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', f(iat))
 
-				#TODO read h5file measuring time_read
+				# read h5file measuring time_read
+				t1 = time()
+				r1 = a[iat]
+				assert r1.shape == shape(iat)
+				tr1 = round(time()-t1, 3)
+				thr1 = round(bytes_to_read / (tr1 * 1024 * 1024), 1)
+				print 'read %s %s (%s) in %s sec at (%s MB/s)' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', f(iat), tr1, thr1)
+				
+				time_to_read = tr1
 				
 				# yield parameter and result values dict
 				yield dict(
@@ -371,49 +436,116 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 					chunkshape_1=chunkshape[1],
 					chunkshape_2=chunkshape[2],
 
+					determined_chunkshape_0=determined_chunkshape_0,
+					determined_chunkshape_1=determined_chunkshape_1,
+					determined_chunkshape_2=determined_chunkshape_2,
+
 					extdim=extdim,
-					expectedrows=shp[extdim],
+					expectedrows=expectedrows,
 					
-#					time_to_write = TODO,
+					bytes_written=atom.size * a.shape,
+					time_to_write=time_to_write,
+					write_rate=thcre,
+					
+					complib=filters.complib,
+					complevel=filters.complevel,
+					shuffle=filters.shuffle,
+					fletcher32=filters.fletcher32,
 					
 					
 					# read
 					
-#					species_indices_total = TODO,
-#					compartment_indices_total = TODO,
-#					timepoint_indices_total = TODO,
+					species_indices_total = len(iat[0]),
+					compartment_indices_total = len(iat[1]),
+					timepoint_indices_total = len(iat[2]),
 
-#					read_indices_total = TODO,
+					read_indices_total = size(iat),
 
-#					species_indices_type = TODO,
-#					compartment_indices_type = TODO,
-#					timepoint_indices_type = TODO,
+					#TODO mix iatypes  
+					species_indices_type = iatype,
+					compartment_indices_type = iatype,
+					timepoint_indices_type = iatype,
 					
-#					time_to_read = TODO,
+					byte_read=bytes_to_read,
+					read_rate=thr1,
+					time_to_read=time_to_read,
 				)
 
 				if skip_reading:
 					skipped_reading += 1
 					continue
+				
 				read += 1
 
 			print '-'*80
+			
+			os.remove(tmpfile.name)
+			
 		print '='*80
+		
 #	print 'total written: %s, skipped: %s' % (written, skipped_writing)
 #	print 'total read: %s, skipped: %s' % (read, skipped_reading)
 
-h5file = openFile('test.h5', mode='w')
-group = h5file.createGroup('/', 'results')
-table = h5file.createTable(group, 'table', Experiment)
-try:
-	experiment = table.row
-	experiment.update(perform(np.int32))
-	experiment.append()
-	table.flush()
-except Exception, e:
-	print e
-finally:
-	print h5file
-	h5file.close()
-print 'total written: %s, skipped: %s' % (written, skipped_writing)
-print 'total read: %s, skipped: %s' % (read, skipped_reading)
+
+def experiment(complib='zlib', complevel=9, shuffle=False, fletcher32=False):
+	filters = Filters(complib, complevel, shuffle, fletcher32)
+	
+	h5file = openFile('test.h5', mode='w')
+	group = h5file.createGroup('/', 'results')
+	table = h5file.createTable(group, 'table', Experiment)
+	try:
+		experiment = table.row
+		experiment.update(perform(np.int32, filters=filters))
+		experiment.append()
+		table.flush()
+	except Exception, e:
+		print e
+	finally:
+		print h5file
+		h5file.close()
+	print 'total written: %s, skipped: %s' % (written, skipped_writing)
+	print 'total read: %s, skipped: %s' % (read, skipped_reading)
+
+
+
+def GB_MB_KB_str(bytes):
+	return '%s GB (%s MB / %s KB)' % tuple(
+		map(
+			lambda B: round(B, 3), 
+			map(
+				lambda exp: bytes / (1024**exp), 
+				range(1,4,1)[::-1])))
+
+
+def setextdim(shape, extdim):
+	shape = list(shape)
+	shape[extdim] = 0
+	return tuple(shape)
+
+
+def determine_chunkshape(shape, extdim, expectedrows):
+#	if not (min(shape) == 0 and len(filter(lambda it: it == 0, shape)) == 1):
+##		shape = shape[:-1]+ (0,)
+#		shape = setextdim(shape, -1)
+	shape = setextdim(shape, extdim)
+	file = tempfile.NamedTemporaryFile(delete=False)
+	name = file.name
+	file.close()
+	f = openFile(name, 'w')
+	a = f.createEArray(f.root, 'a', Int32Atom(), 
+		shape=shape,
+		expectedrows=expectedrows,
+	)
+	chunkshape = a.chunkshape 
+	f.close()
+	return chunkshape
+#	
+#for dim in range(len(shape)):
+#	for i in (1, 10, 100, 1000, 10000):
+#		determined = determine_chunkshape(shape=setextdim(shape, dim), expectedrows=i)
+#		print 'EArray(shape=%s, expectedrows=%s).chunkshape (determined):' % (determined[1], determined[2]), determined[0] 
+
+
+
+if __name__ == '__main__':
+	experiment()
