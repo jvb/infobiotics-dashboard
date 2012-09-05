@@ -1,4 +1,32 @@
-'''
+''' This is an experiment designed to the measure the affect on read 
+performance of the parameters used when writing EArrays in HDF5 (.h5) files.
+
+The motivation is to improve the read performance and therefore scalability of 
+of mcss simulation datasets with respect to data extraction and subsequent 
+analysis: i.e. in the mcss-results component of the Infobiotics Dashboard.
+
+The write parameters are:
+ * the shape of the array, which determines array size and therefore the size 
+ 	of h5 file containing the array
+ * the compression library used and the compression level
+ * the chunkshape used, which is necessary for efficient writing and compression
+
+The write results are:
+ * the time to write the h5 file containing the array
+ * the compressed sized of the h5 file containing the array
+	
+
+The read parameters are:
+ * the set of datapoints to read from the array: the indices of the datapoints 
+ 	along each axis, which can be contiguous or evenly spaced  
+
+The read results are:
+ * the time to read the set of datapoints from the array:
+	
+
+
+
+
 Created on 4 Sep 2012
 
 @author: jvb
@@ -49,21 +77,13 @@ class Experiment(IsDescription):
 	
 	time_to_read = Float32Col()
 
-def chunkshapes(shape):
-	''' Returns a set of chunkshapes that are the order of magnitude 
-	permutations of ... shape. '''
-#	chunkshapes = []
-#	dims = []
-#	dim1, dim2, dim3 = shape 
-#	for dim in f(:
-#		min = 0
-#		max = dim
-#		dims.append()
-	s = lambda max: max #TODO
-	c = lambda max: max #TODO
-	t = lambda max: max #TODO
-	return [(s(dim1), c(dim2), t(dim3)) for dim1, dim2, dim3 in shape]
-#print chunkshapes((10,100,1000))
+
+#semin = 0
+semax = 2#3
+#cemin = 0
+cemax = 5#6
+#temin = 0
+temax = 6#7
 
 
 def pow10(e):
@@ -79,27 +99,39 @@ def pow10s(emin, emax=None):
 #print
 #exit()
 
-
 def onelevelflatten(ll):
 	return [i for l in ll for i in l]
-
-#semin = 0
-semax = 2#3
-#cemin = 0
-cemax = 5#6
-#temin = 0
-temax = 6#7
 
 def arrayshape(*emaxs):
 	return tuple(map(pow10, *emaxs))
 #print arrayshape((1,2,3))
 #exit()
 
+import itertools
 def productarrayshapes(*emaxs):
-	import itertools
 	return [arrayshape(shape) for shape in itertools.product(*map(range, emaxs))]
 #print productarrayshapes(semax, cemax, temax)
 #exit()
+
+def chunkshapes(shape):
+	''' Returns a set of chunkshapes that are the order of magnitude 
+	permutations of ... shape. '''
+	import math
+	print
+	print shape
+	print map(int, map(math.log10, [i + 1 for i in shape]))
+	# 
+	chunkshapes = productarrayshapes(*map(int, map(math.log10, [i + 1 for i in shape])))
+	# ok but what about whole axes?
+	chunkshapes = list(itertools.product(*[sorted(list(s.union((shape[i],)))) for i, s in enumerate(map(set, zip(*chunkshapes)))]))
+	return chunkshapes
+pprint(chunkshapes((10,100,1000)))
+pprint(chunkshapes((99,999,9999)))
+pprint(chunkshapes((9,99,999)))
+##pprint(productarrayshapes(semax, cemax, temax))
+#pprint([chunkshapes(shape) for shape in productarrayshapes(semax, cemax, temax)])
+exit()
+
 
 def contiguous_indices(imax, emin, emax=None):
 	''' Returns a list of arrays of contiguous (step == 1) integers from 0 to  
