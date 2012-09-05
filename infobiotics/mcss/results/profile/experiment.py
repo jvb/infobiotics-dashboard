@@ -257,8 +257,12 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 				
 	atom = Atom.from_dtype(np.dtype(dtype))
 
-	count = 0
-	skipped = 0
+#	count = 0
+#	skipped = 0
+	written = 0
+	skipped_writing = 0
+	read = 0
+	skipped_reading = 0
 
 	# list of array shapes
 	
@@ -306,6 +310,9 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 #		all_index_arrays = cntg_index_arrays + evsp_index_arrays + [evry_index_array] 
 #		print len(all_index_arrays), len(index_array_tuples)
 #		assert len(all_index_arrays) >= len(index_array_tuples)
+
+
+		# writing
 		
 		cshps = chunkshapes(shp)
 		# in-place sorting
@@ -317,19 +324,60 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 #		pprint(cshps)
 
 		for chunkshape in cshps:
-
-#			if rowsize(chunkshape) > maxrowsize:
-			if atom.size * shapesize(chunkshape) > maxrowsize:
-				skipped = skipped + 1
-				continue
-
 #			print chunkshape
-		
+
+			# writing
 			
+#			skip_writing = rowsize(chunkshape) > maxrowsize
+			skip_writing = atom.size * shapesize(chunkshape) > maxrowsize 
+
+			if skip_writing:
+				print 'skipping',
+					
+			print 'writing array shape %s with chunkshape %s' % (shp, chunkshape) 
+
+			if skip_writing:
+#				skipped = skipped + 1
+				skipped_writing += 1
+				continue
 		
-			count = count + 1
+			#TODO write h5file measuring time_write and size_deflated if compressing		
+		
+#			count = count + 1
+			written += 1
+					
+			
+			# reading
+			
+			def f(iat):
+#				return tuple(['%s->%s' % (ia[0], ia[-1]) for ia in iat])
+#				return ', '.join(['%s->%s' % (from_, to) if from_ != to else to for from_, to in [(ia[0], ia[-1]) for ia in iat]])
+				return ', '.join(['%s..%s' % (from_, to) if from_ != to else str(to) for from_, to in [(ia[0], ia[-1]) for ia in iat]])
+		
+			for itype, iat in index_array_tuples:
+				
+				skip_reading = False
+				
+				if skip_reading:
+					print 'skipping',
+				
+				print 'reading %s %s: %s' % (size(iat), ('%s datapoints' % itype) if size(iat) > 1 else 'datapoint', f(iat))#shape(iat))
+
+				#TODO read h5file measuring time_read
+				#TODO create experiment and append to table
+
+				if skip_reading:
+					skipped_reading += 1
+					continue
+				
+				#TODO read
+				
+				read += 1
+
 #		print
-	print count, skipped
+#	print count, skipped
+	print 'total written: %s, skipped: %s' % (written, skipped_writing)
+	print 'total read: %s, skipped: %s' % (read, skipped_reading)
 
 #	amount_atom = Int32
 #	for shape in sorted(shapes, key=lambda shape: np.product(shape)):
