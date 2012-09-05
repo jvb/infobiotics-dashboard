@@ -207,43 +207,6 @@ def sizes(lla):
 ##exit()
 
 
-
-class Experiment(IsDescription):
-	
-	# written
-	
-	species_total = Int32Col()
-	compartments_total = Int32Col()
-	timepoints_total = Int32Col()
-	
-	amounts_total = Int32Col() # np.product([total_species, total_compartments, total_timepoints])
-	
-	chunkshape_0 = Int32Col()
-	chunkshape_1 = Int32Col()
-	chunkshape_2 = Int32Col()
-	
-	size_inflated = Float32Col()
-	size_deflated = Float32Col()
-	
-	time_to_write = Float32Col()
-	
-	
-	# read
-	
-	species_indices_total = Int32Col()
-	compartment_indices_total = Int32Col()
-	timepoint_indices_total = Int32Col()
-	
-	indices_total = Int32Col()
-
-	# indices were contiguous if True, evenly spaced if False
-	species_indices_contig = BoolCol() 
-	compartment_indices_contig = BoolCol()
-	timepoint_indices_contig = BoolCol()
-	
-	time_to_read = Float32Col()
-
-
 # counts
 written = 0
 skipped_writing = 0
@@ -251,7 +214,7 @@ read = 0
 skipped_reading = 0
 
 # generator
-def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=temin, temax=temax, extdim=2, filters=Filters(complib='zlib', complevel=1, shuffle=False, fletcher32=False)):
+def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=temin, temax=temax, extdim=2, filters=Filters(complib='zlib', complevel=1, shuffle=False, fletcher32=False)):
 	
 	# determine a sensible maximum array size given available memory
 	maxsize = maxmem(dtype)
@@ -309,10 +272,16 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 		# remove duplicate index arrays and label with type		
 		index_array_tuples = []
 		index_tuple_tuples = set()
+		
 		for iatype, iat in itertools.chain(
 			# do contiguous first to avoid labelling contiguous index arrays as evenly spaced
-			itertools.product(['contiguous'], cntg_index_arrays + [evry_index_array]), 
-			itertools.product(['evenly spaced'], evsp_index_arrays)
+			itertools.product(
+				['contiguous'],#0,#[indices_type_enum[0]],#['contiguous'], 
+				cntg_index_arrays + [evry_index_array]
+			), 
+			itertools.product(
+				['evenly spaced'],#1,#[indices_type_enum[1]],#['evenly spaced'], 
+				evsp_index_arrays)
 		): 
 			# get a hashable index tuple tuple from an index array tuple
 			itt = tuple(map(tuple, iat))
@@ -353,6 +322,7 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 			print 'writing array shape %s with chunkshape %s' % (shp, chunkshape) 
 			
 			if skip_writing:
+				global skipped_writing
 				skipped_writing += 1
 				continue
 
@@ -375,20 +345,26 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 			# write the array in whole chunks
 			t1 = time()
 			zeros = np.zeros(chunkshape, dtype=dtype)
-			for _ in range(0, shp[extdim], chunkshape[extdim]):
-				a.append(zeros)
-			tcre = round(time()-t1, 3)
+			try:
+				for _ in range(0, shp[extdim], chunkshape[extdim]):
+					a.append(zeros)
+			except Exception, e:
+				print 'error:', e
+				continue
+					
+			tcre = round(time()-t1, 3) or 10**-6 # avoid divide by zero
 			thcre = round(bytes_to_write_per_chunk / (tcre * 1024 * 1024), 1)
-			print 'writing array shape %s with chunkshape %s' % (shp, chunkshape) 
 			print 'wrote array shape %s with chunkshape %s in %s sec at (%s MB/s)' % (shp, chunkshape, tcre, thcre)
 
 			
 			time_to_write = tcre
 			
-			f.close()
+#			f.close()
 			
 			size_deflated = os.path.getsize(write)
 
+
+			global written
 			written += 1
 					
 			
@@ -410,9 +386,12 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 
 				# read h5file measuring time_read
 				t1 = time()
+				print iat
+				iat = np.array(iat)
+				print iat
 				r1 = a[iat]
-				assert r1.shape == shape(iat)
-				tr1 = round(time()-t1, 3)
+				assert np.product(r1.shape) == size(iat)
+				tr1 = round(time()-t1, 3) or 10**-6 # avoid divide by zero
 				thr1 = round(bytes_to_read / (tr1 * 1024 * 1024), 1)
 				print 'read %s %s (%s) in %s sec at (%s MB/s)' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', f(iat), tr1, thr1)
 				
@@ -429,77 +408,149 @@ def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, te
 					
 					amounts_total=amounts_total,
 					
-					size_inflated=inflated_size,
-					size_deflated=size_deflated,
-					
-					chunkshape_0=chunkshape[0],
-					chunkshape_1=chunkshape[1],
-					chunkshape_2=chunkshape[2],
+					extdim=extdim,
 
+					expectedrows=expectedrows,
+					
 					determined_chunkshape_0=determined_chunkshape_0,
 					determined_chunkshape_1=determined_chunkshape_1,
 					determined_chunkshape_2=determined_chunkshape_2,
 
-					extdim=extdim,
-					expectedrows=expectedrows,
-					
-					bytes_written=atom.size * a.shape,
+					chunkshape_0=chunkshape[0],
+					chunkshape_1=chunkshape[1],
+					chunkshape_2=chunkshape[2],
+
+					size_inflated=inflated_size,
+					size_deflated=size_deflated,
+
 					time_to_write=time_to_write,
 					write_rate=thcre,
 					
 					complib=filters.complib,
-					complevel=filters.complevel,
+					complevel=str(filters.complevel),
 					shuffle=filters.shuffle,
 					fletcher32=filters.fletcher32,
 					
 					
 					# read
 					
-					species_indices_total = len(iat[0]),
-					compartment_indices_total = len(iat[1]),
-					timepoint_indices_total = len(iat[2]),
-
-					read_indices_total = size(iat),
-
 					#TODO mix iatypes  
 					species_indices_type = iatype,
+					species_indices_total = len(iat[0]),
+
 					compartment_indices_type = iatype,
+					compartment_indices_total = len(iat[1]),
+
 					timepoint_indices_type = iatype,
+					timepoint_indices_total = len(iat[2]),
 					
-					byte_read=bytes_to_read,
-					read_rate=thr1,
+					amounts_indices_total = size(iat),
+
+					bytes_read=bytes_to_read,
 					time_to_read=time_to_read,
+					read_rate=thr1,
 				)
 
 				if skip_reading:
+					global skipped_reading
 					skipped_reading += 1
 					continue
 				
+				global read
 				read += 1
 
 			print '-'*80
-			
-			os.remove(tmpfile.name)
+		
+		f.close()	
+		os.remove(write)
 			
 		print '='*80
 		
 #	print 'total written: %s, skipped: %s' % (written, skipped_writing)
 #	print 'total read: %s, skipped: %s' % (read, skipped_reading)
 
+indices_type_enum = ['contiguous', 'evenly spaced']
+
+
+class Experiment(IsDescription):
+	
+	# written
+	
+	species_total = Int32Col()
+	compartments_total = Int32Col()
+	timepoints_total = Int32Col()
+	
+	amounts_total = Int32Col()
+	
+	extdim=Int32Col()
+
+	expectedrows=Int32Col()
+
+	determined_chunkshape_0=Int32Col()
+	determined_chunkshape_1=Int32Col()
+	determined_chunkshape_2=Int32Col()
+
+	chunkshape_0 = Int32Col()
+	chunkshape_1 = Int32Col()
+	chunkshape_2 = Int32Col()
+	
+	size_inflated = Float32Col()
+	size_deflated = Float32Col()
+	
+	time_to_write = Float32Col()
+	write_rate=Float32Col()
+	
+#	complib=EnumCol(['none', 'zlib', 'lzo', 'bzip2', 'blosc'], 'none', 'int8')
+	complib=StringCol(5)
+##	complevel=EnumCol([str(l) for l in range(9+1)], '0', 'int8')
+#	complevel=EnumCol(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], '0', 'int8')
+	complevel=Int8Col()
+	shuffle=BoolCol()
+	fletcher32=BoolCol()
+	
+	
+	# read
+	
+#'contiguous'
+#'evenly spaced'
+	
+#	species_indices_type = EnumCol(indices_type_enum, 'contiguous', 'int8') 
+	species_indices_type = StringCol(16) 
+	species_indices_total = Int32Col()
+
+#	compartment_indices_type = EnumCol(indices_type_enum, 'contiguous', 'int8') 
+	compartment_indices_type = StringCol(16) 
+	compartment_indices_total = Int32Col()
+	
+#	timepoint_indices_type = EnumCol(indices_type_enum, 'contiguous', 'int8')
+	timepoint_indices_type = StringCol(16)
+	timepoint_indices_total = Int32Col()
+	
+	amounts_indices_total = Int32Col()
+
+	bytes_read=Int32Col()
+	time_to_read = Float32Col()
+	read_rate=Float32Col()
+
 
 def experiment(complib='zlib', complevel=9, shuffle=False, fletcher32=False):
-	filters = Filters(complib, complevel, shuffle, fletcher32)
+	filters = Filters(complib=complib, complevel=complevel, shuffle=shuffle, fletcher32=fletcher32)
 	
 	h5file = openFile('test.h5', mode='w')
-	group = h5file.createGroup('/', 'results')
-	table = h5file.createTable(group, 'table', Experiment)
+#	group = h5file.createGroup('/', 'results')
+#	table = h5file.createTable(group, 'table', Experiment)
+	table = h5file.createTable('/', 'results', Experiment)
+#	print table.cols[:]#['species_indices_type']
+#	exit()
 	try:
-		experiment = table.row
-		experiment.update(perform(np.int32, filters=filters))
-		experiment.append()
-		table.flush()
-	except Exception, e:
-		print e
+		for result in perform(np.int32, filters=filters):
+			experiment = table.row
+			for k, v in result.iteritems():
+				experiment[k] = v
+			experiment.append()
+			table.flush()
+#	except Exception, e:
+#		print 'failed with exception:\n', e, '\n'
 	finally:
 		print h5file
 		h5file.close()
