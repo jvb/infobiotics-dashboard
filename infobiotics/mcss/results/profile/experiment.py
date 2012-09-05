@@ -241,7 +241,14 @@ class Experiment(IsDescription):
 	time_to_read = Float32Col()
 
 
-def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=temin, temax=temax):#results=None):
+# counts
+written = 0
+skipped_writing = 0
+read = 0
+skipped_reading = 0
+
+# generator
+def perform(table, dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=temin, temax=temax, extdim=2, complib='zlib', complevel=1):
 	
 	# determine a sensible maximum array size given available memory
 	maxsize = maxmem(dtype)
@@ -257,68 +264,62 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 				
 	atom = Atom.from_dtype(np.dtype(dtype))
 
-#	count = 0
-#	skipped = 0
-	written = 0
-	skipped_writing = 0
-	read = 0
-	skipped_reading = 0
+#	# counts
+#	written = 0
+#	skipped_writing = 0
+#	read = 0
+#	skipped_reading = 0
 
 	# list of array shapes
-	
-##	ashps = productarrayshapes(semax, cemax, temax)
-#	ashps = [(58, 10000, 36001)] # testing
-	ashps = [(10, 20, 30)] # testing
+#	ashps = productarrayshapes(semax, cemax, temax) #TODO reinstate
+	ashps = [(58, 10000, 36001)] # testing
 
 	# in-place sorting
 	# descending by dimensions (timepoints > compartments > species)
 	ashps.sort()
-#	pprint(ashps)
 	# ascending by size (smallest > largest)
 	ashps.sort(key=shapesize)
 #	pprint(ashps)
+
 	for shp in ashps:
+		
 		species_total, compartments_total, timepoints_total = shp
 #		print species_total, compartments_total, timepoints_total
+		amounts_total = shapesize(shp)
+		
 		# array size in memory (bytes)
 		inflated_size = atom.size * shapesize(shp)
-#		print inflated_size
-#		print shp
 
-#		pprint(['len: %s, head: %s, tail: %s' % (len(ia), ia[:3], ia[-3:]) for ias in contiguous_index_arrays(shp, semax, cemax, temax) for ia in ias])
 		cntg_index_arrays = contiguous_index_arrays(shp, semax, cemax, temax)
-#		pprint(cntg_index_arrays)
 		evsp_index_arrays = evenly_spaced_index_arrays(shp, semax, cemax, temax)
-#		pprint(evsp_index_arrays)
 		evry_index_array = [np.arange(0, dmax) for dmax in shp] # == [:, :, :]
-#		print evry_index_array
-		
+
+		# remove duplicate index arrays and label with type		
 		index_array_tuples = []
 		index_tuple_tuples = set()
-		for itype, iat in itertools.chain(
+		for iatype, iat in itertools.chain(
+			# do contiguous first to avoid labelling contiguous index arrays as evenly spaced
 			itertools.product(['contiguous'], cntg_index_arrays + [evry_index_array]), 
 			itertools.product(['evenly spaced'], evsp_index_arrays)
 		): 
 			# get a hashable index tuple tuple from an index array tuple
 			itt = tuple(map(tuple, iat))
+			# add index array tuple if not already added
 			if not itt in index_tuple_tuples:
 				index_tuple_tuples.add(itt)
-				index_array_tuples.append((itype, iat))
-#		pprint(index_array_tuples)		
-#		print len(index_array_tuples), len(index_tuple_tuples)
-
+				index_array_tuples.append((iatype, iat))
+##		pprint(index_array_tuples)		
+##		print len(index_array_tuples), len(index_tuple_tuples)
 #		all_index_arrays = cntg_index_arrays + evsp_index_arrays + [evry_index_array] 
 #		print len(all_index_arrays), len(index_array_tuples)
 #		assert len(all_index_arrays) >= len(index_array_tuples)
 
 
-		# writing
-		
+		# chunkshapes for writing
 		cshps = chunkshapes(shp)
 		# in-place sorting
 		# descending by dimensions (timepoints > compartments > species)
 		cshps.sort()
-#		pprint(cshps)
 		# ascending by size (smallest > largest)
 		cshps.sort(key=shapesize)
 #		pprint(cshps)
@@ -327,170 +328,92 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 #			print chunkshape
 
 			# writing
-			
-#			skip_writing = rowsize(chunkshape) > maxrowsize
-			skip_writing = atom.size * shapesize(chunkshape) > maxrowsize 
-
+			skip_writing = atom.size * shapesize(chunkshape) > maxrowsize #TODO replace with exceedsmaxrowsize(shape) function
 			if skip_writing:
 				print 'skipping',
-					
 			print 'writing array shape %s with chunkshape %s' % (shp, chunkshape) 
-
 			if skip_writing:
-#				skipped = skipped + 1
 				skipped_writing += 1
 				continue
-		
-			#TODO write h5file measuring time_write and size_deflated if compressing		
-		
-#			count = count + 1
+
+			#TODO write h5file measuring time_write and size_deflated if compressing
+			
+#			size_deflated = TODO
+			
 			written += 1
 					
-			
 			# reading
-			
-			def f(iat):
-#				return tuple(['%s->%s' % (ia[0], ia[-1]) for ia in iat])
-#				return ', '.join(['%s->%s' % (from_, to) if from_ != to else to for from_, to in [(ia[0], ia[-1]) for ia in iat]])
+			def f(iat): #TODO move outside loops
 				return ', '.join(['%s..%s' % (from_, to) if from_ != to else str(to) for from_, to in [(ia[0], ia[-1]) for ia in iat]])
-		
-			for itype, iat in index_array_tuples:
-				
-				skip_reading = False
-				
+			for iatype, iat in index_array_tuples:
+				skip_reading = atom.size * size(iat) > maxsize
 				if skip_reading:
 					print 'skipping',
-				
-				print 'reading %s %s: %s' % (size(iat), ('%s datapoints' % itype) if size(iat) > 1 else 'datapoint', f(iat))#shape(iat))
+				print 'reading %s %s: %s' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', f(iat))#shape(iat))
 
 				#TODO read h5file measuring time_read
-				#TODO create experiment and append to table
+				
+				# yield parameter and result values dict
+				yield dict(
+						
+					# written
+					
+					species_total=species_total,
+					compartments_total=compartments_total,
+					timepoints_total=timepoints_total,
+					
+					amounts_total=amounts_total,
+					
+					size_inflated=inflated_size,
+					size_deflated=size_deflated,
+					
+					chunkshape_0=chunkshape[0],
+					chunkshape_1=chunkshape[1],
+					chunkshape_2=chunkshape[2],
+
+					extdim=extdim,
+					expectedrows=shp[extdim],
+					
+#					time_to_write = TODO,
+					
+					
+					# read
+					
+#					species_indices_total = TODO,
+#					compartment_indices_total = TODO,
+#					timepoint_indices_total = TODO,
+
+#					read_indices_total = TODO,
+
+#					species_indices_type = TODO,
+#					compartment_indices_type = TODO,
+#					timepoint_indices_type = TODO,
+					
+#					time_to_read = TODO,
+				)
 
 				if skip_reading:
 					skipped_reading += 1
 					continue
-				
-				#TODO read
-				
 				read += 1
 
-#		print
-#	print count, skipped
-	print 'total written: %s, skipped: %s' % (written, skipped_writing)
-	print 'total read: %s, skipped: %s' % (read, skipped_reading)
+			print '-'*80
+		print '='*80
+#	print 'total written: %s, skipped: %s' % (written, skipped_writing)
+#	print 'total read: %s, skipped: %s' % (read, skipped_reading)
 
-#	amount_atom = Int32
-#	for shape in sorted(shapes, key=lambda shape: np.product(shape)):
-#		species_total, compartments_total, timepoints_total = shape
-#		inflated_size = amount_atom * np.product(shape) # bytes
-#		for chunkshape in chunkshapes(shape):
-#			if rowsize(chunkshape) > 10000000:#TODO maxrowsize:
-#				print 'chunkshape %s: N/A' % chunkshape 
-#				continue
-#			#TODO write h5file measuring time_write and size_deflated if compressing
-#			for indices in sorted(indices_list, key=lambda indices: np.product(indices)):
-#				#TODO read h5file measuring time_read
-#				#TODO create experiment and append to table
-#				pass
-		
-
-perform(np.int32)
-
-'''
-
-h5file = openFile('results.h5', mode='w')
-group = h5file.createGroup('/', 'group')
+h5file = openFile('test.h5', mode='w')
+group = h5file.createGroup('/', 'results')
 table = h5file.createTable(group, 'table', Experiment)
-
-# loop writing and reading h5 files with 3D EArrays of different sizes, chunkshapes and accesses
-
-#TODO generate parameterset
-parameterset = []
-
-parameters = {}
-
-#parameters['species_total'] = 
-#parameters['compartments_total'] = 
-#parameters['timepoints_total'] = 
-
-#parameters['chunkshape_0'] = 
-#parameters['chunkshape_1'] = 
-#parameters['chunkshape_2'] = 
-
-parameterset.append(parameters)
-
-
-for parameters in parameterset:
-
-	shape = parameters['species_total'], parameters['compartments_total'], parameters['timepoints_total']
-	
-	amounts_total = np.product(shape)
-	
-	chunkshape_0 = parameters['chunkshape_1']
-	chunkshape_1 = parameters['chunkshape_2']
-	chunkshape_2 = parameters['chunkshape_3']
-	
-	chunkshape = chunkshape_0, chunkshape_1, chunkshape_2
-	expectedrows = parameters['timepoints_total']
-	extdim = 2
-
-	
-	
-	size_inflated = Float32Col()
-	size_deflated = Float32Col()
-	
-	time_to_write = Float32Col()
-	
-	# read
-	
-	species_indices_total = Int32Col()
-	compartment_indices_total = Int32Col()
-	timepoint_indices_total = Int32Col()
-	
-	indices_total = Int32Col()
-
-	# indices were contiguous if True, evenly spaced if False
-	species_indices_contig = BoolCol() 
-	compartment_indices_contig = BoolCol()
-	timepoint_indices_contig = BoolCol()
-	
-	time_to_read = Float32Col()
-
-
-exit()
-
-
-experiment = table.row
-
-experiment['species_total'], experiment['compartments_total'], experiment['timepoints_total'] = shape 
-
-experiment['amounts_total'] = np.product(shape)
-
-experiment['chunkshape_0'], experiment['chunkshape_1'], experiment['chunkshape_2'] = chunkshape
-
-experiment['size_inflated'] = amounts_total * 4#TODO amounts.atom.size
-#experiment['size_deflated'] = os.path.getsize(write)
-
-experiment['time_to_write'] = 0.0#TODO
-
-experiment['species_indices_total'] = 0#TODO
-experiment['compartment_indices_total'] = 0#TODO
-experiment['timepoint_indices_total'] = 0#TODO
-
-experiment['indices_total'] = 0#TODO
-
-experiment['species_indices_contig'] = True#TODO
-experiment['compartment_indices_contig'] = True#TODO
-experiment['timepoint_indices_contig'] = True#TODO
-
-experiment['time_to_read'] = 0.0#TODO
-
-experiment.append()
-
-table.flush()
-
-print h5file
-
-h5file.close()
-
-''' 
+try:
+	experiment = table.row
+	experiment.update(perform(np.int32))
+	experiment.append()
+	table.flush()
+except Exception, e:
+	print e
+finally:
+	print h5file
+	h5file.close()
+print 'total written: %s, skipped: %s' % (written, skipped_writing)
+print 'total read: %s, skipped: %s' % (read, skipped_reading)
