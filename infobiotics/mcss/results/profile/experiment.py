@@ -35,6 +35,8 @@ Created on 4 Sep 2012
 
 from __future__ import division
 
+import itertools
+import math
 from pprint import pprint
 
 import numpy as np
@@ -107,31 +109,23 @@ def arrayshape(*emaxs):
 #print arrayshape((1,2,3))
 #exit()
 
-import itertools
 def productarrayshapes(*emaxs):
 	return [arrayshape(shape) for shape in itertools.product(*map(range, emaxs))]
 #print productarrayshapes(semax, cemax, temax)
 #exit()
 
 def chunkshapes(shape):
-	''' Returns a set of chunkshapes that are the order of magnitude 
-	permutations of ... shape. '''
-	import math
-	print
-	print shape
-	print map(int, map(math.log10, [i + 1 for i in shape]))
-	# 
+	''' Returns a set of chunkshapes of dimensions up to and including those of 
+	shape in increasing order of magnitude from 1. '''
+	# orders of magnitude smaller the dimensions
 	chunkshapes = productarrayshapes(*map(int, map(math.log10, [i + 1 for i in shape])))
-	# ok but what about whole axes?
+	# plus full length of each dimension 
 	chunkshapes = list(itertools.product(*[sorted(list(s.union((shape[i],)))) for i, s in enumerate(map(set, zip(*chunkshapes)))]))
 	return chunkshapes
-pprint(chunkshapes((10,100,1000)))
-pprint(chunkshapes((99,999,9999)))
-pprint(chunkshapes((9,99,999)))
-##pprint(productarrayshapes(semax, cemax, temax))
-#pprint([chunkshapes(shape) for shape in productarrayshapes(semax, cemax, temax)])
-exit()
-
+#pprint(chunkshapes((10,100,1000)))
+#pprint(chunkshapes((99,999,9999)))
+#pprint(chunkshapes((9,99,999)))
+#exit()
 
 def contiguous_indices(imax, emin, emax=None):
 	''' Returns a list of arrays of contiguous (step == 1) integers from 0 to  
@@ -163,53 +157,43 @@ def indices(shape):
 shape = (58, 10000, 36001)
 
 
-##sis = map(lambda d: contiguous_indices(d, semax), shape) + map(lambda d: evenly_spaced_indices(d, semax), shape)
-##cis = map(lambda d: contiguous_indices(d, cemax), shape) + map(lambda d: evenly_spaced_indices(d, cemax), shape)
-##tis = map(lambda d: contiguous_indices(d, temax), shape) + map(lambda d: evenly_spaced_indices(d, temax), shape)
-#sis, cis, tis = [
-#	map(lambda d: contiguous_indices(d, emax), shape) 
-#	+ 
-#	map(lambda d: evenly_spaced_indices(d, emax), shape) 
-#	for emax in semax, cemax, temax
-#]
-#for ddd in (sis, cis, tis):
-#	for dd in ddd:
-#		for d in dd:
-#			print 'len(ddd): %s, len(dd): %s, len(d): %s, head: %s, tail: %s' % (len(ddd), len(dd), len(d), d[0:3], d[-3:])			
+#def _index_arrays(func, shape, semax, cemax, temax):
+#	return zip(*map(onelevelflatten, [
+#		map(lambda d: func(d, emax), shape) 
+#		for emax in semax, cemax, temax
+#	]))
+def _index_arrays(func, shape, *emaxs):
+	return zip(*map(onelevelflatten, [
+		map(lambda d: func(d, emax), shape) 
+		for emax in emaxs
+	]))
 
-##index_arrays = zip(*map(onelevelflatten, (sis, cis, tis)))
-#index_arrays = zip(*map(onelevelflatten, [
-#	map(lambda d: contiguous_indices(d, emax), shape) 
-#	+ 
-#	map(lambda d: evenly_spaced_indices(d, emax), shape) 
-#	for emax in semax, cemax, temax
-#]))
-	
 #contiguous_index_arrays = zip(*map(onelevelflatten, [
 #	map(lambda d: contiguous_indices(d, emax), shape) 
 #	for emax in semax, cemax, temax
 #]))
 def contiguous_index_arrays(shape, semax, cemax, temax):
-	return zip(*map(onelevelflatten, [
-		map(lambda d: contiguous_indices(d, emax), shape) 
-		for emax in semax, cemax, temax
-	]))
-
-contiguous_index_arrays = contiguous_index_arrays(shape, semax, cemax, temax)
+#	return zip(*map(onelevelflatten, [
+#		map(lambda d: contiguous_indices(d, emax), shape) 
+#		for emax in semax, cemax, temax
+#	]))
+	return _index_arrays(contiguous_indices, shape, semax, cemax, temax)
+cntg_index_arrays = contiguous_index_arrays(shape, semax, cemax, temax)
 
 #evenly_spaced_index_arrays = zip(*map(onelevelflatten, [
 #	map(lambda d: evenly_spaced_indices(d, emax), shape) 
 #	for emax in semax, cemax, temax
 #]))
 def evenly_spaced_index_arrays(shape, semax, cemax, temax):
-	return zip(*map(onelevelflatten, [
-		map(lambda d: evenly_spaced_indices(d, emax), shape) 
-		for emax in semax, cemax, temax
-	]))
+#	return zip(*map(onelevelflatten, [
+#		map(lambda d: evenly_spaced_indices(d, emax), shape) 
+#		for emax in semax, cemax, temax
+#	]))
+	return _index_arrays(evenly_spaced_indices, shape, semax, cemax, temax)
 
-evenly_spaced_index_arrays = evenly_spaced_index_arrays(shape, semax, cemax, temax)
+evsp_index_arrays = evenly_spaced_index_arrays(shape, semax, cemax, temax)
 
-index_arrays = contiguous_index_arrays + evenly_spaced_index_arrays
+index_arrays = cntg_index_arrays + evsp_index_arrays
 
 def shape(la):
 	return tuple(map(len, la))
