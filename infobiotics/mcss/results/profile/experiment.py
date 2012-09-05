@@ -7,6 +7,8 @@ Created on 4 Sep 2012
 
 from __future__ import division
 
+from pprint import pprint
+
 import numpy as np
 
 #from tables import IsDescription, Int32Col, Float32Col, BoolCol, openFile
@@ -47,19 +49,6 @@ class Experiment(IsDescription):
 	
 	time_to_read = Float32Col()
 
-
-
-#def shapes(species_orders_of_magnitude, compartments_orders_of_magnitude, timepointss_orders_of_magnitude):
-def arrayshapes(*orders_of_magnitude):
-	''' Returns the set of shapes that are the permutations of the 
-	orders_of_magnitude iterable of (min, max) tuples. '''
-	shapes = []
-	for min_order_of_magnitude, max_order_of_magnitude in orders_of_magnitude:
-		shape = (0, 0, 0)
-		shapes.append(shape)
-	return shapes
-#print shapes((0,2), (0,6), (0,6))
-
 def chunkshapes(shape):
 	''' Returns a set of chunkshapes that are the order of magnitude 
 	permutations of ... shape. '''
@@ -75,28 +64,53 @@ def chunkshapes(shape):
 	t = lambda max: max #TODO
 	return [(s(dim1), c(dim2), t(dim3)) for dim1, dim2, dim3 in shape]
 #print chunkshapes((10,100,1000))
-		
 
-def pow10s(emin, emax):
+
+def pow10(e):
+	return 10**e
+
+def pow10s(emin, emax=None):
+	if not emax:
+		emax = emin
+		emin = 0
 	return [10**e for e in range(emin, emax + 1)]
 #for o in pow10s(0, 6):
 #	print o
 #print
 #exit()
 
-def contiguous_indices(imax, emin, emax):
+
+def onelevelflatten(ll):
+	return [i for l in ll for i in l]
+
+#semin = 0
+semax = 2#3
+#cemin = 0
+cemax = 5#6
+#temin = 0
+temax = 6#7
+
+def arrayshape(*emaxs):
+	return tuple(map(pow10, *emaxs))
+#print arrayshape((1,2,3))
+#exit()
+
+def productarrayshapes(*emaxs):
+	import itertools
+	return [arrayshape(shape) for shape in itertools.product(*map(range, emaxs))]
+#print productarrayshapes(semax, cemax, temax)
+#exit()
+
+def contiguous_indices(imax, emin, emax=None):
 	''' Returns a list of arrays of contiguous (step == 1) integers from 0 to  
 	an order of magnitude (power of 10) in the interval emin <= e <= emax. '''
-#	return [np.arange(0, 10**e) for e in range(emin, emax) if 10**e <= imax]
 	return [np.arange(0, pow10) for pow10 in pow10s(emin, emax) if pow10 <= imax]
 #for a in contiguous_indices(654321, 0, 6):
 #	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
 #print
 #exit()
 
-def evenly_spaced_indices(imax, emin, emax):
-#	return [np.ceil(np.linspace(0, imax -1, 10**e)) for e in range(emin, emax + 1) if 10**e <= imax]
-	#rint/trunc
+def evenly_spaced_indices(imax, emin, emax=None):
 	return [map(int, np.ceil(np.linspace(0, imax - 1, pow10))) for pow10 in pow10s(emin, emax) if pow10 <= imax]
 #for a in evenly_spaced_indices(654321, 0, 6):
 #	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
@@ -115,30 +129,55 @@ def indices(shape):
 #print indices((10,100,1000))
 
 shape = (58, 10000, 36001)
-#sis = map(lambda d: contiguous_indices(d, 0, 2), shape)
-#cis = map(lambda d: contiguous_indices(d, 0, 6), shape)
-#tis = map(lambda d: contiguous_indices(d, 0, 5), shape)
-#for b in (sis, cis, tis):
-#	print len(b)
-#	for c in b:
-#		for a in c:
-#			print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
-sis = map(lambda d: evenly_spaced_indices(d, 0, 2), shape) + map(lambda d: contiguous_indices(d, 0, 2), shape)
-cis = map(lambda d: evenly_spaced_indices(d, 0, 6), shape) + map(lambda d: contiguous_indices(d, 0, 6), shape)
-tis = map(lambda d: evenly_spaced_indices(d, 0, 5), shape) + map(lambda d: contiguous_indices(d, 0, 5), shape)
+
+
+##sis = map(lambda d: contiguous_indices(d, semax), shape) + map(lambda d: evenly_spaced_indices(d, semax), shape)
+##cis = map(lambda d: contiguous_indices(d, cemax), shape) + map(lambda d: evenly_spaced_indices(d, cemax), shape)
+##tis = map(lambda d: contiguous_indices(d, temax), shape) + map(lambda d: evenly_spaced_indices(d, temax), shape)
+#sis, cis, tis = [
+#	map(lambda d: contiguous_indices(d, emax), shape) 
+#	+ 
+#	map(lambda d: evenly_spaced_indices(d, emax), shape) 
+#	for emax in semax, cemax, temax
+#]
 #for ddd in (sis, cis, tis):
-#	print '='*80
 #	for dd in ddd:
 #		for d in dd:
 #			print 'len(ddd): %s, len(dd): %s, len(d): %s, head: %s, tail: %s' % (len(ddd), len(dd), len(d), d[0:3], d[-3:])			
-#		print '-'*80
 
-from pprint import pprint
+##index_arrays = zip(*map(onelevelflatten, (sis, cis, tis)))
+#index_arrays = zip(*map(onelevelflatten, [
+#	map(lambda d: contiguous_indices(d, emax), shape) 
+#	+ 
+#	map(lambda d: evenly_spaced_indices(d, emax), shape) 
+#	for emax in semax, cemax, temax
+#]))
+	
+#contiguous_index_arrays = zip(*map(onelevelflatten, [
+#	map(lambda d: contiguous_indices(d, emax), shape) 
+#	for emax in semax, cemax, temax
+#]))
+def contiguous_index_arrays(shape, semax, cemax, temax):
+	return zip(*map(onelevelflatten, [
+		map(lambda d: contiguous_indices(d, emax), shape) 
+		for emax in semax, cemax, temax
+	]))
 
-def onelevelflatten(ll):
-	return [i for l in ll for i in l]
+contiguous_index_arrays = contiguous_index_arrays(shape, semax, cemax, temax)
 
-index_arrays = zip(*map(onelevelflatten, (sis, cis, tis)))
+#evenly_spaced_index_arrays = zip(*map(onelevelflatten, [
+#	map(lambda d: evenly_spaced_indices(d, emax), shape) 
+#	for emax in semax, cemax, temax
+#]))
+def evenly_spaced_index_arrays(shape, semax, cemax, temax):
+	return zip(*map(onelevelflatten, [
+		map(lambda d: evenly_spaced_indices(d, emax), shape) 
+		for emax in semax, cemax, temax
+	]))
+
+evenly_spaced_index_arrays = evenly_spaced_index_arrays(shape, semax, cemax, temax)
+
+index_arrays = contiguous_index_arrays + evenly_spaced_index_arrays
 
 def shape(la):
 	return tuple(map(len, la))
