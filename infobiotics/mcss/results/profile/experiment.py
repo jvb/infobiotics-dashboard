@@ -8,104 +8,9 @@ Created on 4 Sep 2012
 from __future__ import division
 
 import numpy as np
-import tables
 
-
-#def shapes(species_orders_of_magnitude, compartments_orders_of_magnitude, timepointss_orders_of_magnitude):
-def shapes(*orders_of_magnitude):
-	''' Returns the set of shapes that are the permutations of the 
-	orders_of_magnitude iterable of (min, max) tuples. '''
-	shapes = []
-	for min_order_of_magnitude, max_order_of_magnitude in orders_of_magnitude:
-		shape = (0, 0, 0)
-		shapes.append(shape)
-	return shapes
-#print shapes((0,2), (0,6), (0,6))
-
-def chunkshapes(shape):
-	''' Returns a set of chunkshapes that are the order of magnitude 
-	permutations of ... shape. '''
-#	chunkshapes = []
-#	dims = []
-#	dim1, dim2, dim3 = shape 
-#	for dim in f(:
-#		min = 0
-#		max = dim
-#		dims.append()
-	s = lambda max: max #TODO
-	c = lambda max: max #TODO
-	t = lambda max: max #TODO
-	return [(s(dim1), c(dim2), t(dim3)) for dim1, dim2, dim3 in shape]
-#print chunkshapes((10,100,1000))
-		
-
-def pow10s(emin, emax):
-	return [10**e for e in range(emin, emax + 1)]
-for o in pow10s(0, 6):
-	print o
-print
-#exit()
-
-def contiguous_indices(imax, emin, emax):
-	''' Returns a list of arrays of contiguous (step == 1) integers from 0 to  
-	an order of magnitude (power of 10) in the interval emin <= e <= emax. '''
-#	return [np.arange(0, 10**e) for e in range(emin, emax) if 10**e <= imax]
-	return [np.arange(0, pow10) for pow10 in pow10s(emin, emax) if pow10 <= imax]
-for a in contiguous_indices(654321, 0, 6):
-	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
-print
-#exit()
-
-def evenly_spaced_indices(imax, emin, emax):
-#	return [np.ceil(np.linspace(0, imax -1, 10**e)) for e in range(emin, emax + 1) if 10**e <= imax]
-	return [np.ceil(np.linspace(0, imax - 1, pow10)) for pow10 in pow10s(emin, emax) if pow10 <= imax]
-for a in evenly_spaced_indices(654321, 0, 6):
-	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
-print
-
-def indices(shape):
-	''' Returns a set of (contiguous, evenly spaced) indices that are the 
-	orders of magnitude permutations of ... shape. '''
-	s = lambda max: max #TODO
-	c = lambda max: max #TODO
-	t = lambda max: max #TODO
-	contiguous = [((s(dim1), c(dim2), t(dim3)), 'contiguous') for dim1, dim2, dim3 in shape]
-	gapped = [((s(dim1), c(dim2), t(dim3)), 'gapped') for dim1, dim2, dim3 in shape] 
-	return contiguous + gapped 
-#print indices((10,100,1000))
-shape = (58, 10000, 36001)
-sis = map(lambda d: contiguous_indices(d, 0, 2), shape)
-cis = map(lambda d: contiguous_indices(d, 0, 6), shape)
-tis = map(lambda d: contiguous_indices(d, 0, 5), shape)
-for b in (sis, cis, tis):
-	print len(b)
-	for c in b:
-		for a in c:
-			print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
-exit()
-
-#maxrowsize = tables.warnings...
-
-'''
-def perform(results):
-	amount_atom = Int32
-	for shape in sorted(shapes, key=lambda shape: np.product(shape)):
-		species_total, compartments_total, timepoints_total = shape
-		inflated_size = amount_atom * np.product(shape) # bytes
-		for chunkshape in chunkshapes(shape):
-			if rowsize(chunkshape) > 10000000:#TODO maxrowsize:
-				print 'chunkshape %s: N/A' % chunkshape 
-				continue
-			#TODO write h5file measuring time_write and size_deflated if compressing
-			for indices in sorted(indices_list, key=lambda indices: np.product(indices)):
-				#TODO read h5file measuring time_read
-				#TODO create experiment and append to table
-				pass
-
-
-from tables import IsDescription, Int32Col, Float32Col, BoolCol, openFile
-
-import numpy as np
+#from tables import IsDescription, Int32Col, Float32Col, BoolCol, openFile
+from tables import *
 
 
 class Experiment(IsDescription):
@@ -141,6 +46,138 @@ class Experiment(IsDescription):
 	timepoint_indices_contig = BoolCol()
 	
 	time_to_read = Float32Col()
+
+
+
+#def shapes(species_orders_of_magnitude, compartments_orders_of_magnitude, timepointss_orders_of_magnitude):
+def arrayshapes(*orders_of_magnitude):
+	''' Returns the set of shapes that are the permutations of the 
+	orders_of_magnitude iterable of (min, max) tuples. '''
+	shapes = []
+	for min_order_of_magnitude, max_order_of_magnitude in orders_of_magnitude:
+		shape = (0, 0, 0)
+		shapes.append(shape)
+	return shapes
+#print shapes((0,2), (0,6), (0,6))
+
+def chunkshapes(shape):
+	''' Returns a set of chunkshapes that are the order of magnitude 
+	permutations of ... shape. '''
+#	chunkshapes = []
+#	dims = []
+#	dim1, dim2, dim3 = shape 
+#	for dim in f(:
+#		min = 0
+#		max = dim
+#		dims.append()
+	s = lambda max: max #TODO
+	c = lambda max: max #TODO
+	t = lambda max: max #TODO
+	return [(s(dim1), c(dim2), t(dim3)) for dim1, dim2, dim3 in shape]
+#print chunkshapes((10,100,1000))
+		
+
+def pow10s(emin, emax):
+	return [10**e for e in range(emin, emax + 1)]
+#for o in pow10s(0, 6):
+#	print o
+#print
+#exit()
+
+def contiguous_indices(imax, emin, emax):
+	''' Returns a list of arrays of contiguous (step == 1) integers from 0 to  
+	an order of magnitude (power of 10) in the interval emin <= e <= emax. '''
+#	return [np.arange(0, 10**e) for e in range(emin, emax) if 10**e <= imax]
+	return [np.arange(0, pow10) for pow10 in pow10s(emin, emax) if pow10 <= imax]
+#for a in contiguous_indices(654321, 0, 6):
+#	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
+#print
+#exit()
+
+def evenly_spaced_indices(imax, emin, emax):
+#	return [np.ceil(np.linspace(0, imax -1, 10**e)) for e in range(emin, emax + 1) if 10**e <= imax]
+	#rint/trunc
+	return [map(int, np.ceil(np.linspace(0, imax - 1, pow10))) for pow10 in pow10s(emin, emax) if pow10 <= imax]
+#for a in evenly_spaced_indices(654321, 0, 6):
+#	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
+#print
+#exit()
+
+def indices(shape):
+	''' Returns a set of (contiguous, evenly spaced) indices that are the 
+	orders of magnitude permutations of ... shape. '''
+	s = lambda max: max #TODO
+	c = lambda max: max #TODO
+	t = lambda max: max #TODO
+	contiguous = [((s(dim1), c(dim2), t(dim3)), 'contiguous') for dim1, dim2, dim3 in shape]
+	gapped = [((s(dim1), c(dim2), t(dim3)), 'gapped') for dim1, dim2, dim3 in shape] 
+	return contiguous + gapped 
+#print indices((10,100,1000))
+
+shape = (58, 10000, 36001)
+#sis = map(lambda d: contiguous_indices(d, 0, 2), shape)
+#cis = map(lambda d: contiguous_indices(d, 0, 6), shape)
+#tis = map(lambda d: contiguous_indices(d, 0, 5), shape)
+#for b in (sis, cis, tis):
+#	print len(b)
+#	for c in b:
+#		for a in c:
+#			print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
+sis = map(lambda d: evenly_spaced_indices(d, 0, 2), shape) + map(lambda d: contiguous_indices(d, 0, 2), shape)
+cis = map(lambda d: evenly_spaced_indices(d, 0, 6), shape) + map(lambda d: contiguous_indices(d, 0, 6), shape)
+tis = map(lambda d: evenly_spaced_indices(d, 0, 5), shape) + map(lambda d: contiguous_indices(d, 0, 5), shape)
+#for ddd in (sis, cis, tis):
+#	print '='*80
+#	for dd in ddd:
+#		for d in dd:
+#			print 'len(ddd): %s, len(dd): %s, len(d): %s, head: %s, tail: %s' % (len(ddd), len(dd), len(d), d[0:3], d[-3:])			
+#		print '-'*80
+
+from pprint import pprint
+
+def onelevelflatten(ll):
+	return [i for l in ll for i in l]
+
+index_arrays = zip(*map(onelevelflatten, (sis, cis, tis)))
+
+def shape(la):
+	return tuple(map(len, la))
+
+def shapes(lla):
+	return [shape(la) for la in lla]
+
+def size(la):
+	return np.product(shape(la))
+
+def sizes(lla):
+	return [size(la) for la in lla]
+
+index_arrays.sort(key=shape, reverse=True)
+index_arrays.sort(key=size)
+
+pprint(shapes(index_arrays))
+pprint(sizes(index_arrays))
+exit()
+
+#maxrowsize = tables.warnings...
+
+'''
+def perform(results):
+	amount_atom = Int32
+	for shape in sorted(shapes, key=lambda shape: np.product(shape)):
+		species_total, compartments_total, timepoints_total = shape
+		inflated_size = amount_atom * np.product(shape) # bytes
+		for chunkshape in chunkshapes(shape):
+			if rowsize(chunkshape) > 10000000:#TODO maxrowsize:
+				print 'chunkshape %s: N/A' % chunkshape 
+				continue
+			#TODO write h5file measuring time_write and size_deflated if compressing
+			for indices in sorted(indices_list, key=lambda indices: np.product(indices)):
+				#TODO read h5file measuring time_read
+				#TODO create experiment and append to table
+				pass
+
+
 
 
 h5file = openFile('results.h5', mode='w')
