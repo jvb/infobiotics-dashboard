@@ -168,7 +168,7 @@ def _index_arrays(func, shape, *emaxs):
 		for emax in emaxs
 	]))
 
-#contiguous_index_arrays = zip(*map(onelevelflatten, [
+#cntg_index_arrays = zip(*map(onelevelflatten, [
 #	map(lambda d: contiguous_indices(d, emax), shape) 
 #	for emax in semax, cemax, temax
 #]))
@@ -180,7 +180,7 @@ def contiguous_index_arrays(shape, semax, cemax, temax):
 	return _index_arrays(contiguous_indices, shape, semax, cemax, temax)
 cntg_index_arrays = contiguous_index_arrays(shape, semax, cemax, temax)
 
-#evenly_spaced_index_arrays = zip(*map(onelevelflatten, [
+#evsp_index_arrays = zip(*map(onelevelflatten, [
 #	map(lambda d: evenly_spaced_indices(d, emax), shape) 
 #	for emax in semax, cemax, temax
 #]))
@@ -204,36 +204,75 @@ def shapes(lla):
 def size(la):
 	return np.product(shape(la))
 
+def shapesize(shape):
+	return np.product(shape)
+
 def sizes(lla):
 	return [size(la) for la in lla]
 
+# in-place sorting
+# descending by dimensions
 index_arrays.sort(key=shape, reverse=True)
+# ascending by size
 index_arrays.sort(key=size)
-
-pprint(shapes(index_arrays))
-pprint(sizes(index_arrays))
-exit()
+#pprint(shapes(index_arrays))
+#pprint(sizes(index_arrays))
+#exit()
 
 #maxrowsize = tables.warnings...
 
+def maxmem(dtype):
+	maxmems = pow10s(16)
+	allocated = None
+	while allocated == None:
+		maxmem = maxmems.pop()
+		try:
+			allocated = np.empty( (maxmem,), dtype)
+		except MemoryError:
+			continue
+	return maxmem
+
+def perform(dtype, results=None):
+	pass
+#	amount_atom = Int32
+#	for shape in sorted(shapes, key=lambda shape: np.product(shape)):
+#		species_total, compartments_total, timepoints_total = shape
+#		inflated_size = amount_atom * np.product(shape) # bytes
+#		for chunkshape in chunkshapes(shape):
+#			if rowsize(chunkshape) > 10000000:#TODO maxrowsize:
+#				print 'chunkshape %s: N/A' % chunkshape 
+#				continue
+#			#TODO write h5file measuring time_write and size_deflated if compressing
+#			for indices in sorted(indices_list, key=lambda indices: np.product(indices)):
+#				#TODO read h5file measuring time_read
+#				#TODO create experiment and append to table
+#				pass
+	
+
+	maxmem = maxmem(dtype)
+				
+	atom = Atom.from_dtype(np.dtype(dtype))
+
+	ashps = productarrayshapes(semax, cemax, temax)
+	# in-place sorting
+	# descending by dimensions (timepoints > compartments > species)
+	ashps.sort()
+#	pprint(ashps)
+	# ascending by size (smallest > largest)
+	ashps.sort(key=shapesize)
+#	pprint(ashps)
+	for shp in ashps:
+		sz = shapesize(shp)
+#		print sz
+
+		# array size in memory (bytes)
+		inflated_size = atom.size * shapesize(shp) 
+		print inflated_size
+
+
+perform(np.int32)
+
 '''
-def perform(results):
-	amount_atom = Int32
-	for shape in sorted(shapes, key=lambda shape: np.product(shape)):
-		species_total, compartments_total, timepoints_total = shape
-		inflated_size = amount_atom * np.product(shape) # bytes
-		for chunkshape in chunkshapes(shape):
-			if rowsize(chunkshape) > 10000000:#TODO maxrowsize:
-				print 'chunkshape %s: N/A' % chunkshape 
-				continue
-			#TODO write h5file measuring time_write and size_deflated if compressing
-			for indices in sorted(indices_list, key=lambda indices: np.product(indices)):
-				#TODO read h5file measuring time_read
-				#TODO create experiment and append to table
-				pass
-
-
-
 
 h5file = openFile('results.h5', mode='w')
 group = h5file.createGroup('/', 'group')
