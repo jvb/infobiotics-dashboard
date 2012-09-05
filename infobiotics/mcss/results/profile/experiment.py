@@ -129,14 +129,16 @@ def contiguous_indices(dmax, emin, emax=None):
 	''' Returns a list of arrays of contiguous (step == 1) integers from 0 to  
 	an order of magnitude (power of 10) in the interval emin <= e <= emax. '''
 #	return [np.arange(0, pow10) for pow10 in pow10s(emin, emax) + [dmax] if pow10 <= dmax]
-	return [np.arange(0, pow10) for pow10 in pow10s(emin, emax) if pow10 <= dmax]
+#	return [np.arange(0, pow10) for pow10 in pow10s(emin, emax) if pow10 <= dmax]
+	return [range(0, pow10) for pow10 in pow10s(emin, emax) if pow10 <= dmax]
 #for a in contiguous_indices(654321, 0, 6):
 #	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
 #print
 #exit()
 
 def evenly_spaced_indices(dmax, emin, emax=None):
-	return [np.array(map(int, np.ceil(np.linspace(0, dmax - 1, pow10)))) for pow10 in pow10s(emin, emax) if pow10 <= dmax]
+#	return [np.array(map(int, np.ceil(np.linspace(0, dmax - 1, pow10)))) for pow10 in pow10s(emin, emax) if pow10 <= dmax]
+	return [map(int, np.ceil(np.linspace(0, dmax - 1, pow10))) for pow10 in pow10s(emin, emax) if pow10 <= dmax]
 #for a in evenly_spaced_indices(654321, 0, 6):
 #	print 'len: %s, head: %s, tail: %s' % (len(a), a[0:3], a[-3:])
 #print
@@ -351,6 +353,8 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 			except Exception, e:
 				print 'error:', e
 				continue
+
+#			print '***', a.shape, a[:]
 					
 			tcre = round(time()-t1, 3) or 10**-6 # avoid divide by zero
 			thcre = round(bytes_to_write_per_chunk / (tcre * 1024 * 1024), 1)
@@ -370,7 +374,7 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 			
 			# reading
 			
-			def f(iat): #TODO move outside loops
+			def fromto(iat): #TODO move outside loops
 				return ', '.join(['%s..%s' % (from_, to) if from_ != to else str(to) for from_, to in [(ia[0], ia[-1]) for ia in iat]])
 			
 			for iatype, iat in index_array_tuples:
@@ -382,18 +386,29 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 				if skip_reading:
 					print 'skipping',
 				
-				print 'reading %s %s: %s' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', f(iat))
+				print 'reading %s %s: %s' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', fromto(iat))
 
 				# read h5file measuring time_read
 				t1 = time()
-				print iat
-				iat = np.array(iat)
-				print iat
-				r1 = a[iat]
-				assert np.product(r1.shape) == size(iat)
+				
+##				print iat
+##				iat = np.array(iat)
+##				iat = tuple(onelevelflatten(iat))
+#				print '***', a.shape, a[:]
+#				print iat#iat.shape, iat
+#				print 'a[%s]' % (iat,)
+#				#TODO ValueError: setting an array element with a sequence.
+				try:
+					r1 = a[iat]
+				except ValueError, e:
+					print 'error:', e
+					continue
+				
+				assert np.product(r1.shape) == size(iat), '%s, %s' % (r1.shape, size(iat))
 				tr1 = round(time()-t1, 3) or 10**-6 # avoid divide by zero
 				thr1 = round(bytes_to_read / (tr1 * 1024 * 1024), 1)
-				print 'read %s %s (%s) in %s sec at (%s MB/s)' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', f(iat), tr1, thr1)
+				print 'read %s %s (%s) in %s sec at (%s MB/s)' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', fromto(iat), tr1, thr1)
+				print
 				
 				time_to_read = tr1
 				
@@ -550,8 +565,11 @@ def experiment(complib='zlib', complevel=9, shuffle=False, fletcher32=False):
 			experiment.append()
 			table.flush()
 #	except Exception, e:
-#		print 'failed with exception:\n', e, '\n'
+#		print 'error ^^^'
+#		print 'failed with exception:'#\n', e, '\n'
+#		raise e
 	finally:
+		print '^^^'
 		print h5file
 		h5file.close()
 	print 'total written: %s, skipped: %s' % (written, skipped_writing)
