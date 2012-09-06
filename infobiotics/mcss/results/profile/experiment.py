@@ -324,7 +324,7 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 			print 'writing array shape %s with chunkshape %s' % (shp, chunkshape) 
 			
 			if skip_writing:
-				global skipped_writing
+#				global skipped_writing
 				skipped_writing += 1
 				continue
 
@@ -338,12 +338,13 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 			# create array
 			a = f.createEArray(f.root, 'array', 
 				atom, 
-				shape=setextdim(shp, extdim), 
+#				shape=setextdim(shp, extdim), 
+				setextdim(shp, extdim), 
 				expectedrows=expectedrows,
 				filters=filters,
 				chunkshape=chunkshape, 
 			)
-
+			
 			# write the array in whole chunks
 			t1 = time()
 			zeros = np.zeros(chunkshape, dtype=dtype)
@@ -351,22 +352,19 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 				for _ in range(0, shp[extdim], chunkshape[extdim]):
 					a.append(zeros)
 			except Exception, e:
-				print 'error:', e
+				print 'error (shp[%s]: %s, chunkshape[%s]: %s):' % (extdim, shp[extdim], extdim, chunkshape[extdim]), e
 				continue
-
 #			print '***', a.shape, a[:]
-					
+			
 			tcre = round(time()-t1, 3) or 10**-6 # avoid divide by zero
 			thcre = round(bytes_to_write_per_chunk / (tcre * 1024 * 1024), 1)
 			print 'wrote array shape %s with chunkshape %s in %s sec at (%s MB/s)' % (shp, chunkshape, tcre, thcre)
 
-			
 			time_to_write = tcre
 			
 #			f.close()
 			
 			size_deflated = os.path.getsize(write)
-
 
 			global written
 			written += 1
@@ -398,13 +396,17 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 #				print iat#iat.shape, iat
 #				print 'a[%s]' % (iat,)
 #				#TODO ValueError: setting an array element with a sequence.
-				try:
-					r1 = a[iat]
-				except ValueError, e:
-					print 'error:', e
-					continue
+#				try:
+#					read = a[iat]
 				
-				assert np.product(r1.shape) == size(iat), '%s, %s' % (r1.shape, size(iat))
+				print 'iat:', iat, 'np.ix_(*iat):', np.ix_(*iat), map(tuple, iat), np.ix_(*map(tuple, iat)), 
+				r = a[np.ix_(*map(tuple, iat))]
+				
+#				except ValueError, e:
+#					print 'error:', e
+#					continue
+				assert np.product(r.shape) == size(iat), '%s, %s' % (r.shape, size(iat))
+				del r
 				tr1 = round(time()-t1, 3) or 10**-6 # avoid divide by zero
 				thr1 = round(bytes_to_read / (tr1 * 1024 * 1024), 1)
 				print 'read %s %s (%s) in %s sec at (%s MB/s)' % (size(iat), ('%s datapoints' % iatype) if size(iat) > 1 else 'datapoint', fromto(iat), tr1, thr1)
@@ -467,11 +469,11 @@ def perform(dtype, semin=semin, semax=semax, cemin=cemin, cemax=cemax, temin=tem
 				)
 
 				if skip_reading:
-					global skipped_reading
+#					global skipped_reading
 					skipped_reading += 1
 					continue
 				
-				global read
+#				global read
 				read += 1
 
 			print '-'*80
