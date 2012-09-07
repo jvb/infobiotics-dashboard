@@ -4,14 +4,18 @@ Created on 6 Sep 2012
 @author: jvb
 '''
 
+from __future__ import division 
+
 import numpy as np
 
 import tables
 
 write = tables.openFile('test.h5', 'w')
 #write.removeNode('/', 'a')
-a = write.createEArray('/', 'a', tables.Int32Atom(), (2,3,0), expectedrows=4)
-a.append(np.zeros((2,3,5)))
+a = write.createEArray('/', 'a', tables.Int32Atom(), (20,30,0), expectedrows=4)
+#a.append(np.zeros((20,30,40)))
+#print np.product((20,30,40))
+a.append(np.arange(24000).reshape(20,30,40))
 
 ## bad: extract whole array
 #r = a[:] 
@@ -43,6 +47,71 @@ a.append(np.zeros((2,3,5)))
 #selection = np.ix_(*([0,1],[0,1,2],[0,1,2,3]))
 selection = np.array(([0,1],[0,1,2],[0,1,2,3]))
 print selection.size, selection.shape, selection
+
+print
+print a.shape 
+#print a[np.ix_(*([0],[0],[0]))] 
+#print a[0:1:1] 
+
+chunkshape = a.shape
+def cntg(start, stop=None):
+	if not stop:
+		stop = start
+		start = 0
+	stop = stop + 1
+	return slice(start, stop, 1)
+#print cntg(2), cntg(1,10)
+slices = map(cntg, chunkshape) 
+#print slices 
+r = a[slices[0], slices[1], slices[2]]
+print r.shape 
+#exit()
+#print
+from math import ceil
+def eqsp(n, start=None, stop=None):
+	if not start:
+		if not stop:
+			start = n
+		else:
+			start = 0
+	if not stop:
+		stop = start
+		start = 0
+	stop = stop + 1
+	print stop / n, int(stop / n), int(stop / n) or 1, ceil(int(stop / n))# or 2)
+	return slice(start, stop, int(stop / n) or 1)
+#print eqsp(2,2), eqsp(1,100,10)
+from functools import partial
+n = 3
+slices = map(partial(eqsp, n), chunkshape)
+#print slices 
+r = a[slices[0], slices[1], slices[2]] [:n, :n, :n]
+print r.shape, r
+#print a[] 
+
+
+from experiment import pow10s
+smaxe = 2#3
+cmaxe = 4#5
+tmaxe = 6#7
+#for se in pow10s(smaxe):
+#	for ce in pow10s(cmaxe):
+#		for te in pow10s(tmaxe):
+#			pass
+##			print se, ce, te
+##			for f in cntg, eqsp:
+##				print 'cntg:',
+##				print ()
+##				print 'esqp:',
+##				print 
+smaxs = pow10s(smaxe)
+cmaxs = pow10s(cmaxe)
+tmaxs = pow10s(tmaxe)
+ia = np.array([smaxs, cmaxs, tmaxs])
+from itertools import product
+ia = np.array(list(product(smaxs, cmaxs, tmaxs))).flatten().reshape(tuple([len(smaxs), len(cmaxs), len(tmaxs), 3]))
+print ia[2,:,:,:]
+
 
 
 # see also     def _fancySelection(self, args):
