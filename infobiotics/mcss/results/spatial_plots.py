@@ -389,7 +389,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 'Specify a filename to save data to', 
                 default_filename,
                 movie.QFileDialog_filter_from_available_formats(),
-                'AVI format *.avi (*.avi)'
+#                'AVI format *.avi (*.avi)'
             )
             filename = str(filename)
             if filename == '':

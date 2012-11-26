@@ -15,6 +15,10 @@ called from Eclipse...
 
 from __future__ import with_statement
 
+import sip
+sip.setapi('QString', 2)
+sip.setapi('QVariant', 2)
+
 import sys
 import os.path
 
