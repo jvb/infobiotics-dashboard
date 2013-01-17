@@ -471,7 +471,7 @@ else:
 			'bin/infobiotics-dashboard',
 		],
 		data_files=[
-			('/usr/share/tvtk/tvtk_classes.zip', [os.path.join(sys.prefix, 'tvtk')]), #TODO
+#			('/usr/share/tvtk/tvtk_classes.zip', [os.path.join(sys.prefix, 'tvtk')]), #TODO
 #			("images", glob.glob("images/*.png")), #TODO
 			('/usr/share/applications', ['infobiotics-dashboard.desktop']),
 			('/usr/share/pixmaps', ['images/infobiotics-workbench.xpm', 'images/infobiotics-workbench.png']),
