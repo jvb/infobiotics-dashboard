@@ -75,33 +75,33 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     from vtk import libvtkWidgetsPython
     
     # traitsbackendqt
-    from enthought.pyface.ui.qt4 import about_dialog, application_window, clipboard, confirmation_dialog, dialog, directory_dialog, file_dialog, gui, heading_text, image_cache, image_resource, init, message_dialog, progress_dialog, python_editor, python_shell, resource_manager, splash_screen, split_widget, system_metrics, widget, window
-    from enthought.pyface.ui.qt4.action import action_item, menu_manager, menu_bar_manager, status_bar_manager, tool_bar_manager
-    from enthought.pyface.timer import do_later
-    from enthought.pyface.ui.qt4.timer import do_later
-    from enthought.pyface.ui.qt4.workbench import editor, split_tab_widget, view, workbench_window_layout
-    import enthought.traits.ui.qt4
+    from pyface.ui.qt4 import about_dialog, application_window, clipboard, confirmation_dialog, dialog, directory_dialog, file_dialog, gui, heading_text, image_cache, image_resource, init, message_dialog, progress_dialog, python_editor, python_shell, resource_manager, splash_screen, split_widget, system_metrics, widget, window
+    from pyface.ui.qt4.action import action_item, menu_manager, menu_bar_manager, status_bar_manager, tool_bar_manager
+    from pyface.timer import do_later
+    from pyface.ui.qt4.timer import do_later
+    from pyface.ui.qt4.workbench import editor, split_tab_widget, view, workbench_window_layout
+    import traitsui.qt4
     
     # envisage
-    from enthought.envisage.ui.workbench.action import api
-    import enthought.plugins.ipython_shell.actions
-    import enthought.plugins.ipython_shell.actions.ipython_shell_actions
-    import enthought.plugins.refresh_code.actions
-    import enthought.plugins.remote_editor.actions
-    import enthought.plugins.text_editor.actions
+    from envisage.ui.workbench.action import api
+    import envisage.plugins.ipython_shell.actions
+    import envisage.plugins.ipython_shell.actions.ipython_shell_actions
+    import envisage.plugins.refresh_code.actions
+    import envisage.plugins.remote_editor.actions
+    import envisage.plugins.text_editor.actions
     
     # TVTK
-    import enthought.tvtk.plugins.scene.ui.actions # Envisage actions
+    import tvtk.plugins.scene.ui.actions # Envisage actions
 
-    import enthought.tvtk
-    import enthought.tvtk.vtk_module
-    import enthought.tvtk.pyface.ui.qt4.init
-    import enthought.tvtk.pyface.ui.qt4
-    from enthought.tvtk.pyface.ui.qt4.scene_editor import *
+    import tvtk
+    import tvtk.vtk_module
+    import tvtk.pyface.ui.qt4.init
+    import tvtk.pyface.ui.qt4
+    from tvtk.pyface.ui.qt4.scene_editor import *
 
-    import enthought.tvtk.tvtk_classes # unzipped in py2exe/py2app.sh
-    import enthought.tvtk.tvtk_classes.vtk_version
-    from enthought.tvtk.tvtk_classes import * 
+    import tvtk.tvtk_classes # unzipped in py2exe/py2app.sh
+    import tvtk.tvtk_classes.vtk_version
+    from tvtk.tvtk_classes import * 
 
     # infobiotics-dashboard
     '''Generated with:
@@ -117,9 +117,9 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     grep -v '\._[^_]' # remove file names starting with an underscore but not 2 underscores
     ...
     '''    
-    import infobiotics.core.traits.model_file
-    import infobiotics.core.traits.params_relative_directory
-    import infobiotics.core.traits.params_relative_file
+    import infobiotics.core.traits_.model_file
+    import infobiotics.core.traits_.params_relative_directory
+    import infobiotics.core.traits_.params_relative_file
     import infobiotics.core.experiment
     import infobiotics.core.params
     import infobiotics.core.params_preferences
@@ -149,27 +149,27 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.pmodelchecker.prism.prism_params_handler
     import infobiotics.pmodelchecker.prism.prism_experiment
     import infobiotics.api
-    import infobiotics.commons.traits.float_greater_than_zero
-    import infobiotics.commons.traits.interfaces
-    import infobiotics.commons.traits.int_greater_than_zero
-    import infobiotics.commons.traits.api
-    import infobiotics.commons.traits.file_wrapper
-    import infobiotics.commons.traits.relative_directory
-    import infobiotics.commons.traits.percentage
-    import infobiotics.commons.traits.relative_file
-    import infobiotics.commons.traits.ui.fixed_file_dialog
-    import infobiotics.commons.traits.ui.helpful_controller
-    import infobiotics.commons.traits.ui.api
-    import infobiotics.commons.traits.ui.values_for_enum_editor
-    import infobiotics.commons.traits.ui.key_bindings
-    import infobiotics.commons.traits.ui.qt4.api
-    import infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor
-    import infobiotics.commons.traits.ui.qt4.cancellable_progress_editor
-    import infobiotics.commons.traits.ui.qt4.relative_file_editor
-    import infobiotics.commons.traits.ui.qt4.progress_editor
-    import infobiotics.commons.traits.ui.qt4.relative_directory_editor
-    import infobiotics.commons.traits.long_greater_than_zero
-    import infobiotics.commons.traits.tests.test_relative_directory_and_params_relative_file.test_relative_directory_and_params_relative_file
+    import infobiotics.commons.traits_.float_greater_than_zero
+    import infobiotics.commons.traits_.interfaces
+    import infobiotics.commons.traits_.int_greater_than_zero
+    import infobiotics.commons.traits_.api
+    import infobiotics.commons.traits_.file_wrapper
+    import infobiotics.commons.traits_.relative_directory
+    import infobiotics.commons.traits_.percentage
+    import infobiotics.commons.traits_.relative_file
+    import infobiotics.commons.traits_.ui.fixed_file_dialog
+    import infobiotics.commons.traits_.ui.helpful_controller
+    import infobiotics.commons.traits_.ui.api
+    import infobiotics.commons.traits_.ui.values_for_enum_editor
+    import infobiotics.commons.traits_.ui.key_bindings
+    import infobiotics.commons.traits_.ui.qt4.api
+    import infobiotics.commons.traits_.ui.qt4.matplotlib_figure_editor
+    import infobiotics.commons.traits_.ui.qt4.cancellable_progress_editor
+    import infobiotics.commons.traits_.ui.qt4.relative_file_editor
+    import infobiotics.commons.traits_.ui.qt4.progress_editor
+    import infobiotics.commons.traits_.ui.qt4.relative_directory_editor
+    import infobiotics.commons.traits_.long_greater_than_zero
+    import infobiotics.commons.traits_.tests.test_relative_directory_and_params_relative_file.test_relative_directory_and_params_relative_file
     import infobiotics.commons.quantities.units.concentration
     import infobiotics.commons.quantities.units.length
     import infobiotics.commons.quantities.units.calculators
@@ -185,7 +185,7 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.commons.api
     import infobiotics.commons.files
     import infobiotics.commons.metaclasses.noconflict
-    import infobiotics.commons.mayavi
+    import infobiotics.commons.mayavi_
     import infobiotics.commons.strings
     import infobiotics.commons.dicts
     import infobiotics.commons.qt4
@@ -204,7 +204,6 @@ if False: # guard - py2exe and py2app modulefinder uses lexical analysis so this
     import infobiotics.preferences
     import infobiotics.dashboard.core.ui_plugin
     import infobiotics.dashboard.core.actions
-    import infobiotics.dashboard.core.has_infobiotics_dashboard_workbench_application
     import infobiotics.dashboard.core.dashboard_experiment_handler
     import infobiotics.dashboard.core.dashboard_experiment
     import infobiotics.dashboard.core.dashboard_experiment_editor

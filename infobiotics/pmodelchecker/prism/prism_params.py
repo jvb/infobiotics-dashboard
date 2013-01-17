@@ -1,5 +1,5 @@
 from infobiotics.pmodelchecker.pmodelchecker_params import PModelCheckerParams
-from enthought.traits.api import Str
+from traits.api import Str
 from prism_preferences import PREFERENCES_PATH
 
 class PRISMParams(PModelCheckerParams):

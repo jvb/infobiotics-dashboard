@@ -1,31 +1,43 @@
-#!/bin/bash
+#!/bin/sh
+
+# 
+
 
 echo "freezing with py2app"
 echo "additional flags (see 'python setup.py py2app --help') will by parsed to py2app"
 echo
 
-export ETS_TOOLKIT=qt4
-
-PYTHON=/Library/Frameworks/Python.framework/Versions/Current/bin/python
 
 # cleaning
-#rm -rf build dist
-bash ./clean.sh
+
+# remove PKG_INFO, setup.cfg, .pyc and .class files; build, debian, dist and tmp directories; Debian packages; distribute and InfobioticsDashboard eggs  
+bash .clean.sh
 
 
-# pre-freeze
+# pre-freezing
+
+# make files executable
 chmod +x bin/*
 
+# set environment variables
+export ETS_TOOLKIT=qt4
 
-# freeze
+# install py2app (using pip) 
 easy_install pip
 pip install py2app pexpect
 # is it really necessary to install pexpect?
+
+PYTHON=/Library/Frameworks/Python.framework/Versions/Current/bin/python
+
+
+# freezing
+
+# run py2app
 ${PYTHON} setup.py py2app $* &&
 #--no-strip
 
 
-# post-freeze
+# post-freezing
 
 #zip dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages.zip VERSION.txt &&
 
@@ -35,6 +47,7 @@ patch dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/matplotlib/
 echo "creating qt.conf" &&
 touch dist/InfobioticsDashboard.app/Contents/Resources/qt.conf &&
 
+# add TVTK classes zip file to library; fixes: 'ImportError: TVTK not built properly. Unable to find either a directory: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes or a file: /home/jvb/git/infobiotics-dashboard/dist/library.zip/tvtk/tvtk_classes.zip with the TVTK classes.'
 echo "unzipping tvtk_classes.zip in site-packages.zip" &&
 unzip -q dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages.zip -d dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages &&
 rm dist/InfobioticsDashboard.app/Contents/Resources/lib/python2.6/site-packages.zip &&
@@ -72,7 +85,12 @@ install_name_tool -change  @rpath/libpng12.0.dylib @executable_path/../Framework
 echo "all built ok"
 
 
-## testing
+# testing
+
+# run infobiotics-dashboard
+#dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard
+
+
 #echo &&
 #echo "To run use:" &&
 #echo "dist/InfobioticsDashboard.app/Contents/MacOS/InfobioticsDashboard" &&

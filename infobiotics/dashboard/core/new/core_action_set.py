@@ -1,10 +1,10 @@
-from enthought.envisage.ui.action.api import ActionSet, Action, Group, Menu
+from envisage.ui.action.api import ActionSet, Action, Group, Menu
 
 PKG = 'infobiotics.plugins.dashboard.actions'
 #PKG = '.'.join(__name__.split('.')[:-1]) + '.actions'
 
 class CoreActionSet(ActionSet):
-#from enthought.envisage.ui.workbench.workbench_action_set import WorkbenchActionSet
+#from envisage.ui.workbench.workbench_action_set import WorkbenchActionSet
 #class CoreActionSet(WorkbenchActionSet):
 #    enabled_for_perspectives = ['id',]
 #    visible_for_perspectives = ['id',]

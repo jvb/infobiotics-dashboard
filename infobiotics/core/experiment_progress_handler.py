@@ -1,9 +1,9 @@
 #FIXME adapt for ExperimentHandler and then remove
 
-from enthought.traits.ui.api import Controller, View, VGroup, Item
-from enthought.traits.api import Str, Button 
-from infobiotics.commons.traits.ui.qt4.progress_editor import ProgressEditor                
-from enthought.pyface.api import YES, NO, confirm
+from traitsui.api import Controller, View, VGroup, Item
+from traits.api import Str, Button 
+from infobiotics.commons.traits_.ui.qt4.progress_editor import ProgressEditor                
+from pyface.api import YES, NO, confirm
 
 class ExperimentProgressHandler(Controller):
     '''

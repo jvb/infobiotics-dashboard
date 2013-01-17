@@ -1,9 +1,9 @@
 from __future__ import with_statement
 import os.path, tempfile, subprocess, time, sys
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import HasTraits, Str, List, Int
-from enthought.traits.ui.api import View, Item
+from traits.api import HasTraits, Str, List, Int
+from traitsui.api import View, Item
 from infobiotics.mcss.mcss_params import McssParams
 from infobiotics.language.lpp_editor import LPPEditor as CodeEditor
 

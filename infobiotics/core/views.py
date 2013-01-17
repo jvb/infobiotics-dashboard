@@ -3,8 +3,8 @@ Views, Groups, Items, Actions and KeyBindings that are shared by ParamsHandler
 subclasses.
 '''
 
-from enthought.traits.ui.menu import Action
-from enthought.traits.ui.api import View, HGroup, VGroup, Item, StatusItem
+from traitsui.menu import Action
+from traitsui.api import View, HGroup, VGroup, Item, StatusItem
 
 close_action = Action(
     name='&Close',
@@ -35,7 +35,7 @@ shared_actions = [ # ParamsView and ExperimentView
     'Undo',
 ] 
 
-#from infobiotics.commons.traits.ui.api import help_action
+#from infobiotics.commons.traits_.ui.api import help_action
 
 #shared_actions = shared_actions + ['Help'] # TraitsUI help which doesn't work in TraitsBackendQt
 #shared_actions = shared_actions + [help_action]
@@ -53,7 +53,7 @@ experiment_actions = [ # ExperimentView only
 #    'Cancel',
 ]
 
-from enthought.traits.ui.menu import Menu, MenuBar, ToolBar
+from traitsui.menu import Menu, MenuBar, ToolBar
 
 file_menu = Menu(
     load_action, save_action, close_action,
@@ -64,7 +64,7 @@ file_menu = Menu(
 
 toolbar = ToolBar(load_action, save_action)
 
-#from enthought.traits.ui.api import TextEditor
+#from traitsui.api import TextEditor
 #status_group = HGroup( # better than status bar because long texts can be shown
 #    Item('handler.status',
 #        show_label=False,

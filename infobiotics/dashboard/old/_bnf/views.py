@@ -1,9 +1,9 @@
-from enthought.pyface.workbench.api import TraitsUIView
-from enthought.traits.api import Str, Instance
-from enthought.traits.ui.api import View, Item, TextEditor
+from pyface.workbench.api import TraitsUIView
+from traits.api import Str, Instance
+from traitsui.api import View, Item, TextEditor
 from infobiotics.dashboard.plugins.bnf.actions import *
 from infobiotics.dashboard.plugins.bnf.bnf_file_trees import *
-from enthought.envisage.ui.workbench.workbench_window import WorkbenchWindow
+from envisage.ui.workbench.workbench_window import WorkbenchWindow
 
 
 # example folders and add new action

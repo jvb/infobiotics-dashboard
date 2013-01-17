@@ -10,7 +10,7 @@ from quantities.units.time import hour, minute
 import operator
 from table import indent
 from PyQt4.QtGui import QMessageBox
-from PyQt4.QtCore import QString, Qt, SIGNAL, SLOT
+from PyQt4.QtCore import Qt, SIGNAL, SLOT
 
 from infobiotics.commons.quantities.traits_ui_converters import Quantity, time_units, substance_units, concentration_units, volume_units
 
@@ -562,7 +562,7 @@ class McssResults(object):
             array = np.zeros(shape, self.type)
         except MemoryError:
             if self.parent is not None:
-                QMessageBox.warning(self.parent, QString('Out of memory'), QString(failed_message))
+                QMessageBox.warning(self.parent, 'Out of memory', failed_message)
             else:
                 print failed_message
             return
@@ -695,7 +695,7 @@ class McssResults(object):
         if quantities_display_type == 'concentrations' and not self.has_volumes and not self.has_default_volume and volume is None:
             message = 'Cannot calculate concentrations without volumes dataset, rerun mcss with log_volumes=1' 
             if self.parent is not None:
-                QMessageBox.warning(self.parent, QString('Error'), QString(message)) #TODO test
+                QMessageBox.warning(self.parent, 'Error', message) #TODO test
             else:
                 print message, 'or provide volume argument'# in %s' % self.volumes_data_units
             return
@@ -766,7 +766,7 @@ class McssResults(object):
                 if chunk_size == 0:
                     if self.parent is not None:
                         message = 'Could not allocate memory for chunk.\nTry selecting fewer runs, a shorter time window or a bigger time interval multipler.'
-                        QMessageBox.warning(self.parent, QString('Out of memory'), QString(message))
+                        QMessageBox.warning(self.parent, 'Out of memory', message)
                     else:
                         print message
                         return

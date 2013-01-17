@@ -1,10 +1,10 @@
 from __future__ import with_statement
 import os.path
 from infobiotics.commons.api import read, write
-from enthought.traits.api import (
+from traits.api import (
     Trait, Range, Button, Str, Bool, Instance, DelegatesTo, on_trait_change
 )
-from enthought.traits.ui.api import View, Group, HGroup, Item, CodeEditor, Controller
+from traitsui.api import View, Group, HGroup, Item, CodeEditor, Controller
 from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelCheckerParamsHandler
 from infobiotics.pmodelchecker.model_parameters import ModelParameters
 from prism_params_group import prism_params_group

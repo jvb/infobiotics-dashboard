@@ -1,7 +1,7 @@
 from __future__ import division
 from mcsscmaes_params import McssCmaesParams
 from infobiotics.core.experiment import Experiment
-from enthought.traits.api import Int, Float
+from traits.api import Int, Float
 
 class McssCmaesExperiment(McssCmaesParams, Experiment):
     

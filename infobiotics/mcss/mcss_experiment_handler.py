@@ -1,6 +1,6 @@
 from infobiotics.mcss.mcss_params_handler import McssParamsHandler
 from infobiotics.core.experiment_handler import ExperimentHandler
-from enthought.pyface.api import error
+from pyface.api import error
 from PyQt4.Qt import qApp 
 
 class McssExperimentHandler(McssParamsHandler, ExperimentHandler):

@@ -9,6 +9,6 @@ from experiment_handler import ExperimentHandler
 
 from params_preferences import ParamsPreferencesHelper, ParamsPreferencesPage
 
-from traits.params_relative_file import ParamsRelativeFile
-from traits.params_relative_directory import ParamsRelativeDirectory
-from traits.model_file import ModelFile
+from traits_.params_relative_file import ParamsRelativeFile
+from traits_.params_relative_directory import ParamsRelativeDirectory
+from traits_.model_file import ModelFile

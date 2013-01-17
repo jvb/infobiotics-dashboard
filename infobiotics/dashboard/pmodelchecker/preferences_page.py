@@ -1,6 +1,6 @@
-from enthought.preferences.ui.api import PreferencesPage
+from apptools.preferences.ui.api import PreferencesPage
 from infobiotics.core.params_preferences import Executable 
-from enthought.traits.ui.api import View, Item
+from traitsui.api import View, Item
 
 class PModelCheckerPreferencesPage(PreferencesPage):
     '''

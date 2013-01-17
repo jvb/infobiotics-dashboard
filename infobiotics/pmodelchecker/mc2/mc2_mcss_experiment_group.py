@@ -1,4 +1,4 @@
-from enthought.traits.ui.api import Group, VGroup, Item
+from traitsui.api import Group, VGroup, Item
 
 mc2_mcss_experiment_group = Group(
     Item('model_file', style='readonly'),

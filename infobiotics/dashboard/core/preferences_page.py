@@ -5,9 +5,9 @@ file:///home/jvb/src/ETS_3.3.1/EnvisageCore_3.1.2/docs/html/preferences.html
 https://svn.enthought.com/enthought/browser/AppTools/trunk/examples/preferences/preferences_manager.py
 '''
 
-from enthought.preferences.ui.api import PreferencesPage
-from enthought.traits.api import File
-from enthought.traits.ui.api import View
+from apptools.preferences.ui.api import PreferencesPage
+from traits.api import File
+from traitsui.api import View
 
 class CorePreferencesPage(PreferencesPage):
 

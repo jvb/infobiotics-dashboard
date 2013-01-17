@@ -1,6 +1,6 @@
-from enthought.envisage.api import Plugin
-from enthought.traits.api import List
-#from enthought.pyface.workbench.api import Perspective, PerspectiveItem
+from envisage.api import Plugin
+from traits.api import List
+#from pyface.workbench.api import Perspective, PerspectiveItem
 from action_set import McssResultsActionSet
 
 
@@ -12,7 +12,7 @@ class McssResultsUIPlugin(Plugin):
 
     # Contributions to extension points made by this plugin
 
-    action_sets = List(contributes_to='enthought.envisage.ui.workbench.action_sets')
+    action_sets = List(contributes_to='envisage.ui.workbench.action_sets')
     def _action_sets_default(self):
         return [McssResultsActionSet]
 

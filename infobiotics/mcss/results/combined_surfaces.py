@@ -1,18 +1,18 @@
 import numpy as np
 import sip
 sip.setapi('QString', 1)
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import HasTraits, Instance, on_trait_change, Button, List
-from enthought.traits.ui.api import View, Item
-from enthought.mayavi import mlab
-from enthought.mayavi.core.pipeline_base import PipelineBase
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.tvtk.pyface.scene_editor import SceneEditor
-#from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor
+from traits.api import HasTraits, Instance, on_trait_change, Button, List
+from traitsui.api import View, Item
+from mayavi import mlab
+from mayavi.core.pipeline_base import PipelineBase
+from mayavi.core.ui.mayavi_scene import MayaviScene
+from mayavi.tools.mlab_scene_model import MlabSceneModel
+from tvtk.pyface.scene_editor import SceneEditor
+#from mayavi.core.ui.api import MlabSceneModel, SceneEditor
 from PyQt4.QtGui import qApp
-from enthought.pyface.ui.qt4.gui import GUI
+from pyface.ui.qt4.gui import GUI
 
 class Surfaces(HasTraits):
     scene = Instance(MlabSceneModel, ())

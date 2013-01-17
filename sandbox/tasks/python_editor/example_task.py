@@ -1,9 +1,9 @@
 # Enthought library imports.
-from enthought.pyface.tasks.api import Task, TaskLayout
-from enthought.pyface.tasks.action.api import SMenuBar, SMenu, TaskAction
-from enthought.pyface.api import ConfirmationDialog, YES, OK, CANCEL, FileDialog#TODO remove
+from pyface.tasks.api import Task, TaskLayout
+from pyface.tasks.action.api import SMenuBar, SMenu, TaskAction
+from pyface.api import ConfirmationDialog, YES, OK, CANCEL, FileDialog#TODO remove
 #from infobiotics.pyface.ui.qt4.file_dialog import FileDialog
-from enthought.traits.api import on_trait_change
+from traits.api import on_trait_change
 
 # Local imports.
 from example_panes import PythonEditorPane, PythonScriptBrowserPane

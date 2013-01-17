@@ -1,8 +1,8 @@
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4' 
 # Plugin imports.
-from enthought.envisage.core_plugin import CorePlugin
-from enthought.envisage.ui.tasks.tasks_plugin import TasksPlugin
+from envisage.core_plugin import CorePlugin
+from envisage.ui.tasks.tasks_plugin import TasksPlugin
 from attractors_plugin import AttractorsPlugin
 
 # Local imports.

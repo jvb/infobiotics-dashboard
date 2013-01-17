@@ -1,11 +1,11 @@
-from enthought.envisage.api import Plugin
-from enthought.traits.api import List
+from envisage.api import Plugin
+from traits.api import List
 
-ACTION_SETS = 'enthought.envisage.ui.workbench.action_sets'
+ACTION_SETS = 'envisage.ui.workbench.action_sets'
 
 class TextEditorPlugin(Plugin):
 
-    id = "enthought.plugins.text_editor"
+    id = "envisage.plugins.text_editor"
     
     name = 'Text Editor plugin'
 

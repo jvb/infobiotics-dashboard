@@ -1,13 +1,13 @@
 from text_file_editor import TextFileEditor
-from enthought.traits.api import Code, Int, Str, List, Color, Enum, Bool
-from enthought.traits.ui.api import Group, Item, CodeEditor
+from traits.api import Code, Int, Str, List, Color, Enum, Bool
+from traitsui.api import Group, Item, CodeEditor
 
 class CodeFileEditor(TextFileEditor):
     ''' A generic code editor. '''
 
     content = Code
 
-    # CodeEditor traits http://www.cs.nott.ac.uk/~jvb/ETS34_API/enthought.traits.ui.editors.code_editor.ToolkitEditorFactory.html
+    # CodeEditor traits http://www.cs.nott.ac.uk/~jvb/ETS34_API/traitsui.editors.code_editor.ToolkitEditorFactory.html
     auto_scroll = True
     auto_set = True
     column = Int

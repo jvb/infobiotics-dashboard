@@ -1,12 +1,12 @@
 # this is all horribly wrong, should revert to TextEditor (commented code)
 
-from enthought.pyface.workbench.api import TraitsUIEditor
+from pyface.workbench.api import TraitsUIEditor
 #from os.path import basename
-#from enthought.pyface.api import FileDialog, CANCEL
-#from enthought.traits.api import Code, Instance
-#from enthought.traits.ui.api import CodeEditor, Group, Item, View
-#from enthought.traits.ui.key_bindings import KeyBinding, KeyBindings
-#from enthought.traits.ui.menu import NoButtons
+#from pyface.api import FileDialog, CANCEL
+#from traits.api import Code, Instance
+#from traitsui.api import CodeEditor, Group, Item, View
+#from traitsui.key_bindings import KeyBinding, KeyBindings
+#from traitsui.menu import NoButtons
 
 #def _id_generator():
 #    """ A generator that returns the next number for untitled files. """
@@ -41,7 +41,7 @@ class PModelCheckerResultsEditor(TraitsUIEditor):
 #                ),
 #                show_labels = False
 #            ),
-#            id        = 'enthought.envisage.editor.text_editor',
+#            id        = 'envisage.editor.text_editor',
 #            handler   = TextEditorHandler(),
 #            kind      = 'live',
 #            resizable = True,

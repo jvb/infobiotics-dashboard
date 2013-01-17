@@ -8,12 +8,12 @@ with warnings.catch_warnings():
 from infobiotics.mcss.results import mcss_results
 import numpy as np
 
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
+from infobiotics.commons.traits_.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
 from matplotlib.figure import Figure
 
 
-from enthought.traits.api import *
-from enthought.traits.ui.api import *
+from traits.api import *
+from traitsui.api import *
 
 class Histogram(HasTraits):
     
@@ -349,11 +349,11 @@ class Histogram(HasTraits):
 #        return surf
 #
 #
-#from enthought.mayavi import mlab
-#from enthought.mayavi.core.pipeline_base import PipelineBase
-#from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-#from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-#from enthought.tvtk.pyface.scene_editor import SceneEditor
+#from mayavi import mlab
+#from mayavi.core.pipeline_base import PipelineBase
+#from mayavi.core.ui.mayavi_scene import MayaviScene
+#from mayavi.tools.mlab_scene_model import MlabSceneModel
+#from tvtk.pyface.scene_editor import SceneEditor
 
 
 

@@ -1,6 +1,6 @@
 from __future__ import division
 from infobiotics.core.experiment_progress_handler import ExperimentProgressHandler
-from enthought.traits.api import on_trait_change
+from traits.api import on_trait_change
 
 class McssCmaesExperimentProgressHandler(ExperimentProgressHandler):
 

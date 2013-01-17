@@ -1,24 +1,24 @@
 # use TraitsBackendQt instead of wx
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 
-# fixes 'no handlers could be found for logger "enthought.envisage.plugin"'
+# fixes 'no handlers could be found for logger "envisage.plugin"'
 import logging
 class NullHandler(logging.Handler): # http://docs.python.org/library/logging.html#library-config
     def emit(self, record):
         pass
-logging.getLogger('enthought.envisage.plugin').addHandler(NullHandler())
-logging.getLogger('enthought.pyface.workbench.workbench_window').addHandler(NullHandler())
-logging.getLogger('enthought.pyface.workbench.i_view').addHandler(NullHandler())
+logging.getLogger('envisage.plugin').addHandler(NullHandler())
+logging.getLogger('pyface.workbench.workbench_window').addHandler(NullHandler())
+logging.getLogger('pyface.workbench.i_view').addHandler(NullHandler())
 
 # import plugins
-from enthought.envisage.core_plugin import CorePlugin
-from enthought.envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
-#from enthought.envisage.developer.developer_plugin import DeveloperPlugin
-#from enthought.envisage.developer.ui.developer_ui_plugin import DeveloperUIPlugin
-from enthought.plugins.python_shell.python_shell_plugin import PythonShellPlugin
-#from enthought.plugins.ipython_shell.ipython_shell_plugin import IPythonShellPlugin # IPythonShellPlugin is not supported by Qt backend, yet.
-##from enthought.plugins.text_editor.text_editor_plugin import TextEditorPlugin
+from envisage.core_plugin import CorePlugin
+from envisage.ui.workbench.workbench_plugin import WorkbenchPlugin
+#from envisage.developer.developer_plugin import DeveloperPlugin
+#from envisage.developer.ui.developer_ui_plugin import DeveloperUIPlugin
+from envisage.plugins.python_shell.python_shell_plugin import PythonShellPlugin
+#from envisage.plugins.ipython_shell.ipython_shell_plugin import IPythonShellPlugin # IPythonShellPlugin is not supported by Qt backend, yet.
+##from envisage.plugins.text_editor.text_editor_plugin import TextEditorPlugin
 #from infobiotics.dashboard.plugins.text_editor.text_editor_plugin import TextEditorPlugin
 from plugin import FileEditorsPlugin
 #from infobiotics.dashboard.plugins.core.ui_plugin import CoreUIPlugin
@@ -26,8 +26,8 @@ from plugin import FileEditorsPlugin
 #from infobiotics.dashboard.plugins.bnf.ui_plugin import BNFUIPlugin
 
 # remove ExitAction icon and disable About action is about_dialog is None
-from enthought.pyface.api import ImageResource
-from enthought.pyface.action.api import Action
+from pyface.api import ImageResource
+from pyface.action.api import Action
 
 class ExitAction(Action):
     ''' An action that exits the workbench. '''
@@ -40,8 +40,8 @@ class ExitAction(Action):
         ''' Perform the action. '''
         self.window.application.exit()
 
-from enthought.pyface.action.api import Action
-from enthought.traits.api import Any, Property, Bool
+from pyface.action.api import Action
+from traits.api import Any, Property, Bool
 
 class AboutAction(Action):
     ''' An action that shows the 'About' dialog. '''
@@ -62,8 +62,8 @@ class AboutAction(Action):
         ''' Perform the action. '''
         self.window.application.about()
 
-from enthought.envisage.ui.action.api import Action, ActionSet, Menu
-PKG = 'enthought.envisage.ui.workbench'#'.'.join(__name__.split('.')[:-1])
+from envisage.ui.action.api import Action, ActionSet, Menu
+PKG = 'envisage.ui.workbench'#'.'.join(__name__.split('.')[:-1])
 class DefaultActionSet(ActionSet):
     ''' The default workbench action set. '''
     menus = [
@@ -73,7 +73,7 @@ class DefaultActionSet(ActionSet):
         ),
         Menu(
             path='MenuBar',
-            class_name='enthought.pyface.workbench.action.api:ViewMenuManager'
+            class_name='pyface.workbench.action.api:ViewMenuManager'
         ),
         Menu(
             name='&Tools', path='MenuBar',
@@ -100,8 +100,8 @@ class DefaultActionSet(ActionSet):
     ]
 
 
-from enthought.envisage.ui.workbench.api import WorkbenchApplication
-from enthought.pyface.api import ImageResource, AboutDialog, SplashScreen
+from envisage.ui.workbench.api import WorkbenchApplication
+from pyface.api import ImageResource, AboutDialog, SplashScreen
 
 __version__ = '0.0.1'
 

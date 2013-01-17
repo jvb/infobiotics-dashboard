@@ -1,9 +1,9 @@
-from enthought.pyface.action.api import Action
-from enthought.traits.ui.menu import UndoAction, RedoAction, RevertAction
-from enthought.pyface.constant import * # OK, NO, CANCEL, YES
+from pyface.action.api import Action
+from traitsui.menu import UndoAction, RedoAction, RevertAction
+from pyface.constant import * # OK, NO, CANCEL, YES
 
 class UndoAction(Action):
-    id = 'enthought.envisage.plugins.generic.actions.UndoAction'
+    id = 'envisage.plugins.generic.actions.UndoAction'
     name = '&Undo'
     tooltip = 'Undo the last change'
     accelerator = 'Ctrl-z' # case sensitive

@@ -1,6 +1,6 @@
 import os; os.environ['ETS_TOOLKIT'] = 'qt4'
-from enthought.traits.api import HasTraits, List, Str, Enum, Button
-from enthought.traits.ui.api import View, VGroup, VSplit, Item, SetEditor, ListEditor, EnumEditor
+from traits.api import HasTraits, List, Str, Enum, Button
+from traitsui.api import View, VGroup, VSplit, Item, SetEditor, ListEditor, EnumEditor
 
 class Axis(HasTraits):
     name = Str

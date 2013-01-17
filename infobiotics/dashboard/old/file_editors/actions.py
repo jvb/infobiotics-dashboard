@@ -1,6 +1,6 @@
-from enthought.pyface.action.api import Action# as PyFaceAction
-from enthought.envisage.ui.workbench.api import WorkbenchWindow
-from enthought.traits.api import Any, Property, Bool 
+from pyface.action.api import Action# as PyFaceAction
+from envisage.ui.workbench.api import WorkbenchWindow
+from traits.api import Any, Property, Bool 
 
 #class Action(PyFaceAction):
 #    ''' Extends PyFace Action with 'window' and 'enabled'. '''
@@ -21,10 +21,10 @@ def perform_envisage_action(window):
     ''' Demonstrates pattern that allows non-actions to mimic perform.'''
     raise NotImplementedError
 
-from enthought.io.api import File
+from apptools.io.api import File
 from api import TextFileEditor, PythonModuleEditor, AbstractFileEditor
-from enthought.pyface.api import FileDialog, OK
-from enthought.traits.api import Any
+from pyface.api import FileDialog, OK
+from traits.api import Any
 
 #import logging
 #logger = logging.getLogger(__name__)

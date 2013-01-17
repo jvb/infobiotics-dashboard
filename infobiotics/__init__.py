@@ -2,12 +2,7 @@ from __future__ import absolute_import, with_statement, division
 
 import os, sys
 
-# set PyQt4 APIs compatible with EPD < 3.6
-import sip
-sip.setapi('QString', 1) 
-sip.setapi('QVariant', 1)
-
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.company = 'Infobiotics' # use ~/.infobiotics (or "Application Data\\Infobiotics" on Windows) instead of ~/.enthought for preferences.ini # used by ETSConfig.get_application_data() for persistence (preferences)
 ETSConfig.toolkit = 'qt4' #os.environ['ETS_TOOLKIT']='qt4'
 
@@ -18,6 +13,9 @@ if sys.platform.startswith('win'):
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE' # required for matplotlib with Numpy-MKL 1.6.1 MKL from http://www.lfd.uci.edu/~gohlke/pythonlibs/
     import matplotlib; matplotlib.use('qt4agg') # overrule configuration # http://www.py2exe.org/index.cgi/MatPlotLib
 #    import pylab
+elif sys.platform.startswith('linux'):
+#    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE' # required for matplotlib with Numpy-MKL 1.6.1 MKL from http://www.lfd.uci.edu/~gohlke/pythonlibs/
+    import matplotlib; matplotlib.use('qt4agg')
 
 #import preferences # fails on weasel #TODO
 

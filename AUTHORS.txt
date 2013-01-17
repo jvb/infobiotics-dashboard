@@ -1,8 +1,9 @@
 Author:       Jonathan Blakes
 Contributors: Dr. Jamie Twycross (mcss and cross-platform packaging)
-              Dr. Francisco Jose Romero Campero (PModelChecker)
+              Dr. Francisco Jose Romero Campero (pmodelchecker)
               Dr. Claudio Lima (POptimizer)
               Dr. Hongqing Cao (POptimizer)
+              Daven Sanassy (issue reporting)
               Pawel Widera (matplotlib advice)
-              James Smaldon
+              James Smaldon (issue reporting)
 Supervisor:   Dr. Natalio Krasnogor

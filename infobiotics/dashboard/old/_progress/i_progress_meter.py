@@ -1,5 +1,5 @@
-from enthought.traits.api import Interface, Int, Range, Str 
-#from enthought.traits.api import HasTraits, Enum, Bool, Button, Callable  
+from traits.api import Interface, Int, Range, Str 
+#from traits.api import HasTraits, Enum, Bool, Button, Callable  
 
 class IProgressMeter(Interface):
     ''' A progress meter that can be customised and subclassed for 

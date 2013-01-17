@@ -1,5 +1,5 @@
-from enthought.envisage.ui.workbench.api import WorkbenchActionSet
-from enthought.envisage.ui.action.api import Group, Action
+from envisage.ui.workbench.api import WorkbenchActionSet
+from envisage.ui.action.api import Group, Action
             
 class McssResultsActionSet(WorkbenchActionSet):
 
@@ -9,7 +9,7 @@ class McssResultsActionSet(WorkbenchActionSet):
         Group(
             id='ResultsGroup',
             path='MenuBar/File',
-            after='TextFileGroup', #TODO enthought.plugins.text_editor.text_editor_action_set
+            after='TextFileGroup', #TODO envisage.plugins.text_editor.text_editor_action_set
         ),
     ]
     

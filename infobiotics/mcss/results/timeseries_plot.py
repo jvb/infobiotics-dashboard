@@ -3,15 +3,15 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 import infobiotics
-from enthought.traits.api import (HasTraits, Instance, Str, List, Float, Bool,
+from traits.api import (HasTraits, Instance, Str, List, Float, Bool,
     Button, on_trait_change, Tuple, Dict, Array, Enum, Property, Range, Any, Button,
     cached_property, Int, Set)
-from enthought.traits.ui.api import (View, VGroup, Item, HGroup, Spring,
+from traitsui.api import (View, VGroup, Item, HGroup, Spring,
     ListEditor, InstanceEditor, SetEditor, RangeEditor, VFold, VSplit, VGrid, VFlow, HSplit, TextEditor)
 from infobiotics.commons import colours
 from infobiotics.commons.matplotlib.draggable_legend import DraggableLegend
 from infobiotics.commons.sequences import arrange
-from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
+from infobiotics.commons.traits_.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
 from matplotlib.figure import Figure
 from matplotlib.font_manager import FontProperties
 from matplotlib.lines import Line2D
@@ -282,6 +282,11 @@ class TimeseriesPlot(HasTraits):
         if len(self.figure_title) > 0:
             self._figure.suptitle(self.figure_title)
 
+#        # debugging #TODO delete
+#        for i, t in enumerate(self._timeseries):
+#            if len(t.timepoints) == 0:
+#                print 'len(self._timeseries[%s]) == 0' % i
+        
         # don't allow negative x (time) or y (values)
         for axes in self.axes:
             xmin_xmax_tuples = [(t.timepoints[0].magnitude, t.timepoints[-1].magnitude) for t in self._timeseries]
@@ -805,7 +810,7 @@ class TimeseriesPlot(HasTraits):
     
     @cached_property
     def _get__timeseries_mapping(self):
-#        from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_EnumEditor
+#        from infobiotics.commons.traits_.ui.values_for_enum_editor import values_for_EnumEditor
         if self.separate_volumes:
 #            l = [(timeseries, self.get_timeseries_title(timeseries)) for timeseries in self.timeseries]
 #            w = len(str(len(l)))
@@ -873,8 +878,8 @@ class TimeseriesPlot(HasTraits):
         self._list_widget.show()
 
 
-from enthought.traits.ui.api import TableEditor
-from enthought.traits.ui.table_column import ObjectColumn
+from traitsui.api import TableEditor
+from traitsui.table_column import ObjectColumn
 timeseries_table_editor = TableEditor(
     columns=[
         ObjectColumn(name='title',

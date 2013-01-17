@@ -43,7 +43,7 @@ class PythonModuleEditor(CodeFileEditor):
         # Execute the code.
         if len(self.obj.path) > 0:
             view = self.window.get_view_by_id(
-                'enthought.plugins.python_shell_view'
+                'envisage.plugins.python_shell_view'
             )
             if view is not None:
                 view.execute_command(

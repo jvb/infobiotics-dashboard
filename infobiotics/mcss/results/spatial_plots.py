@@ -1,21 +1,21 @@
 from __future__ import division
 #import sip
 #sip.setapi('QString', 2)
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import *
-from enthought.traits.ui.api import View, Item, VGroup
-from enthought.mayavi.core.pipeline_base import PipelineBase
-from enthought.mayavi.core.ui.mayavi_scene import MayaviScene
-from enthought.mayavi.tools.mlab_scene_model import MlabSceneModel
-from enthought.tvtk.pyface.scene_editor import SceneEditor
+from traits.api import *
+from traitsui.api import View, Item, VGroup
+from mayavi.core.pipeline_base import PipelineBase
+from mayavi.core.ui.mayavi_scene import MayaviScene
+from mayavi.tools.mlab_scene_model import MlabSceneModel
+from tvtk.pyface.scene_editor import SceneEditor
 import numpy as np
 from PyQt4.QtGui import (
     QWidget, QHBoxLayout, QGridLayout, QVBoxLayout, QPushButton, QListWidget, 
     QPixmap, QListWidgetItem, QIcon, QLabel, QFileDialog, QSlider, QMessageBox, 
     QProgressDialog
 )
-from PyQt4.QtCore import Qt, SIGNAL, QSize, QFileInfo, QTimer, SLOT, QString
+from PyQt4.QtCore import Qt, SIGNAL, QSize, QFileInfo, QTimer, SLOT
 from infobiotics.commons.qt4 import centre_window
 import cStringIO as StringIO
 from ui_player_control_widget import Ui_ControlsWidget
@@ -109,7 +109,7 @@ class SpatialPlotsWindow(QWidget):
                 self.saveDataButton.setEnabled(False)
         except Exception, e:
             self.saveDataButton.setText('Failed')
-            self.saveDataButton.setToolTip(QString(str(e)))
+            self.saveDataButton.setToolTip(str(e))
             self.saveDataButton.setEnabled(False)
             
 class SurfacesListWidget(QWidget):
@@ -389,7 +389,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 'Specify a filename to save data to', 
                 default_filename,
                 movie.QFileDialog_filter_from_available_formats(),
-                'AVI format *.avi (*.avi)'
+#                'AVI format *.avi (*.avi)'
             )
             filename = str(filename)
             if filename == '':
@@ -415,8 +415,8 @@ class SpatialPlotsControlsWidget(ControlsWidget):
             self.pause()
             
             progressDialog = QProgressDialog(
-                QString('Processing recording'),
-                QString(), # no cancel button,
+                'Processing recording',
+                '',#QString(), # no cancel button,
                 0, # min
                 2, # join + encode
                 parent# = self.parent()
@@ -426,7 +426,7 @@ class SpatialPlotsControlsWidget(ControlsWidget):
             progressDialog.open()
             
             if len(self.templates) > 1:
-                progressDialog.setLabelText(QString('Joining surface images into frames'))
+                progressDialog.setLabelText('Joining surface images into frames')
                 # join surfaces together
                 tempdir = self.movie.tempdir
                 image = Image.open(os.path.join(tempdir, self.templates[0] % 1))
@@ -455,8 +455,8 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 progressDialog.setValue(2)
                 if QMessageBox.Yes == QMessageBox.question(
                     self.parent(), 
-                    QString('Recording succeeded'),
-                    QString('Play recording now?'),
+                    'Recording succeeded',
+                    'Play recording now?',
                     buttons=QMessageBox.Yes|QMessageBox.No,
                     defaultButton=QMessageBox.No
                 ):
@@ -465,8 +465,8 @@ class SpatialPlotsControlsWidget(ControlsWidget):
                 progressDialog.close()
                 QMessageBox.critical(
                     self.parent(),
-                    QString('Recording failed'),
-                    QString(self.movie.output), 
+                    'Recording failed',
+                    self.movie.output, 
                     buttons=QMessageBox.Ok)
             del self.movie
             self.recording = False

@@ -1,10 +1,10 @@
 from os.path import basename
-from enthought.pyface.workbench.api import Editor
-from enthought.pyface.api import FileDialog, CANCEL
-from enthought.traits.api import Code, Instance
-from enthought.traits.ui.api import CodeEditor, Group, Item, View
-from enthought.traits.ui.key_bindings import KeyBinding, KeyBindings
-from enthought.traits.ui.menu import NoButtons
+from pyface.workbench.api import Editor
+from pyface.api import FileDialog, CANCEL
+from traits.api import Code, Instance
+from traitsui.api import CodeEditor, Group, Item, View
+from traitsui.key_bindings import KeyBinding, KeyBindings
+from traitsui.menu import NoButtons
 from PyQt4.QtCore import QObject, SIGNAL
 import os.path
 
@@ -31,7 +31,7 @@ class McssResultsEditor(Editor):
         if not obj:
             return
         self.id = self._get_unique_id()
-        if hasattr(obj, 'filename'):
+        if hasattr(obj, 'filename') and obj.filename is not None:
             self.name = os.path.basename(obj.filename) 
         else:
             self.name = self.id

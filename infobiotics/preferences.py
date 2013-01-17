@@ -1,5 +1,5 @@
-from enthought.etsconfig.api import ETSConfig
-from enthought.preferences.api import ScopedPreferences, set_default_preferences, get_default_preferences 
+from traits.etsconfig.api import ETSConfig
+from apptools.preferences.api import ScopedPreferences, set_default_preferences, get_default_preferences 
 import os
 import sys
 
@@ -55,7 +55,7 @@ preferences.set('default/'+MC2_PREFERENCES_PATH+'.directory', default_directory)
 preferences.set('default/'+MC2_MCSS_PREFERENCES_PATH+'.directory', default_directory)
 preferences.set('default/'+POPTIMIZER_PREFERENCES_PATH+'.directory', default_directory)
 
-#preferences.set('default/enthought.envisage.ui.workbench.prompt_on_exit', False)
+#preferences.set('default/envisage.ui.workbench.prompt_on_exit', False)
 
 # uncomment to make scope 'default' non-transient
 #preferences.get_scope('default').filename = os.path.join(ETSConfig.get_application_data(create=True), 'default_preferences.ini')

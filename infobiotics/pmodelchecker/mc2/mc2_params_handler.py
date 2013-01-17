@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from enthought.traits.api import Int, Instance, on_trait_change, Button, Bool
+from traits.api import Int, Instance, on_trait_change, Button, Bool
 from infobiotics.pmodelchecker.pmodelchecker_params_handler import PModelCheckerParamsHandler
 from mc2_params_group import mc2_params_group
 from mc2_mcss_experiment import MC2McssExperiment

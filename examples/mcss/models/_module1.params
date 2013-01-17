@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<parameters name="mcss" xmlns="http://www.cpib.ac.uk/~jpt"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.cpib.ac.uk/~jpt parameter.xsd">
+
+    <!-- parameter definitions -->
+    <parameterSet name="SimulationParameters">
+        <parameter name="ode_solver" value="rk2"/>
+        <parameter name="duplicate_initial_amounts" value="true"/>
+        <parameter name="model_file" value="module1.sbml"/>
+        <parameter name="model_format" value="sbml"/>
+        <parameter name="max_time" value="3600.0"/>
+        <parameter name="max_runtime" value="0"/>
+        <parameter name="log_interval" value="1.0"/>
+        <parameter name="data_file" value="module1.h5"/>
+        <parameter name="seed" value="0"/>
+        <parameter name="compress" value="true"/>
+        <parameter name="compression_level" value="9"/>
+        <parameter name="simulation_algorithm" value="ode1"/>
+        <parameter name="log_memory" value="false"/>
+        <parameter name="log_type" value="levels"/>
+        <parameter name="log_propensities" value="false"/>
+        <parameter name="log_volumes" value="false"/>
+        <parameter name="log_steady_state" value="true"/>
+        <parameter name="log_degraded" value="false"/>
+        <parameter name="neighbourhood" value="4"/>
+        <parameter name="periodic_x" value="false"/>
+        <parameter name="periodic_y" value="false"/>
+        <parameter name="periodic_z" value="false"/>
+        <parameter name="division_direction" value="x"/>
+        <parameter name="keep_divisions" value="false"/>
+        <parameter name="growth_type" value="none"/>
+        <parameter name="show_progress" value="false"/>
+        <parameter name="progress_interval" value="0.0"/>
+    </parameterSet>
+</parameters>

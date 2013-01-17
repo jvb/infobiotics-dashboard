@@ -1,7 +1,7 @@
 from params_handler import ParamsHandler
 from experiment_progress_handler import ExperimentProgressHandler
 from infobiotics.core.views import ExperimentView
-from enthought.pyface.api import GUI
+from pyface.api import GUI
 import time
 
 class ExperimentHandler(ParamsHandler):
@@ -50,11 +50,11 @@ class ExperimentHandler(ParamsHandler):
             GUI.invoke_later(self.show_results) # essential
 
 
-# copied from enthought.traits.ui.message to tweak layout 
+# copied from traitsui.message to tweak layout 
 
-from enthought.pyface.timer.api import do_after
-from enthought.traits.api import HasPrivateTraits, Str, Float
-from enthought.traits.ui.api import View, HGroup, Item, spring
+from pyface.timer.api import do_after
+from traits.api import HasPrivateTraits, Str, Float
+from traitsui.api import View, HGroup, Item, spring
 
 class AutoCloseMessage(HasPrivateTraits):
     message = Str('Please wait')

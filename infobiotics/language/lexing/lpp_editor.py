@@ -14,22 +14,22 @@ from PyQt4.Qsci import QsciScintillaBase as QsciBase
 if Qsci.QSCINTILLA_VERSION < 0x20300:
     raise RuntimeError, "QScintilla version 2.3 or higher needed for CodeEditor"
 
-from enthought.traits.api import Str, Unicode, List, Int, Event, Bool, TraitError, on_trait_change
-from enthought.traits.trait_base import SequenceTypes
+from traits.api import Str, Unicode, List, Int, Event, Bool, TraitError, on_trait_change
+from traits.trait_base import SequenceTypes
 
 # FIXME: ToolkitEditorFactory is a proxy class defined here just for backward
 # compatibility. The class has been moved to the 
-# enthought.traits.ui.editors.code_editor file.
-#from enthought.traits.ui.editors.code_editor import ToolkitEditorFactory
+# traitsui.editors.code_editor file.
+#from traitsui.editors.code_editor import ToolkitEditorFactory
 
-from enthought.pyface.key_pressed_event import KeyPressedEvent
-from enthought.pyface.ui.qt4.python_editor import _Scintilla
+from pyface.key_pressed_event import KeyPressedEvent
+from pyface.ui.qt4.python_editor import _Scintilla
 
-from enthought.traits.ui.qt4.constants import OKColor, ErrorColor
-from enthought.traits.ui.qt4.editor import Editor
-from enthought.traits.ui.qt4.helper import pixmap_cache
+from traitsui.qt4.constants import OKColor, ErrorColor
+from traitsui.qt4.editor import Editor
+from traitsui.qt4.helper import pixmap_cache
 
-from enthought.traits.ui.qt4.code_editor import SourceLexer, SourceEditor, FindWidget
+from traitsui.qt4.code_editor import SourceLexer, SourceEditor, FindWidget
 
 # Marker line constants:
 MARK_MARKER = 0 # Marks a marked line
@@ -594,7 +594,7 @@ class LPPLexer(SourceLexer):
 #        self._scintilla.recolor()
 
 
-from enthought.traits.api import Int
+from traits.api import Int
 from PyQt4 import QtGui
 
 class _LPPEditor(SourceEditor):
@@ -741,9 +741,9 @@ class _LPPEditor(SourceEditor):
         self.set_tooltip()
 
 
-from enthought.traits.ui.api import BasicEditorFactory
-from enthought.traits.api import Str, Color, Enum, Bool, Instance
-from infobiotics.commons.traits.ui.key_bindings import KeyBindings
+from traitsui.api import BasicEditorFactory
+from traits.api import Str, Color, Enum, Bool, Instance
+from infobiotics.commons.traits_.ui.key_bindings import KeyBindings
 
 class LPPEditor(BasicEditorFactory):
     klass = _LPPEditor
@@ -788,7 +788,7 @@ class LPPEditor(BasicEditorFactory):
     auto_scroll = Bool(True)
 
     # Optional key bindings associated with the editor    
-    key_bindings = Instance(KeyBindings)# 'enthought.traits.ui.key_bindings.KeyBindings' ) #TODO
+    key_bindings = Instance(KeyBindings)# 'traitsui.key_bindings.KeyBindings' ) #TODO
 
     # Calltip clicked event
     calltip_clicked = Str
@@ -895,8 +895,8 @@ endLPPsystem
 
 """
 
-from enthought.traits.api import HasTraits, Str, List, Int
-from enthought.traits.ui.api import View, Item
+from traits.api import HasTraits, Str, List, Int
+from traitsui.api import View, Item
 class Test(HasTraits):
     model = Str(test)
     squiggle_lines = List(Int, [10, 13])

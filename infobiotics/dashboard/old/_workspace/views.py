@@ -1,4 +1,4 @@
-from enthought.pyface.workbench.api import View as PyFaceView
+from pyface.workbench.api import View as PyFaceView
 
 class ExamplePyFaceView(PyFaceView):
     ''' An example native-widget view for a workbench application plugin
@@ -31,10 +31,10 @@ class ExamplePyFaceView(PyFaceView):
         return widget
     
 
-from enthought.pyface.workbench.api import TraitsUIView
-from enthought.traits.ui.api import View, Item
-from enthought.traits.api import Instance
-from enthought.envisage.ui.workbench.workbench_window import WorkbenchWindow
+from pyface.workbench.api import TraitsUIView
+from traitsui.api import View, Item
+from traits.api import Instance
+from envisage.ui.workbench.workbench_window import WorkbenchWindow
 
 class ExampleTraitsUIView(TraitsUIView):
     ''' An example TraitsUI view for a workbench application plugin 

@@ -1,9 +1,9 @@
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import HasTraits, Array, Instance, on_trait_change, Trait
+from traits.api import HasTraits, Array, Instance, on_trait_change, Trait
 from quantities.quantity import Quantity
-from enthought.traits.ui.api import EnumEditor, View, Item
-from infobiotics.commons.traits.ui.values_for_enum_editor import values_for_EnumEditor
+from traitsui.api import EnumEditor, View, Item
+from infobiotics.commons.traits_.ui.values_for_enum_editor import values_for_EnumEditor
 from units.volume import volume_units
 from units.time import time_units # avoids clash with compiled module 'time'
 from units.concentration import concentration_units

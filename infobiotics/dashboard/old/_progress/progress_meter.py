@@ -1,4 +1,4 @@
-from enthought.traits.api import HasTraits, Int, Range, Str, Enum, Bool, Button, Callable  
+from traits.api import HasTraits, Int, Range, Str, Enum, Bool, Button, Callable  
 debugging = True
 
 class ProgressMeter(HasTraits):

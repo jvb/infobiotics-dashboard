@@ -7,7 +7,7 @@ dist
 build
 eggs
 parts
-bin
+bin/!_*
 var
 sdist
 develop-eggs

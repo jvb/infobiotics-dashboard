@@ -1,6 +1,6 @@
-from enthought.traits.ui.api import Group, VGroup, Item, Spring, HGroup, TextEditor
-from enthought.traits.api import TraitError
-from infobiotics.commons.traits.int_greater_than_zero import IntGreaterThanZero
+from traitsui.api import Group, VGroup, Item, Spring, HGroup, TextEditor
+from traits.api import TraitError
+from infobiotics.commons.traits_.int_greater_than_zero import IntGreaterThanZero
 
 poptimizer_params_group = Group(
     VGroup(

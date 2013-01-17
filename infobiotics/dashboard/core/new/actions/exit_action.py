@@ -1,4 +1,4 @@
-from enthought.pyface.action.api import Action
+from pyface.action.api import Action
 
 class ExitAction(Action):
     ''' An action that exits the workbench. '''

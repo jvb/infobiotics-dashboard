@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from infobiotics.commons.api import read, write
 from infobiotics.core.params_handler import ParamsHandler
-from enthought.traits.api import List, Unicode, Button, Instance, Enum, on_trait_change, Str, DelegatesTo
+from traits.api import List, Unicode, Button, Instance, Enum, on_trait_change, Str, DelegatesTo
 from model_parameters import ModelParameters
 from temporal_formulas import TemporalFormula, TemporalFormulaParameter
 import os.path

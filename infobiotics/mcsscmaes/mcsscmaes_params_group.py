@@ -1,4 +1,4 @@
-from enthought.traits.ui.api import Group, VGroup, Item, HGroup, TextEditor, Spring
+from traitsui.api import Group, VGroup, Item, HGroup, TextEditor, Spring
 
 mcsscmaes_params_group = Group(
     VGroup(

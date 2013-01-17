@@ -1,5 +1,5 @@
 from api import AbstractFileEditor
-from enthought.traits.api import Str
+from traits.api import Str
 
 class TextFileEditor(AbstractFileEditor):
     ''' A text file editor. '''

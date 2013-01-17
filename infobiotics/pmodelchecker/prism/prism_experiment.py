@@ -15,7 +15,7 @@ class PRISMExperimentHandler(PRISMParamsHandler, PModelCheckerExperimentHandler)
 
 from infobiotics.pmodelchecker.pmodelchecker_experiment import PModelCheckerExperiment
 from infobiotics.pmodelchecker.prism.prism_params import PRISMParams
-from enthought.traits.api import Str, Int, on_trait_change 
+from traits.api import Str, Int, on_trait_change 
 
 class PRISMExperiment(PRISMParams, PModelCheckerExperiment):
     '''TODO'''

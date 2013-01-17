@@ -1,10 +1,10 @@
 from __future__ import division
-from enthought.etsconfig.api import ETSConfig
+from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import HasTraits, Instance, Range, Int, Float 
+from traits.api import HasTraits, Instance, Range, Int, Float 
 from matplotlib.figure import Figure
-from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring
-from enthought.pyface.api import FileDialog, OK
+from traitsui.api import View, VGroup, HGroup, Item, Spring
+from pyface.api import FileDialog, OK
     
 class MatplotlibFigureSize(HasTraits):
     
@@ -96,10 +96,10 @@ def resize_and_save_matplotlib_figure(figure):
         
 
 def test_resize_and_save_matplotlib_figure():
-    from enthought.traits.api import HasTraits, Instance, Button
-    from enthought.traits.ui.api import View, VGroup, HGroup, Item, Spring
+    from traits.api import HasTraits, Instance, Button
+    from traitsui.api import View, VGroup, HGroup, Item, Spring
     from matplotlib.figure import Figure
-    from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
+    from infobiotics.commons.traits_.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
     
     class Example(HasTraits):
         figure = Instance(Figure, ())

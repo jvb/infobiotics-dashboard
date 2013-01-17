@@ -16,9 +16,9 @@ import os # standard library imports second
 
 import infobiotics # before enthought imports (to avoid sip QString API issues from TraitsUI PySide bindings)
 
-from enthought.traits.api import HasTraits 
+from traits.api import HasTraits 
 
-# Do NOT import using *, e.g. from enthought.traits.api import *
+# Do NOT import using *, e.g. from traits.api import *
 #
 # Import the module using
 #
@@ -26,7 +26,7 @@ from enthought.traits.api import HasTraits
 #
 # instead or import individual functions as needed, e.g
 #
-#  from enthought.traits.api import HasTraits, Int
+#  from traits.api import HasTraits, Int
 #  from infobiotics.mcss.results.mcss_results import McssResults
 #
 # If you prefer the use of abbreviated module names, we suggest the

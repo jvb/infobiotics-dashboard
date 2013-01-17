@@ -95,9 +95,9 @@ def QFileDialog_filter_from_available_formats():
 
 
 #def filename_from_traits_FileDialog():
-#    from enthought.etsconfig.api import ETSConfig
+#    from traits.etsconfig.api import ETSConfig
 #    ETSConfig.toolkit = 'qt4'
-#    from enthought.pyface.api import FileDialog, OK
+#    from pyface.api import FileDialog, OK
 #    fd = FileDialog(
 #        action='save as',
 #        wildcard=''.join([FileDialog.create_wildcard(f[1], f[0]) for f in formats]), # formats == [('*.asf', 'ASF format'), ...]
@@ -180,7 +180,7 @@ def example():
     m = movie(frame_rate=22.5)
     
     # setup example
-    from enthought.mayavi import mlab
+    from mayavi import mlab
     mlab.options.offscreen = True
     mlab.test_contour3d()
     f = mlab.gcf() 

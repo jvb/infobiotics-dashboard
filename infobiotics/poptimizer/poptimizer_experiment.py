@@ -1,11 +1,11 @@
 from __future__ import division
 from poptimizer_params import POptimizerParams
 from infobiotics.core.experiment import Experiment
-from enthought.traits.api import HasTraits, Str, DictStrStr, List, Float, Instance, Constant, Int, Range, Property
+from traits.api import HasTraits, Str, DictStrStr, List, Float, Instance, Constant, Int, Range, Property
 #from matplotlib.figure import Figure, SubplotParams
-#from enthought.traits.ui.api import View, VGroup, Item, HGroup, TabularEditor
-#from infobiotics.commons.traits.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
-#from enthought.traits.ui.tabular_adapter import TabularAdapter
+#from traitsui.api import View, VGroup, Item, HGroup, TabularEditor
+#from infobiotics.commons.traits_.ui.qt4.matplotlib_figure_editor import MatplotlibFigureEditor
+#from traitsui.tabular_adapter import TabularAdapter
 #
 #class Module(HasTraits):
 #    '''PosReg(X=3,Y=1)''' 

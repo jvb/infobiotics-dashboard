@@ -1,5 +1,5 @@
-from enthought.pyface.action.api import Action
-from enthought.io.api import File
+from pyface.action.api import Action
+from apptools.io.api import File
 from editors.api import TextFileEditor
 
 class UntitledTextFileAction(Action):

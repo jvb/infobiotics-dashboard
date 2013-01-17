@@ -1,4 +1,4 @@
-from enthought.traits.api import HasTraits, implements, Instance
+from traits.api import HasTraits, implements, Instance
 from i_experiment import IExperiment
 from experiment_handler import ExperimentHandler
 

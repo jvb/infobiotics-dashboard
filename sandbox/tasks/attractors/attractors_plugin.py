@@ -2,9 +2,9 @@
 import os.path
 
 # Enthought library imports.
-from enthought.envisage.api import Plugin
-from enthought.envisage.ui.tasks.api import TaskFactory
-from enthought.traits.api import List
+from envisage.api import Plugin
+from envisage.ui.tasks.api import TaskFactory
+from traits.api import List
 
 
 class AttractorsPlugin(Plugin):
@@ -12,9 +12,9 @@ class AttractorsPlugin(Plugin):
     """
 
     # Extension point IDs.
-    PREFERENCES       = 'enthought.envisage.preferences'
-    PREFERENCES_PANES = 'enthought.envisage.ui.tasks.preferences_panes'
-    TASKS             = 'enthought.envisage.ui.tasks.tasks'
+    PREFERENCES       = 'envisage.preferences'
+    PREFERENCES_PANES = 'envisage.ui.tasks.preferences_panes'
+    TASKS             = 'envisage.ui.tasks.tasks'
 
     #### 'IPlugin' interface ##################################################
 

@@ -1,4 +1,4 @@
-from enthought.mayavi import mlab
+from mayavi import mlab
 mlab.test_plot3d()
 arr = mlab.screenshot()
 import pylab as pl

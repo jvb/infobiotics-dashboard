@@ -1,11 +1,11 @@
 from __future__ import division
 #import sip; sip.setapi('QString', 2)
-from enthought.etsconfig.api import ETSConfig; ETSConfig.toolkit = 'qt4'
-from enthought.traits.api import HasTraits, Instance, Float, Range, on_trait_change
-from enthought.traits.ui.api import View, Item, VGroup
-#from enthought.tvtk.pyface.scene_model import SceneModel
-#from enthought.tvtk.pyface.scene_editor import SceneEditor
-from enthought.mayavi.core.ui.api import MlabSceneModel, SceneEditor
+from traits.etsconfig.api import ETSConfig; ETSConfig.toolkit = 'qt4'
+from traits.api import HasTraits, Instance, Float, Range, on_trait_change
+from traitsui.api import View, Item, VGroup
+#from tvtk.pyface.scene_model import SceneModel
+#from tvtk.pyface.scene_editor import SceneEditor
+from mayavi.core.ui.api import MlabSceneModel, SceneEditor
 import numpy as np
 
 class MyModel(HasTraits):
@@ -30,7 +30,7 @@ class MyModel(HasTraits):
     )
 
 #    def example(self):
-#        from enthought.mayavi.__version__ import __version__ as mayavi_version
+#        from mayavi.__version__ import __version__ as mayavi_version
 #        major, minor, micro = mayavi_version.split('.')
 #        if major > 3 or (major == 3 and (minor > 2 or (minor == 2 and micro > 1))): 
 #            self.scene.mlab.points3d(x, y, z, s, figure=self.scene.mayavi_scene)

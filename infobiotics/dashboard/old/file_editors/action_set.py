@@ -1,9 +1,9 @@
-from enthought.envisage.ui.action.api import ActionSet, Action, Group, Menu
+from envisage.ui.action.api import ActionSet, Action, Group, Menu
 
 PKG = 'infobiotics.dashboard.plugins.file_editors.actions:'#'.'.join(__name__.split('.')[:-1]) + '.actions:'
 
 class FileEditorsActionSet(ActionSet):
-#from enthought.envisage.ui.workbench.workbench_action_set import WorkbenchActionSet
+#from envisage.ui.workbench.workbench_action_set import WorkbenchActionSet
 #class FileEditorsActionSet(WorkbenchActionSet):
 #    enabled_for_perspectives = ['id',]
 #    visible_for_perspectives = ['id',]

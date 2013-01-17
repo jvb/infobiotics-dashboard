@@ -1,14 +1,14 @@
-from enthought.pyface.action.api import Action as PyFaceAction
-from enthought.pyface.constant import * # OK, NO, CANCEL, YES
-from enthought.io.api import File
-from enthought.pyface.api import FileDialog, OK
+from pyface.action.api import Action as PyFaceAction
+from pyface.constant import * # OK, NO, CANCEL, YES
+from apptools.io.api import File
+from pyface.api import FileDialog, OK
 from infobiotics.dashboard.plugins.bnf.bnf_editor import BNFEditor
 from infobiotics.dashboard.plugins.bnf.lpp_editor import LPPEditor
 from infobiotics.dashboard.plugins.bnf.sps_editor import SPSEditor
 from infobiotics.dashboard.plugins.bnf.lat_editor import LATEditor
 from infobiotics.dashboard.plugins.bnf.plb_editor import PLBEditor 
 
-from enthought.traits.api import Class, Str
+from traits.api import Class, Str
 
 class NewFileAction(PyFaceAction):
     ''' Superclass for new file actions.
