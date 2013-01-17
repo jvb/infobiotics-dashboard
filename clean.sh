@@ -11,6 +11,8 @@ rm PKG-INFO 2&>/dev/null
 echo "removing setup configuration"
 rm setup.cfg 2&>/dev/null
 
+echo "removing generated bin aliases"
+rm bin/i*
 
 # sets of files
 
