@@ -12,10 +12,12 @@ Installing
 
 1. Either clone this repository or download the zip above.
 2. From the cloned repository/unzipped directory run:
+
 <!--
 	./sdist.sh
 	cd dist/Infobiotics-Dashboard-1.1.0/
 	python setup.py install
  -->
+
 	python setup.py install
 
